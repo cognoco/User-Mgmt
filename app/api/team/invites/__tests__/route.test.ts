@@ -1,0 +1,190 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { POST } from '../route';
+import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { sendTeamInviteEmail } from '@/lib/email/teamInvite';
+import { generateInviteToken } from '@/lib/utils/token';
+
+// Mock dependencies
+vi.mock('next-auth', () => ({
+  getServerSession: vi.fn(),
+}));
+
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    teamMember: {
+      create: vi.fn(),
+      count: vi.fn(),
+    },
+    teamLicense: {
+      findUnique: vi.fn(),
+    },
+  },
+}));
+
+vi.mock('@/lib/email/teamInvite', () => ({
+  sendTeamInviteEmail: vi.fn(),
+}));
+
+vi.mock('@/lib/utils/token', () => ({
+  generateInviteToken: vi.fn(),
+}));
+
+describe('POST /api/team/invites', () => {
+  const mockSession = {
+    user: {
+      id: 'user-123',
+      email: 'admin@example.com',
+    },
+  };
+
+  const mockLicense = {
+    id: 'license-123',
+    teamId: 'team-123',
+    seats: 5,
+    status: 'active',
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (getServerSession as any).mockResolvedValue(mockSession);
+    (prisma.teamLicense.findUnique as any).mockResolvedValue(mockLicense);
+    (prisma.teamMember.count as any).mockResolvedValue(2); // 2 existing members
+    (generateInviteToken as any).mockReturnValue('mock-token');
+    (prisma.teamMember.create as any).mockResolvedValue({
+      id: 'member-123',
+      teamLicenseId: mockLicense.id,
+      invitedEmail: 'new@example.com',
+      inviteToken: 'mock-token',
+      inviteExpires: expect.any(Date),
+      status: 'pending',
+    });
+    (sendTeamInviteEmail as any).mockResolvedValue(undefined);
+  });
+
+  it('creates a new team invite successfully', async () => {
+    const request = new Request('http://localhost:3000/api/team/invites', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'new@example.com',
+        teamLicenseId: mockLicense.id,
+        role: 'member',
+      }),
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(data).toEqual({
+      id: 'member-123',
+      teamLicenseId: mockLicense.id,
+      invitedEmail: 'new@example.com',
+      inviteToken: 'mock-token',
+      inviteExpires: expect.any(String),
+      status: 'pending',
+    });
+
+    expect(sendTeamInviteEmail).toHaveBeenCalledWith({
+      email: 'new@example.com',
+      token: 'mock-token',
+    });
+  });
+
+  it('returns 401 when user is not authenticated', async () => {
+    (getServerSession as any).mockResolvedValue(null);
+
+    const request = new Request('http://localhost:3000/api/team/invites', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'new@example.com',
+        teamLicenseId: mockLicense.id,
+        role: 'member',
+      }),
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(data).toEqual({ error: 'Unauthorized' });
+  });
+
+  it('returns 400 when team license is not found', async () => {
+    (prisma.teamLicense.findUnique as any).mockResolvedValue(null);
+
+    const request = new Request('http://localhost:3000/api/team/invites', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'new@example.com',
+        teamLicenseId: 'invalid-license',
+        role: 'member',
+      }),
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data).toEqual({ error: 'Invalid team license' });
+  });
+
+  it('returns 403 when team has reached seat limit', async () => {
+    (prisma.teamMember.count as any).mockResolvedValue(5); // All seats taken
+
+    const request = new Request('http://localhost:3000/api/team/invites', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'new@example.com',
+        teamLicenseId: mockLicense.id,
+        role: 'member',
+      }),
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(data).toEqual({ error: 'Team has reached its seat limit' });
+  });
+
+  it('returns 400 when email validation fails', async () => {
+    const request = new Request('http://localhost:3000/api/team/invites', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'invalid-email',
+        teamLicenseId: mockLicense.id,
+        role: 'member',
+      }),
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.error).toContain('Invalid email');
+  });
+
+  it('returns 400 when role validation fails', async () => {
+    const request = new Request('http://localhost:3000/api/team/invites', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'new@example.com',
+        teamLicenseId: mockLicense.id,
+        role: 'invalid-role',
+      }),
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.error).toContain('Invalid role');
+  });
+}); 

@@ -1,0 +1,209 @@
+DO NOT CHANGE MORE THAN ONE functionality at the time and then pause to give the user time to check and tell you to move on.  Keep in mind that we need to build this app as a separate building block that can be plugged into any app. It must be versatile and flexible. We currently use Supabase, but we might want to use other database for other services. Contain all code clean and easy to replace. Keep front and back end separated. Always ask if you have several options and you are not sure. This app has to work with both web and mobile application. It has to be plug in into another apps and all functionalities that are not absolute core have to be easy to turn on and off for different apps.  Always check if there are any references to a file which you are changing in all folders, subfolders and files. If there is a reference to a file which does not seem to exist DO NOT automatically create the file! Fist check if the file exists in other location! 
+
+If you are working with a concrete flow or function or test It's crucial to look at the bigger picture and analyze holistically. 
+Read the full code for the core files involved in the flow or test or function to get a complete understanding before suggesting any changes. All changes must make the app more robust. We need it to be production ready at all times! We don't want fixes that fix one thing and break another 5. 
+
+ Please NEVER DELETE EXISTING FUNCTIONALITY, NEVER CREATE A NEW FILE before you check the WHOLE code base including ALL Subfolders and ensure that such file is not existing in some other place. We NEED TO  AVOID DUPLICATES. USE THE EXISTING stack, ASK before you introduce a new technology. Do you have some other questions? Please read cursorrules and the two testing.md files before you start.  You can use the MCP tools to access supabase. The project ID is izziigqgdurqsoyvajvu
+  
+DO NOT REWRITE ANYTHING DUE TO FAILED TEST! DOCUMENT RESULTS OF THE TEST and ask for next action. Once a test fails, the most probable reason for failing is a reference to a file that has been moved. For fixes always review the interdependencies in the files. You want tests that focus on the real functionality and simulate how an end-user would interact with the registration flow, catching bugs that affect the actual user experience, rather than exhaustive tests for every minor detail or internal state change.
+
+
+**Project Context:**
+
+*   The project is a User Management System built with Next.js (App Router), TypeScript, React, Supabase, Zustand, Tailwind CSS, and Shadcn UI. Testing uses Vitest and React Testing Library.
+*   The codebase resides entirely within the `/project` subdirectory of the workspace.
+*   A significant migration from an older Vite/Next.js split structure to this unified Next.js app in `/project` has been completed.
+*   Core personal authentication and basic profile/settings API/UI are implemented, roughly corresponding to Phases 1 & 2 outlined in the previous plans.
+*   API routes are located in `project/app/api/`, pages in `project/app/`, components in `project/src/components/`, stores/libs in `project/src/lib/`.
+*   Key documentation files include:
+    *  all files ending with .md  
+    *   `docs/ROADMAP.md`: Provides a higher-level overview of phases (extracted from an older plan). Use this for phase structure but rely on the `functionality-features-phase*.md` files for feature specifics.
+    *   `docs/TESTING.md`: Describes the current testing setup.
+    *   `docs/TESTING_ISSUES.md`: Details known testing issues.
+    *   `docs/auth-roles.md`: Defines role structure.
+
+
+
+**Instructions & Constraints:**
+
+*   **Prioritize the `functionality-features-phase*.md` files** as the source of truth for required features and details. Use `docs/ROADMAP.md` mainly for the overall phase structure/order.
+*   The implementation plan should be specific enough to guide development, referencing details from the phase files where appropriate.
+*   Assume the existing tech stack will be used unless a new feature explicitly requires something different (mention if so).
+*   Refer to existing code patterns and structure within the `project/` directory when planning.
+*   Begin by performing the Gap Analysis based on the phase files and creating `docs/GAP_ANALYSIS.md`. Once reviewed, proceed to create `docs/IMPLEMENTATION_PLAN.md`.
+
+
+
+
+
+
+
+
+
+# User Management System Implementation Checklist
+
+## Project Overview
+This document tracks the implementation progress of our user management system features.
+
+## Progress Tracking
+
+### 1. Authentication & Authorization
+| Feature | Status | Notes |
+|---------|--------|-------|
+| [x] User registration with email/password | | Implemented with form validation and Zod schema |
+| [x] OAuth provider integration | | Implemented with multiple providers and CSRF protection |
+| [x] Password recovery/reset | | Implemented with forms and validation |
+| [x] JWT token implementation | | Implemented in axios interceptor |
+| [x] Role-based access control | | Implemented with roles, permissions, and HOC |
+| [x] Session management | | Basic implementation in auth store |
+| [x] Two-factor authentication (2FA) | | Implemented with configurable methods and easy toggle |
+
+### 2. User Profile Management
+| Feature | Status | Notes |
+|---------|--------|-------|
+| [x] Profile creation/editing | | Implemented with form validation and Zod schema |
+| [x] Avatar/profile picture upload | | Implemented with file upload, preview, and validation |
+| [x] Privacy settings | | Basic implementation with public/private toggle |
+| [x] Profile visibility options | | Implemented with isPublic flag |
+| [x] Connected accounts management | | Implemented with OAuth provider support and account linking |
+| [x] Profile verification system | | Basic implementation with isVerified flag |
+
+### 3. Security Features
+| Feature | Status | Notes |
+|---------|--------|-------|
+| [x] Password hashing/encryption | | Handled by backend |
+| [x] Input validation/sanitization | | Implemented with Zod schemas |
+| [x] CSRF protection | | Implemented with token generation and validation |
+| [ ] Rate limiting | | |
+| [ ] Security headers | | |
+| [x] Session timeout handling | | Basic implementation in auth store |
+| [ ] Audit logging | | |
+
+### 4. User Preferences & Settings
+| Feature | Status | Notes |
+|---------|--------|-------|
+| [x] Language/localization settings | | |
+| [x] Notification preferences | | Implemented with configurable notification types |
+| [x] Theme preferences (light/dark mode) | | |
+| [x] Privacy settings management | | Implemented in profile form |
+| [ ] Communication preferences | | |
+
+### 5. Multi-step Registration
+| Feature | Status | Notes |
+|---------|--------|-------|
+| [x] Account creation step | | Basic implementation with form validation |
+| [ ] Profile completion step | | |
+| [x] Email verification step | | Implemented with verification page |
+| [x] Terms acceptance step | | Implemented in registration form |
+| [ ] Welcome onboarding | | |
+
+### 6. API Integration
+| Feature | Status | Notes |
+|---------|--------|-------|
+| [x] RESTful API endpoints | | Basic structure in auth store |
+| [x] Authentication middleware | | Implemented in axios interceptor |
+| [x] Error handling | | Implemented in auth store and axios |
+| [ ] Rate limiting implementation | | |
+| [x] API documentation | | |
+
+### 7. Database Schema
+| Feature | Status | Notes |
+|---------|--------|-------|
+| [x] User model implementation | | Implemented with Zod schemas |
+| [x] Profile model implementation | | Implemented with Zod schemas |
+| [x] Relationships setup | | Implemented in database types |
+| [x] Indexes and constraints | | Defined in database types |
+| [x] Migration scripts | | Basic structure in Supabase provider |
+
+### 8. Frontend Components
+| Feature | Status | Notes |
+|---------|--------|-------|
+| [x] Login form | | Implemented with validation |
+| [x] Registration form | | Implemented with validation |
+| [x] Password reset form | | Implemented with validation |
+| [x] Profile editor | | Implemented with form validation |
+| [x] Settings panel | | Implemented with tabs for general, notifications, and privacy settings |
+| [x] Avatar upload component | | Implemented with preview, validation, and cropping |
+| [x] 2FA setup wizard | | Implemented with configurable methods and backup codes |
+| [x] Privacy settings panel | | Implemented in profile form |
+
+### 9. State Management
+| Feature | Status | Notes |
+|---------|--------|-------|
+| [x] Authentication state | | Implemented with Zustand |
+| [x] User profile state | | Implemented with Zustand |
+| [x] Settings state | | Implemented with Zustand and persistence |
+| [x] Form state management | | Implemented with react-hook-form |
+| [x] Error handling state | | Implemented in auth store |
+
+### 10. Additional Features
+| Feature | Status | Notes |
+|---------|--------|-------|
+| [x] Account deletion | | Implemented with confirmation and password verification |
+| [x] Data export | | Implemented with multiple formats and customization options |
+| [ ] Activity logging | | |
+| [ ] Multi-device session management | | |
+| [x] Password strength requirements | | Implemented with Zod schema |
+| [ ] Account recovery options | | |
+| [ ] Email notifications system | | |
+| [x] Subscription management | | Free/Premium user distinction with feature gating |
+| [ ] Payment provider integration | | |
+| [ ] Subscription plan management | | |
+| [x] Private/Corporate user distinction | | Implemented with optional toggle and enhanced profile |
+
+### 11. Technical Implementation
+| Feature | Status | Notes |
+|---------|--------|-------|
+| [x] React + TypeScript setup | | Project initialized |
+| [x] Zustand implementation | | Implemented auth store |
+| [x] Zod schema validation | | Implemented for forms |
+| [x] Axios setup | | Implemented with interceptors |
+| [x] i18next integration | | |
+| [x] Tailwind CSS setup | | Used in components |
+| [x] ShadcN UI components | | Used in forms and components |
+| [x] Modular integration with host applications | | Through UserManagementProvider |
+| [x] Cross-platform support (web + mobile) | | Platform detection, responsive UI, native integration |
+
+### 12. Testing Strategy
+| Feature | Status | Notes |
+|---------|--------|-------|
+| [ ] Unit tests setup | | |
+| [ ] Integration tests setup | | |
+| [ ] E2E tests setup | | |
+| [ ] Security testing | | |
+| [ ] Performance testing | | |
+
+## How to Use This Checklist
+1. As features are completed, mark them with an [x]
+2. Add relevant notes for each completed feature
+3. Use the notes column to track:
+   - Dependencies
+   - Issues encountered
+   - Future improvements
+   - Related pull requests
+
+## Project Status
+- [x] Phase 1: Initial Setup
+- [x] Phase 2: Core Features
+- [x] Phase 3: Enhanced Features
+- [ ] Phase 4: Testing & Security
+- [ ] Phase 5: Deployment & Documentation 
+
+Follow this plan! Remember that we need to build this as a separate building block that can be plugged into any app. It must be versatile and flexible. We currently use Supabase, but we might want to use other database for other services. Contain all code clean and easy to replace. Keep front and back end separated. Always ask if you have several options and you are not sure. This app has to work with both web and mobile application. It has to be plug in into another apps and all functionalities that are not absolute core have to be easy to turn on and off for different apps.  
+  
+  If we focus on testing Please follow these instructions carefully throughout our session:
+
+**Core Goal:** Implement robust tests focusing on end-user perspective and critical user flows.
+
+**Instructions & Constraints:**
+
+1.  **File System Diligence:** Before creating ANY new file (including test files, mocks, or helper utilities), YOU MUST thoroughly check all directories within the workspace to ensure a similar file doesn't already exist elsewhere. Prevent file duplication at all costs.
+2.  **Strict File Structure:** Adhere strictly to the conventions outlined in `docs/File structure guidelines.md` when creating necessary test files, mocks, or related artifacts.
+3.  **Existing Tech Stack Only:** Use only the established testing stack (Vitest, React Testing Library, User Event, MSW, JSDOM, Testing Library Jest DOM). If you believe a new technology is absolutely necessary, you MUST ask me before introducing it.
+4.  **Testing Priority:** Focus testing efforts on end-user scenarios. Test the application from the user's perspective, verifying complete user flows (e.g., registration, login, profile update, MFA setup). Prioritize tests that cover critical functionality over low-level unit tests, unless those unit tests are essential for complex logic.
+5.  **No Simplification for Passing Tests:** Do NOT simplify application code, remove features, or alter core functionality just to make tests pass. The application's intended behavior is paramount.
+6.  **Handling Test Failures:**
+    *   **If a test fails due to a problem within the test file itself** (e.g., incorrect selectors, faulty mocking, async/timing issues, structure not following guidelines): You have permission to modify the test file (`*.test.tsx`, `*.test.ts`, setup files, mocks) to fix the issue. Refer to `docs/TESTING_ISSUES.md` and `docs/TESTING.md` for known issues and best practices.
+    *   **If a test fails and you suspect the issue lies within the actual application code** (i.e., the component or function being tested seems broken or doesn't behave as expected): STOP immediately. Report the failing test, the specific discrepancy you observed, and ask me for confirmation and guidance before making any changes to the application source code (`/src/` or `/app/` directories, excluding test files).
+
+There is no project directlory any longer. The project direcoty was in previous root. All the files have been migrated and reorganized into a new root. If there are references to project in the code you can remove them. Also, if test are failing make sure you check the import paths. 

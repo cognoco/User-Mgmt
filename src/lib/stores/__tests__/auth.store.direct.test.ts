@@ -1,0 +1,111 @@
+/**
+ * Direct tests for auth.store.ts focusing on the getState() functionality
+ * This test file specifically addresses the "function is not a function" error
+ * when accessing functions from getState()
+ */
+
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { useAuthStore } from '../auth.store';
+// Mock dependencies to isolate the store
+// Use the correct path relative to the test file
+vi.mock('@/lib/api/axios', () => ({
+  api: {
+    post: vi.fn().mockImplementation(() => Promise.resolve({ data: {} })),
+    delete: vi.fn().mockImplementation(() => Promise.resolve({ data: {} })),
+  }
+}));
+
+// Mock localStorage
+const localStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+};
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+
+describe('Auth Store Direct Tests', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should expose all action functions through getState()', () => {
+    // Get the store state directly
+    const state = useAuthStore.getState();
+    
+    // Check that all functions exist and are functions
+    expect(state.login).toBeDefined();
+    expect(typeof state.login).toBe('function');
+    
+    expect(state.register).toBeDefined();
+    expect(typeof state.register).toBe('function');
+    
+    expect(state.logout).toBeDefined();
+    expect(typeof state.logout).toBe('function');
+    
+    expect(state.resetPassword).toBeDefined();
+    expect(typeof state.resetPassword).toBe('function');
+    
+    expect(state.updatePassword).toBeDefined();
+    expect(typeof state.updatePassword).toBe('function');
+    
+    expect(state.sendVerificationEmail).toBeDefined();
+    expect(typeof state.sendVerificationEmail).toBe('function');
+    
+    expect(state.verifyEmail).toBeDefined();
+    expect(typeof state.verifyEmail).toBe('function');
+    
+    expect(state.clearError).toBeDefined();
+    expect(typeof state.clearError).toBe('function');
+    
+    expect(state.clearSuccessMessage).toBeDefined();
+    expect(typeof state.clearSuccessMessage).toBe('function');
+    
+    expect(state.deleteAccount).toBeDefined();
+    expect(typeof state.deleteAccount).toBe('function');
+  });
+
+  it('should be able to call functions obtained from getState()', async () => {
+    // Get specific functions from the store state
+    const { login, register, logout } = useAuthStore.getState();
+    
+    // Verify they are functions
+    expect(typeof login).toBe('function');
+    expect(typeof register).toBe('function');
+    expect(typeof logout).toBe('function');
+    
+    // Access the mocked API directly
+    const apiModule = await import('@/lib/api/axios');
+    const api = apiModule.api as any;
+    api.post.mockResolvedValueOnce({
+      data: { user: { id: '123' }, token: 'token123' }
+    });
+    
+    // Try calling the login function directly
+    const result = await login({ email: 'test@example.com', password: 'password' });
+    
+    // Verify the function executed correctly
+    expect(result).toEqual({ success: true });
+    expect(api.post).toHaveBeenCalledWith('/api/auth/login', { 
+      email: 'test@example.com', 
+      password: 'password' 
+    });
+  });
+
+  it('should handle destructured function calls', async () => {
+    // Destructure functions from the store
+    const { login } = useAuthStore.getState();
+    
+    // Access the mocked API directly
+    const apiModule = await import('@/lib/api/axios');
+    const api = apiModule.api as any;
+    api.post.mockResolvedValueOnce({
+      data: { user: { id: '123' }, token: 'token123' }
+    });
+    
+    // Call the destructured function
+    const result = await login({ email: 'test@example.com', password: 'password' });
+    
+    // Verify it worked
+    expect(result).toEqual({ success: true });
+  });
+});

@@ -1,0 +1,173 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  domains   Domain[]
+  ssoConfig SSOConfig?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Domain {
+  id             String       @id @default(cuid())
+  domain         String
+  isVerified     Boolean      @default(false)
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([domain, organizationId])
+}
+
+model SSOConfig {
+  id                  String       @id @default(cuid())
+  organization        Organization @relation(fields: [organizationId], references: [id])
+  organizationId      String       @unique
+  ssoEnabled         Boolean      @default(false)
+  idpType            String?      // 'saml' or 'oidc'
+  entityId           String?      // For SAML
+  ssoUrl             String?      // For SAML
+  x509Certificate    String?      // For SAML
+  clientId           String?      // For OIDC
+  clientSecret       String?      // For OIDC
+  issuer             String?      // For OIDC
+  authEndpoint       String?      // For OIDC
+  tokenEndpoint      String?      // For OIDC
+  userInfoEndpoint   String?      // For OIDC
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+}
+
+enum SubscriptionPlan {
+  free
+  premium
+  business
+}
+
+enum SubscriptionStatus {
+  active
+  past_due
+  canceled
+  incomplete
+  incomplete_expired
+  trialing
+  unpaid
+}
+
+model User {
+  id                String        @id @default(cuid())
+  email             String        @unique
+  name              String?
+  stripeCustomerId  String?       @unique
+  subscription      Subscription?
+  teamMemberships   TeamMember[]
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model Subscription {
+  id                String            @id @default(cuid())
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String            @unique
+  customerId        String?           @unique
+  subscriptionId    String?           @unique
+  plan              SubscriptionPlan  @default(free)
+  status            SubscriptionStatus @default(incomplete)
+  currentPeriodEnd  DateTime?
+  cancelAtPeriodEnd Boolean           @default(false)
+  trialEnd          DateTime?
+  invoices          Invoice[]
+  teamLicense       TeamLicense?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([plan, status])
+}
+
+model Invoice {
+  id              String       @id @default(cuid())
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  subscriptionId  String
+  stripeInvoiceId String       @unique
+  amount          Int
+  currency        String
+  status          String
+  pdfUrl          String?
+  createdAt       DateTime     @default(now())
+
+  @@index([subscriptionId])
+}
+
+model TeamLicense {
+  id             String       @id @default(cuid())
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  subscriptionId String       @unique
+  totalSeats     Int         @default(5)
+  usedSeats      Int         @default(0)
+  members        TeamMember[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+enum TeamMemberStatus {
+  pending
+  active
+  inactive
+  removed
+}
+
+enum TeamRole {
+  ADMIN
+  BILLING_MANAGER
+  MEMBER
+  VIEWER
+}
+
+model TeamMember {
+  id             String           @id @default(cuid())
+  teamLicense    TeamLicense      @relation(fields: [teamLicenseId], references: [id], onDelete: Cascade)
+  teamLicenseId  String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  role           TeamRole         @default(member)
+  invitedEmail   String?
+  status         TeamMemberStatus @default(pending)
+  lastActive     DateTime?
+  invitedBy      String?         // userId of the person who sent the invite
+  inviteToken    String?         @unique // For email invites
+  inviteExpires  DateTime?       // When the invite expires
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@unique([userId, teamLicenseId])
+  @@index([teamLicenseId])
+  @@index([invitedEmail])
+  @@index([inviteToken])
+}
+
+model RolePermission {
+  id          String   @id @default(cuid())
+  role        TeamRole
+  permission  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([role, permission])
+  @@index([role])
+}

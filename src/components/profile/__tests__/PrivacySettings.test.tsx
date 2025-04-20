@@ -1,0 +1,156 @@
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '@/lib/i18n/index';
+
+import { PrivacySettings } from '../PrivacySettings';
+import { useProfileStore } from '@/lib/stores/profile.store';
+import { Profile as DbProfile } from '@/lib/types/database'; // Use the correct Profile type
+
+// Mock the Supabase client EARLY, before other imports might trigger it
+vi.mock('@/lib/supabase');
+
+// Mock the profile store
+vi.mock('@/lib/stores/profile.store');
+
+// Mock UI components used
+vi.mock('@/components/ui/button', () => ({ Button: (props: any) => <button {...props} /> }));
+vi.mock('@/components/ui/card', () => ({
+  Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CardTitle: ({ children }: { children: React.ReactNode }) => <h3>{children}</h3>,
+  CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+vi.mock('@/components/ui/label', () => ({ Label: (props: any) => <label {...props} /> }));
+vi.mock('@/components/ui/switch', () => ({ Switch: (props: any) => <input type="checkbox" role="switch" {...props} /> }));
+vi.mock('@/components/ui/select', () => ({
+  Select: ({ children, value, onValueChange, disabled }: any) => (
+    <select data-testid="profile-visibility-select" value={value} onChange={(e) => onValueChange(e.target.value)} disabled={disabled}>
+      {children}
+    </select>
+  ),
+  SelectTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>, // Simple div for trigger
+  SelectValue: () => null, // Mock SelectValue
+  SelectContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>, // Render content directly for options
+  SelectItem: ({ value, children }: { value: string, children: React.ReactNode }) => <option value={value}>{children}</option>,
+}));
+
+// Mock the useProfile hook directly (alternative to mocking store, depending on useProfile implementation)
+// Keep store mock for consistency for now
+
+// Mock profile data
+const mockProfile: DbProfile = {
+  id: 'user-123',
+  userId: 'user-123',
+  userType: 'private',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  avatarUrl: null,
+  bio: null,
+  location: null,
+  website: null,
+  phoneNumber: null,
+  privacySettings: {
+    showEmail: false,
+    showPhone: false,
+    showLocation: false,
+    profileVisibility: 'private',
+  },
+  companyName: null,
+  companyLogoUrl: null,
+  companySize: null,
+  industry: null,
+  companyWebsite: null,
+  position: null,
+  department: null,
+  vatId: null,
+  address: null,
+};
+
+const mockUpdatePrivacySettings = vi.fn();
+
+describe('PrivacySettings Component', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Setup mock return value for the store hook
+    (useProfileStore as any).mockReturnValue({
+      profile: mockProfile,
+      isLoading: false,
+      updatePrivacySettings: mockUpdatePrivacySettings,
+    });
+  });
+
+  it('should render current privacy settings from profile store', () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <PrivacySettings />
+      </I18nextProvider>
+    );
+
+    // Check profile visibility dropdown
+    const visibilitySelect = screen.getByTestId('profile-visibility-select');
+    expect(visibilitySelect).toBeInTheDocument();
+    expect(visibilitySelect).toHaveValue('private');
+
+    // Check toggles
+    expect(screen.getByLabelText(/Show Email Address/i)).not.toBeChecked();
+    expect(screen.getByLabelText(/Show Phone Number/i)).not.toBeChecked();
+  });
+
+  it('should call updatePrivacySettings with new visibility when dropdown changes', async () => {
+    const user = userEvent.setup();
+    render(
+      <I18nextProvider i18n={i18n}>
+        <PrivacySettings />
+      </I18nextProvider>
+    );
+
+    const visibilitySelect = screen.getByTestId('profile-visibility-select');
+    await user.selectOptions(visibilitySelect, 'public');
+
+    expect(mockUpdatePrivacySettings).toHaveBeenCalledTimes(1);
+    expect(mockUpdatePrivacySettings).toHaveBeenCalledWith({
+      ...mockProfile.privacySettings,
+      profileVisibility: 'public',
+    });
+  });
+
+  it('should call updatePrivacySettings with new value when email toggle changes', async () => {
+    const user = userEvent.setup();
+    render(
+      <I18nextProvider i18n={i18n}>
+        <PrivacySettings />
+      </I18nextProvider>
+    );
+
+    const emailToggle = screen.getByLabelText(/Show Email Address/i);
+    await user.click(emailToggle);
+
+    expect(mockUpdatePrivacySettings).toHaveBeenCalledTimes(1);
+    expect(mockUpdatePrivacySettings).toHaveBeenCalledWith({
+      ...mockProfile.privacySettings,
+      showEmail: true, // Toggled from false to true
+    });
+  });
+
+  it('should call updatePrivacySettings with new value when phone toggle changes', async () => {
+    const user = userEvent.setup();
+    render(
+      <I18nextProvider i18n={i18n}>
+        <PrivacySettings />
+      </I18nextProvider>
+    );
+
+    const phoneToggle = screen.getByLabelText(/Show Phone Number/i);
+    await user.click(phoneToggle);
+
+    expect(mockUpdatePrivacySettings).toHaveBeenCalledTimes(1);
+    expect(mockUpdatePrivacySettings).toHaveBeenCalledWith({
+      ...mockProfile.privacySettings,
+      showPhone: true, // Toggled from false to true
+    });
+  });
+
+}); 
