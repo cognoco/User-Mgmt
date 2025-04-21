@@ -351,4 +351,16 @@ Tests are expected to run in CI pipelines. Pull requests should ideally maintain
 ### 5. General Advice
 - If a test fails due to a network or API error, check both your MSW handlers and your error handling logic.
 - If a test fails due to a type error, check your TypeScript types and update them as needed.
-- Document any new patterns or gotchas you encounter to help future contributors. 
+- Document any new patterns or gotchas you encounter to help future contributors.
+
+## Playwright E2E Selector Best Practices
+
+- When writing Playwright E2E tests for custom UI components (such as Checkbox), **do not assume standard HTML attributes like `name` are present**.
+- Instead, use a robust selector such as a `data-testid` or `id` attribute that is present on the component.
+- For example, in the RegistrationForm, the terms and conditions checkbox uses `data-testid="accept-terms-checkbox"`:
+
+  ```js
+  await page.check('[data-testid="accept-terms-checkbox"]');
+  ```
+
+- Always inspect the rendered HTML or React component code to confirm the correct selector for Playwright tests. 

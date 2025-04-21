@@ -7,6 +7,7 @@ import { supabase } from '@/lib/database/supabase';
 import { useAuthStore } from '@/lib/stores/auth.store';
 import { User } from '@/types/auth';
 import toast, { Toaster } from 'react-hot-toast';
+import { OAuthProvider } from '@/lib/types/oauth';
 
 // Define the callbacks inside the Client Component
 const clientCallbacks: Required<IntegrationCallbacks> = {
@@ -30,12 +31,37 @@ const clientConfig: UserManagementConfig = {
   apiBaseUrl: process.env.NEXT_PUBLIC_API_URL, // Read client-safe env var
   storageKeyPrefix: "user-mgmt", // Or read from env if needed
   callbacks: clientCallbacks,
+  oauth: {
+    enabled: true,
+    providers: [
+      {
+        enabled: true,
+        provider: OAuthProvider.GOOGLE,
+        clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+        redirectUri: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI || (typeof window !== 'undefined' ? window.location.origin + '/auth/callback' : ''),
+      },
+      {
+        enabled: true,
+        provider: OAuthProvider.APPLE,
+        clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID || '',
+        redirectUri: process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI || (typeof window !== 'undefined' ? window.location.origin + '/auth/callback' : ''),
+      },
+      {
+        enabled: true,
+        provider: OAuthProvider.GITHUB,
+        clientId: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || '',
+        redirectUri: process.env.NEXT_PUBLIC_GITHUB_REDIRECT_URI || (typeof window !== 'undefined' ? window.location.origin + '/auth/callback' : ''),
+      },
+    ],
+    autoLink: true,
+    allowUnverifiedEmails: false,
+    defaultRedirectPath: '/',
+  },
   // Add other config defaults from UserManagementProvider if they weren't passed from layout
   // Example: (ensure these match defaults in UserManagementProvider or pass props)
   // twoFactor: { enabled: false, methods: [], required: false },
   // subscription: { enabled: false, defaultTier: 'FREE', features: {}, enableBilling: false },
   // corporateUsers: { enabled: false, registrationEnabled: true, requireCompanyValidation: false, allowUserTypeChange: false, companyFieldsRequired: ['name'], defaultUserType: 'PRIVATE' },
-  // oauth: { enabled: false, providers: [], autoLink: true, allowUnverifiedEmails: false, defaultRedirectPath: '/' },
 };
 
 interface UserManagementClientBoundaryProps {

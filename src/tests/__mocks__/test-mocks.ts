@@ -1,5 +1,5 @@
-import { AuthState, User } from './auth';
-import { JestMockFunction } from './jest-types';
+import { AuthState, User } from '../../types/auth';
+import { JestMockFunction } from '../../types/jest-types';
 
 // Type for mocked auth store
 export type MockAuthStore = {

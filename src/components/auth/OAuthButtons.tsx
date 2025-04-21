@@ -33,7 +33,6 @@ export interface OAuthButtonsProps {
   layout?: 'horizontal' | 'vertical' | 'grid';
   showLabels?: boolean;
   className?: string;
-  onSuccess?: () => void;
 }
 
 export function OAuthButtons({
@@ -41,7 +40,6 @@ export function OAuthButtons({
   layout = 'vertical',
   showLabels = true,
   className = '',
-  onSuccess,
 }: OAuthButtonsProps) {
   const { t } = useTranslation();
   const { oauth } = useUserManagement();
@@ -61,15 +59,33 @@ export function OAuthButtons({
   
   // Get button text based on mode
   const getButtonText = (provider: OAuthProvider) => {
-    const providerName = t(`oauth.providers.${provider.toLowerCase()}`);
-    
+    // Try translation, fallback to English
+    let providerName = '';
+    switch (provider) {
+      case OAuthProvider.GOOGLE:
+        providerName = 'Google'; break;
+      case OAuthProvider.APPLE:
+        providerName = 'Apple'; break;
+      case OAuthProvider.GITHUB:
+        providerName = 'GitHub'; break;
+      case OAuthProvider.FACEBOOK:
+        providerName = 'Facebook'; break;
+      case OAuthProvider.TWITTER:
+        providerName = 'Twitter'; break;
+      case OAuthProvider.MICROSOFT:
+        providerName = 'Microsoft'; break;
+      case OAuthProvider.LINKEDIN:
+        providerName = 'LinkedIn'; break;
+      default:
+        providerName = provider;
+    }
     switch (mode) {
       case 'login':
-        return t('oauth.loginWith', { provider: providerName });
+        return `Sign in with ${providerName}`;
       case 'signup':
-        return t('oauth.signupWith', { provider: providerName });
+        return `Sign up with ${providerName}`;
       case 'connect':
-        return t('oauth.connectWith', { provider: providerName });
+        return `Connect ${providerName}`;
       default:
         return providerName;
     }
@@ -116,7 +132,7 @@ export function OAuthButtons({
           </div>
           <div className="relative flex justify-center text-sm">
             <span className="px-2 bg-background text-muted-foreground">
-              {t('oauth.orDivider')}
+              {t('oauth.orDivider', 'or')}
             </span>
           </div>
         </div>

@@ -247,23 +247,32 @@ const authStoreCreator: StateCreator<AuthState> = (set, get) => {
 
         if (signUpError) {
             console.error('[AuthStore Register Error]', signUpError);
+            // Add debug log for the exact error message
+            console.error('[DEBUG] Supabase signUpError.message:', signUpError.message);
             const errorMessage = signUpError.message || 'Registration failed';
             if (signUpError.status === 429) {
                 set({ isLoading: false, error: 'Too many registration attempts. Please try again later.', rateLimitInfo: { windowMs: 60000} });
                 return { success: false, error: errorMessage, code: 'RATE_LIMIT_EXCEEDED' };
             }
-            if (signUpError.message.includes('User already registered')) {
-                console.log('User already registered, Supabase should resend verification.');
+            if (
+                /already registered|already exists|email in use|account exists|already been registered/i.test(signUpError.message)
+            ) {
                 set({ 
                     isLoading: false, 
-                    error: null, 
-                    successMessage: 'Registration already started. A new verification email has been sent. Please check your inbox.' 
+                    error: 'This user already exists - please use the log in (with link to log in front page)',
+                    successMessage: null
                 });
-                return { success: true };
+                return { success: false, error: 'This user already exists - please use the log in (with link to log in front page)' };
             }
 
             set({ isLoading: false, error: errorMessage });
             return { success: false, error: errorMessage };
+        }
+
+        if (signUpData.user && signUpData.user.email_confirmed_at) {
+            console.error('[DEBUG] Already registered/verified user path hit in register:', signUpData.user);
+            set({ isLoading: false, error: 'Email already exists and is verified. Try logging in.', successMessage: null });
+            return { success: false, error: 'Email already exists and is verified. Try logging in.' };
         }
 
         if (signUpData.user && !signUpData.user.email_confirmed_at) {

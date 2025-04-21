@@ -107,6 +107,14 @@ export function RegistrationForm() {
     }
   }, [form.formState.isDirty]);
   
+  // Debug logging for apiSuccess and apiError
+  useEffect(() => {
+    console.log('[RegistrationForm] apiSuccess changed:', apiSuccess);
+  }, [apiSuccess]);
+  useEffect(() => {
+    console.log('[RegistrationForm] apiError changed:', apiError);
+  }, [apiError]);
+  
   const onSubmit = async (data: RegistrationFormValues) => {
     console.log('[RegistrationForm onSubmit] Handler triggered!');
     console.log('[RegistrationForm onSubmit] Form data:', data);
@@ -144,9 +152,10 @@ export function RegistrationForm() {
         const successMsg = 'Registration successful! Please check your email to verify your account.';
         setApiSuccess(successMsg);
         setApiError(null);
-        console.log('[RegistrationForm] Registration successful, resetting form and preparing redirect.');
-        form.reset();
+        console.log('[RegistrationForm] Registration successful, showing success message.');
+        // Show the success message for 2 seconds before resetting and redirecting
         setTimeout(() => {
+          form.reset();
           console.log(`[RegistrationForm] Redirecting to /check-email?email=${data.email}`);
           router.push(`/check-email?email=${encodeURIComponent(data.email)}`);
         }, 2000);
@@ -154,6 +163,8 @@ export function RegistrationForm() {
         console.error('[RegistrationForm] Registration failed:', result.error);
         setApiError(result.error || 'Registration failed. Please try again.');
         setApiSuccess(null);
+        // Do not redirect or reset form if error
+        return;
       }
     } catch (error: any) {
       console.error('[RegistrationForm] Unexpected error during registration:', error);
@@ -163,6 +174,12 @@ export function RegistrationForm() {
       console.log('[RegistrationForm] Entering finally block, setting isSubmitting to false...');
       setIsSubmitting(false);
       console.log('[RegistrationForm] isSubmitting state should now be false.');
+      // Debug logging for form state after API call
+      console.log('[RegistrationForm] After API call:', {
+        isValid: form.formState.isValid,
+        isSubmitting,
+        apiError
+      });
     }
   };
   
@@ -189,6 +206,10 @@ export function RegistrationForm() {
   
   const showUserTypeSelection = userManagement.corporateUsers.enabled && userManagement.corporateUsers.registrationEnabled;
   
+  console.log('[RegistrationForm DEBUG] formState.isValid:', form.formState.isValid);
+  console.log('[RegistrationForm DEBUG] formState.errors:', form.formState.errors);
+  console.log('[RegistrationForm DEBUG] field values:', form.getValues());
+  
   console.log('[TEST_DEBUG] RegistrationForm function BEFORE RETURN');
   
   return (
@@ -199,8 +220,6 @@ export function RegistrationForm() {
           Register for a new account to get started
         </p>
       </div>
-      <OAuthButtons mode="signup" layout="vertical" className="mb-6" />
-      
       {apiSuccess && (
         <Alert variant="default" className="bg-green-100 border-green-300 text-green-800">
            <Check className="h-4 w-4" />
@@ -208,207 +227,217 @@ export function RegistrationForm() {
           <AlertDescription>{apiSuccess}</AlertDescription>
         </Alert>
       )}
-      
+      {/* Error Alert */}
+      {(() => { console.log('[DEBUG] Rendering error alert, apiError:', apiError); return null; })()}
       {apiError && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" data-testid="registration-error-alert">
           <X className="h-4 w-4" />
           <AlertTitle>Registration Failed</AlertTitle>
           <AlertDescription>{apiError}</AlertDescription>
         </Alert>
       )}
-      
       {!apiSuccess && (
-          <form onSubmit={form.handleSubmit(onSubmit, onValidationErrors)} className="space-y-4" data-testid="registration-form">
-            {showUserTypeSelection && (
-              <div className="space-y-2">
-                <Label>User Type</Label>
-                <RadioGroup 
-                  defaultValue={userManagement.corporateUsers.defaultUserType} 
-                  value={userType}
-                  onValueChange={(value) => handleUserTypeChange(value as UserType)}
-                  className="flex space-x-4"
-                  aria-label="User Type"
-                  data-testid="user-type-radio-group"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value={UserType.PRIVATE} id="private" data-testid="user-type-private" />
-                    <Label htmlFor="private">Personal</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value={UserType.CORPORATE} id="corporate" data-testid="user-type-corporate" />
-                    <Label htmlFor="corporate">Business</Label>
-                  </div>
-                </RadioGroup>
-              </div>
+        <form onSubmit={form.handleSubmit(onSubmit, onValidationErrors)} className="space-y-4" data-testid="registration-form">
+          {showUserTypeSelection && (
+            <div className="space-y-2">
+              <Label>User Type</Label>
+              <RadioGroup 
+                defaultValue={userManagement.corporateUsers.defaultUserType} 
+                value={userType}
+                onValueChange={(value) => handleUserTypeChange(value as UserType)}
+                className="flex space-x-4"
+                aria-label="User Type"
+                data-testid="user-type-radio-group"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value={UserType.PRIVATE} id="private" data-testid="user-type-private" />
+                  <Label htmlFor="private">Personal</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value={UserType.CORPORATE} id="corporate" data-testid="user-type-corporate" />
+                  <Label htmlFor="corporate">Business</Label>
+                </div>
+              </RadioGroup>
+            </div>
+          )}
+          
+          <div className="space-y-1.5">
+            <Label htmlFor="email">Email *</Label>
+            <Input 
+              id="email" 
+              type="email" 
+              placeholder="email@example.com" 
+              {...form.register('email')} 
+              aria-invalid={form.formState.errors.email ? "true" : "false"}
+              data-testid="email-input"
+            />
+            {form.formState.errors.email && (
+              <p className="text-destructive text-sm mt-1">{form.formState.errors.email.message}</p>
             )}
-            
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email">Email *</Label>
+              <Label htmlFor="firstName">First Name {userType === UserType.PRIVATE ? '*' : ''}</Label>
               <Input 
-                id="email" 
-                type="email" 
-                placeholder="email@example.com" 
-                {...form.register('email')} 
-                aria-invalid={form.formState.errors.email ? "true" : "false"}
-                data-testid="email-input"
+                id="firstName" 
+                {...form.register('firstName')} 
+                aria-invalid={form.formState.errors.firstName ? "true" : "false"}
+                data-testid="first-name-input"
               />
-              {form.formState.errors.email && (
-                <p className="text-destructive text-sm mt-1">{form.formState.errors.email.message}</p>
+              {form.formState.errors.firstName && (
+                  <p className="text-destructive text-sm mt-1">{form.formState.errors.firstName.message}</p>
               )}
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="firstName">First Name {userType === UserType.PRIVATE ? '*' : ''}</Label>
-                <Input 
-                  id="firstName" 
-                  {...form.register('firstName')} 
-                  aria-invalid={form.formState.errors.firstName ? "true" : "false"}
-                  data-testid="first-name-input"
-                />
-                {form.formState.errors.firstName && (
-                    <p className="text-destructive text-sm mt-1">{form.formState.errors.firstName.message}</p>
-                )}
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="lastName">Last Name {userType === UserType.PRIVATE ? '*' : ''}</Label>
-                <Input 
-                  id="lastName" 
-                  {...form.register('lastName')} 
-                  aria-invalid={form.formState.errors.lastName ? "true" : "false"}
-                  data-testid="last-name-input"
-                />
-                {form.formState.errors.lastName && (
-                    <p className="text-destructive text-sm mt-1">{form.formState.errors.lastName.message}</p>
-                )}
-              </div>
-            </div>
-            
             <div className="space-y-1.5">
-              <Label htmlFor="password">Password *</Label>
+              <Label htmlFor="lastName">Last Name {userType === UserType.PRIVATE ? '*' : ''}</Label>
               <Input 
-                id="password" 
-                type="password" 
-                {...form.register('password')} 
-                aria-invalid={form.formState.errors.password ? "true" : "false"}
-                data-testid="password-input"
+                id="lastName" 
+                {...form.register('lastName')} 
+                aria-invalid={form.formState.errors.lastName ? "true" : "false"}
+                data-testid="last-name-input"
               />
-              {form.formState.errors.password && (
-                    <p className="text-destructive text-sm mt-1">{form.formState.errors.password.message}</p>
-                )}
-            </div>
-            
-            <div className="space-y-1.5">
-              <Label htmlFor="confirmPassword">Confirm Password *</Label>
-              <Input 
-                id="confirmPassword" 
-                type="password" 
-                {...form.register('confirmPassword')} 
-                aria-invalid={form.formState.errors.confirmPassword ? "true" : "false"}
-                data-testid="confirm-password-input"
-              />
-              {form.formState.errors.confirmPassword && (
-                  <p className="text-destructive text-sm mt-1">{form.formState.errors.confirmPassword.message}</p>
+              {form.formState.errors.lastName && (
+                  <p className="text-destructive text-sm mt-1">{form.formState.errors.lastName.message}</p>
               )}
             </div>
-            
-            {userType === UserType.CORPORATE && (
-              <div className="space-y-4 p-4 border rounded-md bg-muted/20">
-                <h3 className="font-medium text-lg">Company Information</h3>
-                
+          </div>
+          
+          <div className="space-y-1.5">
+            <Label htmlFor="password">Password *</Label>
+            <Input 
+              id="password" 
+              type="password" 
+              {...form.register('password')} 
+              aria-invalid={form.formState.errors.password ? "true" : "false"}
+              data-testid="password-input"
+            />
+            {form.formState.errors.password && (
+                  <p className="text-destructive text-sm mt-1">{form.formState.errors.password.message}</p>
+              )}
+          </div>
+          
+          <div className="space-y-1.5">
+            <Label htmlFor="confirmPassword">Confirm Password *</Label>
+            <Input 
+              id="confirmPassword" 
+              type="password" 
+              {...form.register('confirmPassword')} 
+              aria-invalid={form.formState.errors.confirmPassword ? "true" : "false"}
+              data-testid="confirm-password-input"
+            />
+            {form.formState.errors.confirmPassword && (
+                <p className="text-destructive text-sm mt-1">{form.formState.errors.confirmPassword.message}</p>
+            )}
+          </div>
+          
+          {userType === UserType.CORPORATE && (
+            <div className="space-y-4 p-4 border rounded-md bg-muted/20">
+              <h3 className="font-medium text-lg">Company Information</h3>
+              
+              <div className="space-y-1.5">
+                <Label htmlFor="companyName">Company Name *</Label>
+                <Input 
+                  id="companyName" 
+                  {...form.register('companyName')} 
+                  aria-invalid={userType === UserType.CORPORATE && !!(form.formState.errors as any).companyName}
+                  data-testid="company-name-input"
+                />
+                {userType === UserType.CORPORATE && (form.formState.errors as any).companyName && (
+                  <p className="text-destructive text-sm mt-1">{(form.formState.errors as any).companyName?.message}</p>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="companyName">Company Name *</Label>
+                  <Label htmlFor="position">Position</Label>
                   <Input 
-                    id="companyName" 
-                    {...form.register('companyName')} 
-                    aria-invalid={userType === UserType.CORPORATE && !!(form.formState.errors as any).companyName}
-                    data-testid="company-name-input"
+                    id="position" 
+                    {...form.register('position')} 
+                    data-testid="position-input"
                   />
-                  {userType === UserType.CORPORATE && (form.formState.errors as any).companyName && (
-                    <p className="text-destructive text-sm mt-1">{(form.formState.errors as any).companyName?.message}</p>
-                  )}
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="position">Position</Label>
-                    <Input 
-                      id="position" 
-                      {...form.register('position')} 
-                      data-testid="position-input"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="industry">Industry</Label>
-                    <Input 
-                      id="industry" 
-                      {...form.register('industry')} 
-                      data-testid="industry-input"
-                    />
-                  </div>
-                </div>
-                
                 <div className="space-y-1.5">
-                  <Label htmlFor="companySize">Company Size</Label>
-                  <select
-                    id="companySize"
-                    className="w-full px-3 py-2 border rounded-md bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    {...form.register('companySize')}
-                    data-testid="company-size-select"
-                  >
-                    <option value="">Select Company Size...</option>
-                    <option value="1-10">1-10 employees</option>
-                    <option value="11-50">11-50 employees</option>
-                    <option value="51-200">51-200 employees</option>
-                    <option value="201-500">201-500 employees</option>
-                    <option value="501-1000">501-1000 employees</option>
-                    <option value="1000+">1000+ employees</option>
-                  </select>
+                  <Label htmlFor="industry">Industry</Label>
+                  <Input 
+                    id="industry" 
+                    {...form.register('industry')} 
+                    data-testid="industry-input"
+                  />
                 </div>
               </div>
-            )}
-            
-            <div className="items-top flex space-x-2 pt-2"> 
-              <Checkbox 
-                id="acceptTerms"
-                aria-label="Accept terms and conditions and privacy policy"
-                checked={form.watch('acceptTerms')}
-                onCheckedChange={(checked) => {
-                  form.setValue('acceptTerms', checked === true, { shouldValidate: true }); 
-                }}
-                aria-invalid={form.formState.errors.acceptTerms ? "true" : "false"}
-                data-testid="accept-terms-checkbox"
-              />
-              <div className="grid gap-1.5 leading-none"> 
-                <label 
-                  htmlFor="acceptTerms" 
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              
+              <div className="space-y-1.5">
+                <Label htmlFor="companySize">Company Size</Label>
+                <select
+                  id="companySize"
+                  className="w-full px-3 py-2 border rounded-md bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  {...form.register('companySize')}
+                  data-testid="company-size-select"
                 >
-                  I agree to the 
-                  <a href="#" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-4 hover:text-primary/90">Terms and Conditions</a>
-                   and 
-                  <a href="#" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-4 hover:text-primary/90">Privacy Policy</a>.
-                </label>
-                {form.formState.errors.acceptTerms && (
-                  <p className="text-destructive text-sm mt-1">{form.formState.errors.acceptTerms.message}</p>
-                )}
+                  <option value="">Select Company Size...</option>
+                  <option value="1-10">1-10 employees</option>
+                  <option value="11-50">11-50 employees</option>
+                  <option value="51-200">51-200 employees</option>
+                  <option value="201-500">201-500 employees</option>
+                  <option value="501-1000">501-1000 employees</option>
+                  <option value="1000+">1000+ employees</option>
+                </select>
               </div>
             </div>
-            
-            <Button 
-              type="submit"
-              className="w-full" 
-              disabled={isSubmitting || !form.formState.isValid || apiSuccess !== null} 
-              data-testid="submit-button"
-            >
-              {isSubmitting ? "Creating Account..." : "Create Account"}
-            </Button>
-            
-            <p className="text-center text-sm text-muted-foreground">
-              Already have an account? <a href="/login" className="font-medium text-primary underline underline-offset-4 hover:text-primary/90">Sign in</a>
-            </p>
-          </form>
+          )}
+          
+          <div className="items-top flex space-x-2 pt-2"> 
+            <Checkbox 
+              id="acceptTerms"
+              aria-label="Accept terms and conditions and privacy policy"
+              checked={form.watch('acceptTerms')}
+              onCheckedChange={(checked) => {
+                form.setValue('acceptTerms', checked === true, { shouldValidate: true }); 
+              }}
+              aria-invalid={form.formState.errors.acceptTerms ? "true" : "false"}
+              data-testid="accept-terms-checkbox"
+            />
+            <div className="grid gap-1.5 leading-none"> 
+              <label 
+                htmlFor="acceptTerms" 
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                I agree to the 
+                <a href="#" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-4 hover:text-primary/90">Terms and Conditions</a>
+                 and 
+                <a href="#" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-4 hover:text-primary/90">Privacy Policy</a>.
+              </label>
+              {form.formState.errors.acceptTerms && (
+                <p className="text-destructive text-sm mt-1">{form.formState.errors.acceptTerms.message}</p>
+              )}
+            </div>
+          </div>
+          
+          <Button 
+            type="submit"
+            className="w-full" 
+            disabled={isSubmitting || !form.formState.isValid || apiSuccess !== null} 
+            data-testid="submit-button"
+          >
+            {isSubmitting ? "Creating Account..." : "Create Account"}
+          </Button>
+          
+          <OAuthButtons mode="signup" layout="vertical" className="mb-6 mt-2" />
+          
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            Already have an account? <a href="/login" className="font-medium text-primary underline underline-offset-4 hover:text-primary/90">Sign in</a>
+          </p>
+        </form>
       )}
+      {/* DEBUG: Render form state for E2E diagnosis */}
+      <pre data-testid="form-debug" style={{ background: '#fee', color: '#900', fontSize: 12, padding: 8, marginBottom: 8 }}>
+        {JSON.stringify({
+          isValid: form.formState.isValid,
+          errors: form.formState.errors,
+          values: form.getValues(),
+        }, null, 2)}
+      </pre>
     </div>
   );
 } 

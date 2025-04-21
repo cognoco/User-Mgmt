@@ -339,8 +339,8 @@ These items appear on the checklist or in previous discussions but need clearer 
 The following gaps were identified during the most recent manual verification and checklist review. These are not all reflected in previous phase documents and must be addressed for a production-ready, user-friendly system. Each gap is cross-referenced with the checklist for details.
 
 ### Missing User-Facing UI (Feature Not Exposed to End Users)
-- **Social Login on Login Page:** OAuth logic and UI components exist, but social login buttons are not rendered on the login form. (Checklist: Login Flow)
-- **Social Registration on Registration Page:** Same as above, but for registration. (Checklist: Registration Flow)
+- **Social Login on Login Page:** OAuth logic and UI components exist, but social login buttons are not rendered on the login form. (Checklist: Login Flow) **Implemented (pending verification in production)**
+- **Social Registration on Registration Page:** Same as above, but for registration. (Checklist: Registration Flow) **Implemented (pending verification in production)**
 - **Connected Accounts in Profile:** Account linking UI is now available in the profile page/editor. Integration tests for linking/unlinking are implemented. **E2E tests still missing.**
 - **Role/Permission Management UI:** No UI for role/permission management in admin, settings, or profile. All RBAC logic is backend/store only. **Work on UI is starting now.**
 - **User Profile Verification UI:** No UI for requesting or viewing user profile verification; only company/domain verification exists. (Checklist: Profile Verification Flow)

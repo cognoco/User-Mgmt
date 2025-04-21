@@ -6,6 +6,7 @@ This document establishes standards for organizing code in the User Management M
 
 ```
 /
+├── e2e/                  # End-to-End (Playwright) tests
 ├── app/                  # Next.js App Router pages and API routes
 ├── src/                  # Core source code
 │   ├── components/       # React components
@@ -13,7 +14,7 @@ This document establishes standards for organizing code in the User Management M
 │   ├── lib/              # Core libraries and utilities
 │   ├── middleware/       # Next.js middleware
 │   ├── types/            # TypeScript type definitions
-│   └── tests/            # Test utilities and global tests
+│   └── tests/            # Generic test utilities, mocks, and non-Playwright integration tests
 ├── public/               # Static assets
 ├── docs/                 # Documentation
 └── scripts/              # Utility scripts
@@ -23,11 +24,27 @@ This document establishes standards for organizing code in the User Management M
 
 1. **Single Source of Truth**: Each piece of functionality should exist in exactly one location.
 2. **Feature-Based Organization**: Group code by feature/domain rather than technical role.
-3. **Colocation of Tests**: Tests should live close to the code they test.
+3. **Colocation of Tests**: Unit/Component/API tests should live close to the code they test (`__tests__`). E2E tests reside in the root `/e2e` folder.
 4. **Clear Dependencies**: Higher-level components depend on lower-level ones, not vice versa.
 5. **App Router Standard**: Follow Next.js App Router conventions for pages and API routes.
 
 ## Detailed Guidelines
+
+### End-to-End Tests (`/e2e`)
+
+- **Location**: All End-to-End (E2E) tests using Playwright reside in the root `/e2e` directory.
+- **Test Files**: Test specification files (`*.spec.ts` or `*.test.ts`) should be organized by feature or user flow.
+  ```
+  /e2e/auth/registration.spec.ts
+  /e2e/profile/update-profile.spec.ts
+  /e2e/admin/role-management.spec.ts
+  ```
+- **Utilities**: Helper functions, page object models, custom commands, or setup scripts **specific to Playwright tests** should live in `/e2e/utils/`.
+  ```
+  /e2e/utils/auth.ts
+  /e2e/utils/form-helpers.ts
+  ```
+- **Fixtures/Data**: Test data or fixtures used exclusively by E2E tests can be placed in `/e2e/fixtures/`.
 
 ### App Router (`/app`)
 
@@ -86,6 +103,18 @@ This document establishes standards for organizing code in the User Management M
   /src/components/common/DataTable.tsx
   /src/components/common/ThemeSwitcher.tsx
   ```
+
+- **Global Providers & Contexts**: Global providers and context components (such as ThemeProvider, AuthProvider, etc.) manage application-wide state or configuration and are intended to wrap the entire app or major sections.
+  - If a provider is used throughout the entire application, it may be placed directly in `/src/components/` for easy access and visibility.
+  - For better organization, you may optionally place global providers in a dedicated subfolder (e.g., `/src/components/theme/ThemeProvider.tsx` or `/src/components/auth/AuthProvider.tsx`).
+  - If a provider is feature-specific, colocate it within the relevant feature directory.
+  - **Examples**:
+    ```
+    /src/components/theme-provider.tsx           # Global theme provider (top-level)
+    /src/components/theme/ThemeProvider.tsx      # (Optional) Organized in a theme subfolder
+    /src/components/auth/AuthProvider.tsx        # Auth context provider
+    ```
+  - **Guideline**: Choose the location that best matches the provider's scope and usage. Top-level is preferred for truly global providers; use subfolders for clarity if you have multiple providers or want stricter organization.
 
 ### Hooks (`/src/hooks`)
 
@@ -159,23 +188,26 @@ This document establishes standards for organizing code in the User Management M
   /src/middleware/__tests__/auth.test.ts
   ```
 
-### Tests (`/src/tests`)
+### Shared Test Assets (`/src/tests`)
 
-- **Test Utilities**: Test utilities should be in `/src/tests/utils`.
-  ```
-  /src/tests/utils/test-utils.tsx
-  /src/tests/utils/api-testing-utils.js
-  ```
+This directory holds testing assets that are **not specific to Playwright E2E tests** and may be shared across different types of tests (Unit, Component, Integration).
 
-- **Test Mocks**: Global mocks should be in `/src/tests/mocks`.
+- **Generic Test Utilities (`/src/tests/utils`)**: Contains reusable helper functions, custom render functions (e.g., for React Testing Library), environment setup, or utilities applicable to Vitest/RTL tests. These can potentially be imported by E2E tests if truly generic.
   ```
-  /src/tests/mocks/supabase.js
-  /src/tests/mocks/handlers.ts
+  /src/tests/utils/test-utils.tsx           # Custom RTL render
+  /src/tests/utils/store-testing-utils.ts   # Helpers for Zustand stores
+  /src/tests/utils/environment-setup.ts     # JSDOM or other setup
   ```
 
-- **Integration Tests**: Integration tests should be in `/src/tests/integration`.
+- **Generic Test Mocks (`/src/tests/mocks`)**: Contains global mocks, such as MSW handlers for API mocking, or mock implementations for external libraries used across different test types.
   ```
-  /src/tests/integration/user-auth-flow.test.js
+  /src/tests/mocks/handlers.ts              # MSW request handlers
+  /src/tests/mocks/supabase.js              # Mock Supabase client
+  ```
+
+- **Non-Playwright Integration Tests (`/src/tests/integration`)**: Contains integration tests focusing on the interaction between multiple components, hooks, or services *without* using a full browser environment like Playwright. Typically uses Vitest, RTL, and potentially mocked APIs (via MSW).
+  ```
+  /src/tests/integration/profile-update-flow.test.tsx # Testing form -> store -> mock API
   ```
 
 ## Import Path Guidelines

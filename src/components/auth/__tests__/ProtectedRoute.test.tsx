@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '../ProtectedRoute';
-import { useAuthStore } from '../../stores/auth.store';
+import { useAuthStore } from '../../../lib/stores/auth.store';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({

@@ -159,7 +159,6 @@ export function LoginForm() {
 
   return (
     <>
-      <OAuthButtons mode="login" layout="vertical" className="mb-6" />
       <form onSubmit={handleSubmit(handleSubmitWrapper)} className="space-y-4">
         {rateLimitInfo && (
           <RateLimitFeedback
@@ -261,17 +260,17 @@ export function LoginForm() {
           {isLoading ? 'Logging in...' : 'Login'}
         </Button>
 
-        <div className="flex flex-col space-y-2 text-center text-sm">
-          <p className="text-muted-foreground">
-            <a href="/forgot-password" className="font-medium text-primary hover:underline">
-              Forgot password?
-            </a>
-          </p>
-          <p className="text-muted-foreground">
-            <a href="/register" className="font-medium text-primary hover:underline">
-              Don&apos;t have an account? Sign up
-            </a>
-          </p>
+        {/* Social login buttons below main login fields */}
+        <OAuthButtons mode="login" layout="vertical" className="mb-6 mt-2" />
+
+        {/* Only one set of links at the bottom */}
+        <div className="flex flex-col space-y-2 text-center text-sm mt-6">
+          <a href="/forgot-password" className="font-medium text-primary hover:underline">
+            Forgot password?
+          </a>
+          <a href="/register" className="font-medium text-primary hover:underline">
+            Don&apos;t have an account? Sign up
+          </a>
         </div>
       </form>
     </>
