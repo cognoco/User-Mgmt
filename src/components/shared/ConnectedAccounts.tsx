@@ -1,4 +1,4 @@
-// project/src/components/shared/ConnectedAccounts.tsx
+// src/components/shared/ConnectedAccounts.tsx
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConnectedAccountsStore } from '@/lib/stores/connected-accounts.store';

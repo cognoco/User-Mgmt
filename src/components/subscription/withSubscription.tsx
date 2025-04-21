@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { useSubscriptionStore } from '@/lib/stores/subscription.store';
 import { SubscriptionTier } from '@/lib/types/subscription';
-import { useUserManagement } from '@/lib/UserManagementProvider';
+import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 
 export interface WithSubscriptionProps {
   featureName?: string;

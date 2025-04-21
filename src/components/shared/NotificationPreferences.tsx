@@ -1,6 +1,6 @@
 'use client';
 
-// project/src/components/shared/NotificationPreferences.tsx
+// src/components/shared/NotificationPreferences.tsx
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';

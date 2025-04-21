@@ -1,4 +1,4 @@
-// project/src/components/theme/ThemeProvider.tsx
+// src/components/theme/theme-provider.tsx
 'use client'; // Theme provider needs client context and localStorage
 
 import { createContext, useContext, useEffect, useState } from 'react';

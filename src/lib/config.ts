@@ -3,7 +3,7 @@
  */
 
 // Supabase Configuration
-// Ensure these are defined in project/.env.local or environment
+// Ensure these are defined in .env.local or environment
 export const supabaseConfig = {
   url: process.env.NEXT_PUBLIC_SUPABASE_URL,
   anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,

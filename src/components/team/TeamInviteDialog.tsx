@@ -8,11 +8,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../../../project/src/components/ui/dialog';
-import { Button } from '../../../project/src/components/ui/button';
-import { Input } from '../../../project/src/components/ui/input';
-import { Label } from '../../../project/src/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../project/src/components/ui/select';
+} from '../ui/dialog';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { UserPlus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 

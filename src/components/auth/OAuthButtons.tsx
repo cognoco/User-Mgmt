@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useOAuthStore } from '@/lib/stores/oauth.store';
-import { useUserManagement } from '@/lib/UserManagementProvider';
+import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { OAuthProvider } from '@/lib/types/oauth';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';

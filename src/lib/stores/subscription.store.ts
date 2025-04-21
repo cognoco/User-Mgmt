@@ -6,7 +6,7 @@ import {
   SubscriptionPlan,
   UserSubscription
 } from '../types/subscription';
-import { useUserManagement } from '../UserManagementProvider';
+import { useUserManagement } from '../auth/UserManagementProvider';
 
 export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   plans: [],

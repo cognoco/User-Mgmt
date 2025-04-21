@@ -3,11 +3,11 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MFASetup } from '../../../project/src/components/auth/MFASetup';
+import { MFASetup } from '../../../../components/auth/MFASetup';
 
 // Import our standardized mock
-jest.mock('../../../project/src/lib/supabase', () => require('../../__mocks__/supabase'));
-import { supabase } from '../../../project/src/lib/supabase';
+jest.mock('../../../../lib/supabase', () => require('../../__mocks__/supabase'));
+import { supabase } from '../../../../lib/supabase';
 
 describe('Multi-Factor Authentication Setup', () => {
   let user;
