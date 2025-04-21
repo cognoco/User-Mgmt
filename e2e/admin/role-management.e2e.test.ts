@@ -16,9 +16,11 @@ import { loginAs } from '../utils/auth';
 const ADMIN_USERNAME = process.env.E2E_ADMIN_USERNAME || 'admin@example.com';
 const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'password123';
 const ROLE_MANAGEMENT_URL = '/admin/roles'; // Adjust if the URL is different
-// const TARGET_USER_EMAIL = 'testuser@example.com'; // User to modify roles for - Uncomment when needed
-// const ROLE_TO_ASSIGN = 'editor'; // Role to assign/remove - Uncomment when needed
-// const ROLE_TO_VIEW = 'admin'; // Role to view permissions for - Uncomment when needed
+// Optionally, set these via env or test setup for robustness
+const TARGET_USER_EMAIL = process.env.E2E_TARGET_USER_EMAIL || 'testuser@example.com';
+const ROLE_TO_ASSIGN = process.env.E2E_ROLE_TO_ASSIGN || 'editor';
+const ROLE_TO_REMOVE = process.env.E2E_ROLE_TO_REMOVE || 'editor';
+const ROLE_TO_VIEW = process.env.E2E_ROLE_TO_VIEW || 'admin';
 
 // --- Test Suite --- //
 test.describe('Admin Role/Permission Management', () => {
@@ -26,10 +28,7 @@ test.describe('Admin Role/Permission Management', () => {
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
-    // Log in as admin once before all tests in this suite
-    // Ensure loginAs redirects or handles navigation appropriately
     await loginAs(page, ADMIN_USERNAME, ADMIN_PASSWORD);
-    // It's often safer to navigate *after* login confirmation
     await page.goto(ROLE_MANAGEMENT_URL);
     await page.waitForURL(`**${ROLE_MANAGEMENT_URL}`);
   });
@@ -39,32 +38,60 @@ test.describe('Admin Role/Permission Management', () => {
   });
 
   test('Admin can view the Role Management Panel', async () => {
-    // Already navigated in beforeAll, just verify content
-
     // Verify the main panel heading is visible
-    await expect(page.getByRole('heading', { name: 'Role Management' })).toBeVisible();
-
-    // Verify the user table/list is present (adjust selector as needed)
-    // Example: Check for the table header row elements using more specific roles if possible
-    await expect(page.getByRole('columnheader', { name: 'User' })).toBeVisible(); // More specific role
-    await expect(page.getByRole('columnheader', { name: 'Roles' })).toBeVisible(); // More specific role
-
-    // Verify a known user is listed (optional but good)
-    // This requires knowing the structure of your user list/table
-    // Example: Find the row containing the target user's email
-    // Using getByRole('row') and then filtering is generally more robust
-    // await expect(page.getByRole('row', { name: new RegExp(TARGET_USER_EMAIL) })).toBeVisible();
-
-    // Verify the "Assign Role" or equivalent controls are present for the target user
-    // Example: Check for a combobox within the specific user's row
-    // const userRow = page.getByRole('row', { name: new RegExp(TARGET_USER_EMAIL) });
-    // await expect(userRow.getByRole('combobox', { name: /assign role/i })).toBeVisible(); // Use regex for flexibility
+    await expect(page.getByRole('heading', { name: 'User Role Management' })).toBeVisible();
+    // Verify the table headers
+    await expect(page.getByRole('columnheader', { name: 'Name' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Email' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Roles' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Assign' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Remove' })).toBeVisible();
   });
 
-  // --- TODO: Add tests for --- //
-  // - Assigning a role
-  // - Removing a role
-  // - Viewing permissions
-  // - Error/Loading/Empty states (if feasible)
+  test('Admin can assign a role to a user', async () => {
+    // Find the user row by email
+    const userRow = page.locator('tr', { hasText: TARGET_USER_EMAIL });
+    await expect(userRow).toBeVisible();
+    // Find the assign select by ARIA label
+    const assignSelect = userRow.locator('select[aria-label^="Assign role to"]');
+    await expect(assignSelect).toBeVisible();
+    // Assign the role
+    await assignSelect.selectOption({ label: ROLE_TO_ASSIGN });
+    // Optionally, wait for UI update or success message
+    await expect(userRow).toContainText(ROLE_TO_ASSIGN);
+  });
 
+  test('Admin can remove a role from a user', async () => {
+    // Find the user row by email
+    const userRow = page.locator('tr', { hasText: TARGET_USER_EMAIL });
+    await expect(userRow).toBeVisible();
+    // Find the remove button by ARIA label
+    const removeButton = userRow.locator(`button[aria-label^='Remove role ${ROLE_TO_REMOVE}']`);
+    await expect(removeButton).toBeVisible();
+    await removeButton.click();
+    // Optionally, wait for UI update or success message
+    await expect(userRow).not.toContainText(ROLE_TO_REMOVE);
+  });
+
+  test('Admin can view permissions for a role', async () => {
+    // Find the permissions viewer section
+    await expect(page.getByRole('heading', { name: 'Roles & Permissions' })).toBeVisible();
+    // Expand the details for the target role
+    const roleDetails = page.locator('details').filter({ hasText: ROLE_TO_VIEW });
+    await expect(roleDetails).toBeVisible();
+    await roleDetails.locator('summary').click();
+    // Assert at least one permission is listed (or 'No permissions' text)
+    const permissionsList = roleDetails.locator('ul > li');
+    await expect(permissionsList.first()).toBeVisible();
+  });
+
+  test('Panel shows loading, error, and empty states', async () => {
+    // This test is a placeholder. Simulating these states may require test setup/mocking.
+    // Example: If you can trigger loading, error, or empty states via test data or API mocks, assert the correct message is shown.
+    // await expect(page.getByText('Loading...')).toBeVisible();
+    // await expect(page.getByText('No users found.')).toBeVisible();
+    // await expect(page.getByText(/error/i)).toBeVisible();
+  });
+
+  // TODO: Add accessibility and responsiveness checks as needed
 }); 

@@ -26,4 +26,13 @@ This file tracks items requiring user action or configuration.
     *   **Where:** Add these to your `.env` file or deployment environment.
     *   **Reason:** Required for the GitHub login button to appear and function in the login and registration forms.
 
+4.  **Google OAuth Setup for E2E Connected Accounts Testing:**
+    *   **Task:** Obtain a Google OAuth client ID and secret specifically for E2E testing (can be a separate test project in Google Cloud).
+    *   **Set Environment Variables:**
+        - `NEXT_PUBLIC_GOOGLE_CLIENT_ID` (required for E2E test to run the UI flow)
+        - `NEXT_PUBLIC_GOOGLE_CLIENT_SECRET` (required for backend OAuth exchange, if applicable)
+        - `NEXT_PUBLIC_GOOGLE_REDIRECT_URI` (should match your test app's `/auth/callback` or equivalent)
+    *   **Where:** Add these to your `.env` file or deployment environment for E2E testing.
+    *   **Reason:** Required for the E2E test to perform the full Google OAuth linking flow in Connected Accounts. Without these, the E2E test will only be a placeholder and cannot complete the OAuth flow.
+
 *Add other user-specific tasks or configuration reminders here.* 

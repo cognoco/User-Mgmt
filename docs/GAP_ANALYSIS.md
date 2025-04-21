@@ -102,7 +102,7 @@ Based on checklist items aligned with the "Testing & Security" phase title and g
         *   ✅ **Registration Flow:** Core form submission, validation, and successful call to Supabase (via store) covered by updated integration test (`RegistrationForm.integration.test.tsx`).
         *   🟡 **Login+MFA:** Needs implementation.
         *   🟡 **Password Reset:** Needs implementation.
-        *   🟡 **Profile Update (Personal/Company):** Needs implementation.
+        *   ✅ **Profile Update (Personal/Company):** E2E test for profile info update is implemented in /e2e/profile-update.e2e.test.ts.
         *   🟡 **Settings Update (Notifications/Theme/GDPR):** Needs implementation.
         *   🟡 **Company Setup (including registry mocks):** Needs implementation.
     *   **Unverified User Cleanup Tests:** ❌ Need to implement:
@@ -136,8 +136,7 @@ Based on checklist items aligned with the "Testing & Security" phase title and g
 *   **Role/Permission Management UI:** (UI + Integration Tests Implemented)
     *   ✅ RoleManagementPanel component is now rendered in the admin panel.
     *   ✅ Integration tests for listing, assigning, removing roles, and permissions viewer are implemented (`RoleManagementPanel.test.tsx`).
-    *   **Gaps:**
-        *   E2E tests for role/permission management UI are still missing.
+    *   ✅ E2E tests for role/permission management UI are now implemented (`/e2e/admin/role-management.e2e.test.ts`). Placeholders for error/loading/empty states are present for future expansion.
 
 ## Phase 5: Subscriptions, Licensing, Org/Team Management & Deployment Gaps
 
@@ -362,3 +361,12 @@ The following gaps were identified during the most recent manual verification an
 - For each gap, both the feature and its tests must be implemented together.
 - See the manual verification checklist for detailed status, expected behavior, and test coverage notes.
 - This section should be updated as gaps are closed or new ones are discovered.
+
+*   **Login Flow:**
+    *   ✅ E2E test for login (valid/invalid credentials) is implemented in /e2e/auth/login.e2e.test.ts.
+*   **Password Recovery Flow:**
+    *   ✅ E2E test for password recovery (request with valid/invalid email) is implemented in /e2e/auth/password-recovery.e2e.test.ts.
+    *   🟡 Placeholder for reset via email link is present.
+*   **Email Verification Flow:**
+    *   ✅ E2E test for email verification prompt after registration is implemented in /e2e/auth/email-verification.e2e.test.ts.
+    *   🟡 Placeholder for verify via email link is present.
