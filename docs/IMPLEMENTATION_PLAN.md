@@ -85,8 +85,8 @@ All sensitive user/admin actions are logged in a secure, queryable format and ac
 - [x] Ensure logs include timestamp, user, action, and relevant metadata.
 - [x] Create admin UI for viewing/filtering logs (with pagination, search, and export options).
 - [x] Add access control to audit log endpoints (admin-only, with proper authorization checks).
-- [ ] Write integration tests for logging logic (ensure logs are created for all key actions).
-- [ ] Write E2E tests for admin log viewing and filtering.
+- [x] Write integration tests for logging logic (ensure logs are created for all key actions, including admin UI logic).
+- [x] Write E2E tests for admin log viewing and filtering (admin audit log UI).
 - [x] Document audit log retention and privacy policy.
 
 **Dependencies:**
@@ -94,7 +94,7 @@ All sensitive user/admin actions are logged in a secure, queryable format and ac
 - Admin role and access control implemented.
 
 **Testing:**
-- Integration and E2E tests for log creation and admin UI.
+- Integration and E2E tests for log creation and admin UI are implemented and documented.
 
 **Note:** The admin UI for audit logs is implemented with access control and robust filtering, and is ready for further enhancements or testing.
 
