@@ -11,6 +11,11 @@ const querySchema = z.object({
   userId: z.string().uuid().optional(),
   action: z.string().optional(),
   status: z.enum(['SUCCESS', 'FAILURE', 'INITIATED', 'COMPLETED']).optional(),
+  resourceType: z.string().optional(),
+  resourceId: z.string().optional(),
+  ipAddress: z.string().optional(),
+  userAgent: z.string().optional(),
+  search: z.string().optional(),
   page: z.number().int().min(1).default(1),
   limit: z.number().int().min(1).max(100).default(20),
   sortBy: z.enum(['created_at', 'action', 'status']).default('created_at'),
@@ -35,6 +40,11 @@ export const GET = middleware(
         userId,
         action,
         status,
+        resourceType,
+        resourceId,
+        ipAddress,
+        userAgent,
+        search,
         page,
         limit,
         sortBy,
@@ -71,6 +81,23 @@ export const GET = middleware(
       }
       if (status) {
         query = query.eq('status', status);
+      }
+      if (resourceType) {
+        query = query.eq('target_resource_type', resourceType);
+      }
+      if (resourceId) {
+        query = query.eq('target_resource_id', resourceId);
+      }
+      if (ipAddress) {
+        query = query.ilike('ip_address', `%${ipAddress}%`);
+      }
+      if (userAgent) {
+        query = query.ilike('user_agent', `%${userAgent}%`);
+      }
+      if (search) {
+        // Free-text search across action, details, error, target_resource_id/type
+        // Supabase/Postgres: use ilike for partial, case-insensitive match
+        query = query.or(`action.ilike.%${search}%,details::text.ilike.%${search}%,error.ilike.%${search}%,target_resource_id.ilike.%${search}%,target_resource_type.ilike.%${search}%`);
       }
 
       // Sorting and pagination

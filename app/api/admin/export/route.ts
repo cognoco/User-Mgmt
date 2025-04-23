@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { middleware } from '@/middleware';
+import { logUserAction } from '@/lib/audit/auditLogger';
 
 // Helper to fetch all relevant company data for export
 async function getCompanyExportData(companyId: string) {
@@ -33,7 +34,7 @@ async function getCompanyExportData(companyId: string) {
   // Collect errors
   const errors = [companyError, membersError, rolesError, logError].filter(Boolean);
   if (errors.length > 0) {
-    return { error: errors.map(e => e.message).join('; ') };
+    return { error: errors.map(e => e?.message ?? String(e)).join('; ') };
   }
 
   return {
@@ -47,7 +48,10 @@ async function getCompanyExportData(companyId: string) {
 export const GET = middleware(['cors', 'csrf', 'rateLimit'], async (req: NextRequest) => {
   const user = (req as any).user;
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   // Fetch user's company and check admin role
@@ -58,19 +62,73 @@ export const GET = middleware(['cors', 'csrf', 'rateLimit'], async (req: NextReq
     .single();
 
   if (memberError || !companyMember) {
-    return NextResponse.json({ error: 'Not a company member or error fetching membership.' }, { status: 403 });
+    // Log failed export attempt
+    await logUserAction({
+      userId: user?.id,
+      action: 'COMPANY_DATA_EXPORT',
+      status: 'FAILURE',
+      ipAddress: req.ip,
+      userAgent: req.headers.get('user-agent'),
+      targetResourceType: 'company',
+      targetResourceId: undefined,
+      details: { error: memberError?.message || 'Not a company member or error fetching membership.' }
+    });
+    return new NextResponse(JSON.stringify({ error: 'Not a company member or error fetching membership.' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
   if (companyMember.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden: Admin access required.' }, { status: 403 });
+    // Log forbidden export attempt
+    await logUserAction({
+      userId: user.id,
+      action: 'COMPANY_DATA_EXPORT',
+      status: 'FAILURE',
+      ipAddress: req.ip,
+      userAgent: req.headers.get('user-agent'),
+      targetResourceType: 'company',
+      targetResourceId: companyMember.company_id,
+      details: { error: 'Forbidden: Admin access required.' }
+    });
+    return new NextResponse(JSON.stringify({ error: 'Forbidden: Admin access required.' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   const exportData = await getCompanyExportData(companyMember.company_id);
   if ('error' in exportData) {
-    return NextResponse.json({ error: 'Failed to export company data', details: exportData.error }, { status: 500 });
+    // Log failed export
+    await logUserAction({
+      userId: user.id,
+      action: 'COMPANY_DATA_EXPORT',
+      status: 'FAILURE',
+      ipAddress: req.ip,
+      userAgent: req.headers.get('user-agent'),
+      targetResourceType: 'company',
+      targetResourceId: companyMember.company_id,
+      details: { error: exportData.error }
+    });
+    return new NextResponse(JSON.stringify({ error: 'Failed to export company data', details: exportData.error }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   const filename = `Company_Data_Export_${companyMember.company_id}_${new Date().toISOString().slice(0,10)}.json`;
   const json = JSON.stringify(exportData, null, 2);
+
+  // Log successful export
+  await logUserAction({
+    userId: user.id,
+    action: 'COMPANY_DATA_EXPORT',
+    status: 'SUCCESS',
+    ipAddress: req.ip,
+    userAgent: req.headers.get('user-agent'),
+    targetResourceType: 'company',
+    targetResourceId: companyMember.company_id,
+    details: { filename }
+  });
 
   return new NextResponse(json, {
     status: 200,

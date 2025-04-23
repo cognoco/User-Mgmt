@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
@@ -30,6 +30,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Copy } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 interface AuditLog {
   id: string;
@@ -40,6 +44,8 @@ interface AuditLog {
   status_code: number;
   response_time: number;
   error?: string;
+  action: string;
+  status: string;
 }
 
 interface AuditLogFilters {
@@ -50,6 +56,11 @@ interface AuditLogFilters {
   path?: string;
   statusCode?: number;
   hasError?: boolean;
+  resourceType?: string;
+  resourceId?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  search?: string;
   page: number;
   limit: number;
   sortBy: 'timestamp' | 'status_code' | 'response_time';
@@ -62,15 +73,52 @@ const STATUS_CODES = [200, 201, 400, 401, 403, 404, 500];
 // Add proper type for Calendar date
 type CalendarDate = Date | undefined;
 
-export function AuditLogViewer() {
+// Mapping for user-friendly action labels
+const ACTION_LABELS: Record<string, string> = {
+  LOGIN_SUCCESS: 'Login Success',
+  LOGIN_FAILURE: 'Login Failure',
+  PASSWORD_UPDATE_SUCCESS: 'Password Update Success',
+  PASSWORD_UPDATE_FAILURE: 'Password Update Failure',
+  ACCOUNT_DELETION_INITIATED: 'Account Deletion Initiated',
+  ACCOUNT_DELETION_ERROR: 'Account Deletion Error',
+  COMPANY_DATA_EXPORT: 'Company Data Export',
+  TEAM_ROLE_UPDATE_SUCCESS: 'Team Role Update Success',
+  TEAM_ROLE_UPDATE_FAILURE: 'Team Role Update Failure',
+  // Add more as needed
+};
+
+// Mapping for status badge color and label
+const STATUS_BADGE: Record<string, { label: string; color: 'success' | 'destructive' | 'warning' | 'default' }> = {
+  SUCCESS: { label: 'Success', color: 'success' },
+  FAILURE: { label: 'Failure', color: 'destructive' },
+  INITIATED: { label: 'Initiated', color: 'warning' },
+  COMPLETED: { label: 'Completed', color: 'success' },
+};
+
+export function AuditLogViewer({ isAdmin = true }: { isAdmin?: boolean }) {
+  if (!isAdmin) {
+    return (
+      <div className="w-full">
+        <div className="text-red-600 font-semibold">Access denied: Admins only.</div>
+      </div>
+    );
+  }
+
   const { toast } = useToast();
   const [filters, setFilters] = useState<AuditLogFilters>({
     page: 1,
     limit: 20,
     sortBy: 'timestamp',
     sortOrder: 'desc',
+    search: '',
+    resourceType: '',
+    resourceId: '',
+    ipAddress: '',
+    userAgent: '',
   });
   const [isExporting, setIsExporting] = useState(false);
+  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['auditLogs', filters],
@@ -82,7 +130,7 @@ export function AuditLogViewer() {
         }
       });
 
-      const response = await fetch(`/api/audit/logs?${params.toString()}`);
+      const response = await fetch(`/api/audit/user-actions?${params.toString()}`);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch audit logs');
@@ -99,7 +147,7 @@ export function AuditLogViewer() {
     setFilters(prev => ({ ...prev, page: newPage }));
   };
 
-  const handleExport = async (format: 'csv' | 'json') => {
+  const handleExport = async (format: 'csv' | 'json' | 'xlsx') => {
     try {
       setIsExporting(true);
       
@@ -110,30 +158,55 @@ export function AuditLogViewer() {
           params.append(key, value.toString());
         }
       });
-      params.append('format', format);
-
-      // Fetch the export
-      const response = await fetch(`/api/audit/logs/export?${params.toString()}`);
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to export audit logs');
+      if (format === 'xlsx') {
+        // Fetch all filtered logs (not just current page)
+        params.set('page', '1');
+        params.set('limit', '1000'); // Adjust as needed for max export size
+        const response = await fetch(`/api/audit/user-actions?${params.toString()}`);
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to export audit logs');
+        }
+        const { logs } = await response.json();
+        const worksheet = XLSX.utils.json_to_sheet(logs);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Audit Logs');
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'audit-logs.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        toast({
+          title: 'Export Successful',
+          description: 'Audit logs have been exported as Excel (.xlsx)',
+        });
+      } else {
+        params.append('format', format);
+        const response = await fetch(`/api/audit/user-actions/export?${params.toString()}`);
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to export audit logs');
+        }
+        // Create blob and download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `audit-logs-${format === 'csv' ? 'spreadsheet' : 'data'}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        toast({
+          title: 'Export Successful',
+          description: `Audit logs have been exported as ${format.toUpperCase()}`,
+        });
       }
-
-      // Create blob and download
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `audit-logs-${format === 'csv' ? 'spreadsheet' : 'data'}.${format}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      toast({
-        title: 'Export Successful',
-        description: `Audit logs have been exported as ${format.toUpperCase()}`,
-      });
     } catch (error) {
       console.error('Export error:', error);
       toast({
@@ -145,6 +218,23 @@ export function AuditLogViewer() {
       setIsExporting(false);
     }
   };
+
+  const handleRowClick = (log: AuditLog) => {
+    setSelectedLog(log);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedLog(null);
+  };
+
+  const handleCopyJson = useCallback(() => {
+    if (selectedLog) {
+      navigator.clipboard.writeText(JSON.stringify(selectedLog, null, 2));
+      toast({ title: 'Copied', description: 'Log JSON copied to clipboard.' });
+    }
+  }, [selectedLog, toast]);
 
   if (error) {
     toast({
@@ -196,6 +286,20 @@ export function AuditLogViewer() {
               tabIndex={0}
             >
               Export as JSON
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={isExporting}
+              onClick={() => !isExporting && handleExport('xlsx')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  !isExporting && handleExport('xlsx');
+                }
+              }}
+              role="menuitem"
+              tabIndex={0}
+            >
+              Export as Excel
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -337,6 +441,76 @@ export function AuditLogViewer() {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Free-text Search */}
+          <div className="space-y-2">
+            <label id="search-label" className="text-sm font-medium" htmlFor="search-input">
+              Search
+            </label>
+            <Input
+              id="search-input"
+              value={filters.search || ''}
+              onChange={e => handleFilterChange('search', e.target.value)}
+              placeholder="Search logs..."
+              aria-labelledby="search-label"
+            />
+          </div>
+
+          {/* Resource Type */}
+          <div className="space-y-2">
+            <label id="resource-type-label" className="text-sm font-medium" htmlFor="resource-type-input">
+              Resource Type
+            </label>
+            <Input
+              id="resource-type-input"
+              value={filters.resourceType || ''}
+              onChange={e => handleFilterChange('resourceType', e.target.value)}
+              placeholder="e.g. user, company, team"
+              aria-labelledby="resource-type-label"
+            />
+          </div>
+
+          {/* Resource ID */}
+          <div className="space-y-2">
+            <label id="resource-id-label" className="text-sm font-medium" htmlFor="resource-id-input">
+              Resource ID
+            </label>
+            <Input
+              id="resource-id-input"
+              value={filters.resourceId || ''}
+              onChange={e => handleFilterChange('resourceId', e.target.value)}
+              placeholder="Resource ID..."
+              aria-labelledby="resource-id-label"
+            />
+          </div>
+
+          {/* IP Address */}
+          <div className="space-y-2">
+            <label id="ip-address-label" className="text-sm font-medium" htmlFor="ip-address-input">
+              IP Address
+            </label>
+            <Input
+              id="ip-address-input"
+              value={filters.ipAddress || ''}
+              onChange={e => handleFilterChange('ipAddress', e.target.value)}
+              placeholder="IP Address..."
+              aria-labelledby="ip-address-label"
+            />
+          </div>
+
+          {/* User Agent */}
+          <div className="space-y-2">
+            <label id="user-agent-label" className="text-sm font-medium" htmlFor="user-agent-input">
+              User Agent
+            </label>
+            <Input
+              id="user-agent-input"
+              value={filters.userAgent || ''}
+              onChange={e => handleFilterChange('userAgent', e.target.value)}
+              placeholder="User Agent..."
+              aria-labelledby="user-agent-label"
+            />
+          </div>
         </div>
 
         {/* Results Table */}
@@ -374,23 +548,23 @@ export function AuditLogViewer() {
                   tabIndex={0}
                   role="row"
                   aria-label={`Log entry from ${format(new Date(log.timestamp), 'PPpp')}`}
+                  className="cursor-pointer hover:bg-muted"
+                  onClick={() => handleRowClick(log)}
                 >
                   <TableCell>{format(new Date(log.timestamp), 'PPpp')}</TableCell>
                   <TableCell>
-                    <Badge 
-                      variant={log.method === 'GET' ? 'secondary' : 'default'}
-                      aria-label={`HTTP method: ${log.method}`}
-                    >
+                    <span title={log.method}>
                       {log.method}
-                    </Badge>
+                    </span>
                   </TableCell>
                   <TableCell className="font-mono text-sm">{log.path}</TableCell>
                   <TableCell>
                     <Badge 
-                      variant={log.status_code >= 400 ? 'destructive' : 'default'}
-                      aria-label={`Status code: ${log.status_code}, ${log.status_code >= 400 ? 'error' : 'success'}`}
+                      variant={STATUS_BADGE[log.status]?.color || 'default'}
+                      aria-label={`Status: ${STATUS_BADGE[log.status]?.label || log.status}`}
+                      title={log.status}
                     >
-                      {log.status_code}
+                      {STATUS_BADGE[log.status]?.label || log.status}
                     </Badge>
                   </TableCell>
                   <TableCell aria-label={`Response time: ${log.response_time} milliseconds`}>
@@ -401,8 +575,9 @@ export function AuditLogViewer() {
                       <Badge 
                         variant="destructive"
                         aria-label={`Error: ${log.error}`}
+                        title={log.error}
                       >
-                        {log.error}
+                        Error
                       </Badge>
                     )}
                   </TableCell>
@@ -451,5 +626,32 @@ export function AuditLogViewer() {
         )}
       </CardContent>
     </Card>
+
+    {/* Log Details Modal */}
+    <Dialog open={isModalOpen} onOpenChange={open => { if (!open) handleCloseModal(); }}>
+      <DialogContent className="max-w-lg w-full">
+        <DialogHeader>
+          <DialogTitle>Log Details</DialogTitle>
+          <DialogDescription>
+            Full details for log entry
+          </DialogDescription>
+        </DialogHeader>
+        <ScrollArea className="max-h-[60vh]">
+          {selectedLog && (
+            <pre className="bg-muted rounded p-4 text-xs overflow-x-auto whitespace-pre-wrap">
+              {JSON.stringify(selectedLog, null, 2)}
+            </pre>
+          )}
+        </ScrollArea>
+        <div className="flex justify-end gap-2 mt-2">
+          <Button variant="outline" onClick={handleCopyJson} aria-label="Copy JSON">
+            <Copy className="w-4 h-4 mr-2" /> Copy JSON
+          </Button>
+          <DialogClose asChild>
+            <Button variant="default" aria-label="Close details modal">Close</Button>
+          </DialogClose>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 } 

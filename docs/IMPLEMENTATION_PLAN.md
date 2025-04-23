@@ -80,14 +80,14 @@ All critical user flows are covered by reliable E2E and integration tests; test 
 All sensitive user/admin actions are logged in a secure, queryable format and accessible via a protected admin UI.
 
 **Tasks:**
-- [ ] Design audit log schema in the database (flexible for future events).
-- [ ] Implement backend logging middleware for all sensitive API routes (login, password change, role updates, etc.).
-- [ ] Ensure logs include timestamp, user, action, and relevant metadata.
-- [ ] Create admin UI for viewing/filtering logs (with pagination, search, and export options).
-- [ ] Add access control to audit log endpoints (admin-only, with proper authorization checks).
+- [x] Design audit log schema in the database (flexible for future events).
+- [x] Implement backend logging middleware for all sensitive API routes (login, password change, role updates, etc.).
+- [x] Ensure logs include timestamp, user, action, and relevant metadata.
+- [x] Create admin UI for viewing/filtering logs (with pagination, search, and export options).
+- [x] Add access control to audit log endpoints (admin-only, with proper authorization checks).
 - [ ] Write integration tests for logging logic (ensure logs are created for all key actions).
 - [ ] Write E2E tests for admin log viewing and filtering.
-- [ ] Document audit log retention and privacy policy.
+- [x] Document audit log retention and privacy policy.
 
 **Dependencies:**
 - Database migration system in place.
@@ -95,6 +95,17 @@ All sensitive user/admin actions are logged in a secure, queryable format and ac
 
 **Testing:**
 - Integration and E2E tests for log creation and admin UI.
+
+**Note:** The admin UI for audit logs is implemented with access control and robust filtering, and is ready for further enhancements or testing.
+
+### Planned Enhancements (Audit Logging)
+
+- [x] Log Details Modal/Drawer (view full log entry details)
+- [x] Advanced Filtering & Search (free-text, resource type, IP, user agent)
+- [x] User-Friendly Action/Status Labels (labels, icons, color-coding)
+- [x] Export Enhancements (filtered export, more formats)
+
+**Note:** All planned UI/UX enhancements for audit logging are complete. Next step: create tests for all audit logging features.
 
 ---
 
