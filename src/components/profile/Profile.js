@@ -151,6 +151,26 @@ export default function Profile({ user }) {
           </button>
         </div>
       </form>
+      <hr style={{margin: '2rem 0'}} />
+      {/* Data Export Section */}
+      <React.Suspense fallback={<div>Loading data export...</div>}>
+        {React.createElement(require('./DataExport').default)}
+      </React.Suspense>
+      {/* Company Data Export Section (admin only) */}
+      <React.Suspense fallback={<div>Loading company data export...</div>}>
+        {React.createElement(require('./CompanyDataExport').default)}
+      </React.Suspense>
+      <hr style={{margin: '2rem 0'}} />
+      {/* Notification Preferences Section */}
+      <React.Suspense fallback={<div>Loading notification preferences...</div>}>
+        {React.createElement(require('./NotificationPreferences').default)}
+      </React.Suspense>
+      <hr style={{margin: '2rem 0'}} />
+      {/* Activity Log Section */}
+      {user && <React.Suspense fallback={<div>Loading activity log...</div>}>
+        {/** Dynamically import to avoid SSR issues if needed */}
+        {React.createElement(require('./ActivityLog').default)}
+      </React.Suspense>}
       <style jsx>{`
         .profile {
           max-width: 500px;

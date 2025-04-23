@@ -9,6 +9,7 @@ import { fileToBase64 } from '../utils/file-upload';
 import { useAuthStore } from './auth.store';
 
 import { Profile as DbProfile } from '@/types/database';
+import type { ProfileVerification } from '@/types/profile';
 
 interface ExtendedProfileState extends Omit<ProfileState, 'profile' | 'updateProfile'> {
   profile: DbProfile | null;
@@ -23,10 +24,19 @@ interface ExtendedProfileState extends Omit<ProfileState, 'profile' | 'updatePro
   clearError: () => void;
 }
 
-export const useProfileStore = create<ExtendedProfileState>((set, get) => ({
+export const useProfileStore = create<ExtendedProfileState & {
+  verification: ProfileVerification | null;
+  verificationLoading: boolean;
+  verificationError: string | null;
+  fetchVerificationStatus: () => Promise<void>;
+  requestVerification: (document?: File) => Promise<void>;
+}>((set, get) => ({
   profile: null,
   isLoading: false,
   error: null,
+  verification: null,
+  verificationLoading: false,
+  verificationError: null,
 
   fetchProfile: async () => {
     set({ isLoading: true, error: null });
@@ -239,5 +249,40 @@ export const useProfileStore = create<ExtendedProfileState>((set, get) => ({
 
   clearError: () => {
     set({ error: null });
+  },
+
+  fetchVerificationStatus: async () => {
+    set({ verificationLoading: true, verificationError: null });
+    try {
+      const response = await api.get('/api/profile/verify');
+      set({ verification: response.data.status, verificationLoading: false });
+    } catch (error: any) {
+      set({
+        verificationError: error.response?.data?.error || error.message || 'Failed to fetch verification status',
+        verificationLoading: false,
+      });
+    }
+  },
+
+  requestVerification: async (document?: File) => {
+    set({ verificationLoading: true, verificationError: null });
+    try {
+      let response;
+      if (document) {
+        const formData = new FormData();
+        formData.append('document', document);
+        response = await api.post('/api/profile/verify', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      } else {
+        response = await api.post('/api/profile/verify');
+      }
+      set({ verification: response.data.result, verificationLoading: false });
+    } catch (error: any) {
+      set({
+        verificationError: error.response?.data?.error || error.message || 'Failed to request verification',
+        verificationLoading: false,
+      });
+    }
   },
 })); 

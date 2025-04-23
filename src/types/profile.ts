@@ -79,4 +79,23 @@ export interface ProfileState {
   uploadAvatar: (fileOrBase64: File | string) => Promise<string | null>; 
   removeAvatar: () => Promise<boolean>;
   clearError: () => void;
+}
+
+// Profile verification types
+export type ProfileVerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
+
+export interface ProfileVerification {
+  status: ProfileVerificationStatus;
+  admin_feedback?: string | null;
+  document_url?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ProfileVerificationState {
+  verification: ProfileVerification | null;
+  verificationLoading: boolean;
+  verificationError: string | null;
+  fetchVerificationStatus: () => Promise<void>;
+  requestVerification: (document?: File) => Promise<void>;
 } 

@@ -3,6 +3,37 @@ import { User } from '@/types/user';
 import { useRBACStore } from '@/lib/stores/rbac.store';
 import { UserRoleSchema, RoleSchema } from '@/types/rbac';
 
+/**
+ * RoleManagementPanel Component
+ *
+ * Purpose:
+ *   - Provides an admin-facing UI for listing users, assigning/removing roles, and viewing role permissions.
+ *   - Designed to be modular, pluggable, and database-agnostic (uses RBAC store abstraction).
+ *
+ * Props:
+ *   - users: User[]
+ *     List of user objects to display and manage roles for.
+ *   - (Planned) Optional feature toggles and custom actions for further configuration.
+ *
+ * Usage Example:
+ *   import RoleManagementPanel from '@/components/admin/RoleManagementPanel';
+ *   <RoleManagementPanel users={users} />
+ *
+ * Feature Toggling:
+ *   - To enable/disable this panel, control its rendering in the parent admin/dashboard page.
+ *   - Future: Accepts feature toggle props for finer control (see TODO in props).
+ *
+ * Backend Abstraction:
+ *   - All role/permission logic is abstracted via the RBAC store (see '@/lib/stores/rbac.store').
+ *   - Swapping database providers only requires updating the store implementation.
+ *
+ * Accessibility & Responsiveness:
+ *   - Follows accessibility best practices (ARIA labels, keyboard navigation).
+ *   - Responsive design for mobile and desktop.
+ *
+ * For more details, see the implementation plan and file structure guidelines.
+ */
+
 export interface RoleManagementPanelProps {
   users: User[];
   // TODO: Add optional props for feature toggles, custom actions, etc.

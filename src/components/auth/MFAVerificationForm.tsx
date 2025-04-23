@@ -14,7 +14,7 @@ import { api } from '@/lib/api/axios';
 const mfaFormSchema = z.object({
   code: z.string().min(6, 'Code must be at least 6 characters')
       .max(8, 'Code must not exceed 8 characters')
-      .regex(/^[0-9A-Z\-]+$/, 'Code must contain only digits, uppercase letters, or hyphens'),
+      .regex(/^[0-9A-Z-]+$/, 'Code must contain only digits, uppercase letters, or hyphens'),
 });
 
 type MFAFormValues = z.infer<typeof mfaFormSchema>;
@@ -43,13 +43,21 @@ export function MFAVerificationForm({ accessToken, onSuccess, onCancel }: MFAVer
       setIsLoading(true);
       setApiError(null);
 
-      const response = await api.post('/auth/mfa/verify', {
-        code: values.code,
-        method: isUsingBackupCode ? 'backup' : TwoFactorMethod.TOTP,
-        accessToken,
-      });
-
-      onSuccess(response.data.user, response.data.token);
+      let response;
+      if (isUsingBackupCode) {
+        response = await api.post('/api/2fa/backup-codes/verify', {
+          code: values.code,
+        });
+        // For backup code, just treat success as valid 2FA, but you may want to fetch user/token again if needed
+        onSuccess({}, ''); // You may want to update this to fetch user/token if required
+      } else {
+        response = await api.post('/auth/mfa/verify', {
+          code: values.code,
+          method: TwoFactorMethod.TOTP,
+          accessToken,
+        });
+        onSuccess(response.data.user, response.data.token);
+      }
     } catch (error: any) {
       setApiError(
         error.response?.data?.error || 

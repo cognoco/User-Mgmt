@@ -1,0 +1,36 @@
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import CompanyDataExport from '../CompanyDataExport';
+
+global.URL.createObjectURL = vi.fn(() => 'blob:url');
+
+describe('CompanyDataExport', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it('renders and allows company data export', async () => {
+    const mockBlob = new Blob([JSON.stringify({ test: 'company' })], { type: 'application/json' });
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      blob: async () => mockBlob,
+      headers: { get: () => 'attachment; filename="Company_Data_Export.json"' },
+    });
+    global.fetch = mockFetch;
+    render(<CompanyDataExport />);
+    expect(screen.getByText('Export Company Data')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Download Company Data'));
+    await waitFor(() => {
+      expect(screen.getByText('Company data export has been downloaded successfully.')).toBeInTheDocument();
+    });
+  });
+
+  it('shows error on export failure', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ ok: false, text: async () => 'Error' });
+    render(<CompanyDataExport />);
+    fireEvent.click(screen.getByText('Download Company Data'));
+    await waitFor(() => {
+      expect(screen.getByText('Failed to export company data.')).toBeInTheDocument();
+    });
+  });
+});
