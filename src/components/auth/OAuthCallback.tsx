@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useAuthStore } from '@/lib/stores/auth.store';
+import { getUserHomePage } from '@/lib/utils/getUserHomePage';
+import { toast } from '@/components/ui/use-toast';
 import { useOAuthStore } from '@/lib/stores/oauth.store';
 import { OAuthProvider } from '@/types/oauth';
 import { useTranslation } from 'react-i18next';
@@ -42,6 +45,14 @@ export function OAuthCallback() {
         // Process the callback
         await handleCallback(provider, code);
         setProcessingState('success');
+        // Get the user from auth store
+        const user = useAuthStore.getState().user;
+        // Determine homepage
+        const homepage = user ? getUserHomePage(user) : '/dashboard';
+        // Show toast on next page load (using sessionStorage as a cross-page flag)
+        sessionStorage.setItem('show_oauth_linked_toast', '1');
+        // Redirect
+        window.location.replace(homepage);
       } catch (error) {
         if (process.env.NODE_ENV === 'development') { console.error('OAuth callback error:', error); }
         setProcessingState('error');
@@ -89,15 +100,6 @@ export function OAuthCallback() {
   }
   
   // Success state (should redirect, but just in case)
-  return (
-    <Card className="w-full max-w-md mx-auto mt-8">
-      <CardHeader>
-        <CardTitle>{t('oauth.callback.successTitle')}</CardTitle>
-        <CardDescription>{t('oauth.callback.successDescription')}</CardDescription>
-      </CardHeader>
-      <CardContent className="text-center">
-        <p>{t('oauth.callback.redirecting')}</p>
-      </CardContent>
-    </Card>
-  );
+  return null; // No UI, as we redirect immediately
+
 } 

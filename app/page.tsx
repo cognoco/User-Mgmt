@@ -22,16 +22,19 @@ export default function HomePage() {
       name: t('home.feature.auth.title', 'Authentication'),
       description: t('home.feature.auth.description', 'Secure user authentication with email/password, social login, and two-factor authentication.'),
       icon: KeyRound,
+      href: '/login',
     },
     {
       name: t('home.feature.profile.title', 'Profile Management'),
       description: t('home.feature.profile.description', 'Customizable user profiles with avatar support and privacy settings.'),
       icon: UserCircle,
+      href: '/profile',
     },
     {
       name: t('home.feature.rbac.title', 'Role-Based Access'),
       description: t('home.feature.rbac.description', 'Flexible role and permission system for controlling user access.'),
       icon: Shield,
+      href: '/settings',
     },
   ];
 

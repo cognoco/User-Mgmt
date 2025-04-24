@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '@/lib/stores/settings.store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getPlatformClasses } from '@/lib/hooks/usePlatformStyles';
 import { useUserManagement } from '@/lib/UserManagementProvider';
 import { Platform } from '@/lib/types/platform';
-import { ConnectedAccounts } from './ConnectedAccounts';
+import { ProviderManagementPanel } from '@/components/auth/ProviderManagementPanel';
 
 export function SettingsPanel() {
   const { t } = useTranslation();
@@ -228,7 +227,7 @@ export function SettingsPanel() {
 
             {/* Connected Accounts */}
             <TabsContent value="accounts">
-              <ConnectedAccounts />
+              <ProviderManagementPanel />
             </TabsContent>
           </Tabs>
         </CardContent>

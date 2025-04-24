@@ -1,5 +1,17 @@
 import React, { useEffect } from 'react';
 import { useSessionStore } from '@/lib/stores/session.store';
+import { toast } from '@/components/ui/use-toast';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog';
 
 const SessionManagement: React.FC = () => {
   const {
@@ -10,13 +22,21 @@ const SessionManagement: React.FC = () => {
     revokeSession,
   } = useSessionStore();
 
+  const [pendingSessionId, setPendingSessionId] = React.useState<string | null>(null);
+
   useEffect(() => {
     fetchSessions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleRevoke = async (sessionId: string) => {
-    await revokeSession(sessionId);
+  const handleRevoke = async () => {
+    if (!pendingSessionId) return;
+    await revokeSession(pendingSessionId);
+    toast({
+      title: 'Session revoked',
+      description: 'The session has been successfully revoked.',
+    });
+    setPendingSessionId(null);
   };
 
   return (
@@ -29,43 +49,69 @@ const SessionManagement: React.FC = () => {
       ) : sessions.length === 0 ? (
         <div className="text-gray-500">No active sessions found.</div>
       ) : (
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead>
-            <tr>
-              <th className="px-4 py-2 text-left">Device</th>
-              <th className="px-4 py-2 text-left">IP</th>
-              <th className="px-4 py-2 text-left">Last Active</th>
-              <th className="px-4 py-2 text-left">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sessions.map((session) => (
-              <tr key={session.id} className={session.is_current ? 'bg-blue-50' : ''}>
-                <td className="px-4 py-2">
-                  {session.user_agent || 'Unknown'}
-                  {session.is_current && (
-                    <span className="ml-2 text-xs text-blue-600 font-semibold">(Current)</span>
-                  )}
-                </td>
-                <td className="px-4 py-2">{session.ip_address || '-'}</td>
-                <td className="px-4 py-2">{session.last_active_at ? new Date(session.last_active_at).toLocaleString() : '-'}</td>
-                <td className="px-4 py-2">
-                  {session.is_current ? (
-                    <span className="text-gray-400">Active</span>
-                  ) : (
-                    <button
-                      className="text-red-600 hover:underline disabled:opacity-50"
-                      onClick={() => handleRevoke(session.id)}
-                      disabled={sessionLoading}
-                    >
-                      Revoke
-                    </button>
-                  )}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
+            <thead>
+              <tr>
+                <th scope="col" className="px-4 py-2 text-left">Device</th>
+                <th scope="col" className="px-4 py-2 text-left">IP</th>
+                <th scope="col" className="px-4 py-2 text-left">Last Active</th>
+                <th scope="col" className="px-4 py-2 text-left">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {sessions.map((session) => (
+                <tr key={session.id} className={session.is_current ? 'bg-blue-50' : ''}>
+                  <td className="px-4 py-2">
+                    {session.user_agent || 'Unknown'}
+                    {session.is_current && (
+                      <span className="ml-2 text-xs text-blue-600 font-semibold">
+                        (Current)
+                        <span className="sr-only">(Current session)</span>
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2">{session.ip_address || '-'}</td>
+                  <td className="px-4 py-2">{session.last_active_at ? new Date(session.last_active_at).toLocaleString() : '-'}</td>
+                  <td className="px-4 py-2">
+                    {session.is_current ? (
+                      <span className="text-gray-400">Active</span>
+                    ) : (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button
+                            className="text-red-600 hover:underline disabled:opacity-50"
+                            onClick={() => setPendingSessionId(session.id)}
+                            disabled={sessionLoading}
+                            aria-label="Revoke this session"
+                          >
+                            Revoke
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Revoke Session</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to revoke this session? This will log out the device associated with this session.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel onClick={() => setPendingSessionId(null)}>
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction onClick={handleRevoke} disabled={sessionLoading}>
+                              Revoke
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

@@ -6,8 +6,7 @@ import { OAuthProvider } from '@/types/oauth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
-import { getPlatformClasses } from '@/lib/hooks/usePlatformStyles';
-import { useUserManagement } from '@/lib/UserManagementProvider';
+import { getPlatformClasses } from '@/hooks/usePlatformStyles';
 import { 
   Github, 
   Facebook, 

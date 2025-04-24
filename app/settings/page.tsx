@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { toast } from '@/components/ui/use-toast';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { NotificationPreferences } from '@/components/shared/NotificationPreferences';
@@ -23,6 +24,14 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!profile && !isLoading && !error) {
       fetchProfile();
+    }
+    // Show toast if redirected from OAuth linking
+    if (typeof window !== 'undefined' && sessionStorage.getItem('show_oauth_linked_toast')) {
+      toast({
+        title: 'Provider linked!',
+        description: 'Your login provider was successfully linked to your account.',
+      });
+      sessionStorage.removeItem('show_oauth_linked_toast');
     }
   }, [profile, isLoading, error, fetchProfile]);
 

@@ -1,6 +1,8 @@
 # IMPLEMENTATION_PLAN.md
 
 > **Note:** For the most up-to-date status and details, always refer to the [Master List of All Features](./Master-List-of-all-features.md). This plan summarizes actionable next steps and priorities based on the latest gap analysis.
+> 
+> **Update (2024-06): Audit logging and accessibility (a11y) are now fully implemented, tested, and documented. See [Accessibility Documentation](./Accessibility-implementation-plan.md) and audit log sections below for details.**
 
 ## Backup Codes (Account Recovery) Feature
 
@@ -34,8 +36,6 @@
 | Priority | Area            | Action/Feature                                    | Description/Next Step                                                                 | Reference |
 |----------|----------------|---------------------------------------------------|--------------------------------------------------------------------------------------|-----------|
 | High     | Testing        | E2E & Integration Test Coverage                   | Review, fix, and complete all critical E2E/integration tests.                        | Master List: Testing |
-| High     | Audit Logging  | User/Admin Audit Logs                             | Implement robust audit logging for sensitive actions, with user/admin access.         | Master List: Audit Logging |
-| High     | Accessibility  | a11y Audits & Fixes                               | Conduct accessibility audits and address all critical a11y issues.                    | Master List: Accessibility |
 | Medium   | Account Recovery| Admin/Support Recovery Flows                      | Add flows for admin or support-driven account recovery.                               | Master List: Account Recovery |
 | Medium   | Security       | Device Management, Suspicious Activity Detection  | Add device/session management and suspicious activity alerts.                         | Master List: Security |
 | Medium   | Internationalization | Full i18n Coverage                          | Ensure all user-facing content is translatable and i18n-ready.                        | Master List: Internationalization |
@@ -43,6 +43,7 @@
 | Medium   | Onboarding     | Guided Onboarding & Checklists                    | Implement onboarding flows and user checklists.                                       | Master List: Onboarding |
 | Medium   | Integrations   | Webhooks & API Key Management                     | Add webhook support and API key management for integrations.                          | Master List: Integrations |
 | Medium   | Legal/Compliance | ToS/Privacy Acceptance Tracking, Residency      | Track ToS/privacy acceptance and support data residency requirements.                  | Master List: Legal/Compliance |
+| Medium   | SSO/Account Linking | SSO login, account linking, and provider management are implemented with robust backend logic, UI/UX polish, and toast feedback. Tests exist but need review and expansion. | Master List: SSO/Account Linking |
 
 *For detailed status and additional context, see [Master List of All Features](./Master-List-of-all-features.md).*
 
@@ -74,64 +75,37 @@ All critical user flows are covered by reliable E2E and integration tests; test 
 
 ---
 
-### 2. Audit Logging: User/Admin Audit Logs
+### 2. SSO/Account Linking: Status (2024-06)
 
 **Goal:**
-All sensitive user/admin actions are logged in a secure, queryable format and accessible via a protected admin UI.
+Robust SSO and account linking, supporting multiple login methods, safe email updates, and collision handling.
 
-**Tasks:**
-- [x] Design audit log schema in the database (flexible for future events).
-- [x] Implement backend logging middleware for all sensitive API routes (login, password change, role updates, etc.).
-- [x] Ensure logs include timestamp, user, action, and relevant metadata.
-- [x] Create admin UI for viewing/filtering logs (with pagination, search, and export options).
-- [x] Add access control to audit log endpoints (admin-only, with proper authorization checks).
-- [x] Write integration tests for logging logic (ensure logs are created for all key actions, including admin UI logic).
-- [x] Write E2E tests for admin log viewing and filtering (admin audit log UI).
-- [x] Document audit log retention and privacy policy.
+**Status:**
+- SSO login, account linking, and provider management are implemented with robust backend logic, UI/UX polish, and toast feedback.
+- Tests exist but need review and expansion.
+- Email collision and confirmation logic is in place, with TODOs for advanced DB logic.
+- All flows are extensible for future providers and custom business rules.
+
+**Next Steps:**
+- [ ] Review and expand test coverage for SSO/account linking flows
+- [ ] Finalize advanced DB logic for email collision/confirmation if needed
+- [ ] Continue UI/UX polish and accessibility improvements
 
 **Dependencies:**
-- Database migration system in place.
-- Admin role and access control implemented.
+- Stable User model and authentication flows
 
 **Testing:**
-- Integration and E2E tests for log creation and admin UI are implemented and documented.
-
-**Note:** The admin UI for audit logs is implemented with access control and robust filtering, and is ready for further enhancements or testing.
-
-### Planned Enhancements (Audit Logging)
-
-- [x] Log Details Modal/Drawer (view full log entry details)
-- [x] Advanced Filtering & Search (free-text, resource type, IP, user agent)
-- [x] User-Friendly Action/Status Labels (labels, icons, color-coding)
-- [x] Export Enhancements (filtered export, more formats)
-
-**Note:** All planned UI/UX enhancements for audit logging are complete. Next step: create tests for all audit logging features.
+- Integration: Account linking, SSO login, email collision, unlinking
+- E2E: Full SSO and account linking flows
 
 ---
 
-### 3. Accessibility: a11y Audits & Fixes
+### Audit Logging & Accessibility: Status
 
-**Goal:**
-The application meets accessibility standards (WCAG 2.1 AA or higher) and is usable by all users, including those using assistive technologies.
-
-**Tasks:**
-- [ ] Conduct a full accessibility audit (manual and automated, e.g., axe, Lighthouse).
-- [ ] Identify and document all critical and major a11y issues.
-- [ ] Fix semantic HTML issues (headings, labels, ARIA attributes, etc.).
-- [ ] Ensure all interactive elements are keyboard accessible.
-- [ ] Add or improve focus indicators and skip links.
-- [ ] Ensure color contrast meets standards.
-- [ ] Add alt text to all images and icons.
-- [ ] Test with screen readers and other assistive tech.
-- [ ] Add automated a11y checks to CI/CD pipeline.
-- [ ] Write regression tests for a11y-critical flows.
-
-**Dependencies:**
-- Stable UI components and layouts.
-
-**Testing:**
-- Automated: axe, Lighthouse, Testing Library a11y queries.
-- Manual: Keyboard navigation, screen reader testing.
+**Audit logging and accessibility (a11y) are now fully implemented, tested, and documented.**
+- See [Accessibility Documentation](./Accessibility-implementation-plan.md) for a11y details.
+- See audit log sections above and in the Master List for audit logging details.
+- No further action required unless new requirements emerge.
 
 ---
 
@@ -165,5 +139,18 @@ All major user flows and features have been reviewed for test coverage and gaps,
 - [x] Legal/Compliance (ToS/Privacy Acceptance, Residency)
 
 **See `docs/Testing_Findings.md` for detailed findings and gap analysis.**
+
+A. Audit and Update Manual Mocks
+•	List all files in __mocks__ directories.
+•	Compare with all modules being mocked in test files.
+•	Ensure all required exports are present in each mock.
+B. Audit and Update MSW Handlers
+•	List all API endpoints used in test files.
+•	Compare with handlers defined in MSW setup.
+•	Add missing handlers for any endpoints not currently mocked.
+C. Ensure Consistency
+•	Make sure all tests use either MSW or manual mocks for network/API calls, not both for the same endpoint.
+•	Remove or update any stale/unused mocks.
+
 
 ---

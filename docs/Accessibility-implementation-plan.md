@@ -1,4 +1,4 @@
-# Accessibility Implementation Plan
+# Accessibility Documentation
 
 This document provides a step-by-step, incremental plan for making the User Management Module accessible. It is designed for modular, plug-in systems and can be adapted as the project evolves.
 

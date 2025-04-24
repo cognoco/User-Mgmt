@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
 import { OAuthProvider } from '@/types/oauth';
+import { logUserAction } from '@/lib/audit/auditLogger';
 
 // Request schema
 const disconnectRequestSchema = z.object({
@@ -45,38 +46,69 @@ export async function POST(request: Request) {
       );
     }
 
-    // TODO: In a complete implementation, we would:
-    // 1. Query a user_oauth_connections table
-    // 2. Remove the connection if found
-    // 3. Potentially revoke associated tokens with the provider
-
-    // For this implementation, we'll store the disconnection in user metadata
-    // Get current metadata
-    const connectedProviders = user.user_metadata?.connectedProviders || [];
-    
-    // Filter out the provider to disconnect
-    const updatedProviders = connectedProviders.filter(
-      (p: string) => p !== provider
-    );
-
-    // Update user metadata
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: { 
-        connectedProviders: updatedProviders 
-      }
+    // --- Provider unlink logic using Prisma Account model ---
+    const { prisma } = await import('@/lib/database/prisma');
+    // Find all accounts for this user
+    const userAccounts = await prisma.account.findMany({
+      where: { user_id: user.id },
     });
-
-    if (updateError) {
-      console.error('Failed to update connected providers:', updateError);
+    // Block unlink if this is the last login method (no other accounts and no password)
+    const hasPassword = !!user.user_metadata?.hasPassword; // Adjust if you have a real password check
+    if (userAccounts.length <= 1 && !hasPassword) {
       return NextResponse.json(
-        { error: updateError.message },
+        { error: 'You must have at least one login method (password or another provider) before disconnecting this provider.' },
         { status: 400 }
       );
     }
-
+    // Remove the account for this provider
+    const deleted = await prisma.account.deleteMany({
+      where: {
+        user_id: user.id,
+        provider: provider.toLowerCase(),
+      },
+    });
+    if (deleted.count === 0) {
+      // Audit log: SSO unlink failure
+      try {
+        await logUserAction({
+          userId: user.id,
+          action: 'SSO_UNLINK',
+          status: 'FAILURE',
+          details: { provider, error: 'No linked account found for this provider.' },
+        });
+      } catch (logError) {
+        console.error('Failed to log SSO_UNLINK failure:', logError);
+      }
+      return NextResponse.json(
+        { error: 'No linked account found for this provider.' },
+        { status: 400 }
+      );
+    }
+    // Audit log: SSO unlink success
+    try {
+      await logUserAction({
+        userId: user.id,
+        action: 'SSO_UNLINK',
+        status: 'SUCCESS',
+        details: { provider },
+      });
+    } catch (logError) {
+      console.error('Failed to log SSO_UNLINK success:', logError);
+    }
     return NextResponse.json({ success: true });
+    // --- End provider unlink logic ---
   } catch (error) {
     console.error('Error in OAuth disconnect:', error);
+    // Audit log: SSO unlink failure (unexpected error)
+    try {
+      await logUserAction({
+        action: 'SSO_UNLINK',
+        status: 'FAILURE',
+        details: { error: error instanceof Error ? error.message : 'Unknown error' },
+      });
+    } catch (logError) {
+      console.error('Failed to log SSO_UNLINK failure:', logError);
+    }
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'An unexpected error occurred' },
       { status: 500 }
