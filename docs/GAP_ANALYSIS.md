@@ -32,7 +32,7 @@
 | Onboarding          | Guided onboarding, checklists              | Medium      |
 | Integrations        | Webhooks, API key management               | Medium      |
 | Legal/Compliance    | ToS/Privacy acceptance tracking, residency | Medium      |
-| SSO/Account Linking | Complete: SSO login, account linking, and provider management are implemented with robust backend logic, UI/UX polish, and toast feedback. Tests exist but need review and expansion. | Medium |
+| SSO/Account Linking | Core flows implemented; E2E test *skeletons* created, need implementation & verification. Integration tests need review/expansion. | Medium |
 
 **Note:** Audit logging is fully implemented and documented. Accessibility (a11y) is being actively audited and improved. See [Accessibility Documentation](./Accessibility-implementation-plan.md) for ongoing work.
 
@@ -46,7 +46,7 @@ The following features were not found in the codebase (neither implementation no
 
 | Feature Area         | Notes |
 |----------------------|-------|
-| SSO/Account Linking  | SSO login, social login, OAuth, and account linking are now implemented and integrated with robust backend logic, UI/UX polish, and toast feedback. Tests exist but need review and expansion. |
+| SSO/Account Linking  | Core implementation exists. E2E *skeletons* created, need implementation/verification. Integration tests need review/expansion. |
 | Internationalization | Basic i18n and language switching are present in the UI, but coverage is incomplete and needs expansion and testing. |
 | Mobile Flows         | Responsive UI is implemented and tested for core flows. Native push and biometric auth are planned but not yet implemented. |
 | Onboarding           | Not yet implemented. Planned as next major feature after device/session management. |

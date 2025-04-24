@@ -1,4 +1,4 @@
-import { useUserManagement } from '../UserManagementProvider';
+import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 
 type StyleObject = Record<string, string | number | undefined>;
 type StyleFunction<T> = (props: T) => StyleObject;
@@ -25,7 +25,7 @@ type StyleFunction<T> = (props: T) => StyleObject;
  *   }
  * });
  */
-export function usePlatformStyles<T = {}>(
+export function usePlatformStyles<T = object>(
   options: {
     base?: StyleObject | StyleFunction<T>;
     web?: StyleObject | StyleFunction<T>;
@@ -103,9 +103,10 @@ export function getPlatformClasses(
     android?: string;
     mobile?: string;
     native?: string;
-  }
+  },
+  platformInfo: { platform: string; isNative: boolean }
 ): string {
-  const { platform, isNative } = useUserManagement();
+  const { platform, isNative } = platformInfo; 
   
   const classes: string[] = [];
   

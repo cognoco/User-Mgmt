@@ -43,7 +43,7 @@
 | Medium   | Onboarding     | Guided Onboarding & Checklists                    | Implement onboarding flows and user checklists.                                       | Master List: Onboarding |
 | Medium   | Integrations   | Webhooks & API Key Management                     | Add webhook support and API key management for integrations.                          | Master List: Integrations |
 | Medium   | Legal/Compliance | ToS/Privacy Acceptance Tracking, Residency      | Track ToS/privacy acceptance and support data residency requirements.                  | Master List: Legal/Compliance |
-| Medium   | SSO/Account Linking | SSO login, account linking, and provider management are implemented with robust backend logic, UI/UX polish, and toast feedback. Tests exist but need review and expansion. | Master List: SSO/Account Linking |
+| Medium   | SSO/Account Linking | Review & Expand Test Coverage                   | Core flows implemented. Implement E2E skeletons & verify. Review/expand integration tests. | Master List: SSO/Account Linking |
 
 *For detailed status and additional context, see [Master List of All Features](./Master-List-of-all-features.md).*
 
@@ -78,25 +78,29 @@ All critical user flows are covered by reliable E2E and integration tests; test 
 ### 2. SSO/Account Linking: Status (2024-06)
 
 **Goal:**
-Robust SSO and account linking, supporting multiple login methods, safe email updates, and collision handling.
+Robust SSO and account linking, supporting multiple login methods, safe email updates, and collision handling, covered by comprehensive tests.
 
 **Status:**
 - SSO login, account linking, and provider management are implemented with robust backend logic, UI/UX polish, and toast feedback.
-- Tests exist but need review and expansion.
+- Initial component/integration tests exist for `OrganizationSSO`, `BusinessSSOSetup`, and `IDPConfiguration`.
+- E2E test skeletons created (`e2e/sso-*.e2e.test.ts`, `e2e/business-sso-*.e2e.test.ts`).
+- Store-level and API-level tests are limited.
 - Email collision and confirmation logic is in place, with TODOs for advanced DB logic.
 - All flows are extensible for future providers and custom business rules.
 
 **Next Steps:**
-- [ ] Review and expand test coverage for SSO/account linking flows
-- [ ] Finalize advanced DB logic for email collision/confirmation if needed
-- [ ] Continue UI/UX polish and accessibility improvements
+- [ ] Review and expand existing integration tests to cover all SSO-related UI and API edge cases (e.g., `OAuthButtons`, `ConnectedAccounts`, API endpoints, account linking logic).
+- [ ] Implement E2E test skeletons: Requires user/org setup implementation & verification of selectors/URLs/mocks within the skeletons.
+- [ ] Ensure audit logging is tested for `SSO_LOGIN` and `SSO_LINK` events.
+- [ ] Finalize advanced DB logic for email collision/confirmation if needed.
+- [ ] Continue UI/UX polish and accessibility improvements.
 
 **Dependencies:**
 - Stable User model and authentication flows
 
 **Testing:**
-- Integration: Account linking, SSO login, email collision, unlinking
-- E2E: Full SSO and account linking flows
+- Integration: Account linking, SSO login, email collision, unlinking, API endpoints, components (`OAuthButtons`, `ConnectedAccounts`, etc.)
+- E2E: Full SSO and account linking flows (personal & business), error handling, admin config
 
 ---
 

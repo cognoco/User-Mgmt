@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { getPlatformClasses } from '@/hooks/usePlatformStyles';
+import { useUserManagement } from '@/lib/auth/UserManagementProvider';
+import { ConnectedAccount } from '@/types/connected-accounts';
 import { 
   Github, 
   Facebook, 
@@ -24,6 +26,7 @@ const PROVIDER_ICONS = {
   [OAuthProvider.TWITTER]: Twitter,
   [OAuthProvider.LINKEDIN]: Linkedin,
   [OAuthProvider.MICROSOFT]: Mail,
+  [OAuthProvider.APPLE]: Mail,
 };
 
 const PROVIDER_LABELS = {
@@ -33,6 +36,7 @@ const PROVIDER_LABELS = {
   [OAuthProvider.TWITTER]: 'Twitter',
   [OAuthProvider.LINKEDIN]: 'LinkedIn',
   [OAuthProvider.MICROSOFT]: 'Microsoft',
+  [OAuthProvider.APPLE]: 'Apple',
 };
 
 interface ConnectedAccountsProps {
@@ -48,6 +52,8 @@ export function ConnectedAccounts({
 }: ConnectedAccountsProps) {
   const { t } = useTranslation();
   const { accounts, isLoading, error, fetchConnectedAccounts, connectAccount, disconnectAccount } = useConnectedAccountsStore();
+  const { platform, isNative } = useUserManagement();
+  const platformInfo = { platform, isNative };
 
   useEffect(() => {
     fetchConnectedAccounts();
@@ -56,12 +62,12 @@ export function ConnectedAccounts({
   const containerClasses = getPlatformClasses({
     base: `space-y-4 ${className}`,
     mobile: "px-2"
-  });
+  }, platformInfo);
 
   const cardClasses = getPlatformClasses({
     base: "bg-card rounded-lg shadow",
     mobile: "rounded-md"
-  });
+  }, platformInfo);
 
   const handleConnect = async (provider: OAuthProvider) => {
     await connectAccount(provider);
@@ -83,7 +89,7 @@ export function ConnectedAccounts({
 
         <div className="space-y-4">
           {/* Connected Accounts List */}
-          {accounts.map((account) => {
+          {accounts.map((account: ConnectedAccount) => {
             const Icon = PROVIDER_ICONS[account.provider];
             return (
               <div
@@ -112,7 +118,7 @@ export function ConnectedAccounts({
             {Object.values(OAuthProvider).map((provider) => {
               const Icon = PROVIDER_ICONS[provider];
               const isConnected = accounts.some(
-                (account) => account.provider === provider
+                (account: ConnectedAccount) => account.provider === provider
               );
               
               return (
@@ -157,7 +163,7 @@ export function ConnectedAccounts({
 
           <div className="space-y-4">
             {/* Connected Accounts List */}
-            {accounts.map((account) => {
+            {accounts.map((account: ConnectedAccount) => {
               const Icon = PROVIDER_ICONS[account.provider];
               return (
                 <div
@@ -193,7 +199,7 @@ export function ConnectedAccounts({
                 {Object.values(OAuthProvider).map((provider) => {
                   const Icon = PROVIDER_ICONS[provider];
                   const isConnected = accounts.some(
-                    (account) => account.provider === provider
+                    (account: ConnectedAccount) => account.provider === provider
                   );
                   
                   return (

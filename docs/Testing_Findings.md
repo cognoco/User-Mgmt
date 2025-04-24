@@ -77,9 +77,16 @@ This file should be maintained alongside TESTING.md and TESTING_ISSUES.md for a 
 # Additional Findings (2024-06, continued)
 
 ## SSO Login & Account Linking
-- No E2E or integration test coverage for SSO login or account linking flows was found.
-- No skeletons or placeholder test files exist for these flows.
-- This is a significant gap, as SSO and account linking are critical for user experience and security.
+- Previously identified as having no E2E coverage.
+- E2E test *skeletons* have now been created and implemented for core flows:
+  - Personal OAuth Login: `e2e/sso-login-oauth.e.test.ts`
+  - Personal OAuth Signup: `e2e/sso-signup-oauth.e2e.test.ts`
+  - Business SAML/OIDC Admin Config: `e2e/business-sso-admin-config.e2e.test.ts`
+  - Business SAML/OIDC User Login: `e2e/business-sso-user-login.e2e.test.ts`
+  - Business SSO Status Display: `e2e/business-sso-status.e2e.test.ts`
+- An existing E2E test covers Connected Accounts linking/unlinking: `e2e/connected-accounts.e2e.test.ts`.
+- **Action Required:** These new skeletons require verification of selectors/URLs/mocks and implementation of user/org setup logic before they can be run successfully.
+- Integration test coverage for API endpoints and specific linking logic still needs review/expansion.
 
 ## Subscription Management
 - Integration/store test is implemented and robust for subscription logic (plan fetching, user subscription, feature gating).
