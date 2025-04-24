@@ -6,8 +6,9 @@ import { languages, type LanguageCode } from '@/lib/i18n';
 import { Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useProfileStore } from '@/lib/stores/profile.store';
-import { ProfileState } from '@/lib/types/profile';
-import { getPlatformClasses } from '@/lib/hooks/usePlatformStyles';
+import { ProfileState } from '@/types/profile';
+import { getPlatformClasses } from '@/hooks/usePlatformStyles';
+import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 
 interface LanguageSelectorProps {
   minimal?: boolean;

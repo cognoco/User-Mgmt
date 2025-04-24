@@ -136,3 +136,35 @@ This file should be maintained alongside TESTING.md and TESTING_ISSUES.md for a 
 ---
 
 (Continue to append findings for each new flow/feature reviewed.)
+
+---
+
+# Test Remediation Plan (Based on 2024-06-24 Test Run)
+
+**Overall Strategy:** Address failures in layers, starting with foundational issues before moving to specific test logic.
+
+**Layer 1: Core Resolution & Setup (Highest Priority)**
+
+1.  **Fix Module Resolution Errors:**
+    *   [ ] **`@/lib/hooks/usePlatformStyles`:** Resolve import in `src/components/settings/LanguageSelector.tsx` (Build failure). -> *Action: Find correct path/name for `usePlatformStyles`.*
+    *   [ ] **`@/components/auth/MFASetup`:** Resolve import in `src/lib/auth/__tests__/mfa/setup.test.tsx`. -> *Action: Rename import and usage to `TwoFactorSetup`.*
+    *   [ ] **`@/components/auth/MFAVerificationForm`:** (Likely needs similar rename check in `.../mfa/verification.test.tsx`). -> *Action: Check component existence/name, update test import/usage.*
+    *   [ ] Systematically review other test files for deep relative paths (`../`, `../../` etc.) and replace with aliases, verifying component existence/names. (Ref: Grep results from earlier).
+2.  **Fix Core Mocking Issues:**
+    *   [ ] **Supabase Client Mocks:** Investigate `TypeError: Cannot read properties of undefined (reading 'select')` errors (e.g., in `data-management-flow.test.tsx`). -> *Action: Review shared Supabase mock (`src/lib/auth/__mocks__/supabase.ts`?) to ensure methods (`.from`, `.select`, `.rpc`, etc.) are correctly mocked and chainable.*
+    *   [ ] **TypeScript Mock Errors:** Address `Property 'mockResolvedValue' does not exist...` errors concurrently with fixing the runtime mock issues. Ensure mocks align with Supabase client types.
+    *   [ ] **`jest` Namespace Errors:** Investigate `Cannot use namespace 'jest' as a value` errors. -> *Action: Check Vitest/TS config for conflicts.*
+3.  **Address Resource Errors:**
+    *   [ ] **`JS heap out of memory`:** Monitor if fixing mocks resolves this. If not, requires deeper investigation into specific tests identified in the logs. -> *Action: Postpone unless mock fixes don't help.*
+
+**Layer 2: Unit & Integration Tests (Medium Priority)**
+
+*   *Prerequisite: Layer 1 issues resolved.*
+*   [ ] **`TestingLibraryElementError`s:** Fix element query failures (`Unable to find...`, `Found multiple...`) on a test-by-test basis, likely starting with Login/Registration flows (`user-auth-flow.test.tsx`). -> *Action: Update selectors/assertions to match current UI.*
+*   [ ] **Runtime Type Errors:** Fix errors like `TypeError: accounts.map is not a function` (`ConnectedAccounts` in `user-auth-flow.test.tsx`). -> *Action: Ensure tests provide correctly typed mock data/props.*
+*   [ ] Address remaining test logic failures flow-by-flow.
+
+**Layer 3: E2E Tests (Lower Priority)**
+
+*   *Prerequisite: Layer 1 & 2 issues resolved.*
+*   [ ] Address any remaining E2E test failures.
