@@ -83,10 +83,15 @@ export function CorporateProfileSection({
                  : undefined, 
       size: data.size || undefined, 
     };
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Error calling onUpdate for corporate profile:", error);
+    }
     try {
       await onUpdate(updatePayload as Company);
     } catch (error) {
-      console.error("Error calling onUpdate for corporate profile:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Error calling onUpdate for corporate profile:", error);
+      }
     }
   };
   
@@ -99,7 +104,7 @@ export function CorporateProfileSection({
       
       {error && (
         <CardContent>
-          <Alert variant="destructive">
+          <Alert variant="destructive" role="alert">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         </CardContent>
@@ -123,7 +128,7 @@ export function CorporateProfileSection({
                 {...form.register('name')} 
               />
               {form.formState.errors.name && (
-                <p className="text-destructive text-sm">{form.formState.errors.name.message}</p>
+                <p className="text-destructive text-sm" role="alert">{form.formState.errors.name.message}</p>
               )}
             </div>
             
@@ -161,7 +166,7 @@ export function CorporateProfileSection({
                 {...form.register('website')} 
               />
               {form.formState.errors.website && (
-                <p className="text-destructive text-sm">{form.formState.errors.website.message}</p>
+                <p className="text-destructive text-sm" role="alert">{form.formState.errors.website.message}</p>
               )}
             </div>
             

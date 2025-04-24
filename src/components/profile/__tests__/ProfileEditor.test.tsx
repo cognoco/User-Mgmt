@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event';
 import { ProfileEditor } from '@/components/profile/ProfileEditor';
 import { useProfileStore } from '@/lib/stores/profile.store';
 import { useConnectedAccountsStore } from '@/lib/stores/connected-accounts.store';
-import { OAuthProvider } from '@/types/connected-accounts';
+import { OAuthProvider } from '@/types/oauth';
 
 // Mock the profile store
 jest.mock('@/lib/stores/profile.store', () => ({

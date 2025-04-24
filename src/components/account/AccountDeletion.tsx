@@ -83,7 +83,7 @@ export function AccountDeletion() {
             </DialogHeader>
             
             {(error || localError) && (
-              <Alert variant="destructive" className="mt-4">
+              <Alert variant="destructive" className="mt-4" role="alert">
                 <AlertDescription>{error || localError}</AlertDescription>
               </Alert>
             )}

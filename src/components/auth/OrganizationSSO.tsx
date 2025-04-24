@@ -42,7 +42,7 @@ const OrganizationSSO: React.FC<OrganizationSSOProps> = ({ orgId }) => {
         const response = await api.get(`/organizations/${orgId}/sso/status`);
         setSsoStatus(response.data);
       } catch (error) {
-        console.error('Failed to fetch SSO status:', error);
+        if (process.env.NODE_ENV === 'development') { console.error('Failed to fetch SSO status:', error) }
       }
     };
 

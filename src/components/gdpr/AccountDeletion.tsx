@@ -46,7 +46,7 @@ export function AccountDeletion() {
       }, 2000);
 
     } catch (error: any) {
-      console.error("Account deletion error:", error);
+      if (process.env.NODE_ENV === 'development') { console.error("Account deletion error:", error); }
       toast({
         variant: "destructive",
         title: t('common.error'),

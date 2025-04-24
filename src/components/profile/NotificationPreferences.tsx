@@ -62,7 +62,7 @@ const NotificationPreferences: React.FC = () => {
     <div className="rounded border p-4 max-w-lg mx-auto bg-white shadow mt-6">
       <h3 className="text-lg font-semibold mb-2">Notification Preferences</h3>
       {loading ? (
-        <div className="text-gray-500">Loading preferences...</div>
+        <div className="text-gray-500" role="status">Loading preferences...</div>
       ) : (
         <form onSubmit={handleSave} className="space-y-4">
           <div>
@@ -109,8 +109,8 @@ const NotificationPreferences: React.FC = () => {
             >
               {saving ? 'Saving...' : 'Save Preferences'}
             </button>
-            {success && <span className="text-green-600 text-sm">{success}</span>}
-            {error && <span className="text-red-600 text-sm">{error}</span>}
+            {success && <span className="text-green-600 text-sm" role="alert">{success}</span>}
+            {error && <span className="text-red-600 text-sm" role="alert">{error}</span>}
           </div>
         </form>
       )}

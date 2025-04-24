@@ -167,7 +167,7 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
       setSpMetadata(metadataResponse.data.xml);
       
     } catch (err) {
-      console.error(`Failed to fetch ${idpType.toUpperCase()} configuration:`, err);
+      if (process.env.NODE_ENV === 'development') { console.error(`Failed to fetch ${idpType.toUpperCase()} configuration:`, err); }
       setError(t('org.sso.fetchConfigError'));
     } finally {
       setIsLoading(false);
@@ -191,7 +191,7 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
         onConfigurationUpdate(true);
       }
     } catch (err) {
-      console.error(`Failed to save ${idpType.toUpperCase()} configuration:`, err);
+      if (process.env.NODE_ENV === 'development') { console.error(`Failed to save ${idpType.toUpperCase()} configuration:`, err); }
       setError(t('org.sso.saveConfigError'));
       
       if (onConfigurationUpdate) {

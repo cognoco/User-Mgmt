@@ -2,13 +2,12 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConnectedAccountsStore } from '@/lib/stores/connected-accounts.store';
-import { OAuthProvider } from '@/lib/types/connected-accounts';
+import { OAuthProvider } from '@/types/oauth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { getPlatformClasses } from '@/lib/hooks/usePlatformStyles';
 import { useUserManagement } from '@/lib/UserManagementProvider';
-import { Platform } from '@/lib/types/platform';
 import { 
   Github, 
   Facebook, 
@@ -50,7 +49,6 @@ export function ConnectedAccounts({
 }: ConnectedAccountsProps) {
   const { t } = useTranslation();
   const { accounts, isLoading, error, fetchConnectedAccounts, connectAccount, disconnectAccount } = useConnectedAccountsStore();
-  const { platform } = useUserManagement();
 
   useEffect(() => {
     fetchConnectedAccounts();
@@ -79,7 +77,7 @@ export function ConnectedAccounts({
     return (
       <div className={containerClasses}>
         {error && (
-          <Alert variant="destructive" className="mb-4">
+          <Alert variant="destructive" className="mb-4" role="alert">
             {error}
           </Alert>
         )}
@@ -102,6 +100,7 @@ export function ConnectedAccounts({
                   size="sm"
                   onClick={() => handleDisconnect(account.id)}
                   disabled={isLoading}
+                  aria-label={`Disconnect ${PROVIDER_LABELS[account.provider]} account`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -125,6 +124,7 @@ export function ConnectedAccounts({
                   onClick={() => handleConnect(provider)}
                   disabled={isLoading || isConnected}
                   size="sm"
+                  aria-label={`Connect ${PROVIDER_LABELS[provider]} account`}
                 >
                   <Icon className="h-4 w-4" />
                   <span>{PROVIDER_LABELS[provider]}</span>
@@ -151,7 +151,7 @@ export function ConnectedAccounts({
         )}
         <CardContent>
           {error && (
-            <Alert variant="destructive" className="mb-4">
+            <Alert variant="destructive" className="mb-4" role="alert">
               {error}
             </Alert>
           )}
@@ -177,6 +177,7 @@ export function ConnectedAccounts({
                     size="sm"
                     onClick={() => handleDisconnect(account.id)}
                     disabled={isLoading}
+                    aria-label={`Disconnect ${PROVIDER_LABELS[account.provider]} account`}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -203,6 +204,7 @@ export function ConnectedAccounts({
                       className="flex items-center space-x-2"
                       onClick={() => handleConnect(provider)}
                       disabled={isLoading || isConnected}
+                      aria-label={`Connect ${PROVIDER_LABELS[provider]} account`}
                     >
                       <Icon className="h-4 w-4" />
                       <span>{PROVIDER_LABELS[provider]}</span>

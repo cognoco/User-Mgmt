@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next';
 import Link from 'next/link'; // Use next/link
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/lib/stores/auth.store';
+import { Hero } from '@/components/layout/Hero';
+import { Features, FeatureItem } from '@/components/layout/Features';
+import { Shield, UserCircle, KeyRound } from 'lucide-react';
 
 // Replaces the previous placeholder HomePage
 export default function HomePage() { 
@@ -13,61 +16,57 @@ export default function HomePage() {
       isAuthenticated: state.isAuthenticated 
   }));
 
+  // Feature grid for this app
+  const features: FeatureItem[] = [
+    {
+      name: t('home.feature.auth.title', 'Authentication'),
+      description: t('home.feature.auth.description', 'Secure user authentication with email/password, social login, and two-factor authentication.'),
+      icon: KeyRound,
+    },
+    {
+      name: t('home.feature.profile.title', 'Profile Management'),
+      description: t('home.feature.profile.description', 'Customizable user profiles with avatar support and privacy settings.'),
+      icon: UserCircle,
+    },
+    {
+      name: t('home.feature.rbac.title', 'Role-Based Access'),
+      description: t('home.feature.rbac.description', 'Flexible role and permission system for controlling user access.'),
+      icon: Shield,
+    },
+  ];
+
   return (
     <div className="container mx-auto px-4 py-16">
-      <div className="flex flex-col items-center text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-          {t('home.title', 'Welcome to User Management')} 
-        </h1>
-        <p className="mt-6 text-lg leading-8 text-muted-foreground">
-          {t('home.description', 'A powerful and flexible user management system that can be integrated into any application.')}
-        </p>
-        <div className="mt-10 flex items-center gap-x-6">
-          {isAuthenticated ? (
-            <>
-              {/* Use next/link and href */}
-              <Link href="/profile">
-                <Button>{t('home.viewProfile', 'View Profile')}</Button>
-              </Link>
-              <Link href="/settings">
-                <Button variant="outline">{t('home.settings', 'Settings')}</Button>
-              </Link>
-            </>
-          ) : (
-            <>
-              {/* Use next/link and href */}
-              <Link href="/register">
-                <Button>{t('home.getStarted', 'Get Started')}</Button>
-              </Link>
-              <Link href="/login">
-                <Button variant="outline">{t('home.signIn', 'Sign In')}</Button>
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Feature Grid */}
-      <div className="mt-24 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-lg border bg-card p-6"> {/* Use card bg */} 
-          <h3 className="text-lg font-semibold">{t('home.feature.auth.title', 'Authentication')}</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t('home.feature.auth.description', 'Secure user authentication with email/password, social login, and two-factor authentication.')}
-          </p>
-        </div>
-        <div className="rounded-lg border bg-card p-6"> {/* Use card bg */} 
-          <h3 className="text-lg font-semibold">{t('home.feature.profile.title', 'Profile Management')}</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t('home.feature.profile.description', 'Customizable user profiles with avatar support and privacy settings.')}
-          </p>
-        </div>
-        <div className="rounded-lg border bg-card p-6"> {/* Use card bg */} 
-          <h3 className="text-lg font-semibold">{t('home.feature.rbac.title', 'Role-Based Access')}</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t('home.feature.rbac.description', 'Flexible role and permission system for controlling user access.')}
-          </p>
-        </div>
-      </div>
+      <Hero
+        title={t('home.title', 'Welcome to User Management')}
+        description={t('home.description', 'A powerful and flexible user management system that can be integrated into any application.')}
+      >
+        {isAuthenticated ? (
+          <>
+            <Link href="/profile">
+              <Button>{t('home.viewProfile', 'View Profile')}</Button>
+            </Link>
+            <Link href="/settings">
+              <Button variant="outline">{t('home.settings', 'Settings')}</Button>
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link href="/register">
+              <Button>{t('home.getStarted', 'Get Started')}</Button>
+            </Link>
+            <Link href="/login">
+              <Button variant="outline">{t('home.signIn', 'Sign In')}</Button>
+            </Link>
+          </>
+        )}
+      </Hero>
+      <Features
+        features={features}
+        title={t('home.featuresTitle', 'Key Features')}
+        description={t('home.featuresDescription', 'Explore the core capabilities of our user management system.')}
+        className="mt-24"
+      />
     </div>
   );
 } 

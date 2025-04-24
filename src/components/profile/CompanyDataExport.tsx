@@ -47,11 +47,12 @@ const CompanyDataExport: React.FC = () => {
         className="px-4 py-2 rounded bg-blue-600 text-white disabled:opacity-50"
         onClick={handleExport}
         disabled={downloading}
+        {...(downloading ? { role: "status" } : {})}
       >
         {downloading ? 'Generating export...' : 'Download Company Data'}
       </button>
-      {success && <div className="text-green-600 text-sm mt-2">{success}</div>}
-      {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
+      {success && <div className="text-green-600 text-sm mt-2" role="alert">{success}</div>}
+      {error && <div className="text-red-600 text-sm mt-2" role="alert">{error}</div>}
     </div>
   );
 };

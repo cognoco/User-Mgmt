@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { api } from '../api/axios';
-import { ConnectedAccountsState, OAuthProvider } from '../types/connected-accounts';
+import { ConnectedAccountsState } from '../types/connected-accounts';
+import { OAuthProvider } from '../../types/oauth';
 
 export const useConnectedAccountsStore = create<ConnectedAccountsState>((set) => ({
   accounts: [],

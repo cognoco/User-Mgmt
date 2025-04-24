@@ -7,7 +7,7 @@ import { supabase } from '@/lib/database/supabase';
 import { useAuthStore } from '@/lib/stores/auth.store';
 import { User } from '@/types/auth';
 import toast, { Toaster } from 'react-hot-toast';
-import { OAuthProvider } from '@/lib/types/oauth';
+import { OAuthProvider } from '@/types/oauth';
 
 // Define the callbacks inside the Client Component
 const clientCallbacks: Required<IntegrationCallbacks> = {

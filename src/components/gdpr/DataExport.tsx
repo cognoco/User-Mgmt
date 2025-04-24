@@ -52,7 +52,7 @@ export function DataExport() {
       });
 
     } catch (error: any) {
-      console.error("Data export error:", error);
+      if (process.env.NODE_ENV === 'development') { console.error("Data export error:", error); }
       toast({
         variant: "destructive",
         title: t('common.error'),
@@ -70,7 +70,7 @@ export function DataExport() {
         <CardDescription>{t('gdpr.export.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <Button onClick={handleExport} disabled={isLoading}>
+        <Button onClick={handleExport} disabled={isLoading} {...(isLoading ? { role: "status" } : {})}>
           {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (

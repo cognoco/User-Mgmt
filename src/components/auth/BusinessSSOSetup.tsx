@@ -42,7 +42,7 @@ const BusinessSSOSetup: React.FC<BusinessSSOSetupProps> = ({ orgId, onSettingsCh
             setIdpType(response.data.idp_type);
             setInitialSettings(response.data);
         } catch (err) {
-            console.error("Failed to fetch SSO settings:", err);
+            if (process.env.NODE_ENV === 'development') { console.error("Failed to fetch SSO settings:", err); }
             setError(t('org.sso.fetchError'));
             setInitialSettings({ sso_enabled: false, idp_type: null }); // Set default on error
         } finally {
@@ -72,7 +72,7 @@ const BusinessSSOSetup: React.FC<BusinessSSOSetupProps> = ({ orgId, onSettingsCh
             // Optionally refetch or just update state
             // fetchSettings(); // Could refetch to ensure sync
         } catch (err) {
-            console.error("Failed to save SSO settings:", err);
+            if (process.env.NODE_ENV === 'development') { console.error("Failed to save SSO settings:", err); }
             setError(t('org.sso.saveError'));
         } finally {
             setIsSaving(false);

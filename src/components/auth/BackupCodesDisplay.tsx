@@ -75,14 +75,14 @@ export function BackupCodesDisplay({
       
       <CardContent className="space-y-4">
         {error && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" role="alert">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
         
         {!regenerateConfirmVisible ? (
           <>
-            <Alert className="mb-4">
+            <Alert className="mb-4" role="alert">
               <AlertDescription>
                 {t('2fa.backupCodes.saveWarning')}
               </AlertDescription>
@@ -118,7 +118,7 @@ export function BackupCodesDisplay({
           </>
         ) : (
           <div className="space-y-4">
-            <Alert variant="destructive">
+            <Alert variant="destructive" role="alert">
               <AlertDescription>
                 {t('2fa.backupCodes.regenerateWarning')}
               </AlertDescription>

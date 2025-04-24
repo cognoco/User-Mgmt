@@ -63,11 +63,11 @@ type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
 export function RegistrationForm() {
   const userManagementContext = useUserManagement?.();
-  console.log('[DEBUG] RegistrationForm mounted', { context: userManagementContext });
+  if (process.env.NODE_ENV === 'development') { console.log('[DEBUG] RegistrationForm mounted', { context: userManagementContext }); }
   const userManagement = useUserManagement();
-  console.log('[FORM_DEBUG] RegistrationForm rendered. corporateUsers:', userManagement.corporateUsers);
-  console.log('RegistrationForm rendered');
-  console.log('[TEST_DEBUG] RegistrationForm function START');
+  if (process.env.NODE_ENV === 'development') { console.log('[FORM_DEBUG] RegistrationForm rendered. corporateUsers:', userManagement.corporateUsers); }
+  if (process.env.NODE_ENV === 'development') { console.log('RegistrationForm rendered'); }
+  if (process.env.NODE_ENV === 'development') { console.log('[TEST_DEBUG] RegistrationForm function START'); }
 
   const router = useRouter();
   const [userType, setUserType] = useState<UserType>(userManagement.corporateUsers.defaultUserType);
@@ -94,10 +94,10 @@ export function RegistrationForm() {
     mode: 'onChange',
   });
   
-  console.log('[RegistrationForm State] isValid:', form.formState.isValid);
+  if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm State] isValid:', form.formState.isValid); }
 
   useEffect(() => {
-    console.log('[RegistrationForm Errors]', form.formState.errors);
+    if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm Errors]', form.formState.errors); }
   }, [form.formState.errors]);
   
   useEffect(() => {
@@ -109,84 +109,84 @@ export function RegistrationForm() {
   
   // Debug logging for apiSuccess and apiError
   useEffect(() => {
-    console.log('[RegistrationForm] apiSuccess changed:', apiSuccess);
+    if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm] apiSuccess changed:', apiSuccess); }
   }, [apiSuccess]);
   useEffect(() => {
-    console.log('[RegistrationForm] apiError changed:', apiError);
+    if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm] apiError changed:', apiError); }
   }, [apiError]);
   
   const onSubmit = async (data: RegistrationFormValues) => {
-    console.log('[RegistrationForm onSubmit] Handler triggered!');
-    console.log('[RegistrationForm onSubmit] Form data:', data);
-    console.log('[RegistrationForm onSubmit] authStore object:', authStore);
+    if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm onSubmit] Handler triggered!'); }
+    if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm onSubmit] Form data:', data); }
+    if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm onSubmit] authStore object:', authStore); }
 
-    console.log('[RegistrationForm] onSubmit triggered. Current isSubmitting:', isSubmitting);
+    if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm] onSubmit triggered. Current isSubmitting:', isSubmitting); }
     if (isSubmitting) {
-      console.warn('[RegistrationForm] Submission already in progress, preventing duplicate submission.');
+      if (process.env.NODE_ENV === 'development') { console.warn('[RegistrationForm] Submission already in progress, preventing duplicate submission.'); }
       return;
     }
     if (!authStore || typeof authStore.register !== 'function') {
-        console.error('[RegistrationForm] Auth store or register function is not available!', authStore);
+        if (process.env.NODE_ENV === 'development') { console.error('[RegistrationForm] Auth store or register function is not available!', authStore); }
         setApiError('An internal error occurred (Auth service unavailable). Please try again later.');
         setIsSubmitting(false);
         return;
     }
-    console.log('[RegistrationForm] Setting isSubmitting to true...');
+    if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm] Setting isSubmitting to true...'); }
     setIsSubmitting(true);
-    console.log('[RegistrationForm] isSubmitting state should now be true.');
+    if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm] isSubmitting state should now be true.'); }
 
     setApiError(null);
     setApiSuccess(null);
 
     try {
-      console.log('[RegistrationForm onSubmit] Calling authStore.register...');
+      if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm onSubmit] Calling authStore.register...'); }
       const result = await authStore.register({
         email: data.email,
         password: data.password,
         firstName: data.firstName || '',
         lastName: data.lastName || '',
       });
-      console.log('[RegistrationForm] authStore.register result:', result);
+      if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm] authStore.register result:', result); }
 
       if (result.success) {
         const successMsg = 'Registration successful! Please check your email to verify your account.';
         setApiSuccess(successMsg);
         setApiError(null);
-        console.log('[RegistrationForm] Registration successful, showing success message.');
+        if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm] Registration successful, showing success message.'); }
         // Show the success message for 2 seconds before resetting and redirecting
         setTimeout(() => {
           form.reset();
-          console.log(`[RegistrationForm] Redirecting to /check-email?email=${data.email}`);
+          if (process.env.NODE_ENV === 'development') { console.log(`[RegistrationForm] Redirecting to /check-email?email=${data.email}`); }
           router.push(`/check-email?email=${encodeURIComponent(data.email)}`);
         }, 2000);
       } else {
-        console.error('[RegistrationForm] Registration failed:', result.error);
+        if (process.env.NODE_ENV === 'development') { console.error('[RegistrationForm] Registration failed:', result.error); }
         setApiError(result.error || 'Registration failed. Please try again.');
         setApiSuccess(null);
         // Do not redirect or reset form if error
         return;
       }
     } catch (error: any) {
-      console.error('[RegistrationForm] Unexpected error during registration:', error);
+      if (process.env.NODE_ENV === 'development') { console.error('[RegistrationForm] Unexpected error during registration:', error); }
       setApiError(`An unexpected error occurred: ${error.message || 'Unknown error'}. Please try again.`);
       setApiSuccess(null);
     } finally {
-      console.log('[RegistrationForm] Entering finally block, setting isSubmitting to false...');
+      if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm] Entering finally block, setting isSubmitting to false...'); }
       setIsSubmitting(false);
-      console.log('[RegistrationForm] isSubmitting state should now be false.');
+      if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm] isSubmitting state should now be false.'); }
       // Debug logging for form state after API call
-      console.log('[RegistrationForm] After API call:', {
+      if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm] After API call:', {
         isValid: form.formState.isValid,
         isSubmitting,
         apiError
-      });
+      }); }
     }
   };
   
   const onValidationErrors = (errors: any) => {
     // Log validation errors when submit fails client-side
-    console.error('[RegistrationForm Validation Errors on Submit]:', errors);
-    console.log('[RegistrationForm State onValidationError] isValid:', form.formState.isValid);
+    if (process.env.NODE_ENV === 'development') { console.error('[RegistrationForm Validation Errors on Submit]:', errors); }
+    if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm State onValidationError] isValid:', form.formState.isValid); }
   };
 
   const handleUserTypeChange = (type: UserType) => {
@@ -206,11 +206,11 @@ export function RegistrationForm() {
   
   const showUserTypeSelection = userManagement.corporateUsers.enabled && userManagement.corporateUsers.registrationEnabled;
   
-  console.log('[RegistrationForm DEBUG] formState.isValid:', form.formState.isValid);
-  console.log('[RegistrationForm DEBUG] formState.errors:', form.formState.errors);
-  console.log('[RegistrationForm DEBUG] field values:', form.getValues());
+  if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm DEBUG] formState.isValid:', form.formState.isValid); }
+  if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm DEBUG] formState.errors:', form.formState.errors); }
+  if (process.env.NODE_ENV === 'development') { console.log('[RegistrationForm DEBUG] field values:', form.getValues()); }
   
-  console.log('[TEST_DEBUG] RegistrationForm function BEFORE RETURN');
+  if (process.env.NODE_ENV === 'development') { console.log('[TEST_DEBUG] RegistrationForm function BEFORE RETURN'); }
   
   return (
     <div className="space-y-6">
@@ -221,16 +221,16 @@ export function RegistrationForm() {
         </p>
       </div>
       {apiSuccess && (
-        <Alert variant="default" className="bg-green-100 border-green-300 text-green-800">
+        <Alert variant="default" className="bg-green-100 border-green-300 text-green-800" role="alert">
            <Check className="h-4 w-4" />
           <AlertTitle>Success!</AlertTitle>
           <AlertDescription>{apiSuccess}</AlertDescription>
         </Alert>
       )}
       {/* Error Alert */}
-      {(() => { console.log('[DEBUG] Rendering error alert, apiError:', apiError); return null; })()}
+      {(() => { if (process.env.NODE_ENV === 'development') { console.log('[DEBUG] Rendering error alert, apiError:', apiError); return null; } })()}
       {apiError && (
-        <Alert variant="destructive" data-testid="registration-error-alert">
+        <Alert variant="destructive" data-testid="registration-error-alert" role="alert">
           <X className="h-4 w-4" />
           <AlertTitle>Registration Failed</AlertTitle>
           <AlertDescription>{apiError}</AlertDescription>
@@ -404,9 +404,9 @@ export function RegistrationForm() {
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 I agree to the 
-                <a href="#" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-4 hover:text-primary/90">Terms and Conditions</a>
+                <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-4 hover:text-primary/90">Terms and Conditions</a>
                  and 
-                <a href="#" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-4 hover:text-primary/90">Privacy Policy</a>.
+                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-4 hover:text-primary/90">Privacy Policy</a>.
               </label>
               {form.formState.errors.acceptTerms && (
                 <p className="text-destructive text-sm mt-1">{form.formState.errors.acceptTerms.message}</p>
@@ -431,6 +431,7 @@ export function RegistrationForm() {
         </form>
       )}
       {/* DEBUG: Render form state for E2E diagnosis */}
+      {/*
       <pre data-testid="form-debug" style={{ background: '#fee', color: '#900', fontSize: 12, padding: 8, marginBottom: 8 }}>
         {JSON.stringify({
           isValid: form.formState.isValid,
@@ -438,6 +439,7 @@ export function RegistrationForm() {
           values: form.getValues(),
         }, null, 2)}
       </pre>
+      */}
     </div>
   );
 } 

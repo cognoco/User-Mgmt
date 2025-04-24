@@ -2,9 +2,7 @@ import { useState } from 'react';
 import { useProfile } from '@/lib/hooks/useProfile';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Alert } from '../ui/alert';
 import { Switch } from '../ui/switch';
-import { Label } from '../ui/label';
 import { Shield, Smartphone, Mail } from 'lucide-react';
 import {
   Dialog,
@@ -16,7 +14,7 @@ import {
 } from '../ui/dialog';
 
 export function SecuritySettings() {
-  const { profile, toggleTwoFactor, isLoading, error } = useProfile();
+  const { profile, toggleTwoFactor, isLoading } = useProfile();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   if (!profile) return null;
@@ -42,6 +40,7 @@ export function SecuritySettings() {
               checked={profile.twoFactorEnabled}
               onCheckedChange={toggleTwoFactor}
               disabled={isLoading}
+              aria-label="Toggle two-factor authentication"
             />
           </div>
 
@@ -58,6 +57,7 @@ export function SecuritySettings() {
             <Button
               variant={profile.emailVerified ? 'ghost' : 'default'}
               disabled={profile.emailVerified}
+              aria-label={profile.emailVerified ? 'Email verified' : 'Verify your email address'}
             >
               {profile.emailVerified ? 'Verified' : 'Verify Email'}
             </Button>
@@ -76,6 +76,7 @@ export function SecuritySettings() {
             <Button
               variant={profile.phoneVerified ? 'ghost' : 'default'}
               disabled={profile.phoneVerified}
+              aria-label={profile.phoneVerified ? 'Phone verified' : 'Verify your phone number'}
             >
               {profile.phoneVerified ? 'Verified' : 'Verify Phone'}
             </Button>

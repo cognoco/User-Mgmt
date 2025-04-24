@@ -61,6 +61,7 @@ async function fetchTeamLicense(): Promise<TeamLicense> {
   const response = await fetch('/api/subscriptions/team/license');
   if (!response.ok) {
     const error = await response.json();
+    if (process.env.NODE_ENV === 'development') { console.error('Failed to fetch team license', error); }
     throw new Error(error.message || 'Failed to fetch team license');
   }
   return response.json();
@@ -74,6 +75,7 @@ async function updateSeats(seats: number): Promise<TeamLicense> {
   });
   if (!response.ok) {
     const error = await response.json();
+    if (process.env.NODE_ENV === 'development') { console.error('Failed to update seats', error); }
     throw new Error(error.message || 'Failed to update seats');
   }
   return response.json();
@@ -85,6 +87,7 @@ async function removeMember(memberId: string): Promise<void> {
   });
   if (!response.ok) {
     const error = await response.json();
+    if (process.env.NODE_ENV === 'development') { console.error('Failed to remove member', error); }
     throw new Error(error.message || 'Failed to remove member');
   }
 }
@@ -108,6 +111,7 @@ export function TeamManagement(): JSX.Element {
       toast.success('Successfully updated seat count');
     },
     onError: (error: Error) => {
+      if (process.env.NODE_ENV === 'development') { console.error('Failed to update seats', error); }
       toast.error('Failed to update seats: ' + error.message);
     },
   });
@@ -119,6 +123,7 @@ export function TeamManagement(): JSX.Element {
       toast.success('Successfully removed team member');
     },
     onError: (error: Error) => {
+      if (process.env.NODE_ENV === 'development') { console.error('Failed to remove member', error); }
       toast.error('Failed to remove member: ' + error.message);
     },
   });

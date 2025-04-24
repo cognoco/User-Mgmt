@@ -126,7 +126,7 @@ export function CompanyLogoUpload() {
         }
        
     } catch (error: any) {
-        console.error("Cropping/Upload error:", error);
+        if (process.env.NODE_ENV === 'development') { console.error("Cropping/Upload error:", error); }
         setUploadError(error.message || t('profile.errors.uploadFailed'));
         setIsProcessingCrop(false);
     }

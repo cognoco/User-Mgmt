@@ -88,7 +88,7 @@ export function MFAVerificationForm({ accessToken, onSuccess, onCancel }: MFAVer
       </div>
 
       {apiError && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" role="alert">
           <AlertDescription>{apiError}</AlertDescription>
         </Alert>
       )}

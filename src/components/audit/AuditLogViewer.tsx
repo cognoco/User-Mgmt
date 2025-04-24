@@ -208,7 +208,7 @@ export function AuditLogViewer({ isAdmin = true }: { isAdmin?: boolean }) {
         });
       }
     } catch (error) {
-      console.error('Export error:', error);
+      if (process.env.NODE_ENV === 'development') { console.error('Export error:', error); }
       toast({
         title: 'Export Failed',
         description: error instanceof Error ? error.message : 'Failed to export audit logs',
@@ -237,6 +237,7 @@ export function AuditLogViewer({ isAdmin = true }: { isAdmin?: boolean }) {
   }, [selectedLog, toast]);
 
   if (error) {
+    if (process.env.NODE_ENV === 'development') { console.error('Error:', error); }
     toast({
       title: 'Error',
       description: error instanceof Error ? error.message : 'Failed to fetch audit logs',
@@ -254,6 +255,7 @@ export function AuditLogViewer({ isAdmin = true }: { isAdmin?: boolean }) {
               variant="outline" 
               disabled={isExporting}
               aria-label="Export options"
+              role={isExporting ? "status" : undefined}
             >
               Export <ChevronDown className="ml-2 h-4 w-4" aria-hidden="true" />
             </Button>
@@ -560,7 +562,13 @@ export function AuditLogViewer({ isAdmin = true }: { isAdmin?: boolean }) {
                   <TableCell className="font-mono text-sm">{log.path}</TableCell>
                   <TableCell>
                     <Badge 
-                      variant={STATUS_BADGE[log.status]?.color || 'default'}
+                      variant={
+                        STATUS_BADGE[log.status]?.color === 'destructive' ? 'destructive' :
+                        STATUS_BADGE[log.status]?.color === 'default' ? 'default' :
+                        STATUS_BADGE[log.status]?.color === 'outline' ? 'outline' :
+                        STATUS_BADGE[log.status]?.color === 'secondary' ? 'secondary' :
+                        'default'
+                      }
                       aria-label={`Status: ${STATUS_BADGE[log.status]?.label || log.status}`}
                       title={log.status}
                     >

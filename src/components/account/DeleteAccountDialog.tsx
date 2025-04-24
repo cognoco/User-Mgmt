@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useDeleteAccount } from '@/hooks/useDeleteAccount';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface DeleteAccountDialogProps {
@@ -23,7 +22,6 @@ interface DeleteAccountDialogProps {
 const CONFIRMATION_TEXT = 'DELETE';
 
 const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ open, onClose }) => {
-  const { t } = useTranslation();
   const [confirmText, setConfirmText] = useState('');
   const { deleteAccount, isLoading, error } = useDeleteAccount();
 
@@ -52,7 +50,7 @@ const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ open, onClose
 
         <div className="space-y-4 py-4">
           {error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" role="alert">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>

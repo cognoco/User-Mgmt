@@ -76,7 +76,7 @@ export function RemoveMemberDialog({
               <span className="font-semibold">{member.name || member.email}</span>{' '}
               from the team?
             </p>
-            <div className="bg-muted p-4 rounded-md space-y-2 text-sm">
+            <div className="bg-muted p-4 rounded-md space-y-2 text-sm" role="alert">
               <p className="font-medium text-destructive">Warning:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>This action cannot be undone</li>

@@ -36,7 +36,8 @@ export const NotificationCenter: React.FC = () => {
       }
     };
     const channel = mockSubscription; // Simulate getting channel
-    channel.on('postgres_changes', (payload) => { console.log('Mock received', payload); /* handle payload */ }).subscribe();
+    if (process.env.NODE_ENV === 'development') { console.log('Mock received', payload); /* handle payload */ }
+    channel.on('postgres_changes', (payload) => { if (process.env.NODE_ENV === 'development') { console.log('Mock received', payload); /* handle payload */ } }).subscribe();
 
     return () => clearTimeout(timer);
   }, []);

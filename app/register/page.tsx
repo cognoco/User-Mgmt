@@ -14,15 +14,6 @@ export default function RegisterPage() { // Use default export for Next.js pages
       </h1>
       <div className="bg-card rounded-lg shadow p-6"> {/* Use theme-aware background */} 
         <RegistrationForm />
-        <div className="mt-4 text-sm text-center">
-          <p>
-            {t('auth.register.haveAccount', 'Already have an account?')} {' '}
-            {/* Use href instead of to */}
-            <Link href="/login" className="text-primary hover:underline">
-              {t('auth.register.signIn', 'Sign in')}
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   );

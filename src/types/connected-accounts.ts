@@ -1,13 +1,5 @@
 import { z } from 'zod';
-
-export enum OAuthProvider {
-  GOOGLE = 'google',
-  GITHUB = 'github',
-  FACEBOOK = 'facebook',
-  TWITTER = 'twitter',
-  LINKEDIN = 'linkedin',
-  MICROSOFT = 'microsoft',
-}
+import { OAuthProvider } from '../types/oauth';
 
 export const connectedAccountSchema = z.object({
   id: z.string(),

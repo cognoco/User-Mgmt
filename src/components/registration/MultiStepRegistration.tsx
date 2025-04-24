@@ -45,7 +45,7 @@ export function MultiStepRegistration() {
       setCurrentStep(currentStep + 1);
     } else {
       // Handle final submission
-      console.log('Registration data:', data);
+      if (process.env.NODE_ENV === 'development') { console.log('Registration data:', data); }
     }
   };
 

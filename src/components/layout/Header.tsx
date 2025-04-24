@@ -31,7 +31,7 @@ export function Header({ type = 'fixed' }: HeaderProps) {
       await logout();
       navigate('/login');
     } catch (error) {
-      console.error("Logout failed:", error);
+      if (process.env.NODE_ENV === 'development') { console.error("Logout failed:", error) }
       navigate('/login');
     }
   };

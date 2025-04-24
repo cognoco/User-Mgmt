@@ -72,13 +72,13 @@ export function DataExport() {
       </CardHeader>
       <CardContent className="space-y-6">
         {error && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" role="alert">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
         
         {success && (
-          <Alert className="bg-green-50 border-green-200">
+          <Alert className="bg-green-50 border-green-200" role="alert">
             <AlertDescription className="text-green-800">
               {t('settings.dataExport.success')}
             </AlertDescription>
@@ -195,7 +195,7 @@ export function DataExport() {
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={handleExport} disabled={isLoading}>
+        <Button onClick={handleExport} disabled={isLoading} {...(isLoading ? { role: "status" } : {})}>
           {isLoading ? (
             <>
               <Spinner className="mr-2 h-4 w-4" />

@@ -85,7 +85,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ users }) => {
               </tr>
             ) : error ? (
               <tr>
-                <td colSpan={5} className="text-center text-red-500 py-4">{error}</td>
+                <td colSpan={5} className="text-center text-red-500 py-4" role="alert">{error}</td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
@@ -165,7 +165,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ users }) => {
         {isLoading ? (
           <div className="py-4 text-center">Loading roles...</div>
         ) : error ? (
-          <div className="py-4 text-center text-red-500">{error}</div>
+          <div className="py-4 text-center text-red-500" role="alert">{error}</div>
         ) : roles.length === 0 ? (
           <div className="py-4 text-center text-gray-500">No roles defined.</div>
         ) : (

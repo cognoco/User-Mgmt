@@ -66,7 +66,7 @@ export function ChangePasswordForm() {
       form.reset(); // Clear form on success
 
     } catch (err: any) {
-      console.error('Change password error:', err);
+      if (process.env.NODE_ENV === 'development') { console.error('Change password error:', err); }
       const apiError = err.response?.data?.error || 'Failed to update password. Please try again.';
       const apiField = err.response?.data?.field || null; // Get specific field from API error
       setError(apiError);

@@ -46,7 +46,7 @@ export function AccountDeletion() {
       setConfirmText('');
       setConfirmChecked(false);
     } catch (error) {
-      console.error('Error deleting account:', error);
+      if (process.env.NODE_ENV === 'development') { console.error('Error deleting account:', error) }
     }
   };
   
@@ -83,7 +83,7 @@ export function AccountDeletion() {
             </DialogHeader>
             
             {(error || localError) && (
-              <Alert variant="destructive" className="mt-4">
+              <Alert variant="destructive" className="mt-4" role="alert">
                 <AlertDescription>{error || localError}</AlertDescription>
               </Alert>
             )}

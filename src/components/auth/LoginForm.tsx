@@ -53,7 +53,7 @@ export function LoginForm() {
   });
 
   const onSubmit = async (data: LoginData) => {
-    console.log("[DEBUG] LoginForm onSubmit triggered");
+    if (process.env.NODE_ENV === 'development') { console.log("[DEBUG] LoginForm onSubmit triggered"); }
     clearError();
     setResendStatus(null);
     setShowResendLink(false);
@@ -98,14 +98,14 @@ export function LoginForm() {
           remainingAttempts: parseInt(error.response.headers['x-ratelimit-remaining'] || '0', 10)
         });
       }
-      console.error("Unexpected error during login submission:", error);
+      if (process.env.NODE_ENV === 'development') { console.error("Unexpected error during login submission:", error); }
     }
   };
 
   // Wrapper function to log data and errors before calling original onSubmit
   const handleSubmitWrapper = (data: LoginData) => {
-    console.log("[DEBUG] handleSubmitWrapper called. Data:", data);
-    console.log("[DEBUG] handleSubmitWrapper form errors:", errors);
+    if (process.env.NODE_ENV === 'development') { console.log("[DEBUG] handleSubmitWrapper called. Data:", data); }
+    if (process.env.NODE_ENV === 'development') { console.log("[DEBUG] handleSubmitWrapper form errors:", errors); }
     onSubmit(data); // Call the original submit handler
   };
 
@@ -233,7 +233,7 @@ export function LoginForm() {
         </div>
 
         {error && !rateLimitInfo && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" role="alert">
             <AlertTitle>Login Failed</AlertTitle>
             <AlertDescription>
               {error}
@@ -251,7 +251,7 @@ export function LoginForm() {
         )}
 
         {resendStatus && (
-          <Alert variant={resendStatus.type === 'success' ? 'default' : 'destructive'}>
+          <Alert variant={resendStatus.type === 'success' ? 'default' : 'destructive'} role="alert">
             <AlertDescription>{resendStatus.message}</AlertDescription>
           </Alert>
         )}

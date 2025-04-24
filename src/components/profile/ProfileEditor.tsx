@@ -74,7 +74,7 @@ export function ProfileEditor() {
         await uploadAvatar(avatar);
       }
     } catch (submitError) {
-      console.error('Error updating profile:', submitError);
+      if (process.env.NODE_ENV === 'development') { console.error('Error updating profile:', submitError) }
     }
   };
 
@@ -106,7 +106,7 @@ export function ProfileEditor() {
           <Label htmlFor="name">Name</Label>
           <Input id="name" {...register('name')} />
           {errors.name && (
-            <Alert variant="destructive">{errors.name.message}</Alert>
+            <Alert variant="destructive" role="alert">{errors.name.message}</Alert>
           )}
         </div>
 
@@ -125,7 +125,7 @@ export function ProfileEditor() {
           <Label htmlFor="bio">Bio</Label>
           <Input id="bio" {...register('bio')} />
           {errors.bio && (
-            <Alert variant="destructive">{errors.bio.message}</Alert>
+            <Alert variant="destructive" role="alert">{errors.bio.message}</Alert>
           )}
         </div>
 
@@ -133,7 +133,7 @@ export function ProfileEditor() {
           <Label htmlFor="location">Location</Label>
           <Input id="location" {...register('location')} />
           {errors.location && (
-            <Alert variant="destructive">{errors.location.message}</Alert>
+            <Alert variant="destructive" role="alert">{errors.location.message}</Alert>
           )}
         </div>
 
@@ -141,12 +141,12 @@ export function ProfileEditor() {
           <Label htmlFor="website">Website</Label>
           <Input id="website" {...register('website')} />
           {errors.website && (
-            <Alert variant="destructive">{errors.website.message}</Alert>
+            <Alert variant="destructive" role="alert">{errors.website.message}</Alert>
           )}
         </div>
 
         {error && (
-          <Alert variant="destructive">{error}</Alert>
+          <Alert variant="destructive" role="alert">{error}</Alert>
         )}
 
         <Button type="submit" disabled={isLoading}>

@@ -74,7 +74,7 @@ export function ProfileCompletion() {
         updateSettings(settings),
       ]);
     } catch (error) {
-      console.error('Error updating profile:', error);
+      if (process.env.NODE_ENV === 'development') { console.error('Error updating profile:', error) }
     }
   };
 

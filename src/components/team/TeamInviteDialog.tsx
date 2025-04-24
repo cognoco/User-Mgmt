@@ -28,6 +28,7 @@ async function inviteTeamMember(data: { email: string; role: 'admin' | 'member' 
   });
   if (!response.ok) {
     const error = await response.json();
+    if (process.env.NODE_ENV === 'development') { console.error('Failed to invite team member: ' + error.message) }
     throw new Error(error.message || 'Failed to invite team member');
   }
 }
@@ -48,7 +49,7 @@ export function TeamInviteDialog({ availableSeats }: TeamInviteDialogProps): JSX
       toast.success('Successfully sent team invitation');
     },
     onError: (error: Error) => {
-      toast.error('Failed to invite team member: ' + error.message);
+      if (process.env.NODE_ENV === 'development') { console.error('Failed to invite team member: ' + error.message) }
     },
   });
 

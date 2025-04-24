@@ -107,7 +107,7 @@ export function TeamMembersList() {
 
   if (error) {
     return (
-      <div className="p-4 text-center text-red-500">
+      <div className="p-4 text-center text-red-500" role="alert">
         Error loading team members. Please try again.
       </div>
     );

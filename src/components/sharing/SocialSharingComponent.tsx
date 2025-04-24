@@ -48,7 +48,7 @@ export const SocialSharingComponent: React.FC<SocialSharingComponentProps> = ({
       setShareUrl(constructedUrl);
     } else {
       setShareUrl(''); // Clear URL if data is missing or invalid
-      console.warn('SocialSharingComponent: Missing itemData or slug for URL generation.');
+      if (process.env.NODE_ENV === 'development') { console.warn('SocialSharingComponent: Missing itemData or slug for URL generation.'); }
     }
   // Recalculate URL if itemData or basePath prop changes
   }, [itemData, basePath]); 
@@ -63,7 +63,7 @@ export const SocialSharingComponent: React.FC<SocialSharingComponentProps> = ({
               content_title: itemData.title
           });
       }
-      console.log(`Shared on ${platform}`);
+      if (process.env.NODE_ENV === 'development') { console.log(`Shared on ${platform}`); }
   };
 
   const handleCopyLink = async () => {
@@ -102,7 +102,7 @@ export const SocialSharingComponent: React.FC<SocialSharingComponentProps> = ({
         if (itemData.content_type === 'image' && itemData.url) {
            url = `https://pinterest.com/pin/create/button/?url=${encodedShareUrl}&media=${encodeURIComponent(itemData.url)}&description=${text}`;
         } else {
-            console.warn('Pinterest share requires image content type and URL.');
+            if (process.env.NODE_ENV === 'development') { console.warn('Pinterest share requires image content type and URL.'); }
             return; 
         }
         break;
@@ -123,7 +123,7 @@ export const SocialSharingComponent: React.FC<SocialSharingComponentProps> = ({
 
   // Component only renders if valid itemData is provided
   if (!itemData) {
-      console.error('SocialSharingComponent: itemData prop is required.');
+      if (process.env.NODE_ENV === 'development') { console.error('SocialSharingComponent: itemData prop is required.'); }
       return null; // Don't render anything if required data is missing
   }
 

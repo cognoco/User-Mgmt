@@ -49,53 +49,60 @@ export function ForgotPasswordForm() {
       const result = await resetPassword(data.email);
       setSubmitted(true); 
     } catch (error) {
-      console.error("Unexpected error during password reset submission:", error);
+      if (process.env.NODE_ENV === 'development') { console.error("Unexpected error during password reset submission:", error) }
       setSubmitted(true);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {submitted && successMessage && !error && (
-         <Alert variant="default" className="bg-green-100 border-green-300 text-green-800">
-            <AlertTitle>Request Sent</AlertTitle>
-            <AlertDescription>{successMessage}</AlertDescription>
-        </Alert>
-      )}
-      
-      {submitted && error && (
-         <Alert variant="destructive">
-            <AlertTitle>Request Failed</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+    <>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {submitted && successMessage && !error && (
+           <Alert variant="default" className="bg-green-100 border-green-300 text-green-800" role="alert">
+              <AlertTitle>Request Sent</AlertTitle>
+              <AlertDescription>{successMessage}</AlertDescription>
+          </Alert>
+        )}
+        
+        {submitted && error && (
+           <Alert variant="destructive" role="alert">
+              <AlertTitle>Request Failed</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-      {!successMessage && (
-        <>
-          <div className="space-y-1.5">
-            <Label htmlFor="email">Email Address</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              {...register('email')}
+        {!successMessage && (
+          <>
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                {...register('email')}
+                disabled={isLoading}
+                aria-invalid={errors.email ? 'true' : 'false'}
+              />
+              {errors.email && (
+                <p className="text-destructive text-sm mt-1" role="alert">{errors.email.message}</p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
               disabled={isLoading}
-              aria-invalid={errors.email ? 'true' : 'false'}
-            />
-            {errors.email && (
-              <p className="text-destructive text-sm mt-1">{errors.email.message}</p>
-            )}
-          </div>
-
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? 'Sending...' : 'Send Reset Link'}
-          </Button>
-        </>
-      )}
-    </form>
+              className="w-full"
+            >
+              {isLoading ? 'Sending...' : 'Send Reset Link'}
+            </Button>
+          </>
+        )}
+      </form>
+      <div className="text-center text-sm mt-6">
+        <a href="/login" className="font-medium text-primary hover:underline">
+          Back to login
+        </a>
+      </div>
+    </>
   );
 } 

@@ -13,7 +13,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useProfileStore } from '@/lib/stores/profile';
 import { useAuthStore, AuthState } from '@/lib/stores/auth.store';
 import { profileSchema, ProfileFormData } from '@/types/profile';
-import { Edit2 } from 'lucide-react';
+import { Edit2, XCircle, Save } from 'lucide-react';
 import { api } from '@/lib/api/axios';
 
 const ProfileDisplayField = ({ label, value }: { label: string; value: string | null | undefined }) => {
@@ -89,7 +89,7 @@ export function ProfileForm() {
           setIsEditing(false);
       }
     } catch (error) {
-      console.error("Error updating profile:", error);
+      if (process.env.NODE_ENV === 'development') { console.error("Error updating profile:", error) }
     }
   };
 
@@ -103,7 +103,7 @@ export function ProfileForm() {
           }));
           toast({ title: "Success", description: response.data.message });
       } catch (err: any) {
-          console.error("Privacy update error:", err);
+          if (process.env.NODE_ENV === 'development') { console.error("Privacy update error:", err) }
           const errorMsg = err.response?.data?.error || "Failed to update visibility.";
           toast({ title: "Error", description: errorMsg, variant: "destructive" });
           setValue('is_public', !checked, { shouldDirty: false });
@@ -138,7 +138,7 @@ export function ProfileForm() {
        </div>
 
       {isEditing && profileError && (
-        <Alert variant="destructive" className="mb-4">
+        <Alert variant="destructive" className="mb-4" role="alert">
           <AlertTitle>Update Failed</AlertTitle>
           <AlertDescription>{profileError}</AlertDescription>
         </Alert>
@@ -179,7 +179,7 @@ export function ProfileForm() {
             <div className="space-y-1.5">
                 <Label htmlFor="bio">Bio</Label>
                 <Textarea id="bio" {...register('bio')} disabled={isLoading} rows={3} />
-                {errors.bio && <p className="text-destructive text-sm mt-1">{errors.bio.message}</p>}
+                {errors.bio && <p className="text-destructive text-sm mt-1" role="alert">{errors.bio.message}</p>}
             </div>
 
             <div className="space-y-1.5">
@@ -192,7 +192,7 @@ export function ProfileForm() {
                   {...register('phone_number')} 
                   disabled={isLoading} 
                 />
-                {errors.phone_number && <p className="text-destructive text-sm mt-1">{errors.phone_number.message}</p>}
+                {errors.phone_number && <p className="text-destructive text-sm mt-1" role="alert">{errors.phone_number.message}</p>}
             </div>
             
             <div className="space-y-1.5">

@@ -99,13 +99,13 @@ export function MFAManagementSection() {
       
       <CardContent className="space-y-4">
         {error && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" role="alert">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
         
         {success && (
-          <Alert className="bg-green-50 border-green-200 text-green-800">
+          <Alert className="bg-green-50 border-green-200 text-green-800" role="alert">
             <AlertDescription>{success}</AlertDescription>
           </Alert>
         )}
@@ -191,7 +191,7 @@ export function MFAManagementSection() {
             </CardHeader>
             
             <CardContent className="space-y-4">
-              <Alert variant="destructive">
+              <Alert variant="destructive" role="alert">
                 <AlertDescription>
                   {t('mfa.management.disableWarning')}
                 </AlertDescription>

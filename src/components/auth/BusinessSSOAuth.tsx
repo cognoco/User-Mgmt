@@ -62,7 +62,7 @@ export function BusinessSSOAuth({ className = '' }: BusinessSSOAuthProps) {
         window.location.assign(data.url);
       }
     } catch (err) {
-      console.error('SSO authentication error:', err);
+      if (process.env.NODE_ENV === 'development') { console.error('SSO authentication error:', err) }
       setError(t('auth.errors.ssoFailed'));
     }
   };

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useOAuthStore } from '@/lib/stores/oauth.store';
-import { OAuthProvider } from '@/lib/types/oauth';
+import { OAuthProvider } from '@/types/oauth';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -24,15 +24,18 @@ export function OAuthCallback() {
         
         // Handle error from OAuth provider
         if (error) {
+          if (process.env.NODE_ENV === 'development') { console.error(`Provider error: ${error}`); }
           throw new Error(`Provider error: ${error}`);
         }
         
         // Validate required parameters
         if (!code) {
+          if (process.env.NODE_ENV === 'development') { console.error('Authorization code is missing'); }
           throw new Error('Authorization code is missing');
         }
         
         if (!provider) {
+          if (process.env.NODE_ENV === 'development') { console.error('Provider is missing'); }
           throw new Error('Provider is missing');
         }
         
@@ -40,7 +43,7 @@ export function OAuthCallback() {
         await handleCallback(provider, code);
         setProcessingState('success');
       } catch (error) {
-        console.error('OAuth callback error:', error);
+        if (process.env.NODE_ENV === 'development') { console.error('OAuth callback error:', error); }
         setProcessingState('error');
       }
     };

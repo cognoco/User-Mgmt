@@ -90,7 +90,7 @@ export function ProfileTypeConversion() {
       // form.reset(); 
 
     } catch (err: any) {
-      console.error("Profile conversion error:", err);
+      if (process.env.NODE_ENV === 'development') { console.error("Profile conversion error:", err); }
       const isDomainValidationError = err.response?.status === 400 && err.response?.data?.isValid === false;
       const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'An unexpected error occurred during conversion.';
       setConversionError(errorMsg);

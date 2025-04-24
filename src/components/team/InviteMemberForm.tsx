@@ -45,8 +45,7 @@ export function InviteMemberForm({ teamLicenseId, onInviteSent }: InviteMemberFo
       form.reset();
       onInviteSent?.();
     } catch (error) {
-      // TODO: Implement proper user-facing error handling (e.g., toast notification)
-      console.error("Failed to send invitation:", error);
+      if (process.env.NODE_ENV === 'development') { console.error("Failed to send invitation:", error); }
     } finally {
       setIsSubmitting(false);
     }

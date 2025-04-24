@@ -32,7 +32,7 @@ const SearchPage: React.FC = () => {
     const fetchData = async () => {
         setLoading(true);
         setError(null);
-        console.log('Fetching/filtering data with:', { debouncedSearchTerm, selectedCategories, startDate, endDate });
+        if (process.env.NODE_ENV === 'development') { console.log('Fetching/filtering data with:', { debouncedSearchTerm, selectedCategories, startDate, endDate }); }
 
         try {
             let query = supabase
@@ -70,7 +70,7 @@ const SearchPage: React.FC = () => {
             setLoading(false); // Set loading false AFTER data is set
 
         } catch (err: any) { 
-            console.error("Error fetching search data:", err);
+            if (process.env.NODE_ENV === 'development') { console.error("Error fetching search data:", err); }
             // Update state on error: set error and clear items first, then loading false
             setError(err.message || 'Failed to fetch search results.'); 
             setItems([]); // Clear items on error
@@ -94,7 +94,7 @@ const SearchPage: React.FC = () => {
   const handleDateApply = () => {
     // This function might not be strictly needed anymore as useEffect handles data fetching
     // based on state changes. Keep it if there's a specific reason to manually trigger.
-    console.log("Applying date range (useEffect will fetch):", startDate, endDate);
+    if (process.env.NODE_ENV === 'development') { console.log("Applying date range (useEffect will fetch):", startDate, endDate); }
   };
 
   const resetFilters = () => {

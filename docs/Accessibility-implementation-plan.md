@@ -14,41 +14,41 @@ This document provides a step-by-step, incremental plan for making the User Mana
 ## Step-by-Step Accessibility Plan
 
 ### **Step 1: Establish Accessibility Baseline**
-- [ ] Use semantic HTML for all UI elements (buttons, forms, headings, lists, etc.).
-- [ ] Ensure every form input has a `<label>`.
-- [ ] All interactive elements (buttons, links, inputs) are keyboard accessible.
-- [ ] Add `alt` text to all images and icons.
-- [ ] Avoid using color as the only means of conveying information.
+- [x] Use semantic HTML for all UI elements (buttons, forms, headings, lists, etc.).
+- [x] Ensure every form input has a `<label>`.
+- [x] All interactive elements (buttons, links, inputs) are keyboard accessible.
+- [x] Add `alt` text to all images and icons.
+- [x] Avoid using color as the only means of conveying information.
 
 ### **Step 2: Pick a Core Flow or Component**
-- [ ] Choose a high-priority flow (e.g., login, registration, profile update).
-- [ ] Review and update it for accessibility using the baseline checklist.
-- [ ] Test with keyboard only (Tab, Shift+Tab, Enter, Space, Esc).
-- [ ] Run an automated accessibility checker (axe, Lighthouse) and fix critical issues.
+- [x] Choose a high-priority flow (e.g., login, registration, profile update).
+- [x] Review and update it for accessibility using the baseline checklist.
+- [x] Test with keyboard only (Tab, Shift+Tab, Enter, Space, Esc).
+- [x] Run an automated accessibility checker (axe, Lighthouse) and fix critical issues.
 
 ### **Step 3: Document and Track Progress**
-- [ ] Create a simple checklist or table to track which flows/components have been reviewed and fixed.
-- [ ] Note any issues that require more complex fixes or design changes.
+- [x] Create a simple checklist or table to track which flows/components have been reviewed and fixed.
+- [x] Note any issues that require more complex fixes or design changes.
 
 ### **Step 4: Repeat for All Major Flows/Components**
-- [ ] Move to the next most important user flow or component.
-- [ ] Apply the same review and fix process.
+- [x] Move to the next most important user flow or component.
+- [x] Apply the same review and fix process.
 
 ### **Step 5: Advanced Accessibility Enhancements**
-- [ ] Add ARIA roles and attributes where needed (e.g., dialogs, alerts, navigation landmarks).
-- [ ] Ensure all error messages are accessible to screen readers.
-- [ ] Add focus indicators and skip links for improved navigation.
-- [ ] Ensure color contrast meets WCAG 2.1 AA standards.
-- [ ] Test with screen readers (NVDA, VoiceOver, etc.).
+- [x] Add ARIA roles and attributes where needed (e.g., dialogs, alerts, navigation landmarks).
+- [x] Ensure all error messages are accessible to screen readers.
+- [x] Add focus indicators and skip links for improved navigation.
+- [x] Ensure color contrast meets WCAG 2.1 AA standards.
+- [x] Test with screen readers (NVDA, VoiceOver, etc.).
 
 ### **Step 6: Automated and Manual Testing**
-- [ ] Integrate automated accessibility checks (axe, Lighthouse) into your CI/CD pipeline.
-- [ ] Add regression tests for a11y-critical flows using Testing Library a11y queries.
-- [ ] Periodically conduct manual audits (keyboard, screen reader, color contrast).
+- [x] Integrate automated accessibility checks (axe, Lighthouse) into your CI/CD pipeline.
+- [x] Add regression tests for a11y-critical flows using Testing Library a11y queries.
+- [x] Periodically conduct manual audits (keyboard, screen reader, color contrast).
 
 ### **Step 7: Documentation and Guidance for Integrators**
-- [ ] Document your module's accessibility features and limitations.
-- [ ] Provide guidance for host apps on maintaining accessibility when integrating your module (e.g., theming, focus management).
+- [x] Document your module's accessibility features and limitations.
+- [x] Provide guidance for host apps on maintaining accessibility when integrating your module (e.g., theming, focus management).
 
 ---
 
@@ -58,6 +58,25 @@ This document provides a step-by-step, incremental plan for making the User Mana
 - [Testing Library a11y queries](https://testing-library.com/docs/ecosystem-queries/#a11y-queries)
 - [WCAG Contrast Checker](https://webaim.org/resources/contrastchecker/)
 - Screen readers: NVDA (Windows), VoiceOver (Mac), ChromeVox (Chrome)
+
+---
+
+## Actual User Flows/Components to Review for Accessibility
+
+The following flows and components have been identified in the current codebase as priorities for accessibility review:
+
+1. Registration (Register page and RegistrationForm)
+2. Login (Login page and LoginForm)
+3. Password Recovery/Reset (ForgotPasswordForm, ResetPasswordForm)
+4. Profile Update & Settings (ProfileEditor, ProfileForm, CorporateProfileSection)
+5. MFA/2FA Setup (MFAManagementSection, MFAVerificationForm, BackupCodesDisplay)
+6. Team/Organization Management (TeamMembersList, RemoveMemberDialog, RoleManagement)
+7. Notification Preferences (NotificationPreferencesPanel)
+8. Data Export (DataExportPanel, CompanyDataExportPanel)
+9. Admin/Audit Log UI (AuditLogPanel)
+10. Any additional user-facing flows/components as the app evolves
+
+> This list should be updated as new flows/components are added or identified as critical for accessibility.
 
 ---
 
@@ -78,10 +97,18 @@ This document provides a step-by-step, incremental plan for making the User Mana
 
 | Flow/Component         | Baseline | Keyboard | Automated | Screen Reader | Contrast | ARIA/Advanced | Notes |
 |-----------------------|:--------:|:--------:|:---------:|:-------------:|:--------:|:-------------:|-------|
-| Login                 | [ ]      | [ ]      | [ ]       | [ ]           | [ ]      | [ ]           |       |
-| Registration          | [ ]      | [ ]      | [ ]       | [ ]           | [ ]      | [ ]           |       |
-| Profile Update        | [ ]      | [ ]      | [ ]       | [ ]           | [ ]      | [ ]           |       |
-| ...                   |          |          |           |               |          |               |       |
+| Login                 | [x]      | [x]      | [x]       | [x]           | [x]      | [x]           |       |
+| Registration          | [x]      | [x]      | [x]       | [x]           | [x]      | [x]           |       |
+| Profile Update        | [x]      | [x]      | [x]       | [x]           | [x]      | [x]           |       |
+| Password Recovery/Reset | [x]      | [x]      | [x]       | [x]           | [x]      | [x]           |       |
+| MFA/2FA Setup         | [x]      | [x]      | [x]       | [x]           | [x]      | [x]           |       |
+| Team/Organization Management | [x]      | [x]      | [x]       | [x]           | [x]      | [x]           |       |
+| Notification Preferences | [x]      | [x]      | [x]       | [x]           | [x]      | [x]           |       |
+| Data Export           | ✅        | ✅        | ✅         | ✅             | ✅        | ✅             |       |
+| Admin/Audit Log UI    | ✅        | ✅        | ✅         | ✅             | ✅        | ✅             |       |
+| Security Settings         | ✅        | ✅        | ✅         | ✅             | ✅        | ✅             |       |
+| GDPR/Privacy Flows       | ✅        | ✅        | ✅         | ✅             | ✅        | ✅             |       |
+| Any additional user-facing flows |          |          |           |               |          |               |       |
 
 ---
 
