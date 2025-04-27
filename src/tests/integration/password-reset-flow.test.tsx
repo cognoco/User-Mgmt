@@ -7,7 +7,7 @@ import { ResetPasswordForm } from '@/components/auth/ResetPasswordForm';
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 
 // Import and mock Supabase
-vi.mock('@/lib/supabase', () => require('../__mocks__/supabase'));
+vi.mock('@/lib/supabase', () => require('../mocks/supabase'));
 import { supabase } from '@/lib/supabase';
 
 // Store original window location

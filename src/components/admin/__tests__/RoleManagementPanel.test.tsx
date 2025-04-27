@@ -1,10 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { act } from 'react-dom/test-utils';
 import RoleManagementPanel from '../RoleManagementPanel';
 import { useRBACStore } from '@/lib/stores/rbac.store';
 import { User } from '@/types/user';
 import { RoleSchema, UserRoleSchema, Role, Permission } from '@/types/rbac';
+import { createRBACStoreMock } from '@/tests/mocks/rbac.store.mock';
 
 vi.mock('@/lib/stores/rbac.store');
 
@@ -24,9 +26,10 @@ const mockUserRoles: UserRoleSchema[] = [
 ];
 
 describe('RoleManagementPanel', () => {
+  let rbacMock: ReturnType<typeof createRBACStoreMock>;
   beforeEach(() => {
     vi.clearAllMocks();
-    (useRBACStore as any).mockReturnValue({
+    rbacMock = createRBACStoreMock({
       roles: mockRoles,
       userRoles: mockUserRoles,
       isLoading: false,
@@ -34,6 +37,7 @@ describe('RoleManagementPanel', () => {
       assignRole: vi.fn(),
       removeRole: vi.fn(),
     });
+    (useRBACStore as any).mockReturnValue(rbacMock);
   });
 
   it('renders the panel and user/role list', () => {
@@ -48,7 +52,7 @@ describe('RoleManagementPanel', () => {
 
   it('assigns a role to a user', async () => {
     const assignRole = vi.fn();
-    (useRBACStore as any).mockReturnValue({
+    rbacMock = createRBACStoreMock({
       roles: mockRoles,
       userRoles: mockUserRoles,
       isLoading: false,
@@ -56,11 +60,14 @@ describe('RoleManagementPanel', () => {
       assignRole,
       removeRole: vi.fn(),
     });
+    (useRBACStore as any).mockReturnValue(rbacMock);
     render(<RoleManagementPanel users={mockUsers} />);
     // For user 2, only 'admin' is assignable
     const selects = screen.getAllByRole('combobox');
     expect(selects.length).toBe(2);
-    await userEvent.selectOptions(selects[1], 'r1');
+    await act(async () => {
+      await userEvent.selectOptions(selects[1], 'r1');
+    });
     await waitFor(() => {
       expect(assignRole).toHaveBeenCalledWith('2', 'r1');
     });
@@ -68,7 +75,7 @@ describe('RoleManagementPanel', () => {
 
   it('removes a role from a user', async () => {
     const removeRole = vi.fn();
-    (useRBACStore as any).mockReturnValue({
+    rbacMock = createRBACStoreMock({
       roles: mockRoles,
       userRoles: mockUserRoles,
       isLoading: false,
@@ -76,11 +83,14 @@ describe('RoleManagementPanel', () => {
       assignRole: vi.fn(),
       removeRole,
     });
+    (useRBACStore as any).mockReturnValue(rbacMock);
     render(<RoleManagementPanel users={mockUsers} />);
     // Find the remove button for Admin User's 'admin' role
     const removeButtons = screen.getAllByRole('button', { name: /remove role/i });
     expect(removeButtons.length).toBeGreaterThan(0);
-    await userEvent.click(removeButtons[0]);
+    await act(async () => {
+      await userEvent.click(removeButtons[0]);
+    });
     await waitFor(() => {
       expect(removeRole).toHaveBeenCalledWith('1', 'r1');
     });
@@ -97,7 +107,7 @@ describe('RoleManagementPanel', () => {
 
   it('handles loading, error, and empty states', () => {
     // Loading state
-    (useRBACStore as any).mockReturnValue({
+    rbacMock = createRBACStoreMock({
       roles: [],
       userRoles: [],
       isLoading: true,
@@ -105,11 +115,12 @@ describe('RoleManagementPanel', () => {
       assignRole: vi.fn(),
       removeRole: vi.fn(),
     });
+    (useRBACStore as any).mockReturnValue(rbacMock);
     render(<RoleManagementPanel users={mockUsers} />);
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
     // Error state
-    (useRBACStore as any).mockReturnValue({
+    rbacMock = createRBACStoreMock({
       roles: [],
       userRoles: [],
       isLoading: false,
@@ -117,11 +128,12 @@ describe('RoleManagementPanel', () => {
       assignRole: vi.fn(),
       removeRole: vi.fn(),
     });
+    (useRBACStore as any).mockReturnValue(rbacMock);
     render(<RoleManagementPanel users={mockUsers} />);
     expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
 
     // Empty state
-    (useRBACStore as any).mockReturnValue({
+    rbacMock = createRBACStoreMock({
       roles: [],
       userRoles: [],
       isLoading: false,
@@ -129,6 +141,7 @@ describe('RoleManagementPanel', () => {
       assignRole: vi.fn(),
       removeRole: vi.fn(),
     });
+    (useRBACStore as any).mockReturnValue(rbacMock);
     render(<RoleManagementPanel users={[]} />);
     expect(screen.getByText(/no users found/i)).toBeInTheDocument();
     expect(screen.getByText(/no roles defined/i)).toBeInTheDocument();

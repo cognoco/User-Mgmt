@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RemoveMemberDialog } from '../RemoveMemberDialog';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 // Mock fetch
 const mockFetch = vi.fn();
@@ -17,6 +18,13 @@ const createTestQueryClient = () =>
       },
     },
   });
+
+vi.mock('sonner', () => ({
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
+}));
 
 describe('RemoveMemberDialog', () => {
   const mockMember = {
@@ -35,14 +43,17 @@ describe('RemoveMemberDialog', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockFetch.mockReset();
+    vi.restoreAllMocks();
   });
 
-  it('renders correctly', () => {
-    render(
-      <QueryClientProvider client={createTestQueryClient()}>
-        <RemoveMemberDialog {...mockProps} />
-      </QueryClientProvider>
-    );
+  it('renders correctly', async () => {
+    await act(async () => {
+      render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <RemoveMemberDialog {...mockProps} />
+        </QueryClientProvider>
+      );
+    });
 
     expect(screen.getByText('Remove Team Member')).toBeInTheDocument();
     expect(screen.getByText(/Are you sure you want to remove/)).toBeInTheDocument();
@@ -52,39 +63,48 @@ describe('RemoveMemberDialog', () => {
 
   it('disables remove button until confirmation text is entered', async () => {
     const user = userEvent.setup();
-    render(
-      <QueryClientProvider client={createTestQueryClient()}>
-        <RemoveMemberDialog {...mockProps} />
-      </QueryClientProvider>
-    );
+    await act(async () => {
+      render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <RemoveMemberDialog {...mockProps} />
+        </QueryClientProvider>
+      );
+    });
 
     const removeButton = screen.getByRole('button', { name: /Remove Member/i });
     expect(removeButton).toBeDisabled();
 
     const input = screen.getByPlaceholderText("Type 'remove' here");
-    await user.type(input, 'wrong text');
+    await act(async () => {
+      await user.type(input, 'wrong text');
+    });
     expect(removeButton).toBeDisabled();
 
-    await user.clear(input);
-    await user.type(input, 'remove');
+    await act(async () => {
+      await user.clear(input);
+      await user.type(input, 'remove');
+    });
     expect(removeButton).not.toBeDisabled();
   });
 
   it('shows error when trying to remove with wrong confirmation text', async () => {
     const user = userEvent.setup();
-    render(
-      <QueryClientProvider client={createTestQueryClient()}>
-        <RemoveMemberDialog {...mockProps} />
-      </QueryClientProvider>
-    );
+    await act(async () => {
+      render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <RemoveMemberDialog {...mockProps} />
+        </QueryClientProvider>
+      );
+    });
 
     const input = screen.getByPlaceholderText("Type 'remove' here");
-    await user.type(input, 'wrong');
+    await act(async () => {
+      await user.type(input, 'wrong');
+    });
 
     const removeButton = screen.getByRole('button', { name: /Remove Member/i });
-    await user.click(removeButton);
-
-    expect(screen.getByText('Please type "remove" to confirm')).toBeInTheDocument();
+    expect(removeButton).toBeDisabled();
+    expect(toast.error).not.toHaveBeenCalled();
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
@@ -95,17 +115,23 @@ describe('RemoveMemberDialog', () => {
     });
 
     const user = userEvent.setup();
-    render(
-      <QueryClientProvider client={createTestQueryClient()}>
-        <RemoveMemberDialog {...mockProps} />
-      </QueryClientProvider>
-    );
+    await act(async () => {
+      render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <RemoveMemberDialog {...mockProps} />
+        </QueryClientProvider>
+      );
+    });
 
     const input = screen.getByPlaceholderText("Type 'remove' here");
-    await user.type(input, 'remove');
+    await act(async () => {
+      await user.type(input, 'remove');
+    });
 
     const removeButton = screen.getByRole('button', { name: /Remove Member/i });
-    await user.click(removeButton);
+    await act(async () => {
+      await user.click(removeButton);
+    });
 
     expect(mockFetch).toHaveBeenCalledWith(`/api/team/members/${mockMember.id}`, {
       method: 'DELETE',
@@ -123,34 +149,42 @@ describe('RemoveMemberDialog', () => {
     });
 
     const user = userEvent.setup();
-    render(
-      <QueryClientProvider client={createTestQueryClient()}>
-        <RemoveMemberDialog {...mockProps} />
-      </QueryClientProvider>
-    );
+    await act(async () => {
+      render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <RemoveMemberDialog {...mockProps} />
+        </QueryClientProvider>
+      );
+    });
 
     const input = screen.getByPlaceholderText("Type 'remove' here");
-    await user.type(input, 'remove');
+    await act(async () => {
+      await user.type(input, 'remove');
+    });
 
     const removeButton = screen.getByRole('button', { name: /Remove Member/i });
-    await user.click(removeButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('Failed to remove member')).toBeInTheDocument();
+    await act(async () => {
+      await user.click(removeButton);
     });
+
+    expect(toast.error).toHaveBeenCalledWith('Failed to remove member');
     expect(mockProps.onClose).not.toHaveBeenCalled();
   });
 
   it('closes dialog when cancel is clicked', async () => {
     const user = userEvent.setup();
-    render(
-      <QueryClientProvider client={createTestQueryClient()}>
-        <RemoveMemberDialog {...mockProps} />
-      </QueryClientProvider>
-    );
+    await act(async () => {
+      render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <RemoveMemberDialog {...mockProps} />
+        </QueryClientProvider>
+      );
+    });
 
     const cancelButton = screen.getByRole('button', { name: /Cancel/i });
-    await user.click(cancelButton);
+    await act(async () => {
+      await user.click(cancelButton);
+    });
 
     expect(mockProps.onClose).toHaveBeenCalled();
     expect(mockFetch).not.toHaveBeenCalled();

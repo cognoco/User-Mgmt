@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event';
 import { FileManager } from '@/components/common/FileManager';
 
 // Import our standardized mock
-jest.mock('@/lib/supabase', () => require('../__mocks__/supabase'));
+jest.mock('@/lib/supabase', () => require('../mocks/supabase'));
 import { supabase } from '@/lib/supabase';
 
 describe('File Upload and Management Flow', () => {

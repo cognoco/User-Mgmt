@@ -3,16 +3,18 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { OrganizationSessionManager } from '../\.\.\/\.\.\/src\/components/auth/OrganizationSessionManager';
-import { OrganizationProvider } from '../\.\.\/\.\.\/src\/context/OrganizationContext';
-import { AuthProvider } from '../\.\.\/\.\.\/src\/context/AuthContext';
+import type { UserEvent } from '@testing-library/user-event/dist/types/setup/setup'; // Import UserEvent type
+import { OrganizationSessionManager } from '@/components/auth/OrganizationSessionManager'; // Corrected import path
+import { OrganizationProvider } from '@/context/OrganizationContext'; // Corrected import path
+import { AuthProvider } from '@/context/AuthContext'; // Corrected import path
+import { vi, describe, beforeEach, test, expect } from 'vitest'; // Import vi
 
-// Import our standardized mock
-jest.mock('../\.\.\/\.\.\/src\/lib/supabase', () => require('../../__mocks__/supabase'));
-import { supabase } from '../\.\.\/\.\.\/src\/lib/supabase';
+// Import our standardized mock using vi.mock
+vi.mock('@/lib/supabase', async () => (await import('@/tests/mocks/supabase')));
+import { supabase } from '@/lib/supabase';
 
 describe('Business-specific Session Controls', () => {
-  let user;
+  let user: UserEvent; // Type the user variable
   
   // Mock authenticated user (admin)
   const mockAdminUser = {
@@ -65,51 +67,51 @@ describe('Business-specific Session Controls', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     user = userEvent.setup();
     
     // Mock authentication state
-    supabase.auth.getUser.mockResolvedValue({
+    (supabase.auth.getUser as vi.Mock).mockResolvedValue({
       data: { user: mockAdminUser },
       error: null
     });
     
     // Mock organization data fetch
-    supabase.from().select.mockImplementation((table) => {
+    (supabase.from as vi.Mock).mockImplementation((table: string) => {
       if (table === 'organizations') {
         return {
-          eq: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({
+          eq: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValue({
             data: mockOrganization,
             error: null
           })
         };
       } else if (table === 'organization_members') {
         return {
-          eq: jest.fn().mockReturnThis(),
-          select: jest.fn().mockReturnThis(),
-          order: jest.fn().mockResolvedValue({
+          eq: vi.fn().mockReturnThis(),
+          select: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({
             data: mockOrgMembers,
             error: null
           })
         };
       }
       return {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis()
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis()
       };
     });
   });
 
   test('Admin can view and configure organization session policies', async () => {
     // Mock successful policy update
-    supabase.from().update.mockImplementation((data) => {
-      return {
-        eq: jest.fn().mockResolvedValue({
-          data: { ...mockOrganization, security_settings: { ...mockOrganization.security_settings, ...data } },
-          error: null
-        })
-      };
+    (supabase.from as vi.Mock).mockReturnValue({
+        update: vi.fn().mockImplementation((data) => ({
+            eq: vi.fn().mockResolvedValue({
+                data: { ...mockOrganization, security_settings: { ...mockOrganization.security_settings, ...data } },
+                error: null
+            })
+        }))
     });
 
     // Render organization session manager component
@@ -133,15 +135,19 @@ describe('Business-specific Session Controls', () => {
     
     // Update session timeout policy
     const timeoutInput = screen.getByLabelText(/session timeout/i);
-    await user.clear(timeoutInput);
-    await user.type(timeoutInput, '30');
+    await act(async () => {
+        await user.clear(timeoutInput);
+        await user.type(timeoutInput, '30');
+    });
     
     // Save settings
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // Verify update was called with correct data
     await waitFor(() => {
-      expect(supabase.from().update).toHaveBeenCalledWith(
+      expect((supabase.from as vi.Mock)('organizations').update).toHaveBeenCalledWith(
         expect.objectContaining({
           session_timeout_mins: 30
         })
@@ -154,7 +160,7 @@ describe('Business-specific Session Controls', () => {
 
   test('Admin can view and terminate user sessions across organization', async () => {
     // Mock successful session termination
-    supabase.rpc.mockImplementation((procedure, params) => {
+    (supabase.rpc as vi.Mock).mockImplementation((procedure, params) => {
       if (procedure === 'terminate_user_sessions') {
         return Promise.resolve({
           data: { count: params.user_id === 'user-123' ? 2 : 1 },
@@ -183,10 +189,14 @@ describe('Business-specific Session Controls', () => {
     
     // Click to terminate all sessions for first user
     const terminateButtons = screen.getAllByRole('button', { name: /terminate sessions/i });
-    await user.click(terminateButtons[0]); // First user (user-123)
+    await act(async () => {
+        await user.click(terminateButtons[0]); // First user (user-123)
+    });
     
     // Confirm termination
-    await user.click(screen.getByRole('button', { name: /confirm/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /confirm/i }));
+    });
     
     // Verify RPC call was made with correct user ID
     await waitFor(() => {
@@ -201,13 +211,13 @@ describe('Business-specific Session Controls', () => {
 
   test('Admin can configure IP restrictions', async () => {
     // Mock successful policy update
-    supabase.from().update.mockImplementation((data) => {
-      return {
-        eq: jest.fn().mockResolvedValue({
-          data: { ...mockOrganization, security_settings: { ...mockOrganization.security_settings, ...data } },
-          error: null
-        })
-      };
+    (supabase.from as vi.Mock).mockReturnValue({
+        update: vi.fn().mockImplementation((data) => ({
+            eq: vi.fn().mockResolvedValue({
+                data: { ...mockOrganization, security_settings: { ...mockOrganization.security_settings, ...data } },
+                error: null
+            })
+        }))
     });
 
     // Render organization session manager
@@ -220,7 +230,9 @@ describe('Business-specific Session Controls', () => {
     );
     
     // Click on IP restrictions tab
-    await user.click(screen.getByRole('tab', { name: /ip restrictions/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('tab', { name: /ip restrictions/i }));
+    });
     
     // Wait for IP restriction settings to load
     await waitFor(() => {
@@ -229,25 +241,38 @@ describe('Business-specific Session Controls', () => {
     });
     
     // Toggle IP restrictions off
-    await user.click(screen.getByLabelText(/enforce ip restrictions/i));
+    await act(async () => {
+        await user.click(screen.getByLabelText(/enforce ip restrictions/i));
+    });
     
     // Add a new IP range
-    await user.click(screen.getByRole('button', { name: /add ip range/i }));
-    await user.type(screen.getByPlaceholderText(/enter ip range/i), '172.16.0.0/16');
-    await user.click(screen.getByRole('button', { name: /add/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /add ip range/i }));
+    });
+    await act(async () => {
+        await user.type(screen.getByPlaceholderText(/enter ip range/i), '172.16.0.0/16');
+    });
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /add/i }));
+    });
     
     // Save settings
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // Verify update was called with correct data
     await waitFor(() => {
-      expect(supabase.from().update).toHaveBeenCalledWith(
+      expect((supabase.from as vi.Mock)('organizations').update).toHaveBeenCalledWith(
         expect.objectContaining({
           enforce_ip_restrictions: false,
           allowed_ip_ranges: ['192.168.1.0/24', '10.0.0.0/16', '172.16.0.0/16']
         })
       );
     });
+
+    // Success message should be displayed
+    expect(screen.getByText(/settings updated/i)).toBeInTheDocument();
   });
 
   test('Admin can configure reauthentication for sensitive actions', async () => {
@@ -335,7 +360,7 @@ describe('Business-specific Session Controls', () => {
     expect(screen.getByText(/ip verification successful/i)).toBeInTheDocument();
     
     // Now test with unauthorized IP
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const unauthorizedIp = '203.0.113.1'; // Outside allowed range
     
     // Update mock response for unauthorized IP

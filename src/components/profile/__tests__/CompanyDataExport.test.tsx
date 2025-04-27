@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import CompanyDataExport from '../CompanyDataExport';
 
 global.URL.createObjectURL = vi.fn(() => 'blob:url');
@@ -17,9 +18,16 @@ describe('CompanyDataExport', () => {
       headers: { get: () => 'attachment; filename="Company_Data_Export.json"' },
     });
     global.fetch = mockFetch;
-    render(<CompanyDataExport />);
+
+    await act(async () => {
+      render(<CompanyDataExport />);
+    });
+
     expect(screen.getByText('Export Company Data')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Download Company Data'));
+    
+    const downloadButton = screen.getByText('Download Company Data');
+    await userEvent.click(downloadButton);
+
     await waitFor(() => {
       expect(screen.getByText('Company data export has been downloaded successfully.')).toBeInTheDocument();
     });
@@ -27,8 +35,14 @@ describe('CompanyDataExport', () => {
 
   it('shows error on export failure', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: false, text: async () => 'Error' });
-    render(<CompanyDataExport />);
-    fireEvent.click(screen.getByText('Download Company Data'));
+    
+    await act(async () => {
+      render(<CompanyDataExport />);
+    });
+
+    const downloadButton = screen.getByText('Download Company Data');
+    await userEvent.click(downloadButton);
+
     await waitFor(() => {
       expect(screen.getByText('Failed to export company data.')).toBeInTheDocument();
     });

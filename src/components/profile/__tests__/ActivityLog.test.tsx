@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import ActivityLog from '../ActivityLog';
 
 // Mock useSession
@@ -33,7 +33,9 @@ describe('ActivityLog', () => {
   });
 
   it('renders activity log entries', async () => {
-    render(<ActivityLog />);
+    await act(async () => {
+      render(<ActivityLog />);
+    });
     expect(screen.getByText('Account Activity Log')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByText('LOGIN_SUCCESS')).toBeInTheDocument();
@@ -43,15 +45,19 @@ describe('ActivityLog', () => {
     });
   });
 
-  it('shows loading state', () => {
+  it('shows loading state', async () => {
     global.fetch = vi.fn(() => new Promise(() => {})); // never resolves
-    render(<ActivityLog />);
+    await act(async () => {
+      render(<ActivityLog />);
+    });
     expect(screen.getByText('Loading activity log...')).toBeInTheDocument();
   });
 
   it('shows error state', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: false, text: async () => 'Error' });
-    render(<ActivityLog />);
+    await act(async () => {
+      render(<ActivityLog />);
+    });
     await waitFor(() => {
       expect(screen.getByText('Failed to load activity log.')).toBeInTheDocument();
     });
@@ -62,7 +68,9 @@ describe('ActivityLog', () => {
       ok: true,
       json: async () => ({ logs: [], pagination: { page: 1, totalPages: 1 } })
     });
-    render(<ActivityLog />);
+    await act(async () => {
+      render(<ActivityLog />);
+    });
     await waitFor(() => {
       expect(screen.getByText('No activity found.')).toBeInTheDocument();
     });

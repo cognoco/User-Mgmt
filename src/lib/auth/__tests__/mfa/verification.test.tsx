@@ -1,16 +1,18 @@
 // __tests__/auth/mfa/verification.test.js
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { LoginWithMFA } from '../../../../components/auth/MFAVerificationForm';
+import type { UserEvent } from '@testing-library/user-event/dist/types/setup/setup';
+import { MFAVerificationForm } from '@/components/auth/MFAVerificationForm';
+import { vi, describe, beforeEach, test, expect } from 'vitest';
 
-// Import our standardized mock
-jest.mock('../../../../lib/supabase', () => require('../../__mocks__/supabase'));
-import { supabase } from '../../../../lib/supabase';
+// Import our standardized mock using vi.mock with dynamic import
+vi.mock('@/lib/supabase', async () => (await import('@/tests/mocks/supabase')));
+import { supabase } from '@/lib/supabase';
 
 describe('MFA Verification During Login', () => {
-  let user;
+  let user: UserEvent;
   
   // Mock user with MFA enabled
   const mockUser = {
@@ -23,11 +25,11 @@ describe('MFA Verification During Login', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     user = userEvent.setup();
     
     // Mock initial auth (first factor authenticated, second factor required)
-    supabase.auth.signInWithPassword.mockResolvedValue({
+    (supabase.auth.signInWithPassword as vi.Mock).mockResolvedValue({
       data: { 
         user: mockUser,
         session: null // No session yet, MFA required
@@ -36,7 +38,7 @@ describe('MFA Verification During Login', () => {
     });
     
     // Mock MFA factors list
-    supabase.auth.mfa.listFactors.mockResolvedValue({
+    (supabase.auth.mfa.listFactors as vi.Mock).mockResolvedValue({
       data: {
         totp: [{ id: 'totp-123', name: 'Authenticator App', verified: true }],
         phone: [{ id: 'phone-123', name: 'Mobile Phone', verified: true }]
@@ -47,13 +49,13 @@ describe('MFA Verification During Login', () => {
 
   test('User can complete login with TOTP code', async () => {
     // Mock MFA challenge
-    supabase.auth.mfa.challenge.mockResolvedValueOnce({
+    (supabase.auth.mfa.challenge as vi.Mock).mockResolvedValueOnce({
       data: { id: 'challenge-123' },
       error: null
     });
     
     // Mock successful verification
-    supabase.auth.mfa.verify.mockResolvedValueOnce({
+    (supabase.auth.mfa.verify as vi.Mock).mockResolvedValueOnce({
       data: { 
         session: { 
           access_token: 'mfa-verified-token',
@@ -63,20 +65,29 @@ describe('MFA Verification During Login', () => {
       error: null
     });
 
+    const mockOnSuccess = vi.fn();
+    const mockAccessToken = 'initial-access-token';
+
     // Render login component
-    render(<LoginWithMFA />);
+    render(<MFAVerificationForm accessToken={mockAccessToken} onSuccess={mockOnSuccess} />);
     
     // Enter email and password
-    await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'Password123');
+    await act(async () => {
+        await user.type(screen.getByLabelText(/email/i), 'user@example.com');
+        await user.type(screen.getByLabelText(/password/i), 'Password123');
+    });
     
     // Submit login form
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /sign in/i }));
+    });
     
     // Verify initial login was attempted
-    expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({
-      email: 'user@example.com',
-      password: 'Password123'
+    await waitFor(() => {
+        expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({
+          email: 'user@example.com',
+          password: 'Password123'
+        });
     });
     
     // Wait for MFA verification screen
@@ -86,10 +97,14 @@ describe('MFA Verification During Login', () => {
     });
     
     // Enter TOTP code
-    await user.type(screen.getByLabelText(/code/i), '123456');
+    await act(async () => {
+        await user.type(screen.getByLabelText(/code/i), '123456');
+    });
     
     // Submit verification form
-    await user.click(screen.getByRole('button', { name: /verify/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /verify/i }));
+    });
     
     // Verify MFA was completed
     await waitFor(() => {
@@ -107,7 +122,7 @@ describe('MFA Verification During Login', () => {
 
   test('User can switch between available MFA methods', async () => {
     // Mock MFA challenge for TOTP
-    supabase.auth.mfa.challenge.mockImplementation((params) => {
+    (supabase.auth.mfa.challenge as vi.Mock).mockImplementation((params) => {
       if (params.factorId === 'totp-123') {
         return Promise.resolve({
           data: { id: 'challenge-totp-123' },
@@ -122,15 +137,22 @@ describe('MFA Verification During Login', () => {
       return Promise.resolve({ data: null, error: new Error('Unknown factor') });
     });
     
+    const mockOnSuccessSwitch = vi.fn();
+    const mockAccessTokenSwitch = 'initial-access-token-switch';
+
     // Render login component
-    render(<LoginWithMFA />);
+    render(<MFAVerificationForm accessToken={mockAccessTokenSwitch} onSuccess={mockOnSuccessSwitch} />);
     
     // Enter email and password
-    await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'Password123');
+    await act(async () => {
+        await user.type(screen.getByLabelText(/email/i), 'user@example.com');
+        await user.type(screen.getByLabelText(/password/i), 'Password123');
+    });
     
     // Submit login form
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /sign in/i }));
+    });
     
     // Wait for MFA verification screen with TOTP selected by default
     await waitFor(() => {
@@ -138,7 +160,9 @@ describe('MFA Verification During Login', () => {
     });
     
     // Switch to phone verification
-    await user.click(screen.getByRole('button', { name: /mobile phone/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /mobile phone/i }));
+    });
     
     // Verify phone challenge was requested
     await waitFor(() => {
@@ -149,7 +173,9 @@ describe('MFA Verification During Login', () => {
     });
     
     // Switch back to TOTP
-    await user.click(screen.getByRole('button', { name: /authenticator app/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /authenticator app/i }));
+    });
     
     // Verify TOTP challenge was requested
     await waitFor(() => {
@@ -161,7 +187,7 @@ describe('MFA Verification During Login', () => {
 
   test('User can authenticate with backup code', async () => {
     // Mock MFA verification with backup code
-    supabase.auth.mfa.verifyWithBackupCode.mockResolvedValueOnce({
+    (supabase.auth.mfa.verifyWithBackupCode as vi.Mock).mockResolvedValueOnce({
       data: { 
         session: { 
           access_token: 'backup-code-token',
@@ -171,15 +197,22 @@ describe('MFA Verification During Login', () => {
       error: null
     });
 
+    const mockOnSuccessBackup = vi.fn();
+    const mockAccessTokenBackup = 'initial-access-token-backup';
+
     // Render login component
-    render(<LoginWithMFA />);
+    render(<MFAVerificationForm accessToken={mockAccessTokenBackup} onSuccess={mockOnSuccessBackup} />);
     
     // Enter email and password
-    await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'Password123');
+    await act(async () => {
+        await user.type(screen.getByLabelText(/email/i), 'user@example.com');
+        await user.type(screen.getByLabelText(/password/i), 'Password123');
+    });
     
     // Submit login form
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /sign in/i }));
+    });
     
     // Wait for MFA verification screen
     await waitFor(() => {
@@ -187,13 +220,19 @@ describe('MFA Verification During Login', () => {
     });
     
     // Click "Use backup code" option
-    await user.click(screen.getByText(/use backup code/i));
+    await act(async () => {
+        await user.click(screen.getByText(/use backup code/i));
+    });
     
     // Enter backup code
-    await user.type(screen.getByLabelText(/backup code/i), '123456789012');
+    await act(async () => {
+        await user.type(screen.getByLabelText(/backup code/i), '123456789012');
+    });
     
     // Submit backup code
-    await user.click(screen.getByRole('button', { name: /verify/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /verify/i }));
+    });
     
     // Verify backup code was used for authentication
     await waitFor(() => {
@@ -207,26 +246,30 @@ describe('MFA Verification During Login', () => {
 
   test('Handles incorrect MFA code', async () => {
     // Mock MFA challenge
-    supabase.auth.mfa.challenge.mockResolvedValueOnce({
+    (supabase.auth.mfa.challenge as vi.Mock).mockResolvedValueOnce({
       data: { id: 'challenge-123' },
       error: null
     });
     
     // Mock verification failure
-    supabase.auth.mfa.verify.mockResolvedValueOnce({
+    (supabase.auth.mfa.verify as vi.Mock).mockResolvedValueOnce({
       data: null,
       error: { message: 'Invalid verification code' }
     });
 
     // Render login component
-    render(<LoginWithMFA />);
+    render(<MFAVerificationForm />);
     
     // Enter email and password
-    await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'Password123');
+    await act(async () => {
+        await user.type(screen.getByLabelText(/email/i), 'user@example.com');
+        await user.type(screen.getByLabelText(/password/i), 'Password123');
+    });
     
     // Submit login form
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /sign in/i }));
+    });
     
     // Wait for MFA verification screen
     await waitFor(() => {
@@ -234,42 +277,46 @@ describe('MFA Verification During Login', () => {
     });
     
     // Enter wrong TOTP code
-    await user.type(screen.getByLabelText(/code/i), '999999');
+    await act(async () => {
+        await user.type(screen.getByLabelText(/code/i), '999999');
+    });
     
     // Submit verification form
-    await user.click(screen.getByRole('button', { name: /verify/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /verify/i }));
+    });
     
-    // Verify error is displayed
+    // Verify error message is displayed
     await waitFor(() => {
-      expect(screen.getByText(/invalid verification code/i)).toBeInTheDocument();
+        expect(screen.getByText(/invalid verification code/i)).toBeInTheDocument();
     });
     
     // User should be able to try again
-    expect(screen.getByRole('button', { name: /verify/i })).not.toBeDisabled();
+    expect(screen.getByLabelText(/code/i)).toBeEnabled();
   });
 
   test('User can request new SMS code during verification', async () => {
     // Mock MFA challenge
-    supabase.auth.mfa.challenge.mockResolvedValueOnce({
+    (supabase.auth.mfa.challenge as vi.Mock).mockResolvedValueOnce({
       data: { id: 'challenge-phone-123' },
       error: null
     });
     
     // Mock new challenge request
-    supabase.auth.mfa.challenge.mockResolvedValueOnce({
+    (supabase.auth.mfa.challenge as vi.Mock).mockResolvedValueOnce({
       data: { id: 'challenge-phone-456' }, // New challenge ID
       error: null
     });
 
     // Render login component
-    render(<LoginWithMFA />);
+    render(<MFAVerificationForm />);
     
     // Enter email and password
-    await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'Password123');
-    
-    // Submit login form
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
+    await act(async () => {
+        await user.type(screen.getByLabelText(/email/i), 'user@example.com');
+        await user.type(screen.getByLabelText(/password/i), 'Password123');
+        await user.click(screen.getByRole('button', { name: /sign in/i }));
+    });
     
     // Wait for MFA verification screen
     await waitFor(() => {
@@ -277,7 +324,9 @@ describe('MFA Verification During Login', () => {
     });
     
     // Switch to phone verification
-    await user.click(screen.getByRole('button', { name: /mobile phone/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /mobile phone/i }));
+    });
     
     // Wait for SMS verification screen
     await waitFor(() => {
@@ -285,57 +334,68 @@ describe('MFA Verification During Login', () => {
     });
     
     // Request new code
-    await user.click(screen.getByRole('button', { name: /resend code/i }));
+    await act(async () => {
+      await user.click(screen.getByText(/resend code/i));
+    });
     
     // Verify new challenge was requested
     await waitFor(() => {
       // Challenge should have been called twice (initial + resend)
-      expect(supabase.auth.mfa.challenge).toHaveBeenCalledTimes(3); 
+      expect(supabase.auth.mfa.challenge).toHaveBeenCalledTimes(2);
       expect(screen.getByText(/new code sent/i)).toBeInTheDocument();
     });
   });
 
   test('Handles "Remember this device" functionality', async () => {
     // Mock MFA challenge
-    supabase.auth.mfa.challenge.mockResolvedValueOnce({
+    (supabase.auth.mfa.challenge as vi.Mock).mockResolvedValueOnce({
       data: { id: 'challenge-123' },
       error: null
     });
     
     // Mock successful verification
-    supabase.auth.mfa.verify.mockResolvedValueOnce({
+    (supabase.auth.mfa.verify as vi.Mock).mockResolvedValueOnce({
       data: { 
         session: { 
-          access_token: 'mfa-verified-token',
+          access_token: 'mfa-remembered-token',
           user: mockUser
         } 
       },
       error: null
     });
 
+    const mockOnSuccessRemember = vi.fn();
+    const mockAccessTokenRemember = 'initial-access-token-remember';
+
     // Render login component
-    render(<LoginWithMFA />);
+    render(<MFAVerificationForm accessToken={mockAccessTokenRemember} onSuccess={mockOnSuccessRemember} />);
     
     // Enter email and password
-    await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'Password123');
-    
-    // Submit login form
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
+    await act(async () => {
+        await user.type(screen.getByLabelText(/email/i), 'user@example.com');
+        await user.type(screen.getByLabelText(/password/i), 'Password123');
+        await user.click(screen.getByRole('button', { name: /sign in/i }));
+    });
     
     // Wait for MFA verification screen
     await waitFor(() => {
       expect(screen.getByText(/verification code/i)).toBeInTheDocument();
     });
     
-    // Check "Remember this device" option
-    await user.click(screen.getByLabelText(/remember this device/i));
+    // Check the remember device box
+    await act(async () => {
+        await user.click(screen.getByLabelText(/remember this device/i));
+    });
     
     // Enter TOTP code
-    await user.type(screen.getByLabelText(/code/i), '123456');
+    await act(async () => {
+        await user.type(screen.getByLabelText(/code/i), '123456');
+    });
     
     // Submit verification form
-    await user.click(screen.getByRole('button', { name: /verify/i }));
+    await act(async () => {
+        await user.click(screen.getByRole('button', { name: /verify/i }));
+    });
     
     // Verify MFA was completed with remember device option
     await waitFor(() => {

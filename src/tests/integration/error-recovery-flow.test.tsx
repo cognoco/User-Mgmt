@@ -1,13 +1,13 @@
 // __tests__/integration/error-recovery-flow.test.tsx
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FormWithRecovery } from '@/components/common/FormWithRecovery';
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 
 // Import our standardized mock
-vi.mock('@/lib/supabase');
+vi.mock('@/lib/supabase', () => require('@/tests/mocks/supabase'));
 import { supabase } from '@/lib/supabase';
 
 describe('Error Recovery Flow', () => {
@@ -53,10 +53,14 @@ describe('Error Recovery Flow', () => {
     render(<FormWithRecovery onSubmit={mockSubmit} />);
 
     // Fill out form (assuming FormWithRecovery has name input)
-    await user.type(screen.getByLabelText(/name/i), 'Test Name');
+    await act(async () => {
+      await user.type(screen.getByLabelText(/name/i), 'Test Name');
+    });
 
     // Submit form
-    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await act(async () => {
+      await user.click(screen.getAllByRole('button', { name: /submit/i })[0]);
+    });
 
     // Verify error message is displayed
     await waitFor(() => {
@@ -83,7 +87,9 @@ describe('Error Recovery Flow', () => {
     });
 
     // Submit recovered form
-    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await act(async () => {
+      await user.click(screen.getAllByRole('button', { name: /submit/i })[0]);
+    });
 
     // Verify success
     await waitFor(() => {
@@ -94,8 +100,7 @@ describe('Error Recovery Flow', () => {
   test('User can discard recovered data', async () => {
     // Mock localStorage to return saved form data
     localStorageMock.getItem.mockReturnValueOnce(JSON.stringify({
-      title: 'Old Title',
-      description: 'Old Description',
+      name: 'Old Title',
       timestamp: Date.now() - 3600000 // 1 hour ago
     }));
     
@@ -104,7 +109,7 @@ describe('Error Recovery Flow', () => {
     
     // Verify form data is recovered
     await waitFor(() => {
-      expect(screen.getByLabelText(/title/i)).toHaveValue('Old Title');
+      expect(screen.getByLabelText(/name/i)).toHaveValue('Old Title');
     });
     
     // Verify recovery message with timestamp is displayed
@@ -112,12 +117,13 @@ describe('Error Recovery Flow', () => {
     expect(screen.getByText(/from about 1 hour ago/i)).toBeInTheDocument();
     
     // Click discard button
-    await user.click(screen.getByRole('button', { name: /discard/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /discard/i }));
+    });
     
     // Verify form is cleared
     await waitFor(() => {
-      expect(screen.getByLabelText(/title/i)).toHaveValue('');
-      expect(screen.getByLabelText(/description/i)).toHaveValue('');
+      expect(screen.getByLabelText(/name/i)).toHaveValue('');
     });
     
     // Verify localStorage entry was removed
@@ -127,8 +133,7 @@ describe('Error Recovery Flow', () => {
   test('Recovery only shows for recent data', async () => {
     // Mock localStorage to return very old form data (3 days old)
     localStorageMock.getItem.mockReturnValueOnce(JSON.stringify({
-      title: 'Very Old Title',
-      description: 'Very Old Description',
+      name: 'Very Old Title',
       timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000) // 3 days ago
     }));
     
@@ -137,8 +142,7 @@ describe('Error Recovery Flow', () => {
     
     // Verify form data is NOT recovered (default empty form)
     await waitFor(() => {
-      expect(screen.getByLabelText(/title/i)).toHaveValue('');
-      expect(screen.getByLabelText(/description/i)).toHaveValue('');
+      expect(screen.getByLabelText(/name/i)).toHaveValue('');
     });
     
     // Verify no recovery message is displayed
@@ -153,8 +157,9 @@ describe('Error Recovery Flow', () => {
     const { rerender } = render(<FormWithRecovery formId="form-a" />);
     
     // Fill out first form
-    await user.type(screen.getByLabelText(/title/i), 'Form A Title');
-    await user.type(screen.getByLabelText(/description/i), 'Form A Description');
+    await act(async () => {
+      await user.type(screen.getByLabelText(/name/i), 'Form A Title');
+    });
     
     // Mock submission error
     supabase.from().insert.mockResolvedValueOnce({
@@ -163,7 +168,9 @@ describe('Error Recovery Flow', () => {
     });
     
     // Submit first form
-    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await act(async () => {
+      await user.click(screen.getAllByRole('button', { name: /submit/i })[0]);
+    });
     
     // Verify first form data was saved to localStorage
     expect(localStorage.setItem).toHaveBeenCalledWith(
@@ -175,8 +182,9 @@ describe('Error Recovery Flow', () => {
     rerender(<FormWithRecovery formId="form-b" />);
     
     // Fill out second form
-    await user.type(screen.getByLabelText(/title/i), 'Form B Title');
-    await user.type(screen.getByLabelText(/description/i), 'Form B Description');
+    await act(async () => {
+      await user.type(screen.getByLabelText(/name/i), 'Form B Title');
+    });
     
     // Mock submission error
     supabase.from().insert.mockResolvedValueOnce({
@@ -185,7 +193,9 @@ describe('Error Recovery Flow', () => {
     });
     
     // Submit second form
-    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await act(async () => {
+      await user.click(screen.getAllByRole('button', { name: /submit/i })[0]);
+    });
     
     // Verify second form data was saved to localStorage under different key
     expect(localStorage.setItem).toHaveBeenCalledWith(

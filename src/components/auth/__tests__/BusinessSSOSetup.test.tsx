@@ -177,7 +177,9 @@ describe('BusinessSSOSetup', () => {
       }), 100))
     );
 
-    render(<BusinessSSOSetup orgId={mockOrgId} onSettingsChange={mockOnSettingsChange} />);
+    await act(async () => {
+      render(<BusinessSSOSetup orgId={mockOrgId} onSettingsChange={mockOnSettingsChange} />);
+    });
 
     // Initially shows loading state
     const header = screen.getByTestId('card-header');

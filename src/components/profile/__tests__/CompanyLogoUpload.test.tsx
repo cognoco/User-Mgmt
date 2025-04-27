@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nextProvider } from 'react-i18next';
@@ -77,7 +77,7 @@ const mockUploadCompanyLogo = vi.fn();
 const mockRemoveCompanyLogo = vi.fn();
 
 describe('CompanyLogoUpload Component', () => {
-  const setup = (profileData: Partial<DbProfile>) => {
+  const setup = async (profileData: Partial<DbProfile>) => {
     // Reset mocks before each test setup
     vi.clearAllMocks();
     mockIsValidImage.mockReturnValue(true); // Reset to valid by default
@@ -94,23 +94,26 @@ describe('CompanyLogoUpload Component', () => {
       removeCompanyLogo: mockRemoveCompanyLogo,
     });
 
-    render(
-      <I18nextProvider i18n={i18n}>
-        <CompanyLogoUpload />
-      </I18nextProvider>
-    );
+    // Wrap render in act
+    await act(async () => {
+      render(
+        <I18nextProvider i18n={i18n}>
+          <CompanyLogoUpload />
+        </I18nextProvider>
+      );
+    });
   };
 
-  it('should render fallback icon when no logo URL is present', () => {
-    setup({ companyLogoUrl: null });
+  it('should render fallback icon when no logo URL is present', async () => {
+    await setup({ companyLogoUrl: null });
     expect(screen.getByTestId('building-icon')).toBeInTheDocument();
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Remove/i })).not.toBeInTheDocument();
   });
 
-  it('should render company logo image when URL is present', () => {
+  it('should render company logo image when URL is present', async () => {
     const logoUrl = 'http://example.com/logo.png';
-    setup({ companyLogoUrl: logoUrl });
+    await setup({ companyLogoUrl: logoUrl });
     const img = screen.getByRole('img');
     expect(img).toHaveAttribute('src', logoUrl);
     expect(screen.queryByTestId('building-icon')).not.toBeInTheDocument();
@@ -118,7 +121,7 @@ describe('CompanyLogoUpload Component', () => {
   });
 
   it('should open file input when change button is clicked', async () => {
-    setup({ companyLogoUrl: null });
+    await setup({ companyLogoUrl: null });
     const user = userEvent.setup();
     const changeButton = screen.getByLabelText(/Change Company Logo/i);
     // File input is hidden, we test clicking the button that triggers it
@@ -131,7 +134,7 @@ describe('CompanyLogoUpload Component', () => {
   });
 
   it('should show error if invalid file is selected', async () => {
-    setup({ companyLogoUrl: null });
+    await setup({ companyLogoUrl: null });
     const user = userEvent.setup();
     mockIsValidImage.mockReturnValueOnce(false); // Simulate invalid file
     const file = new File(['hello'], 'hello.txt', { type: 'text/plain' });
@@ -144,7 +147,7 @@ describe('CompanyLogoUpload Component', () => {
   });
   
   it('should open crop modal when valid file is selected', async () => {
-    setup({ companyLogoUrl: null });
+    await setup({ companyLogoUrl: null });
     const user = userEvent.setup();
     const file = new File(['(⌐□_□)'], 'chucknorris.png', { type: 'image/png' });
     const fileInput = screen.getByTestId('company-logo-upload').querySelector('input[type="file"]') as HTMLElement;
@@ -158,7 +161,7 @@ describe('CompanyLogoUpload Component', () => {
 
   // TODO: Need to refine mocking for getCroppedImgBlob to test upload
   it.skip('should call uploadCompanyLogo on crop and save', async () => {
-     setup({ companyLogoUrl: null });
+     // await setup({ companyLogoUrl: null }); // Keep commented if test is skipped
      const user = userEvent.setup();
      
      // Wait for modal and cropper
@@ -173,7 +176,7 @@ describe('CompanyLogoUpload Component', () => {
    });
 
   it('should call removeCompanyLogo when remove button is clicked', async () => {
-    setup({ companyLogoUrl: 'http://example.com/logo.png' }); // Ensure button is visible
+    await setup({ companyLogoUrl: 'http://example.com/logo.png' }); // Ensure button is visible
     const user = userEvent.setup();
     const removeButton = screen.getByRole('button', { name: /Remove/i });
 

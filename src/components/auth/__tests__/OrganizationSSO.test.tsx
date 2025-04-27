@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, Mock } from 'vitest';
 import { api } from '@/lib/api/axios';
@@ -52,14 +52,18 @@ describe('OrganizationSSO', () => {
     });
   });
 
-  it('renders BusinessSSOSetup initially', () => {
-    render(<OrganizationSSO orgId={mockOrgId} />);
+  it('renders BusinessSSOSetup initially', async () => {
+    await act(async () => {
+      render(<OrganizationSSO orgId={mockOrgId} />);
+    });
     expect(screen.getByText('org.sso.title')).toBeInTheDocument();
     expect(screen.getByText('org.sso.description')).toBeInTheDocument();
   });
 
   it('does not show IDP Configuration when SSO is disabled', async () => {
-    render(<OrganizationSSO orgId={mockOrgId} />);
+    await act(async () => {
+      render(<OrganizationSSO orgId={mockOrgId} />);
+    });
     
     await waitFor(() => {
       expect(api.get).toHaveBeenCalledWith(`/organizations/${mockOrgId}/sso/settings`);
@@ -168,8 +172,10 @@ describe('OrganizationSSO', () => {
     });
   });
 
-  it('does not show status indicator when SSO is disabled', () => {
-    render(<OrganizationSSO orgId={mockOrgId} />);
+  it('does not show status indicator when SSO is disabled', async () => {
+    await act(async () => {
+      render(<OrganizationSSO orgId={mockOrgId} />);
+    });
     expect(screen.queryByText('org.sso.status.healthy')).not.toBeInTheDocument();
   });
 

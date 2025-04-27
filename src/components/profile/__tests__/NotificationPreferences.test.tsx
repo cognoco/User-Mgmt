@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import NotificationPreferences from '../NotificationPreferences';
 
 // Mock fetch
@@ -16,7 +17,9 @@ describe('NotificationPreferences', () => {
       ok: true,
       json: async () => ({ notifications: { email: true, push: false, marketing: true } })
     });
-    render(<NotificationPreferences />);
+    await act(async () => {
+      render(<NotificationPreferences />);
+    });
     expect(screen.getByText('Notification Preferences')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByLabelText('Email Notifications')).toBeChecked();
@@ -25,15 +28,19 @@ describe('NotificationPreferences', () => {
     });
   });
 
-  it('shows loading state', () => {
+  it('shows loading state', async () => {
     mockFetch.mockImplementation(() => new Promise(() => {}));
-    render(<NotificationPreferences />);
+    await act(async () => {
+      render(<NotificationPreferences />);
+    });
     expect(screen.getByText('Loading preferences...')).toBeInTheDocument();
   });
 
   it('shows error state', async () => {
     mockFetch.mockResolvedValueOnce({ ok: false, text: async () => 'Error' });
-    render(<NotificationPreferences />);
+    await act(async () => {
+      render(<NotificationPreferences />);
+    });
     await waitFor(() => {
       expect(screen.getByText('Failed to load notification preferences.')).toBeInTheDocument();
     });
@@ -43,10 +50,12 @@ describe('NotificationPreferences', () => {
     mockFetch
       .mockResolvedValueOnce({ ok: true, json: async () => ({ notifications: { email: true, push: false, marketing: false } }) }) // GET
       .mockResolvedValueOnce({ ok: true }); // PUT
-    render(<NotificationPreferences />);
+    await act(async () => {
+      render(<NotificationPreferences />);
+    });
     await waitFor(() => expect(screen.getByLabelText('Email Notifications')).toBeChecked());
-    fireEvent.click(screen.getByLabelText('Push Notifications'));
-    fireEvent.click(screen.getByText('Save Preferences'));
+    await userEvent.click(screen.getByLabelText('Push Notifications'));
+    await userEvent.click(screen.getByText('Save Preferences'));
     await waitFor(() => {
       expect(screen.getByText('Notification preferences saved successfully.')).toBeInTheDocument();
     });
@@ -56,9 +65,11 @@ describe('NotificationPreferences', () => {
     mockFetch
       .mockResolvedValueOnce({ ok: true, json: async () => ({ notifications: { email: true, push: false, marketing: false } }) }) // GET
       .mockResolvedValueOnce({ ok: false, text: async () => 'Error' }); // PUT
-    render(<NotificationPreferences />);
+    await act(async () => {
+      render(<NotificationPreferences />);
+    });
     await waitFor(() => expect(screen.getByLabelText('Email Notifications')).toBeChecked());
-    fireEvent.click(screen.getByText('Save Preferences'));
+    await userEvent.click(screen.getByText('Save Preferences'));
     await waitFor(() => {
       expect(screen.getByText('Failed to save notification preferences.')).toBeInTheDocument();
     });

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { useSession } from 'next-auth/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { usePermission, withPermission } from '@/hooks/usePermission';
@@ -71,7 +71,7 @@ describe('usePermission', () => {
 
   it('checks permission when session exists', async () => {
     vi.mocked(useSession).mockReturnValue({
-      data: { user: { id: 'user1' } },
+      data: { user: { id: 'user1' }, expires: '2099-01-01T00:00:00.000Z' },
       status: 'authenticated',
       update: vi.fn(),
     });
@@ -99,7 +99,7 @@ describe('usePermission', () => {
 
   it('returns false when role fetch fails', async () => {
     vi.mocked(useSession).mockReturnValue({
-      data: { user: { id: 'user1' } },
+      data: { user: { id: 'user1' }, expires: '2099-01-01T00:00:00.000Z' },
       status: 'authenticated',
       update: vi.fn(),
     });
@@ -121,7 +121,7 @@ describe('usePermission', () => {
 
   it('returns false when permission check fails', async () => {
     vi.mocked(useSession).mockReturnValue({
-      data: { user: { id: 'user1' } },
+      data: { user: { id: 'user1' }, expires: '2099-01-01T00:00:00.000Z' },
       status: 'authenticated',
       update: vi.fn(),
     });
@@ -170,7 +170,7 @@ describe('withPermission HOC', () => {
 
   it('renders nothing when permission check fails', async () => {
     vi.mocked(useSession).mockReturnValue({
-      data: { user: { id: 'user1' } },
+      data: { user: { id: 'user1' }, expires: '2099-01-01T00:00:00.000Z' },
       status: 'authenticated',
       update: vi.fn(),
     });
@@ -182,9 +182,12 @@ describe('withPermission HOC', () => {
 
     vi.mocked(checkRolePermission).mockResolvedValueOnce(false);
 
-    const { container } = renderHook(() => WrappedComponent({}), {
-      wrapper,
-    }).result.current;
+    let container: HTMLElement;
+    await act(async () => {
+      container = renderHook(() => WrappedComponent({}), {
+        wrapper,
+      }).result.current.container;
+    });
 
     await waitFor(() => {
       expect(container.firstChild).toBeNull();
@@ -193,7 +196,7 @@ describe('withPermission HOC', () => {
 
   it('renders component when permission check passes', async () => {
     vi.mocked(useSession).mockReturnValue({
-      data: { user: { id: 'user1' } },
+      data: { user: { id: 'user1' }, expires: '2099-01-01T00:00:00.000Z' },
       status: 'authenticated',
       update: vi.fn(),
     });
@@ -205,9 +208,12 @@ describe('withPermission HOC', () => {
 
     vi.mocked(checkRolePermission).mockResolvedValueOnce(true);
 
-    const { getByText } = renderHook(() => WrappedComponent({}), {
-      wrapper,
-    }).result.current;
+    let getByText: (text: string) => HTMLElement;
+    await act(async () => {
+      getByText = renderHook(() => WrappedComponent({}), {
+        wrapper,
+      }).result.current.getByText;
+    });
 
     await waitFor(() => {
       expect(getByText('Test Component')).toBeInTheDocument();

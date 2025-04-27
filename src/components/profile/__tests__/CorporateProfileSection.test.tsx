@@ -97,51 +97,61 @@ describe('CorporateProfileSection Component', () => {
     }));
   });
 
-  it('should render nothing if corporate users are disabled', () => {
+  it('should render nothing if corporate users are disabled', async () => {
     (useUserManagement as any).mockImplementation(() => ({
       corporateUsers: { enabled: false },
     }));
-    const { container } = render(
-      <I18nextProvider i18n={i18next}>
-        <MemoryRouter>
-          <CorporateProfileSection 
-            userType={UserType.CORPORATE} 
-            company={initialCompanyData} 
-            onUpdate={mockOnUpdate} 
-          />
-        </MemoryRouter>
-      </I18nextProvider>
-    );
-    expect(container.firstChild).toBeNull();
+    let container: HTMLElement | null = null;
+    await act(async () => {
+      const result = render(
+        <I18nextProvider i18n={i18next}>
+          <MemoryRouter>
+            <CorporateProfileSection 
+              userType={UserType.CORPORATE} 
+              company={initialCompanyData} 
+              onUpdate={mockOnUpdate} 
+            />
+          </MemoryRouter>
+        </I18nextProvider>
+      );
+      container = result.container;
+    });
+    expect(container?.firstChild).toBeNull();
   });
 
-  it('should render nothing if user type is not corporate', () => {
-    const { container } = render(
-      <I18nextProvider i18n={i18next}>
-        <MemoryRouter>
-          <CorporateProfileSection 
-            userType={UserType.PRIVATE} // Pass PRIVATE type
-            company={initialCompanyData} 
-            onUpdate={mockOnUpdate} 
-          />
-        </MemoryRouter>
-      </I18nextProvider>
-    );
-    expect(container.firstChild).toBeNull();
+  it('should render nothing if user type is not corporate', async () => {
+    let container: HTMLElement | null = null;
+    await act(async () => {
+      const result = render(
+        <I18nextProvider i18n={i18next}>
+          <MemoryRouter>
+            <CorporateProfileSection 
+              userType={UserType.PRIVATE} // Pass PRIVATE type
+              company={initialCompanyData} 
+              onUpdate={mockOnUpdate} 
+            />
+          </MemoryRouter>
+        </I18nextProvider>
+      );
+      container = result.container;
+    });
+    expect(container?.firstChild).toBeNull();
   });
 
-  it('should render the form with initial company data', () => {
-    render(
-      <I18nextProvider i18n={i18next}>
-        <MemoryRouter>
-          <CorporateProfileSection 
-            userType={UserType.CORPORATE} 
-            company={initialCompanyData} 
-            onUpdate={mockOnUpdate} 
-          />
-        </MemoryRouter>
-      </I18nextProvider>
-    );
+  it('should render the form with initial company data', async () => {
+    await act(async () => {
+      render(
+        <I18nextProvider i18n={i18next}>
+          <MemoryRouter>
+            <CorporateProfileSection 
+              userType={UserType.CORPORATE} 
+              company={initialCompanyData} 
+              onUpdate={mockOnUpdate} 
+            />
+          </MemoryRouter>
+        </I18nextProvider>
+      );
+    });
 
     expect(screen.getByLabelText('profile.corporate.companyName *')).toHaveValue(initialCompanyData.name);
     expect(screen.getByLabelText('profile.corporate.industry')).toHaveValue(initialCompanyData.industry);
@@ -161,17 +171,19 @@ describe('CorporateProfileSection Component', () => {
 
   it('should call onUpdate with updated data on form submission', async () => {
     const user = userEvent.setup();
-    render(
-      <I18nextProvider i18n={i18next}>
-        <MemoryRouter>
-          <CorporateProfileSection 
-            userType={UserType.CORPORATE} 
-            company={initialCompanyData} 
-            onUpdate={mockOnUpdate} 
-          />
-        </MemoryRouter>
-      </I18nextProvider>
-    );
+    await act(async () => {
+      render(
+        <I18nextProvider i18n={i18next}>
+          <MemoryRouter>
+            <CorporateProfileSection 
+              userType={UserType.CORPORATE} 
+              company={initialCompanyData} 
+              onUpdate={mockOnUpdate} 
+            />
+          </MemoryRouter>
+        </I18nextProvider>
+      );
+    });
 
     const newCompanyName = 'New Acme Inc.';
     const newIndustry = 'Software';
@@ -208,17 +220,19 @@ describe('CorporateProfileSection Component', () => {
 
   it('should call onUpdate with address as undefined if all address fields are cleared', async () => {
     const user = userEvent.setup();
-    render(
-      <I18nextProvider i18n={i18next}>
-        <MemoryRouter>
-          <CorporateProfileSection 
-            userType={UserType.CORPORATE} 
-            company={initialCompanyData} // Start with address data
-            onUpdate={mockOnUpdate} 
-          />
-        </MemoryRouter>
-      </I18nextProvider>
-    );
+    await act(async () => {
+      render(
+        <I18nextProvider i18n={i18next}>
+          <MemoryRouter>
+            <CorporateProfileSection 
+              userType={UserType.CORPORATE} 
+              company={initialCompanyData} // Start with address data
+              onUpdate={mockOnUpdate} 
+            />
+          </MemoryRouter>
+        </I18nextProvider>
+      );
+    });
 
     await act(async () => {
       await user.clear(screen.getByLabelText('profile.corporate.street'));

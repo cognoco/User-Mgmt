@@ -25,14 +25,19 @@
 | Area                | Potential Gap / Enhancement                | Criticality |
 |---------------------|--------------------------------------------|-------------|
 | Testing             | Failing/incomplete E2E & integration tests | High        |
-| Account Recovery    | Support/admin recovery flows               | Medium      |
-| Security            | Device/session management is next in the roadmap. Suspicious activity detection is not yet implemented. | Medium      |
-| Internationalization| Full i18n for all user-facing content      | Medium      |
-| Mobile              | Native push, biometric auth                | Medium      |
-| Onboarding          | Guided onboarding, checklists              | Medium      |
-| Integrations        | Webhooks, API key management               | Medium      |
-| Legal/Compliance    | ToS/Privacy acceptance tracking, residency | Medium      |
-| SSO/Account Linking | Core flows implemented; E2E test *skeletons* created, need implementation & verification. Integration tests need review/expansion. | Medium |
+| Company Profile     | No E2E/integration/component tests for company profile CRUD | High |
+| User Preferences    | No direct tests for user settings/preferences CRUD | High |
+| 2FA/MFA             | No tests for disabling 2FA, error states, admin override | High |
+| Subscription        | No E2E for full payment/checkout/invoice journey | High |
+| Audit Logging       | No explicit E2E/integration/component tests for audit log viewing/export | Medium |
+| Session Management  | No tests for admin session revocation, session expiration, error handling | Medium |
+| SSO/Account Linking | E2E skeletons exist, not implemented/verified; integration tests need expansion | Medium |
+| Accessibility (a11y)| No automated/manual test coverage          | Medium      |
+| Internationalization| No test coverage for i18n or language switching | Medium |
+| Mobile              | No test coverage for push notifications, biometric auth, responsive UI | Medium |
+| Onboarding          | No test coverage for onboarding, checklists, first-time user flows | Medium |
+| Integrations        | No test coverage for webhooks, API key management | Medium |
+| Legal/Compliance    | No test coverage for ToS/privacy acceptance, residency | Medium |
 
 **Note:** Audit logging is fully implemented and documented. Accessibility (a11y) is being actively audited and improved. See [Accessibility Documentation](./Accessibility-implementation-plan.md) for ongoing work.
 
@@ -47,10 +52,17 @@ The following features were not found in the codebase (neither implementation no
 | Feature Area         | Notes |
 |----------------------|-------|
 | SSO/Account Linking  | Core implementation exists. E2E *skeletons* created, need implementation/verification. Integration tests need review/expansion. |
-| Internationalization | Basic i18n and language switching are present in the UI, but coverage is incomplete and needs expansion and testing. |
-| Mobile Flows         | Responsive UI is implemented and tested for core flows. Native push and biometric auth are planned but not yet implemented. |
-| Onboarding           | Not yet implemented. Planned as next major feature after device/session management. |
-| Integrations         | Not yet implemented. |
-| Legal/Compliance     | ToS/privacy acceptance is implemented in registration. Residency and other compliance flows are not yet implemented. |
+| Company Profile CRUD | No E2E/integration/component tests for company profile management. |
+| User Preferences     | No direct tests for user settings/preferences CRUD. |
+| 2FA/MFA Edge Cases   | No tests for disabling 2FA, error states, admin override. |
+| Subscription E2E     | No E2E for full payment/checkout/invoice journey. |
+| Audit Logging        | No explicit E2E/integration/component tests for audit log viewing/export. |
+| Session Management   | No tests for admin session revocation, session expiration, error handling. |
+| Accessibility (a11y) | No automated/manual test coverage. |
+| Internationalization | No test coverage for i18n or language switching. |
+| Mobile Flows         | No test coverage for push notifications, biometric auth, responsive UI. |
+| Onboarding           | No test coverage for onboarding, checklists, first-time user flows. |
+| Integrations         | No test coverage for webhooks, API key management. |
+| Legal/Compliance     | No test coverage for ToS/privacy acceptance, residency. |
 
 > This section should be updated as features are implemented or verified to exist. If a feature is found or added, move it to the main gap/enhancement table above or mark as resolved.

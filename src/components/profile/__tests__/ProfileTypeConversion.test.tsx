@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
@@ -7,7 +7,6 @@ import { ProfileTypeConversion } from '../ProfileTypeConversion';
 import { useProfileStore } from '@/lib/stores/profile.store';
 import { vi } from 'vitest'; // Ensure vi is imported
 import { api } from '@/lib/api/axios'; // Import api directly
-import { AxiosResponse } from 'axios'; // Keep for default mock value type
 import { apiConfig } from '@/lib/config';
 
 // --- Mocking Setup ---
@@ -171,7 +170,9 @@ describe('ProfileTypeConversion', () => {
   };
 
   test('renders conversion form for personal profile', async () => {
-    render(<ProfileTypeConversion />);
+    await act(async () => { // Wrap render
+      render(<ProfileTypeConversion />);
+    });
     expect(screen.getByRole('heading', { name: /convert to business account/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/company name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/company size/i)).toBeInTheDocument();
@@ -181,7 +182,9 @@ describe('ProfileTypeConversion', () => {
   });
 
   test('successfully validates domain, creates business, and updates profile', async () => {
-    render(<ProfileTypeConversion />);
+    await act(async () => { // Wrap render
+      render(<ProfileTypeConversion />);
+    });
     await fillForm();
     await user.click(screen.getByRole('button', { name: /convert profile/i }));
     await waitFor(() => {
@@ -204,7 +207,9 @@ describe('ProfileTypeConversion', () => {
         return HttpResponse.json({ isValid: false, message: 'Domain already taken' }, { status: 400 });
       })
     );
-    render(<ProfileTypeConversion />);
+    await act(async () => { // Wrap render
+      render(<ProfileTypeConversion />);
+    });
     await fillForm();
     await user.click(screen.getByRole('button', { name: /convert profile/i }));
     await waitFor(() => {
@@ -226,7 +231,9 @@ describe('ProfileTypeConversion', () => {
         return HttpResponse.json({ error: 'Creation failed on server' }, { status: 500 });
       })
     );
-    render(<ProfileTypeConversion />);
+    await act(async () => { // Wrap render
+      render(<ProfileTypeConversion />);
+    });
     await fillForm();
     await user.click(screen.getByRole('button', { name: /convert profile/i }));
     await waitFor(() => {
@@ -241,7 +248,9 @@ describe('ProfileTypeConversion', () => {
 
   test('shows error if profile update fails', async () => {
     mockUpdateProfile.mockRejectedValueOnce(new Error('Store update failed'));
-    render(<ProfileTypeConversion />);
+    await act(async () => { // Wrap render
+      render(<ProfileTypeConversion />);
+    });
     await fillForm();
     await user.click(screen.getByRole('button', { name: /convert profile/i }));
     await waitFor(() => {
@@ -267,7 +276,9 @@ describe('ProfileTypeConversion', () => {
         await new Promise(res => setTimeout(res, 50));
         return {};
     });
-    render(<ProfileTypeConversion />);
+    await act(async () => { // Wrap render
+      render(<ProfileTypeConversion />);
+    });
     await fillForm();
     const submitButton = screen.getByRole('button', { name: /convert profile/i });
     user.click(submitButton); // Don't await click itself

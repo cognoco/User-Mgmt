@@ -7,6 +7,7 @@ import DeleteAccountDialog from './DeleteAccountDialog';
 import { useDeleteAccount } from '@/hooks/useDeleteAccount';
 import enTranslations from '@/lib/i18n/locales/en.json';
 import { USER_MANAGEMENT_NAMESPACE } from '@/lib/i18n';
+import { act } from 'react-dom/test-utils';
 
 // Mock the custom hook
 vi.mock('@/hooks/useDeleteAccount');
@@ -34,7 +35,7 @@ testI18nInstance
 describe('DeleteAccountDialog', () => {
   let handleClose: ReturnType<typeof vi.fn>;
   let mockDeleteAccount: ReturnType<typeof vi.fn>;
-  let mockUseDeleteAccount = vi.mocked(useDeleteAccount);
+  const mockUseDeleteAccount = vi.mocked(useDeleteAccount);
 
   beforeEach(() => {
     // Reset mocks before each test
@@ -70,9 +71,11 @@ describe('DeleteAccountDialog', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('should call onClose when the cancel button is clicked', () => {
+  it('should call onClose when the cancel button is clicked', async () => {
     renderComponent();
-    fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    });
     expect(handleClose).toHaveBeenCalledTimes(1);
   });
 
@@ -89,13 +92,17 @@ describe('DeleteAccountDialog', () => {
     expect(deleteButton).toBeDisabled();
 
     // Type the confirmation text
-    fireEvent.change(confirmationInput, { target: { value: 'DELETE' } });
+    await act(async () => {
+      fireEvent.change(confirmationInput, { target: { value: 'DELETE' } });
+    });
 
     // Now the delete button should be enabled
     expect(deleteButton).toBeEnabled();
     
     // Click the delete button
-    fireEvent.click(deleteButton);
+    await act(async () => {
+      fireEvent.click(deleteButton);
+    });
 
     // Wait for the async operation if necessary
     await waitFor(() => {

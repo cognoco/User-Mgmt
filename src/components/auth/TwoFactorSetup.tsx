@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { use2FAStore } from '@/lib/stores/2fa.store';
-import { TwoFactorMethod } from '@/lib/types/2fa';
+import { TwoFactorMethod, type TwoFactorFactor } from '@/types/2fa';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api/axios';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, CheckCircle, XCircle, QrCode, Smartphone, KeyRound, Trash2, Edit, Save, Copy } from "lucide-react";
+import { useUserManagement } from "@/lib/auth/UserManagementProvider";
+// import { useAuthStore } from "@/lib/stores/auth.store"; // Keep commented if unused
 
 interface TwoFactorSetupProps {
   onComplete?: () => void;

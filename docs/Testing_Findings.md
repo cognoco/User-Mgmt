@@ -139,32 +139,143 @@ This file should be maintained alongside TESTING.md and TESTING_ISSUES.md for a 
 
 ---
 
-# Test Remediation Plan (Based on 2024-06-24 Test Run)
+# Unified Test Remediation & Coverage Expansion Plan (2024-06)
 
-**Overall Strategy:** Address failures in layers, starting with foundational issues before moving to specific test logic.
+**Follow this prioritized, step-by-step plan to systematically resolve remaining test issues and expand coverage:**
 
-**Layer 1: Core Resolution & Setup (Highest Priority)**
+## 1. Triage and Fix High-Impact Test Failures First
 
-1.  **Fix Module Resolution Errors:**
-    *   [ ] **`@/lib/hooks/usePlatformStyles`:** Resolve import in `src/components/settings/LanguageSelector.tsx` (Build failure). -> *Action: Find correct path/name for `usePlatformStyles`.*
-    *   [ ] **`@/components/auth/MFASetup`:** Resolve import in `src/lib/auth/__tests__/mfa/setup.test.tsx`. -> *Action: Rename import and usage to `TwoFactorSetup`.*
-    *   [ ] **`@/components/auth/MFAVerificationForm`:** (Likely needs similar rename check in `.../mfa/verification.test.tsx`). -> *Action: Check component existence/name, update test import/usage.*
-    *   [ ] Systematically review other test files for deep relative paths (`../`, `../../` etc.) and replace with aliases, verifying component existence/names. (Ref: Grep results from earlier).
-2.  **Fix Core Mocking Issues:**
-    *   [ ] **Supabase Client Mocks:** Investigate `TypeError: Cannot read properties of undefined (reading 'select')` errors (e.g., in `data-management-flow.test.tsx`). -> *Action: Review shared Supabase mock (`src/lib/auth/__mocks__/supabase.ts`?) to ensure methods (`.from`, `.select`, `.rpc`, etc.) are correctly mocked and chainable.*
-    *   [ ] **TypeScript Mock Errors:** Address `Property 'mockResolvedValue' does not exist...` errors concurrently with fixing the runtime mock issues. Ensure mocks align with Supabase client types.
-    *   [ ] **`jest` Namespace Errors:** Investigate `Cannot use namespace 'jest' as a value` errors. -> *Action: Check Vitest/TS config for conflicts.*
-3.  **Address Resource Errors:**
-    *   [ ] **`JS heap out of memory`:** Monitor if fixing mocks resolves this. If not, requires deeper investigation into specific tests identified in the logs. -> *Action: Postpone unless mock fixes don't help.*
+### A. Selector/Label Mismatches & Test Logic
+- Review failing tests for selector mismatches and update queries to match the actual DOM (use correct label text, input `id`, or `getByTestId`).
+- Use robust queries (`getByRole`, `getByTestId`, function matchers) and handle split text across elements.
+- Remove or update assertions for elements that are not present in the current UI.
 
-**Layer 2: Unit & Integration Tests (Medium Priority)**
+### B. Mock All API/Network Calls
+- Use MSW or `vi.spyOn` to mock all backend/network calls in tests (e.g., data export, member removal, session revoke).
+- Simulate both success and error responses as needed.
 
-*   *Prerequisite: Layer 1 issues resolved.*
-*   [ ] **`TestingLibraryElementError`s:** Fix element query failures (`Unable to find...`, `Found multiple...`) on a test-by-test basis, likely starting with Login/Registration flows (`user-auth-flow.test.tsx`). -> *Action: Update selectors/assertions to match current UI.*
-*   [ ] **Runtime Type Errors:** Fix errors like `TypeError: accounts.map is not a function` (`ConnectedAccounts` in `user-auth-flow.test.tsx`). -> *Action: Ensure tests provide correctly typed mock data/props.*
-*   [ ] Address remaining test logic failures flow-by-flow.
+### C. Test Data & Prop Validation
+- Review and update test setups to provide valid, realistic mock data for all required props.
+- Ensure all required props and mock data are provided for each test.
 
-**Layer 3: E2E Tests (Lower Priority)**
+### D. Environment Variable Setup
+- Ensure all required environment variables are set in the test environment (e.g., in `vitest.setup.ts` or `.env.test`).
+- Mock `process.env` as needed for specific tests.
 
-*   *Prerequisite: Layer 1 & 2 issues resolved.*
-*   [ ] Address any remaining E2E test failures.
+### E. Resource/Memory Issue Mitigation
+- Refactor tests with large data or infinite loops.
+- Mock all async/network calls to avoid hanging promises and timeouts.
+
+## 2. Systematic Import Path and Mock Audit
+- Audit all test files for correct, absolute import paths.
+- Remove any lingering references to old or incorrect store implementations.
+- Ensure all test files use the correct, robust mocks from `/src/tests/mocks/`.
+
+## 3. Expand/Refactor Coverage for Missing Flows
+- Use the updated `GAP_ANALYSIS.md` and the "Explicitly Missing Test Coverage" section above as a checklist.
+- For each uncovered store/feature, plan and implement:
+  - Integration tests (simulate user actions, store state changes, API interactions)
+  - Component tests (if there are UI components for these flows)
+  - E2E tests (for full user journeys, if not already present)
+- Prioritize adding tests for the most critical missing flows (e.g., company profile, user preferences, 2FA edge cases, subscription E2E).
+
+## 4. Iterative Test Remediation
+- After each fix, re-run only the affected test files to verify the fix before running the full suite again.
+- Update documentation as issues are resolved or new ones are found.
+
+---
+
+**Always work through these steps in order, updating this findings file as each is completed or as new issues are discovered.**
+
+# Test Findings Status Update (2024-06-24)
+
+**Latest Status:**
+- Zustand auth store mock is now robust and compatible with all usage patterns (function call, getState, setState, subscribe, destroy, destructured calls). All interface-related failures for useAuthStore are resolved.
+- Most auth store-related test failures are now fixed. Remaining failures are due to business logic, selector mismatches, unmocked API/network calls, or environment issues—not the store mock itself.
+- Data export, member removal, and session management tests are failing due to either missing/incorrect mocks, selector mismatches, or JSDOM limitations (navigation not implemented).
+- Some tests fail due to missing or misconfigured environment variables.
+- Out-of-memory and timeout issues persist in some tests, likely due to unmocked async calls or large test data.
+- **Next steps:** Focus on fixing business logic/selector issues in failing tests, ensure all API/network calls are mocked, and address environment variable setup for tests. Continue import path audit and expand coverage for missing flows (a11y, i18n, mobile, onboarding, integrations, legal/compliance) once core issues are resolved.
+
+# Action Plan (2024-06-24)
+
+**Follow this prioritized, step-by-step plan to systematically resolve remaining test issues and improve coverage:**
+
+## 1. Triage and Fix High-Impact Test Failures First
+
+### A. Selector/Label Mismatches & Test Logic
+- Review failing tests for selector mismatches and update queries to match the actual DOM.
+- Use robust queries (`getByRole`, `getByTestId`, function matchers) and handle split text across elements.
+
+### B. Mock All API/Network Calls
+- Use MSW or `vi.spyOn` to mock all backend/network calls in tests (e.g., data export, member removal, session revoke).
+- Simulate both success and error responses as needed.
+
+### C. Environment Variable Setup
+- Ensure all required environment variables are set in the test environment (e.g., in `vitest.setup.ts` or `.env.test`).
+- Mock `process.env` as needed for specific tests.
+
+## 2. Address Resource/Timeout Issues
+- Refactor tests with large data or infinite loops.
+- Mock all async/network calls to avoid hanging promises and timeouts.
+
+## 3. Systematic Import Path Audit
+- Audit all test files for correct, absolute import paths.
+- Remove any lingering references to the old `project` directory.
+
+## 4. Expand/Refactor Coverage (Once Core Issues Are Fixed)
+- Add/expand tests for: Accessibility (a11y), internationalization (i18n), mobile/responsive flows, onboarding/guided checklists, integrations (webhooks, API keys), and legal/compliance flows.
+
+---
+
+**Team Note:** Work through these steps in order, updating this findings file as each is completed or as new issues are discovered.
+
+---Create robust mocks for all other major Zustand stores (profile, preferences, session, etc.) in src/tests/mocks/, following the pattern of auth.store.mock.ts:
+Implement all expected state and methods.
+Include getState, setState, subscribe, destroy.
+Allow for method overrides and initial state injection.
+
+# Explicitly Missing Test Coverage (2024-06)
+
+The following flows/features have no E2E, integration, or component test coverage (or only skeletons exist):
+
+- Company Profile CRUD: No E2E/integration/component tests for company profile management.
+- User Preferences: No direct tests for user settings/preferences CRUD.
+- 2FA/MFA Edge Cases: No tests for disabling 2FA, error states, admin override.
+- Subscription Management: No E2E for full payment/checkout/invoice journey (skeleton exists).
+- Audit Logging: No explicit E2E/integration/component tests for audit log viewing/export.
+- Session Management: No tests for admin session revocation, session expiration, error handling.
+- SSO/Account Linking: E2E skeletons exist, not implemented/verified; integration tests need expansion.
+- Accessibility (a11y): No automated/manual test coverage.
+- Internationalization (i18n): No test coverage for i18n or language switching.
+- Mobile-Specific Flows: No test coverage for push notifications, biometric auth, responsive UI.
+- Onboarding & Guided Checklists: No test coverage for onboarding, checklists, first-time user flows.
+- Integrations: No test coverage for webhooks, API key management.
+- Legal/Compliance: No test coverage for ToS/privacy acceptance, residency.
+
+## Systematic Test Remediation Plan Update (2024-06)
+
+**Summary:**
+A new, systematic remediation plan has been adopted to address widespread test failures and improve reliability. This plan is designed to maximize impact and reduce noise, making it easier to identify and fix real issues in the codebase. See `docs/TESTING_ISSUES.md` for full details.
+
+### Key Steps:
+1. **Batch-Fix React act(...) Warnings**
+   - Search for all test actions that cause state updates (userEvent, fireEvent, direct state changes).
+   - Wrap these actions in `await act(async () => { ... })` or `await waitFor(...)` as appropriate.
+   - Apply this fix across all test files as the immediate next step.
+2. **Address JSDOM/Environment Issues**
+   - Add global mocks/polyfills for missing browser APIs (e.g., navigation) in the test setup file.
+   - Ensure all required environment variables are set or mocked for tests.
+3. **Triage and Group Remaining Assertion/Logic Failures**
+   - After the above, re-run the suite. Many assertion failures may disappear once the environment and act warnings are fixed.
+   - For remaining failures, group by file/component/feature and prioritize core user flows and most-used components.
+   - Fix or update tests to match current app logic, or fix real bugs if found.
+4. **Document and Track Progress**
+   - Maintain this file and TESTING_ISSUES.md with categories of failures, files/tests affected, and status.
+5. **Iterate**
+   - Repeat: fix, re-run, document, and move to the next category or group.
+
+**Immediate Next Step:**
+- Begin the batch-fix for React `act(...)` warnings across all test files.
+
+---

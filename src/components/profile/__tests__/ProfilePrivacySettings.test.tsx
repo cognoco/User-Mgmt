@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ProfilePrivacySettings } from '@/components/profile/ProfilePrivacySettings';
 import { useProfileStore } from '@/lib/stores/profile.store';
@@ -41,8 +41,10 @@ describe('ProfilePrivacySettings', () => {
     });
   });
 
-  test('renders privacy settings form with current values', () => {
-    render(<ProfilePrivacySettings />);
+  test('renders privacy settings form with current values', async () => {
+    await act(async () => {
+      render(<ProfilePrivacySettings />);
+    });
     
     // Check if all privacy toggles are rendered
     expect(screen.getByLabelText(/public profile/i)).toBeInTheDocument();
@@ -75,7 +77,9 @@ describe('ProfilePrivacySettings', () => {
       updateVisibilitySettings: mockUpdateVisibilitySettings
     });
 
-    render(<ProfilePrivacySettings />);
+    await act(async () => {
+      render(<ProfilePrivacySettings />);
+    });
     
     // Change profile visibility
     await user.click(screen.getByLabelText(/public profile/i));
@@ -110,7 +114,9 @@ describe('ProfilePrivacySettings', () => {
       updateVisibilitySettings: mockUpdateVisibilitySettings
     });
 
-    render(<ProfilePrivacySettings />);
+    await act(async () => {
+      render(<ProfilePrivacySettings />);
+    });
     
     // Change location visibility
     await user.selectOptions(screen.getByLabelText(/location visibility/i), 'public');
@@ -144,7 +150,9 @@ describe('ProfilePrivacySettings', () => {
       updateVisibilitySettings: vi.fn()
     });
 
-    render(<ProfilePrivacySettings />);
+    await act(async () => {
+      render(<ProfilePrivacySettings />);
+    });
     
     // Verify loading states
     expect(screen.getByTestId('privacy-settings-spinner')).toBeInTheDocument();
@@ -174,7 +182,9 @@ describe('ProfilePrivacySettings', () => {
       updateVisibilitySettings: mockUpdateVisibilitySettings
     });
 
-    render(<ProfilePrivacySettings />);
+    await act(async () => {
+      render(<ProfilePrivacySettings />);
+    });
     
     // Change setting
     await user.click(screen.getByLabelText(/public profile/i));
@@ -191,7 +201,9 @@ describe('ProfilePrivacySettings', () => {
       isLoading: false
     });
 
-    render(<ProfilePrivacySettings />);
+    await act(async () => {
+      render(<ProfilePrivacySettings />);
+    });
     
     // Verify all controls are disabled
     expect(screen.getByLabelText(/public profile/i)).toBeDisabled();
@@ -206,7 +218,9 @@ describe('ProfilePrivacySettings', () => {
       isLoading: false
     });
 
-    render(<ProfilePrivacySettings />);
+    await act(async () => {
+      render(<ProfilePrivacySettings />);
+    });
     
     // Hover over disabled control
     await user.hover(screen.getByLabelText(/public profile/i));

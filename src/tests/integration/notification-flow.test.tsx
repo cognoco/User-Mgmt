@@ -7,7 +7,7 @@ import { NotificationPreferences } from '@/components/shared/NotificationPrefere
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 
 // Import our standardized mock
-vi.mock('@/lib/supabase', () => require('../__mocks__/supabase'));
+vi.mock('@/lib/supabase', () => require('../mocks/supabase'));
 import { supabase } from '@/lib/supabase';
 
 describe('Notification Management Flow', () => {

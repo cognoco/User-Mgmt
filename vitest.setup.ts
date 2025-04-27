@@ -6,6 +6,7 @@ import '@testing-library/jest-dom';
 import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
+import { createMockAuthStore } from '@/tests/mocks/auth.store.mock';
 
 // Extend Vitest's expect method with methods from react-testing-library
 expect.extend(matchers);
@@ -35,7 +36,7 @@ vi.stubGlobal('fetch', fetchMock);
 vi.mock('react-i18next', () => ({
   // Mock the useTranslation hook
   useTranslation: () => ({
-    t: (key: string) => key, // Basic translation function: returns the key
+    t: (key: string) => `[i18n:${key}]`, // Return key wrapped for identification
     i18n: {
       changeLanguage: () => new Promise(() => {}), // Mock function doesn't need to resolve
       // Add other i18n properties/methods if needed by components
@@ -46,7 +47,7 @@ vi.mock('react-i18next', () => ({
     },
   }),
   // Mock Trans component if used
-  Trans: ({ i18nKey }: { i18nKey: string }) => i18nKey,
+  Trans: ({ i18nKey }: { i18nKey: string }) => `[i18n:${i18nKey}]`, // Apply same logic to Trans
   // Mock I18nextProvider if needed (usually not needed if useTranslation is mocked)
   // I18nextProvider: ({ children }) => children,
 }));
@@ -77,23 +78,14 @@ vi.mock('@/lib/api/axios', () => ({
 // --- End Axios mock --- 
 
 // --- Mock Auth Store --- 
-vi.mock('@/lib/stores/auth.store', () => ({ useAuthStore: vi.fn(() => ({
-  register: vi.fn(),
-  isLoading: false,
-  error: null,
-  successMessage: null,
-  user: null,
-  isAuthenticated: false,
-  clearError: vi.fn(),
-  clearSuccessMessage: vi.fn(),
-  login: vi.fn(),
-  logout: vi.fn(),
-  sendVerificationEmail: vi.fn(),
-  deleteAccount: vi.fn(),
-  setState: vi.fn(),
-  getState: vi.fn(() => ({})),
-  // Add other store functions/state as needed
-})) }));
+const mockStore = createMockAuthStore();
+Object.assign(mockStore, {
+  setState: mockStore.setState,
+  getState: mockStore.getState,
+  subscribe: mockStore.subscribe,
+  destroy: mockStore.destroy,
+});
+vi.mock('@/lib/stores/auth.store', () => ({ useAuthStore: mockStore }));
 // --- End Auth Store mock --- 
 
 // --- Mock User Store ---
@@ -188,7 +180,6 @@ vi.mock('next/navigation', () => {
 
 // --- Mock ResizeObserver for JSDOM (required for Radix UI components in tests) ---
 if (typeof window !== 'undefined' && !window.ResizeObserver) {
-  // @ts-ignore
   window.ResizeObserver = class {
     observe() {}
     unobserve() {}

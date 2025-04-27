@@ -5,6 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DomainBasedOrgMatching } from '@/components/auth/DomainBasedOrgMatching';
 import { api } from '@/lib/api/axios';
 import { z } from 'zod';
+import { act } from 'react-dom/test-utils';
 
 // Mock necessary dependencies
 vi.mock('@/lib/api/axios');
@@ -30,7 +31,7 @@ const mockFormState: FormState = {
 const mockFormContext = {
   register: (name: string) => ({
     name,
-    onChange: (e: any) => {
+    onChange: (_e: any) => {
       mockFormState.isDirty = true;
       mockFormState.isValid = true;
       mockFormState.errors = {};
@@ -166,7 +167,7 @@ vi.mock('@/components/ui/form', () => ({
   FormField: ({ name, render }: { name: string; render: (props: { field: any; formState: FormState }) => React.ReactNode }) => {
     const field = {
       name,
-      onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange: (_e: React.ChangeEvent<HTMLInputElement>) => {
         mockFormState.isDirty = true;
         mockFormState.isValid = true;
         mockFormState.errors = {};
@@ -203,8 +204,8 @@ vi.mock('@/components/ui/form', () => ({
   ),
 }));
 
-vi.mock('@/components/ui/input', () => ({
-  Input: React.forwardRef(({ name, onChange, value, placeholder }: any, ref: any) => (
+vi.mock('@/components/ui/input', () => {
+  const MockInput = React.forwardRef(({ name, onChange, value, placeholder }: any, ref: any) => (
     <input 
       data-testid="input"
       name={name}
@@ -213,26 +214,24 @@ vi.mock('@/components/ui/input', () => ({
       placeholder={placeholder}
       onChange={(e) => onChange?.(e)}
     />
-  )),
-}));
+  ));
+  MockInput.displayName = 'Input'; 
+  return { Input: MockInput };
+});
 
 vi.mock('@/components/ui/button', () => ({
-  Button: ({ 
-    children, 
-    disabled, 
-    onClick, 
+  Button: ({
+    children,
+    disabled,
+    onClick,
     type = 'button',
-    variant,
-    size,
     className,
-    'aria-label': ariaLabel 
-  }: { 
+    'aria-label': ariaLabel
+  }: {
     children: React.ReactNode;
     disabled?: boolean;
     onClick?: () => void;
     type?: 'button' | 'submit';
-    variant?: string;
-    size?: string;
     className?: string;
     'aria-label'?: string;
   }) => (
@@ -352,7 +351,9 @@ describe('DomainBasedOrgMatching', () => {
   });
 
   it('renders the component with initial state (disabled)', async () => {
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     await waitFor(() => {
       expect(mockApiGet).toHaveBeenCalledWith('/api/organizations/test-org/domains');
@@ -369,7 +370,9 @@ describe('DomainBasedOrgMatching', () => {
   it('shows loading skeletons while fetching initial data', async () => {
     mockApiGet.mockImplementationOnce(() => new Promise(resolve => setTimeout(resolve, 100)));
     
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
     
     const skeletons = screen.getAllByTestId(/skeleton/);
     expect(skeletons.length).toBeGreaterThan(0);
@@ -390,7 +393,9 @@ describe('DomainBasedOrgMatching', () => {
       },
     });
 
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     await waitFor(() => {
       expect(mockApiGet).toHaveBeenCalledWith('/api/organizations/test-org/domains');
@@ -410,7 +415,9 @@ describe('DomainBasedOrgMatching', () => {
   });
 
   it('toggles domains matching when switch is clicked', async () => {
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     await waitFor(() => {
       expect(mockApiGet).toHaveBeenCalledWith('/api/organizations/test-org/domains');
@@ -439,7 +446,9 @@ describe('DomainBasedOrgMatching', () => {
       },
     });
 
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     await waitFor(() => {
       expect(mockApiGet).toHaveBeenCalledWith('/api/organizations/test-org/domains');
@@ -466,7 +475,9 @@ describe('DomainBasedOrgMatching', () => {
       resolvePost = resolve;
     }));
 
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     // Fill and submit form
     const input = screen.getByTestId('input');
@@ -509,7 +520,9 @@ describe('DomainBasedOrgMatching', () => {
       },
     });
 
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     await waitFor(() => {
       expect(mockApiGet).toHaveBeenCalledWith('/api/organizations/test-org/domains');
@@ -541,7 +554,9 @@ describe('DomainBasedOrgMatching', () => {
       }
     });
 
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     // Fill and submit form
     const input = screen.getByTestId('input');
@@ -580,7 +595,9 @@ describe('DomainBasedOrgMatching', () => {
       }
     });
 
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     // Fill and submit form
     const input = screen.getByTestId('input');
@@ -620,7 +637,9 @@ describe('DomainBasedOrgMatching', () => {
       }
     });
 
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     await waitFor(() => {
       expect(mockApiGet).toHaveBeenCalledWith('/api/organizations/test-org/domains');
@@ -642,7 +661,9 @@ describe('DomainBasedOrgMatching', () => {
   });
 
   it('validates domain format before submission', async () => {
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     // Type an invalid domain
     const input = screen.getByTestId('input');
@@ -706,7 +727,9 @@ describe('DomainBasedOrgMatching', () => {
       }
     });
     
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
     
     await waitFor(() => {
       const cardContent = screen.getByTestId('card-content');
@@ -722,7 +745,9 @@ describe('DomainBasedOrgMatching', () => {
       resolveGet = resolve;
     }));
 
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     // Should show skeletons while loading
     expect(screen.getAllByTestId('skeleton')).toHaveLength(3);
@@ -741,11 +766,13 @@ describe('DomainBasedOrgMatching', () => {
   });
 
   it('validates domain format on blur', async () => {
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     const input = screen.getByTestId('input');
     await userEvent.type(input, 'invalid-domain');
-    input.blur();
+    await input.blur();
 
     await waitFor(() => {
       const message = screen.getByTestId('form-message');
@@ -756,7 +783,9 @@ describe('DomainBasedOrgMatching', () => {
   });
 
   it('shows form-level validation message on submit with invalid domain', async () => {
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     const input = screen.getByTestId('input');
     await userEvent.type(input, 'invalid-domain');
@@ -774,7 +803,9 @@ describe('DomainBasedOrgMatching', () => {
   });
 
   it('handles successful form submission', async () => {
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     const input = screen.getByTestId('input');
     await userEvent.type(input, 'example.com');
@@ -808,7 +839,9 @@ describe('DomainBasedOrgMatching', () => {
     // Mock API delay
     mockApiPost.mockImplementationOnce(() => new Promise(resolve => setTimeout(resolve, 100)));
 
-    render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    await act(async () => {
+      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+    });
 
     // Fill and submit form
     const input = screen.getByTestId('input');

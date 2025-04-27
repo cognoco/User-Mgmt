@@ -17,7 +17,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'; // A
 // Mock Supabase (using factory with dynamic import)
 vi.mock('@/lib/supabase', async (/* importOriginal */) => {
   // Import the actual mock implementation using dynamic import
-  const mockModule = await vi.importActual('../__mocks__/supabase') as { supabase: any }; 
+  const mockModule = await vi.importActual('@/tests/mocks/supabase') as { supabase: any }; 
   return {
     supabase: mockModule.supabase, // Return the mocked supabase object
     // Include other exports from the original module if needed
@@ -27,7 +27,10 @@ vi.mock('@/lib/supabase', async (/* importOriginal */) => {
 import { supabase } from '@/lib/supabase';
 
 // Import Profile type
-import type { Profile } from '../../types/profile'; // Assuming type exists here
+import type { Profile } from '@/types/profile'; // Assuming type exists here
+import type { User, RateLimitInfo } from '@/types/auth'; // Import types
+// If ConnectedAccount is only used as a type, re-import it from the correct alias
+import type { ConnectedAccount } from '@/types/connected-accounts';
 
 // --- Mock Profile Store with exported state object ---
 const mockProfileStoreActions = {
@@ -51,9 +54,21 @@ vi.mock('@/lib/stores/profile.store', () => ({
 }));
 // --- End Profile Store Mock ---
 
-// --- Revert to vi.mock for Auth Store with exported mock state ---
-import type { User, RateLimitInfo } from '../../types/auth'; // Import types
+// --- Mock Connected Accounts Store ---
+// import { useConnectedAccountsStore } from '@/lib/stores/connected-accounts.store';
+// import { ConnectedAccount } from '@/types/connected-accounts';
+// import { OAuthProvider } from '@/types/oauth';
 
+import { createConnectedAccountsStoreMock } from '@/tests/mocks/connected-accounts.store.mock';
+
+let mockConnectedAccountsStoreActions = createConnectedAccountsStoreMock();
+
+vi.mock('@/lib/stores/connected-accounts.store', () => ({
+  useConnectedAccountsStore: vi.fn(() => mockConnectedAccountsStoreActions)
+}));
+// --- End Connected Accounts Store Mock ---
+
+// --- Revert to vi.mock for Auth Store with exported mock state ---
 const mockAuthStoreActions = {
   user: null as User | null, // Use type assertion for initial null
   token: null as string | null,
@@ -116,7 +131,12 @@ describe('User Authentication Flow', () => {
     mockAuthStoreActions.error = null;
     mockAuthStoreActions.successMessage = null;
     mockAuthStoreActions.isLoading = false;
-    // ... reset other relevant mock state properties
+    // Reset connected accounts store state
+    mockConnectedAccountsStoreActions = createConnectedAccountsStoreMock();
+    // Reset profile store state
+    mockProfileStoreActions.profile = null;
+    mockProfileStoreActions.isLoading = false;
+    mockProfileStoreActions.error = null;
     
     user = userEvent.setup();
   });
@@ -138,15 +158,29 @@ describe('User Authentication Flow', () => {
     const { unmount: unmountSignup } = render(<RegistrationForm />); 
 
     // Fill sign up form
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await user.type(screen.getByLabelText(/^Password \*$/i), 'Password123');
-    await user.type(screen.getByLabelText(/first name \*/i), 'Test');
-    await user.type(screen.getByLabelText(/last name \*/i), 'User');
-    await user.type(screen.getByLabelText(/^Confirm Password \*$/i), 'Password123');
-    await user.click(screen.getByRole('checkbox', { name: /accept terms/i }));
+    await act(async () => {
+      await user.type(screen.getByLabelText(/email \*/i), 'test@example.com');
+    });
+    await act(async () => {
+      await user.type(screen.getByLabelText(/^Password \*$/i), 'Password123');
+    });
+    await act(async () => {
+      await user.type(screen.getByLabelText(/first name \*/i), 'Test');
+    });
+    await act(async () => {
+      await user.type(screen.getByLabelText(/last name \*/i), 'User');
+    });
+    await act(async () => {
+      await user.type(screen.getByLabelText(/^Confirm Password \*$/i), 'Password123');
+    });
+    await act(async () => {
+      await user.click(screen.getByRole('checkbox', { name: /accept terms/i }));
+    });
 
     // Submit sign up form 
-    await user.click(screen.getByRole('button', { name: /create account/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /create account/i }));
+    });
 
     // Verify mockRegister was called
     await waitFor(() => {
@@ -169,8 +203,12 @@ describe('User Authentication Flow', () => {
     const { unmount: unmountLogin } = render(<LoginForm />); 
 
     // Fill login form
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await user.type(screen.getByLabelText(/^Password$/i), 'Password123');
+    await act(async () => {
+      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+    });
+    await act(async () => {
+      await user.type(screen.getByLabelText(/^Password$/i), 'Password123');
+    });
 
     // Submit login form (use act)
     await act(async () => {

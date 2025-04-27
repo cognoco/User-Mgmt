@@ -3,14 +3,14 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AccountSwitcher } from '\.\.\/\.\.\/src\/components/account/AccountSwitcher';
+import { AccountSwitcher } from '@/components/account/AccountSwitcher';
 
 // Import our standardized mock
-jest.mock('@/lib/supabase');
-import { supabase } from '\.\.\/\.\.\/src\/lib/supabase';
+vi.mock('@/lib/supabase', () => require('@/tests/mocks/supabase'));
+import { supabase } from '@/lib/supabase';
 
 describe('Account Switching Flow', () => {
-  let user;
+  let user: ReturnType<typeof userEvent.setup>;
   
   // Mock accounts data
   const mockAccounts = [
@@ -20,11 +20,11 @@ describe('Account Switching Flow', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     user = userEvent.setup();
     
     // Mock current user and session
-    supabase.auth.getUser.mockResolvedValue({
+    (supabase.auth.getUser as any).mockResolvedValue({
       data: { 
         user: { 
           id: 'user-123', 
@@ -36,7 +36,7 @@ describe('Account Switching Flow', () => {
     });
     
     // Mock available accounts
-    supabase.from().select.mockResolvedValueOnce({
+    (supabase.from('accounts').select as any).mockResolvedValueOnce('*', {
       data: mockAccounts,
       error: null
     });
@@ -45,43 +45,39 @@ describe('Account Switching Flow', () => {
   test('User can view and switch between accounts', async () => {
     // Render account switcher
     render(<AccountSwitcher />);
-    
+    // Wait for loading spinner to disappear
+    await waitFor(() => {
+      expect(screen.queryByText(/loading accounts/i)).not.toBeInTheDocument();
+    });
     // Wait for accounts to load
     await waitFor(() => {
       expect(screen.getByText('Personal Account')).toBeInTheDocument();
       expect(screen.getByText('Work Account')).toBeInTheDocument();
       expect(screen.getByText('Client Project')).toBeInTheDocument();
     });
-    
     // Verify current account is indicated
     expect(screen.getByText('Personal Account').closest('li')).toHaveClass('active-account');
-    
     // Mock successful account switch
-    supabase.rpc = jest.fn().mockResolvedValueOnce({
+    supabase.rpc = vi.fn().mockResolvedValueOnce({
       data: { success: true },
       error: null
     });
-    
     // Switch to work account
     await user.click(screen.getByText('Work Account'));
-    
     // Verify RPC call was made with correct parameters
     expect(supabase.rpc).toHaveBeenCalledWith('switch_account', {
       account_id: 'work'
     });
-    
-    // Verify loading state during switch
-    expect(screen.getByText(/switching/i)).toBeInTheDocument();
-    
+    // Verify spinner during switch
+    expect(screen.getByText('🔄')).toBeInTheDocument();
     // Mock page reload
-    const mockReload = jest.fn();
+    const mockReload = vi.fn();
     Object.defineProperty(window, 'location', {
       value: {
         reload: mockReload
       },
       writable: true
     });
-    
     // Verify page reload was triggered after successful switch
     await waitFor(() => {
       expect(mockReload).toHaveBeenCalled();
@@ -91,20 +87,20 @@ describe('Account Switching Flow', () => {
   test('User can create a new organization account', async () => {
     // Render account switcher
     render(<AccountSwitcher />);
-    
+    // Wait for loading spinner to disappear
+    await waitFor(() => {
+      expect(screen.queryByText(/loading accounts/i)).not.toBeInTheDocument();
+    });
     // Wait for accounts to load
     await waitFor(() => {
       expect(screen.getByText('Personal Account')).toBeInTheDocument();
     });
-    
     // Click create new organization button
     await user.click(screen.getByRole('button', { name: /create organization/i }));
-    
     // Fill organization details
     await user.type(screen.getByLabelText(/organization name/i), 'New Organization');
-    
     // Mock successful creation
-    supabase.from().insert.mockResolvedValueOnce({
+    (supabase.from('accounts').insert as any).mockResolvedValueOnce({
       data: { 
         id: 'new-org', 
         name: 'New Organization', 
@@ -113,28 +109,23 @@ describe('Account Switching Flow', () => {
       },
       error: null
     });
-    
     // Submit form
     await user.click(screen.getByRole('button', { name: /create/i }));
-    
     // Verify insert was called with correct data
-    expect(supabase.from().insert).toHaveBeenCalledWith({
+    expect(supabase.from('accounts').insert).toHaveBeenCalledWith({
       name: 'New Organization',
       type: 'organization',
       owner_id: 'user-123'
     });
-    
     // Verify success message
     await waitFor(() => {
       expect(screen.getByText(/organization created/i)).toBeInTheDocument();
     });
-    
     // Mock automatic switch to new account
-    supabase.rpc = jest.fn().mockResolvedValueOnce({
+    supabase.rpc = vi.fn().mockResolvedValueOnce({
       data: { success: true },
       error: null
     });
-    
     // Verify RPC call to switch account
     expect(supabase.rpc).toHaveBeenCalledWith('switch_account', {
       account_id: 'new-org'
@@ -149,7 +140,7 @@ describe('Account Switching Flow', () => {
     ];
     
     // Mock members query
-    supabase.from().select.mockImplementation((query) => {
+    (supabase.from('organization_members').select as any).mockImplementation((query: string) => {
       if (query && query.includes('members')) {
         return Promise.resolve({
           data: mockMembers,
@@ -211,7 +202,7 @@ describe('Account Switching Flow', () => {
     await user.click(screen.getByRole('button', { name: /confirm/i }));
     
     // Mock successful leave operation
-    supabase.rpc = jest.fn().mockResolvedValueOnce({
+    supabase.rpc = vi.fn().mockResolvedValueOnce({
       data: { success: true },
       error: null
     });
@@ -222,7 +213,7 @@ describe('Account Switching Flow', () => {
     });
     
     // Mock account list refresh - organization removed
-    supabase.from().select.mockResolvedValueOnce({
+    (supabase.from('accounts').select as any).mockResolvedValueOnce('*', {
       data: [mockAccounts[0], mockAccounts[2]], // Work account removed
       error: null
     });
@@ -244,7 +235,7 @@ describe('Account Switching Flow', () => {
     });
     
     // Mock error during account switch
-    supabase.rpc = jest.fn().mockResolvedValueOnce({
+    supabase.rpc = vi.fn().mockResolvedValueOnce({
       data: null,
       error: { message: 'Error switching accounts' }
     });

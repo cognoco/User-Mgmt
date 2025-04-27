@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import SessionManagement from '../SessionManagement';
 import { useSessionStore } from '@/lib/stores/session.store';
@@ -44,8 +45,10 @@ describe('SessionManagement', () => {
     vi.clearAllMocks();
   });
 
-  it('renders session list and highlights current session', () => {
-    render(<SessionManagement />);
+  it('renders session list and highlights current session', async () => {
+    await act(async () => {
+      render(<SessionManagement />);
+    });
     expect(screen.getByText('Active Sessions')).toBeInTheDocument();
     expect(screen.getByText('Chrome on Windows')).toBeInTheDocument();
     expect(screen.getByText('Safari on iPhone')).toBeInTheDocument();
@@ -55,15 +58,19 @@ describe('SessionManagement', () => {
   });
 
   it('calls revokeSession when Revoke button is clicked', async () => {
-    render(<SessionManagement />);
+    await act(async () => {
+      render(<SessionManagement />);
+    });
     const revokeBtn = screen.getByText('Revoke');
-    fireEvent.click(revokeBtn);
+    await act(async () => {
+      await userEvent.click(revokeBtn);
+    });
     await waitFor(() => {
       expect(revokeSession).toHaveBeenCalledWith('session-2');
     });
   });
 
-  it('shows loading state', () => {
+  it('shows loading state', async () => {
     (useSessionStore as any).mockReturnValue({
       sessions: [],
       sessionLoading: true,
@@ -71,11 +78,13 @@ describe('SessionManagement', () => {
       fetchSessions,
       revokeSession,
     });
-    render(<SessionManagement />);
+    await act(async () => {
+      render(<SessionManagement />);
+    });
     expect(screen.getByText('Loading sessions...')).toBeInTheDocument();
   });
 
-  it('shows error state', () => {
+  it('shows error state', async () => {
     (useSessionStore as any).mockReturnValue({
       sessions: [],
       sessionLoading: false,
@@ -83,11 +92,13 @@ describe('SessionManagement', () => {
       fetchSessions,
       revokeSession,
     });
-    render(<SessionManagement />);
+    await act(async () => {
+      render(<SessionManagement />);
+    });
     expect(screen.getByText('Failed to fetch')).toBeInTheDocument();
   });
 
-  it('shows empty state', () => {
+  it('shows empty state', async () => {
     (useSessionStore as any).mockReturnValue({
       sessions: [],
       sessionLoading: false,
@@ -95,7 +106,9 @@ describe('SessionManagement', () => {
       fetchSessions,
       revokeSession,
     });
-    render(<SessionManagement />);
+    await act(async () => {
+      render(<SessionManagement />);
+    });
     expect(screen.getByText('No active sessions found.')).toBeInTheDocument();
   });
 });

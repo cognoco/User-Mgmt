@@ -1,13 +1,56 @@
 // __tests__/utils/testing-utils.js
 
-import { supabase } from '../../lib/supabase';
+// Use Vitest's vi.fn() for mocking
+
+// Create a robust supabase mock with all chained methods
+export const supabase = {
+  auth: {
+    getUser: vi.fn(),
+    signInWithPassword: vi.fn(),
+    signUp: vi.fn(),
+    signOut: vi.fn(),
+    mfa: {
+      enroll: vi.fn(),
+      challenge: vi.fn(),
+      verify: vi.fn(),
+      listFactors: vi.fn(),
+      unenroll: vi.fn(),
+    },
+  },
+  from: vi.fn((_: string) => ({
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    upsert: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    range: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue({ data: null, error: null }),
+    maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    then: vi.fn(),
+  })),
+  storage: {
+    from: vi.fn((_: string) => ({
+      upload: vi.fn().mockResolvedValue({ data: null, error: null }),
+      getPublicUrl: vi.fn().mockReturnValue({ data: { publicUrl: '' } }),
+      download: vi.fn().mockResolvedValue({ data: null, error: null }),
+      remove: vi.fn().mockResolvedValue({ data: null, error: null }),
+      list: vi.fn().mockResolvedValue({ data: [], error: null }),
+    })),
+  },
+  rpc: vi.fn(),
+};
+
+// Optionally, replace the real supabase import with the mock in test environments
+vi.mock('../../lib/supabase', () => ({ supabase }));
 
 /**
  * Creates a mock user with customizable properties
  * @param {Object} overrides - Custom properties to override defaults
  * @returns {Object} A mock user object
  */
-export function createMockUser(overrides = {}) {
+export function createMockUser(overrides: any = {}) {
   return {
     id: 'test-user-id',
     email: 'test@example.com',
@@ -22,7 +65,7 @@ export function createMockUser(overrides = {}) {
  * @param {Object} overrides - Custom properties to override defaults
  * @returns {Object} A mock admin user object
  */
-export function createMockAdminUser(overrides = {}) {
+export function createMockAdminUser(overrides: any = {}) {
   return createMockUser({
     id: 'admin-user-id',
     email: 'admin@example.com',
@@ -36,7 +79,7 @@ export function createMockAdminUser(overrides = {}) {
  * @param {Object} overrides - Custom properties to override defaults
  * @returns {Object} A mock profile object
  */
-export function createMockProfile(overrides = {}) {
+export function createMockProfile(overrides: any = {}) {
   return {
     id: 'test-user-id',
     full_name: 'Test User',
@@ -51,7 +94,7 @@ export function createMockProfile(overrides = {}) {
  * @param {Object} user - User object to return from getUser
  * @param {Object|null} error - Optional error to return
  */
-export function mockAuthentication(user, error = null) {
+export function mockAuthentication(user: any, error: any = null) {
   supabase.auth.getUser.mockResolvedValue({
     data: { user },
     error
@@ -64,18 +107,18 @@ export function mockAuthentication(user, error = null) {
  * @param {Object|Array} data - Data to return
  * @param {string} operation - Operation type (select, insert, update, etc.)
  */
-export function mockDatabaseSuccess(table, data, operation = 'select') {
+export function mockDatabaseSuccess(table: any, data: any, operation: any = 'select') {
   const mockResponse = { data, error: null };
   
   // For operations that return a single item
   if (['single', 'maybeSingle'].includes(operation)) {
-    supabase.single.mockResolvedValue(mockResponse);
-    supabase.maybeSingle?.mockResolvedValue(mockResponse);
+    (supabase as any).single.mockResolvedValue(mockResponse);
+    (supabase as any).maybeSingle?.mockResolvedValue(mockResponse);
     return;
   }
   
   // For regular query operations
-  const mock = supabase.from(table);
+  const mock = (supabase.from(table) as any);
   
   if (operation === 'select') {
     mock.select.mockResolvedValue(mockResponse);
@@ -97,19 +140,19 @@ export function mockDatabaseSuccess(table, data, operation = 'select') {
  * @param {string} operation - Operation type (select, insert, update, etc.)
  * @param {number} code - Error code
  */
-export function mockDatabaseError(table, message, operation = 'select', code = 500) {
+export function mockDatabaseError(table: any, message: any, operation: any = 'select', code: any = 500) {
   const error = { message, code };
   const mockResponse = { data: null, error };
   
   // For operations that return a single item
   if (['single', 'maybeSingle'].includes(operation)) {
-    supabase.single.mockResolvedValue(mockResponse);
-    supabase.maybeSingle?.mockResolvedValue(mockResponse);
+    (supabase as any).single.mockResolvedValue(mockResponse);
+    (supabase as any).maybeSingle?.mockResolvedValue(mockResponse);
     return;
   }
   
   // For regular query operations
-  const mock = supabase.from(table);
+  const mock = (supabase.from(table) as any);
   
   if (operation === 'select') {
     mock.select.mockResolvedValue(mockResponse);
@@ -129,7 +172,7 @@ export function mockDatabaseError(table, message, operation = 'select', code = 5
  * @param {string} bucket - Bucket name
  * @param {Object} responses - Object containing responses for different operations
  */
-export function mockStorage(bucket, responses = {}) {
+export function mockStorage(bucket: any, responses: any = {}) {
   const defaultResponses = {
     upload: { data: { path: 'test-path.jpg' }, error: null },
     getPublicUrl: { data: { publicUrl: 'https://example.com/test.jpg' } },
@@ -139,7 +182,7 @@ export function mockStorage(bucket, responses = {}) {
   };
   
   const mockResponses = { ...defaultResponses, ...responses };
-  const mockBucket = supabase.storage.from(bucket);
+  const mockBucket = (supabase.storage.from(bucket) as any);
   
   // Configure mock responses
   Object.entries(mockResponses).forEach(([operation, response]) => {
@@ -156,17 +199,11 @@ export function mockStorage(bucket, responses = {}) {
  */
 export function setupMocks() {
   // Clear all mocks
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   
   // Set up default responses
   mockAuthentication(null);
-  supabase.from.mockReturnThis();
-  supabase.select.mockReturnThis();
-  supabase.storage.from.mockReturnValue({
-    upload: jest.fn().mockResolvedValue({ data: null, error: null }),
-    getPublicUrl: jest.fn().mockReturnValue({ data: { publicUrl: '' } }),
-    download: jest.fn().mockResolvedValue({ data: null, error: null }),
-    remove: jest.fn().mockResolvedValue({ data: null, error: null }),
-    list: jest.fn().mockResolvedValue({ data: [], error: null })
-  });
+  (supabase as any).from.mockReturnThis();
+  (supabase as any).select.mockReturnThis();
+  (supabase.storage.from as any).mockReturnValue();
 }

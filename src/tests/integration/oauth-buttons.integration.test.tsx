@@ -6,6 +6,7 @@ import { OAuthButtons } from '@/components/auth/OAuthButtons';
 import { useOAuthStore } from '@/lib/stores/oauth.store';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { OAuthProvider } from '@/types/oauth';
+import { createOAuthStoreMock } from '@/tests/mocks/oauth.store.mock';
 
 // Mock the hooks
 vi.mock('@/lib/stores/oauth.store');
@@ -23,12 +24,14 @@ describe('OAuthButtons Integration Tests', () => {
     vi.clearAllMocks();
 
     // Default mock implementation for OAuth Store
-    mockUseOAuthStore.mockReturnValue({
-      login: mockLogin,
-      isLoading: false,
-      error: null,
-      clearError: mockClearError,
-    });
+    mockUseOAuthStore.mockReturnValue(
+      createOAuthStoreMock({
+        login: mockLogin,
+        isLoading: false,
+        error: null,
+        clearError: mockClearError,
+      })
+    );
 
     // Default mock implementation for User Management context
     mockUseUserManagement.mockReturnValue({
@@ -76,12 +79,14 @@ describe('OAuthButtons Integration Tests', () => {
   it('should display an error message when there is an error', () => {
     // Arrange
     const errorMessage = 'Invalid credentials';
-    mockUseOAuthStore.mockReturnValue({
-      login: mockLogin,
-      isLoading: false,
-      error: errorMessage,
-      clearError: mockClearError,
-    });
+    mockUseOAuthStore.mockReturnValue(
+      createOAuthStoreMock({
+        login: mockLogin,
+        isLoading: false,
+        error: errorMessage,
+        clearError: mockClearError,
+      })
+    );
     render(<OAuthButtons />);
 
     // Assert
@@ -90,12 +95,14 @@ describe('OAuthButtons Integration Tests', () => {
 
   it('should disable buttons when loading', () => {
     // Arrange
-    mockUseOAuthStore.mockReturnValue({
-      login: mockLogin,
-      isLoading: true,
-      error: null,
-      clearError: mockClearError,
-    });
+    mockUseOAuthStore.mockReturnValue(
+      createOAuthStoreMock({
+        login: mockLogin,
+        isLoading: true,
+        error: null,
+        clearError: mockClearError,
+      })
+    );
     render(<OAuthButtons />);
 
     // Assert

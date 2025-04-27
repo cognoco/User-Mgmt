@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { AdminDashboard } from '../AdminDashboard';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act } from 'react-dom/test-utils';
 
 // Mock data
 const mockDashboardData = {
@@ -64,12 +65,14 @@ describe('AdminDashboard', () => {
     vi.clearAllMocks();
   });
 
-  it('renders loading state initially', () => {
+  it('renders loading state initially', async () => {
     mockFetch.mockImplementationOnce(() => 
       new Promise(() => {})
     );
 
-    render(<AdminDashboard />, { wrapper });
+    await act(async () => {
+      render(<AdminDashboard />, { wrapper });
+    });
 
     expect(screen.getByText('Team Overview')).toBeInTheDocument();
     expect(screen.getByText('Subscription Status')).toBeInTheDocument();
@@ -88,7 +91,9 @@ describe('AdminDashboard', () => {
       })
     );
 
-    render(<AdminDashboard />, { wrapper });
+    await act(async () => {
+      render(<AdminDashboard />, { wrapper });
+    });
 
     // Wait for data to load
     await waitFor(() => {
@@ -115,7 +120,9 @@ describe('AdminDashboard', () => {
       })
     );
 
-    render(<AdminDashboard />, { wrapper });
+    await act(async () => {
+      render(<AdminDashboard />, { wrapper });
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Error Loading Dashboard')).toBeInTheDocument();
@@ -136,7 +143,9 @@ describe('AdminDashboard', () => {
       })
     );
 
-    render(<AdminDashboard />, { wrapper });
+    await act(async () => {
+      render(<AdminDashboard />, { wrapper });
+    });
 
     await waitFor(() => {
       expect(screen.getByText('No recent activity to display')).toBeInTheDocument();
@@ -161,7 +170,9 @@ describe('AdminDashboard', () => {
         })
       );
 
-    render(<AdminDashboard />, { wrapper });
+    await act(async () => {
+      render(<AdminDashboard />, { wrapper });
+    });
 
     // Initial data
     await waitFor(() => {

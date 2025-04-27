@@ -4,8 +4,8 @@ import { createMocks } from 'node-mocks-http';
 import { withAuth } from '../../middleware/auth';
 
 // Import our standardized mock
-jest.mock('\.\.\/\.\.\/src\/lib/supabase', () => require('../__mocks__/supabase'));
-import { supabase } from '\.\.\/\.\.\/src\/lib/supabase';
+jest.mock('../../src/lib/supabase', () => require('../mocks/supabase'));
+import { supabase } from '../../src/lib/supabase';
 
 // Import utility functions
 import { setupTestEnvironment } from '../utils/environment-setup';

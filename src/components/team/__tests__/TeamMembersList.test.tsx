@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TeamMembersList } from '@/components/team/TeamMembersList';
-import { usePermission } from '@/lib/hooks/usePermission';
+import { usePermission } from '@/hooks/usePermission';
+import userEvent from '@testing-library/user-event';
 
 // Mock the usePermission hook
-vi.mock('@/lib/hooks/usePermission', () => ({
+vi.mock('@/hooks/usePermission', () => ({
   usePermission: vi.fn(),
 }));
 
@@ -65,10 +66,14 @@ const mockTeamMembers = {
   },
 };
 
-function renderWithProviders(ui: React.ReactElement) {
-  return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-  );
+async function renderWithProviders(ui: React.ReactElement) {
+  let result;
+  await act(async () => {
+    result = render(
+      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+    );
+  });
+  return result;
 }
 
 describe('TeamMembersList', () => {
@@ -81,9 +86,9 @@ describe('TeamMembersList', () => {
     });
   });
 
-  it('renders loading state initially', () => {
+  it('renders loading state initially', async () => {
     mockFetch.mockImplementationOnce(() => new Promise(() => {}));
-    renderWithProviders(<TeamMembersList />);
+    await renderWithProviders(<TeamMembersList />);
 
     expect(screen.getAllByRole('row')[0]).toHaveTextContent('Member');
     expect(screen.getAllByRole('row')[0]).toHaveTextContent('Role');
@@ -101,7 +106,7 @@ describe('TeamMembersList', () => {
       json: () => Promise.resolve(mockTeamMembers),
     });
 
-    renderWithProviders(<TeamMembersList />);
+    await renderWithProviders(<TeamMembersList />);
 
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
@@ -122,7 +127,7 @@ describe('TeamMembersList', () => {
       json: () => Promise.resolve(mockTeamMembers),
     });
 
-    renderWithProviders(<TeamMembersList />);
+    await renderWithProviders(<TeamMembersList />);
 
     await waitFor(() => {
       expect(screen.getByText('Invite Member')).toBeInTheDocument();
@@ -135,10 +140,12 @@ describe('TeamMembersList', () => {
       json: () => Promise.resolve(mockTeamMembers),
     });
 
-    renderWithProviders(<TeamMembersList />);
+    await renderWithProviders(<TeamMembersList />);
 
     const searchInput = screen.getByPlaceholderText('Search members...');
-    fireEvent.change(searchInput, { target: { value: 'john' } });
+    await act(async () => {
+      await userEvent.type(searchInput, 'john');
+    });
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
@@ -153,11 +160,13 @@ describe('TeamMembersList', () => {
       json: () => Promise.resolve(mockTeamMembers),
     });
 
-    renderWithProviders(<TeamMembersList />);
+    await renderWithProviders(<TeamMembersList />);
 
     const statusSelect = screen.getByRole('combobox');
-    fireEvent.click(statusSelect);
-    fireEvent.click(screen.getByText('Active'));
+    await act(async () => {
+      await userEvent.click(statusSelect);
+      await userEvent.click(screen.getByText('Active'));
+    });
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
@@ -172,10 +181,12 @@ describe('TeamMembersList', () => {
       json: () => Promise.resolve(mockTeamMembers),
     });
 
-    renderWithProviders(<TeamMembersList />);
+    await renderWithProviders(<TeamMembersList />);
 
     const roleSort = screen.getByText('Role').closest('button');
-    fireEvent.click(roleSort!);
+    await act(async () => {
+      await userEvent.click(roleSort!);
+    });
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
@@ -190,7 +201,7 @@ describe('TeamMembersList', () => {
       json: () => Promise.resolve(mockTeamMembers),
     });
 
-    renderWithProviders(<TeamMembersList />);
+    await renderWithProviders(<TeamMembersList />);
 
     await waitFor(() => {
       expect(screen.getByText('Seat Usage: 2/5')).toBeInTheDocument();
@@ -218,14 +229,16 @@ describe('TeamMembersList', () => {
         json: () => Promise.resolve(mockDataWithPagination),
       });
 
-    renderWithProviders(<TeamMembersList />);
+    await renderWithProviders(<TeamMembersList />);
 
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
 
-    const nextButton = screen.getByRole('button', { name: /next/i });
-    fireEvent.click(nextButton);
+    const nextButton = screen.getByText('Next');
+    await act(async () => {
+      await userEvent.click(nextButton);
+    });
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
@@ -237,7 +250,7 @@ describe('TeamMembersList', () => {
   it('displays error state', async () => {
     mockFetch.mockRejectedValueOnce(new Error('Failed to fetch'));
 
-    renderWithProviders(<TeamMembersList />);
+    await renderWithProviders(<TeamMembersList />);
 
     await waitFor(() => {
       expect(

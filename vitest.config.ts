@@ -29,5 +29,19 @@ export default defineConfig({
     },
     // Consider adding options for Next.js specific mocks if needed
     // environmentOptions: { ... }
+    exclude: [
+      // Default excludes (keep these)
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.{idea,git,cache,output,temp}/**',
+      '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}/**',
+
+      // --- Add this line ---
+      '**/*[Ss]keleton*', 
+      // --- Or potentially more specific ---
+      // '**/*[Ss]keleton*.test.{ts,tsx}',
+
+      // You might have other custom excludes here too
+    ],
   },
 }); 

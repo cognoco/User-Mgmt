@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '../ProtectedRoute';
 import { useAuthStore } from '../../../lib/stores/auth.store';
@@ -39,29 +39,33 @@ describe('ProtectedRoute', () => {
     }));
   });
 
-  it('should show loading state when authentication is being checked', () => {
+  it('should show loading state when authentication is being checked', async () => {
     (useAuthStore as any).mockImplementation(() => ({
       isAuthenticated: false,
       user: null,
       isLoading: true
     }));
 
-    render(
-      <ProtectedRoute>
-        <MockComponent />
-      </ProtectedRoute>
-    );
+    await act(async () => {
+      render(
+        <ProtectedRoute>
+          <MockComponent />
+        </ProtectedRoute>
+      );
+    });
 
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
 
   it('should redirect to login when user is not authenticated', async () => {
-    render(
-      <ProtectedRoute>
-        <MockComponent />
-      </ProtectedRoute>
-    );
+    await act(async () => {
+      render(
+        <ProtectedRoute>
+          <MockComponent />
+        </ProtectedRoute>
+      );
+    });
 
     await waitFor(() => {
       expect(mockRouter.replace).toHaveBeenCalledWith('/auth/login?returnUrl=/');
@@ -69,29 +73,33 @@ describe('ProtectedRoute', () => {
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
 
-  it('should render children when user is authenticated', () => {
+  it('should render children when user is authenticated', async () => {
     (useAuthStore as any).mockImplementation(() => ({
       isAuthenticated: true,
       user: { id: '1', email: 'test@example.com' },
       isLoading: false
     }));
 
-    render(
-      <ProtectedRoute>
-        <MockComponent />
-      </ProtectedRoute>
-    );
+    await act(async () => {
+      render(
+        <ProtectedRoute>
+          <MockComponent />
+        </ProtectedRoute>
+      );
+    });
 
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
     expect(mockRouter.replace).not.toHaveBeenCalled();
   });
 
   it('should handle custom redirect paths', async () => {
-    render(
-      <ProtectedRoute loginRedirect="/custom/login">
-        <MockComponent />
-      </ProtectedRoute>
-    );
+    await act(async () => {
+      render(
+        <ProtectedRoute redirectPath="/custom/login">
+          <MockComponent />
+        </ProtectedRoute>
+      );
+    });
 
     await waitFor(() => {
       expect(mockRouter.replace).toHaveBeenCalledWith('/custom/login?returnUrl=/');
@@ -99,7 +107,7 @@ describe('ProtectedRoute', () => {
   });
 
   describe('Role-based access control', () => {
-    it('should allow access when user has required role', () => {
+    it('should allow access when user has required role', async () => {
       (useAuthStore as any).mockImplementation(() => ({
         isAuthenticated: true,
         user: { 
@@ -110,11 +118,13 @@ describe('ProtectedRoute', () => {
         isLoading: false
       }));
 
-      render(
-        <ProtectedRoute requiredRoles={['admin']}>
-          <MockComponent />
-        </ProtectedRoute>
-      );
+      await act(async () => {
+        render(
+          <ProtectedRoute requiredRoles={['admin']}>
+            <MockComponent />
+          </ProtectedRoute>
+        );
+      });
 
       expect(screen.getByText('Protected Content')).toBeInTheDocument();
     });
@@ -130,17 +140,19 @@ describe('ProtectedRoute', () => {
         isLoading: false
       }));
 
-      render(
-        <ProtectedRoute requiredRoles={['admin']}>
-          <MockComponent />
-        </ProtectedRoute>
-      );
+      await act(async () => {
+        render(
+          <ProtectedRoute requiredRoles={['admin']}>
+            <MockComponent />
+          </ProtectedRoute>
+        );
+      });
 
       expect(screen.getByText('Access Denied')).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
 
-    it('should handle multiple required roles', () => {
+    it('should handle multiple required roles', async () => {
       (useAuthStore as any).mockImplementation(() => ({
         isAuthenticated: true,
         user: { 
@@ -151,16 +163,18 @@ describe('ProtectedRoute', () => {
         isLoading: false
       }));
 
-      render(
-        <ProtectedRoute requiredRoles={['editor', 'user']}>
-          <MockComponent />
-        </ProtectedRoute>
-      );
+      await act(async () => {
+        render(
+          <ProtectedRoute requiredRoles={['editor', 'user']}>
+            <MockComponent />
+          </ProtectedRoute>
+        );
+      });
 
       expect(screen.getByText('Protected Content')).toBeInTheDocument();
     });
 
-    it('should handle custom access denied component', () => {
+    it('should handle custom access denied component', async () => {
       (useAuthStore as any).mockImplementation(() => ({
         isAuthenticated: true,
         user: { 
@@ -173,14 +187,16 @@ describe('ProtectedRoute', () => {
 
       const CustomDenied = () => <div>Custom Access Denied</div>;
 
-      render(
-        <ProtectedRoute 
-          requiredRoles={['admin']} 
-          accessDeniedComponent={<CustomDenied />}
-        >
-          <MockComponent />
-        </ProtectedRoute>
-      );
+      await act(async () => {
+        render(
+          <ProtectedRoute 
+            requiredRoles={['admin']} 
+            accessDeniedComponent={<CustomDenied />}
+          >
+            <MockComponent />
+          </ProtectedRoute>
+        );
+      });
 
       expect(screen.getByText('Custom Access Denied')).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
@@ -188,7 +204,7 @@ describe('ProtectedRoute', () => {
   });
 
   describe('Permission-based access control', () => {
-    it('should allow access when user has required permission', () => {
+    it('should allow access when user has required permission', async () => {
       (useAuthStore as any).mockImplementation(() => ({
         isAuthenticated: true,
         user: { 
@@ -199,16 +215,18 @@ describe('ProtectedRoute', () => {
         isLoading: false
       }));
 
-      render(
-        <ProtectedRoute requiredPermissions={['create:post']}>
-          <MockComponent />
-        </ProtectedRoute>
-      );
+      await act(async () => {
+        render(
+          <ProtectedRoute requiredPermissions={['create:post']}>
+            <MockComponent />
+          </ProtectedRoute>
+        );
+      });
 
       expect(screen.getByText('Protected Content')).toBeInTheDocument();
     });
 
-    it('should deny access when user lacks required permission', () => {
+    it('should deny access when user lacks required permission', async () => {
       (useAuthStore as any).mockImplementation(() => ({
         isAuthenticated: true,
         user: { 
@@ -219,17 +237,19 @@ describe('ProtectedRoute', () => {
         isLoading: false
       }));
 
-      render(
-        <ProtectedRoute requiredPermissions={['create:post']}>
-          <MockComponent />
-        </ProtectedRoute>
-      );
+      await act(async () => {
+        render(
+          <ProtectedRoute requiredPermissions={['create:post']}>
+            <MockComponent />
+          </ProtectedRoute>
+        );
+      });
 
       expect(screen.getByText('Access Denied')).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
 
-    it('should handle multiple required permissions', () => {
+    it('should handle multiple required permissions', async () => {
       (useAuthStore as any).mockImplementation(() => ({
         isAuthenticated: true,
         user: { 
@@ -240,11 +260,13 @@ describe('ProtectedRoute', () => {
         isLoading: false
       }));
 
-      render(
-        <ProtectedRoute requiredPermissions={['read:post', 'create:post']}>
-          <MockComponent />
-        </ProtectedRoute>
-      );
+      await act(async () => {
+        render(
+          <ProtectedRoute requiredPermissions={['read:post', 'create:post']}>
+            <MockComponent />
+          </ProtectedRoute>
+        );
+      });
 
       expect(screen.getByText('Protected Content')).toBeInTheDocument();
     });

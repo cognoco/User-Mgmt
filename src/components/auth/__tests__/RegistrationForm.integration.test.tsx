@@ -74,6 +74,7 @@ import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
 import { RegistrationForm } from '../RegistrationForm';
 import { UserType } from '@/types/user-type';
 import { ThemeProvider } from '@/components/theme-provider';
+import { OAuthProvider } from '@/types/oauth';
 
 describe('RegistrationForm Integration Flow', () => {
   const renderWithProvider = () => {
@@ -90,6 +91,28 @@ describe('RegistrationForm Integration Flow', () => {
         enabled: false,
         required: false,
         methods: []
+      },
+      oauth: {
+        enabled: true,
+        providers: [
+          {
+            provider: OAuthProvider.GOOGLE,
+            clientId: 'test-google-client-id',
+            redirectUri: 'http://localhost:3000/auth/callback/google',
+            enabled: true,
+            label: 'Google'
+          },
+          {
+            provider: OAuthProvider.APPLE,
+            clientId: 'test-apple-client-id',
+            redirectUri: 'http://localhost:3000/auth/callback/apple',
+            enabled: true,
+            label: 'Apple'
+          }
+        ],
+        autoLink: true,
+        allowUnverifiedEmails: false,
+        defaultRedirectPath: '/'
       }
     };
     return render(
@@ -109,14 +132,26 @@ describe('RegistrationForm Integration Flow', () => {
     mockClearSuccessMessage.mockReset();
     mockRouterPush.mockReset();
     mockRegisterUserAction.mockImplementation(async (data) => {
-        const result = await mockSupabaseSignUp(data);
-        return { success: !result.error, error: result.error?.message };
+      const result = await mockSupabaseSignUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            first_name: data.firstName,
+            last_name: data.lastName,
+          },
+          emailRedirectTo: 'http://localhost:3000/check-email',
+        },
+      });
+      return { success: !result.error, error: result.error?.message };
     });
   });
 
   it('shows validation errors for required fields (Personal user)', async () => {
     const user = userEvent.setup();
-    renderWithProvider();
+    await act(async () => {
+      renderWithProvider();
+    });
 
     // Type, clear, and blur each required field to trigger validation
     const emailInput = screen.getByTestId('email-input');
@@ -189,7 +224,9 @@ describe('RegistrationForm Integration Flow', () => {
 
   it('disables submit button if terms are not accepted', async () => {
     const user = userEvent.setup();
-    renderWithProvider();
+    await act(async () => {
+      renderWithProvider();
+    });
     await user.type(screen.getByTestId('email-input'), 'terms@example.com');
     await user.type(screen.getByTestId('first-name-input'), 'Test');
     await user.type(screen.getByTestId('last-name-input'), 'User');
@@ -214,7 +251,9 @@ describe('RegistrationForm Integration Flow', () => {
       error: null
     });
 
-    renderWithProvider();
+    await act(async () => {
+      renderWithProvider();
+    });
 
     await user.type(screen.getByTestId('email-input'), testEmail);
     await user.type(screen.getByTestId('first-name-input'), 'Test');
@@ -269,7 +308,9 @@ describe('RegistrationForm Integration Flow', () => {
 
   it('requires company name for corporate users', async () => {
     const user = userEvent.setup();
-    renderWithProvider();
+    await act(async () => {
+      renderWithProvider();
+    });
     const corporateRadio = screen.getByTestId('user-type-corporate');
     await user.click(corporateRadio);
     await user.type(screen.getByTestId('email-input'), 'test@example.com');
@@ -286,6 +327,9 @@ describe('RegistrationForm Integration Flow', () => {
   it('shows API error message when registration fails', async () => {
     // Skipped: API error handling is not testable without mocking Supabase directly.
     // To test this, you would need to mock supabase.auth.signUp to return an error.
+    await act(async () => {
+      // renderWithProvider();
+    });
   });
 
   it('should not have duplicate login links or duplicate error/success messages', async () => {

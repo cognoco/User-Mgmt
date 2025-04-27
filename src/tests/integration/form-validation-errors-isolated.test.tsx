@@ -98,36 +98,56 @@ describe('Form Validation Errors (Isolated Test)', () => {
 
     // Interact with required fields using the more elaborate pattern
     // Email
-    await user.type(emailInput, 'a');
-    await user.clear(emailInput);
+    await act(async () => {
+      await user.type(emailInput, 'a');
+    });
+    await act(async () => {
+      await user.clear(emailInput);
+    });
     fireEvent.change(emailInput, { target: { value: '' } });
     fireEvent.blur(emailInput);
     await user.tab();
 
     // Password
-    await user.type(passwordInput, 'a');
-    await user.clear(passwordInput);
+    await act(async () => {
+      await user.type(passwordInput, 'a');
+    });
+    await act(async () => {
+      await user.clear(passwordInput);
+    });
     fireEvent.change(passwordInput, { target: { value: '' } });
     fireEvent.blur(passwordInput);
     await user.tab();
     
     // First Name
-    await user.type(firstNameInput, 'a');
-    await user.clear(firstNameInput);
+    await act(async () => {
+      await user.type(firstNameInput, 'a');
+    });
+    await act(async () => {
+      await user.clear(firstNameInput);
+    });
     fireEvent.change(firstNameInput, { target: { value: '' } });
     fireEvent.blur(firstNameInput);
     await user.tab();
 
     // Last Name
-    await user.type(lastNameInput, 'a');
-    await user.clear(lastNameInput);
+    await act(async () => {
+      await user.type(lastNameInput, 'a');
+    });
+    await act(async () => {
+      await user.clear(lastNameInput);
+    });
     fireEvent.change(lastNameInput, { target: { value: '' } });
     fireEvent.blur(lastNameInput);
     await user.tab();
 
     // Terms Checkbox
-    await user.click(termsCheckbox); // Check
-    await user.click(termsCheckbox); // Uncheck
+    await act(async () => {
+      await user.click(termsCheckbox); // Check
+    });
+    await act(async () => {
+      await user.click(termsCheckbox); // Uncheck
+    });
     await user.tab(); // Tab away from checkbox
 
     // Submit empty/invalid form (wrapped in act)

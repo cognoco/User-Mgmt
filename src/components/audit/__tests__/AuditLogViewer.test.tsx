@@ -3,6 +3,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import { AuditLogViewer } from '../AuditLogViewer';
+import { act } from 'react-dom/test-utils';
 
 const mockLogs = [
   {
@@ -69,7 +70,9 @@ describe('AuditLogViewer (admin)', () => {
   it('filters logs by method', async () => {
     render(<AuditLogViewer isAdmin={true} />);
     await waitFor(() => screen.getByText('POST'));
-    fireEvent.change(screen.getByLabelText('Method'), { target: { value: 'DELETE' } });
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText('Method'), { target: { value: 'DELETE' } });
+    });
     // Simulate filter logic: MSW will still return both logs, but UI should update if filter is implemented client-side
     // For now, just check that filter UI is present
     expect(screen.getByLabelText('Method')).toBeInTheDocument();
@@ -79,9 +82,13 @@ describe('AuditLogViewer (admin)', () => {
     render(<AuditLogViewer isAdmin={true} />);
     await waitFor(() => screen.getByText('Audit Logs'));
     const exportButton = screen.getByRole('button', { name: /Export options/i });
-    fireEvent.click(exportButton);
+    await act(async () => {
+      fireEvent.click(exportButton);
+    });
     const csvOption = screen.getByRole('menuitem', { name: /Export as CSV/i });
-    fireEvent.click(csvOption);
+    await act(async () => {
+      fireEvent.click(csvOption);
+    });
     // No error should be thrown, and export should be triggered (mocked)
     await waitFor(() => expect(screen.getByText(/Export Successful/i)).toBeInTheDocument());
   });
@@ -90,7 +97,9 @@ describe('AuditLogViewer (admin)', () => {
     render(<AuditLogViewer isAdmin={true} />);
     await waitFor(() => screen.getByText('POST'));
     const row = screen.getByRole('row', { name: /Log entry from/i });
-    fireEvent.click(row);
+    await act(async () => {
+      fireEvent.click(row);
+    });
     await waitFor(() => expect(screen.getByText(/Log Details/i)).toBeInTheDocument());
     expect(screen.getByText(/Full details for log entry/i)).toBeInTheDocument();
   });

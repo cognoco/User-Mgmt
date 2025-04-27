@@ -1,5 +1,5 @@
-import { renderHook, act } from '@testing-library/react';
-import { useSubscription } from '../hooks/useSubscription';
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { useSubscription } from '@/hooks/useSubscription';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock fetch globally
@@ -62,19 +62,36 @@ describe('useSubscription', () => {
     const { result } = renderHook(() => useSubscription());
 
     const windowSpy = vi.spyOn(window, 'location', 'get');
-    const mockLocation = { assign: vi.fn() };
+    const mockLocation = {
+      assign: vi.fn(),
+      ancestorOrigins: [] as any,
+      hash: '',
+      host: '',
+      hostname: '',
+      href: '',
+      origin: '',
+      pathname: '',
+      port: '',
+      protocol: '',
+      search: '',
+      reload: vi.fn(),
+      replace: vi.fn(),
+      toString: () => '',
+    } as Location;
     windowSpy.mockReturnValue(mockLocation);
 
     await act(async () => {
       await result.current.createCheckoutSession('premium');
     });
 
-    expect(mockFetch).toHaveBeenCalledWith('/api/subscriptions/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan: 'premium' }),
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith('/api/subscriptions/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: 'premium' }),
+      });
+      expect(mockLocation.assign).toHaveBeenCalledWith(mockUrl);
     });
-    expect(mockLocation.assign).toHaveBeenCalledWith(mockUrl);
   });
 
   it('should create customer portal session', async () => {
@@ -87,17 +104,34 @@ describe('useSubscription', () => {
     const { result } = renderHook(() => useSubscription());
 
     const windowSpy = vi.spyOn(window, 'location', 'get');
-    const mockLocation = { assign: vi.fn() };
+    const mockLocation = {
+      assign: vi.fn(),
+      ancestorOrigins: [] as any,
+      hash: '',
+      host: '',
+      hostname: '',
+      href: '',
+      origin: '',
+      pathname: '',
+      port: '',
+      protocol: '',
+      search: '',
+      reload: vi.fn(),
+      replace: vi.fn(),
+      toString: () => '',
+    } as Location;
     windowSpy.mockReturnValue(mockLocation);
 
     await act(async () => {
       await result.current.createCustomerPortalSession();
     });
 
-    expect(mockFetch).toHaveBeenCalledWith('/api/subscriptions/portal', {
-      method: 'POST',
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith('/api/subscriptions/portal', {
+        method: 'POST',
+      });
+      expect(mockLocation.assign).toHaveBeenCalledWith(mockUrl);
     });
-    expect(mockLocation.assign).toHaveBeenCalledWith(mockUrl);
   });
 
   it('should cancel subscription', async () => {

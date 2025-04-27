@@ -1,41 +1,57 @@
 // __tests__/auth/sso/personal-sso.test.js
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SSOAuth } from '../\.\.\/\.\.\/src\/components/auth/SSOAuth';
+import { SSOAuth } from '@/components/auth/SSOAuth';
+import { vi, describe, beforeEach, test, expect } from 'vitest';
 
-// Import our standardized mock
-jest.mock('../\.\.\/\.\.\/src\/lib/supabase', () => require('../../__mocks__/supabase'));
-import { supabase } from '../\.\.\/\.\.\/src\/lib/supabase';
+// Import our standardized mock using vi.mock
+vi.mock('@/lib/supabase', async () => (await import('@/tests/mocks/supabase')));
+import { supabase } from '@/lib/supabase';
 
-// Mock window.location for redirects
-const mockWindowLocation = jest.fn();
-Object.defineProperty(window, 'location', {
-  value: {
-    assign: mockWindowLocation,
-    origin: 'https://app.example.com'
-  },
-  writable: true
-});
+// Store original window location
+const originalLocation = window.location;
 
 describe('Personal SSO Authentication Flows', () => {
   let user;
+  let mockWindowLocationAssign: vi.Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     user = userEvent.setup();
     
+    // Mock window.location for redirects
+    mockWindowLocationAssign = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: {
+        assign: mockWindowLocationAssign,
+        origin: 'https://app.example.com',
+        href: 'https://app.example.com/auth'
+      },
+      writable: true,
+      configurable: true
+    });
+
     // Mock auth state
-    supabase.auth.getUser.mockResolvedValue({
+    (supabase.auth.getUser as vi.Mock).mockResolvedValue({
       data: { user: null },
       error: null
     });
   });
 
+  afterEach(() => {
+    // Restore original window.location
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+      writable: true,
+      configurable: true
+    });
+  });
+
   test('User can sign in with GitHub', async () => {
     // Mock successful GitHub auth
-    supabase.auth.signInWithOAuth.mockResolvedValueOnce({
+    (supabase.auth.signInWithOAuth as vi.Mock).mockResolvedValueOnce({
       data: { provider: 'github', url: 'https://supabase-auth.io/github-redirect' },
       error: null
     });
@@ -44,7 +60,9 @@ describe('Personal SSO Authentication Flows', () => {
     render(<SSOAuth />);
     
     // Click GitHub button
-    await user.click(screen.getByRole('button', { name: /github/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /github/i }));
+    });
     
     // Verify Supabase auth method was called with correct params
     expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({
@@ -55,12 +73,12 @@ describe('Personal SSO Authentication Flows', () => {
     });
     
     // Verify user is redirected to GitHub auth URL
-    expect(mockWindowLocation).toHaveBeenCalledWith('https://supabase-auth.io/github-redirect');
+    expect(mockWindowLocationAssign).toHaveBeenCalledWith('https://supabase-auth.io/github-redirect');
   });
 
   test('User can sign in with Google', async () => {
     // Mock successful Google auth
-    supabase.auth.signInWithOAuth.mockResolvedValueOnce({
+    (supabase.auth.signInWithOAuth as vi.Mock).mockResolvedValueOnce({
       data: { provider: 'google', url: 'https://supabase-auth.io/google-redirect' },
       error: null
     });
@@ -69,7 +87,9 @@ describe('Personal SSO Authentication Flows', () => {
     render(<SSOAuth />);
     
     // Click Google button
-    await user.click(screen.getByRole('button', { name: /google/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /google/i }));
+    });
     
     // Verify Supabase auth method was called
     expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({
@@ -80,12 +100,12 @@ describe('Personal SSO Authentication Flows', () => {
     });
     
     // Verify user is redirected to Google auth URL
-    expect(mockWindowLocation).toHaveBeenCalledWith('https://supabase-auth.io/google-redirect');
+    expect(mockWindowLocationAssign).toHaveBeenCalledWith('https://supabase-auth.io/google-redirect');
   });
 
   test('Handles SSO error gracefully', async () => {
     // Mock auth error
-    supabase.auth.signInWithOAuth.mockResolvedValueOnce({
+    (supabase.auth.signInWithOAuth as vi.Mock).mockResolvedValueOnce({
       data: null,
       error: { message: 'Authentication failed' }
     });
@@ -94,7 +114,9 @@ describe('Personal SSO Authentication Flows', () => {
     render(<SSOAuth />);
     
     // Click Facebook button
-    await user.click(screen.getByRole('button', { name: /facebook/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /facebook/i }));
+    });
     
     // Verify error message is displayed
     await waitFor(() => {
@@ -102,12 +124,12 @@ describe('Personal SSO Authentication Flows', () => {
     });
     
     // Verify no redirect happened
-    expect(mockWindowLocation).not.toHaveBeenCalled();
+    expect(mockWindowLocationAssign).not.toHaveBeenCalled();
   });
 
   test('User can authenticate with Apple', async () => {
     // Mock successful Apple auth
-    supabase.auth.signInWithOAuth.mockResolvedValueOnce({
+    (supabase.auth.signInWithOAuth as vi.Mock).mockResolvedValueOnce({
       data: { provider: 'apple', url: 'https://supabase-auth.io/apple-redirect' },
       error: null
     });
@@ -116,7 +138,9 @@ describe('Personal SSO Authentication Flows', () => {
     render(<SSOAuth />);
     
     // Click Apple button
-    await user.click(screen.getByRole('button', { name: /apple/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /apple/i }));
+    });
     
     // Verify Supabase auth method was called
     expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({
@@ -127,12 +151,12 @@ describe('Personal SSO Authentication Flows', () => {
     });
     
     // Verify user is redirected to Apple auth URL
-    expect(mockWindowLocation).toHaveBeenCalledWith('https://supabase-auth.io/apple-redirect');
+    expect(mockWindowLocationAssign).toHaveBeenCalledWith('https://supabase-auth.io/apple-redirect');
   });
 
   test('SSO auth with scopes and additional options', async () => {
     // Mock successful GitHub auth with scopes
-    supabase.auth.signInWithOAuth.mockResolvedValueOnce({
+    (supabase.auth.signInWithOAuth as vi.Mock).mockResolvedValueOnce({
       data: { provider: 'github', url: 'https://supabase-auth.io/github-redirect' },
       error: null
     });
@@ -141,7 +165,9 @@ describe('Personal SSO Authentication Flows', () => {
     render(<SSOAuth providerScopes={{ github: 'repo,user' }} />);
     
     // Click GitHub button
-    await user.click(screen.getByRole('button', { name: /github/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /github/i }));
+    });
     
     // Verify Supabase auth method was called with correct scopes
     expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({
@@ -164,7 +190,7 @@ describe('Personal SSO Authentication Flows', () => {
     });
     
     // Mock successful token exchange
-    supabase.auth.getSession.mockResolvedValueOnce({
+    (supabase.auth.getSession as vi.Mock).mockResolvedValueOnce({
       data: { 
         session: { 
           access_token: 'test-token',
@@ -188,7 +214,7 @@ describe('Personal SSO Authentication Flows', () => {
     // Clean up
     Object.defineProperty(window, 'location', {
       value: {
-        assign: mockWindowLocation,
+        assign: mockWindowLocationAssign,
         origin: 'https://app.example.com',
         hash: '',
         href: 'https://app.example.com/auth'

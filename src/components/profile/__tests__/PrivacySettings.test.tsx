@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nextProvider } from 'react-i18next';
@@ -82,12 +82,14 @@ describe('PrivacySettings Component', () => {
     });
   });
 
-  it('should render current privacy settings from profile store', () => {
-    render(
-      <I18nextProvider i18n={i18n}>
-        <PrivacySettings />
-      </I18nextProvider>
-    );
+  it('should render current privacy settings from profile store', async () => {
+    await act(async () => {
+      render(
+        <I18nextProvider i18n={i18n}>
+          <PrivacySettings />
+        </I18nextProvider>
+      );
+    });
 
     // Check profile visibility dropdown
     const visibilitySelect = screen.getByTestId('profile-visibility-select');
@@ -101,11 +103,13 @@ describe('PrivacySettings Component', () => {
 
   it('should call updatePrivacySettings with new visibility when dropdown changes', async () => {
     const user = userEvent.setup();
-    render(
-      <I18nextProvider i18n={i18n}>
-        <PrivacySettings />
-      </I18nextProvider>
-    );
+    await act(async () => {
+      render(
+        <I18nextProvider i18n={i18n}>
+          <PrivacySettings />
+        </I18nextProvider>
+      );
+    });
 
     const visibilitySelect = screen.getByTestId('profile-visibility-select');
     await user.selectOptions(visibilitySelect, 'public');
@@ -119,11 +123,13 @@ describe('PrivacySettings Component', () => {
 
   it('should call updatePrivacySettings with new value when email toggle changes', async () => {
     const user = userEvent.setup();
-    render(
-      <I18nextProvider i18n={i18n}>
-        <PrivacySettings />
-      </I18nextProvider>
-    );
+    await act(async () => {
+      render(
+        <I18nextProvider i18n={i18n}>
+          <PrivacySettings />
+        </I18nextProvider>
+      );
+    });
 
     const emailToggle = screen.getByLabelText(/Show Email Address/i);
     await user.click(emailToggle);
@@ -137,11 +143,13 @@ describe('PrivacySettings Component', () => {
 
   it('should call updatePrivacySettings with new value when phone toggle changes', async () => {
     const user = userEvent.setup();
-    render(
-      <I18nextProvider i18n={i18n}>
-        <PrivacySettings />
-      </I18nextProvider>
-    );
+    await act(async () => {
+      render(
+        <I18nextProvider i18n={i18n}>
+          <PrivacySettings />
+        </I18nextProvider>
+      );
+    });
 
     const phoneToggle = screen.getByLabelText(/Show Phone Number/i);
     await user.click(phoneToggle);

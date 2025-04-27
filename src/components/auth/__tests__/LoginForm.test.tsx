@@ -120,8 +120,10 @@ describe('LoginForm', () => {
     setupMocks();
   });
 
-  it('should render form elements', () => {
-    render(<LoginForm />);
+  it('should render form elements', async () => {
+    await act(async () => {
+      render(<LoginForm />);
+    });
     
     // Check for form elements
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
@@ -135,7 +137,9 @@ describe('LoginForm', () => {
     // Setup mocks for this specific test
     setupMocks();
     
-    render(<LoginForm />);
+    await act(async () => {
+      render(<LoginForm />);
+    });
     
     // Data to be submitted
     const formData: LoginData = {
@@ -167,7 +171,9 @@ describe('LoginForm', () => {
     };
     setupMocks({}, { errors, isValid: false });
 
-    render(<LoginForm />);
+    await act(async () => {
+      render(<LoginForm />);
+    });
     
     // Check for validation messages provided by the mock formState
     expect(await screen.findByText('Invalid email address')).toBeInTheDocument(); 
@@ -178,7 +184,9 @@ describe('LoginForm', () => {
     // Test invalid email
     const emailError = { email: { type: 'invalid_string', message: 'Invalid email address' } };
     setupMocks({}, { errors: emailError, isValid: false });
-    render(<LoginForm />);
+    await act(async () => {
+      render(<LoginForm />);
+    });
     expect(await screen.findByText('Invalid email address')).toBeInTheDocument(); 
 
     // Rerender or update mocks for password test is tricky without full interaction.
@@ -186,7 +194,7 @@ describe('LoginForm', () => {
     // Consider if covered by 'should display error messages for invalid inputs'
   });
 
-  it('should disable button while loading', () => {
+  it('should disable button while loading', async () => {
     // Mock loading state
     (useAuthStore as any).mockReturnValue({
       login: mockLogin,
@@ -196,7 +204,9 @@ describe('LoginForm', () => {
       sendVerificationEmail: vi.fn(),
     });
     
-    render(<LoginForm />);
+    await act(async () => {
+      render(<LoginForm />);
+    });
     
     const submitButton = screen.getByRole('button', { name: /logging in/i });
     expect(submitButton).toBeDisabled();
@@ -205,7 +215,9 @@ describe('LoginForm', () => {
 
   it('should toggle password visibility', async () => {
     const user = userEvent.setup();
-    render(<LoginForm />);
+    await act(async () => {
+      render(<LoginForm />);
+    });
     
     const passwordInput = screen.getByLabelText(/^Password$/i);
     const toggleButton = screen.getByRole('button', { name: /show password/i });
@@ -241,7 +253,9 @@ describe('LoginForm', () => {
       sendVerificationEmail: vi.fn(),
     });
     
-    render(<LoginForm />);
+    await act(async () => {
+      render(<LoginForm />);
+    });
     
     await waitFor(() => {
       const alert = screen.getByTestId('alert');
@@ -251,8 +265,10 @@ describe('LoginForm', () => {
     });
   });
 
-  it('should not have duplicate sign-up links or elements', () => {
-    render(<LoginForm />);
+  it('should not have duplicate sign-up links or elements', async () => {
+    await act(async () => {
+      render(<LoginForm />);
+    });
     
     // Get all elements containing sign up text or links, including nested text
     const signUpElements = screen.queryAllByText(/Sign up|Don't have an account\?/i, { exact: false });
@@ -284,8 +300,10 @@ describe('LoginForm', () => {
     ).toBe(1);
   });
 
-  it('renders social login buttons (OAuthButtons) for Google and Apple login', () => {
-    render(<LoginForm />);
+  it('renders social login buttons (OAuthButtons) for Google and Apple login', async () => {
+    await act(async () => {
+      render(<LoginForm />);
+    });
     expect(screen.getByRole('button', { name: /sign in with google/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign in with apple/i })).toBeInTheDocument();
   });

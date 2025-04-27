@@ -27,9 +27,12 @@ export const Dashboard: React.FC = () => {
   }, []);
 
   const handleCreate = async (title: string, description: string) => {
-    const { data, error } = await supabase
+    // console.log('[TEST_DEBUG] handleCreate called');
+    // const { data, error } = await supabase // Original
+    const { error } = await supabase // Remove unused 'data'
       .from('items')
       .insert([{ title, description }]);
+    // console.log('[TEST_DEBUG] handleCreate insert response:', { data, error });
     
     if (error) {
       setError(error.message);
@@ -40,11 +43,14 @@ export const Dashboard: React.FC = () => {
   };
 
   const handleUpdate = async (id: string, title: string, description: string) => {
-    const { data, error } = await supabase
+    // console.log('[TEST_DEBUG] handleUpdate called');
+    // const { data, error } = await supabase // Original
+    const { error } = await supabase // Remove unused 'data'
       .from('items')
       .update({ title, description })
       .eq('id', id);
-    
+    // console.log('[TEST_DEBUG] handleUpdate update response:', { data, error });
+
     if (error) {
       setError(error.message);
     } else {
@@ -55,11 +61,14 @@ export const Dashboard: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const { data, error } = await supabase
+    // console.log('[TEST_DEBUG] handleDelete called');
+    // const { data, error } = await supabase // Original
+    const { error } = await supabase // Remove unused 'data'
       .from('items')
       .delete()
       .eq('id', id);
-    
+    // console.log('[TEST_DEBUG] handleDelete delete response:', { data, error });
+
     if (error) {
       setError(error.message);
     } else {

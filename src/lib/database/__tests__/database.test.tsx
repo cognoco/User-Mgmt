@@ -1,5 +1,5 @@
 // Import our standardized mock
-jest.mock('../../lib/supabase', () => require('../__mocks__/supabase'));
+jest.mock('../../lib/supabase', () => require('../mocks/supabase'));
 import { supabase, getServiceSupabase } from '../../lib/supabase';
 
 describe('Database Operations', () => {

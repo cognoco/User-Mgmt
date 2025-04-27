@@ -1,8 +1,7 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, MockInstance } from 'vitest';
-import { AxiosResponse, AxiosRequestConfig } from 'axios';
 import { api } from '@/lib/api/axios';
 import IDPConfiguration from '../IDPConfiguration';
 
@@ -71,14 +70,18 @@ describe('IDPConfiguration', () => {
     });
   });
 
-  it('renders loading state initially', () => {
-    render(<IDPConfiguration {...mockProps} />);
+  it('renders loading state initially', async () => {
+    await act(async () => {
+      render(<IDPConfiguration {...mockProps} />);
+    });
     expect(screen.getByText(/org.sso.samlConfigTitle/i)).toBeInTheDocument();
     expect(screen.getByText(/org.sso.samlConfigDescription/i)).toBeInTheDocument();
   });
 
   it('loads and displays SAML configuration', async () => {
-    render(<IDPConfiguration {...mockProps} />);
+    await act(async () => {
+      render(<IDPConfiguration {...mockProps} />);
+    });
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalledWith('/organizations/org123/sso/saml/config');
@@ -101,7 +104,9 @@ describe('IDPConfiguration', () => {
       return Promise.reject(new Error('Not found'));
     });
 
-    render(<IDPConfiguration {...mockProps} idpType="oidc" />);
+    await act(async () => {
+      render(<IDPConfiguration {...mockProps} idpType="oidc" />);
+    });
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalledWith('/organizations/org123/sso/oidc/config');
@@ -113,7 +118,9 @@ describe('IDPConfiguration', () => {
   });
 
   it('handles certificate file upload', async () => {
-    render(<IDPConfiguration {...mockProps} />);
+    await act(async () => {
+      render(<IDPConfiguration {...mockProps} />);
+    });
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalled();
@@ -130,7 +137,9 @@ describe('IDPConfiguration', () => {
   it('submits SAML configuration successfully', async () => {
     (api.put as unknown as MockInstance).mockResolvedValueOnce({});
     
-    render(<IDPConfiguration {...mockProps} />);
+    await act(async () => {
+      render(<IDPConfiguration {...mockProps} />);
+    });
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalled();
@@ -156,7 +165,9 @@ describe('IDPConfiguration', () => {
   it('handles configuration fetch error', async () => {
     (api.get as unknown as MockInstance).mockRejectedValueOnce(new Error('Failed to fetch'));
 
-    render(<IDPConfiguration {...mockProps} />);
+    await act(async () => {
+      render(<IDPConfiguration {...mockProps} />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('org.sso.fetchConfigError')).toBeInTheDocument();
@@ -166,7 +177,9 @@ describe('IDPConfiguration', () => {
   it('handles configuration save error', async () => {
     (api.put as unknown as MockInstance).mockRejectedValueOnce(new Error('Failed to save'));
 
-    render(<IDPConfiguration {...mockProps} />);
+    await act(async () => {
+      render(<IDPConfiguration {...mockProps} />);
+    });
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalled();
@@ -182,7 +195,9 @@ describe('IDPConfiguration', () => {
   });
 
   it('switches between configuration and metadata tabs', async () => {
-    render(<IDPConfiguration {...mockProps} />);
+    await act(async () => {
+      render(<IDPConfiguration {...mockProps} />);
+    });
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalled();
@@ -198,7 +213,9 @@ describe('IDPConfiguration', () => {
   });
 
   it('validates required fields for SAML configuration', async () => {
-    render(<IDPConfiguration {...mockProps} />);
+    await act(async () => {
+      render(<IDPConfiguration {...mockProps} />);
+    });
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalled();
@@ -226,7 +243,9 @@ describe('IDPConfiguration', () => {
       return Promise.reject(new Error('Not found'));
     });
 
-    render(<IDPConfiguration {...mockProps} idpType="oidc" />);
+    await act(async () => {
+      render(<IDPConfiguration {...mockProps} idpType="oidc" />);
+    });
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalled();

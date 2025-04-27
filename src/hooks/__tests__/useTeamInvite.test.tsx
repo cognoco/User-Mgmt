@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useTeamInvite } from '../useTeamInvite';
@@ -26,9 +26,11 @@ function createWrapper() {
     },
   });
 
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+  function QueryClientTestProvider({ children }: { children: React.ReactNode }) {
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  }
+  QueryClientTestProvider.displayName = 'QueryClientTestProvider';
+  return QueryClientTestProvider;
 }
 
 describe('useTeamInvite', () => {
@@ -52,7 +54,9 @@ describe('useTeamInvite', () => {
       wrapper: createWrapper(),
     });
 
-    result.current.mutate(inviteData);
+    await act(async () => {
+      result.current.mutate(inviteData);
+    });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -80,7 +84,9 @@ describe('useTeamInvite', () => {
       wrapper: createWrapper(),
     });
 
-    result.current.mutate(inviteData);
+    await act(async () => {
+      result.current.mutate(inviteData);
+    });
 
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
@@ -96,7 +102,9 @@ describe('useTeamInvite', () => {
       wrapper: createWrapper(),
     });
 
-    result.current.mutate(inviteData);
+    await act(async () => {
+      result.current.mutate(inviteData);
+    });
 
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
