@@ -16,7 +16,6 @@ import { ConnectedAccounts } from '@/components/shared/ConnectedAccounts';
 
 const profileSchema = z.object({
   name: z.string().min(2),
-  email: z.string().email(),
   bio: z.string().max(500).optional(),
   location: z.string().optional(),
   website: z.string().url().optional().or(z.literal('')),

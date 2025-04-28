@@ -30,7 +30,7 @@ import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/types/profile'; // Assuming type exists here
 import type { User, RateLimitInfo } from '@/types/auth'; // Import types
 // If ConnectedAccount is only used as a type, re-import it from the correct alias
-import type { ConnectedAccount } from '@/types/connected-accounts';
+// import type { ConnectedAccount } from '@/types/connected-accounts';
 
 // --- Mock Profile Store with exported state object ---
 const mockProfileStoreActions = {
@@ -115,6 +115,9 @@ vi.mock('@/lib/stores/auth.store', () => ({
   useAuthStore: vi.fn(() => mockAuthStoreActions)
 }));
 // --- End Auth Store Mock ---
+
+import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
+import { OAuthProvider } from '@/types/oauth';
 
 describe('User Authentication Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;
@@ -253,14 +256,11 @@ describe('User Authentication Flow', () => {
     // Wait for editor to load
     await waitFor(() => {
       expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
-      // Add check for email field
-      expect(screen.getByLabelText(/email/i)).toBeInTheDocument(); 
+      // Removed check for email field, as ProfileEditor does not render it
     });
 
     // Fill and submit profile form
     // Ensure email field is populated to pass validation
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com'); 
-    
     await user.clear(screen.getByLabelText(/name/i));
     await user.type(screen.getByLabelText(/name/i), 'Test User Updated');
     await user.clear(screen.getByLabelText(/website/i));
@@ -279,8 +279,7 @@ describe('User Authentication Flow', () => {
     await waitFor(() => {
       expect(mockUpdateProfile).toHaveBeenCalledWith({
         name: 'Test User Updated',
-        email: 'test@example.com', 
-        bio: 'Test bio', 
+        bio: 'Test bio',
         location: 'Test location', // Expect location based on previous error msg
         website: 'https://updated.example.com',
       });
@@ -288,14 +287,45 @@ describe('User Authentication Flow', () => {
   });
 
   test('Social login buttons (Google/Apple) are visible in Login and Registration forms', async () => {
+    // Provide UserManagementProvider with Google and Apple enabled
+    const oauthConfig = {
+      enabled: true,
+      providers: [
+        {
+          provider: OAuthProvider.GOOGLE,
+          clientId: 'test-google-client-id',
+          redirectUri: 'http://localhost/callback/google',
+          enabled: true,
+        },
+        {
+          provider: OAuthProvider.APPLE,
+          clientId: 'test-apple-client-id',
+          redirectUri: 'http://localhost/callback/apple',
+          enabled: true,
+        },
+      ],
+      autoLink: true,
+      allowUnverifiedEmails: false,
+      defaultRedirectPath: '/',
+    };
+    const userManagementConfig = { oauth: oauthConfig };
+
     // Registration Form
-    const { unmount: unmountSignup } = render(<RegistrationForm />);
+    const { unmount: unmountSignup } = render(
+      <UserManagementProvider config={userManagementConfig}>
+        <RegistrationForm />
+      </UserManagementProvider>
+    );
     expect(screen.getByRole('button', { name: /sign up with google/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign up with apple/i })).toBeInTheDocument();
     unmountSignup();
 
     // Login Form
-    const { unmount: unmountLogin } = render(<LoginForm />);
+    const { unmount: unmountLogin } = render(
+      <UserManagementProvider config={userManagementConfig}>
+        <LoginForm />
+      </UserManagementProvider>
+    );
     expect(screen.getByRole('button', { name: /sign in with google/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign in with apple/i })).toBeInTheDocument();
     unmountLogin();
