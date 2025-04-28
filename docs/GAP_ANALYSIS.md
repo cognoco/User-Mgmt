@@ -22,24 +22,25 @@
 
 ## Remaining Gaps & Potential Enhancements (Project-wide)
 
-| Area                | Potential Gap / Enhancement                | Criticality |
-|---------------------|--------------------------------------------|-------------|
-| Testing             | Failing/incomplete E2E & integration tests | High        |
-| Company Profile     | No E2E/integration/component tests for company profile CRUD | High |
-| User Preferences    | No direct tests for user settings/preferences CRUD | High |
-| 2FA/MFA             | No tests for disabling 2FA, error states, admin override | High |
-| Subscription        | No E2E for full payment/checkout/invoice journey | High |
-| Audit Logging       | No explicit E2E/integration/component tests for audit log viewing/export | Medium |
-| Session Management  | No tests for admin session revocation, session expiration, error handling | Medium |
-| SSO/Account Linking | E2E skeletons exist, not implemented/verified; integration tests need expansion | Medium |
-| Accessibility (a11y)| No automated/manual test coverage          | Medium      |
-| Internationalization| No test coverage for i18n or language switching | Medium |
-| Mobile              | No test coverage for push notifications, biometric auth, responsive UI | Medium |
-| Onboarding          | No test coverage for onboarding, checklists, first-time user flows | Medium |
-| Integrations        | No test coverage for webhooks, API key management | Medium |
-| Legal/Compliance    | No test coverage for ToS/privacy acceptance, residency | Medium |
+| Area                | Potential Gap / Enhancement                | Criticality | Coverage Status |
+|---------------------|--------------------------------------------|-------------|----------------|
+| Testing             | Failing/incomplete E2E & integration tests | High        | Some tests fail, see Testing_Findings.md |
+| Company Profile     | No E2E/integration/component tests for company profile CRUD | High | No CRUD tests found |
+| User Preferences    | No direct tests for user settings/preferences CRUD | High | Integration tests exist, E2E missing |
+| 2FA/MFA             | No tests for disabling 2FA, error states, admin override | High | No tests found |
+| Subscription        | No E2E for full payment/checkout/invoice journey | High | Store/integration tests exist, E2E missing |
+| Audit Logging       | No explicit E2E/integration/component tests for audit log viewing/export | Medium | Some E2E/component tests exist, may not cover all flows |
+| Session Management  | No tests for admin session revocation, session expiration, error handling | Medium | Main user flow covered, edge cases missing |
+| SSO/Account Linking | E2E skeletons exist, not implemented/verified; integration tests need expansion | Medium | Partial, needs verification |
+| Accessibility (a11y)| No automated/manual test coverage          | Medium      | No tests found |
+| Internationalization| No test coverage for i18n or language switching | Medium | No tests found |
+| Mobile              | No test coverage for push notifications, biometric auth, responsive UI | Medium | No tests found |
+| Onboarding          | No test coverage for onboarding, checklists, first-time user flows | Medium | No tests found |
+| Integrations        | No test coverage for webhooks, API key management | Medium | No tests found |
+| Legal/Compliance    | No test coverage for ToS/privacy acceptance, residency | Medium | No tests found |
+| Avatar/Profile Editing | No E2E test for avatar/profile editing | Medium | No E2E found |
 
-**Note:** Audit logging is fully implemented and documented. Accessibility (a11y) is being actively audited and improved. See [Accessibility Documentation](./Accessibility-implementation-plan.md) for ongoing work.
+**Note:** Some features have partial test coverage (integration/component), but E2E or edge-case coverage is still missing. See [`docs/Testing_Findings.md`](./Testing_Findings.md) for detailed findings and [`docs/TESTING_ISSUES.md`](./TESTING_ISSUES.md) for the remediation plan.
 
 *For detailed status, see [Master List of All Features](./Master-List-of-all-features.md).*
 
@@ -64,6 +65,14 @@ The following features were not found in the codebase (neither implementation no
 | Onboarding           | No test coverage for onboarding, checklists, first-time user flows. |
 | Integrations         | No test coverage for webhooks, API key management. |
 | Legal/Compliance     | No test coverage for ToS/privacy acceptance, residency. |
-Avatar and profile editing coverage E2E
+| Avatar/Profile Editing | No E2E test for avatar/profile editing. |
 
 > This section should be updated as features are implemented or verified to exist. If a feature is found or added, move it to the main gap/enhancement table above or mark as resolved.
+
+---
+
+## Related Documentation
+
+- For detailed findings and actionable recommendations, see [`docs/Testing_Findings.md`](./Testing_Findings.md).
+- For the systematic remediation plan and ongoing issues, see [`docs/TESTING_ISSUES.md`](./TESTING_ISSUES.md).
+- For best practices and setup, see [`docs/TESTING.md`](./TESTING.md).

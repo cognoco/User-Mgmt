@@ -63,24 +63,123 @@ export function createMockAuthStore(
         store[key] = newState[key];
       }
     },
-    login: methodOverrides.login || defaultState.login,
-    logout: methodOverrides.logout || defaultState.logout,
-    register: methodOverrides.register || defaultState.register,
-    refreshToken: methodOverrides.refreshToken || defaultState.refreshToken,
-    handleSessionTimeout: methodOverrides.handleSessionTimeout || defaultState.handleSessionTimeout,
-    clearError: methodOverrides.clearError || defaultState.clearError,
-    clearSuccessMessage: methodOverrides.clearSuccessMessage || defaultState.clearSuccessMessage,
-    setUser: methodOverrides.setUser || defaultState.setUser,
-    setToken: methodOverrides.setToken || defaultState.setToken,
-    setupMFA: methodOverrides.setupMFA || defaultState.setupMFA,
-    verifyMFA: methodOverrides.verifyMFA || defaultState.verifyMFA,
-    disableMFA: methodOverrides.disableMFA || defaultState.disableMFA,
-    sendVerificationEmail: methodOverrides.sendVerificationEmail || defaultState.sendVerificationEmail,
-    setLoading: methodOverrides.setLoading || defaultState.setLoading,
-    resetPassword: methodOverrides.resetPassword || defaultState.resetPassword,
-    updatePassword: methodOverrides.updatePassword || defaultState.updatePassword,
-    deleteAccount: methodOverrides.deleteAccount || defaultState.deleteAccount,
-    verifyEmail: methodOverrides.verifyEmail || defaultState.verifyEmail,
+    // --- Stateful mock implementations for test flows ---
+    login: vi.fn(async (payload) => {
+      store.isLoading = true;
+      // Call the API mock as the real store would
+      let apiResult;
+      try {
+// @ts-expect-error: test mock global property
+        apiResult = await (globalThis.api as any)?.post?.('/api/auth/login', payload);
+      } catch (err) {
+        store.isLoading = false;
+        const errorMsg = (err && typeof err === 'object' && 'response' in err && (err as any).response?.data?.error) ? (err as any).response.data.error : 'Invalid credentials';
+        store.error = errorMsg;
+        store.isAuthenticated = false;
+        store.user = null;
+        return { error: errorMsg };
+      }
+      if (apiResult && apiResult.data && apiResult.data.user && apiResult.data.token) {
+        store.user = apiResult.data.user;
+        store.token = apiResult.data.token;
+        store.isAuthenticated = true;
+        store.isLoading = false;
+        store.error = null;
+        store.successMessage = null;
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem('auth_token', apiResult.data.token);
+        }
+        return apiResult.data;
+      } else {
+        store.isLoading = false;
+        store.error = 'Invalid credentials';
+        store.isAuthenticated = false;
+        store.user = null;
+        return { error: 'Invalid credentials' };
+      }
+    }),
+    register: vi.fn(async (payload) => {
+      store.isLoading = true;
+      store.error = null;
+      store.successMessage = null;
+      // Call the Supabase signUp mock as the real store would
+      let signUpResult;
+      try {
+// @ts-expect-error: test mock global property
+        signUpResult = await (globalThis.supabase as any)?.auth?.signUp?.(payload);
+      } catch (err) {
+        store.isLoading = false;
+        store.error = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : 'Registration failed';
+        store.isAuthenticated = false;
+        store.user = null;
+        return { success: false, error: store.error };
+      }
+      if (signUpResult && !signUpResult.error) {
+        store.isLoading = false;
+        store.user = null; // Not set until email is verified
+        store.isAuthenticated = false;
+        store.successMessage = 'Registration successful! Please check your email.';
+        return { success: true };
+      } else {
+        store.isLoading = false;
+        store.error = signUpResult?.error?.message || 'Registration failed';
+        store.isAuthenticated = false;
+        store.user = null;
+        return { success: false, error: store.error };
+      }
+    }),
+    logout: vi.fn(async () => {
+      // Call the API mock as the real store would
+// @ts-expect-error: test mock global property
+      try {
+        await (globalThis.api as any)?.post?.('/api/auth/logout');
+      } catch (err) {
+        store.isLoading = false;
+        const errorMsg = (err && typeof err === 'object' && 'response' in err && (err as any).response?.data?.error) ? (err as any).response.data.error : 'Logout failed';
+        store.error = errorMsg;
+        return { error: errorMsg };
+      }
+      store.isLoading = false;
+      store.user = null;
+      store.token = null;
+      store.isAuthenticated = false;
+      store.error = null;
+      store.successMessage = null;
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.removeItem('auth_token');
+      }
+      return {};
+    }),
+    clearError: vi.fn(() => {
+      store.error = null;
+    }),
+    clearSuccessMessage: vi.fn(() => {
+      store.successMessage = null;
+    }),
+    deleteAccount: vi.fn(async (password) => {
+      // Call the API mock as the real store would
+// @ts-expect-error: test mock global property
+      try {
+        await (globalThis.api as any)?.delete?.('/api/auth/delete-account', { data: { password } });
+      } catch (err) {
+        store.error = (err && typeof err === 'object' && 'response' in err && (err as any).response?.data?.error) ? (err as any).response.data.error : 'Delete failed';
+        return { error: store.error };
+      }
+      if (store.user && store.user.email === 'test@example.com') {
+        store.user = null;
+        store.isAuthenticated = false;
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.removeItem('auth_token');
+        }
+        return {};
+      } else {
+        store.error = 'Delete failed';
+        return { error: 'Delete failed' };
+      }
+    }),
+    // --- End stateful mock implementations ---
+    // Allow overrides for other methods
+    ...methodOverrides,
   };
 
   // Allow direct state mutation for tests

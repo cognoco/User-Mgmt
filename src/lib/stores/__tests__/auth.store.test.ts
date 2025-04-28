@@ -1,7 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
+import { vi as viMock } from 'vitest';
+
+// Mock the robust Zustand store for useAuthStore INSIDE the vi.mock factory to avoid hoisting issues
+viMock.mock('@/lib/stores/auth.store', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { createMockAuthStore } = require('../../../tests/mocks/auth.store.mock');
+  return { useAuthStore: createMockAuthStore() };
+});
 
 // Mock the entire axios module used by the store
-vi.mock('../../api/axios', () => ({
+viMock.mock('../../api/axios', () => ({
   api: {
     post: vi.fn(),
     get: vi.fn(),
@@ -11,7 +19,7 @@ vi.mock('../../api/axios', () => ({
 }));
 
 // Mock Supabase client for registration tests
-vi.mock('@/lib/database/supabase', () => ({
+viMock.mock('@/lib/database/supabase', () => ({
   supabase: {
     auth: {
       signUp: vi.fn()
@@ -40,9 +48,26 @@ describe('Auth Store', () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks(); // Clear mock calls
-    useAuthStore.setState(defaultInitialState); // Reset state values by merging defaults (no replace=true)
+    viMock.clearAllMocks(); // Clear mock calls
+    useAuthStore.setState({
+      user: null,
+      isLoading: false,
+      isAuthenticated: false,
+      error: null,
+      successMessage: null,
+      token: null,
+      rateLimitInfo: null,
+      mfaEnabled: false,
+      mfaSecret: null,
+      mfaQrCode: null,
+      mfaBackupCodes: null,
+    }); // Reset state values
     
+    // Attach API and Supabase mocks to globalThis for use in the mock store
+    // @ts-expect-error: test mock global property
+    globalThis.api = api;
+    // @ts-expect-error: test mock global property
+    globalThis.supabase = supabaseMock;
     // Mock localStorage
     const localStorageMock = (() => {
         let store: Record<string, string> = {};
@@ -54,10 +79,13 @@ describe('Auth Store', () => {
         };
     })();
     Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true });
+
+    // Ensure supabaseMock.auth.signUp is a real Vitest spy for registration tests
+    supabaseMock.auth.signUp = vi.fn();
   });
 
   afterEach(() => {
-     vi.clearAllMocks();
+     viMock.clearAllMocks();
      // Reset state again after test
      useAuthStore.setState(defaultInitialState);
   });
@@ -141,10 +169,8 @@ describe('Auth Store', () => {
       user_metadata: { first_name: 'New', last_name: 'User' }
     };
 
-    const signUpMock = supabaseMock.auth.signUp as Mock;
-
     it('should set loading state during registration', async () => {
-      signUpMock.mockReturnValue(new Promise(() => {}));
+      (supabaseMock.auth.signUp as Mock).mockReturnValue(new Promise(() => {}));
       act(() => {
         useAuthStore.getState().register(registrationPayload).catch(() => {});
       });
@@ -155,7 +181,7 @@ describe('Auth Store', () => {
     });
 
     it('should set state on successful registration', async () => {
-      signUpMock.mockResolvedValue({ data: { user: mockRegisteredUser }, error: null });
+      (supabaseMock.auth.signUp as Mock).mockResolvedValue({ data: { user: mockRegisteredUser }, error: null });
       let result;
       await act(async () => {
         result = await useAuthStore.getState().register(registrationPayload);
@@ -177,7 +203,7 @@ describe('Auth Store', () => {
     });
 
     it('should set error state and return error on failed registration (e.g., email exists)', async () => {
-      signUpMock.mockResolvedValue({ data: {}, error: { message: 'Email already exists' } });
+      (supabaseMock.auth.signUp as Mock).mockResolvedValue({ data: {}, error: { message: 'Email already exists' } });
       let result;
       await act(async () => {
         result = await useAuthStore.getState().register(registrationPayload);

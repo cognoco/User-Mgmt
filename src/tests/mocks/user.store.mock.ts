@@ -40,4 +40,6 @@ export function createUserStoreMock(overrides = {}) {
   };
   const destroy = () => subscribers.clear();
   return { ...state, getState, setState, subscribe, destroy };
-} 
+}
+
+export default createUserStoreMock; 

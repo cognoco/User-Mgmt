@@ -279,3 +279,11 @@ A new, systematic remediation plan has been adopted to address widespread test f
 - Begin the batch-fix for React `act(...)` warnings across all test files.
 
 ---
+
+## Related Documentation
+
+- For the canonical list of missing tests and coverage gaps, see [`docs/GAP_ANALYSIS.md`](./GAP_ANALYSIS.md).
+- For the systematic remediation plan and ongoing issues, see [`docs/TESTING_ISSUES.md`](./TESTING_ISSUES.md).
+- For best practices and setup, see [`docs/TESTING.md`](./TESTING.md).
+
+---

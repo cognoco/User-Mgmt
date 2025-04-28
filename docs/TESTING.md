@@ -28,6 +28,23 @@
    - Tests are more resilient to refactoring and better reflect real user experience.
    - Use `screen.getByRole`, `screen.getByLabelText`, etc. Avoid querying by implementation details (e.g., class names, test IDs unless necessary).
 
+---
+
+## Zod Schema & Form Field Alignment Issue (Case Study)
+
+**Problem:**
+- If a Zod schema used for form validation includes a required field (e.g., `email`) that is not actually rendered in the form, form validation will always fail, and the submit handler will never be called.
+- This can cause tests to fail with errors like: `expected mock to be called, but it was never called`.
+
+**Example:**
+- In the `ProfileEditor` component, the Zod schema required an `email` field, but the form did not render an email input. As a result, the form could never be submitted, and the test for profile update always failed.
+
+**Solution:**
+- Always ensure that the Zod schema matches the fields actually rendered in the form. Remove any required fields from the schema that are not present in the UI, or make them optional if they are conditionally rendered.
+- After aligning the schema and the form, the test and the user flow will work as expected.
+
+---
+
 ## Backup Codes Integration & E2E Tests
 
 ### Integration Test: `src/tests/integration/backup.integration.test.tsx`
@@ -48,3 +65,11 @@
 - Tests simulate real user actions for backup code management and recovery flows.
 - Integration and E2E tests ensure both UI and backend endpoints work as intended.
 - If backup code flows are extended (e.g., admin/manual recovery), tests should be updated accordingly.
+
+---
+
+## For Test Coverage Gaps and Current Status
+
+- For the canonical list of missing tests and coverage gaps, see [`docs/GAP_ANALYSIS.md`](./GAP_ANALYSIS.md).
+- For the latest test run results and actionable findings, see [`docs/Testing_Findings.md`](./Testing_Findings.md).
+- For ongoing and known issues, see [`docs/TESTING_ISSUES.md`](./TESTING_ISSUES.md).

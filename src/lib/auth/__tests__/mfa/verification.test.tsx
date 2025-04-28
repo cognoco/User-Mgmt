@@ -3,9 +3,10 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { UserEvent } from '@testing-library/user-event/dist/types/setup/setup';
 import { MFAVerificationForm } from '@/components/auth/MFAVerificationForm';
-import { vi, describe, beforeEach, test, expect } from 'vitest';
+import { vi, describe, beforeEach, test, expect, Mock } from 'vitest';
+import { api } from '@/lib/api/axios';
+import type { UserEvent } from '@testing-library/user-event';
 
 // Import our standardized mock using vi.mock with dynamic import
 vi.mock('@/lib/supabase', async () => (await import('@/tests/mocks/supabase')));
@@ -29,7 +30,7 @@ describe('MFA Verification During Login', () => {
     user = userEvent.setup();
     
     // Mock initial auth (first factor authenticated, second factor required)
-    (supabase.auth.signInWithPassword as vi.Mock).mockResolvedValue({
+    (supabase.auth.signInWithPassword as Mock).mockResolvedValue({
       data: { 
         user: mockUser,
         session: null // No session yet, MFA required
@@ -38,7 +39,7 @@ describe('MFA Verification During Login', () => {
     });
     
     // Mock MFA factors list
-    (supabase.auth.mfa.listFactors as vi.Mock).mockResolvedValue({
+    (supabase.auth.mfa.listFactors as Mock).mockResolvedValue({
       data: {
         totp: [{ id: 'totp-123', name: 'Authenticator App', verified: true }],
         phone: [{ id: 'phone-123', name: 'Mobile Phone', verified: true }]
@@ -48,364 +49,243 @@ describe('MFA Verification During Login', () => {
   });
 
   test('User can complete login with TOTP code', async () => {
-    // Mock MFA challenge
-    (supabase.auth.mfa.challenge as vi.Mock).mockResolvedValueOnce({
-      data: { id: 'challenge-123' },
-      error: null
-    });
-    
-    // Mock successful verification
-    (supabase.auth.mfa.verify as vi.Mock).mockResolvedValueOnce({
-      data: { 
-        session: { 
-          access_token: 'mfa-verified-token',
-          user: mockUser
-        } 
+    // Mock api.post for TOTP verification
+    const mockApiPost = vi.spyOn(api, 'post').mockResolvedValueOnce({
+      data: {
+        user: mockUser,
+        token: 'mfa-verified-token',
       },
-      error: null
     });
 
     const mockOnSuccess = vi.fn();
     const mockAccessToken = 'initial-access-token';
 
-    // Render login component
     render(<MFAVerificationForm accessToken={mockAccessToken} onSuccess={mockOnSuccess} />);
-    
-    // Enter email and password
-    await act(async () => {
-        await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-        await user.type(screen.getByLabelText(/password/i), 'Password123');
-    });
-    
-    // Submit login form
-    await act(async () => {
-        await user.click(screen.getByRole('button', { name: /sign in/i }));
-    });
-    
-    // Verify initial login was attempted
-    await waitFor(() => {
-        expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({
-          email: 'user@example.com',
-          password: 'Password123'
-        });
-    });
-    
-    // Wait for MFA verification screen
-    await waitFor(() => {
-      expect(screen.getByText(/verification code/i)).toBeInTheDocument();
-      expect(screen.getByText(/authenticator app/i)).toBeInTheDocument();
-    });
-    
+
     // Enter TOTP code
     await act(async () => {
-        await user.type(screen.getByLabelText(/code/i), '123456');
+      await user.type(screen.getByLabelText(/code/i), '123456');
     });
-    
+
     // Submit verification form
     await act(async () => {
-        await user.click(screen.getByRole('button', { name: /verify/i }));
+      await user.click(screen.getByRole('button', { name: /verify/i }));
     });
-    
-    // Verify MFA was completed
+
+    // Assert api.post was called with correct arguments
     await waitFor(() => {
-      expect(supabase.auth.mfa.challenge).toHaveBeenCalledWith({
-        factorId: 'totp-123'
+      expect(mockApiPost).toHaveBeenCalledWith('/auth/mfa/verify', {
+        code: '123456',
+        method: 'totp',
+        accessToken: mockAccessToken,
+        rememberDevice: false,
       });
-      expect(supabase.auth.mfa.verify).toHaveBeenCalledWith({
-        factorId: 'totp-123',
-        challengeId: 'challenge-123',
-        code: '123456'
-      });
-      expect(screen.getByText(/successfully authenticated/i)).toBeInTheDocument();
+      expect(mockOnSuccess).toHaveBeenCalledWith(mockUser, 'mfa-verified-token');
     });
+
+    mockApiPost.mockRestore();
   });
 
   test('User can switch between available MFA methods', async () => {
-    // Mock MFA challenge for TOTP
-    (supabase.auth.mfa.challenge as vi.Mock).mockImplementation((params) => {
-      if (params.factorId === 'totp-123') {
-        return Promise.resolve({
-          data: { id: 'challenge-totp-123' },
-          error: null
-        });
-      } else if (params.factorId === 'phone-123') {
-        return Promise.resolve({
-          data: { id: 'challenge-phone-123' },
-          error: null
-        });
-      }
-      return Promise.resolve({ data: null, error: new Error('Unknown factor') });
+    // Mock api.post for TOTP and backup code verification
+    const mockApiPost = vi.spyOn(api, 'post');
+    mockApiPost.mockResolvedValue({
+      data: {
+        user: mockUser,
+        token: 'mfa-verified-token',
+      },
     });
-    
+
     const mockOnSuccessSwitch = vi.fn();
     const mockAccessTokenSwitch = 'initial-access-token-switch';
 
-    // Render login component
     render(<MFAVerificationForm accessToken={mockAccessTokenSwitch} onSuccess={mockOnSuccessSwitch} />);
-    
-    // Enter email and password
+
+    // Switch to backup code method
     await act(async () => {
-        await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-        await user.type(screen.getByLabelText(/password/i), 'Password123');
+      await user.click(screen.getByText((content) => content.includes('useBackupCode')));
     });
-    
-    // Submit login form
+
+    // Enter backup code
     await act(async () => {
-        await user.click(screen.getByRole('button', { name: /sign in/i }));
+      await user.type(screen.getByLabelText((content) => content.includes('backupCodeLabel')), '12345678');
     });
-    
-    // Wait for MFA verification screen with TOTP selected by default
+
+    // Switch back to TOTP method
+    await act(async () => {
+      await user.click(screen.getByText((content) => content.includes('useTOTPInstead')));
+    });
+
+    // Enter TOTP code
+    await act(async () => {
+      await user.type(screen.getByLabelText(/code/i), '654321');
+    });
+
+    // Submit verification form
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /verify/i }));
+    });
+
+    // Assert api.post was called with correct arguments for TOTP method
     await waitFor(() => {
-      expect(screen.getByText(/authenticator app/i)).toBeInTheDocument();
-    });
-    
-    // Switch to phone verification
-    await act(async () => {
-        await user.click(screen.getByRole('button', { name: /mobile phone/i }));
-    });
-    
-    // Verify phone challenge was requested
-    await waitFor(() => {
-      expect(supabase.auth.mfa.challenge).toHaveBeenCalledWith({
-        factorId: 'phone-123'
+      expect(mockApiPost).toHaveBeenCalledWith('/auth/mfa/verify', {
+        code: '654321',
+        method: 'totp',
+        accessToken: mockAccessTokenSwitch,
+        rememberDevice: false,
       });
-      expect(screen.getByText(/verification code sent/i)).toBeInTheDocument();
+      expect(mockOnSuccessSwitch).toHaveBeenCalledWith(mockUser, 'mfa-verified-token');
     });
-    
-    // Switch back to TOTP
-    await act(async () => {
-        await user.click(screen.getByRole('button', { name: /authenticator app/i }));
-    });
-    
-    // Verify TOTP challenge was requested
-    await waitFor(() => {
-      expect(supabase.auth.mfa.challenge).toHaveBeenCalledWith({
-        factorId: 'totp-123'
-      });
-    });
+
+    mockApiPost.mockRestore();
   });
 
   test('User can authenticate with backup code', async () => {
-    // Mock MFA verification with backup code
-    (supabase.auth.mfa.verifyWithBackupCode as vi.Mock).mockResolvedValueOnce({
-      data: { 
-        session: { 
-          access_token: 'backup-code-token',
-          user: mockUser
-        } 
+    const mockApiPost = vi.spyOn(api, 'post').mockResolvedValueOnce({
+      data: {
+        user: mockUser,
+        token: 'backup-code-token',
       },
-      error: null
     });
 
     const mockOnSuccessBackup = vi.fn();
     const mockAccessTokenBackup = 'initial-access-token-backup';
 
-    // Render login component
     render(<MFAVerificationForm accessToken={mockAccessTokenBackup} onSuccess={mockOnSuccessBackup} />);
-    
-    // Enter email and password
+
+    // Switch to backup code mode
     await act(async () => {
-        await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-        await user.type(screen.getByLabelText(/password/i), 'Password123');
+      await user.click(screen.getByText((content) => content.includes('useBackupCode')));
     });
-    
-    // Submit login form
-    await act(async () => {
-        await user.click(screen.getByRole('button', { name: /sign in/i }));
-    });
-    
-    // Wait for MFA verification screen
-    await waitFor(() => {
-      expect(screen.getByText(/verification code/i)).toBeInTheDocument();
-    });
-    
-    // Click "Use backup code" option
-    await act(async () => {
-        await user.click(screen.getByText(/use backup code/i));
-    });
-    
+
     // Enter backup code
     await act(async () => {
-        await user.type(screen.getByLabelText(/backup code/i), '123456789012');
+      await user.type(screen.getByLabelText((content) => content.includes('backupCodeLabel')), '12345678');
     });
-    
+
     // Submit backup code
     await act(async () => {
-        await user.click(screen.getByRole('button', { name: /verify/i }));
+      await user.click(screen.getByRole('button', { name: /verify/i }));
     });
-    
-    // Verify backup code was used for authentication
+
+    // Assert api.post was called with correct arguments
     await waitFor(() => {
-      expect(supabase.auth.mfa.verifyWithBackupCode).toHaveBeenCalledWith({
-        factorId: expect.any(String),
-        code: '123456789012'
+      expect(mockApiPost).toHaveBeenCalledWith('/api/2fa/backup-codes/verify', {
+        code: '12345678',
       });
-      expect(screen.getByText(/successfully authenticated/i)).toBeInTheDocument();
+      expect(mockOnSuccessBackup).toHaveBeenCalledWith({}, '');
     });
+
+    mockApiPost.mockRestore();
   });
 
   test('Handles incorrect MFA code', async () => {
-    // Mock MFA challenge
-    (supabase.auth.mfa.challenge as vi.Mock).mockResolvedValueOnce({
-      data: { id: 'challenge-123' },
-      error: null
-    });
-    
     // Mock verification failure
-    (supabase.auth.mfa.verify as vi.Mock).mockResolvedValueOnce({
-      data: null,
-      error: { message: 'Invalid verification code' }
+    const mockApiPost = vi.spyOn(api, 'post').mockRejectedValueOnce({
+      response: { data: { error: 'Invalid verification code' } },
     });
 
-    // Render login component
-    render(<MFAVerificationForm />);
-    
-    // Enter email and password
-    await act(async () => {
-        await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-        await user.type(screen.getByLabelText(/password/i), 'Password123');
-    });
-    
-    // Submit login form
-    await act(async () => {
-        await user.click(screen.getByRole('button', { name: /sign in/i }));
-    });
-    
-    // Wait for MFA verification screen
-    await waitFor(() => {
-      expect(screen.getByText(/verification code/i)).toBeInTheDocument();
-    });
-    
+    const mockOnSuccess = vi.fn();
+    const mockAccessToken = 'initial-access-token';
+
+    render(<MFAVerificationForm accessToken={mockAccessToken} onSuccess={mockOnSuccess} />);
+
     // Enter wrong TOTP code
     await act(async () => {
-        await user.type(screen.getByLabelText(/code/i), '999999');
+      await user.type(screen.getByLabelText(/code/i), '999999');
     });
-    
+
     // Submit verification form
     await act(async () => {
-        await user.click(screen.getByRole('button', { name: /verify/i }));
+      await user.click(screen.getByRole('button', { name: /verify/i }));
     });
-    
+
     // Verify error message is displayed
     await waitFor(() => {
-        expect(screen.getByText(/invalid verification code/i)).toBeInTheDocument();
+      expect(screen.getByText(/invalid verification code/i)).toBeInTheDocument();
     });
-    
+
     // User should be able to try again
     expect(screen.getByLabelText(/code/i)).toBeEnabled();
+
+    mockApiPost.mockRestore();
   });
 
   test('User can request new SMS code during verification', async () => {
-    // Mock MFA challenge
-    (supabase.auth.mfa.challenge as vi.Mock).mockResolvedValueOnce({
-      data: { id: 'challenge-phone-123' },
-      error: null
-    });
-    
-    // Mock new challenge request
-    (supabase.auth.mfa.challenge as vi.Mock).mockResolvedValueOnce({
-      data: { id: 'challenge-phone-456' }, // New challenge ID
-      error: null
+    // Mock resend code API call
+    const mockApiPost = vi.spyOn(api, 'post').mockResolvedValueOnce({
+      data: { message: 'New code sent' },
     });
 
-    // Render login component
-    render(<MFAVerificationForm />);
-    
-    // Enter email and password
+    const mockOnSuccess = vi.fn();
+    const mockAccessToken = 'initial-access-token';
+
+    render(
+      <MFAVerificationForm
+        accessToken={mockAccessToken}
+        onSuccess={mockOnSuccess}
+        enableResendCode={true}
+        mfaMethod="sms"
+      />
+    );
+
+    // Simulate clicking the resend code button
     await act(async () => {
-        await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-        await user.type(screen.getByLabelText(/password/i), 'Password123');
-        await user.click(screen.getByRole('button', { name: /sign in/i }));
+      await user.click(screen.getByText((content) => content.includes('resendCode')));
     });
-    
-    // Wait for MFA verification screen
-    await waitFor(() => {
-      expect(screen.getByText(/verification code/i)).toBeInTheDocument();
-    });
-    
-    // Switch to phone verification
-    await act(async () => {
-        await user.click(screen.getByRole('button', { name: /mobile phone/i }));
-    });
-    
-    // Wait for SMS verification screen
-    await waitFor(() => {
-      expect(screen.getByText(/verification code sent/i)).toBeInTheDocument();
-    });
-    
-    // Request new code
-    await act(async () => {
-      await user.click(screen.getByText(/resend code/i));
-    });
-    
+
     // Verify new challenge was requested
     await waitFor(() => {
-      // Challenge should have been called twice (initial + resend)
-      expect(supabase.auth.mfa.challenge).toHaveBeenCalledTimes(2);
-      expect(screen.getByText(/new code sent/i)).toBeInTheDocument();
+      expect(mockApiPost).toHaveBeenCalledWith('/auth/mfa/resend-sms', { accessToken: mockAccessToken });
+      expect(screen.getByText('[i18n:auth.mfa.resendSuccess]')).toBeInTheDocument();
     });
+
+    mockApiPost.mockRestore();
   });
 
   test('Handles "Remember this device" functionality', async () => {
-    // Mock MFA challenge
-    (supabase.auth.mfa.challenge as vi.Mock).mockResolvedValueOnce({
-      data: { id: 'challenge-123' },
-      error: null
-    });
-    
-    // Mock successful verification
-    (supabase.auth.mfa.verify as vi.Mock).mockResolvedValueOnce({
-      data: { 
-        session: { 
-          access_token: 'mfa-remembered-token',
-          user: mockUser
-        } 
-      },
-      error: null
+    const mockApiPost = vi.spyOn(api, 'post').mockResolvedValueOnce({
+      data: { user: mockUser, token: 'mfa-remembered-token' },
     });
 
-    const mockOnSuccessRemember = vi.fn();
-    const mockAccessTokenRemember = 'initial-access-token-remember';
+    const mockOnSuccess = vi.fn();
+    const mockAccessToken = 'initial-access-token-remember';
 
-    // Render login component
-    render(<MFAVerificationForm accessToken={mockAccessTokenRemember} onSuccess={mockOnSuccessRemember} />);
-    
-    // Enter email and password
-    await act(async () => {
-        await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-        await user.type(screen.getByLabelText(/password/i), 'Password123');
-        await user.click(screen.getByRole('button', { name: /sign in/i }));
-    });
-    
-    // Wait for MFA verification screen
-    await waitFor(() => {
-      expect(screen.getByText(/verification code/i)).toBeInTheDocument();
-    });
-    
+    render(
+      <MFAVerificationForm
+        accessToken={mockAccessToken}
+        onSuccess={mockOnSuccess}
+        enableRememberDevice={true}
+        mfaMethod="totp"
+      />
+    );
+
     // Check the remember device box
     await act(async () => {
-        await user.click(screen.getByLabelText(/remember this device/i));
+      await user.click(screen.getByLabelText((content) => content.includes('rememberDevice')));
     });
-    
+
     // Enter TOTP code
     await act(async () => {
-        await user.type(screen.getByLabelText(/code/i), '123456');
+      await user.type(screen.getByLabelText(/code/i), '123456');
     });
-    
+
     // Submit verification form
     await act(async () => {
-        await user.click(screen.getByRole('button', { name: /verify/i }));
+      await user.click(screen.getByRole('button', { name: /verify/i }));
     });
-    
-    // Verify MFA was completed with remember device option
+
+    // Verify API was called with rememberDevice: true
     await waitFor(() => {
-      expect(supabase.auth.mfa.verify).toHaveBeenCalledWith({
-        factorId: 'totp-123',
-        challengeId: 'challenge-123',
+      expect(mockApiPost).toHaveBeenCalledWith('/auth/mfa/verify', {
         code: '123456',
-        rememberDevice: true
+        method: 'totp',
+        accessToken: mockAccessToken,
+        rememberDevice: true,
       });
-      expect(screen.getByText(/successfully authenticated/i)).toBeInTheDocument();
+      expect(mockOnSuccess).toHaveBeenCalledWith(mockUser, 'mfa-remembered-token');
     });
+
+    mockApiPost.mockRestore();
   });
 });

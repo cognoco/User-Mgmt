@@ -44,3 +44,8 @@
 ---
 
 **This plan is designed to maximize impact and reduce noise, making it easier to identify and fix real issues in the codebase.**
+
+## For Detailed Test Findings and Coverage Gaps
+
+- For the latest test run results and actionable findings, see [`docs/Testing_Findings.md`](./Testing_Findings.md).
+- For the canonical list of missing tests and coverage gaps, see [`docs/GAP_ANALYSIS.md`](./GAP_ANALYSIS.md).
