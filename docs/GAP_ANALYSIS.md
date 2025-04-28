@@ -64,5 +64,6 @@ The following features were not found in the codebase (neither implementation no
 | Onboarding           | No test coverage for onboarding, checklists, first-time user flows. |
 | Integrations         | No test coverage for webhooks, API key management. |
 | Legal/Compliance     | No test coverage for ToS/privacy acceptance, residency. |
+Avatar and profile editing coverage E2E
 
 > This section should be updated as features are implemented or verified to exist. If a feature is found or added, move it to the main gap/enhancement table above or mark as resolved.

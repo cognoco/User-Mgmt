@@ -1,14 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { TeamMembersList } from '@/components/team/TeamMembersList';
+import React from 'react';
+
+// Restore the usePermission mock
+vi.mock('@/hooks/usePermission', () => ({
+  __esModule: true,
+  usePermission: vi.fn(),
+}));
+
+import { TeamMembersList as TeamMembersListComponent } from '@/components/team/TeamMembersList';
 import { usePermission } from '@/hooks/usePermission';
 import userEvent from '@testing-library/user-event';
 
-// Mock the usePermission hook
-vi.mock('@/hooks/usePermission', () => ({
-  usePermission: vi.fn(),
-}));
+// Explicitly type the component
+const TeamMembersList: React.FC = TeamMembersListComponent;
 
 // Mock fetch globally
 const mockFetch = vi.fn();

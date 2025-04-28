@@ -26,7 +26,7 @@ import {
   ArrowUpDown,
   UserPlus,
 } from 'lucide-react';
-import { usePermission } from '@/lib/hooks/usePermission';
+import { usePermission } from '@/hooks/usePermission';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 

@@ -92,6 +92,7 @@ export function ProfileEditor() {
             onChange={handleAvatarChange}
             className="hidden"
             id="avatar-upload"
+            data-testid="avatar-upload"
           />
           <Label htmlFor="avatar-upload">
             <Button variant="outline" className="cursor-pointer">
