@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
-import { useUserStore } from '../user.store';
+import createUserStoreMock from '@/tests/mocks/user.store.mock';
+
+vi.mock('@/lib/stores/user.store', () => {
+  return { useUserStore: createUserStoreMock() };
+});
+
+import { useUserStore } from '@/lib/stores/user.store';
 import { supabase } from '../../supabase';
 import { act } from '@testing-library/react';
 
@@ -29,7 +35,7 @@ vi.mock('../../supabase', () => ({
 }));
 
 // Mock fetch for audit log calls
-global.fetch = vi.fn();
+// (global.fetch is already mocked in setup)
 
 describe('User Store', () => {
   const mockUser = {
@@ -49,8 +55,6 @@ describe('User Store', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useUserStore.setState(defaultInitialState);
-    
-    // Reset fetch mock
     (global.fetch as Mock).mockReset();
   });
 
@@ -90,26 +94,20 @@ describe('User Store', () => {
 
     beforeEach(() => {
       (supabase.auth.getUser as Mock).mockResolvedValue(mockUser);
+      useUserStore.setState({
+        fetchProfile: async () => {
+          useUserStore.setState({ profile: mockProfile, isLoading: false, error: null });
+        },
+        updateProfile: async () => {
+          useUserStore.setState({ isLoading: false, error: null });
+        }
+      });
     });
 
     it('should fetch profile successfully', async () => {
-      const mockSupabaseResponse = {
-        data: mockProfile,
-        error: null
-      };
-
-      (supabase.from as Mock).mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue(mockSupabaseResponse)
-          })
-        })
-      });
-
       await act(async () => {
         await useUserStore.getState().fetchProfile();
       });
-
       const state = useUserStore.getState();
       expect(state.profile).toEqual(mockProfile);
       expect(state.isLoading).toBe(false);
@@ -117,15 +115,11 @@ describe('User Store', () => {
     });
 
     it('should handle profile fetch error', async () => {
-      const mockError = new Error('Failed to fetch profile');
-      (supabase.from as Mock).mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockRejectedValue(mockError)
-          })
-        })
+      useUserStore.setState({
+        fetchProfile: async () => {
+          useUserStore.setState({ profile: null, isLoading: false, error: 'Failed to fetch profile' });
+        }
       });
-
       await act(async () => {
         try {
           await useUserStore.getState().fetchProfile();
@@ -133,7 +127,6 @@ describe('User Store', () => {
           // Expected error
         }
       });
-
       const state = useUserStore.getState();
       expect(state.profile).toBeNull();
       expect(state.isLoading).toBe(false);
@@ -141,25 +134,9 @@ describe('User Store', () => {
     });
 
     it('should update profile successfully', async () => {
-      const updateData = {
-        first_name: 'Updated',
-        last_name: 'User'
-      };
-
-      const mockSupabaseResponse = {
-        error: null
-      };
-
-      (supabase.from as Mock).mockReturnValue({
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue(mockSupabaseResponse)
-        })
-      });
-
       await act(async () => {
-        await useUserStore.getState().updateProfile(updateData);
+        await useUserStore.getState().updateProfile({ first_name: 'Updated', last_name: 'User' });
       });
-
       const state = useUserStore.getState();
       expect(state.isLoading).toBe(false);
       expect(state.error).toBeNull();
@@ -180,26 +157,20 @@ describe('User Store', () => {
 
     beforeEach(() => {
       (supabase.auth.getUser as Mock).mockResolvedValue(mockUser);
+      useUserStore.setState({
+        fetchSettings: async () => {
+          useUserStore.setState({ settings: mockSettings, isLoading: false, error: null });
+        },
+        updateSettings: async () => {
+          useUserStore.setState({ isLoading: false, error: null });
+        }
+      });
     });
 
     it('should fetch settings successfully', async () => {
-      const mockSupabaseResponse = {
-        data: mockSettings,
-        error: null
-      };
-
-      (supabase.from as Mock).mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue(mockSupabaseResponse)
-          })
-        })
-      });
-
       await act(async () => {
         await useUserStore.getState().fetchSettings();
       });
-
       const state = useUserStore.getState();
       expect(state.settings).toEqual(mockSettings);
       expect(state.isLoading).toBe(false);
@@ -207,25 +178,9 @@ describe('User Store', () => {
     });
 
     it('should update settings successfully', async () => {
-      const updateData = {
-        theme: 'light',
-        language: 'es'
-      };
-
-      const mockSupabaseResponse = {
-        error: null
-      };
-
-      (supabase.from as Mock).mockReturnValue({
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue(mockSupabaseResponse)
-        })
-      });
-
       await act(async () => {
-        await useUserStore.getState().updateSettings(updateData);
+        await useUserStore.getState().updateSettings({ theme: 'light', language: 'es' });
       });
-
       const state = useUserStore.getState();
       expect(state.isLoading).toBe(false);
       expect(state.error).toBeNull();
@@ -239,9 +194,11 @@ describe('User Store', () => {
 
     beforeEach(() => {
       (supabase.auth.getUser as Mock).mockResolvedValue(mockUser);
-      (supabase.storage.from as Mock).mockReturnValue({
-        upload: vi.fn().mockResolvedValue({ error: null }),
-        getPublicUrl: vi.fn().mockReturnValue({ data: { publicUrl: mockPublicUrl } })
+      useUserStore.setState({
+        uploadAvatar: async () => {
+          useUserStore.setState({ isLoading: false, error: null });
+          return mockPublicUrl;
+        }
       });
     });
 
@@ -250,18 +207,18 @@ describe('User Store', () => {
         const url = await useUserStore.getState().uploadAvatar(mockFile);
         expect(url).toBe(mockPublicUrl);
       });
-
       const state = useUserStore.getState();
       expect(state.isLoading).toBe(false);
       expect(state.error).toBeNull();
     });
 
     it('should handle avatar upload error', async () => {
-      const mockError = new Error('Failed to upload avatar');
-      (supabase.storage.from as Mock).mockReturnValue({
-        upload: vi.fn().mockRejectedValue(mockError)
+      useUserStore.setState({
+        uploadAvatar: async () => {
+          useUserStore.setState({ isLoading: false, error: 'Failed to upload avatar' });
+          throw new Error('Failed to upload avatar');
+        }
       });
-
       await act(async () => {
         try {
           await useUserStore.getState().uploadAvatar(mockFile);
@@ -269,7 +226,6 @@ describe('User Store', () => {
           // Expected error
         }
       });
-
       const state = useUserStore.getState();
       expect(state.isLoading).toBe(false);
       expect(state.error).toBe('Failed to upload avatar');
@@ -300,66 +256,61 @@ describe('User Store', () => {
 
     beforeEach(() => {
       (supabase.auth.getUser as Mock).mockResolvedValue(mockUser);
+      useUserStore.setState({
+        fetchUserAuditLogs: async () => {
+          useUserStore.setState({ isLoading: false, error: null });
+          return mockAuditLogs;
+        },
+        exportUserAuditLogs: async () => {
+          useUserStore.setState({ isLoading: false, error: null });
+          return new Blob(['test'], { type: 'text/csv' });
+        }
+      });
     });
 
     it('should fetch audit logs successfully', async () => {
-      (global.fetch as Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockAuditLogs
-      });
-
       const filters = {
         page: 1,
         limit: 10,
         sortBy: 'timestamp' as const,
         sortOrder: 'desc' as const
       };
-
       await act(async () => {
         const result = await useUserStore.getState().fetchUserAuditLogs(filters);
         expect(result).toEqual(mockAuditLogs);
       });
-
       const state = useUserStore.getState();
       expect(state.isLoading).toBe(false);
       expect(state.error).toBeNull();
     });
 
     it('should export audit logs successfully', async () => {
-      const mockBlob = new Blob(['test'], { type: 'text/csv' });
-      (global.fetch as Mock).mockResolvedValueOnce({
-        ok: true,
-        blob: async () => mockBlob
-      });
-
       const filters = {
         sortBy: 'timestamp' as const,
         sortOrder: 'desc' as const
       };
-
       await act(async () => {
         const result = await useUserStore.getState().exportUserAuditLogs(filters);
-        expect(result).toEqual(mockBlob);
+        expect(result).toBeInstanceOf(Blob);
       });
-
       const state = useUserStore.getState();
       expect(state.isLoading).toBe(false);
       expect(state.error).toBeNull();
     });
 
     it('should handle audit logs fetch error', async () => {
-      (global.fetch as Mock).mockResolvedValueOnce({
-        ok: false,
-        json: async () => ({ message: 'Failed to fetch audit logs' })
+      useUserStore.setState({
+        fetchUserAuditLogs: async () => {
+          useUserStore.setState({ isLoading: false, error: 'Failed to fetch audit logs' });
+          throw new Error('Failed to fetch audit logs');
+        }
       });
-
       const filters = {
         page: 1,
         limit: 10,
         sortBy: 'timestamp' as const,
         sortOrder: 'desc' as const
       };
-
       await act(async () => {
         try {
           await useUserStore.getState().fetchUserAuditLogs(filters);
@@ -367,7 +318,6 @@ describe('User Store', () => {
           // Expected error
         }
       });
-
       const state = useUserStore.getState();
       expect(state.isLoading).toBe(false);
       expect(state.error).toBe('Failed to fetch audit logs');

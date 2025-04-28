@@ -89,14 +89,10 @@ vi.mock('@/lib/stores/auth.store', () => ({ useAuthStore: mockStore }));
 // --- End Auth Store mock --- 
 
 // --- Mock User Store ---
-vi.mock('@/lib/stores/user.store', () => ({
-  useUserStore: vi.fn(() => ({
-    user: { id: 'test-user-id', email: 'testuser@example.com', name: 'Test User' },
-    setUser: vi.fn(),
-    clearUser: vi.fn(),
-    // Add other user store functions/state as needed
-  })),
-}));
+// (Removed robust Zustand mock; let each test file provide its own mock if needed)
+// vi.mock('@/lib/stores/user.store', () => ({
+//   useUserStore: userStoreMock,
+// }));
 // --- End User Store mock ---
 
 // Mock other global dependencies or setup if needed 
