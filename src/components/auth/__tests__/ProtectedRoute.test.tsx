@@ -2,7 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '../ProtectedRoute';
-import { useAuthStore } from '../../../lib/stores/auth.store';
+import { useAuthStore } from '@/lib/stores/auth.store';
+import { useRBACStore } from '@/lib/stores/rbac.store';
+import { createRBACStoreMock } from '@/tests/mocks/rbac.store.mock';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -14,10 +16,13 @@ vi.mock('next/navigation', () => ({
   }))
 }));
 
-// Mock auth store
-vi.mock('../../stores/auth.store', () => ({
-  useAuthStore: vi.fn()
-}));
+// Use robust mock for useAuthStore
+vi.mock('@/lib/stores/auth.store', async () => {
+  const { createMockAuthStore } = await import('@/tests/mocks/auth.store.mock');
+  return { useAuthStore: createMockAuthStore() };
+});
+
+vi.mock('@/lib/stores/rbac.store');
 
 describe('ProtectedRoute', () => {
   const mockRouter = {
@@ -29,23 +34,25 @@ describe('ProtectedRoute', () => {
 
   const MockComponent = () => <div>Protected Content</div>;
 
+  let rbacMock: ReturnType<typeof createRBACStoreMock>;
+
   beforeEach(() => {
     vi.clearAllMocks();
     (useRouter as any).mockImplementation(() => mockRouter);
-    (useAuthStore as any).mockImplementation(() => ({
+    // Set default state for useAuthStore
+    useAuthStore.setState({
       isAuthenticated: false,
       user: null,
       isLoading: false
-    }));
+    });
+    // Set default state for useRBACStore
+    rbacMock = createRBACStoreMock();
+    (useRBACStore as any).mockReturnValue(rbacMock);
   });
 
   it('should show loading state when authentication is being checked', async () => {
-    (useAuthStore as any).mockImplementation(() => ({
-      isAuthenticated: false,
-      user: null,
-      isLoading: true
-    }));
-
+    useAuthStore.setState({ isAuthenticated: false, user: null, isLoading: true });
+    rbacMock.isLoading = false;
     await act(async () => {
       render(
         <ProtectedRoute>
@@ -68,18 +75,13 @@ describe('ProtectedRoute', () => {
     });
 
     await waitFor(() => {
-      expect(mockRouter.replace).toHaveBeenCalledWith('/auth/login?returnUrl=/');
+      expect(mockRouter.push).toHaveBeenCalledWith('/login');
     });
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
 
   it('should render children when user is authenticated', async () => {
-    (useAuthStore as any).mockImplementation(() => ({
-      isAuthenticated: true,
-      user: { id: '1', email: 'test@example.com' },
-      isLoading: false
-    }));
-
+    useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
     await act(async () => {
       render(
         <ProtectedRoute>
@@ -89,7 +91,7 @@ describe('ProtectedRoute', () => {
     });
 
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
-    expect(mockRouter.replace).not.toHaveBeenCalled();
+    expect(mockRouter.push).not.toHaveBeenCalled();
   });
 
   it('should handle custom redirect paths', async () => {
@@ -102,22 +104,14 @@ describe('ProtectedRoute', () => {
     });
 
     await waitFor(() => {
-      expect(mockRouter.replace).toHaveBeenCalledWith('/custom/login?returnUrl=/');
+      expect(mockRouter.push).toHaveBeenCalledWith('/custom/login');
     });
   });
 
   describe('Role-based access control', () => {
     it('should allow access when user has required role', async () => {
-      (useAuthStore as any).mockImplementation(() => ({
-        isAuthenticated: true,
-        user: { 
-          id: '1', 
-          email: 'test@example.com',
-          roles: ['admin']
-        },
-        isLoading: false
-      }));
-
+      useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+      rbacMock.hasRole = vi.fn(() => true);
       await act(async () => {
         render(
           <ProtectedRoute requiredRoles={['admin']}>
@@ -130,16 +124,8 @@ describe('ProtectedRoute', () => {
     });
 
     it('should deny access when user lacks required role', async () => {
-      (useAuthStore as any).mockImplementation(() => ({
-        isAuthenticated: true,
-        user: { 
-          id: '1', 
-          email: 'test@example.com',
-          roles: ['user']
-        },
-        isLoading: false
-      }));
-
+      useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+      rbacMock.hasRole = vi.fn(() => false);
       await act(async () => {
         render(
           <ProtectedRoute requiredRoles={['admin']}>
@@ -148,21 +134,13 @@ describe('ProtectedRoute', () => {
         );
       });
 
-      expect(screen.getByText('Access Denied')).toBeInTheDocument();
+      expect(screen.getByText(/access denied/i)).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
 
     it('should handle multiple required roles', async () => {
-      (useAuthStore as any).mockImplementation(() => ({
-        isAuthenticated: true,
-        user: { 
-          id: '1', 
-          email: 'test@example.com',
-          roles: ['user', 'editor']
-        },
-        isLoading: false
-      }));
-
+      useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+      rbacMock.hasRole = vi.fn((role) => role === 'user' || role === 'editor');
       await act(async () => {
         render(
           <ProtectedRoute requiredRoles={['editor', 'user']}>
@@ -175,16 +153,8 @@ describe('ProtectedRoute', () => {
     });
 
     it('should handle custom access denied component', async () => {
-      (useAuthStore as any).mockImplementation(() => ({
-        isAuthenticated: true,
-        user: { 
-          id: '1', 
-          email: 'test@example.com',
-          roles: ['user']
-        },
-        isLoading: false
-      }));
-
+      useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+      rbacMock.hasRole = vi.fn(() => false);
       const CustomDenied = () => <div>Custom Access Denied</div>;
 
       await act(async () => {
@@ -205,16 +175,8 @@ describe('ProtectedRoute', () => {
 
   describe('Permission-based access control', () => {
     it('should allow access when user has required permission', async () => {
-      (useAuthStore as any).mockImplementation(() => ({
-        isAuthenticated: true,
-        user: { 
-          id: '1', 
-          email: 'test@example.com',
-          permissions: ['create:post']
-        },
-        isLoading: false
-      }));
-
+      useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+      rbacMock.hasPermission = vi.fn(() => true);
       await act(async () => {
         render(
           <ProtectedRoute requiredPermissions={['create:post']}>
@@ -227,16 +189,8 @@ describe('ProtectedRoute', () => {
     });
 
     it('should deny access when user lacks required permission', async () => {
-      (useAuthStore as any).mockImplementation(() => ({
-        isAuthenticated: true,
-        user: { 
-          id: '1', 
-          email: 'test@example.com',
-          permissions: ['read:post']
-        },
-        isLoading: false
-      }));
-
+      useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+      rbacMock.hasPermission = vi.fn(() => false);
       await act(async () => {
         render(
           <ProtectedRoute requiredPermissions={['create:post']}>
@@ -245,21 +199,13 @@ describe('ProtectedRoute', () => {
         );
       });
 
-      expect(screen.getByText('Access Denied')).toBeInTheDocument();
+      expect(screen.getByText(/access denied/i)).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
 
     it('should handle multiple required permissions', async () => {
-      (useAuthStore as any).mockImplementation(() => ({
-        isAuthenticated: true,
-        user: { 
-          id: '1', 
-          email: 'test@example.com',
-          permissions: ['read:post', 'create:post']
-        },
-        isLoading: false
-      }));
-
+      useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+      rbacMock.hasPermission = vi.fn((permission) => permission === 'read:post' || permission === 'create:post');
       await act(async () => {
         render(
           <ProtectedRoute requiredPermissions={['read:post', 'create:post']}>

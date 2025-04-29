@@ -30,7 +30,7 @@ export function ProtectedRoute({
 
   // Show loading state while checking authentication and permissions
   if (authLoading || rbacLoading) {
-    return <div className="animate-pulse">Loading...</div>;
+    return <div className="animate-pulse" data-testid="loading-spinner">Loading...</div>;
   }
 
   // Redirect to login if not authenticated
