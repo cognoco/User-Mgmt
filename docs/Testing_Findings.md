@@ -287,3 +287,22 @@ A new, systematic remediation plan has been adopted to address widespread test f
 - For best practices and setup, see [`docs/TESTING.md`](./TESTING.md).
 
 ---
+
+## New Finding: MSW, Axios, and Node.js Test Environment (2024-06)
+
+- **Issue:** MSW (Mock Service Worker) does not intercept axios requests in Node.js test environments because axios uses Node's HTTP module, not fetch/XHR. As a result, MSW handlers for API endpoints (e.g., `/api/business/validate-domain`) are not triggered, and tests receive empty or unexpected responses.
+- **Symptoms:**
+  - Handlers for API endpoints are never hit in tests, even though the code works in the browser.
+  - Debug/catch-all handlers in MSW do not log any requests from axios.
+  - Component receives `{}` or empty data, causing test failures.
+- **Solution:**
+  - Directly mock the axios instance (e.g., `api.post`) in the test file using `vi.spyOn(api, 'post').mockImplementation(...)` for all relevant endpoints and scenarios.
+  - For error scenarios, override the mock within the specific test to return the appropriate error or invalid response.
+  - Remove MSW handlers for these endpoints in the test file to avoid confusion.
+- **Best Practice:**
+  - Use MSW for fetch/XHR-based clients and browser-like environments (JSDOM).
+  - Use direct mocking (e.g., `vi.spyOn`, `axios-mock-adapter`) for axios in Node.js test environments.
+
+This knowledge should be applied to all tests using axios in Node, and documented for future contributors.
+
+---

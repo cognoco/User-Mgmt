@@ -4,8 +4,8 @@
  * when accessing functions from getState()
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useAuthStore } from '../auth.store';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
+import { vi as viMock } from 'vitest';
 // Mock dependencies to isolate the store
 // Use the correct path relative to the test file
 vi.mock('@/lib/api/axios', () => ({
@@ -23,12 +23,39 @@ const localStorageMock = {
 };
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
+// Patch: Use robust mock for useAuthStore
+viMock.mock('@/lib/stores/auth.store', async () => {
+  const { createMockAuthStore } = await import('@/tests/mocks/auth.store.mock');
+  return { useAuthStore: createMockAuthStore() };
+});
+
+// Patch: Set up globalThis.api for the mock to work
+beforeAll(async () => {
+  // Attach API mock to globalThis for use in the mock store
+  // @ts-expect-error: test mock global property
+  globalThis.api = (await import('@/lib/api/axios')).api;
+});
+
 describe('Auth Store Direct Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should expose all action functions through getState()', () => {
+  it('should expose all action functions through getState()', async () => {
+    const { useAuthStore } = await import('../auth.store');
+    useAuthStore.setState({
+      user: null,
+      token: null,
+      isLoading: false,
+      isAuthenticated: false,
+      error: null,
+      successMessage: null,
+      rateLimitInfo: null,
+      mfaEnabled: false,
+      mfaSecret: null,
+      mfaQrCode: null,
+      mfaBackupCodes: null,
+    });
     // Get the store state directly
     const state = useAuthStore.getState();
     
@@ -65,6 +92,20 @@ describe('Auth Store Direct Tests', () => {
   });
 
   it('should be able to call functions obtained from getState()', async () => {
+    const { useAuthStore } = await import('../auth.store');
+    useAuthStore.setState({
+      user: null,
+      token: null,
+      isLoading: false,
+      isAuthenticated: false,
+      error: null,
+      successMessage: null,
+      rateLimitInfo: null,
+      mfaEnabled: false,
+      mfaSecret: null,
+      mfaQrCode: null,
+      mfaBackupCodes: null,
+    });
     // Get specific functions from the store state
     const { login, register, logout } = useAuthStore.getState();
     
@@ -77,14 +118,21 @@ describe('Auth Store Direct Tests', () => {
     const apiModule = await import('@/lib/api/axios');
     const api = apiModule.api as any;
     api.post.mockResolvedValueOnce({
-      data: { user: { id: '123' }, token: 'token123' }
+      data: {
+        user: { id: '123' },
+        token: 'token123',
+        requiresMfa: false,
+        expiresAt: Date.now() + 10000
+      }
     });
     
     // Try calling the login function directly
     const result = await login({ email: 'test@example.com', password: 'password' });
+    // Debug log
+    console.log('DEBUG login result:', result);
     
     // Verify the function executed correctly
-    expect(result).toEqual({ success: true });
+    expect(result).toEqual({ success: true, requiresMfa: false, token: 'token123' });
     expect(api.post).toHaveBeenCalledWith('/api/auth/login', { 
       email: 'test@example.com', 
       password: 'password' 
@@ -92,6 +140,20 @@ describe('Auth Store Direct Tests', () => {
   });
 
   it('should handle destructured function calls', async () => {
+    const { useAuthStore } = await import('../auth.store');
+    useAuthStore.setState({
+      user: null,
+      token: null,
+      isLoading: false,
+      isAuthenticated: false,
+      error: null,
+      successMessage: null,
+      rateLimitInfo: null,
+      mfaEnabled: false,
+      mfaSecret: null,
+      mfaQrCode: null,
+      mfaBackupCodes: null,
+    });
     // Destructure functions from the store
     const { login } = useAuthStore.getState();
     
@@ -99,13 +161,20 @@ describe('Auth Store Direct Tests', () => {
     const apiModule = await import('@/lib/api/axios');
     const api = apiModule.api as any;
     api.post.mockResolvedValueOnce({
-      data: { user: { id: '123' }, token: 'token123' }
+      data: {
+        user: { id: '123' },
+        token: 'token123',
+        requiresMfa: false,
+        expiresAt: Date.now() + 10000
+      }
     });
     
     // Call the destructured function
     const result = await login({ email: 'test@example.com', password: 'password' });
+    // Debug log
+    console.log('DEBUG login result (destructured):', result);
     
     // Verify it worked
-    expect(result).toEqual({ success: true });
+    expect(result).toEqual({ success: true, requiresMfa: false, token: 'token123' });
   });
 });

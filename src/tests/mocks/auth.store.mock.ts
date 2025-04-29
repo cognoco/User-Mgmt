@@ -69,15 +69,14 @@ export function createMockAuthStore(
       // Call the API mock as the real store would
       let apiResult;
       try {
-// @ts-expect-error: test mock global property
-        apiResult = await (globalThis.api as any)?.post?.('/api/auth/login', payload);
+        apiResult = await (globalThis as any).api?.post?.('/api/auth/login', payload);
       } catch (err) {
         store.isLoading = false;
         const errorMsg = (err && typeof err === 'object' && 'response' in err && (err as any).response?.data?.error) ? (err as any).response.data.error : 'Invalid credentials';
         store.error = errorMsg;
         store.isAuthenticated = false;
         store.user = null;
-        return { error: errorMsg };
+        return { success: false, error: errorMsg };
       }
       if (apiResult && apiResult.data && apiResult.data.user && apiResult.data.token) {
         store.user = apiResult.data.user;
@@ -89,13 +88,18 @@ export function createMockAuthStore(
         if (typeof window !== 'undefined' && window.localStorage) {
           window.localStorage.setItem('auth_token', apiResult.data.token);
         }
-        return apiResult.data;
+        // Return the same shape as the real store
+        return {
+          success: true,
+          requiresMfa: apiResult.data.requiresMfa,
+          token: apiResult.data.token
+        };
       } else {
         store.isLoading = false;
         store.error = 'Invalid credentials';
         store.isAuthenticated = false;
         store.user = null;
-        return { error: 'Invalid credentials' };
+        return { success: false, error: 'Invalid credentials' };
       }
     }),
     register: vi.fn(async (payload) => {
@@ -105,8 +109,7 @@ export function createMockAuthStore(
       // Call the Supabase signUp mock as the real store would
       let signUpResult;
       try {
-// @ts-expect-error: test mock global property
-        signUpResult = await (globalThis.supabase as any)?.auth?.signUp?.(payload);
+        signUpResult = await (globalThis as any).supabase?.auth?.signUp?.(payload);
       } catch (err) {
         store.isLoading = false;
         store.error = (err && typeof err === 'object' && 'message' in err) ? (err as any).message : 'Registration failed';
@@ -130,9 +133,8 @@ export function createMockAuthStore(
     }),
     logout: vi.fn(async () => {
       // Call the API mock as the real store would
-// @ts-expect-error: test mock global property
       try {
-        await (globalThis.api as any)?.post?.('/api/auth/logout');
+        await (globalThis as any).api?.post?.('/api/auth/logout');
       } catch (err) {
         store.isLoading = false;
         const errorMsg = (err && typeof err === 'object' && 'response' in err && (err as any).response?.data?.error) ? (err as any).response.data.error : 'Logout failed';
@@ -158,9 +160,8 @@ export function createMockAuthStore(
     }),
     deleteAccount: vi.fn(async (password) => {
       // Call the API mock as the real store would
-// @ts-expect-error: test mock global property
       try {
-        await (globalThis.api as any)?.delete?.('/api/auth/delete-account', { data: { password } });
+        await (globalThis as any).api?.delete?.('/api/auth/delete-account', { data: { password } });
       } catch (err) {
         store.error = (err && typeof err === 'object' && 'response' in err && (err as any).response?.data?.error) ? (err as any).response.data.error : 'Delete failed';
         return { error: store.error };

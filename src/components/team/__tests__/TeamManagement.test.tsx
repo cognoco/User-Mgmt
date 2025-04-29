@@ -5,6 +5,8 @@ import { TeamManagement } from '../TeamManagement';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import userEvent from '@testing-library/user-event';
+import { toast } from 'sonner';
+import { vi } from 'vitest';
 
 const adminUser = {
   id: '1',
@@ -32,12 +34,18 @@ const teamLicense = {
   ],
 };
 
+let currentTotalSeats = 5;
+
 const server = setupServer(
   http.get('/api/subscriptions/team/license', () => {
-    return HttpResponse.json(teamLicense);
+    return HttpResponse.json({ ...teamLicense, totalSeats: currentTotalSeats });
   }),
-  http.put('/api/subscriptions/team/seats', () => {
-    return HttpResponse.json({ ...teamLicense, totalSeats: 6 });
+  http.put('/api/subscriptions/team/seats', async ({ request }) => {
+    const body = await request.json();
+    if (body && typeof body === 'object' && 'seats' in body) {
+      currentTotalSeats = body.seats;
+    }
+    return HttpResponse.json({ ...teamLicense, totalSeats: currentTotalSeats });
   }),
   http.delete('/api/subscriptions/team/members/:memberId', ({ params }) => {
     const { memberId } = params;
@@ -49,8 +57,19 @@ const server = setupServer(
 );
 
 beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  server.resetHandlers();
+  currentTotalSeats = 5;
+});
 afterAll(() => server.close());
+
+// Mock toast from sonner
+vi.mock('sonner', () => ({
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
+}));
 
 async function renderWithClient(ui: React.ReactElement) {
   const queryClient = new QueryClient();
@@ -79,19 +98,26 @@ describe('TeamManagement (integration)', () => {
     await renderWithClient(<TeamManagement />);
     await waitFor(() => screen.getByText('Update Seats'));
     const user = userEvent.setup();
+    const [openDialogButton] = screen.getAllByText('Update Seats');
     await act(async () => {
-      await user.click(screen.getByText('Update Seats'));
+      await user.click(openDialogButton);
     });
     const input = screen.getByLabelText(/Number of Seats/i);
     await act(async () => {
       await user.clear(input);
       await user.type(input, '6');
     });
+    const updateButtons = screen.getAllByText('Update Seats');
+    const dialogButton = updateButtons[1];
     await act(async () => {
-      await user.click(screen.getByText('Update Seats', { selector: 'button' }));
+      await user.click(dialogButton);
     });
     await waitFor(() => {
-      expect(screen.getByText(/Seats Used: 3 of 6/)).toBeInTheDocument();
+      expect(
+        screen.getByText((content) =>
+          /Seats Used:\s*3\s*of\s*6/.test(content)
+        )
+      ).toBeInTheDocument();
     });
   });
 
@@ -104,7 +130,7 @@ describe('TeamManagement (integration)', () => {
       await user.click(removeButtons[0]); // Try to remove self (admin)
     });
     await waitFor(() => {
-      expect(screen.getByText(/Failed to remove member/i)).toBeInTheDocument();
+      expect(toast.error).toHaveBeenCalledWith(expect.stringMatching(/Failed to remove member/i));
     });
   });
 
@@ -117,7 +143,7 @@ describe('TeamManagement (integration)', () => {
       await user.click(removeButtons[1]); // Remove member
     });
     await waitFor(() => {
-      expect(screen.getByText(/Successfully removed team member/i)).toBeInTheDocument();
+      expect(toast.success).toHaveBeenCalledWith(expect.stringMatching(/Successfully removed team member/i));
     });
   });
 

@@ -125,10 +125,10 @@ const authStoreCreator: StateCreator<AuthState> = (set, get) => {
     // Modify existing login method to handle session and token management
     login: async (data: LoginPayload): Promise<AuthResult> => {
       set({ isLoading: true, error: null });
-      
+      console.log('[DEBUG AuthStore] login called with:', data);
       try {
         const response = await api.post('/api/auth/login', data);
-        
+        console.log('[DEBUG AuthStore] api.post response:', response);
         set({ 
           isLoading: false,
           user: response.data.user,
@@ -153,6 +153,7 @@ const authStoreCreator: StateCreator<AuthState> = (set, get) => {
           token: response.data.token
         };
       } catch (error: any) {
+        console.log('[DEBUG AuthStore] login caught error:', error);
         const errorMessage = error.response?.data?.error || 'An error occurred during login';
         const errorCode = error.response?.data?.code;
         
