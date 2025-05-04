@@ -14,6 +14,16 @@ import { describe, test, beforeAll, afterAll, beforeEach, expect, vi } from 'vit
 vi.mock('@/lib/supabase', async () => await import('@/tests/mocks/supabase'));
 import { supabase } from '@/lib/supabase';
 
+// Add global error handlers for debugging
+process.on('unhandledRejection', (reason) => {
+  // eslint-disable-next-line no-console
+  console.error('UNHANDLED REJECTION:', reason);
+});
+process.on('uncaughtException', (err) => {
+  // eslint-disable-next-line no-console
+  console.error('UNCAUGHT EXCEPTION:', err);
+});
+
 describe('Profile Component', () => {
   // Setup test environment and router
   let cleanup: (() => void) | undefined;
@@ -22,14 +32,22 @@ describe('Profile Component', () => {
   let getPublicUrlSpy: any;
 
   beforeAll(() => {
+    // vi.spyOn(console, 'error').mockImplementation(() => {});
+    // vi.spyOn(console, 'warn').mockImplementation(() => {});
     cleanup = setupTestEnvironment();
   });
-  
+
   afterAll(() => {
-    if (cleanup) cleanup();
+    try {
+      if (cleanup) cleanup();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Error in afterAll cleanup:', err);
+    }
   });
-  
+
   beforeEach(() => {
+    vi.resetModules();
     vi.clearAllMocks();
     // Always inject a fresh spy for supabase.storage.from
     uploadSpy = vi.fn().mockResolvedValue({ data: { path: 'test-user-id/avatar.jpg' }, error: null });
@@ -45,6 +63,15 @@ describe('Profile Component', () => {
       upsert: vi.fn().mockResolvedValue({ data: null, error: null }),
     };
     (supabase.from as any).mockReturnValue(builder);
+  });
+
+  afterEach(() => {
+    try {
+      // Add any additional cleanup if needed
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Error in afterEach:', err);
+    }
   });
 
   // Create mock user and profile data
