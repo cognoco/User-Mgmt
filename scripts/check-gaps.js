@@ -48,6 +48,11 @@ function fuzzyMatch(flow, testFiles) {
 }
 
 // --- MAIN ---
+/**
+ * Compares the manual verification checklist (docs/MANUAL_VERIFICATION_CHECKLIST.md) with actual test files to identify missing test coverage.
+ * Reads: docs/MANUAL_VERIFICATION_CHECKLIST.md, all test files in e2e/ and src/tests/
+ * Writes: none (outputs gap analysis report to the console)
+ */
 const checklistMd = fs.readFileSync(CHECKLIST_PATH, 'utf8');
 const flows = extractFlowsFromChecklist(checklistMd);
 const testFiles = [

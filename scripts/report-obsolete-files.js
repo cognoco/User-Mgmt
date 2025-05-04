@@ -17,6 +17,12 @@ const PACKAGE_JSON = path.join(__dirname, '../package.json');
 
 const FUZZY_THRESHOLD = 0.7;
 
+/**
+ * Scans the codebase for obsolete, redundant, or unused test files, scripts, and components.
+ * Reads: docs/MANUAL_VERIFICATION_CHECKLIST.md, all test/component/script files
+ * Writes: docs/OBSOLETE_FILES_REPORT.md (report of unused/obsolete files)
+ */
+
 function getAllFiles(dir, filter = () => true) {
   let results = [];
   if (!fs.existsSync(dir)) return results;

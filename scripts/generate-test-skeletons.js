@@ -5,6 +5,12 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/**
+ * Generates skeleton test files for flows/components listed in the manual verification checklist that are missing tests.
+ * Reads: docs/MANUAL_VERIFICATION_CHECKLIST.md
+ * Writes: e2e/*.Skeleton.e2e.test.ts, src/tests/integration/*.Skeleton.integration.test.tsx, docs/GENERATED_TEST_SKELETONS_REPORT.md
+ */
+
 // --- CONFIG ---
 const CHECKLIST_PATH = path.join(__dirname, '../docs/MANUAL_VERIFICATION_CHECKLIST.md');
 const E2E_DIR = path.join(__dirname, '../e2e');

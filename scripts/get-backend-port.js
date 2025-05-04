@@ -1,6 +1,8 @@
 /**
- * Helper script to detect the currently running backend port
- * Used by the frontend to connect to the backend API
+ * Detects the port of the currently running backend server by checking lock files, running processes, and common ports.
+ * Reads: .port.lock, .last-backend-port, project/.backend-port (if present)
+ * Writes: .last-backend-port (updates with detected port)
+ * Output: Prints detected port to the console for use by the frontend.
  */
 
 import fs from 'fs';
