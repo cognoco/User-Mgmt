@@ -89,5 +89,41 @@
     "loginAlerts.description": "Get notified when someone logs into your account",
     "privacy": "Privacy",
     "account": "Account"
+  },
+  "org": {
+    "domains": {
+      "title": "Organization Domains",
+      "description": "Manage the domains associated with your organization. Users with email addresses at these domains can join automatically.",
+      "currentDomains": "Current Domains",
+      "noDomains": "No domains have been added yet.",
+      "addDomain": "Add Domain",
+      "domainLabel": "Domain",
+      "domainDescription": "Enter the domain you want to allow (e.g. example.com)",
+      "autoJoinLabel": "Auto-Join",
+      "autoJoinDescription": "Allow users with this domain to join automatically.",
+      "enforceSSOLabel": "Enforce SSO",
+      "enforceSSODescription": "Require single sign-on for users with this domain.",
+      "addButton": "Add",
+      "verificationTitle": "Domain Verification",
+      "verificationDescription": "Verify your domain to enable secure access.",
+      "verificationInstructions": "Add a DNS record to verify your domain. See documentation for details.",
+      "invalidDomain": "Enter a valid domain (e.g. example.com)",
+      "addSuccess": "Domain {{domain}} added successfully!",
+      "addError": "Failed to add domain. Please try again.",
+      "fetchError": "Failed to fetch domains. Please try again.",
+      "removeSuccess": "Domain removed successfully!",
+      "removeError": "Failed to remove domain. Please try again.",
+      "verifySuccess": "Domain verified successfully!",
+      "verifyError": "Failed to verify domain. Please try again.",
+      "updateError": "Failed to update domain settings. Please try again.",
+      "domain": "Domain",
+      "status": "Status",
+      "autoJoin": "Auto-Join",
+      "enforceSSO": "Enforce SSO",
+      "verified": "Verified",
+      "unverified": "Unverified",
+      "verify": "Verify",
+      "deleteDomain": "Delete domain"
+    }
   }
 } 
