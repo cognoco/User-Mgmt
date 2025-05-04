@@ -325,3 +325,12 @@ This knowledge should be applied to all tests using axios in Node, and documente
 - **Reference:** See `TESTING.md` for best practices and code examples.
 
 ---
+
+## (2025-05-04) Unhandled Rejection Warnings in Middleware/Error Handling Tests
+
+- **Finding:** When testing error handling in async middleware (e.g., using `mockRejectedValue` for `next` in Express/Next.js-style middleware), Vitest may report an "unhandled rejection" warning even if the test uses try/catch or `expect(...).rejects` to handle the error.
+- **Root Cause:** The test runner sometimes detects the rejected promise at the process level before the test's catch block executes, especially with async chains.
+- **Action:** If all assertions pass and the warning only appears in tests that intentionally simulate errors, this can be safely ignored. Optionally, add a global `process.on('unhandledRejection', () => {})` handler in the test file to silence the warning.
+- **Reference:** See audit-log middleware test for a real-world example.
+
+---

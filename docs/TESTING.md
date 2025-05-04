@@ -116,3 +116,56 @@
 
 - **Pattern:** Always wrap user events and async state updates in `await act(async () => { ... })` or `await waitFor(...)` to avoid act warnings and ensure reliable test results.
 - **Reference:** See `TESTING_ISSUES.md` and `Testing_Findings.md` for more details and examples.
+
+## Supabase Files: Purpose and Usage Guide
+
+This project contains several files related to Supabase. Each serves a distinct purpose. Use this guide to select the correct file for your use case and avoid duplication or confusion.
+
+### 1. `src/lib/database/supabase.ts` & `src/lib/database/supabase.js`
+- **Purpose:**
+  - These files provide the main Supabase client instance for the application, using environment variables for configuration.
+  - They export both a standard client (`supabase`) for client-side use and a `getServiceSupabase()` function for server-side/admin operations (using the service role key).
+- **When to use:**
+  - Use these for most direct database interactions in the app, especially in backend logic, API routes, or when you need to distinguish between client and service role access.
+- **Note:**
+  - The `.ts` version is preferred for TypeScript projects. The `.js` version may be legacy or for compatibility.
+
+### 2. `src/lib/supabase.ts`
+- **Purpose:**
+  - A minimal Supabase client export, using only the public URL and anon key.
+- **When to use:**
+  - Use this for simple, client-side only operations where you do not need service role/admin access or extra configuration.
+- **Note:**
+  - Does not provide a `getServiceSupabase()` function.
+
+### 3. `src/lib/database/providers/supabase.ts`
+- **Purpose:**
+  - Implements a `SupabaseProvider` class that abstracts all user, profile, preferences, and activity log operations behind a common interface (`DatabaseProvider`).
+  - Designed for plug-and-play database backends (e.g., swapping Supabase for another provider).
+- **When to use:**
+  - Use this when you want to interact with the database in a provider-agnostic way, or when building features that should work with multiple database backends.
+- **Note:**
+  - This is the most flexible and future-proof approach for database operations.
+
+### 4. `src/tests/mocks/supabase.ts` (and `.bak`)
+- **Purpose:**
+  - Provides a comprehensive mock of the Supabase client for use in tests.
+  - Mocks all major methods (auth, storage, from, etc.) and supports chaining and spying with Vitest.
+- **When to use:**
+  - Import this mock in your test files when you need to simulate Supabase behavior without hitting the real backend.
+- **Note:**
+  - The `.bak` file is a backup/older version. Use `supabase.ts` for current tests.
+
+### 5. `src/lib/database/__tests__/supabase.test.tsx`
+- **Purpose:**
+  - Contains tests for the Supabase client setup itself, ensuring correct instantiation and error handling.
+- **When to use:**
+  - Reference for how to test Supabase client instantiation and environment variable handling.
+
+---
+
+**Best Practices:**
+- For application code, prefer the provider class (`SupabaseProvider`) for maximum flexibility.
+- For direct, simple access, use `src/lib/database/supabase.ts` (TypeScript) or `.js` (JavaScript).
+- For tests, always use the mock in `src/tests/mocks/supabase.ts`.
+- Avoid duplicating Supabase client logic; always check this guide before creating new files or mocks.

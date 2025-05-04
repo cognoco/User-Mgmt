@@ -27,18 +27,24 @@ type SupabaseRpcResponse = { data: unknown | null; error: unknown | null };
 // Helper to create a fully chainable builder
 function createMockBuilder() {
   const builder: any = {};
-  const methods = [
-    'select', 'insert', 'update', 'upsert', 'delete',
-    'eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'ilike', 'in', 'is', 'or', 'filter', 'range', 'order', 'limit',
-    'single', 'maybeSingle',
+  const terminalMethods = [
+    'select', 'insert', 'update', 'upsert', 'delete', 'single', 'maybeSingle'
   ];
-  methods.forEach((method) => {
+  const chainableMethods = [
+    'eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'ilike', 'in', 'is', 'or', 'filter', 'range', 'order', 'limit'
+  ];
+  terminalMethods.forEach((method) => {
+    builder[method] = vi.fn().mockResolvedValue({ data: undefined, error: null });
+  });
+  chainableMethods.forEach((method) => {
     builder[method] = vi.fn().mockReturnValue(builder);
   });
-  // Add a .then method to allow awaiting the chain in tests
   builder.then = vi.fn();
   return builder;
 }
+
+// Table builder cache for consistent mocks
+const builderCache: Record<string, any> = {};
 
 const mockSupabase = {
   auth: {
@@ -80,7 +86,12 @@ const mockSupabase = {
     on: vi.fn().mockReturnThis(),
     subscribe: vi.fn()
   }),
-  from: vi.fn().mockImplementation(() => createMockBuilder()),
+  from: vi.fn().mockImplementation((table: string) => {
+    if (!builderCache[table]) {
+      builderCache[table] = createMockBuilder();
+    }
+    return builderCache[table];
+  }),
 };
 
 // Cast the whole mock object for better type checking if possible
