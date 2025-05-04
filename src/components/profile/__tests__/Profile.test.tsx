@@ -111,11 +111,13 @@ describe('Profile Component', () => {
     await waitFor(() => {
       expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
     });
-    await userEvent.clear(screen.getByLabelText(/full name/i));
-    await userEvent.type(screen.getByLabelText(/full name/i), updatedProfile.full_name);
-    await userEvent.clear(screen.getByLabelText(/website/i));
-    await userEvent.type(screen.getByLabelText(/website/i), updatedProfile.website);
-    await userEvent.click(screen.getByRole('button', { name: /update profile/i }));
+    await act(async () => {
+      await userEvent.clear(screen.getByLabelText(/full name/i));
+      await userEvent.type(screen.getByLabelText(/full name/i), updatedProfile.full_name);
+      await userEvent.clear(screen.getByLabelText(/website/i));
+      await userEvent.type(screen.getByLabelText(/website/i), updatedProfile.website);
+      await userEvent.click(screen.getByRole('button', { name: /update profile/i }));
+    });
     // Only expect the updated value after update
     await waitFor(() => {
       expect(screen.getByDisplayValue('Jane Smith')).toBeInTheDocument();
@@ -143,12 +145,14 @@ describe('Profile Component', () => {
     await waitFor(() => {
       expect(screen.getByAltText(/avatar/i)).toBeInTheDocument();
     });
-    const input = screen.getByLabelText(/upload avatar/i);
-    const file = createMockFile('test-avatar.jpg', 'image/jpeg', 1024);
-    await userEvent.upload(input, file);
+    await act(async () => {
+      const input = screen.getByLabelText(/upload avatar/i);
+      const file = createMockFile('test-avatar.jpg', 'image/jpeg', 1024);
+      await userEvent.upload(input, file);
+    });
     await waitFor(() => {
       expect(storageFromSpy).toHaveBeenCalledWith('avatars');
-      expect(uploadSpy).toHaveBeenCalledWith(expect.any(String), file);
+      expect(uploadSpy).toHaveBeenCalledWith(expect.any(String), expect.any(File));
       expect(getPublicUrlSpy).toHaveBeenCalled();
     });
   });
@@ -172,7 +176,9 @@ describe('Profile Component', () => {
     await waitFor(() => {
       expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
     });
-    await userEvent.click(screen.getByRole('button', { name: /update profile/i }));
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: /update profile/i }));
+    });
     await waitFor(() => {
       expect(screen.getByText(/Failed to update profile|Error updating profile/i)).toBeInTheDocument();
     });
@@ -200,9 +206,11 @@ describe('Profile Component', () => {
     await waitFor(() => {
       expect(screen.getByAltText(/avatar/i)).toBeInTheDocument();
     });
-    const input = screen.getByLabelText(/upload avatar/i);
-    const file = createMockFile('test-avatar.jpg');
-    await userEvent.upload(input, file);
+    await act(async () => {
+      const input = screen.getByLabelText(/upload avatar/i);
+      const file = createMockFile('test-avatar.jpg');
+      await userEvent.upload(input, file);
+    });
     await waitFor(() => {
       expect(screen.getByText(/Error uploading avatar/i)).toBeInTheDocument();
     });

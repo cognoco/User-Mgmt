@@ -1,4 +1,3 @@
-
 /**
  * Run node scripts/update-test-results.js
  * Runs all Vitest tests and generates a Markdown summary of passing and failing test files.
@@ -67,6 +66,7 @@ if (Array.isArray(vitestJson.testResults)) {
   for (const file of vitestJson.testResults) {
     if (!file.name || !file.status) continue;
     const relPath = path.relative(process.cwd(), file.name);
+    console.log('file.name:', file.name, 'relPath:', relPath, 'status:', file.status); // Diagnostic log
     if (file.status === 'passed') {
       passing.add(relPath);
     } else if (file.status === 'failed') {
@@ -77,6 +77,7 @@ if (Array.isArray(vitestJson.testResults)) {
   for (const file of vitestJson.results) {
     if (!file.file || !file.result) continue;
     const relPath = path.relative(process.cwd(), file.file);
+    console.log('file.file:', file.file, 'relPath:', relPath, 'result:', file.result); // Diagnostic log
     if (file.result === 'pass') {
       passing.add(relPath);
     } else if (file.result === 'fail') {
@@ -87,6 +88,7 @@ if (Array.isArray(vitestJson.testResults)) {
   for (const file of vitestJson) {
     if (!file.file || !file.status) continue;
     const relPath = path.relative(process.cwd(), file.file);
+    console.log('file.file:', file.file, 'relPath:', relPath, 'status:', file.status); // Diagnostic log
     if (file.status === 'pass') {
       passing.add(relPath);
     } else if (file.status === 'fail') {
@@ -99,7 +101,7 @@ if (Array.isArray(vitestJson.testResults)) {
 function toMdList(set) {
   return Array.from(set)
     .sort()
-    .map((f) => `- ${f.replace(/^[^/]*\//, '')}`) // remove root dir
+    .map((f) => `- ${f.replace(/^[^/]*\//, '').replace(/\\/g, '/')}`) // normalize to forward slashes
     .join('\n');
 }
 
