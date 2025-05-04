@@ -6,19 +6,16 @@ interface CSRFOptions {
   headerName?: string;
   secure?: boolean;
   sameSite?: 'Strict' | 'Lax' | 'None';
+  generateToken?: () => string;
 }
 
-const defaultOptions: Required<CSRFOptions> = {
+const defaultOptions = {
   cookieName: 'csrf-token',
   headerName: 'X-CSRF-Token',
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'Strict'
+  sameSite: 'Strict',
+  generateToken: () => randomBytes(32).toString('hex'),
 };
-
-// Generate a random token
-function generateToken(): string {
-  return randomBytes(32).toString('hex');
-}
 
 // Validate that the token from the header matches the cookie
 function validateToken(cookie: string | undefined, header: string | undefined): boolean {
@@ -28,6 +25,7 @@ function validateToken(cookie: string | undefined, header: string | undefined): 
 
 export function csrf(options: CSRFOptions = {}) {
   const opts = { ...defaultOptions, ...options };
+  const tokenGenerator = opts.generateToken;
 
   return async function csrfMiddleware(
     req: NextApiRequest,
@@ -40,7 +38,7 @@ export function csrf(options: CSRFOptions = {}) {
         // For GET requests, set a new CSRF token if one doesn't exist
         const existingToken = req.cookies[opts.cookieName];
         if (!existingToken) {
-          const newToken = generateToken();
+          const newToken = tokenGenerator();
           res.setHeader('Set-Cookie', [
             `${opts.cookieName}=${newToken}; Path=/; HttpOnly; ${opts.secure ? 'Secure; ' : ''}SameSite=${opts.sameSite}`
           ]);
@@ -59,7 +57,7 @@ export function csrf(options: CSRFOptions = {}) {
       }
 
       // Generate a new token after successful validation
-      const newToken = generateToken();
+      const newToken = tokenGenerator();
       res.setHeader('Set-Cookie', [
         `${opts.cookieName}=${newToken}; Path=/; HttpOnly; ${opts.secure ? 'Secure; ' : ''}SameSite=${opts.sameSite}`
       ]);

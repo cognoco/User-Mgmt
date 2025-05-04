@@ -1,6 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { csrf, getCSRFToken } from '../csrf';
-import { randomBytes } from 'crypto';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 // Mock NextApiRequest and NextApiResponse
@@ -26,18 +24,19 @@ describe('CSRF Middleware', () => {
 
   beforeEach(() => {
     next = vi.fn().mockResolvedValue(undefined);
-    vi.spyOn(randomBytes as unknown as { toString: () => string }, 'toString').mockReturnValue('mock-token');
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.resetModules();
   });
 
   describe('Token Generation', () => {
     it('should generate a new token for GET requests without existing token', async () => {
       const req = mockReq('GET');
       const res = mockRes();
-      const middleware = csrf();
+      const { csrf } = await import('../csrf');
+      const middleware = csrf({ generateToken: () => 'mock-token' });
 
       await middleware(req, res, next);
 
@@ -48,8 +47,10 @@ describe('CSRF Middleware', () => {
     });
 
     it('should not generate a new token for GET requests with existing token', async () => {
+      vi.resetModules();
       const req = mockReq('GET', { 'csrf-token': 'existing-token' });
       const res = mockRes();
+      const { csrf } = await import('../csrf');
       const middleware = csrf();
 
       await middleware(req, res, next);
@@ -67,6 +68,7 @@ describe('CSRF Middleware', () => {
         { 'x-csrf-token': token }
       );
       const res = mockRes();
+      const { csrf } = await import('../csrf');
       const middleware = csrf();
 
       await middleware(req, res, next);
@@ -78,6 +80,7 @@ describe('CSRF Middleware', () => {
     it('should reject requests with missing tokens', async () => {
       const req = mockReq('POST');
       const res = mockRes();
+      const { csrf } = await import('../csrf');
       const middleware = csrf();
 
       await middleware(req, res, next);
@@ -93,6 +96,7 @@ describe('CSRF Middleware', () => {
         { 'x-csrf-token': 'token2' }
       );
       const res = mockRes();
+      const { csrf } = await import('../csrf');
       const middleware = csrf();
 
       await middleware(req, res, next);
@@ -107,7 +111,8 @@ describe('CSRF Middleware', () => {
     it('should use custom cookie name when provided', async () => {
       const req = mockReq('GET');
       const res = mockRes();
-      const middleware = csrf({ cookieName: 'custom-csrf' });
+      const { csrf } = await import('../csrf');
+      const middleware = csrf({ cookieName: 'custom-csrf', generateToken: () => 'mock-token' });
 
       await middleware(req, res, next);
 
@@ -123,6 +128,7 @@ describe('CSRF Middleware', () => {
         { 'custom-csrf-header': token }
       );
       const res = mockRes();
+      const { csrf } = await import('../csrf');
       const middleware = csrf({ headerName: 'custom-csrf-header' });
 
       await middleware(req, res, next);
@@ -136,6 +142,7 @@ describe('CSRF Middleware', () => {
 
       const req = mockReq('GET');
       const res = mockRes();
+      const { csrf } = await import('../csrf');
       const middleware = csrf();
 
       await middleware(req, res, next);
@@ -150,18 +157,18 @@ describe('CSRF Middleware', () => {
   });
 
   describe('getCSRFToken', () => {
-    it('should return token from cookies', () => {
+    it('should return token from cookies', async () => {
       const token = 'test-token';
       const req = mockReq('GET', { 'csrf-token': token });
-
+      const { getCSRFToken } = await import('../csrf');
       const result = getCSRFToken(req);
 
       expect(result).toBe(token);
     });
 
-    it('should return null when no token exists', () => {
+    it('should return null when no token exists', async () => {
       const req = mockReq('GET');
-
+      const { getCSRFToken } = await import('../csrf');
       const result = getCSRFToken(req);
 
       expect(result).toBeNull();
