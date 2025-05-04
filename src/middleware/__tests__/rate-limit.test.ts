@@ -1,42 +1,59 @@
+// Set required environment variables for rate limiting BEFORE any imports
+process.env.REDIS_URL = 'redis://localhost:6379';
+process.env.REDIS_TOKEN = 'dummy-token';
+
 import { NextApiRequest, NextApiResponse } from 'next';
 import { NextRequest } from 'next/server';
-import { Redis, type UpstashResponse } from '@upstash/redis';
-import { rateLimit, checkRateLimit } from '../rate-limit';
+import { type UpstashResponse } from '@upstash/redis';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-// Mock Redis with proper response types
 vi.mock('@upstash/redis', () => {
   const createResponse = (value: number): UpstashResponse<number> => ({
     result: value,
     error: undefined,
   });
+  // Use a singleton multiMock for all Redis instances
+  const multiMock = {
+    zremrangebyscore: vi.fn().mockReturnThis(),
+    zadd: vi.fn().mockReturnThis(),
+    zcount: vi.fn().mockReturnThis(),
+    expire: vi.fn().mockReturnThis(),
+    exec: vi.fn(),
+  };
+  // Global setter for exec implementation
+  (globalThis as any).__multiExecMockImpl = (globalThis as any).__multiExecMockImpl || (async () => [
+    createResponse(0),
+    createResponse(1),
+    createResponse(0),
+    createResponse(1),
+  ]);
+  multiMock.exec.mockImplementation((...args: any[]) => {
+    return (globalThis as any).__multiExecMockImpl(...args);
+  });
+  const RedisMock = vi.fn(() => ({
+    multi: () => multiMock,
+  }));
+  (RedisMock as any).multiMock = multiMock;
   return {
-    Redis: vi.fn(() => ({
-      multi: vi.fn(() => ({
-        zremrangebyscore: vi.fn().mockReturnThis(),
-        zadd: vi.fn().mockReturnThis(),
-        zcount: vi.fn().mockReturnThis(),
-        expire: vi.fn().mockReturnThis(),
-        exec: vi.fn().mockResolvedValue([
-          createResponse(0),  // zremrangebyscore response
-          createResponse(1),  // zadd response
-          createResponse(0),  // zcount response
-          createResponse(1),  // expire response
-        ]),
-      })),
-    })),
+    Redis: RedisMock,
   };
 });
 
 // Mock NextRequest and NextApiRequest
-const mockNextReq = (ip = '127.0.0.1', headers = {}) => ({
+const mockNextReq = (ip = '127.0.0.1', headers: Record<string, string> = {}) => ({
   ip,
-  headers: new Headers(headers),
+  headers: {
+    get: (key: string) => headers[key.toLowerCase()] || headers[key],
+    ...headers,
+  },
 }) as unknown as NextRequest;
 
-const mockApiReq = (ip = '127.0.0.1', headers = {}) => ({
+const mockApiReq = (ip = '127.0.0.1', headers: Record<string, string> = {}) => ({
   socket: { remoteAddress: ip },
-  headers: headers,
+  headers: {
+    get: (key: string) => headers[key.toLowerCase()] || headers[key],
+    ...headers,
+  },
 }) as unknown as NextApiRequest;
 
 const mockRes = () => {
@@ -51,12 +68,32 @@ const mockRes = () => {
 };
 
 describe('Rate Limiting', () => {
-  let redis: Redis;
   let next: () => Promise<void>;
+  let rateLimit: typeof import('@/middleware/rate-limit').rateLimit;
+  let checkRateLimit: typeof import('@/middleware/rate-limit').checkRateLimit;
+  let multiMock: any;
 
-  beforeEach(() => {
-    redis = new Redis({ url: 'fake-url', token: 'fake-token' });
+  beforeEach(async () => {
+    vi.resetModules();
+    multiMock = ((await import('@upstash/redis')) as any).Redis.multiMock;
+    // Reset all mock methods
+    Object.values(multiMock).forEach(fn => (fn as any).mockReset && (fn as any).mockReset());
+    // Fallback: always return 4 responses to avoid TypeError
+    multiMock.exec.mockImplementation(async (...args: any[]) => {
+      console.log('[GLOBAL DEBUG] multiMock.exec called with:', args);
+      return [
+        { result: 0, error: undefined },
+        { result: 1, error: undefined },
+        { result: 0, error: undefined },
+        { result: 1, error: undefined },
+      ];
+    });
     next = vi.fn().mockResolvedValue(undefined);
+    process.env.REDIS_URL = 'redis://localhost:6379';
+    process.env.REDIS_TOKEN = 'dummy-token';
+    const mod = await import('@/middleware/rate-limit');
+    rateLimit = mod.rateLimit;
+    checkRateLimit = mod.checkRateLimit;
   });
 
   afterEach(() => {
@@ -66,7 +103,7 @@ describe('Rate Limiting', () => {
   describe('checkRateLimit', () => {
     it('should allow requests within rate limit', async () => {
       const req = mockNextReq();
-      vi.mocked(redis.multi().exec).mockResolvedValueOnce([
+      vi.mocked(multiMock.exec).mockResolvedValueOnce([
         { result: 0, error: undefined },
         { result: 1, error: undefined },
         { result: 5, error: undefined },  // 5 requests in window
@@ -80,26 +117,28 @@ describe('Rate Limiting', () => {
 
     it('should block requests exceeding rate limit', async () => {
       const req = mockNextReq();
-      vi.mocked(redis.multi().exec).mockResolvedValueOnce([
-        { result: 0, error: undefined },
-        { result: 1, error: undefined },
-        { result: 15, error: undefined },  // 15 requests in window
-        { result: 1, error: undefined },
-      ]);
-
+      // Patch the global exec mock for this test
+      (globalThis as any).__multiExecMockImpl = async (...args: any[]) => {
+        console.log('[TEST DEBUG] multiMock.exec called with:', args);
+        return [
+          { result: 0, error: undefined },
+          { result: 1, error: undefined },
+          { result: 15, error: undefined },  // 15 requests in window
+          { result: 1, error: undefined },
+        ];
+      };
       const isLimited = await checkRateLimit(req, { max: 10 });
-
+      console.log('[TEST DEBUG] isLimited:', isLimited);
       expect(isLimited).toBe(true);
     });
 
     it('should use IP address for rate limit key', async () => {
       const ip = '192.168.1.1';
       const req = mockNextReq(ip);
-      const multi = redis.multi();
 
       await checkRateLimit(req);
 
-      expect(multi.zadd).toHaveBeenCalledWith(
+      expect(multiMock.zadd).toHaveBeenCalledWith(
         expect.stringContaining(ip),
         expect.any(Object)
       );
@@ -107,14 +146,22 @@ describe('Rate Limiting', () => {
 
     it('should use x-forwarded-for header when IP is not available', async () => {
       const forwardedIp = '10.0.0.1';
-      const req = mockNextReq(undefined, {
-        'x-forwarded-for': forwardedIp,
-      });
-      const multi = redis.multi();
+      // Create a request object without an 'ip' property
+      const req = {
+        headers: {
+          get: (key: string) => ({ 'x-forwarded-for': forwardedIp }[key.toLowerCase()]),
+        },
+      } as unknown as NextRequest;
+      multiMock.exec.mockResolvedValue([
+        { result: 0, error: undefined },
+        { result: 1, error: undefined },
+        { result: 5, error: undefined },
+        { result: 1, error: undefined },
+      ]);
 
       await checkRateLimit(req);
 
-      expect(multi.zadd).toHaveBeenCalledWith(
+      expect(multiMock.zadd).toHaveBeenCalledWith(
         expect.stringContaining(forwardedIp),
         expect.any(Object)
       );
@@ -122,13 +169,12 @@ describe('Rate Limiting', () => {
 
     it('should clean up old entries before checking limit', async () => {
       const req = mockNextReq();
-      const multi = redis.multi();
       const now = Date.now();
       const windowMs = 15 * 60 * 1000; // 15 minutes
 
       await checkRateLimit(req, { windowMs });
 
-      expect(multi.zremrangebyscore).toHaveBeenCalledWith(
+      expect(multiMock.zremrangebyscore).toHaveBeenCalledWith(
         expect.any(String),
         0,
         now - windowMs
@@ -141,7 +187,7 @@ describe('Rate Limiting', () => {
       const req = mockApiReq();
       const res = mockRes();
       const middleware = rateLimit({ max: 10 });
-      vi.mocked(redis.multi().exec).mockResolvedValueOnce([
+      vi.mocked(multiMock.exec).mockResolvedValueOnce([
         { result: 0, error: undefined },
         { result: 1, error: undefined },
         { result: 5, error: undefined },  // 5 requests
@@ -158,15 +204,20 @@ describe('Rate Limiting', () => {
       const req = mockApiReq();
       const res = mockRes();
       const middleware = rateLimit({ max: 10 });
-      vi.mocked(redis.multi().exec).mockResolvedValueOnce([
-        { result: 0, error: undefined },
-        { result: 1, error: undefined },
-        { result: 15, error: undefined },  // 15 requests
-        { result: 1, error: undefined },
-      ]);
-
+      // Patch the global exec mock for this test
+      (globalThis as any).__multiExecMockImpl = async (...args: any[]) => {
+        console.log('[TEST DEBUG] multiMock.exec called with:', args);
+        return [
+          { result: 0, error: undefined },
+          { result: 1, error: undefined },
+          { result: 15, error: undefined },  // 15 requests
+          { result: 1, error: undefined },
+        ];
+      };
       await middleware(req, res, next);
-
+      console.log('[TEST DEBUG] res.status.mock.calls:', (res.status as any).mock.calls);
+      console.log('[TEST DEBUG] res.json.mock.calls:', (res.json as any).mock.calls);
+      console.log('[TEST DEBUG] next.mock.calls:', (next as any).mock.calls);
       expect(res.status).toHaveBeenCalledWith(429);
       expect(res.json).toHaveBeenCalledWith({
         error: 'Too many requests, please try again later.',
@@ -178,7 +229,7 @@ describe('Rate Limiting', () => {
       const req = mockApiReq();
       const res = mockRes();
       const middleware = rateLimit({ max: 10 });
-      vi.mocked(redis.multi().exec).mockResolvedValueOnce([
+      vi.mocked(multiMock.exec).mockResolvedValueOnce([
         { result: 0, error: undefined },
         { result: 1, error: undefined },
         { result: 5, error: undefined },  // 5 requests
@@ -195,7 +246,7 @@ describe('Rate Limiting', () => {
       const req = mockApiReq();
       const res = mockRes();
       const middleware = rateLimit({ max: 10 });
-      vi.mocked(redis.multi().exec).mockRejectedValueOnce(new Error('Redis error'));
+      vi.mocked(multiMock.exec).mockRejectedValueOnce(new Error('Redis error'));
 
       await middleware(req, res, next);
 
@@ -207,11 +258,10 @@ describe('Rate Limiting', () => {
       const res = mockRes();
       const customWindow = 30 * 60 * 1000; // 30 minutes
       const middleware = rateLimit({ windowMs: customWindow });
-      const multi = redis.multi();
 
       await middleware(req, res, next);
 
-      expect(multi.expire).toHaveBeenCalledWith(
+      expect(multiMock.expire).toHaveBeenCalledWith(
         expect.any(String),
         Math.ceil(customWindow / 1000)
       );

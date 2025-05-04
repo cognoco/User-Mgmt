@@ -82,16 +82,22 @@ export async function checkRateLimit(
     // Set expiry for the key to clean up if inactive
     multi.expire(key, Math.ceil(windowMs / 1000));
 
-    const results = await multi.exec<[number, number, number, number]>();
-    
-    // results[2] should contain the count from zcount
-    const currentHits = results[2]; 
-
-    if (currentHits > max) {
+    const results = await multi.exec();
+    // Upstash returns an array of objects: { result, error }
+    // The third result (zcount) is the count of requests in the window
+    let currentHits: number | undefined;
+    if (Array.isArray(results) && results.length > 2) {
+      const zcountResult = results[2];
+      if (typeof zcountResult === 'object' && zcountResult !== null && 'result' in zcountResult) {
+        currentHits = zcountResult.result as number;
+      } else {
+        currentHits = zcountResult as number;
+      }
+    }
+    if (typeof currentHits === 'number' && currentHits > max) {
       console.warn(`Rate limit exceeded for IP: ${ip}`);
       return true; // Rate limited
     }
-
     return false; // Not rate limited
 
   } catch (error) {
