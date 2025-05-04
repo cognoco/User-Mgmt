@@ -2,9 +2,15 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react'; // May cause error if not installed
 import tsconfigPaths from 'vite-tsconfig-paths';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react() as any, tsconfigPaths()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

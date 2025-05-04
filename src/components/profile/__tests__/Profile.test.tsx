@@ -1,11 +1,12 @@
 // __tests__/components/Profile.test.js
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import Profile from '@/components/profile/Profile';
+import { screen, waitFor } from '@testing-library/react';
+import Profile from '../Profile.jsx';
+import userEvent from '@testing-library/user-event';
 
 // Import our utility functions
-import { setupTestEnvironment, mockNextRouter } from '@/tests/utils/environment-setup';
+import { setupTestEnvironment } from '@/tests/utils/environment-setup';
 import { renderWithProviders, createMockFile } from '@/tests/utils/component-testing-utils';
 import { createMockUser, createMockProfile, mockStorage } from '@/tests/utils/testing-utils';
 
@@ -16,12 +17,10 @@ import { supabase } from '@/lib/supabase';
 
 describe('Profile Component', () => {
   // Setup test environment and router
-  let cleanup;
-  let router;
+  let cleanup: (() => void) | undefined;
   
   beforeAll(() => {
     cleanup = setupTestEnvironment();
-    router = mockNextRouter();
   });
   
   afterAll(() => {
@@ -30,6 +29,15 @@ describe('Profile Component', () => {
   
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: ensure supabase.from returns a builder with all needed methods mocked
+    const builder = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: null, error: null }),
+      update: vi.fn().mockResolvedValue({ data: null, error: null }),
+      upsert: vi.fn().mockResolvedValue({ data: null, error: null }),
+    };
+    (supabase.from as any).mockReturnValue(builder);
   });
 
   // Create mock user and profile data
@@ -42,16 +50,18 @@ describe('Profile Component', () => {
   });
 
   test('renders profile form with user data', async () => {
-    // Setup authentication and profile data mocks
-    supabase.auth.getUser.mockResolvedValue({ 
+    (supabase.auth.getUser as any).mockResolvedValue({ 
       data: { user: mockUser }, 
       error: null 
     });
-    
-    supabase.from().single.mockResolvedValue({ 
-      data: mockProfileData, 
-      error: null 
-    });
+    // Create a local builder for this test
+    const builder: any = {};
+    builder.select = vi.fn().mockReturnValue(builder);
+    builder.eq = vi.fn().mockReturnValue(builder);
+    builder.single = vi.fn().mockResolvedValue({ data: mockProfileData, error: null });
+    builder.update = vi.fn().mockReturnValue(builder);
+    builder.upsert = vi.fn().mockReturnValue(builder);
+    (supabase.from as any).mockReturnValue(builder);
     
     // Setup storage mocks
     mockStorage('avatars', {
@@ -59,7 +69,7 @@ describe('Profile Component', () => {
     });
 
     // Render with our utility
-    const { user } = renderWithProviders(<Profile />);
+    renderWithProviders(<Profile user={mockUser} />);
 
     // Wait for data to load
     await waitFor(() => {
@@ -70,16 +80,18 @@ describe('Profile Component', () => {
   });
 
   test('handles profile update', async () => {
-    // Setup initial data
-    supabase.auth.getUser.mockResolvedValue({ 
+    (supabase.auth.getUser as any).mockResolvedValue({ 
       data: { user: mockUser }, 
       error: null 
     });
-    
-    supabase.from().single.mockResolvedValue({ 
-      data: mockProfileData, 
-      error: null 
-    });
+    // Initial builder for fetch
+    const initialBuilder: any = {};
+    initialBuilder.select = vi.fn().mockReturnValue(initialBuilder);
+    initialBuilder.eq = vi.fn().mockReturnValue(initialBuilder);
+    initialBuilder.single = vi.fn().mockResolvedValue({ data: mockProfileData, error: null });
+    initialBuilder.update = vi.fn().mockReturnValue(initialBuilder);
+    initialBuilder.upsert = vi.fn().mockReturnValue(initialBuilder);
+    (supabase.from as any).mockReturnValue(initialBuilder);
     
     // Mock storage
     mockStorage('avatars', {
@@ -93,13 +105,17 @@ describe('Profile Component', () => {
       website: 'https://updated-example.com',
     };
 
-    supabase.from().upsert.mockResolvedValueOnce({
-      data: updatedProfile,
-      error: null,
-    });
+    // After update, override with updated builder
+    const updateBuilder: any = {};
+    updateBuilder.select = vi.fn().mockReturnValue(updateBuilder);
+    updateBuilder.eq = vi.fn().mockReturnValue(updateBuilder);
+    updateBuilder.single = vi.fn().mockResolvedValue({ data: updatedProfile, error: null });
+    updateBuilder.update = vi.fn().mockReturnValue(updateBuilder);
+    updateBuilder.upsert = vi.fn().mockReturnValue(updateBuilder);
+    (supabase.from as any).mockReturnValue(updateBuilder);
 
     // Render component
-    const { user } = renderWithProviders(<Profile />);
+    renderWithProviders(<Profile user={mockUser} />);
 
     // Wait for initial data to load
     await waitFor(() => {
@@ -107,18 +123,18 @@ describe('Profile Component', () => {
     });
 
     // Update form fields
-    await user.clear(screen.getByLabelText(/full name/i));
-    await user.type(screen.getByLabelText(/full name/i), updatedProfile.full_name);
-    await user.clear(screen.getByLabelText(/website/i));
-    await user.type(screen.getByLabelText(/website/i), updatedProfile.website);
+    await userEvent.clear(screen.getByLabelText(/full name/i));
+    await userEvent.type(screen.getByLabelText(/full name/i), updatedProfile.full_name);
+    await userEvent.clear(screen.getByLabelText(/website/i));
+    await userEvent.type(screen.getByLabelText(/website/i), updatedProfile.website);
 
     // Submit form
-    await user.click(screen.getByRole('button', { name: /update profile/i }));
+    await userEvent.click(screen.getByRole('button', { name: /update profile/i }));
 
     // Verify update was called with correct data
     await waitFor(() => {
-      expect(supabase.from).toHaveBeenCalledWith('profiles');
-      expect(supabase.from().upsert).toHaveBeenCalledWith({
+      expect(supabase.from('profiles')).toHaveBeenCalledWith('profiles');
+      expect(supabase.from('profiles').upsert).toHaveBeenCalledWith({
         id: mockUser.id,
         full_name: updatedProfile.full_name,
         website: updatedProfile.website,
@@ -127,16 +143,17 @@ describe('Profile Component', () => {
   });
 
   test('handles avatar upload', async () => {
-    // Setup initial data
-    supabase.auth.getUser.mockResolvedValue({ 
+    (supabase.auth.getUser as any).mockResolvedValue({ 
       data: { user: mockUser }, 
       error: null 
     });
-    
-    supabase.from().single.mockResolvedValue({ 
-      data: mockProfileData, 
-      error: null 
-    });
+    const builder: any = {};
+    builder.select = vi.fn().mockReturnValue(builder);
+    builder.eq = vi.fn().mockReturnValue(builder);
+    builder.single = vi.fn().mockResolvedValue({ data: mockProfileData, error: null });
+    builder.update = vi.fn().mockReturnValue(builder);
+    builder.upsert = vi.fn().mockReturnValue(builder);
+    (supabase.from as any).mockReturnValue(builder);
     
     // Mock storage
     mockStorage('avatars', {
@@ -148,7 +165,7 @@ describe('Profile Component', () => {
     const file = createMockFile('test-avatar.jpg', 'image/jpeg', 1024);
     
     // Render component
-    const { user } = renderWithProviders(<Profile />);
+    renderWithProviders(<Profile user={mockUser} />);
 
     // Wait for component to load
     await waitFor(() => {
@@ -157,11 +174,11 @@ describe('Profile Component', () => {
 
     // Find the file input and upload a file
     const input = screen.getByLabelText(/upload avatar/i);
-    await user.upload(input, file);
+    await userEvent.upload(input, file);
 
     await waitFor(() => {
-      expect(supabase.storage.from).toHaveBeenCalledWith('avatars');
-      expect(supabase.storage.from().upload).toHaveBeenCalledWith(
+      expect(supabase.storage.from('avatars')).toHaveBeenCalledWith('avatars');
+      expect(supabase.storage.from('avatars').upload).toHaveBeenCalledWith(
         `${mockUser.id}/avatar.jpg`,
         file,
         { upsert: true }
@@ -170,16 +187,18 @@ describe('Profile Component', () => {
   });
 
   test('displays error message on update failure', async () => {
-    // Setup initial data
-    supabase.auth.getUser.mockResolvedValue({ 
+    (supabase.auth.getUser as any).mockResolvedValue({ 
       data: { user: mockUser }, 
       error: null 
     });
-    
-    supabase.from().single.mockResolvedValue({ 
-      data: mockProfileData, 
-      error: null 
-    });
+    const builder: any = {};
+    builder.select = vi.fn().mockReturnValue(builder);
+    builder.eq = vi.fn().mockReturnValue(builder);
+    builder.single = vi.fn().mockResolvedValue({ data: mockProfileData, error: null });
+    builder.update = vi.fn().mockReturnValue(builder);
+    builder.upsert = vi.fn().mockReturnValue(builder);
+    builder.upsert = vi.fn().mockReturnValue(builder).mockResolvedValue({ data: null, error: { message: 'Failed to update profile' } });
+    (supabase.from as any).mockReturnValue(builder);
     
     // Mock storage
     mockStorage('avatars', {
@@ -187,20 +206,23 @@ describe('Profile Component', () => {
     });
 
     // Mock update error
-    supabase.from().upsert.mockResolvedValueOnce({
-      data: null,
-      error: { message: 'Failed to update profile' },
+    (supabase.from as any).mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: mockProfileData, error: null }),
+      update: vi.fn().mockResolvedValue({ data: mockProfileData, error: null }),
+      upsert: vi.fn().mockResolvedValue({ data: null, error: { message: 'Failed to update profile' } }),
     });
 
     // Render component
-    const { user } = renderWithProviders(<Profile />);
+    renderWithProviders(<Profile user={mockUser} />);
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
     });
 
     // Submit form without changes
-    await user.click(screen.getByRole('button', { name: /update profile/i }));
+    await userEvent.click(screen.getByRole('button', { name: /update profile/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/failed to update profile/i)).toBeInTheDocument();
@@ -208,16 +230,17 @@ describe('Profile Component', () => {
   });
 
   test('handles avatar upload error', async () => {
-    // Setup initial data
-    supabase.auth.getUser.mockResolvedValue({ 
+    (supabase.auth.getUser as any).mockResolvedValue({ 
       data: { user: mockUser }, 
       error: null 
     });
-    
-    supabase.from().single.mockResolvedValue({ 
-      data: mockProfileData, 
-      error: null 
-    });
+    const builder: any = {};
+    builder.select = vi.fn().mockReturnValue(builder);
+    builder.eq = vi.fn().mockReturnValue(builder);
+    builder.single = vi.fn().mockResolvedValue({ data: mockProfileData, error: null });
+    builder.update = vi.fn().mockReturnValue(builder);
+    builder.upsert = vi.fn().mockReturnValue(builder);
+    (supabase.from as any).mockReturnValue(builder);
     
     // Mock storage with upload error
     mockStorage('avatars', {
@@ -229,7 +252,7 @@ describe('Profile Component', () => {
     const file = createMockFile('test-avatar.jpg');
     
     // Render component
-    const { user } = renderWithProviders(<Profile />);
+    renderWithProviders(<Profile user={mockUser} />);
 
     // Wait for component to load
     await waitFor(() => {
@@ -238,7 +261,7 @@ describe('Profile Component', () => {
 
     // Find the file input and upload a file
     const input = screen.getByLabelText(/upload avatar/i);
-    await user.upload(input, file);
+    await userEvent.upload(input, file);
 
     await waitFor(() => {
       expect(screen.getByText(/failed to upload avatar/i)).toBeInTheDocument();

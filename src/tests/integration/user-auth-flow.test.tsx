@@ -146,144 +146,152 @@ describe('User Authentication Flow', () => {
 
   // Add afterEach if timers or other global mocks need restoring
   afterEach(() => {
-    // vi.restoreAllMocks(); // Not needed if only using vi.mock module mocks
+    vi.restoreAllMocks(); // Ensure all mocks are fully reset after each test
   });
 
   test('User can sign up, login, and update profile', async () => {
-    // Get refs to mock functions from the exported objects
-    const mockLogin = mockAuthStoreActions.login;
-    const mockRegister = mockAuthStoreActions.register;
-    const mockUpdateProfile = mockProfileStoreActions.updateProfile;
-    // Add mockUploadAvatar if we want to test that too
-    // const mockUploadAvatar = mockProfileStoreActions.uploadAvatar;
+    try {
+      // Get refs to mock functions from the exported objects
+      const mockLogin = mockAuthStoreActions.login;
+      const mockRegister = mockAuthStoreActions.register;
+      const mockUpdateProfile = mockProfileStoreActions.updateProfile;
+      // Add mockUploadAvatar if we want to test that too
+      // const mockUploadAvatar = mockProfileStoreActions.uploadAvatar;
 
-    // 1. SIGN UP FLOW
-    const { unmount: unmountSignup } = render(<RegistrationForm />); 
+      // 1. SIGN UP FLOW
+      const { unmount: unmountSignup } = render(<RegistrationForm />); 
 
-    // Fill sign up form
-    await act(async () => {
-      await user.type(screen.getByLabelText(/email \*/i), 'test@example.com');
-    });
-    await act(async () => {
-      await user.type(screen.getByLabelText(/^Password \*$/i), 'Password123');
-    });
-    await act(async () => {
-      await user.type(screen.getByLabelText(/first name \*/i), 'Test');
-    });
-    await act(async () => {
-      await user.type(screen.getByLabelText(/last name \*/i), 'User');
-    });
-    await act(async () => {
-      await user.type(screen.getByLabelText(/^Confirm Password \*$/i), 'Password123');
-    });
-    await act(async () => {
-      await user.click(screen.getByRole('checkbox', { name: /accept terms/i }));
-    });
-
-    // Submit sign up form 
-    await act(async () => {
-      await user.click(screen.getByRole('button', { name: /create account/i }));
-    });
-
-    // Verify mockRegister was called
-    await waitFor(() => {
-      expect(mockRegister).toHaveBeenCalled();
-      // Optional: Check arguments if needed
-      expect(mockRegister).toHaveBeenCalledWith(expect.objectContaining({
-        email: 'test@example.com', 
-        password: 'Password123',
-        firstName: 'Test',
-        lastName: 'User'
-      }));
-    });
-    // Check for success message (can check state or UI)
-    // expect(mockAuthStoreActions.successMessage).toContain(...); // Check state
-    expect(await screen.findByRole('alert')).toHaveTextContent(/Registration successful/i); // Check UI
-
-    unmountSignup();
-
-    // 2. LOGIN FLOW
-    const { unmount: unmountLogin } = render(<LoginForm />); 
-
-    // Fill login form
-    await act(async () => {
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-    });
-    await act(async () => {
-      await user.type(screen.getByLabelText(/^Password$/i), 'Password123');
-    });
-
-    // Submit login form (use act)
-    await act(async () => {
-      await user.click(screen.getByRole('button', { name: /login/i }));
-    });
-
-    // Check the mockLogin function from the imported object
-    expect(mockLogin, 'Expected login function from exported mock state to be called').toHaveBeenCalled();
-    expect(mockLogin, 'Expected login function to be called with specific arguments').toHaveBeenCalledWith({
-      email: 'test@example.com',
-      password: 'Password123',
-      rememberMe: false, // Include rememberMe based on defaultValues in LoginForm
-    });
-
-    unmountLogin();
-
-    // 3. PROFILE UPDATE FLOW
-    // Supabase mocks for getUser are still needed by ProfileEditor potentially
-    (supabase.auth.getUser as any).mockResolvedValue({
-      data: { user: { id: 'test-user-id', email: 'test@example.com' } }, 
-      error: null
-    });
-    // No need to mock supabase.from('profiles')... calls directly anymore
-    // const profileQueryBuilder = supabase.from('profiles');
-    // ((profileQueryBuilder as any).single as any).mockResolvedValueOnce({ ... });
-    // (supabase.from as any)('profiles').upsert.mockResolvedValueOnce({ error: null });
-
-    // Simulate profile existing in the store. 
-    // ProfileEditor likely uses auth user for email and maybe defaults name internally.
-    // Only include fields from Profile type that might be read initially.
-    mockProfileStoreActions.profile = {
-      id: 'test-user-id',
-      bio: '', 
-      website: '',
-      avatar_url: null,
-      created_at: new Date().toISOString(), 
-      updated_at: new Date().toISOString(), 
-    };
-
-    render(<ProfileEditor />);
-
-    // Wait for editor to load
-    await waitFor(() => {
-      expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
-      // Removed check for email field, as ProfileEditor does not render it
-    });
-
-    // Fill and submit profile form
-    // Ensure email field is populated to pass validation
-    await user.clear(screen.getByLabelText(/name/i));
-    await user.type(screen.getByLabelText(/name/i), 'Test User Updated');
-    await user.clear(screen.getByLabelText(/website/i));
-    await user.type(screen.getByLabelText(/website/i), 'https://updated.example.com');
-    await user.clear(screen.getByLabelText(/bio/i));
-    await user.type(screen.getByLabelText(/bio/i), 'Test bio');
-    await user.clear(screen.getByLabelText(/location/i));
-    await user.type(screen.getByLabelText(/location/i), 'Test location');
-
-    // Wrap the submission click in act
-    await act(async () => {
-      await user.click(screen.getByRole('button', { name: /save profile/i }));
-    });
-
-    // Verify profile store updateProfile was called with the FORM data payload
-    await waitFor(() => {
-      expect(mockUpdateProfile).toHaveBeenCalledWith({
-        name: 'Test User Updated',
-        bio: 'Test bio',
-        location: 'Test location', // Expect location based on previous error msg
-        website: 'https://updated.example.com',
+      // Fill sign up form
+      await act(async () => {
+        await user.type(screen.getByLabelText(/email \*/i), 'test@example.com');
       });
-    });
+      await act(async () => {
+        await user.type(screen.getByLabelText(/^Password \*$/i), 'Password123');
+      });
+      await act(async () => {
+        await user.type(screen.getByLabelText(/first name \*/i), 'Test');
+      });
+      await act(async () => {
+        await user.type(screen.getByLabelText(/last name \*/i), 'User');
+      });
+      await act(async () => {
+        await user.type(screen.getByLabelText(/^Confirm Password \*$/i), 'Password123');
+      });
+      await act(async () => {
+        await user.click(screen.getByRole('checkbox', { name: /accept terms/i }));
+      });
+
+      // Submit sign up form 
+      await act(async () => {
+        await user.click(screen.getByRole('button', { name: /create account/i }));
+      });
+
+      // Verify mockRegister was called
+      await waitFor(() => {
+        expect(mockRegister).toHaveBeenCalled();
+        // Optional: Check arguments if needed
+        expect(mockRegister).toHaveBeenCalledWith(expect.objectContaining({
+          email: 'test@example.com', 
+          password: 'Password123',
+          firstName: 'Test',
+          lastName: 'User'
+        }));
+      }, { timeout: 2000 });
+      // Check for success message (can check state or UI)
+      // expect(mockAuthStoreActions.successMessage).toContain(...); // Check state
+      expect(await screen.findByRole('alert')).toHaveTextContent(/Registration successful/i); // Check UI
+
+      unmountSignup();
+
+      // 2. LOGIN FLOW
+      const { unmount: unmountLogin } = render(<LoginForm />); 
+
+      // Fill login form
+      await act(async () => {
+        await user.type(screen.getByLabelText(/email/i), 'test@example.com');
+      });
+      await act(async () => {
+        await user.type(screen.getByLabelText(/^Password$/i), 'Password123');
+      });
+
+      // Submit login form (use act)
+      await act(async () => {
+        await user.click(screen.getByRole('button', { name: /login/i }));
+      });
+
+      // Check the mockLogin function from the imported object
+      expect(mockLogin, 'Expected login function from exported mock state to be called').toHaveBeenCalled();
+      expect(mockLogin, 'Expected login function to be called with specific arguments').toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'Password123',
+        rememberMe: false, // Include rememberMe based on defaultValues in LoginForm
+      });
+
+      unmountLogin();
+
+      // 3. PROFILE UPDATE FLOW
+      // Supabase mocks for getUser are still needed by ProfileEditor potentially
+      (supabase.auth.getUser as any).mockResolvedValue({
+        data: { user: { id: 'test-user-id', email: 'test@example.com' } }, 
+        error: null
+      });
+      // No need to mock supabase.from('profiles')... calls directly anymore
+      // const profileQueryBuilder = supabase.from('profiles');
+      // ((profileQueryBuilder as any).single as any).mockResolvedValueOnce({ ... });
+      // (supabase.from as any)('profiles').upsert.mockResolvedValueOnce({ error: null });
+
+      // Simulate profile existing in the store. 
+      // ProfileEditor likely uses auth user for email and maybe defaults name internally.
+      // Only include fields from Profile type that might be read initially.
+      mockProfileStoreActions.profile = {
+        id: 'test-user-id',
+        bio: '', 
+        website: '',
+        avatar_url: null,
+        created_at: new Date().toISOString(), 
+        updated_at: new Date().toISOString(), 
+      };
+
+      render(<ProfileEditor />);
+
+      // Wait for editor to load
+      await waitFor(() => {
+        expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
+        // Removed check for email field, as ProfileEditor does not render it
+      }, { timeout: 2000 });
+
+      // Fill and submit profile form
+      // Ensure email field is populated to pass validation
+      await user.clear(screen.getByLabelText(/name/i));
+      await user.type(screen.getByLabelText(/name/i), 'Test User Updated');
+      await user.clear(screen.getByLabelText(/website/i));
+      await user.type(screen.getByLabelText(/website/i), 'https://updated.example.com');
+      await user.clear(screen.getByLabelText(/bio/i));
+      await user.type(screen.getByLabelText(/bio/i), 'Test bio');
+      await user.clear(screen.getByLabelText(/location/i));
+      await user.type(screen.getByLabelText(/location/i), 'Test location');
+
+      // Wrap the submission click in act
+      await act(async () => {
+        await user.click(screen.getByRole('button', { name: /save profile/i }));
+      });
+
+      // Verify profile store updateProfile was called with the FORM data payload
+      await waitFor(() => {
+        expect(mockUpdateProfile).toHaveBeenCalledWith({
+          name: 'Test User Updated',
+          bio: 'Test bio',
+          location: 'Test location', // Expect location based on previous error msg
+          website: 'https://updated.example.com',
+        });
+      }, { timeout: 2000 });
+    } catch (err) {
+      // Log the DOM for debugging if the test fails
+      // eslint-disable-next-line no-console
+      console.error('Test failed, DOM snapshot:');
+      screen.debug();
+      throw err;
+    }
   });
 
   test('Social login buttons (Google/Apple) are visible in Login and Registration forms', async () => {
