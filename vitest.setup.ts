@@ -33,24 +33,22 @@ vi.stubGlobal('fetch', fetchMock);
 // --- End fetch mock --- 
 
 // --- Mock react-i18next --- 
-vi.mock('react-i18next', () => ({
-  // Mock the useTranslation hook
-  useTranslation: () => ({
-    t: (key: string) => `[i18n:${key}]`, // Return key wrapped for identification
-    i18n: {
-      changeLanguage: () => new Promise(() => {}), // Mock function doesn't need to resolve
-      // Add other i18n properties/methods if needed by components
-      language: 'en',
-      options: {},
-      isInitialized: true,
-      // ... add other needed i18n instance methods/properties
-    },
-  }),
-  // Mock Trans component if used
-  Trans: ({ i18nKey }: { i18nKey: string }) => `[i18n:${i18nKey}]`, // Apply same logic to Trans
-  // Mock I18nextProvider if needed (usually not needed if useTranslation is mocked)
-  // I18nextProvider: ({ children }) => children,
-}));
+vi.mock('react-i18next', async () => {
+  const actual = await import('react-i18next');
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string) => `[i18n:${key}]`,
+      i18n: {
+        changeLanguage: () => new Promise(() => {}),
+        language: 'en',
+        options: {},
+        isInitialized: true,
+      },
+    }),
+    Trans: ({ i18nKey }: { i18nKey: string }) => `[i18n:${i18nKey}]`,
+  };
+});
 // --- End react-i18next mock ---
 
 // --- Mock Axios instance used by UserManagementProvider --- 

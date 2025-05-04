@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 31  |  **Failed Test Files:** 51
+**Passed Test Files:** 33  |  **Failed Test Files:** 49
 
 ## Passing Test Files
 
@@ -10,6 +10,8 @@
 - src\components\profile\__tests__\ActivityLog.test.tsx
 - src\components\profile\__tests__\CompanyDataExport.test.tsx
 - src\components\profile\__tests__\CompanyLogoUpload.test.tsx
+- src\components\profile\__tests__\CorporateProfileSection.test.tsx
+- src\components\profile\__tests__\DataExport.test.tsx
 - src\components\profile\__tests__\NotificationPreferences.test.tsx
 - src\components\profile\__tests__\ProfileEditor.test.tsx
 - src\components\profile\__tests__\ProfileTypeConversion.test.tsx
@@ -46,8 +48,6 @@
 - src\components\auth\__tests__\IDPConfiguration.test.tsx
 - src\components\auth\__tests__\LoginForm.test.tsx
 - src\components\auth\__tests__\OrganizationSSO.test.tsx
-- src\components\profile\__tests__\CorporateProfileSection.test.tsx
-- src\components\profile\__tests__\DataExport.test.tsx
 - src\components\profile\__tests__\PrivacySettings.test.tsx
 - src\components\profile\__tests__\Profile.test.js
 - src\components\profile\__tests__\ProfilePrivacySettings.test.tsx

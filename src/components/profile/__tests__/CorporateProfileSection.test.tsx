@@ -8,14 +8,14 @@ import i18n from '@/lib/i18n/index';
 import { initReactI18next } from 'react-i18next';
 import i18next from 'i18next';
 import { MemoryRouter } from 'react-router-dom';
+import * as UserManagementProvider from '@/lib/auth/UserManagementProvider';
 
 // Import the actual i18n instance used by the app if possible, or create one for tests
 // Assuming i18n configuration exists and can be imported/mocked
 // import i18nTestConfig from '@/lib/i18n/config/i18n.test.config'; // Adjust path if needed
 
 import { CorporateProfileSection } from '../CorporateProfileSection';
-import { UserType, Company } from '@/lib/types/user-type';
-import { useUserManagement } from '@/lib/UserManagementProvider';
+import { UserType, Company } from '@/types/user-type';
 
 // Initialize i18next specifically for testing before describing tests
 // This ensures the t function behaves predictably (e.g., returns the key)
@@ -41,13 +41,6 @@ i18next.use(initReactI18next).init({
   // Return the key itself if not found
   parseMissingKeyHandler: (key) => key,
 });
-
-// Mock the UserManagementProvider hook
-vi.mock('@/lib/UserManagementProvider', () => ({
-  useUserManagement: vi.fn(() => ({
-    corporateUsers: { enabled: true }, // Assume corporate users are enabled for this test
-  })),
-}));
 
 // Mock UI components used
 vi.mock('@/components/ui/button', () => ({ Button: (props: any) => <button {...props} /> }));
@@ -88,19 +81,84 @@ const initialCompanyData: Company = {
   },
 };
 
+const defaultUserManagementContext = {
+  config: {},
+  callbacks: {
+    onUserLogin: () => {},
+    onUserLogout: () => {},
+    onProfileUpdate: () => {},
+    onError: () => {},
+  },
+  layout: {
+    useCustomHeader: false,
+    headerComponent: null,
+    useCustomFooter: false,
+    footerComponent: null,
+    useCustomLayout: false,
+    layoutComponent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  },
+  platform: 'web',
+  isNative: false,
+  ui: {},
+  api: {},
+  storageKeyPrefix: 'user',
+  i18nNamespace: 'userManagement',
+  twoFactor: {
+    enabled: false,
+    methods: [],
+    required: false,
+  },
+  subscription: {
+    enabled: false,
+    defaultTier: 'FREE',
+    features: {},
+    enableBilling: false,
+  },
+  corporateUsers: {
+    enabled: true,
+    registrationEnabled: true,
+    requireCompanyValidation: false,
+    allowUserTypeChange: false,
+    companyFieldsRequired: ['name'],
+    defaultUserType: UserType.PRIVATE,
+  },
+  oauth: {
+    enabled: false,
+    providers: [],
+    autoLink: true,
+    allowUnverifiedEmails: false,
+    defaultRedirectPath: '/',
+  },
+};
+
 describe('CorporateProfileSection Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset mock implementation if needed
-    (useUserManagement as any).mockImplementation(() => ({
-      corporateUsers: { enabled: true },
-    }));
+    vi.spyOn(UserManagementProvider, 'useUserManagement').mockReturnValue({
+      ...defaultUserManagementContext,
+      corporateUsers: {
+        enabled: true,
+        registrationEnabled: true,
+        requireCompanyValidation: false,
+        allowUserTypeChange: false,
+        companyFieldsRequired: ['name'],
+        defaultUserType: UserType.PRIVATE,
+      },
+    });
   });
 
   it('should render nothing if corporate users are disabled', async () => {
-    (useUserManagement as any).mockImplementation(() => ({
-      corporateUsers: { enabled: false },
-    }));
+    vi.spyOn(UserManagementProvider, 'useUserManagement').mockReturnValue({
+      ...defaultUserManagementContext,
+      corporateUsers: {
+        enabled: false,
+        registrationEnabled: true,
+        requireCompanyValidation: false,
+        allowUserTypeChange: false,
+        companyFieldsRequired: ['name'],
+        defaultUserType: UserType.PRIVATE,
+      },
+    });
     let container: HTMLElement | null = null;
     await act(async () => {
       const result = render(
@@ -153,18 +211,18 @@ describe('CorporateProfileSection Component', () => {
       );
     });
 
-    expect(screen.getByLabelText('profile.corporate.companyName *')).toHaveValue(initialCompanyData.name);
-    expect(screen.getByLabelText('profile.corporate.industry')).toHaveValue(initialCompanyData.industry);
-    expect(screen.getByLabelText('profile.corporate.companySize')).toHaveValue(initialCompanyData.size);
-    expect(screen.getByLabelText('profile.corporate.website')).toHaveValue(initialCompanyData.website);
-    expect(screen.getByLabelText('profile.corporate.vatId')).toHaveValue(initialCompanyData.vatId);
-    expect(screen.getByLabelText('profile.corporate.position')).toHaveValue(initialCompanyData.position);
-    expect(screen.getByLabelText('profile.corporate.department')).toHaveValue(initialCompanyData.department);
-    expect(screen.getByLabelText('profile.corporate.street')).toHaveValue(initialCompanyData.address?.street);
-    expect(screen.getByLabelText('profile.corporate.city')).toHaveValue(initialCompanyData.address?.city);
-    expect(screen.getByLabelText('profile.corporate.state')).toHaveValue(initialCompanyData.address?.state);
-    expect(screen.getByLabelText('profile.corporate.postalCode')).toHaveValue(initialCompanyData.address?.postalCode);
-    expect(screen.getByLabelText('profile.corporate.country')).toHaveValue(initialCompanyData.address?.country);
+    expect(screen.getByLabelText(/companyName/i)).toHaveValue(initialCompanyData.name);
+    expect(screen.getByLabelText(/industry/i)).toHaveValue(initialCompanyData.industry);
+    expect(screen.getByLabelText(/companySize/i)).toHaveValue(initialCompanyData.size);
+    expect(screen.getByLabelText(/website/i)).toHaveValue(initialCompanyData.website);
+    expect(screen.getByLabelText(/vatId/i)).toHaveValue(initialCompanyData.vatId);
+    expect(screen.getByLabelText(/position/i)).toHaveValue(initialCompanyData.position);
+    expect(screen.getByLabelText(/department/i)).toHaveValue(initialCompanyData.department);
+    expect(screen.getByLabelText(/street/i)).toHaveValue(initialCompanyData.address?.street);
+    expect(screen.getByLabelText(/city/i)).toHaveValue(initialCompanyData.address?.city);
+    expect(screen.getByLabelText(/state/i)).toHaveValue(initialCompanyData.address?.state);
+    expect(screen.getByLabelText(/postalCode/i)).toHaveValue(initialCompanyData.address?.postalCode);
+    expect(screen.getByLabelText(/country/i)).toHaveValue(initialCompanyData.address?.country);
 
     expect(screen.getByTestId('company-logo-upload')).toBeInTheDocument();
   });
@@ -190,16 +248,13 @@ describe('CorporateProfileSection Component', () => {
     const newStreet = '456 Side St';
 
     await act(async () => {
-      await user.clear(screen.getByLabelText('profile.corporate.companyName *'));
-      await user.type(screen.getByLabelText('profile.corporate.companyName *'), newCompanyName);
-      
-      await user.clear(screen.getByLabelText('profile.corporate.industry'));
-      await user.type(screen.getByLabelText('profile.corporate.industry'), newIndustry);
-  
-      await user.clear(screen.getByLabelText('profile.corporate.street'));
-      await user.type(screen.getByLabelText('profile.corporate.street'), newStreet);
-  
-      await user.click(screen.getByRole('button', { name: 'common.save' }));
+      await user.clear(screen.getByLabelText(/companyName/i));
+      await user.type(screen.getByLabelText(/companyName/i), newCompanyName);
+      await user.clear(screen.getByLabelText(/industry/i));
+      await user.type(screen.getByLabelText(/industry/i), newIndustry);
+      await user.clear(screen.getByLabelText(/street/i));
+      await user.type(screen.getByLabelText(/street/i), newStreet);
+      await user.click(screen.getByRole('button', { name: /save/i }));
     });
 
     expect(mockOnUpdate).toHaveBeenCalledTimes(1);
@@ -235,13 +290,13 @@ describe('CorporateProfileSection Component', () => {
     });
 
     await act(async () => {
-      await user.clear(screen.getByLabelText('profile.corporate.street'));
-      await user.clear(screen.getByLabelText('profile.corporate.city'));
-      await user.clear(screen.getByLabelText('profile.corporate.state'));
-      await user.clear(screen.getByLabelText('profile.corporate.postalCode'));
-      await user.clear(screen.getByLabelText('profile.corporate.country'));
+      await user.clear(screen.getByLabelText(/street/i));
+      await user.clear(screen.getByLabelText(/city/i));
+      await user.clear(screen.getByLabelText(/state/i));
+      await user.clear(screen.getByLabelText(/postalCode/i));
+      await user.clear(screen.getByLabelText(/country/i));
   
-      await user.click(screen.getByRole('button', { name: 'common.save' }));
+      await user.click(screen.getByRole('button', { name: /save/i }));
     });
 
     expect(mockOnUpdate).toHaveBeenCalledTimes(1);

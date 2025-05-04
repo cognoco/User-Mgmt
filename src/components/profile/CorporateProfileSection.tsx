@@ -1,8 +1,8 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
-import { UserType, companySchema, Company } from '@/lib/types/user-type';
-import { useUserManagement } from '@/lib/UserManagementProvider';
+import { UserType, companySchema, Company } from '@/types/user-type';
+import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
