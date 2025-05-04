@@ -1,4 +1,13 @@
-#!/usr/bin/env node
+
+/**
+ * Run node scripts/update-test-results.js
+ * Runs all Vitest tests and generates a Markdown summary of passing and failing test files.
+ * Reads: none (runs Vitest directly)
+ * Writes: docs/TestResultLatest.md (summary), docs/TestResultsPrevious.md (previous summary)
+ */
+
+
+
 import fs from 'fs';
 import path from 'path';
 import { spawnSync } from 'child_process';
@@ -10,11 +19,6 @@ const LATEST = path.join(DOCS_DIR, 'TestResultLatest.md');
 const PREVIOUS = path.join(DOCS_DIR, 'TestResultsPrevious.md');
 const TEMP_JSON = path.join(os.tmpdir(), `vitest-results-${Date.now()}.json`);
 
-/**
- * Runs all Vitest tests and generates a Markdown summary of passing and failing test files.
- * Reads: none (runs Vitest directly)
- * Writes: docs/TestResultLatest.md (summary), docs/TestResultsPrevious.md (previous summary)
- */
 
 // --- STEP 1: Copy Latest to Previous ---
 if (fs.existsSync(LATEST)) {

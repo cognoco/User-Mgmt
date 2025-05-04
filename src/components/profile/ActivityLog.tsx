@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSession } from '@/lib/auth/useSession';
+import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 
 interface ActivityLogEntry {
@@ -16,7 +16,7 @@ interface ActivityLogEntry {
 }
 
 const ActivityLog: React.FC = () => {
-  const { user } = useSession();
+  const user = useAuth().user;
   const [logs, setLogs] = useState<ActivityLogEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
