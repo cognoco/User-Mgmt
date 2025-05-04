@@ -6,31 +6,50 @@ const CompanyDataExport: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
 
   const handleExport = async () => {
-    setDownloading(true);
     setError(null);
     setSuccess(null);
+    setDownloading(true);
+    // eslint-disable-next-line no-console
+    console.log('DEBUG: handleExport called');
     try {
-      const res = await fetch('/api/admin/export');
-      if (!res.ok) throw new Error(await res.text());
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: Fetching /api/company/export');
+      const res = await fetch('/api/company/export');
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: Fetch response', res);
+      if (!res.ok) {
+        // eslint-disable-next-line no-console
+        console.log('DEBUG: Response not ok');
+        throw new Error(await res.text());
+      }
       const blob = await res.blob();
-      // Extract filename from Content-Disposition header
-      const disposition = res.headers.get('Content-Disposition');
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: Got blob', blob);
+      const contentDisposition = res.headers.get('content-disposition');
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: contentDisposition', contentDisposition);
       let filename = 'Company_Data_Export.json';
-      if (disposition) {
-        const match = disposition.match(/filename="(.+?)"/);
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="(.+)"/);
         if (match) filename = match[1];
       }
-      // Trigger download
-      const url = window.URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: Blob URL', url);
       const a = document.createElement('a');
       a.href = url;
       a.download = filename;
       document.body.appendChild(a);
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: Clicking anchor');
       a.click();
       a.remove();
-      window.URL.revokeObjectURL(url);
       setSuccess('Company data export has been downloaded successfully.');
-    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: setSuccess(true)');
+    } catch (err: any) {
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: Error in handleExport', err);
       setError('Failed to export company data.');
     } finally {
       setDownloading(false);

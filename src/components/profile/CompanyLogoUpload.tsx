@@ -194,6 +194,7 @@ export function CompanyLogoUpload() {
             accept={ALLOWED_IMAGE_TYPES.join(',')}
             onChange={handleFileChange}
             className="hidden"
+            data-testid="company-logo-file-input"
           />
 
           {profile?.companyLogoUrl && (
