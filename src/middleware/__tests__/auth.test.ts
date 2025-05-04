@@ -5,8 +5,8 @@ import { withAuth } from '../../middleware/auth';
 import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
 
 // Import our standardized mock
-vi.mock('../../lib/supabase', () => require('../../tests/mocks/supabase'));
-import { supabase } from '../../lib/supabase';
+vi.mock('@/lib/database/supabase', async () => await import('@/tests/mocks/supabase'));
+import { supabase } from '@/lib/database/supabase';
 
 // Import utility functions
 import { setupTestEnvironment } from '../../tests/utils/environment-setup';

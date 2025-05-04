@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase.js';
+import { supabase } from '../lib/database/supabase';
 
 /**
  * Authentication middleware for API routes
@@ -15,8 +15,13 @@ export function withAuth(handler, options = {}) {
         return res.status(401).json({ error: 'Unauthorized: Missing authorization header' });
       }
 
+      // Extract token from 'Bearer token123' or 'token123'
+      let token = authHeader;
+      if (authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+      }
       // Get user from Supabase
-      const { data: { user }, error } = await supabase.auth.getUser(authHeader.split(' ')[1]);
+      const { data: { user }, error } = await supabase.auth.getUser(token);
 
       if (error || !user) {
         return res.status(401).json({ error: 'Unauthorized: Invalid token' });

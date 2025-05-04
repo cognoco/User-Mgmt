@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 37  |  **Failed Test Files:** 44
+**Passed Test Files:** 39  |  **Failed Test Files:** 42
 
 ## Passing Test Files
 
@@ -31,6 +31,8 @@
 - src/lib/stores/__tests__/connected-accounts.store.test.ts
 - src/lib/stores/__tests__/preferences.store.test.ts
 - src/lib/stores/__tests__/user.store.test.ts
+- src/middleware/__tests__/audit-log.test.ts
+- src/middleware/__tests__/auth.test.ts
 - src/middleware/__tests__/security-headers.test.ts
 - src/tests/integration/connected-accounts.integration.test.tsx
 - src/tests/integration/dashboard-view-flow.test.tsx
@@ -66,8 +68,6 @@
 - src/lib/database/__tests__/supabase.test.tsx
 - src/lib/rbac/__tests__/roleService.test.ts
 - src/lib/stores/__tests__/subscription.store.test.ts
-- src/middleware/__tests__/audit-log.test.ts
-- src/middleware/__tests__/auth.test.js
 - src/middleware/__tests__/csrf.test.ts
 - src/middleware/__tests__/index.test.ts
 - src/middleware/__tests__/permissions.test.ts

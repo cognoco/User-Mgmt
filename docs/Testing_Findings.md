@@ -334,3 +334,24 @@ This knowledge should be applied to all tests using axios in Node, and documente
 - **Reference:** See audit-log middleware test for a real-world example.
 
 ---
+
+# Middleware Test Fixes & Best Practices (2025-05-04)
+
+## Key Findings Relevant for All Middleware Tests
+
+- **Path Aliasing:** Always use the `@/` alias for imports and mocks in tests (e.g., `@/lib/database/supabase`). This ensures compatibility with the project's TypeScript and Vitest setup and avoids issues after directory migrations.
+- **File Extensions:** Ensure all test files use `.ts` or `.tsx` extensions, not `.js`, so they are picked up and transpiled by Vitest.
+- **Mock Paths:** The mock path in `vi.mock()` must exactly match the import path used in the middleware/component under test.
+- **Token Extraction Robustness:** Middleware that extracts tokens from authorization headers should support both `Bearer token123` and `token123` formats for maximum compatibility. Use logic like:
+  ```js
+  let token = authHeader;
+  if (authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  }
+  ```
+- **Test Registration:** If tests are not being discovered, check for import errors, file extension mismatches, and Vitest config patterns.
+- **General:** After migration or refactor, always audit import paths and mocks in all middleware and their tests to ensure they match the current codebase structure and conventions.
+
+_These findings were confirmed and resolved in the process of fixing the `auth` middleware test and are applicable to all middleware test files._
+
+---
