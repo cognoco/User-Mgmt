@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 35  |  **Failed Test Files:** 47
+**Passed Test Files:** 36  |  **Failed Test Files:** 45
 
 ## Passing Test Files
 
@@ -17,6 +17,7 @@
 - src\components\profile\__tests__\ProfileEditor.test.tsx
 - src\components\profile\__tests__\ProfileTypeConversion.test.tsx
 - src\components\profile\__tests__\ProfileVerification.test.tsx
+- src\components\profile\__tests__\SessionManagement.test.tsx
 - src\components\team\__tests__\InviteMemberForm.test.tsx
 - src\components\team\__tests__\RemoveMemberDialog.test.tsx
 - src\components\team\__tests__\TeamManagement.test.tsx
@@ -51,8 +52,6 @@
 - src\components\auth\__tests__\LoginForm.test.tsx
 - src\components\auth\__tests__\OrganizationSSO.test.tsx
 - src\components\profile\__tests__\Profile.test.tsx
-- src\components\profile\__tests__\ProfilePrivacySettings.test.tsx
-- src\components\profile\__tests__\SessionManagement.test.tsx
 - src\components\team\__tests__\TeamMembersList.test.tsx
 - src\hooks\__tests__\usePayment.test.ts
 - src\hooks\__tests__\usePermission.test.tsx

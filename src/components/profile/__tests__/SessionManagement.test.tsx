@@ -61,9 +61,15 @@ describe('SessionManagement', () => {
     await act(async () => {
       render(<SessionManagement />);
     });
-    const revokeBtn = screen.getByText('Revoke');
+    // Click the first 'Revoke' button (opens dialog)
+    const revokeBtn = screen.getAllByText('Revoke')[0];
     await act(async () => {
       await userEvent.click(revokeBtn);
+    });
+    // Click the 'Revoke' button in the dialog (confirms revoke)
+    const confirmBtn = screen.getAllByText('Revoke')[1];
+    await act(async () => {
+      await userEvent.click(confirmBtn);
     });
     await waitFor(() => {
       expect(revokeSession).toHaveBeenCalledWith('session-2');
