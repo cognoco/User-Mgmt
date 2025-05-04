@@ -1,12 +1,13 @@
 # Test Results
 
-**Passed Test Files:** 28  |  **Failed Test Files:** 54
+**Passed Test Files:** 29  |  **Failed Test Files:** 53
 
 ## Passing Test Files
 
 - src\components\auth\__tests__\BusinessSSOSetup.test.tsx
 - src\components\auth\__tests__\ProtectedRoute.test.tsx
 - src\components\auth\__tests__\RegistrationForm.integration.test.tsx
+- src\components\profile\__tests__\ActivityLog.test.tsx
 - src\components\profile\__tests__\NotificationPreferences.test.tsx
 - src\components\profile\__tests__\ProfileEditor.test.tsx
 - src\components\profile\__tests__\ProfileTypeConversion.test.tsx
@@ -43,7 +44,6 @@
 - src\components\auth\__tests__\IDPConfiguration.test.tsx
 - src\components\auth\__tests__\LoginForm.test.tsx
 - src\components\auth\__tests__\OrganizationSSO.test.tsx
-- src\components\profile\__tests__\ActivityLog.test.tsx
 - src\components\profile\__tests__\CompanyDataExport.test.tsx
 - src\components\profile\__tests__\CompanyLogoUpload.test.tsx
 - src\components\profile\__tests__\CorporateProfileSection.test.tsx

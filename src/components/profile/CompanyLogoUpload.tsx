@@ -6,7 +6,6 @@ import { useProfileStore } from '@/lib/stores/profile.store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'; // Using Avatar for consistency, but might change icon
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import ReactCrop, { type Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -17,8 +16,9 @@ import {
   formatFileSize,
   canvasPreview // Re-using canvasPreview helper
 } from '@/lib/utils/file-upload';
-import { Upload, Building, Trash, X, Camera } from 'lucide-react'; // Use Building icon for company
-import { getPlatformClasses } from '@/lib/hooks/usePlatformStyles';
+import { Upload, Building, Trash, Camera } from 'lucide-react'; // Use Building icon for company
+import { getPlatformClasses } from '@/hooks/usePlatformStyles';
+import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 
 // Helper function (same as AvatarUpload) - can be moved to utils
 async function getCroppedImgBlob(image: HTMLImageElement, crop: PixelCrop): Promise<Blob | null> {
@@ -47,10 +47,12 @@ export function CompanyLogoUpload() {
   const [imgSrc, setImgSrc] = useState('');
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
-  const [aspect, setAspect] = useState<number | undefined>(1); // Keep aspect ratio 1:1
+  const [aspect] = useState<number | undefined>(1); // Keep aspect ratio 1:1
   
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isProcessingCrop, setIsProcessingCrop] = useState(false);
+
+  const { platform, isNative } = useUserManagement();
 
   useEffect(() => {
       setUploadError(null);
@@ -155,18 +157,18 @@ export function CompanyLogoUpload() {
   const logoClasses = getPlatformClasses({
     base: "h-32 w-32 border-4 border-background relative rounded-md", // Square for logo
     mobile: "h-24 w-24"
-  });
+  }, { platform, isNative });
   const iconButtonClasses = getPlatformClasses({
     base: "absolute -bottom-3 -right-3 rounded-full bg-primary text-primary-foreground h-10 w-10 flex items-center justify-center shadow hover:bg-primary/90",
     mobile: "h-8 w-8 -bottom-2 -right-2"
-  });
+  }, { platform, isNative });
 
   const isLoading = storeLoading || isProcessingCrop;
 
   return (
     <Card className="border-none shadow-none p-0">
       <CardContent className="pt-0 flex flex-col items-center space-y-4">
-          <div className="relative">
+          <div className="relative" data-testid="company-logo-upload">
             {/* Using Avatar component structure but with square fallback */}
             <div className={`${logoClasses} flex items-center justify-center overflow-hidden bg-muted`}>
                 {profile?.companyLogoUrl ? (

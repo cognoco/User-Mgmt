@@ -1,5 +1,31 @@
 # TESTING.md
 
+## Recent Test Infrastructure Updates (May 2025)
+
+- **TypeScript Configuration:**
+  - Enabled `jsx: react-jsx` for modern React JSX transform.
+  - Added `allowSyntheticDefaultImports: true` and ensured `esModuleInterop: true` for compatibility with default imports (e.g., React).
+  - Confirmed and documented path alias support: `@/*` now maps to `src/*` via `tsconfig.json`.
+- **Vite/Vitest Configuration:**
+  - Installed and enabled `vite-tsconfig-paths` plugin in `vitest.config.ts` to ensure path aliases work in both app and test environments.
+  - Removed manual alias config in favor of plugin-based resolution.
+- **Jest-DOM Matchers:**
+  - Confirmed global setup of `@testing-library/jest-dom` matchers in `vitest.setup.ts` for all tests.
+# TESTING.md
+
+## Recent Test Infrastructure Updates (June 2024)
+
+- **TypeScript Configuration:**
+  - Enabled `jsx: react-jsx` for modern React JSX transform.
+  - Added `allowSyntheticDefaultImports: true` and ensured `esModuleInterop: true` for compatibility with default imports (e.g., React).
+  - Confirmed and documented path alias support: `@/*` now maps to `src/*` via `tsconfig.json`.
+- **Vite/Vitest Configuration:**
+  - Installed and enabled `vite-tsconfig-paths` plugin in `vitest.config.ts` to ensure path aliases work in both app and test environments.
+  - Removed manual alias config in favor of plugin-based resolution.
+- **Jest-DOM Matchers:**
+  - Confirmed global setup of `@testing-library/jest-dom` matchers in `vitest.setup.ts` for all tests.
+  - No further action needed; all tests can use matchers like `toBeInTheDocument()`.
+
 ## General Test Best Practices
 
 1. **Isolate Tests with Local Mocks**

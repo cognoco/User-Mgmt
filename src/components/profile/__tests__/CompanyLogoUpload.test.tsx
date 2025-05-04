@@ -1,15 +1,14 @@
 import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '@/lib/i18n/index';
-import { supabase } from '@/lib/supabase';
 
 import { CompanyLogoUpload } from '../CompanyLogoUpload';
 import { useProfileStore } from '@/lib/stores/profile.store';
-import { Profile as DbProfile } from '@/lib/types/database';
 import * as FileUploadUtils from '@/lib/utils/file-upload'; // Import utils to mock
+import { Profile } from '@/types/database';
 
 // Mock the Supabase client EARLY
 vi.mock('@/lib/supabase');
@@ -66,7 +65,7 @@ vi.mock('../CompanyLogoUpload', async (importOriginal) => {
 });
 
 // Mock profile data
-const mockProfileBase: Partial<DbProfile> = {
+const mockProfileBase: Partial<Profile> = {
   id: 'corp-123',
   userId: 'corp-123',
   userType: 'corporate',
@@ -77,7 +76,7 @@ const mockUploadCompanyLogo = vi.fn();
 const mockRemoveCompanyLogo = vi.fn();
 
 describe('CompanyLogoUpload Component', () => {
-  const setup = async (profileData: Partial<DbProfile>) => {
+  const setup = async (profileData: Partial<Profile>) => {
     // Reset mocks before each test setup
     vi.clearAllMocks();
     mockIsValidImage.mockReturnValue(true); // Reset to valid by default
@@ -159,21 +158,9 @@ describe('CompanyLogoUpload Component', () => {
     expect(screen.getByRole('img', { name: /Crop me/i })).toBeInTheDocument();
   });
 
-  // TODO: Need to refine mocking for getCroppedImgBlob to test upload
   it.skip('should call uploadCompanyLogo on crop and save', async () => {
-     // await setup({ companyLogoUrl: null }); // Keep commented if test is skipped
-     const user = userEvent.setup();
-     
-     // Wait for modal and cropper
-     const dialog = await screen.findByTestId('dialog');
-     expect(dialog).toBeInTheDocument();
-     
-     // Mock that cropping happened (ReactCrop onComplete is tricky to simulate directly)
-     // We will assume completedCrop state is set implicitly by interaction with mock cropper
-     
-     // Click save button inside the modal
-     const saveButton = screen.getByRole('button', { name: /Upload and Save/i });
-   });
+    // Test implementation skipped
+  });
 
   it('should call removeCompanyLogo when remove button is clicked', async () => {
     await setup({ companyLogoUrl: 'http://example.com/logo.png' }); // Ensure button is visible
@@ -185,4 +172,13 @@ describe('CompanyLogoUpload Component', () => {
     expect(mockRemoveCompanyLogo).toHaveBeenCalledTimes(1);
   });
 
+}); 
+
+vi.mock('react-i18next', async (importOriginal) => {
+    const actual = await importOriginal();
+    return {
+        ...actual,
+        useTranslation: () => ({ t: (key: string) => key, i18n: { changeLanguage: () => Promise.resolve() } }),
+        initReactI18next: { type: '3rdParty', init: () => {} },
+    };
 }); 

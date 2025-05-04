@@ -1,10 +1,10 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react'; // May cause error if not installed
-import path from 'path';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  plugins: [react() as any],
+  plugins: [react() as any, tsconfigPaths()],
   test: {
     globals: true,
     environment: 'jsdom',
@@ -23,10 +23,6 @@ export default defineConfig({
     //     '*.config.ts',
     //   ],
     // },
-    alias: {
-      // Replicate tsconfig paths
-      '@': path.resolve(__dirname, './src'),
-    },
     // Consider adding options for Next.js specific mocks if needed
     // environmentOptions: { ... }
     exclude: [
