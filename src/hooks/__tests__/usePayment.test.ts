@@ -102,16 +102,37 @@ describe('usePayment', () => {
       expiryYear: '26',
     };
 
-    ((api.post as unknown) as MockInstance).mockRejectedValueOnce(new Error('API Error'));
-
+    // Set up initial state with one payment method
     const { result } = renderHook(() => usePayment());
+    result.current.paymentMethods = [
+      {
+        id: '1',
+        type: 'card',
+        last4: '4242',
+        brand: 'visa',
+        expiryMonth: '12',
+        expiryYear: '25',
+      },
+    ];
+
+    ((api.post as unknown) as MockInstance).mockRejectedValueOnce(new Error('API Error'));
 
     await act(async () => {
       await result.current.addPaymentMethod(newPaymentMethod);
     });
 
     expect(api.post).toHaveBeenCalledWith('/payment/methods', newPaymentMethod);
-    expect(result.current.paymentMethods).toEqual([]);
+    // Should remain as the initial state (not reset to empty)
+    expect(result.current.paymentMethods).toEqual([
+      {
+        id: '1',
+        type: 'card',
+        last4: '4242',
+        brand: 'visa',
+        expiryMonth: '12',
+        expiryYear: '25',
+      },
+    ]);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBe('Failed to add payment method');
   });

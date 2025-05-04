@@ -1,10 +1,13 @@
 # Test Results
 
-**Passed Test Files:** 43  |  **Failed Test Files:** 38
+**Passed Test Files:** 47  |  **Failed Test Files:** 35
 
 ## Passing Test Files
 
+- src/components/account/__tests__/DeleteAccountDialog.test.tsx
+- src/components/admin/__tests__/AdminDashboard.test.tsx
 - src/components/auth/__tests__/BusinessSSOSetup.test.tsx
+- src/components/auth/__tests__/DomainBasedOrgMatchingMatching.test.tsx
 - src/components/auth/__tests__/ProtectedRoute.test.tsx
 - src/components/auth/__tests__/RegistrationForm.integration.test.tsx
 - src/components/profile/__tests__/ActivityLog.test.tsx
@@ -14,6 +17,7 @@
 - src/components/profile/__tests__/DataExport.test.tsx
 - src/components/profile/__tests__/NotificationPreferences.test.tsx
 - src/components/profile/__tests__/PrivacySettings.test.tsx
+- src/components/profile/__tests__/Profile.test.tsx
 - src/components/profile/__tests__/ProfileEditor.test.tsx
 - src/components/profile/__tests__/ProfileTypeConversion.test.tsx
 - src/components/profile/__tests__/ProfileVerification.test.tsx
@@ -50,15 +54,12 @@
 
 ## Failing Test Files
 
-- src/components/account/__tests__/DeleteAccountDialog.test.tsx
-- src/components/admin/__tests__/AdminDashboard.test.tsx
 - src/components/admin/__tests__/RoleManagementPanel.test.tsx
 - src/components/audit/__tests__/AuditLogViewer.test.tsx
 - src/components/auth/__tests__/DomainBasedOrgMatching.test.tsx
 - src/components/auth/__tests__/IDPConfiguration.test.tsx
 - src/components/auth/__tests__/LoginForm.test.tsx
 - src/components/auth/__tests__/OrganizationSSO.test.tsx
-- src/components/profile/__tests__/Profile.test.tsx
 - src/components/team/__tests__/TeamMembersList.test.tsx
 - src/hooks/__tests__/usePayment.test.ts
 - src/hooks/__tests__/usePermission.test.tsx

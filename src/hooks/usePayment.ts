@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { api } from '../api/axios';
+import { api } from '../lib/api/axios';
 
 interface PaymentMethod {
   id: string;
@@ -55,7 +55,7 @@ export const usePayment = create<PaymentState>((set, get) => ({
       const response = await api.get('/payment/methods');
       set({ paymentMethods: response.data, isLoading: false });
     } catch (error) {
-      set({ error: 'Failed to fetch payment methods', isLoading: false });
+      set({ paymentMethods: [], error: 'Failed to fetch payment methods', isLoading: false });
     }
   },
 
@@ -87,7 +87,7 @@ export const usePayment = create<PaymentState>((set, get) => ({
       const response = await api.get('/subscriptions/active');
       set({ activeSubscription: response.data, isLoading: false });
     } catch (error) {
-      set({ error: 'Failed to fetch subscription', isLoading: false });
+      set({ activeSubscription: null, error: 'Failed to fetch subscription', isLoading: false });
     }
   },
 
@@ -107,7 +107,7 @@ export const usePayment = create<PaymentState>((set, get) => ({
       const response = await api.get('/payment/history');
       set({ paymentHistory: response.data, isLoading: false });
     } catch (error) {
-      set({ error: 'Failed to fetch payment history', isLoading: false });
+      set({ paymentHistory: [], error: 'Failed to fetch payment history', isLoading: false });
     }
   },
 }));
