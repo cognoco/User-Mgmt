@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 36  |  **Failed Test Files:** 45
+**Passed Test Files:** 37  |  **Failed Test Files:** 44
 
 ## Passing Test Files
 
@@ -31,6 +31,7 @@
 - src/lib/stores/__tests__/connected-accounts.store.test.ts
 - src/lib/stores/__tests__/preferences.store.test.ts
 - src/lib/stores/__tests__/user.store.test.ts
+- src/middleware/__tests__/security-headers.test.ts
 - src/tests/integration/connected-accounts.integration.test.tsx
 - src/tests/integration/dashboard-view-flow.test.tsx
 - src/tests/integration/form-validation-errors-isolated.test.tsx
@@ -71,7 +72,6 @@
 - src/middleware/__tests__/index.test.ts
 - src/middleware/__tests__/permissions.test.ts
 - src/middleware/__tests__/rate-limit.test.ts
-- src/middleware/__tests__/security-headers.test.ts
 - src/tests/integration/account-settings-flow.test.tsx
 - src/tests/integration/account-switching-flow.test.tsx
 - src/tests/integration/admin-users-flow.test.tsx

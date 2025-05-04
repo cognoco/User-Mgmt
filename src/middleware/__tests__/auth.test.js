@@ -2,14 +2,15 @@
 
 import { createMocks } from 'node-mocks-http';
 import { withAuth } from '../../middleware/auth';
+import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
 
 // Import our standardized mock
-jest.mock('../../src/lib/supabase', () => require('../mocks/supabase'));
-import { supabase } from '../../src/lib/supabase';
+vi.mock('../../lib/supabase', () => require('../../tests/mocks/supabase'));
+import { supabase } from '../../lib/supabase';
 
 // Import utility functions
-import { setupTestEnvironment } from '../utils/environment-setup';
-import { createMockUser, createMockAdminUser } from '../utils/testing-utils';
+import { setupTestEnvironment } from '../../tests/utils/environment-setup';
+import { createMockUser, createMockAdminUser } from '../../tests/utils/testing-utils';
 
 describe('Auth Middleware', () => {
   // Setup test environment
@@ -25,10 +26,10 @@ describe('Auth Middleware', () => {
   
   beforeEach(() => {
     // Clear all mocks before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  test('allows authenticated requests to proceed', async () => {
+  it('allows authenticated requests to proceed', async () => {
     // Use our utility to create a mock user
     const mockUser = createMockUser();
     
@@ -39,7 +40,7 @@ describe('Auth Middleware', () => {
     });
 
     // Create a mock handler that the middleware will wrap
-    const handler = jest.fn().mockImplementation((req, res) => {
+    const handler = vi.fn().mockImplementation((req, res) => {
       res.status(200).json({ success: true });
     });
 
@@ -71,9 +72,9 @@ describe('Auth Middleware', () => {
     expect(supabase.auth.getUser).toHaveBeenCalledWith('valid-token');
   });
 
-  test('rejects requests without authorization header', async () => {
+  it('rejects requests without authorization header', async () => {
     // Create a mock handler that the middleware will wrap
-    const handler = jest.fn().mockImplementation((req, res) => {
+    const handler = vi.fn().mockImplementation((req, res) => {
       res.status(200).json({ success: true });
     });
 
@@ -98,7 +99,7 @@ describe('Auth Middleware', () => {
     });
   });
 
-  test('rejects requests with invalid token', async () => {
+  it('rejects requests with invalid token', async () => {
     // Mock auth error with exact structure expected by the middleware
     supabase.auth.getUser.mockResolvedValue({
       data: { user: null },
@@ -106,7 +107,7 @@ describe('Auth Middleware', () => {
     });
 
     // Create a mock handler that the middleware will wrap
-    const handler = jest.fn().mockImplementation((req, res) => {
+    const handler = vi.fn().mockImplementation((req, res) => {
       res.status(200).json({ success: true });
     });
 
@@ -137,12 +138,12 @@ describe('Auth Middleware', () => {
     expect(supabase.auth.getUser).toHaveBeenCalledWith('invalid-token');
   });
 
-  test('handles server errors during authentication', async () => {
+  it('handles server errors during authentication', async () => {
     // Mock server error
     supabase.auth.getUser.mockRejectedValue(new Error('Server error'));
 
     // Create a mock handler that the middleware will wrap
-    const handler = jest.fn().mockImplementation((req, res) => {
+    const handler = vi.fn().mockImplementation((req, res) => {
       res.status(200).json({ success: true });
     });
 
@@ -170,7 +171,7 @@ describe('Auth Middleware', () => {
     });
   });
 
-  test('checks for admin role when required', async () => {
+  it('checks for admin role when required', async () => {
     // Use our utility to create a mock admin user
     const mockAdminUser = createMockAdminUser();
     
@@ -183,7 +184,7 @@ describe('Auth Middleware', () => {
     });
 
     // Create a mock handler that the middleware will wrap
-    const handler = jest.fn().mockImplementation((req, res) => {
+    const handler = vi.fn().mockImplementation((req, res) => {
       res.status(200).json({ success: true });
     });
 
@@ -209,7 +210,7 @@ describe('Auth Middleware', () => {
     expect(JSON.parse(res._getData())).toEqual({ success: true });
   });
 
-  test('rejects non-admin users when admin is required', async () => {
+  it('rejects non-admin users when admin is required', async () => {
     // Use our utility to create a regular user
     const mockUser = createMockUser();
     
@@ -222,7 +223,7 @@ describe('Auth Middleware', () => {
     });
 
     // Create a mock handler that the middleware will wrap
-    const handler = jest.fn().mockImplementation((req, res) => {
+    const handler = vi.fn().mockImplementation((req, res) => {
       res.status(200).json({ success: true });
     });
 
@@ -250,7 +251,7 @@ describe('Auth Middleware', () => {
     });
   });
   
-  test('correctly extracts token from different authorization formats', async () => {
+  it('correctly extracts token from different authorization formats', async () => {
     // Test cases for different authorization header formats
     const testCases = [
       { header: 'Bearer token123', expectedToken: 'token123' },
@@ -259,7 +260,7 @@ describe('Auth Middleware', () => {
     
     for (const testCase of testCases) {
       // Clear mocks before each test case
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       
       // Create a mock user
       const mockUser = createMockUser();
@@ -272,7 +273,7 @@ describe('Auth Middleware', () => {
         error: null,
       });
       
-      const handler = jest.fn().mockImplementation((req, res) => {
+      const handler = vi.fn().mockImplementation((req, res) => {
         res.status(200).json({ success: true });
       });
       
