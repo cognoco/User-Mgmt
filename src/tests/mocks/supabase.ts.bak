@@ -1,42 +1,21 @@
-// Mock Supabase client using Vitest
-import { vi, Mock } from 'vitest';
-import type { 
-  SupabaseClient, 
-  AuthResponse, 
-  AuthError, 
-  Session, 
-  UserResponse, 
-  SignInWithPasswordCredentials, 
-  SignInWithOAuthCredentials, 
-  SignUpWithPasswordCredentials, 
-  AuthTokenResponsePassword, 
-  AuthMFAListFactorsResponse, 
-  MFAChallengeParams, 
-  AuthMFAChallengeResponse, 
-  MFAVerifyParams, 
-  AuthMFAVerifyResponse, 
-  MFAEnrollParams, 
-  AuthMFAEnrollResponse, // Assuming this type exists or use specific ones
-  AuthMFAUnenrollResponse, MFAUnenrollParams,
-  // AuthMFAResponse // General MFA response type if needed - Removed as it doesn't exist
-} from '@supabase/supabase-js'; // Import necessary types
-
-// Define a type for the RPC response structure
-type SupabaseRpcResponse = { data: unknown | null; error: unknown | null };
-
 // Helper to create a fully chainable builder
 function createMockBuilder() {
-  const builder: any = {};
+  const builder = {};
+  // List of all chainable/query methods
   const methods = [
     'select', 'insert', 'update', 'upsert', 'delete',
     'eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'ilike', 'in', 'is', 'or', 'filter', 'range', 'order', 'limit',
     'single', 'maybeSingle',
+    // Add more as needed
   ];
   methods.forEach((method) => {
-    builder[method] = vi.fn().mockReturnValue(builder);
+    // For methods that should resolve to a value, return a Promise
+    if (['select', 'insert', 'update', 'upsert', 'delete', 'single', 'maybeSingle'].includes(method)) {
+      builder[method] = vi.fn().mockReturnValue(Promise.resolve({ data: [], error: null }));
+    } else {
+      builder[method] = vi.fn().mockReturnValue(builder);
+    }
   });
-  // Add a .then method to allow awaiting the chain in tests
-  builder.then = vi.fn();
   return builder;
 }
 
@@ -83,8 +62,4 @@ const mockSupabase = {
   from: vi.fn().mockImplementation(() => createMockBuilder()),
 };
 
-// Cast the whole mock object for better type checking if possible
-// Or rely on casting within tests: (supabase.auth.mfa.enroll as Mock).mockResolvedValueOnce(...)
-export const supabase = mockSupabase as unknown as SupabaseClient; // Use casting carefully
-// Remove CommonJS export
-// module.exports = mockSupabase; 
+export const supabase = mockSupabase as unknown as SupabaseClient; 

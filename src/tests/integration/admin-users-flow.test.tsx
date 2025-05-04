@@ -7,7 +7,7 @@ import { AdminUsers } from '\.\.\/\.\.\/src\/components/admin/AdminUsers';
 
 // Import and mock Supabase
 jest.mock('@/lib/supabase');
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 describe('Admin Users Management Flow', () => {
   let user;

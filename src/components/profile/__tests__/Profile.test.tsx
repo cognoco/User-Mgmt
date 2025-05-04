@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event';
 
 // Import our utility functions
 import { setupTestEnvironment } from '@/tests/utils/environment-setup';
-import { renderWithProviders, createMockFile } from '@/tests/utils/component-testing-utils';
+import { renderWithProviders, createMockFile, mockProfileFetch } from '@/tests/utils/component-testing-utils';
 import { createMockUser, createMockProfile, mockStorage } from '@/tests/utils/testing-utils';
 
 // Import and use our standardized mock
@@ -54,23 +54,13 @@ describe('Profile Component', () => {
       data: { user: mockUser }, 
       error: null 
     });
-    // Create a local builder for this test
-    const builder: any = {};
-    builder.select = vi.fn().mockReturnValue(builder);
-    builder.eq = vi.fn().mockReturnValue(builder);
-    builder.single = vi.fn().mockResolvedValue({ data: mockProfileData, error: null });
-    builder.update = vi.fn().mockReturnValue(builder);
-    builder.upsert = vi.fn().mockReturnValue(builder);
-    (supabase.from as any).mockReturnValue(builder);
-    
+    mockProfileFetch(mockUser.id, mockProfileData);
     // Setup storage mocks
     mockStorage('avatars', {
       getPublicUrl: { data: { publicUrl: mockProfileData.avatar_url } }
     });
-
     // Render with our utility
     renderWithProviders(<Profile user={mockUser} />);
-
     // Wait for data to load
     await waitFor(() => {
       expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
@@ -84,53 +74,32 @@ describe('Profile Component', () => {
       data: { user: mockUser }, 
       error: null 
     });
-    // Initial builder for fetch
-    const initialBuilder: any = {};
-    initialBuilder.select = vi.fn().mockReturnValue(initialBuilder);
-    initialBuilder.eq = vi.fn().mockReturnValue(initialBuilder);
-    initialBuilder.single = vi.fn().mockResolvedValue({ data: mockProfileData, error: null });
-    initialBuilder.update = vi.fn().mockReturnValue(initialBuilder);
-    initialBuilder.upsert = vi.fn().mockReturnValue(initialBuilder);
-    (supabase.from as any).mockReturnValue(initialBuilder);
-    
+    mockProfileFetch(mockUser.id, mockProfileData);
     // Mock storage
     mockStorage('avatars', {
       getPublicUrl: { data: { publicUrl: mockProfileData.avatar_url } }
     });
-
     // Setup update mock
     const updatedProfile = {
       ...mockProfileData,
       full_name: 'Jane Smith',
       website: 'https://updated-example.com',
     };
-
     // After update, override with updated builder
-    const updateBuilder: any = {};
-    updateBuilder.select = vi.fn().mockReturnValue(updateBuilder);
-    updateBuilder.eq = vi.fn().mockReturnValue(updateBuilder);
-    updateBuilder.single = vi.fn().mockResolvedValue({ data: updatedProfile, error: null });
-    updateBuilder.update = vi.fn().mockReturnValue(updateBuilder);
-    updateBuilder.upsert = vi.fn().mockReturnValue(updateBuilder);
-    (supabase.from as any).mockReturnValue(updateBuilder);
-
+    mockProfileFetch(mockUser.id, updatedProfile);
     // Render component
     renderWithProviders(<Profile user={mockUser} />);
-
     // Wait for initial data to load
     await waitFor(() => {
       expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
     });
-
     // Update form fields
     await userEvent.clear(screen.getByLabelText(/full name/i));
     await userEvent.type(screen.getByLabelText(/full name/i), updatedProfile.full_name);
     await userEvent.clear(screen.getByLabelText(/website/i));
     await userEvent.type(screen.getByLabelText(/website/i), updatedProfile.website);
-
     // Submit form
     await userEvent.click(screen.getByRole('button', { name: /update profile/i }));
-
     // Verify update was called with correct data
     await waitFor(() => {
       expect(supabase.from('profiles')).toHaveBeenCalledWith('profiles');
@@ -147,35 +116,23 @@ describe('Profile Component', () => {
       data: { user: mockUser }, 
       error: null 
     });
-    const builder: any = {};
-    builder.select = vi.fn().mockReturnValue(builder);
-    builder.eq = vi.fn().mockReturnValue(builder);
-    builder.single = vi.fn().mockResolvedValue({ data: mockProfileData, error: null });
-    builder.update = vi.fn().mockReturnValue(builder);
-    builder.upsert = vi.fn().mockReturnValue(builder);
-    (supabase.from as any).mockReturnValue(builder);
-    
+    mockProfileFetch(mockUser.id, mockProfileData);
     // Mock storage
     mockStorage('avatars', {
       getPublicUrl: { data: { publicUrl: mockProfileData.avatar_url } },
       upload: { data: { path: `${mockUser.id}/avatar.jpg` }, error: null }
     });
-
     // Create a mock file using our utility
     const file = createMockFile('test-avatar.jpg', 'image/jpeg', 1024);
-    
     // Render component
     renderWithProviders(<Profile user={mockUser} />);
-
     // Wait for component to load
     await waitFor(() => {
       expect(screen.getByAltText(/avatar/i)).toBeInTheDocument();
     });
-
     // Find the file input and upload a file
     const input = screen.getByLabelText(/upload avatar/i);
     await userEvent.upload(input, file);
-
     await waitFor(() => {
       expect(supabase.storage.from('avatars')).toHaveBeenCalledWith('avatars');
       expect(supabase.storage.from('avatars').upload).toHaveBeenCalledWith(
@@ -191,20 +148,11 @@ describe('Profile Component', () => {
       data: { user: mockUser }, 
       error: null 
     });
-    const builder: any = {};
-    builder.select = vi.fn().mockReturnValue(builder);
-    builder.eq = vi.fn().mockReturnValue(builder);
-    builder.single = vi.fn().mockResolvedValue({ data: mockProfileData, error: null });
-    builder.update = vi.fn().mockReturnValue(builder);
-    builder.upsert = vi.fn().mockReturnValue(builder);
-    builder.upsert = vi.fn().mockReturnValue(builder).mockResolvedValue({ data: null, error: { message: 'Failed to update profile' } });
-    (supabase.from as any).mockReturnValue(builder);
-    
+    mockProfileFetch(mockUser.id, mockProfileData);
     // Mock storage
     mockStorage('avatars', {
       getPublicUrl: { data: { publicUrl: mockProfileData.avatar_url } }
     });
-
     // Mock update error
     (supabase.from as any).mockReturnValue({
       select: vi.fn().mockReturnThis(),
@@ -213,17 +161,13 @@ describe('Profile Component', () => {
       update: vi.fn().mockResolvedValue({ data: mockProfileData, error: null }),
       upsert: vi.fn().mockResolvedValue({ data: null, error: { message: 'Failed to update profile' } }),
     });
-
     // Render component
     renderWithProviders(<Profile user={mockUser} />);
-
     await waitFor(() => {
       expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
     });
-
     // Submit form without changes
     await userEvent.click(screen.getByRole('button', { name: /update profile/i }));
-
     await waitFor(() => {
       expect(screen.getByText(/failed to update profile/i)).toBeInTheDocument();
     });
@@ -234,35 +178,23 @@ describe('Profile Component', () => {
       data: { user: mockUser }, 
       error: null 
     });
-    const builder: any = {};
-    builder.select = vi.fn().mockReturnValue(builder);
-    builder.eq = vi.fn().mockReturnValue(builder);
-    builder.single = vi.fn().mockResolvedValue({ data: mockProfileData, error: null });
-    builder.update = vi.fn().mockReturnValue(builder);
-    builder.upsert = vi.fn().mockReturnValue(builder);
-    (supabase.from as any).mockReturnValue(builder);
-    
+    mockProfileFetch(mockUser.id, mockProfileData);
     // Mock storage with upload error
     mockStorage('avatars', {
       getPublicUrl: { data: { publicUrl: mockProfileData.avatar_url } },
       upload: { data: null, error: { message: 'Failed to upload avatar' } }
     });
-    
     // Create a mock file
     const file = createMockFile('test-avatar.jpg');
-    
     // Render component
     renderWithProviders(<Profile user={mockUser} />);
-
     // Wait for component to load
     await waitFor(() => {
       expect(screen.getByAltText(/avatar/i)).toBeInTheDocument();
     });
-
     // Find the file input and upload a file
     const input = screen.getByLabelText(/upload avatar/i);
     await userEvent.upload(input, file);
-
     await waitFor(() => {
       expect(screen.getByText(/failed to upload avatar/i)).toBeInTheDocument();
     });

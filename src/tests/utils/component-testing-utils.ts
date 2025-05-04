@@ -3,7 +3,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 /**
  * Creates a mock user event setup
@@ -39,7 +39,7 @@ export function mockAuthState(user = null, loading = false) {
     return {
       data: {
         subscription: {
-          unsubscribe: jest.fn().mockImplementation(() => {
+          unsubscribe: vi.fn().mockImplementation(() => {
             const index = listeners.indexOf(callback);
             if (index > -1) {
               listeners.splice(index, 1);
@@ -128,18 +128,18 @@ export function mockProfileFetch(userId, profile, error = null) {
   supabase.from.mockImplementation((table) => {
     if (table === 'profiles') {
       return {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockImplementation((field, value) => {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockImplementation((field, value) => {
           if (field === 'id' && value === userId) {
             return {
-              single: jest.fn().mockResolvedValue(mockResponse)
+              single: vi.fn().mockResolvedValue(mockResponse)
             };
           }
-          return { single: jest.fn().mockResolvedValue({ data: null, error: null }) };
+          return { single: vi.fn().mockResolvedValue({ data: null, error: null }) };
         })
       };
     }
-    return { select: jest.fn().mockReturnThis() };
+    return { select: vi.fn().mockReturnThis() };
   });
 }
 

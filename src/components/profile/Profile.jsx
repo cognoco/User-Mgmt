@@ -1,6 +1,10 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import DataExport from './DataExport';
+import CompanyDataExport from './CompanyDataExport';
+import NotificationPreferences from './NotificationPreferences';
+import ActivityLog from './ActivityLog';
 
 export default function Profile({ user }) {
   const [loading, setLoading] = useState(true);
@@ -153,24 +157,15 @@ export default function Profile({ user }) {
       </form>
       <hr style={{margin: '2rem 0'}} />
       {/* Data Export Section */}
-      <React.Suspense fallback={<div>Loading data export...</div>}>
-        {React.createElement(require('./DataExport').default)}
-      </React.Suspense>
+      <DataExport />
       {/* Company Data Export Section (admin only) */}
-      <React.Suspense fallback={<div>Loading company data export...</div>}>
-        {React.createElement(require('./CompanyDataExport').default)}
-      </React.Suspense>
+      <CompanyDataExport />
       <hr style={{margin: '2rem 0'}} />
       {/* Notification Preferences Section */}
-      <React.Suspense fallback={<div>Loading notification preferences...</div>}>
-        {React.createElement(require('./NotificationPreferences').default)}
-      </React.Suspense>
+      <NotificationPreferences />
       <hr style={{margin: '2rem 0'}} />
       {/* Activity Log Section */}
-      {user && <React.Suspense fallback={<div>Loading activity log...</div>}>
-        {/** Dynamically import to avoid SSR issues if needed */}
-        {React.createElement(require('./ActivityLog').default)}
-      </React.Suspense>}
+      {user && <ActivityLog />}
       <style jsx>{`
         .profile {
           max-width: 500px;

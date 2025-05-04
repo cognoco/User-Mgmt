@@ -4,7 +4,7 @@ import { auditLog } from '../../middleware/audit-log';
 
 // Import our standardized mock
 jest.mock('../../lib/supabase', () => require('../mocks/supabase'));
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 // Extend NextApiRequest to include user property
 interface ExtendedRequest extends NextApiRequest {
