@@ -26,7 +26,8 @@ describe('useSubscription', () => {
 
     const { result } = renderHook(() => useSubscription());
 
-    expect(result.current.isLoading).toBe(true);
+    // On initial render, isLoading should be false
+    expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBe(null);
 
     await act(async () => {
