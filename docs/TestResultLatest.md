@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 33  |  **Failed Test Files:** 49
+**Passed Test Files:** 34  |  **Failed Test Files:** 48
 
 ## Passing Test Files
 
@@ -36,6 +36,7 @@
 - src\tests\integration\oauth-buttons.integration.test.tsx
 - src\tests\integration\search-filter-flow.test.tsx
 - src\tests\integration\social-sharing-flow.test.tsx
+- src\tests\integration\user-auth-flow.test.tsx
 - src\tests\ui\DuplicateUIElements.test.tsx
 
 ## Failing Test Files
@@ -87,5 +88,4 @@
 - src\tests\integration\notification-flow.test.tsx
 - src\tests\integration\password-reset-flow.test.tsx
 - src\tests\integration\theme-settings-flow.test.tsx
-- src\tests\integration\user-auth-flow.test.tsx
 - src\tests\integration\user-preferences-flow.test.tsx

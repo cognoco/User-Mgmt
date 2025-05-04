@@ -306,3 +306,22 @@ A new, systematic remediation plan has been adopted to address widespread test f
 This knowledge should be applied to all tests using axios in Node, and documented for future contributors.
 
 ---
+
+## (2024-06-24) Supabase Builder Chain Mocking Pattern
+
+- **New Finding:** When mocking Supabase's `.from(...).update(...).eq(...)` chain, always return a builder object at each step, not a promise. This prevents `eq is not a function` errors in tests.
+- **Example:**
+  ```js
+  update: vi.fn().mockImplementation((updates) => ({
+    eq: vi.fn().mockImplementation(() => Promise.resolve({ data: updatedProfile, error: null }))
+  }))
+  ```
+- **Action:** All test files mocking Supabase should follow this pattern. See `TESTING_ISSUES.md` for details.
+
+## (2024-06-24) React act(...) Warnings
+
+- **Finding:** Persistent act warnings in tests indicate state updates are not wrapped in `act` or `waitFor`.
+- **Action:** Always wrap user events and async state updates in `await act(async () => { ... })` or `await waitFor(...)`.
+- **Reference:** See `TESTING.md` for best practices and code examples.
+
+---

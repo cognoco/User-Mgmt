@@ -1,9 +1,8 @@
 import { create } from 'zustand';
-import { axiosInstance } from '@/lib/axios';
+import { api } from '@/lib/api/axios';
 import type { 
   User, 
   AuthResult, 
-  LoginPayload, 
   RegistrationPayload,
   MFASetupResponse,
   MFAVerifyResponse
@@ -53,7 +52,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (email: string, password: string, rememberMe = false): Promise<AuthResult> => {
     try {
       set({ loading: true, error: null });
-      const response = await axiosInstance.post<{ user: User; token: string; requiresMfa?: boolean }>('/api/auth/login', { 
+      const response = await api.post<{ user: User; token: string; requiresMfa?: boolean }>('/api/auth/login', { 
         email, 
         password,
         rememberMe 
@@ -86,7 +85,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   register: async (data: RegistrationPayload): Promise<AuthResult> => {
     try {
       set({ loading: true, error: null });
-      const response = await axiosInstance.post<{ user: User; token: string }>('/api/auth/register', data);
+      const response = await api.post<{ user: User; token: string }>('/api/auth/register', data);
       set({ 
         token: response.data.token,
         user: response.data.user,
@@ -121,7 +120,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   resetPassword: async (email: string) => {
     try {
       set({ loading: true, error: null });
-      await axiosInstance.post('/api/auth/reset-password', { email });
+      await api.post('/api/auth/reset-password', { email });
       set({ success: 'Password reset email sent' });
       return { success: true, message: 'Password reset email sent' };
     } catch (error: any) {
@@ -136,7 +135,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   updatePassword: async (oldPassword: string, newPassword: string) => {
     try {
       set({ loading: true, error: null });
-      await axiosInstance.post('/api/auth/update-password', { oldPassword, newPassword });
+      await api.post('/api/auth/update-password', { oldPassword, newPassword });
       set({ success: 'Password updated successfully' });
       return { success: true };
     } catch (error: any) {
@@ -151,7 +150,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setupMFA: async (): Promise<MFASetupResponse> => {
     try {
       set({ loading: true, error: null });
-      const response = await axiosInstance.post<MFASetupResponse>('/api/auth/2fa/setup');
+      const response = await api.post<MFASetupResponse>('/api/auth/2fa/setup');
       set({ 
         mfaSecret: response.data.secret || null,
         mfaQrCode: response.data.qrCode || null,
@@ -170,7 +169,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   verifyMFA: async (code: string, isBackupCode = false): Promise<MFAVerifyResponse> => {
     try {
       set({ loading: true, error: null });
-      const response = await axiosInstance.post<MFAVerifyResponse>('/api/auth/2fa/verify', { 
+      const response = await api.post<MFAVerifyResponse>('/api/auth/2fa/verify', { 
         code,
         isBackupCode
       });
@@ -192,7 +191,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   disableMFA: async (): Promise<AuthResult> => {
     try {
       set({ loading: true, error: null });
-      await axiosInstance.post('/api/auth/2fa/disable');
+      await api.post('/api/auth/2fa/disable');
       set({ 
         mfaEnabled: false,
         mfaSecret: null,

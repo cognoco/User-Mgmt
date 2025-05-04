@@ -66,3 +66,21 @@
   - Use direct mocking (e.g., `vi.spyOn`, `axios-mock-adapter`) for axios in Node.js test environments.
 
 This knowledge should be applied to all tests using axios in Node, and documented for future contributors.
+
+## (2024-06-24) Update: Supabase Builder Chain Mocking for Tests
+
+- **Issue:** When mocking Supabase's `.from(...).update(...).eq(...)` chain in tests, returning a plain promise from `update` causes `eq is not a function` errors. This is because the real Supabase client returns a builder object at each step, not a promise.
+- **Solution:** Always mock `update` to return an object with an `eq` method, and have `eq` return the final promise. Example:
+  ```js
+  update: vi.fn().mockImplementation((updates) => ({
+    eq: vi.fn().mockImplementation(() => Promise.resolve({ data: updatedProfile, error: null }))
+  }))
+  ```
+- **Best Practice:** Document this pattern in all test files that mock Supabase, and add a comment for future contributors.
+- **Related:** See also the MSW/Axios/Node.js mocking note below.
+
+## (2024-06-24) React act(...) Warnings
+
+- **Issue:** Many tests still trigger React `act(...)` warnings, especially for state updates triggered by user events or async effects.
+- **Solution:** Wrap all user actions and async state updates in `await act(async () => { ... })` or `await waitFor(...)` as appropriate. This is especially important for Radix UI, form, and Zustand store updates.
+- **Best Practice:** See `TESTING.md` for code examples and always check for act warnings in test output.

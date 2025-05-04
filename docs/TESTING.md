@@ -99,3 +99,20 @@
 - For the canonical list of missing tests and coverage gaps, see [`docs/GAP_ANALYSIS.md`](./GAP_ANALYSIS.md).
 - For the latest test run results and actionable findings, see [`docs/Testing_Findings.md`](./Testing_Findings.md).
 - For ongoing and known issues, see [`docs/TESTING_ISSUES.md`](./TESTING_ISSUES.md).
+
+## (2024-06-24) Supabase Builder Chain Mocking Pattern
+
+- **Pattern:** When mocking Supabase's `.from(...).update(...).eq(...)` chain, always return a builder object at each step, not a promise. This prevents `eq is not a function` errors in tests.
+- **Example:**
+  ```js
+  update: vi.fn().mockImplementation((updates) => ({
+    eq: vi.fn().mockImplementation(() => Promise.resolve({ data: updatedProfile, error: null }))
+  }))
+  ```
+- **Why:** The real Supabase client returns a builder at each step, so tests must mirror this for correct behavior.
+- **Reference:** See `TESTING_ISSUES.md` and `Testing_Findings.md` for more details and examples.
+
+## (2024-06-24) React act(...) Warnings
+
+- **Pattern:** Always wrap user events and async state updates in `await act(async () => { ... })` or `await waitFor(...)` to avoid act warnings and ensure reliable test results.
+- **Reference:** See `TESTING_ISSUES.md` and `Testing_Findings.md` for more details and examples.
