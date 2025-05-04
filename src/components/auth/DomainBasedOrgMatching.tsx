@@ -10,7 +10,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Building, Globe, Plus, Trash, Check, X } from 'lucide-react';
+import { Building, Globe, Plus, Trash, Check } from 'lucide-react';
 import { api } from '@/lib/api/axios';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -39,12 +39,12 @@ interface Domain {
 
 interface DomainBasedOrgMatchingProps {
   organizationId: string;
-  organizationName: string;
 }
 
-export function DomainBasedOrgMatching({ organizationId, organizationName }: DomainBasedOrgMatchingProps) {
+export function DomainBasedOrgMatching({ organizationId }: DomainBasedOrgMatchingProps) {
   const { t } = useTranslation();
   const [domains, setDomains] = useState<Domain[]>([]);
+  const [domainsMatchingEnabled, setDomainsMatchingEnabled] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -57,9 +57,9 @@ export function DomainBasedOrgMatching({ organizationId, organizationName }: Dom
       autoJoin: true,
       enforceSSO: false,
     },
+    mode: 'onBlur',
   });
 
-  // Fetch organization domains
   useEffect(() => {
     fetchDomains();
   }, [organizationId]);
@@ -68,11 +68,32 @@ export function DomainBasedOrgMatching({ organizationId, organizationName }: Dom
     try {
       setIsLoading(true);
       setError(null);
-      
       const response = await api.get(`/api/organizations/${organizationId}/domains`);
       setDomains(response.data.domains);
+      setDomainsMatchingEnabled(
+        typeof response.data.domains_matching_enabled === 'boolean'
+          ? response.data.domains_matching_enabled
+          : false
+      );
     } catch (error: any) {
       setError(error.response?.data?.error || t('org.domains.fetchError'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleDomainsMatching = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const newValue = !domainsMatchingEnabled;
+      await api.put(`/api/organizations/${organizationId}/domains/settings`, {
+        domains_matching_enabled: newValue,
+      });
+      setDomainsMatchingEnabled(newValue);
+      if (newValue) fetchDomains();
+    } catch (error: any) {
+      setError(error.response?.data?.error || t('org.domains.updateError'));
     } finally {
       setIsLoading(false);
     }
@@ -166,6 +187,19 @@ export function DomainBasedOrgMatching({ organizationId, organizationName }: Dom
         <CardDescription>
           {t('org.domains.description')}
         </CardDescription>
+        <div className="flex items-center gap-4 mt-4">
+          <Switch
+            checked={domainsMatchingEnabled}
+            onCheckedChange={toggleDomainsMatching}
+            disabled={isLoading}
+            aria-label={t('org.domains.domainsMatchingLabel', 'Enable domain-based auto-join')}
+          />
+          <span className="text-sm">
+            {domainsMatchingEnabled
+              ? t('org.domains.domainsMatchingEnabled', 'Users with allowed domains can join automatically.')
+              : t('org.domains.domainsMatchingDisabled', 'Domain-based auto-join is disabled.')}
+          </span>
+        </div>
       </CardHeader>
       
       <CardContent className="space-y-6">
@@ -181,175 +215,179 @@ export function DomainBasedOrgMatching({ organizationId, organizationName }: Dom
           </Alert>
         )}
 
-        {/* Current domains list */}
-        <div>
-          <h3 className="text-lg font-medium mb-3">{t('org.domains.currentDomains')}</h3>
-          
-          {isLoading ? (
-            <div className="space-y-4">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-            </div>
-          ) : domains.length === 0 ? (
-            <div className="text-center p-6 border rounded-md border-dashed">
-              <Globe className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">
-                {t('org.domains.noDomains')}
-              </p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('org.domains.domain')}</TableHead>
-                  <TableHead>{t('org.domains.status')}</TableHead>
-                  <TableHead>{t('org.domains.autoJoin')}</TableHead>
-                  <TableHead>{t('org.domains.enforceSSO')}</TableHead>
-                  <TableHead className="text-right">{t('common.actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {domains.map((domain) => (
-                  <TableRow key={domain.id}>
-                    <TableCell className="font-medium">{domain.domain}</TableCell>
-                    <TableCell>
-                      {domain.verified ? (
-                        <Badge className="bg-green-100 text-green-800">
-                          <Check className="h-3 w-3 mr-1" /> {t('org.domains.verified')}
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="bg-amber-100 text-amber-800">
-                          {t('org.domains.unverified')}
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Switch
-                        checked={domain.autoJoin}
-                        onCheckedChange={(checked) => toggleDomainSetting(domain.id, 'autoJoin', checked)}
-                        disabled={isLoading}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Switch
-                        checked={domain.enforceSSO}
-                        onCheckedChange={(checked) => toggleDomainSetting(domain.id, 'enforceSSO', checked)}
-                        disabled={isLoading || !domain.verified}
-                      />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        {!domain.verified && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8"
-                            onClick={() => verifyDomain(domain.id)}
-                            disabled={verificationInProgress === domain.id}
-                          >
-                            {verificationInProgress === domain.id ? (
-                              <span>{t('common.loading')}</span>
-                            ) : (
-                              <span>{t('org.domains.verify')}</span>
+        {domainsMatchingEnabled && (
+          <>
+            {/* Current domains list */}
+            <div>
+              <h3 className="text-lg font-medium mb-3">{t('org.domains.currentDomains')}</h3>
+              
+              {isLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              ) : domains.length === 0 ? (
+                <div className="text-center p-6 border rounded-md border-dashed">
+                  <Globe className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    {t('org.domains.noDomains')}
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('org.domains.domain')}</TableHead>
+                      <TableHead>{t('org.domains.status')}</TableHead>
+                      <TableHead>{t('org.domains.autoJoin')}</TableHead>
+                      <TableHead>{t('org.domains.enforceSSO')}</TableHead>
+                      <TableHead className="text-right">{t('common.actions')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {domains.map((domain) => (
+                      <TableRow key={domain.id}>
+                        <TableCell className="font-medium">{domain.domain}</TableCell>
+                        <TableCell>
+                          {domain.verified ? (
+                            <Badge className="bg-green-100 text-green-800">
+                              <Check className="h-3 w-3 mr-1" /> {t('org.domains.verified')}
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-amber-100 text-amber-800">
+                              {t('org.domains.unverified')}
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Switch
+                            checked={domain.autoJoin}
+                            onCheckedChange={(checked) => toggleDomainSetting(domain.id, 'autoJoin', checked)}
+                            disabled={isLoading}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Switch
+                            checked={domain.enforceSSO}
+                            onCheckedChange={(checked) => toggleDomainSetting(domain.id, 'enforceSSO', checked)}
+                            disabled={isLoading || !domain.verified}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            {!domain.verified && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8"
+                                onClick={() => verifyDomain(domain.id)}
+                                disabled={verificationInProgress === domain.id}
+                              >
+                                {verificationInProgress === domain.id ? (
+                                  <span>{t('common.loading')}</span>
+                                ) : (
+                                  <span>{t('org.domains.verify')}</span>
+                                )}
+                              </Button>
                             )}
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive"
-                          onClick={() => removeDomain(domain.id)}
-                          disabled={isLoading}
-                          aria-label={t('org.domains.deleteDomain', { domain: domain.domain })}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive"
+                              onClick={() => removeDomain(domain.id)}
+                              disabled={isLoading}
+                              aria-label={t('org.domains.deleteDomain', { domain: domain.domain })}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </div>
 
-        <Separator />
+            <Separator />
 
-        {/* Add new domain form */}
-        <div>
-          <h3 className="text-lg font-medium mb-3">{t('org.domains.addDomain')}</h3>
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="domain"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('org.domains.domainLabel')}</FormLabel>
-                    <FormControl>
-                      <Input placeholder="example.com" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      {t('org.domains.domainDescription')}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {/* Add new domain form */}
+            <div>
+              <h3 className="text-lg font-medium mb-3">{t('org.domains.addDomain')}</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="autoJoin"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between p-3 border rounded-md">
-                      <div className="space-y-0.5">
-                        <FormLabel>{t('org.domains.autoJoinLabel')}</FormLabel>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="domain"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('org.domains.domainLabel')}</FormLabel>
+                        <FormControl>
+                          <Input placeholder="example.com" {...field} />
+                        </FormControl>
                         <FormDescription>
-                          {t('org.domains.autoJoinDescription')}
+                          {t('org.domains.domainDescription')}
                         </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="enforceSSO"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between p-3 border rounded-md">
-                      <div className="space-y-0.5">
-                        <FormLabel>{t('org.domains.enforceSSOLabel')}</FormLabel>
-                        <FormDescription>
-                          {t('org.domains.enforceSSODescription')}
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <Button type="submit" disabled={isLoading} className="mt-2">
-                <Plus className="mr-2 h-4 w-4" />
-                {t('org.domains.addButton')}
-              </Button>
-            </form>
-          </Form>
-        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="autoJoin"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between p-3 border rounded-md">
+                          <div className="space-y-0.5">
+                            <FormLabel>{t('org.domains.autoJoinLabel')}</FormLabel>
+                            <FormDescription>
+                              {t('org.domains.autoJoinDescription')}
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="enforceSSO"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between p-3 border rounded-md">
+                          <div className="space-y-0.5">
+                            <FormLabel>{t('org.domains.enforceSSOLabel')}</FormLabel>
+                            <FormDescription>
+                              {t('org.domains.enforceSSODescription')}
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <Button type="submit" disabled={isLoading} className="mt-2">
+                    <Plus className="mr-2 h-4 w-4" />
+                    {t('org.domains.addButton')}
+                  </Button>
+                </form>
+              </Form>
+            </div>
+          </>
+        )}
       </CardContent>
       
       <CardFooter className="bg-muted/50 px-6 py-4 flex flex-col items-start">

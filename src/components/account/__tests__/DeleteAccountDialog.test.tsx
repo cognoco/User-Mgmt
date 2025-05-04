@@ -3,7 +3,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import i18n from 'i18next';
 import { vi } from 'vitest'; // Import vi
-import DeleteAccountDialog from './DeleteAccountDialog';
+import type { Mock } from 'vitest';
+import DeleteAccountDialog from '../DeleteAccountDialog';
 import { useDeleteAccount } from '@/hooks/useDeleteAccount';
 import enTranslations from '@/lib/i18n/locales/en.json';
 import { USER_MANAGEMENT_NAMESPACE } from '@/lib/i18n';
@@ -34,13 +35,13 @@ testI18nInstance
 
 describe('DeleteAccountDialog', () => {
   let handleClose: ReturnType<typeof vi.fn>;
-  let mockDeleteAccount: ReturnType<typeof vi.fn>;
+  let mockDeleteAccount: Mock<[], Promise<void>>;
   const mockUseDeleteAccount = vi.mocked(useDeleteAccount);
 
   beforeEach(() => {
     // Reset mocks before each test
     handleClose = vi.fn();
-    mockDeleteAccount = vi.fn();
+    mockDeleteAccount = vi.fn<[], Promise<void>>();
     mockUseDeleteAccount.mockReturnValue({
       deleteAccount: mockDeleteAccount,
       isLoading: false,

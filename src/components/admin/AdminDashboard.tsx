@@ -57,12 +57,21 @@ async function fetchDashboardData(): Promise<DashboardData> {
   return response.json();
 }
 
-export function AdminDashboard() {
-  const { data, isLoading, isError } = useQuery({
+export interface AdminDashboardProps {
+  exposeRefetch?: (refetch: () => void) => void;
+}
+
+export function AdminDashboard({ exposeRefetch }: AdminDashboardProps = {}) {
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['admin-dashboard'],
     queryFn: fetchDashboardData,
     refetchInterval: 30000, // Refresh every 30 seconds
   });
+
+  // Expose refetch for testing if requested
+  if (exposeRefetch) {
+    exposeRefetch(refetch);
+  }
 
   if (isError) {
     return (

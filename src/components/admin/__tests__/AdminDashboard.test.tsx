@@ -152,7 +152,8 @@ describe('AdminDashboard', () => {
     });
   });
 
-  it('refreshes data periodically', async () => {
+  it('refreshes data when refetch is called manually', async () => {
+    let refetchFn: (() => void) | undefined;
     mockFetch
       .mockImplementationOnce(() =>
         Promise.resolve({
@@ -171,7 +172,7 @@ describe('AdminDashboard', () => {
       );
 
     await act(async () => {
-      render(<AdminDashboard />, { wrapper });
+      render(<AdminDashboard exposeRefetch={fn => { refetchFn = fn; }} />, { wrapper });
     });
 
     // Initial data
@@ -179,12 +180,22 @@ describe('AdminDashboard', () => {
       expect(screen.getByText('8')).toBeInTheDocument(); // Initial active members
     });
 
+    // Call refetch manually
+    await act(async () => {
+      refetchFn && refetchFn();
+    });
+
+    // Assert that fetch was called twice (initial + refetch)
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
     // Wait for refetch and check updated data
     await waitFor(
       () => {
         expect(screen.getByText('9')).toBeInTheDocument(); // Updated active members
       },
-      { timeout: 31000 } // Slightly longer than refetch interval
+      { timeout: 10000 }
     );
   });
 });

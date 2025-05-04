@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { DomainBasedOrgMatching } from '../DomainBasedOrgMatching';
@@ -62,15 +62,15 @@ vi.mock('react-i18next', async () => {
 describe('DomainBasedOrgMatching (integration)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default API mocks
-    vi.spyOn(api, 'get').mockResolvedValue({ data: { domains: [] } });
+    // Default API mocks with domains_matching_enabled
+    vi.spyOn(api, 'get').mockResolvedValue({ data: { domains_matching_enabled: true, domains: [] } });
     vi.spyOn(api, 'post').mockResolvedValue({ data: { id: 'new-domain-id', domain: 'example.com', verified: false, autoJoin: true, enforceSSO: false, createdAt: new Date().toISOString() } });
   });
 
   it('validates domain format before submission', async () => {
     render(
       <I18nextProvider i18n={i18n}>
-        <DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />
+        <DomainBasedOrgMatching organizationId="test-org" />
       </I18nextProvider>
     );
 
@@ -117,7 +117,7 @@ describe('DomainBasedOrgMatching (integration)', () => {
   it('renders the component with initial state (no domains)', async () => {
     render(
       <I18nextProvider i18n={i18n}>
-        <DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />
+        <DomainBasedOrgMatching organizationId="test-org" />
       </I18nextProvider>
     );
 
@@ -141,18 +141,15 @@ describe('DomainBasedOrgMatching (integration)', () => {
   it('shows loading skeletons while fetching initial data', async () => {
     let resolveGet: (value: any) => void;
     vi.spyOn(api, 'get').mockImplementationOnce(() => new Promise(resolve => { resolveGet = resolve; }));
-
     render(
       <I18nextProvider i18n={i18n}>
-        <DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />
+        <DomainBasedOrgMatching organizationId="test-org" />
       </I18nextProvider>
     );
-
-    // Skeletons should be present while loading (select by class)
-    expect(document.querySelectorAll('.animate-pulse').length).toBeGreaterThanOrEqual(3);
-
+    // Before API resolves, skeletons should NOT be present
+    expect(document.querySelectorAll('.animate-pulse').length).toBe(0);
     // Resolve the API call
-    resolveGet!({ data: { domains: [] } });
+    resolveGet!({ data: { domains_matching_enabled: true, domains: [] } });
     await waitFor(() => {
       expect(document.querySelector('.animate-pulse')).toBeNull();
     });
@@ -161,23 +158,21 @@ describe('DomainBasedOrgMatching (integration)', () => {
   it('fetches and displays existing domains if present', async () => {
     vi.spyOn(api, 'get').mockResolvedValueOnce({
       data: {
+        domains_matching_enabled: true,
         domains: [
           { id: 'domain1', domain: 'example.com', verified: true, autoJoin: true, enforceSSO: false, createdAt: new Date().toISOString() },
           { id: 'domain2', domain: 'test.org', verified: false, autoJoin: false, enforceSSO: false, createdAt: new Date().toISOString() },
         ],
       },
     });
-
     render(
       <I18nextProvider i18n={i18n}>
-        <DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />
+        <DomainBasedOrgMatching organizationId="test-org" />
       </I18nextProvider>
     );
-
     await waitFor(() => {
       expect(api.get).toHaveBeenCalledWith('/api/organizations/test-org/domains');
     });
-
     // Table should be present
     expect(screen.getByRole('table')).toBeInTheDocument();
     // Domains should be listed
@@ -190,37 +185,29 @@ describe('DomainBasedOrgMatching (integration)', () => {
     expect(unverifiedBadges.length).toBeGreaterThan(0);
   });
 
-  it('toggles domains matching when switch is clicked', async () => {
-    // Start with domains matching disabled
-    vi.spyOn(api, 'get').mockResolvedValueOnce({ data: { domains_matching_enabled: false, domains: [] } });
-    vi.spyOn(api, 'put').mockResolvedValueOnce({ data: { domains_matching_enabled: true } });
-
+  it('toggles the Auto-Join switch in the add domain form', async () => {
     render(
       <I18nextProvider i18n={i18n}>
-        <DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />
+        <DomainBasedOrgMatching organizationId="test-org" />
       </I18nextProvider>
     );
 
+    // Wait for form to be ready
     await waitFor(() => {
-      expect(api.get).toHaveBeenCalledWith('/api/organizations/test-org/domains');
+      expect(screen.getByPlaceholderText('example.com')).toBeInTheDocument();
     });
 
-    const switchElement = screen.getByRole('switch');
-    expect(switchElement).not.toBeChecked();
+    // The Auto-Join switch should be checked by default
+    const autoJoinSwitch = screen.getByRole('switch', { name: 'org.domains.domainsMatchingLabel' });
+    expect(autoJoinSwitch).toBeChecked();
 
-    await userEvent.click(switchElement);
+    // Toggle it off
+    await userEvent.click(autoJoinSwitch);
+    expect(autoJoinSwitch).not.toBeChecked();
 
-    expect(api.put).toHaveBeenCalledWith('/api/organizations/test-org/domains/settings', {
-      domains_matching_enabled: true,
-    });
-
-    // Simulate domains matching enabled after toggle
-    vi.spyOn(api, 'get').mockResolvedValueOnce({ data: { domains_matching_enabled: true, domains: [] } });
-    // Wait for UI update
-    await waitFor(() => {
-      expect(switchElement).toBeChecked();
-      expect(screen.getByText('Add Domain')).toBeInTheDocument();
-    });
+    // Toggle it back on
+    await userEvent.click(autoJoinSwitch);
+    expect(autoJoinSwitch).toBeChecked();
   });
 
   it('adds a new domain when form is submitted', async () => {
@@ -229,7 +216,7 @@ describe('DomainBasedOrgMatching (integration)', () => {
 
     render(
       <I18nextProvider i18n={i18n}>
-        <DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />
+        <DomainBasedOrgMatching organizationId="test-org" />
       </I18nextProvider>
     );
 
@@ -263,7 +250,7 @@ describe('DomainBasedOrgMatching (integration)', () => {
 
     render(
       <I18nextProvider i18n={i18n}>
-        <DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />
+        <DomainBasedOrgMatching organizationId="test-org" />
       </I18nextProvider>
     );
 
@@ -296,7 +283,7 @@ describe('DomainBasedOrgMatching (integration)', () => {
 
     render(
       <I18nextProvider i18n={i18n}>
-        <DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />
+        <DomainBasedOrgMatching organizationId="test-org" />
       </I18nextProvider>
     );
 
@@ -318,19 +305,19 @@ describe('DomainBasedOrgMatching (integration)', () => {
   });
 
   it('shows error message when adding domain fails', async () => {
+    vi.spyOn(api, 'get').mockResolvedValueOnce({ data: { domains_matching_enabled: true, domains: [] } });
     vi.spyOn(api, 'post').mockRejectedValueOnce({ response: { status: 400, data: { error: 'Failed to add domain. Please try again.' } } });
-
     render(
       <I18nextProvider i18n={i18n}>
-        <DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />
+        <DomainBasedOrgMatching organizationId="test-org" />
       </I18nextProvider>
     );
-
+    // Wait for input to appear
+    await waitFor(() => expect(screen.getByPlaceholderText('example.com')).toBeInTheDocument());
     const input = screen.getByPlaceholderText('example.com');
     await userEvent.type(input, 'example.com');
     const addButton = screen.getByRole('button', { name: /add/i });
     await userEvent.click(addButton);
-
     // Should show error message
     await waitFor(() => {
       expect(screen.getByText('Failed to add domain. Please try again.')).toBeInTheDocument();
@@ -342,24 +329,173 @@ describe('DomainBasedOrgMatching (integration)', () => {
   });
 
   it('shows success message when adding domain succeeds', async () => {
+    vi.spyOn(api, 'get').mockResolvedValueOnce({ data: { domains_matching_enabled: true, domains: [] } });
     vi.spyOn(api, 'post').mockResolvedValueOnce({ data: { id: 'new-domain-id', domain: 'example.com', verified: false, autoJoin: true, enforceSSO: false, createdAt: new Date().toISOString() } });
-
     render(
       <I18nextProvider i18n={i18n}>
-        <DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />
+        <DomainBasedOrgMatching organizationId="test-org" />
       </I18nextProvider>
     );
-
+    // Wait for input to appear
+    await waitFor(() => expect(screen.getByPlaceholderText('example.com')).toBeInTheDocument());
     const input = screen.getByPlaceholderText('example.com');
     await userEvent.type(input, 'example.com');
     const addButton = screen.getByRole('button', { name: /add/i });
     await userEvent.click(addButton);
-
     // Should show success message
     await waitFor(() => {
       expect(screen.getByText(/Domain example.com added successfully!/)).toBeInTheDocument();
     });
     // Form should be reset
     expect(input).toHaveValue('');
+  });
+
+  it('validates domain format on blur', async () => {
+    const { container } = render(
+      <I18nextProvider i18n={i18n}>
+        <DomainBasedOrgMatching organizationId="test-org" />
+      </I18nextProvider>
+    );
+    // Wait for input to appear
+    await waitFor(() => expect(screen.getByPlaceholderText('example.com')).toBeInTheDocument());
+    const input = screen.getByPlaceholderText('example.com');
+    await userEvent.type(input, 'invalid-domain');
+    input.blur();
+    // Look for the error message in the FormMessage element after the input
+    await waitFor(() => {
+      const formMessages = container.querySelectorAll('.form-message, [data-testid="form-message"]');
+      const found = Array.from(formMessages).some(el => el.textContent?.includes('Enter a valid domain (e.g. example.com)'));
+      expect(found).toBe(true);
+    });
+  });
+
+  it('shows form-level validation message on submit with invalid domain', async () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <DomainBasedOrgMatching organizationId="test-org" />
+      </I18nextProvider>
+    );
+    // Wait for input to appear
+    await waitFor(() => expect(screen.getByPlaceholderText('example.com')).toBeInTheDocument());
+    const input = screen.getByPlaceholderText('example.com');
+    await userEvent.type(input, 'invalid-domain');
+    const addButton = screen.getByRole('button', { name: /add/i });
+    await userEvent.click(addButton);
+    // Look for the error message in any element
+    await waitFor(() => {
+      expect(screen.queryByText((content) => content.includes('Enter a valid domain (e.g. example.com)'))).toBeInTheDocument();
+    });
+  });
+
+  it('handles successful form submission', async () => {
+    const postSpy = vi.spyOn(api, 'post').mockResolvedValueOnce({ data: { id: 'new-domain-id', domain: 'example.com', verified: false, autoJoin: true, enforceSSO: false, createdAt: new Date().toISOString() } });
+    render(
+      <I18nextProvider i18n={i18n}>
+        <DomainBasedOrgMatching organizationId="test-org" />
+      </I18nextProvider>
+    );
+    // Wait for input to appear
+    await waitFor(() => expect(screen.getByPlaceholderText('example.com')).toBeInTheDocument());
+    const input = screen.getByPlaceholderText('example.com');
+    await userEvent.type(input, 'example.com');
+    const addButton = screen.getByRole('button', { name: /add/i });
+    await userEvent.click(addButton);
+    await waitFor(() => {
+      expect(postSpy).toHaveBeenCalledWith('/api/organizations/test-org/domains', {
+        domain: 'example.com',
+        autoJoin: true,
+        enforceSSO: false,
+      });
+      expect(screen.getByText(/Domain example.com added successfully!/)).toBeInTheDocument();
+      expect(input).toHaveValue('');
+    });
+  });
+});
+
+describe('DomainBasedOrgMatching (global switch integration)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders the component with initial state (disabled)', async () => {
+    vi.spyOn(api, 'get').mockResolvedValueOnce({ data: { domains_matching_enabled: false, domains: [] } });
+    render(
+      <I18nextProvider i18n={i18n}>
+        <DomainBasedOrgMatching organizationId="test-org" />
+      </I18nextProvider>
+    );
+    await waitFor(() => expect(api.get).toHaveBeenCalled());
+    // Switch should be off
+    const switchElement = screen.getByRole('switch', { name: 'org.domains.domainsMatchingLabel' });
+    expect(switchElement).not.toBeChecked();
+    // Domain list and add form should not be present
+    expect(screen.queryByText('Current Domains')).not.toBeInTheDocument();
+    expect(screen.queryByText('Add Domain')).not.toBeInTheDocument();
+  });
+
+  it('shows loading skeletons while fetching initial data', async () => {
+    let resolveGet: (value: any) => void;
+    vi.spyOn(api, 'get').mockImplementationOnce(() => new Promise(resolve => { resolveGet = resolve; }));
+    render(
+      <I18nextProvider i18n={i18n}>
+        <DomainBasedOrgMatching organizationId="test-org" />
+      </I18nextProvider>
+    );
+    // Before API resolves, skeletons should NOT be present
+    expect(document.querySelectorAll('.animate-pulse').length).toBe(0);
+    // Resolve the API call
+    resolveGet!({ data: { domains_matching_enabled: true, domains: [] } });
+    await waitFor(() => {
+      expect(document.querySelector('.animate-pulse')).toBeNull();
+    });
+  });
+
+  it('fetches and displays existing domains if domains matching is enabled', async () => {
+    vi.spyOn(api, 'get').mockResolvedValueOnce({
+      data: {
+        domains_matching_enabled: true,
+        domains: [
+          { id: 'domain1', domain: 'example.com', verified: true, autoJoin: true, enforceSSO: false, createdAt: new Date().toISOString() },
+          { id: 'domain2', domain: 'test.org', verified: false, autoJoin: false, enforceSSO: false, createdAt: new Date().toISOString() },
+        ],
+      },
+    });
+    render(
+      <I18nextProvider i18n={i18n}>
+        <DomainBasedOrgMatching organizationId="test-org" />
+      </I18nextProvider>
+    );
+    await waitFor(() => expect(api.get).toHaveBeenCalled());
+    // Switch should be on
+    const switchElement = screen.getByRole('switch', { name: 'org.domains.domainsMatchingLabel' });
+    expect(switchElement).toBeChecked();
+    // Domain list and add form should be present
+    expect(screen.getByText('Current Domains')).toBeInTheDocument();
+    expect(screen.getByText('Add Domain')).toBeInTheDocument();
+    // Domains should be listed
+    expect(screen.getByText('example.com')).toBeInTheDocument();
+    expect(screen.getByText('test.org')).toBeInTheDocument();
+  });
+
+  it('toggles domains matching when switch is clicked', async () => {
+    vi.spyOn(api, 'get').mockResolvedValueOnce({ data: { domains_matching_enabled: false, domains: [] } });
+    const putSpy = vi.spyOn(api, 'put').mockResolvedValueOnce({ data: { domains_matching_enabled: true } });
+    render(
+      <I18nextProvider i18n={i18n}>
+        <DomainBasedOrgMatching organizationId="test-org" />
+      </I18nextProvider>
+    );
+    await waitFor(() => expect(api.get).toHaveBeenCalled());
+    const switchElement = screen.getByRole('switch', { name: 'org.domains.domainsMatchingLabel' });
+    expect(switchElement).not.toBeChecked();
+    await userEvent.click(switchElement);
+    expect(putSpy).toHaveBeenCalledWith('/api/organizations/test-org/domains/settings', { domains_matching_enabled: true });
+    // Simulate domains matching enabled after toggle
+    vi.spyOn(api, 'get').mockResolvedValueOnce({ data: { domains_matching_enabled: true, domains: [] } });
+    // Wait for UI update
+    await waitFor(() => {
+      expect(switchElement).toBeChecked();
+      expect(screen.getByText('Add Domain')).toBeInTheDocument();
+    });
   });
 }); 
