@@ -84,3 +84,10 @@ This knowledge should be applied to all tests using axios in Node, and documente
 - **Issue:** Many tests still trigger React `act(...)` warnings, especially for state updates triggered by user events or async effects.
 - **Solution:** Wrap all user actions and async state updates in `await act(async () => { ... })` or `await waitFor(...)` as appropriate. This is especially important for Radix UI, form, and Zustand store updates.
 - **Best Practice:** See `TESTING.md` for code examples and always check for act warnings in test output.
+
+Section: Middleware Test Mocking Issues
+> #### (2024-06-24) Middleware Test Mocking: Global State & Instance Isolation
+>
+> - Issue: Middleware that instantiates a new client (e.g., Redis) per request can break test mocks if the mock is not globally updatable or if the test relies on module-level state.
+> - Solution: Always use a global variable to control the mock's behavior, and reset it in beforeEach. Never rely on per-test local mocks for such cases.
+> - Best Practice: Document this pattern in all middleware test files and ensure all contributors follow it for new middleware tests.

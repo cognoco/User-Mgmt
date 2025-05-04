@@ -169,3 +169,27 @@ This project contains several files related to Supabase. Each serves a distinct 
 - For direct, simple access, use `src/lib/database/supabase.ts` (TypeScript) or `.js` (JavaScript).
 - For tests, always use the mock in `src/tests/mocks/supabase.ts`.
 - Avoid duplicating Supabase client logic; always check this guide before creating new files or mocks.
+
+### Middleware & Global Mocking Patterns
+
+#### Robust Global Mocking for Middleware Tests (2024-06)
+
+- When testing middleware that relies on a global singleton or a new instance per request (e.g., Upstash Redis, database clients), always ensure your mock implementation is dynamically updatable per test.
+- **Pattern:** Use a global variable (e.g., `globalThis.__multiExecMockImpl`) to control the return value of the core mock (such as `multi.exec`). In your test setup, always have the mock call the current value of this global function, and set it explicitly in each test.
+- **Why:** This allows each test to simulate different backend responses (e.g., "under limit" vs. "over limit") without test pollution or race conditions, and ensures the middleware always uses the correct mock for the current test.
+- **Example:**
+  ```ts
+  // In your vi.mock setup:
+  multiMock.exec.mockImplementation((...args) => {
+    return typeof globalThis.__multiExecMockImpl === 'function'
+      ? globalThis.__multiExecMockImpl(...args)
+      : Promise.resolve(defaultResponses);
+  });
+  // In each test:
+  globalThis.__multiExecMockImpl = async () => [ /* custom responses */ ];
+  ```
+- **Result:** This pattern ensures robust, isolated, and flexible middleware tests, especially for rate limiting, authentication, and other request-based logic.
+
+---
+
+If you move the files into the correct directory or resolve the permissions, I can add this content for you automatically. Would you like instructions on how to move the files, or do you want to try again?

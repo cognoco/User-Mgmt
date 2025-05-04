@@ -354,4 +354,9 @@ This knowledge should be applied to all tests using axios in Node, and documente
 
 _These findings were confirmed and resolved in the process of fixing the `auth` middleware test and are applicable to all middleware test files._
 
----
+---Section: Middleware Test Successes & Patterns
+> #### Rate Limit Middleware Test Success (2024-06)
+>
+> - All rate limit middleware tests now pass after adopting a robust global mock pattern for the Redis multi.exec method.
+> - Key Fix: The test suite sets a global mock function (globalThis.__multiExecMockImpl) before each test, and the mock implementation always calls the latest version of this function. This allows each test to simulate different Redis responses without interference.
+> - Takeaway: For any middleware or service that creates a new instance per request, always use a global, dynamically updatable mock for core methods. This pattern is now the standard for all similar middleware tests in the codebase.

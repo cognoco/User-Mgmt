@@ -27,8 +27,16 @@ vi.mock('@upstash/redis', () => {
     createResponse(0),
     createResponse(1),
   ]);
-  multiMock.exec.mockImplementation((...args: any[]) => {
-    return (globalThis as any).__multiExecMockImpl(...args);
+  multiMock.exec.mockImplementation(function (...args: any[]) {
+    // Always call the latest value of globalThis.__multiExecMockImpl
+    return (typeof (globalThis as any).__multiExecMockImpl === 'function')
+      ? (globalThis as any).__multiExecMockImpl(...args)
+      : Promise.resolve([
+          createResponse(0),
+          createResponse(1),
+          createResponse(0),
+          createResponse(1),
+        ]);
   });
   const RedisMock = vi.fn(() => ({
     multi: () => multiMock,
@@ -78,16 +86,24 @@ describe('Rate Limiting', () => {
     multiMock = ((await import('@upstash/redis')) as any).Redis.multiMock;
     // Reset all mock methods
     Object.values(multiMock).forEach(fn => (fn as any).mockReset && (fn as any).mockReset());
-    // Fallback: always return 4 responses to avoid TypeError
-    multiMock.exec.mockImplementation(async (...args: any[]) => {
-      console.log('[GLOBAL DEBUG] multiMock.exec called with:', args);
-      return [
-        { result: 0, error: undefined },
-        { result: 1, error: undefined },
-        { result: 0, error: undefined },
-        { result: 1, error: undefined },
-      ];
+    // Always use the global exec mock for every test
+    multiMock.exec.mockImplementation(function (...args: any[]) {
+      return (typeof (globalThis as any).__multiExecMockImpl === 'function')
+        ? (globalThis as any).__multiExecMockImpl(...args)
+        : Promise.resolve([
+            { result: 0, error: undefined },
+            { result: 1, error: undefined },
+            { result: 0, error: undefined },
+            { result: 1, error: undefined },
+          ]);
     });
+    // Default: allow requests (0 hits)
+    (globalThis as any).__multiExecMockImpl = async () => [
+      { result: 0, error: undefined },
+      { result: 1, error: undefined },
+      { result: 0, error: undefined },
+      { result: 1, error: undefined },
+    ];
     next = vi.fn().mockResolvedValue(undefined);
     process.env.REDIS_URL = 'redis://localhost:6379';
     process.env.REDIS_TOKEN = 'dummy-token';
@@ -103,32 +119,27 @@ describe('Rate Limiting', () => {
   describe('checkRateLimit', () => {
     it('should allow requests within rate limit', async () => {
       const req = mockNextReq();
-      vi.mocked(multiMock.exec).mockResolvedValueOnce([
+      // Set the global exec mock to allow (5 < 10)
+      (globalThis as any).__multiExecMockImpl = async () => [
         { result: 0, error: undefined },
         { result: 1, error: undefined },
         { result: 5, error: undefined },  // 5 requests in window
         { result: 1, error: undefined },
-      ]);
-
+      ];
       const isLimited = await checkRateLimit(req, { max: 10 });
-
       expect(isLimited).toBe(false);
     });
 
     it('should block requests exceeding rate limit', async () => {
       const req = mockNextReq();
-      // Patch the global exec mock for this test
-      (globalThis as any).__multiExecMockImpl = async (...args: any[]) => {
-        console.log('[TEST DEBUG] multiMock.exec called with:', args);
-        return [
-          { result: 0, error: undefined },
-          { result: 1, error: undefined },
-          { result: 15, error: undefined },  // 15 requests in window
-          { result: 1, error: undefined },
-        ];
-      };
+      // Set the global exec mock to block (15 > 10)
+      (globalThis as any).__multiExecMockImpl = async () => [
+        { result: 0, error: undefined },
+        { result: 1, error: undefined },
+        { result: 15, error: undefined },  // 15 requests in window
+        { result: 1, error: undefined },
+      ];
       const isLimited = await checkRateLimit(req, { max: 10 });
-      console.log('[TEST DEBUG] isLimited:', isLimited);
       expect(isLimited).toBe(true);
     });
 
@@ -187,15 +198,14 @@ describe('Rate Limiting', () => {
       const req = mockApiReq();
       const res = mockRes();
       const middleware = rateLimit({ max: 10 });
-      vi.mocked(multiMock.exec).mockResolvedValueOnce([
+      // Set the global exec mock to allow (5 < 10)
+      (globalThis as any).__multiExecMockImpl = async () => [
         { result: 0, error: undefined },
         { result: 1, error: undefined },
         { result: 5, error: undefined },  // 5 requests
         { result: 1, error: undefined },
-      ]);
-
+      ];
       await middleware(req, res, next);
-
       expect(next).toHaveBeenCalled();
       expect(res.status).not.toHaveBeenCalledWith(429);
     });
@@ -204,20 +214,14 @@ describe('Rate Limiting', () => {
       const req = mockApiReq();
       const res = mockRes();
       const middleware = rateLimit({ max: 10 });
-      // Patch the global exec mock for this test
-      (globalThis as any).__multiExecMockImpl = async (...args: any[]) => {
-        console.log('[TEST DEBUG] multiMock.exec called with:', args);
-        return [
-          { result: 0, error: undefined },
-          { result: 1, error: undefined },
-          { result: 15, error: undefined },  // 15 requests
-          { result: 1, error: undefined },
-        ];
-      };
+      // Set the global exec mock to block (15 > 10)
+      (globalThis as any).__multiExecMockImpl = async () => [
+        { result: 0, error: undefined },
+        { result: 1, error: undefined },
+        { result: 15, error: undefined },  // 15 requests
+        { result: 1, error: undefined },
+      ];
       await middleware(req, res, next);
-      console.log('[TEST DEBUG] res.status.mock.calls:', (res.status as any).mock.calls);
-      console.log('[TEST DEBUG] res.json.mock.calls:', (res.json as any).mock.calls);
-      console.log('[TEST DEBUG] next.mock.calls:', (next as any).mock.calls);
       expect(res.status).toHaveBeenCalledWith(429);
       expect(res.json).toHaveBeenCalledWith({
         error: 'Too many requests, please try again later.',
