@@ -6,14 +6,14 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from '@/lib/i18n/index';
 
 import { PrivacySettings } from '../PrivacySettings';
-import { useProfileStore } from '@/lib/stores/profile.store';
-import { Profile as DbProfile } from '@/lib/types/database'; // Use the correct Profile type
+import { useProfile } from '@/hooks/useProfile';
+import { Profile as DbProfile } from '@/types/database';
 
 // Mock the Supabase client EARLY, before other imports might trigger it
 vi.mock('@/lib/supabase');
 
-// Mock the profile store
-vi.mock('@/lib/stores/profile.store');
+// Mock the useProfile hook
+vi.mock('@/hooks/useProfile');
 
 // Mock UI components used
 vi.mock('@/components/ui/button', () => ({ Button: (props: any) => <button {...props} /> }));
@@ -24,17 +24,35 @@ vi.mock('@/components/ui/card', () => ({
   CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 vi.mock('@/components/ui/label', () => ({ Label: (props: any) => <label {...props} /> }));
-vi.mock('@/components/ui/switch', () => ({ Switch: (props: any) => <input type="checkbox" role="switch" {...props} /> }));
+vi.mock('@/components/ui/switch', () => ({
+  Switch: ({ checked, onCheckedChange, ...props }: any) => (
+    <input
+      type="checkbox"
+      role="switch"
+      checked={checked}
+      onChange={e => onCheckedChange && onCheckedChange(e.target.checked)}
+      {...props}
+    />
+  )
+}));
 vi.mock('@/components/ui/select', () => ({
   Select: ({ children, value, onValueChange, disabled }: any) => (
-    <select data-testid="profile-visibility-select" value={value} onChange={(e) => onValueChange(e.target.value)} disabled={disabled}>
+    <select
+      data-testid="profile-visibility-select"
+      value={value}
+      onChange={e => onValueChange && onValueChange(e.target.value)}
+      disabled={disabled}
+    >
       {children}
     </select>
   ),
-  SelectTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>, // Simple div for trigger
-  SelectValue: () => null, // Mock SelectValue
-  SelectContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>, // Render content directly for options
-  SelectItem: ({ value, children }: { value: string, children: React.ReactNode }) => <option value={value}>{children}</option>,
+  SelectTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SelectValue: () => null,
+  SelectContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  SelectItem: Object.assign(
+    ({ value, children }: { value: string, children: React.ReactNode }) => <option value={value}>{children}</option>,
+    { displayName: 'SelectItem' }
+  ),
 }));
 
 // Mock the useProfile hook directly (alternative to mocking store, depending on useProfile implementation)
@@ -74,12 +92,14 @@ const mockUpdatePrivacySettings = vi.fn();
 describe('PrivacySettings Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Setup mock return value for the store hook
-    (useProfileStore as any).mockReturnValue({
+    (useProfile as any).mockReturnValue({
       profile: mockProfile,
       isLoading: false,
       updatePrivacySettings: mockUpdatePrivacySettings,
     });
+    // Debug: log what useProfile returns
+    // eslint-disable-next-line no-console
+    console.log('MOCK useProfile:', (useProfile as any).mock.results?.[0]?.value);
   });
 
   it('should render current privacy settings from profile store', async () => {

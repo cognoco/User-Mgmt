@@ -2,15 +2,16 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { Profile } from '@/components/profile/Profile';
+import Profile from '@/components/profile/Profile';
 
 // Import our utility functions
-import { setupTestEnvironment, mockNextRouter } from '../utils/environment-setup';
-import { renderWithProviders, createMockFile } from '../utils/component-testing-utils';
-import { createMockUser, createMockProfile, mockStorage } from '../utils/testing-utils';
+import { setupTestEnvironment, mockNextRouter } from '@/tests/utils/environment-setup';
+import { renderWithProviders, createMockFile } from '@/tests/utils/component-testing-utils';
+import { createMockUser, createMockProfile, mockStorage } from '@/tests/utils/testing-utils';
 
 // Import and use our standardized mock
-jest.mock('@/lib/supabase', () => require('../__mocks__/supabase'));
+import { describe, test, beforeAll, afterAll, beforeEach, expect, vi } from 'vitest';
+vi.mock('@/lib/supabase', async () => await import('@/tests/mocks/supabase'));
 import { supabase } from '@/lib/supabase';
 
 describe('Profile Component', () => {
@@ -28,7 +29,7 @@ describe('Profile Component', () => {
   });
   
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   // Create mock user and profile data
@@ -242,5 +243,9 @@ describe('Profile Component', () => {
     await waitFor(() => {
       expect(screen.getByText(/failed to upload avatar/i)).toBeInTheDocument();
     });
+  });
+
+  test('sanity check - test runner executes this file', () => {
+    expect(true).toBe(true);
   });
 });
