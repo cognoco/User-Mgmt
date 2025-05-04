@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 import { getServerSession } from 'next-auth';
 import { sendTeamInviteEmail } from '@/lib/email/teamInvite';
 import { generateInviteToken } from '@/lib/utils/token';
@@ -10,7 +10,7 @@ vi.mock('next-auth', () => ({
   getServerSession: vi.fn(),
 }));
 
-vi.mock('@/lib/prisma', () => ({
+vi.mock('@/lib/database/prisma', () => ({
   prisma: {
     teamMember: {
       create: vi.fn(),

@@ -18,7 +18,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 // Mock Prisma client
-vi.mock('@/lib/prisma', () => ({
+vi.mock('@/lib/database/prisma', () => ({
   prisma: {
     domain: {
       findMany: vi.fn(),

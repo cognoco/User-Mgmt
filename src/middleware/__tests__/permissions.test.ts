@@ -11,8 +11,11 @@ vi.mock('next-auth', () => ({
   getServerSession: vi.fn(),
 }));
 
-vi.mock('@/lib/prisma', () => ({
+vi.mock('@/lib/database/prisma', () => ({
   prisma: {
+    user: {
+      findUnique: vi.fn(),
+    },
     teamMember: {
       findFirst: vi.fn(),
     },
@@ -44,7 +47,7 @@ describe('Permission Middleware', () => {
       vi.mocked(getServerSession).mockResolvedValue(null);
 
       const middleware = withPermissionCheck(mockHandler, {
-        required: Permission.VIEW_TEAM_MEMBERS,
+        requiredPermission: Permission.VIEW_TEAM_MEMBERS,
       });
 
       const response = await middleware(mockRequest);
@@ -60,7 +63,7 @@ describe('Permission Middleware', () => {
       vi.mocked(prisma.teamMember.findFirst).mockResolvedValue(null);
 
       const middleware = withPermissionCheck(mockHandler, {
-        required: Permission.VIEW_TEAM_MEMBERS,
+        requiredPermission: Permission.VIEW_TEAM_MEMBERS,
       });
 
       const response = await middleware(mockRequest);
@@ -82,7 +85,7 @@ describe('Permission Middleware', () => {
       vi.mocked(checkRolePermission).mockResolvedValue(true);
 
       const middleware = withPermissionCheck(mockHandler, {
-        required: Permission.VIEW_TEAM_MEMBERS,
+        requiredPermission: Permission.VIEW_TEAM_MEMBERS,
       });
 
       await middleware(mockRequest);
@@ -94,7 +97,7 @@ describe('Permission Middleware', () => {
       vi.mocked(checkRolePermission).mockResolvedValue(false);
 
       const middleware = withPermissionCheck(mockHandler, {
-        required: Permission.MANAGE_BILLING,
+        requiredPermission: Permission.MANAGE_BILLING,
       });
 
       const response = await middleware(mockRequest);
@@ -109,7 +112,7 @@ describe('Permission Middleware', () => {
       vi.mocked(checkRolePermission).mockResolvedValue(true);
 
       const middleware = withPermissionCheck(mockHandler, {
-        required: Permission.VIEW_TEAM_MEMBERS,
+        requiredPermission: Permission.VIEW_TEAM_MEMBERS,
       });
 
       // First call should check permissions
@@ -131,9 +134,8 @@ describe('Permission Middleware', () => {
 
     it('should allow access to own team resources', async () => {
       const middleware = withPermissionCheck(mockHandler, {
-        required: Permission.VIEW_TEAM_MEMBERS,
+        requiredPermission: Permission.VIEW_TEAM_MEMBERS,
         resourceId: 'team-1',
-        resourceType: 'team',
       });
 
       await middleware(mockRequest);
@@ -143,9 +145,8 @@ describe('Permission Middleware', () => {
 
     it('should deny access to other team resources', async () => {
       const middleware = withPermissionCheck(mockHandler, {
-        required: Permission.VIEW_TEAM_MEMBERS,
+        requiredPermission: Permission.VIEW_TEAM_MEMBERS,
         resourceId: 'team-2',
-        resourceType: 'team',
       });
 
       const response = await middleware(mockRequest);
@@ -161,9 +162,8 @@ describe('Permission Middleware', () => {
       } as any);
 
       const middleware = withPermissionCheck(mockHandler, {
-        required: Permission.VIEW_PROJECTS,
+        requiredPermission: Permission.VIEW_PROJECTS,
         resourceId: 'project-1',
-        resourceType: 'project',
       });
 
       await middleware(mockRequest);
@@ -177,9 +177,8 @@ describe('Permission Middleware', () => {
       } as any);
 
       const middleware = withPermissionCheck(mockHandler, {
-        required: Permission.MANAGE_ORG_SETTINGS,
+        requiredPermission: Permission.MANAGE_ORG_SETTINGS,
         resourceId: 'org-1',
-        resourceType: 'organization',
       });
 
       await middleware(mockRequest);
@@ -193,7 +192,7 @@ describe('Permission Middleware', () => {
       vi.mocked(getServerSession).mockRejectedValue(new Error('Database error'));
 
       const middleware = withPermissionCheck(mockHandler, {
-        required: Permission.VIEW_TEAM_MEMBERS,
+        requiredPermission: Permission.VIEW_TEAM_MEMBERS,
       });
 
       const response = await middleware(mockRequest);

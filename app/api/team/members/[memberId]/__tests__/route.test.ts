@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DELETE } from '../route';
 import { getServerSession } from 'next-auth';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 import { hasPermission } from '@/lib/auth/hasPermission';
 
 vi.mock('next-auth');
-vi.mock('@/lib/prisma');
+vi.mock('@/lib/database/prisma');
 vi.mock('@/lib/auth/hasPermission');
 
 describe('DELETE /api/team/members/[memberId]', () => {

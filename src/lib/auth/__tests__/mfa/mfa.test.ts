@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { setupMFA, verifyMFAToken, disableMFA } from '@/lib/auth/mfa';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 
-jest.mock('@/lib/prisma');
+jest.mock('@/lib/database/prisma');
 
 describe('Multi-Factor Authentication', () => {
   beforeEach(() => {

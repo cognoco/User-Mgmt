@@ -1,10 +1,9 @@
 import { createMocks } from 'node-mocks-http';
 import { NextApiRequest } from 'next';
 import { auditLog } from '../../middleware/audit-log';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 
-// Import our standardized mock
-vi.mock('../../lib/supabase', () => require('../../tests/mocks/supabase'));
+vi.mock('@/tests/mocks/supabase', async () => await import('@/tests/mocks/supabase'));
 import { supabase } from '@/lib/supabase';
 
 // Extend NextApiRequest to include user property
@@ -153,7 +152,7 @@ describe('Audit Log Middleware', () => {
 
     const error = new Error('Test error');
     const next = vi.fn().mockRejectedValue(error);
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const middleware = auditLog();
 
     await middleware(req, res, next);
@@ -180,8 +179,8 @@ describe('Audit Log Middleware', () => {
     });
 
     const dbError = new Error('Database error');
-    (supabase.from('audit_logs').insert as vi.Mock).mockRejectedValue(dbError);
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
+    (supabase.from('audit_logs').insert as Mock).mockRejectedValue(dbError);
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const middleware = auditLog();
     const next = vi.fn();
