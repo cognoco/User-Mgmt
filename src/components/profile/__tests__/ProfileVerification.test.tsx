@@ -50,7 +50,7 @@ describe('ProfileVerification', () => {
     await act(async () => {
       render(<ProfileVerification />);
     });
-    expect(screen.getByText(/verified/i)).toBeInTheDocument();
+    expect(screen.getByText('Verified')).toBeInTheDocument();
     expect(screen.getByText(/your profile is verified/i)).toBeInTheDocument();
   });
 

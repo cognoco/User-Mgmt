@@ -111,9 +111,9 @@ export default function Profile({ user }) {
           </label>
         </div>
       </div>
-      <form onSubmit={(e) => {
+      <form onSubmit={async (e) => {
         e.preventDefault();
-        updateProfile({
+        await updateProfile({
           full_name: profile.full_name,
           website: profile.website,
           avatar_url: profile.avatar_url

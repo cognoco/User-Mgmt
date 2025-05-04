@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ProfilePrivacySettings } from '@/components/profile/ProfilePrivacySettings';
+import { PrivacySettings } from '@/components/profile/PrivacySettings';
 import { useProfileStore } from '@/lib/stores/profile.store';
 import { usePermission } from '@/hooks/usePermission';
 
@@ -9,7 +9,7 @@ import { usePermission } from '@/hooks/usePermission';
 vi.mock('@/lib/stores/profile.store');
 vi.mock('@/hooks/usePermission');
 
-describe('ProfilePrivacySettings', () => {
+describe('PrivacySettings', () => {
   const user = userEvent.setup();
   
   beforeEach(() => {
@@ -43,7 +43,7 @@ describe('ProfilePrivacySettings', () => {
 
   test('renders privacy settings form with current values', async () => {
     await act(async () => {
-      render(<ProfilePrivacySettings />);
+      render(<PrivacySettings />);
     });
     
     // Check if all privacy toggles are rendered
@@ -78,7 +78,7 @@ describe('ProfilePrivacySettings', () => {
     });
 
     await act(async () => {
-      render(<ProfilePrivacySettings />);
+      render(<PrivacySettings />);
     });
     
     // Change profile visibility
@@ -115,7 +115,7 @@ describe('ProfilePrivacySettings', () => {
     });
 
     await act(async () => {
-      render(<ProfilePrivacySettings />);
+      render(<PrivacySettings />);
     });
     
     // Change location visibility
@@ -151,7 +151,7 @@ describe('ProfilePrivacySettings', () => {
     });
 
     await act(async () => {
-      render(<ProfilePrivacySettings />);
+      render(<PrivacySettings />);
     });
     
     // Verify loading states
@@ -183,7 +183,7 @@ describe('ProfilePrivacySettings', () => {
     });
 
     await act(async () => {
-      render(<ProfilePrivacySettings />);
+      render(<PrivacySettings />);
     });
     
     // Change setting
@@ -202,7 +202,7 @@ describe('ProfilePrivacySettings', () => {
     });
 
     await act(async () => {
-      render(<ProfilePrivacySettings />);
+      render(<PrivacySettings />);
     });
     
     // Verify all controls are disabled
@@ -219,7 +219,7 @@ describe('ProfilePrivacySettings', () => {
     });
 
     await act(async () => {
-      render(<ProfilePrivacySettings />);
+      render(<PrivacySettings />);
     });
     
     // Hover over disabled control
