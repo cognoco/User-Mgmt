@@ -42,9 +42,13 @@ export default function Profile({ user }) {
     try {
       setLoading(true);
       setError(null);
+      const updatesWithTimestamp = {
+        ...updates,
+        updated_at: new Date().toISOString(),
+      };
       const { error } = await supabase
         .from('profiles')
-        .update(updates)
+        .update(updatesWithTimestamp)
         .eq('id', user.id);
 
       if (error) throw error;

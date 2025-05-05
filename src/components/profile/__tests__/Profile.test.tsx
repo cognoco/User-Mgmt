@@ -1,7 +1,7 @@
 // __tests__/components/Profile.test.js
 
 import React from 'react';
-import { screen, waitFor, act } from '@testing-library/react';
+import { screen, waitFor, act, cleanup as testingLibraryCleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 // Import our utility functions
@@ -26,27 +26,27 @@ process.on('uncaughtException', (err) => {
 
 describe('Profile Component', () => {
   // Setup test environment and router
-  let cleanup: (() => void) | undefined;
+  let cleanupEnv: (() => void) | undefined;
   let storageFromSpy: any;
   let uploadSpy: any;
   let getPublicUrlSpy: any;
 
   beforeAll(() => {
-    // vi.spyOn(console, 'error').mockImplementation(() => {});
-    // vi.spyOn(console, 'warn').mockImplementation(() => {});
-    cleanup = setupTestEnvironment();
+    console.log('[DEBUG] beforeAll - Profile Component');
+    cleanupEnv = setupTestEnvironment();
   });
 
   afterAll(() => {
+    console.log('[DEBUG] afterAll - Profile Component');
     try {
-      if (cleanup) cleanup();
+      if (cleanupEnv) cleanupEnv();
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('Error in afterAll cleanup:', err);
     }
   });
 
   beforeEach(() => {
+    console.log('[DEBUG] beforeEach - Profile Component');
     vi.resetModules();
     vi.clearAllMocks();
     // Always inject a fresh spy for supabase.storage.from
@@ -63,14 +63,16 @@ describe('Profile Component', () => {
       upsert: vi.fn().mockResolvedValue({ data: null, error: null }),
     };
     (supabase.from as any).mockReturnValue(builder);
+    console.log('[DEBUG] supabase.from mock:', supabase.from);
+    console.log('[DEBUG] supabase.storage.from mock:', supabase.storage.from);
   });
 
   afterEach(() => {
+    console.log('[DEBUG] afterEach - Profile Component');
     try {
-      // Add any additional cleanup if needed
+      testingLibraryCleanup();
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('Error in afterEach:', err);
+      console.error('Error in afterEach cleanup:', err);
     }
   });
 
@@ -84,6 +86,7 @@ describe('Profile Component', () => {
   });
 
   test('renders profile form with user data', async () => {
+    console.log('[DEBUG] TEST START: renders profile form with user data');
     (supabase.auth.getUser as any).mockResolvedValue({ 
       data: { user: mockUser }, 
       error: null 
@@ -104,9 +107,11 @@ describe('Profile Component', () => {
       expect(screen.getByDisplayValue('https://example.com')).toBeInTheDocument();
       expect(screen.getByAltText(/avatar/i)).toHaveAttribute('src', mockProfileData.avatar_url);
     });
+    console.log('[DEBUG] TEST END: renders profile form with user data');
   });
 
   test('handles profile update', async () => {
+    console.log('[DEBUG] TEST START: handles profile update');
     (supabase.auth.getUser as any).mockResolvedValue({ 
       data: { user: mockUser }, 
       error: null 
@@ -150,41 +155,71 @@ describe('Profile Component', () => {
       expect(screen.getByDisplayValue('Jane Smith')).toBeInTheDocument();
       expect(screen.getByDisplayValue('https://updated-example.com')).toBeInTheDocument();
     });
+    console.log('[DEBUG] TEST END: handles profile update');
   });
 
   test('handles avatar upload', async () => {
-    (supabase.auth.getUser as any).mockResolvedValue({ 
-      data: { user: mockUser }, 
-      error: null 
+    console.log('[DEBUG] TEST START: handles avatar upload');
+    (supabase.auth.getUser as any).mockResolvedValue({
+      data: { user: mockUser },
+      error: null
     });
-    // Mock profile fetch
-    const builder = {
+
+    // Mock profile fetch AND the subsequent update/eq chain
+    let currentProfile = { ...mockProfileData };
+    // Create a separate spy for the .eq method
+    const eqSpy = vi.fn().mockImplementation((_idKey, _idValue) => {
+      // Simulate update for avatar_url
+      // No need to update currentProfile here, just resolve the promise
+      return Promise.resolve({ data: [{}], error: null }); // Return minimal success data
+    });
+    const updateSpy = vi.fn().mockImplementation((updates) => {
+      // Store the updates for assertion later
+      currentProfile = { ...currentProfile, ...updates };
+      // Return the object containing the eq spy
+      return { eq: eqSpy };
+    });
+
+    const profileBuilder = {
       select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({ data: mockProfileData, error: null }),
-      update: vi.fn().mockResolvedValue({ data: mockProfileData, error: null }),
+      eq: vi.fn().mockReturnThis(), // For initial fetch
+      single: vi.fn().mockImplementation(() => Promise.resolve({ data: currentProfile, error: null })), // For initial fetch
+      update: updateSpy, // Use the update spy
     };
-    (supabase.from as any) = vi.fn((table: string) => (table === 'profiles' ? builder : {}));
+    (supabase.from as any) = vi.fn((table: string) => (table === 'profiles' ? profileBuilder : {}));
+
     const Profile = (await import('../Profile.jsx')).default;
     await act(async () => {
       renderWithProviders(<Profile user={mockUser} />);
     });
+
     await waitFor(() => {
       expect(screen.getByAltText(/avatar/i)).toBeInTheDocument();
     });
+
     await act(async () => {
       const input = screen.getByLabelText(/upload avatar/i);
       const file = createMockFile('test-avatar.jpg', 'image/jpeg', 1024);
       await userEvent.upload(input, file);
     });
+
+    // Wait for all promises to resolve
     await waitFor(() => {
+      // Check storage calls
       expect(storageFromSpy).toHaveBeenCalledWith('avatars');
       expect(uploadSpy).toHaveBeenCalledWith(expect.any(String), expect.any(File));
       expect(getPublicUrlSpy).toHaveBeenCalled();
+
+      // Check profile update mock was called correctly
+      expect(updateSpy).toHaveBeenCalledWith({ avatar_url: 'https://example.com/avatar.jpg', updated_at: expect.any(String) });
+      // Check that the eq spy (returned by updateSpy) was called correctly
+      expect(eqSpy).toHaveBeenCalledWith('id', mockUser.id);
     });
+    console.log('[DEBUG] TEST END: handles avatar upload');
   });
 
   test('displays error message on update failure', async () => {
+    console.log('[DEBUG] TEST START: displays error message on update failure');
     (supabase.auth.getUser as any).mockResolvedValue({ data: { user: mockUser }, error: null });
     // Builder chain: update returns an object with eq, eq returns a rejected promise
     const builder = {
@@ -209,23 +244,27 @@ describe('Profile Component', () => {
     await waitFor(() => {
       expect(screen.getByText(/Failed to update profile|Error updating profile/i)).toBeInTheDocument();
     });
+    console.log('[DEBUG] TEST END: displays error message on update failure');
   });
 
   test('handles avatar upload error', async () => {
-    (supabase.auth.getUser as any).mockResolvedValue({ 
-      data: { user: mockUser }, 
-      error: null 
+    console.log('[DEBUG] TEST START: handles avatar upload error');
+    (supabase.auth.getUser as any).mockResolvedValue({
+      data: { user: mockUser },
+      error: null
     });
-    // Mock profile fetch
-    const builder = {
+    // Mock profile fetch (update won't be called if upload fails)
+    const profileBuilder = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: mockProfileData, error: null }),
-      update: vi.fn().mockResolvedValue({ data: mockProfileData, error: null }),
+      // No need to mock update/eq here as it shouldn't be reached
     };
-    (supabase.from as any) = vi.fn((table: string) => (table === 'profiles' ? builder : {}));
-    // Override uploadSpy to simulate error
+    (supabase.from as any) = vi.fn((table: string) => (table === 'profiles' ? profileBuilder : {}));
+
+    // Override uploadSpy to simulate error BEFORE profile update attempt
     uploadSpy.mockResolvedValue({ data: null, error: { message: 'Failed to upload avatar' } });
+
     const Profile = (await import('../Profile.jsx')).default;
     await act(async () => {
       renderWithProviders(<Profile user={mockUser} />);
@@ -241,9 +280,12 @@ describe('Profile Component', () => {
     await waitFor(() => {
       expect(screen.getByText(/Error uploading avatar/i)).toBeInTheDocument();
     });
+    console.log('[DEBUG] TEST END: handles avatar upload error');
   });
 
   test('sanity check - test runner executes this file', () => {
+    console.log('[DEBUG] TEST START: sanity check');
     expect(true).toBe(true);
+    console.log('[DEBUG] TEST END: sanity check');
   });
 });

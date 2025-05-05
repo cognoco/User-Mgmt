@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 50  |  **Failed Test Files:** 31
+**Passed Test Files:** 51  |  **Failed Test Files:** 30
 
 ## Passing Test Files
 
@@ -8,6 +8,7 @@
 - src/components/admin/__tests__/AdminDashboard.test.tsx
 - src/components/auth/__tests__/BusinessSSOSetup.test.tsx
 - src/components/auth/__tests__/DomainBasedOrgMatching.test.tsx
+- src/components/auth/__tests__/IDPConfiguration.test.tsx
 - src/components/auth/__tests__/ProtectedRoute.test.tsx
 - src/components/auth/__tests__/RegistrationForm.integration.test.tsx
 - src/components/profile/__tests__/ActivityLog.test.tsx
@@ -59,7 +60,6 @@
 
 - src/components/admin/__tests__/RoleManagementPanel.test.tsx
 - src/components/audit/__tests__/AuditLogViewer.test.tsx
-- src/components/auth/__tests__/IDPConfiguration.test.tsx
 - src/components/auth/__tests__/LoginForm.test.tsx
 - src/components/auth/__tests__/OrganizationSSO.test.tsx
 - src/components/team/__tests__/TeamMembersList.test.tsx

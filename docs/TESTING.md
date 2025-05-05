@@ -193,3 +193,32 @@ This project contains several files related to Supabase. Each serves a distinct 
 ---
 
 If you move the files into the correct directory or resolve the permissions, I can add this content for you automatically. Would you like instructions on how to move the files, or do you want to try again?
+
+## Robust Selector Patterns for Custom UI Libraries (2024-06)
+
+- When using Radix UI, Shadcn UI, or similar libraries, standard label associations may not work for all elements (especially hidden file inputs or custom components).
+- If `getByLabelText` fails, use:
+  - `getByRole` or `getAllByRole` for visible elements.
+  - `container.querySelector('#element-id')` for hidden or custom elements (ensure the element has a unique `id`).
+- Always document non-standard queries in the test file for future maintainers.
+
+## File Input Testing (2024-06)
+
+- Always assign a unique `id` to file inputs.
+- Use `container.querySelector('#file-input-id')` to select file inputs in tests, especially if they are hidden or not directly labeled.
+- Document this pattern in the test for clarity.
+
+## i18n/Translation Testing Patterns
+
+- By default, a global mock for `react-i18next` is used for speed and simplicity.
+- For tests that require real translation (e.g., to verify language switching or namespace logic), unmock at the top of the file:
+  ```ts
+  vi.unmock('react-i18next');
+  ```
+- Always initialize the i18n instance with the correct namespace and resource structure to match component usage.
+
+## Selector Patterns for Custom UI Libraries
+
+- For hidden or custom elements (e.g., file inputs, Radix UI), use:
+  - `getByRole`, `getByTestId`, or `container.querySelector('#element-id')`
+- Document any non-standard queries in the test file for clarity.

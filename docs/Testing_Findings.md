@@ -71,6 +71,7 @@ This file should be maintained alongside TESTING.md and TESTING_ISSUES.md for a 
 - For each major user flow, E2E and integration/component tests are present and robust, except where noted (e.g., some E2E skeletons left for future flows).
 - Skeletons are only removed when a real test exists; otherwise, they are left in place for future implementation.
 - No duplicate or unnecessary test files remain for the flows reviewed so far.
+- **Selector mismatches are a common cause of test failures with custom UI libraries (e.g., Radix UI, Shadcn UI). Prefer robust, DOM-accurate queries such as getByRole, getAllByRole, or container.querySelector for hidden/custom elements, and document any workarounds in the test file.**
 
 ---
 
@@ -360,3 +361,10 @@ _These findings were confirmed and resolved in the process of fixing the `auth` 
 > - All rate limit middleware tests now pass after adopting a robust global mock pattern for the Redis multi.exec method.
 > - Key Fix: The test suite sets a global mock function (globalThis.__multiExecMockImpl) before each test, and the mock implementation always calls the latest version of this function. This allows each test to simulate different Redis responses without interference.
 > - Takeaway: For any middleware or service that creates a new instance per request, always use a global, dynamically updatable mock for core methods. This pattern is now the standard for all similar middleware tests in the codebase.
+
+## Recurring Issue: i18n Placeholders in Tests
+
+- If you see `[i18n:namespace.key]` placeholders in test output, check:
+  - The i18n resource structure matches the namespace/key usage in the component.
+  - The test is not using a global mock for `react-i18next` if real translation is needed.
+  - Use `vi.unmock('react-i18next')` at the top of the test file if needed.

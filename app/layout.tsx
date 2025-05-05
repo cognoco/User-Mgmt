@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css"; // Import the new global CSS file
 import { UserManagementClientBoundary } from "@/lib/auth/UserManagementClientBoundary"; // Import the new boundary component
+import "@/lib/i18n"; // Ensure i18n is initialized globally
 
 const inter = Inter({ subsets: ["latin"] });
 

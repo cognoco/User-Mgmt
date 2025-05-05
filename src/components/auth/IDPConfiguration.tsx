@@ -67,7 +67,7 @@ interface IDPConfigurationProps {
 }
 
 const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onConfigurationUpdate }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('org');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -168,7 +168,7 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
       
     } catch (err) {
       if (process.env.NODE_ENV === 'development') { console.error(`Failed to fetch ${idpType.toUpperCase()} configuration:`, err); }
-      setError(t('org.sso.fetchConfigError'));
+      setError(t('sso.fetchConfigError'));
     } finally {
       setIsLoading(false);
     }
@@ -185,14 +185,14 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
       const { type, ...configData } = data;
       
       await api.put(`/organizations/${orgId}/sso/${idpType}/config`, configData);
-      setSuccess(t('org.sso.saveConfigSuccess'));
+      setSuccess(t('sso.saveConfigSuccess'));
       
       if (onConfigurationUpdate) {
         onConfigurationUpdate(true);
       }
     } catch (err) {
       if (process.env.NODE_ENV === 'development') { console.error(`Failed to save ${idpType.toUpperCase()} configuration:`, err); }
-      setError(t('org.sso.saveConfigError'));
+      setError(t('sso.saveConfigError'));
       
       if (onConfigurationUpdate) {
         onConfigurationUpdate(false);
@@ -240,21 +240,21 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
         <CardTitle className="flex items-center gap-2">
           <KeyRound className="h-5 w-5" />
           {idpType === 'saml' 
-            ? t('org.sso.samlConfigTitle') 
-            : t('org.sso.oidcConfigTitle')}
+            ? t('sso.samlConfigTitle') 
+            : t('sso.oidcConfigTitle')}
         </CardTitle>
         <CardDescription>
           {idpType === 'saml' 
-            ? t('org.sso.samlConfigDescription') 
-            : t('org.sso.oidcConfigDescription')}
+            ? t('sso.samlConfigDescription') 
+            : t('sso.oidcConfigDescription')}
         </CardDescription>
       </CardHeader>
       
       <Tabs value={currentTab} onValueChange={(val) => setCurrentTab(val as 'config' | 'metadata')}>
         <CardContent>
           <TabsList className="mb-4">
-            <TabsTrigger value="config">{t('org.sso.configTab')}</TabsTrigger>
-            <TabsTrigger value="metadata">{t('org.sso.metadataTab')}</TabsTrigger>
+            <TabsTrigger value="config">{t('sso.configTab')}</TabsTrigger>
+            <TabsTrigger value="metadata">{t('sso.metadataTab')}</TabsTrigger>
           </TabsList>
 
           {error && (
@@ -282,11 +282,11 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                       name="entity_id"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('org.sso.saml.entityIdLabel')}</FormLabel>
+                          <FormLabel>{t('sso.saml.entityIdLabel')}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <FormDescription>{t('org.sso.saml.entityIdDescription')}</FormDescription>
+                          <FormDescription>{t('sso.saml.entityIdDescription')}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -297,11 +297,11 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                       name="sign_in_url"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('org.sso.saml.signInUrlLabel')}</FormLabel>
+                          <FormLabel>{t('sso.saml.signInUrlLabel')}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <FormDescription>{t('org.sso.saml.signInUrlDescription')}</FormDescription>
+                          <FormDescription>{t('sso.saml.signInUrlDescription')}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -312,11 +312,11 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                       name="sign_out_url"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('org.sso.saml.signOutUrlLabel')}</FormLabel>
+                          <FormLabel>{t('sso.saml.signOutUrlLabel')}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <FormDescription>{t('org.sso.saml.signOutUrlDescription')}</FormDescription>
+                          <FormDescription>{t('sso.saml.signOutUrlDescription')}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -327,18 +327,18 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                       name="certificate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('org.sso.saml.certificateLabel')}</FormLabel>
+                          <FormLabel>{t('sso.saml.certificateLabel')}</FormLabel>
                           <FormControl>
                             <div className="flex flex-col space-y-2">
                               <Textarea 
                                 {...field} 
                                 rows={5} 
-                                placeholder={t('org.sso.saml.certificatePlaceholder')} 
+                                placeholder={t('sso.saml.certificatePlaceholder')} 
                               />
                               <div className="flex items-center gap-2">
                                 <Button type="button" variant="outline" onClick={() => document.getElementById('cert-upload')?.click()}>
                                   <Upload className="h-4 w-4 mr-2" />
-                                  {t('org.sso.saml.uploadCertificate')}
+                                  {t('sso.saml.uploadCertificate')}
                                 </Button>
                                 <input
                                   id="cert-upload"
@@ -350,7 +350,7 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                               </div>
                             </div>
                           </FormControl>
-                          <FormDescription>{t('org.sso.saml.certificateDescription')}</FormDescription>
+                          <FormDescription>{t('sso.saml.certificateDescription')}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -361,11 +361,11 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                       name="attribute_mapping.email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('org.sso.saml.emailMappingLabel')}</FormLabel>
+                          <FormLabel>{t('sso.saml.emailMappingLabel')}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <FormDescription>{t('org.sso.saml.emailMappingDescription')}</FormDescription>
+                          <FormDescription>{t('sso.saml.emailMappingDescription')}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -376,11 +376,11 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                       name="attribute_mapping.name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('org.sso.saml.nameMappingLabel')}</FormLabel>
+                          <FormLabel>{t('sso.saml.nameMappingLabel')}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <FormDescription>{t('org.sso.saml.nameMappingDescription')}</FormDescription>
+                          <FormDescription>{t('sso.saml.nameMappingDescription')}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -391,11 +391,11 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                       name="attribute_mapping.role"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('org.sso.saml.roleMappingLabel')}</FormLabel>
+                          <FormLabel>{t('sso.saml.roleMappingLabel')}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <FormDescription>{t('org.sso.saml.roleMappingDescription')}</FormDescription>
+                          <FormDescription>{t('sso.saml.roleMappingDescription')}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -409,11 +409,11 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                       name="client_id"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('org.sso.oidc.clientIdLabel')}</FormLabel>
+                          <FormLabel>{t('sso.oidc.clientIdLabel')}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <FormDescription>{t('org.sso.oidc.clientIdDescription')}</FormDescription>
+                          <FormDescription>{t('sso.oidc.clientIdDescription')}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -424,11 +424,11 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                       name="client_secret"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('org.sso.oidc.clientSecretLabel')}</FormLabel>
+                          <FormLabel>{t('sso.oidc.clientSecretLabel')}</FormLabel>
                           <FormControl>
                             <Input type="password" {...field} />
                           </FormControl>
-                          <FormDescription>{t('org.sso.oidc.clientSecretDescription')}</FormDescription>
+                          <FormDescription>{t('sso.oidc.clientSecretDescription')}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -439,11 +439,11 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                       name="discovery_url"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('org.sso.oidc.discoveryUrlLabel')}</FormLabel>
+                          <FormLabel>{t('sso.oidc.discoveryUrlLabel')}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <FormDescription>{t('org.sso.oidc.discoveryUrlDescription')}</FormDescription>
+                          <FormDescription>{t('sso.oidc.discoveryUrlDescription')}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -454,11 +454,11 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                       name="scopes"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('org.sso.oidc.scopesLabel')}</FormLabel>
+                          <FormLabel>{t('sso.oidc.scopesLabel')}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <FormDescription>{t('org.sso.oidc.scopesDescription')}</FormDescription>
+                          <FormDescription>{t('sso.oidc.scopesDescription')}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -469,11 +469,11 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                       name="attribute_mapping.email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('org.sso.oidc.emailMappingLabel')}</FormLabel>
+                          <FormLabel>{t('sso.oidc.emailMappingLabel')}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <FormDescription>{t('org.sso.oidc.emailMappingDescription')}</FormDescription>
+                          <FormDescription>{t('sso.oidc.emailMappingDescription')}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -484,11 +484,11 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                       name="attribute_mapping.name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('org.sso.oidc.nameMappingLabel')}</FormLabel>
+                          <FormLabel>{t('sso.oidc.nameMappingLabel')}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <FormDescription>{t('org.sso.oidc.nameMappingDescription')}</FormDescription>
+                          <FormDescription>{t('sso.oidc.nameMappingDescription')}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -499,11 +499,11 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                       name="attribute_mapping.role"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('org.sso.oidc.roleMappingLabel')}</FormLabel>
+                          <FormLabel>{t('sso.oidc.roleMappingLabel')}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
-                          <FormDescription>{t('org.sso.oidc.roleMappingDescription')}</FormDescription>
+                          <FormDescription>{t('sso.oidc.roleMappingDescription')}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -513,7 +513,7 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
 
                 <div className="flex justify-end pt-2">
                   <Button type="submit" disabled={isSaving}>
-                    {isSaving ? t('common.saving') : t('org.sso.saveConfigButton')}
+                    {isSaving ? t('common.saving') : t('sso.saveConfigButton')}
                   </Button>
                 </div>
               </form>
@@ -523,15 +523,15 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
           <TabsContent value="metadata">
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-medium">{t('org.sso.spMetadataTitle')}</h3>
-                <p className="text-sm text-muted-foreground">{t('org.sso.spMetadataDescription')}</p>
+                <h3 className="text-lg font-medium">{t('sso.spMetadataTitle')}</h3>
+                <p className="text-sm text-muted-foreground">{t('sso.spMetadataDescription')}</p>
               </div>
 
               <div className="space-y-2">
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <label className="text-sm font-medium">
-                      {t('org.sso.spEntityIdLabel')}
+                      {t('sso.spEntityIdLabel')}
                     </label>
                     <CopyButton value={spEntityId} />
                   </div>
@@ -541,7 +541,7 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <label className="text-sm font-medium">
-                      {t('org.sso.spMetadataUrlLabel')}
+                      {t('sso.spMetadataUrlLabel')}
                     </label>
                     <CopyButton value={metadataUrl} />
                   </div>
@@ -551,7 +551,7 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <label className="text-sm font-medium">
-                      {t('org.sso.spMetadataXmlLabel')}
+                      {t('sso.spMetadataXmlLabel')}
                     </label>
                     <CopyButton value={spMetadata} />
                   </div>
@@ -571,8 +571,8 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
       <CardFooter className="border-t pt-4">
         <p className="text-sm text-muted-foreground">
           {idpType === 'saml' 
-            ? t('org.sso.samlConfigFooter') 
-            : t('org.sso.oidcConfigFooter')}
+            ? t('sso.samlConfigFooter') 
+            : t('sso.oidcConfigFooter')}
         </p>
       </CardFooter>
     </Card>

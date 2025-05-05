@@ -91,3 +91,27 @@ Section: Middleware Test Mocking Issues
 > - Issue: Middleware that instantiates a new client (e.g., Redis) per request can break test mocks if the mock is not globally updatable or if the test relies on module-level state.
 > - Solution: Always use a global variable to control the mock's behavior, and reset it in beforeEach. Never rely on per-test local mocks for such cases.
 > - Best Practice: Document this pattern in all middleware test files and ensure all contributors follow it for new middleware tests.
+
+## Robust Selector Patterns for Custom UI Libraries (2024-06)
+
+- When using Radix UI, Shadcn UI, or similar libraries, standard label associations may not work for all elements (especially hidden file inputs or custom components).
+- If `getByLabelText` fails, use:
+  - `getByRole` or `getAllByRole` for visible elements.
+  - `container.querySelector('#element-id')` for hidden or custom elements (ensure the element has a unique `id`).
+- Always document non-standard queries in the test file for future maintainers.
+
+## File Input Testing (2024-06)
+
+- Always assign a unique `id` to file inputs.
+- Use `container.querySelector('#file-input-id')` to select file inputs in tests, especially if they are hidden or not directly labeled.
+- Document this pattern in the test for clarity.
+
+### (2024-06) Selective Unmocking of `react-i18next` for i18n Tests
+
+- If a test requires real translation logic (e.g., for namespace/language switching), unmock `react-i18next` at the top of the test file:
+  ```ts
+  vi.unmock('react-i18next');
+  ```
+- This disables the global mock for that file only, allowing real i18n behavior.
+- Always ensure the i18n resource structure matches the namespace/key usage in the component.
+

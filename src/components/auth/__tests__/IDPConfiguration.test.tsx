@@ -1,24 +1,68 @@
 import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, MockInstance } from 'vitest';
 import { api } from '@/lib/api/axios';
 import IDPConfiguration from '../IDPConfiguration';
+import { initializeI18n } from '@/lib/i18n';
+import i18n from '@/lib/i18n';
+import enTranslations from '@/lib/i18n/locales/en.json';
 
-// Mock the api
-vi.mock('@/lib/api/axios', () => ({
-  api: {
-    get: vi.fn(),
-    put: vi.fn(),
+vi.unmock('react-i18next');
+
+const mockSamlConfig = {
+  entity_id: 'https://test.idp.com',
+  sign_in_url: 'https://test.idp.com/login',
+  sign_out_url: 'https://test.idp.com/logout',
+  certificate: '-----BEGIN CERTIFICATE-----\nMIIC...\n-----END CERTIFICATE-----',
+  attribute_mapping: {
+    email: 'email',
+    name: 'name',
+    role: 'role',
   },
-}));
+};
 
-// Mock translations
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-  }),
-}));
+const mockOidcConfig = {
+  client_id: 'client123',
+  client_secret: 'secret123',
+  discovery_url: 'https://test.idp.com/.well-known/openid-configuration',
+  scopes: 'openid email profile',
+  attribute_mapping: {
+    email: 'email',
+    name: 'name',
+    role: 'role',
+  },
+};
+
+const mockMetadata = {
+  url: 'https://app.com/metadata',
+  entity_id: 'https://app.com',
+  xml: '<?xml version="1.0"?>...',
+};
+
+beforeAll(async () => {
+  await initializeI18n({
+    namespace: 'org',
+    resources: { en: { org: enTranslations.org } },
+    defaultLanguage: 'en',
+  });
+  // Debug: log the i18n resource store
+  // eslint-disable-next-line no-console
+  console.log('i18n store:', JSON.stringify(i18n.store?.data, null, 2));
+});
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  (api.get as unknown as MockInstance).mockImplementation((url: string) => {
+    if (url.includes('/config')) {
+      return Promise.resolve({ data: mockSamlConfig });
+    }
+    if (url.includes('/metadata')) {
+      return Promise.resolve({ data: mockMetadata });
+    }
+    return Promise.reject(new Error('Not found'));
+  });
+});
 
 describe('IDPConfiguration', () => {
   const mockProps = {
@@ -27,61 +71,13 @@ describe('IDPConfiguration', () => {
     onConfigurationUpdate: vi.fn(),
   };
 
-  const mockSamlConfig = {
-    entity_id: 'https://test.idp.com',
-    sign_in_url: 'https://test.idp.com/login',
-    sign_out_url: 'https://test.idp.com/logout',
-    certificate: '-----BEGIN CERTIFICATE-----\nMIIC...\n-----END CERTIFICATE-----',
-    attribute_mapping: {
-      email: 'email',
-      name: 'name',
-      role: 'role',
-    },
-  };
-
-  const mockOidcConfig = {
-    client_id: 'client123',
-    client_secret: 'secret123',
-    discovery_url: 'https://test.idp.com/.well-known/openid-configuration',
-    scopes: 'openid email profile',
-    attribute_mapping: {
-      email: 'email',
-      name: 'name',
-      role: 'role',
-    },
-  };
-
-  const mockMetadata = {
-    url: 'https://app.com/metadata',
-    entity_id: 'https://app.com',
-    xml: '<?xml version="1.0"?>...',
-  };
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    (api.get as unknown as MockInstance).mockImplementation((url: string) => {
-      if (url.includes('/config')) {
-        return Promise.resolve({ data: mockSamlConfig });
-      }
-      if (url.includes('/metadata')) {
-        return Promise.resolve({ data: mockMetadata });
-      }
-      return Promise.reject(new Error('Not found'));
-    });
-  });
-
   it('renders loading state initially', async () => {
-    await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
-    });
-    expect(screen.getByText(/org.sso.samlConfigTitle/i)).toBeInTheDocument();
-    expect(screen.getByText(/org.sso.samlConfigDescription/i)).toBeInTheDocument();
+    render(<IDPConfiguration {...mockProps} />);
+    expect(screen.getAllByRole('generic', { hidden: true }).some(el => el.className.includes('skeleton'))).toBe(true);
   });
 
   it('loads and displays SAML configuration', async () => {
-    await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
-    });
+    render(<IDPConfiguration {...mockProps} />);
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalledWith('/organizations/org123/sso/saml/config');
@@ -90,7 +86,12 @@ describe('IDPConfiguration', () => {
 
     expect(screen.getByDisplayValue(mockSamlConfig.entity_id)).toBeInTheDocument();
     expect(screen.getByDisplayValue(mockSamlConfig.sign_in_url)).toBeInTheDocument();
-    expect(screen.getByDisplayValue(mockSamlConfig.certificate)).toBeInTheDocument();
+    // For certificate, robustly find the textarea by value
+    const certificateTextarea = screen.getAllByRole('textbox').find(
+      (el) => (el as HTMLTextAreaElement).value === mockSamlConfig.certificate
+    ) as HTMLTextAreaElement | undefined;
+    expect(certificateTextarea).toBeDefined();
+    expect(certificateTextarea?.value).toBe(mockSamlConfig.certificate);
   });
 
   it('loads and displays OIDC configuration', async () => {
@@ -104,9 +105,7 @@ describe('IDPConfiguration', () => {
       return Promise.reject(new Error('Not found'));
     });
 
-    await act(async () => {
-      render(<IDPConfiguration {...mockProps} idpType="oidc" />);
-    });
+    render(<IDPConfiguration {...mockProps} idpType="oidc" />);
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalledWith('/organizations/org123/sso/oidc/config');
@@ -118,34 +117,30 @@ describe('IDPConfiguration', () => {
   });
 
   it('handles certificate file upload', async () => {
-    await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
-    });
+    const { container } = render(<IDPConfiguration {...mockProps} />);
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalled();
     });
 
     const file = new File(['test certificate content'], 'cert.pem', { type: 'application/x-pem-file' });
-    const fileInput = screen.getByLabelText(/org.sso.saml.certificateLabel/i) as HTMLInputElement;
-
+    // Select the hidden file input by id
+    const fileInput = container.querySelector('#cert-upload') as HTMLInputElement;
+    expect(fileInput).toBeDefined();
     await userEvent.upload(fileInput, file);
-
     expect(fileInput.files?.[0]).toBe(file);
   });
 
   it('submits SAML configuration successfully', async () => {
     (api.put as unknown as MockInstance).mockResolvedValueOnce({});
     
-    await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
-    });
+    render(<IDPConfiguration {...mockProps} />);
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalled();
     });
 
-    const submitButton = screen.getByText('org.sso.saveConfigButton');
+    const submitButton = screen.getByText('Save Configuration');
     await userEvent.click(submitButton);
 
     await waitFor(() => {
@@ -157,7 +152,7 @@ describe('IDPConfiguration', () => {
           certificate: mockSamlConfig.certificate,
         })
       );
-      expect(screen.getByText('org.sso.saveConfigSuccess')).toBeInTheDocument();
+      expect(screen.getByText('Configuration saved successfully!')).toBeInTheDocument();
       expect(mockProps.onConfigurationUpdate).toHaveBeenCalledWith(true);
     });
   });
@@ -165,57 +160,49 @@ describe('IDPConfiguration', () => {
   it('handles configuration fetch error', async () => {
     (api.get as unknown as MockInstance).mockRejectedValueOnce(new Error('Failed to fetch'));
 
-    await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
-    });
+    render(<IDPConfiguration {...mockProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText('org.sso.fetchConfigError')).toBeInTheDocument();
+      expect(screen.getByText('Failed to load configuration. Please try again.')).toBeInTheDocument();
     });
   });
 
   it('handles configuration save error', async () => {
     (api.put as unknown as MockInstance).mockRejectedValueOnce(new Error('Failed to save'));
 
-    await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
-    });
+    render(<IDPConfiguration {...mockProps} />);
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalled();
     });
 
-    const submitButton = screen.getByText('org.sso.saveConfigButton');
+    const submitButton = screen.getByText('Save Configuration');
     await userEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('org.sso.saveConfigError')).toBeInTheDocument();
+      expect(screen.getByText('Failed to save configuration. Please try again.')).toBeInTheDocument();
       expect(mockProps.onConfigurationUpdate).toHaveBeenCalledWith(false);
     });
   });
 
   it('switches between configuration and metadata tabs', async () => {
-    await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
-    });
+    render(<IDPConfiguration {...mockProps} />);
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalled();
     });
 
-    const metadataTab = screen.getByText('org.sso.metadataTab');
+    const metadataTab = screen.getByText('Metadata');
     await userEvent.click(metadataTab);
 
-    expect(screen.getByText('org.sso.spMetadataTitle')).toBeInTheDocument();
+    expect(screen.getByText('Service Provider Metadata')).toBeInTheDocument();
     expect(screen.getByDisplayValue(mockMetadata.url)).toBeInTheDocument();
     expect(screen.getByDisplayValue(mockMetadata.entity_id)).toBeInTheDocument();
     expect(screen.getByDisplayValue(mockMetadata.xml)).toBeInTheDocument();
   });
 
   it('validates required fields for SAML configuration', async () => {
-    await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
-    });
+    render(<IDPConfiguration {...mockProps} />);
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalled();
@@ -225,7 +212,7 @@ describe('IDPConfiguration', () => {
     const entityIdInput = screen.getByDisplayValue(mockSamlConfig.entity_id);
     await userEvent.clear(entityIdInput);
 
-    const submitButton = screen.getByText('org.sso.saveConfigButton');
+    const submitButton = screen.getByText('Save Configuration');
     await userEvent.click(submitButton);
 
     expect(await screen.findByText(/Entity ID is required/i)).toBeInTheDocument();
@@ -243,9 +230,7 @@ describe('IDPConfiguration', () => {
       return Promise.reject(new Error('Not found'));
     });
 
-    await act(async () => {
-      render(<IDPConfiguration {...mockProps} idpType="oidc" />);
-    });
+    render(<IDPConfiguration {...mockProps} idpType="oidc" />);
 
     await waitFor(() => {
       expect(api.get).toHaveBeenCalled();
@@ -255,7 +240,7 @@ describe('IDPConfiguration', () => {
     const clientIdInput = screen.getByDisplayValue(mockOidcConfig.client_id);
     await userEvent.clear(clientIdInput);
 
-    const submitButton = screen.getByText('org.sso.saveConfigButton');
+    const submitButton = screen.getByText('Save Configuration');
     await userEvent.click(submitButton);
 
     expect(await screen.findByText(/Client ID is required/i)).toBeInTheDocument();
