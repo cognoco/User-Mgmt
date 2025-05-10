@@ -10,7 +10,28 @@
     "back": "Back",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
-    "allRightsReserved": "All rights reserved."
+    "allRightsReserved": "All rights reserved.",
+    "confirm": "Confirm",
+    "close": "Close",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "refresh": "Refresh",
+    "download": "Download",
+    "upload": "Upload",
+    "remove": "Remove",
+    "add": "Add",
+    "create": "Create",
+    "update": "Update",
+    "view": "View",
+    "details": "Details",
+    "status": "Status",
+    "actions": "Actions",
+    "required": "Required",
+    "optional": "Optional"
   },
   "auth": {
     "login": "Login",
@@ -22,12 +43,31 @@
     "forgotPassword": "Forgot password?",
     "resetPassword": "Reset Password",
     "confirmPassword": "Confirm Password",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "continueWith": "Continue with",
+    "or": "or",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "verification": {
+      "title": "Email Verification",
+      "description": "Please check your email to verify your account",
+      "resend": "Resend verification email",
+      "success": "Email verified successfully",
+      "error": "Email verification failed"
+    },
     "errors": {
       "invalidEmail": "Please enter a valid email address",
       "passwordRequired": "Password is required",
       "passwordMinLength": "Password must be at least 8 characters",
       "passwordsMatch": "Passwords do not match",
-      "invalidCredentials": "Invalid email or password"
+      "invalidCredentials": "Invalid email or password",
+      "accountExists": "An account with this email already exists",
+      "networkError": "Network error. Please try again",
+      "serverError": "Server error. Please try again later",
+      "invalidToken": "Invalid or expired token",
+      "sessionExpired": "Your session has expired. Please login again"
     }
   },
   "profile": {
@@ -38,7 +78,9 @@
       "upload": "Upload new picture",
       "save": "Save picture",
       "remove": "Remove picture",
-      "helpText": "Supported formats: {{types}} up to {{size}}"
+      "helpText": "Supported formats: {{types}} up to {{size}}",
+      "crop": "Crop Image",
+      "preview": "Preview"
     },
     "firstName": "First Name",
     "lastName": "Last Name",
@@ -58,16 +100,40 @@
     "country": "Country",
     "postalCode": "Postal Code",
     "phoneNumber": "Phone Number",
+    "business": {
+      "title": "Business Profile",
+      "name": "Business Name",
+      "type": "Business Type",
+      "industry": "Industry",
+      "website": "Website",
+      "description": "Business Description",
+      "logo": "Business Logo",
+      "taxId": "Tax ID",
+      "registrationNumber": "Registration Number"
+    },
+    "verification": {
+      "title": "Profile Verification",
+      "status": "Verification Status",
+      "verified": "Verified",
+      "pending": "Pending",
+      "rejected": "Rejected",
+      "uploadDocuments": "Upload Documents",
+      "submitForReview": "Submit for Review",
+      "reviewInProgress": "Review in Progress",
+      "verificationComplete": "Verification Complete"
+    },
     "errors": {
       "nameRequired": "Name is required",
       "uploadFailed": "Failed to upload image",
-      "invalidImage": "Invalid image. Please use {{types}} up to {{size}}"
+      "invalidImage": "Invalid image. Please use {{types}} up to {{size}}",
+      "verificationFailed": "Verification failed",
+      "documentRequired": "Document is required",
+      "invalidDocument": "Invalid document format"
     }
   },
   "settings": {
     "title": "Settings",
     "preferences": "Preferences",
-    "language": "Language",
     "language": {
       "label": "Language",
       "english": "English",
@@ -77,17 +143,159 @@
     "theme": {
       "label": "Theme",
       "light": "Light",
-      "dark": "Dark"
+      "dark": "Dark",
+      "system": "System"
     },
-    "emailNotifications": "Email Notifications",
-    "emailNotifications.description": "Receive important updates and notifications via email",
-    "pushNotifications": "Push Notifications",
-    "pushNotifications.description": "Get instant notifications in your browser",
-    "twoFactorAuth": "Two-Factor Authentication",
-    "twoFactorAuth.description": "Add an extra layer of security to your account",
-    "loginAlerts": "Login Alerts",
-    "loginAlerts.description": "Get notified when someone logs into your account",
-    "privacy": "Privacy",
-    "account": "Account"
+    "notifications": {
+      "title": "Notifications",
+      "email": {
+        "title": "Email Notifications",
+        "description": "Receive important updates and notifications via email",
+        "marketing": "Marketing Emails",
+        "security": "Security Alerts",
+        "updates": "Product Updates",
+        "newsletter": "Newsletter"
+      },
+      "push": {
+        "title": "Push Notifications",
+        "description": "Get instant notifications in your browser",
+        "enabled": "Push Notifications Enabled",
+        "disabled": "Push Notifications Disabled"
+      }
+    },
+    "security": {
+      "title": "Security",
+      "twoFactorAuth": {
+        "title": "Two-Factor Authentication",
+        "description": "Add an extra layer of security to your account",
+        "enable": "Enable 2FA",
+        "disable": "Disable 2FA",
+        "setup": "Setup 2FA",
+        "verify": "Verify 2FA",
+        "backupCodes": "Backup Codes",
+        "qrCode": "Scan QR Code",
+        "manualEntry": "Manual Entry",
+        "recoveryCodes": "Recovery Codes",
+        "selectMethod": "Select a method",
+        "methods": {
+          "authenticator": "Authenticator App",
+          "sms": "SMS",
+          "email": "Email",
+          "backup": "Backup Codes"
+        },
+        "setup": {
+          "title": "Setup 2FA",
+          "description": "Choose your preferred 2FA method",
+          "authenticator": {
+            "title": "Authenticator App",
+            "description": "Use an authenticator app like Google Authenticator or Authy",
+            "scanQR": "Scan QR Code",
+            "enterManually": "Enter code manually",
+            "verifyCode": "Enter verification code"
+          },
+          "sms": {
+            "title": "SMS",
+            "description": "Receive codes via text message",
+            "enterPhone": "Enter phone number",
+            "verifyCode": "Enter verification code"
+          },
+          "email": {
+            "title": "Email",
+            "description": "Receive codes via email",
+            "verifyCode": "Enter verification code"
+          },
+          "backup": {
+            "title": "Backup Codes",
+            "description": "Generate backup codes for emergency access",
+            "generate": "Generate backup codes",
+            "download": "Download backup codes",
+            "print": "Print backup codes"
+          }
+        }
+      },
+      "loginAlerts": {
+        "title": "Login Alerts",
+        "description": "Get notified when someone logs into your account",
+        "enabled": "Login Alerts Enabled",
+        "disabled": "Login Alerts Disabled"
+      },
+      "sessions": {
+        "title": "Active Sessions",
+        "description": "Manage your active sessions",
+        "current": "Current Session",
+        "other": "Other Sessions",
+        "terminate": "Terminate Session",
+        "terminateAll": "Terminate All Other Sessions"
+      }
+    },
+    "privacy": {
+      "title": "Privacy",
+      "dataExport": "Export Data",
+      "dataDeletion": "Delete Account",
+      "visibility": "Profile Visibility",
+      "public": "Public",
+      "private": "Private",
+      "connections": "Connected Accounts"
+    },
+    "account": {
+      "title": "Account",
+      "subscription": "Subscription",
+      "billing": "Billing",
+      "paymentMethods": "Payment Methods",
+      "invoices": "Invoices",
+      "cancel": "Cancel Account"
+    }
+  },
+  "org": {
+    "sso": {
+      "title": "Single Sign-On",
+      "description": "Configure SSO for your organization",
+      "setup": "Setup SSO",
+      "configure": "Configure SSO",
+      "providers": {
+        "saml": "SAML",
+        "oidc": "OpenID Connect",
+        "azure": "Azure AD",
+        "google": "Google Workspace"
+      }
+    },
+    "team": {
+      "title": "Team Management",
+      "members": "Team Members",
+      "roles": "Roles & Permissions",
+      "invite": "Invite Member",
+      "remove": "Remove Member",
+      "transfer": "Transfer Ownership"
+    }
+  },
+  "subscription": {
+    "title": "Subscription",
+    "plans": {
+      "free": "Free",
+      "pro": "Pro",
+      "enterprise": "Enterprise"
+    },
+    "features": {
+      "users": "Users",
+      "storage": "Storage",
+      "support": "Support",
+      "api": "API Access"
+    },
+    "billing": {
+      "title": "Billing",
+      "cycle": "Billing Cycle",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "nextBilling": "Next Billing Date",
+      "paymentMethod": "Payment Method",
+      "addPaymentMethod": "Add Payment Method",
+      "removePaymentMethod": "Remove Payment Method"
+    },
+    "status": {
+      "active": "Active",
+      "canceled": "Canceled",
+      "expired": "Expired",
+      "trial": "Trial"
+    }
   }
 } 

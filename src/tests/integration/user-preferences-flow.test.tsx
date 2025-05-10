@@ -6,8 +6,12 @@ import userEvent from '@testing-library/user-event';
 import { UserPreferences } from '@/components/common/UserPreferences';
 
 // Import our standardized mock
-vi.mock('@/lib/supabase', () => require('@/tests/mocks/supabase'));
-import { supabase } from '@/lib/supabase';
+vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
+import { supabase } from '@/tests/mocks/supabase';
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
 
 describe('User Preferences Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;
@@ -23,7 +27,8 @@ describe('User Preferences Flow', () => {
     });
     
     // Mock current user preferences
-    (supabase.from() as any).select.mockResolvedValueOnce({
+    const preferencesBuilder = supabase.from('user_preferences') as any;
+    preferencesBuilder.select.mockResolvedValueOnce({
       data: {
         id: 'pref-1',
         user_id: 'user-123',
@@ -67,7 +72,8 @@ describe('User Preferences Flow', () => {
     await user.type(screen.getByLabelText(/items per page/i), '50');
     
     // Mock successful update
-    (supabase.from() as any).update.mockResolvedValueOnce({
+    const preferencesBuilder = supabase.from('user_preferences') as any;
+    preferencesBuilder.update.mockResolvedValueOnce({
       data: {
         id: 'pref-1',
         user_id: 'user-123',
@@ -89,7 +95,7 @@ describe('User Preferences Flow', () => {
     });
     
     // Verify update was called with correct data
-    expect((supabase.from().update as any)).toHaveBeenCalledWith({
+    expect(preferencesBuilder.update).toHaveBeenCalledWith({
       theme: 'dark',
       language: 'es',
       timezone: 'America/New_York',
@@ -112,7 +118,8 @@ describe('User Preferences Flow', () => {
     });
     
     // Mock preference update
-    (supabase.from() as any).update.mockResolvedValueOnce({
+    const preferencesBuilder = supabase.from('user_preferences') as any;
+    preferencesBuilder.update.mockResolvedValueOnce({
       data: {
         theme: 'dark'
       },
@@ -161,7 +168,7 @@ describe('User Preferences Flow', () => {
     expect(screen.getByText(/maximum allowed is 100/i)).toBeInTheDocument();
     
     // Verify no update was attempted
-    expect(supabase.from().update).not.toHaveBeenCalled();
+    expect(supabase.from('user_preferences').update).not.toHaveBeenCalled();
   });
   
   test('handles error when saving preferences', async () => {
@@ -177,7 +184,8 @@ describe('User Preferences Flow', () => {
     await user.selectOptions(screen.getByLabelText(/theme/i), 'dark');
     
     // Mock error during update
-    (supabase.from() as any).update.mockResolvedValueOnce({
+    const preferencesBuilder = supabase.from('user_preferences') as any;
+    preferencesBuilder.update.mockResolvedValueOnce({
       data: null,
       error: { message: 'Error saving preferences' }
     });
@@ -207,7 +215,8 @@ describe('User Preferences Flow', () => {
     await user.click(screen.getByText('Europe/London'));
     
     // Mock successful update
-    (supabase.from() as any).update.mockResolvedValueOnce({
+    const preferencesBuilder = supabase.from('user_preferences') as any;
+    preferencesBuilder.update.mockResolvedValueOnce({
       data: {
         timezone: 'Europe/London'
       },
@@ -218,7 +227,7 @@ describe('User Preferences Flow', () => {
     await user.click(screen.getByRole('button', { name: /save/i }));
     
     // Verify update was called with correct timezone
-    expect((supabase.from().update as any)).toHaveBeenCalledWith(expect.objectContaining({
+    expect(preferencesBuilder.update).toHaveBeenCalledWith(expect.objectContaining({
       timezone: 'Europe/London'
     }));
   });
@@ -236,7 +245,8 @@ describe('User Preferences Flow', () => {
     await user.selectOptions(screen.getByLabelText(/date format/i), 'DD/MM/YYYY');
     
     // Mock successful update
-    (supabase.from() as any).update.mockResolvedValueOnce({
+    const preferencesBuilder = supabase.from('user_preferences') as any;
+    preferencesBuilder.update.mockResolvedValueOnce({
       data: {
         date_format: 'DD/MM/YYYY'
       },
@@ -247,7 +257,7 @@ describe('User Preferences Flow', () => {
     await user.click(screen.getByRole('button', { name: /save/i }));
     
     // Verify update was called with correct date format
-    expect((supabase.from().update as any)).toHaveBeenCalledWith(expect.objectContaining({
+    expect(preferencesBuilder.update).toHaveBeenCalledWith(expect.objectContaining({
       date_format: 'DD/MM/YYYY'
     }));
     
@@ -278,7 +288,8 @@ describe('User Preferences Flow', () => {
     await user.click(screen.getByLabelText(/keyboard shortcuts/i));
     
     // Mock successful update
-    (supabase.from() as any).update.mockResolvedValueOnce({
+    const preferencesBuilder = supabase.from('user_preferences') as any;
+    preferencesBuilder.update.mockResolvedValueOnce({
       data: {
         advanced_settings: {
           keyboard_shortcuts: true,
@@ -292,7 +303,7 @@ describe('User Preferences Flow', () => {
     await user.click(screen.getByRole('button', { name: /save/i }));
     
     // Verify update was called with correct advanced settings
-    expect((supabase.from().update as any)).toHaveBeenCalledWith(expect.objectContaining({
+    expect(preferencesBuilder.update).toHaveBeenCalledWith(expect.objectContaining({
       advanced_settings: {
         keyboard_shortcuts: true,
         auto_save: false
@@ -319,7 +330,8 @@ describe('User Preferences Flow', () => {
     };
     
     // Mock successful reset
-    (supabase.from() as any).update.mockResolvedValueOnce({
+    const preferencesBuilder = supabase.from('user_preferences') as any;
+    preferencesBuilder.update.mockResolvedValueOnce({
       data: defaultPreferences,
       error: null
     });

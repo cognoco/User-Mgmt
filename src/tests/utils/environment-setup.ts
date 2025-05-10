@@ -21,28 +21,28 @@ export function setupTestEnvironment() {
 
   if (typeof localStorage === 'undefined') {
     global.localStorage = {
-      getItem: jest.fn(),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-      clear: jest.fn()
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn()
     };
   }
 
   if (typeof sessionStorage === 'undefined') {
     global.sessionStorage = {
-      getItem: jest.fn(),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-      clear: jest.fn()
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn()
     };
   }
 
   if (typeof document === 'undefined') {
     global.document = {
-      createElement: jest.fn(),
-      getElementById: jest.fn(),
-      querySelector: jest.fn(),
-      querySelectorAll: jest.fn(),
+      createElement: vi.fn(),
+      getElementById: vi.fn(),
+      querySelector: vi.fn(),
+      querySelectorAll: vi.fn(),
       documentElement: {
         style: {}
       }
@@ -51,7 +51,7 @@ export function setupTestEnvironment() {
 
   // Set up mock APIs
   if (typeof fetch === 'undefined') {
-    global.fetch = jest.fn().mockImplementation(() => 
+    global.fetch = vi.fn().mockImplementation(() => 
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({}),
@@ -98,23 +98,23 @@ export function createMockConsole() {
   };
 
   // Replace console methods with mocks
-  console.log = jest.fn((...args) => {
+  console.log = vi.fn((...args) => {
     captured.logs.push(args);
   });
 
-  console.warn = jest.fn((...args) => {
+  console.warn = vi.fn((...args) => {
     captured.warnings.push(args);
   });
 
-  console.error = jest.fn((...args) => {
+  console.error = vi.fn((...args) => {
     captured.errors.push(args);
   });
 
-  console.info = jest.fn((...args) => {
+  console.info = vi.fn((...args) => {
     captured.infos.push(args);
   });
 
-  console.debug = jest.fn((...args) => {
+  console.debug = vi.fn((...args) => {
     captured.debugs.push(args);
   });
 
@@ -161,19 +161,19 @@ export function setupMockTimers(options = {}) {
   } = options;
 
   // Use fake timers
-  jest.useFakeTimers({
+  vi.useFakeTimers({
     now: now.getTime(),
     doNotFake: ['nextTick', 'setImmediate', 'clearImmediate']
   });
 
   // Advance timers if requested
   if (advanceTimers) {
-    jest.advanceTimersByTime(0);
+    vi.advanceTimersByTime(0);
   }
 
   // Return cleanup function
   return () => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   };
 }
 
@@ -187,23 +187,23 @@ export function mockNextRouter(routerProps = {}) {
     pathname: '/',
     query: {},
     asPath: '/',
-    push: jest.fn().mockResolvedValue(true),
-    replace: jest.fn().mockResolvedValue(true),
-    reload: jest.fn(),
-    back: jest.fn(),
-    prefetch: jest.fn().mockResolvedValue(undefined),
-    beforePopState: jest.fn(),
+    push: vi.fn().mockResolvedValue(true),
+    replace: vi.fn().mockResolvedValue(true),
+    reload: vi.fn(),
+    back: vi.fn(),
+    prefetch: vi.fn().mockResolvedValue(undefined),
+    beforePopState: vi.fn(),
     isFallback: false,
     events: {
-      on: jest.fn(),
-      off: jest.fn(),
-      emit: jest.fn()
+      on: vi.fn(),
+      off: vi.fn(),
+      emit: vi.fn()
     },
     ...routerProps
   };
 
   // Set up the mock
-  jest.mock('next/router', () => ({
+  vi.mock('next/router', () => ({
     useRouter: () => router
   }));
 

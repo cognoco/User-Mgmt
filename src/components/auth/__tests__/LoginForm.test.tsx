@@ -77,6 +77,27 @@ vi.mock('@/components/ui/alert', () => ({
   ),
 }));
 
+// Mock OAuth context and store for OAuthButtons
+vi.mock('@/lib/auth/UserManagementProvider', () => ({
+  useUserManagement: () => ({
+    oauth: {
+      enabled: true,
+      providers: [
+        { provider: 'google' },
+        { provider: 'apple' },
+      ],
+    },
+  }),
+}));
+vi.mock('@/lib/stores/oauth.store', () => ({
+  useOAuthStore: () => ({
+    login: vi.fn(),
+    isLoading: false,
+    error: null,
+    clearError: vi.fn(),
+  }),
+}));
+
 // Mock lucide-react icons if needed for password toggle
 vi.mock('lucide-react', () => ({
   Eye: () => <div data-testid="eye-icon" />,

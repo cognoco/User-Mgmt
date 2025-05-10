@@ -4,16 +4,21 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FeedbackForm } from '@/components/common/FeedbackForm';
+import { vi } from 'vitest';
+import { supabase } from '@/tests/mocks/supabase';
 
 // Import our standardized mock
-jest.mock('@/lib/supabase');
-import { supabase } from '@/lib/supabase';
+vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
 
 describe('Feedback Submission Flow', () => {
-  let user;
+  let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     user = userEvent.setup();
     
     // Mock authentication
@@ -22,8 +27,8 @@ describe('Feedback Submission Flow', () => {
       error: null
     });
     
-    // Mock environment info
-    global.navigator.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36';
+    // Mock navigator.userAgent and window properties safely for JSDOM
+    Object.defineProperty(global.navigator, 'userAgent', { value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', configurable: true });
     global.window.innerWidth = 1024;
     global.window.innerHeight = 768;
   });
@@ -43,7 +48,8 @@ describe('Feedback Submission Flow', () => {
     );
     
     // Mock successful submission
-    supabase.from().insert.mockResolvedValueOnce({
+    const feedbackBuilder = supabase.from('feedback') as any;
+    feedbackBuilder.insert.mockResolvedValueOnce({
       data: { id: 'feedback-123' },
       error: null
     });
@@ -52,7 +58,7 @@ describe('Feedback Submission Flow', () => {
     await user.click(screen.getByRole('button', { name: /submit feedback/i }));
     
     // Verify insert was called with correct data
-    expect(supabase.from().insert).toHaveBeenCalledWith(expect.objectContaining({
+    expect(feedbackBuilder.insert).toHaveBeenCalledWith(expect.objectContaining({
       user_id: 'user-123',
       category: 'feature_request',
       description: 'I would like to see a dark mode option in the application.',
@@ -98,7 +104,8 @@ describe('Feedback Submission Flow', () => {
     });
     
     // Mock successful feedback submission
-    supabase.from().insert.mockResolvedValueOnce({
+    const feedbackBuilder = supabase.from('feedback') as any;
+    feedbackBuilder.insert.mockResolvedValueOnce({
       data: { id: 'feedback-123' },
       error: null
     });
@@ -108,7 +115,7 @@ describe('Feedback Submission Flow', () => {
     
     // Verify screenshot was uploaded and included in feedback
     expect(supabase.storage.from().upload).toHaveBeenCalled();
-    expect(supabase.from().insert).toHaveBeenCalledWith(expect.objectContaining({
+    expect(feedbackBuilder.insert).toHaveBeenCalledWith(expect.objectContaining({
       category: 'bug_report',
       description: 'The save button is not working properly.',
       screenshot_url: 'https://example.com/screenshots/feedback-123/screenshot.png'
@@ -132,7 +139,8 @@ describe('Feedback Submission Flow', () => {
     expect(screen.getByText(/please provide a description/i)).toBeInTheDocument();
     
     // Verify no submission attempt was made
-    expect(supabase.from().insert).not.toHaveBeenCalled();
+    const feedbackBuilder = supabase.from('feedback') as any;
+    expect(feedbackBuilder.insert).not.toHaveBeenCalled();
   });
   
   test('User can include contact information for follow-up', async () => {
@@ -156,7 +164,8 @@ describe('Feedback Submission Flow', () => {
     await user.type(screen.getByLabelText(/preferred contact method/i), 'Email');
     
     // Mock successful submission
-    supabase.from().insert.mockResolvedValueOnce({
+    const feedbackBuilder = supabase.from('feedback') as any;
+    feedbackBuilder.insert.mockResolvedValueOnce({
       data: { id: 'feedback-123' },
       error: null
     });
@@ -165,7 +174,7 @@ describe('Feedback Submission Flow', () => {
     await user.click(screen.getByRole('button', { name: /submit feedback/i }));
     
     // Verify insert was called with contact information
-    expect(supabase.from().insert).toHaveBeenCalledWith(expect.objectContaining({
+    expect(feedbackBuilder.insert).toHaveBeenCalledWith(expect.objectContaining({
       category: 'question',
       description: 'How do I export my data?',
       allow_contact: true,
@@ -198,7 +207,8 @@ describe('Feedback Submission Flow', () => {
     await user.type(screen.getByLabelText(/email \(optional\)/i), 'anonymous@example.com');
     
     // Mock successful submission
-    supabase.from().insert.mockResolvedValueOnce({
+    const feedbackBuilder = supabase.from('feedback') as any;
+    feedbackBuilder.insert.mockResolvedValueOnce({
       data: { id: 'feedback-123' },
       error: null
     });
@@ -207,7 +217,7 @@ describe('Feedback Submission Flow', () => {
     await user.click(screen.getByRole('button', { name: /submit feedback/i }));
     
     // Verify insert was called with appropriate data
-    expect(supabase.from().insert).toHaveBeenCalledWith(expect.objectContaining({
+    expect(feedbackBuilder.insert).toHaveBeenCalledWith(expect.objectContaining({
       category: 'suggestion',
       description: 'The UI could be more intuitive.',
       is_anonymous: true,
@@ -233,7 +243,8 @@ describe('Feedback Submission Flow', () => {
     );
     
     // Mock submission error
-    supabase.from().insert.mockResolvedValueOnce({
+    const feedbackBuilder = supabase.from('feedback') as any;
+    feedbackBuilder.insert.mockResolvedValueOnce({
       data: null,
       error: { message: 'Error submitting feedback' }
     });
@@ -250,7 +261,7 @@ describe('Feedback Submission Flow', () => {
     expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
     
     // Fix the error
-    supabase.from().insert.mockResolvedValueOnce({
+    feedbackBuilder.insert.mockResolvedValueOnce({
       data: { id: 'feedback-123' },
       error: null
     });

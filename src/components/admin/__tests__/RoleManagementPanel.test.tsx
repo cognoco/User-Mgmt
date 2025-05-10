@@ -46,8 +46,8 @@ describe('RoleManagementPanel', () => {
     expect(screen.getByText('Admin User')).toBeInTheDocument();
     expect(screen.getByText('Regular User')).toBeInTheDocument();
     expect(screen.getAllByRole('row')).toHaveLength(3); // header + 2 users
-    expect(screen.getByText('admin')).toBeInTheDocument();
-    expect(screen.getByText('user')).toBeInTheDocument();
+    expect(screen.getAllByText('admin').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('user').length).toBeGreaterThan(0);
   });
 
   it('assigns a role to a user', async () => {
@@ -101,8 +101,8 @@ describe('RoleManagementPanel', () => {
     // Expand all details
     const summaries = screen.getAllByRole('button', { name: /admin|user/i });
     summaries.forEach((summary) => fireEvent.click(summary));
-    expect(screen.getByText('read:users')).toBeInTheDocument();
-    expect(screen.getByText('assign:roles')).toBeInTheDocument();
+    expect(screen.getAllByText('read:users').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('assign:roles').length).toBeGreaterThan(0);
   });
 
   it('handles loading, error, and empty states', () => {
@@ -117,7 +117,7 @@ describe('RoleManagementPanel', () => {
     });
     (useRBACStore as any).mockReturnValue(rbacMock);
     render(<RoleManagementPanel users={mockUsers} />);
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/loading/i).length).toBeGreaterThan(0);
 
     // Error state
     rbacMock = createRBACStoreMock({

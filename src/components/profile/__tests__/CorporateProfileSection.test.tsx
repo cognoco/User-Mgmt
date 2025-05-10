@@ -2,65 +2,12 @@ import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { I18nextProvider } from 'react-i18next';
-import i18n from '@/lib/i18n/index';
-// Import init function from i18next
-import { initReactI18next } from 'react-i18next';
-import i18next from 'i18next';
 import { MemoryRouter } from 'react-router-dom';
 import * as UserManagementProvider from '@/lib/auth/UserManagementProvider';
 
-// Import the actual i18n instance used by the app if possible, or create one for tests
-// Assuming i18n configuration exists and can be imported/mocked
-// import i18nTestConfig from '@/lib/i18n/config/i18n.test.config'; // Adjust path if needed
-
 import { CorporateProfileSection } from '../CorporateProfileSection';
 import { UserType, Company } from '@/types/user-type';
-
-// Initialize i18next specifically for testing before describing tests
-// This ensures the t function behaves predictably (e.g., returns the key)
-i18next.use(initReactI18next).init({
-  lng: 'en', // Set a default language
-  // Provide minimal resources, or rely on fallbackLng/key return
-  resources: { 
-    en: { 
-      translation: { 
-        // You can add specific keys here if needed for complex tests,
-        // but often just returning the key is sufficient.
-      } 
-    } 
-  },
-  // Key options for testing:
-  interpolation: {
-    escapeValue: false, // React already protects from XSS
-  },
-  // Make t function return the key if no translation is found
-  fallbackLng: false, // Don't fallback to other languages
-  nsSeparator: false, 
-  keySeparator: false, // Allow dots in keys
-  // Return the key itself if not found
-  parseMissingKeyHandler: (key) => key,
-});
-
-// Mock UI components used
-vi.mock('@/components/ui/button', () => ({ Button: (props: any) => <button {...props} /> }));
-vi.mock('@/components/ui/input', () => ({ Input: React.forwardRef((props: any, ref: any) => <input ref={ref} {...props} />) }));
-vi.mock('@/components/ui/label', () => ({ Label: (props: any) => <label {...props} /> }));
-vi.mock('@/components/ui/card', () => ({
-  Card: ({ children }: { children: React.ReactNode }) => <div data-testid="card">{children}</div>,
-  CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  CardTitle: ({ children }: { children: React.ReactNode }) => <h3>{children}</h3>,
-  CardDescription: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
-  CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  CardFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
-vi.mock('@/components/ui/separator', () => ({ Separator: () => <hr /> }));
-vi.mock('@/components/ui/alert', () => ({
-  Alert: ({ children }: { children: React.ReactNode }) => <div role="alert">{children}</div>,
-  AlertDescription: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
-}));
-// Mock CompanyLogoUpload as it has its own tests/dependencies
-vi.mock('../CompanyLogoUpload', () => ({ CompanyLogoUpload: () => <div data-testid="company-logo-upload">Logo Upload</div> }));
+import { UserManagementContextValue, Platform } from '@/types/user-management';
 
 const mockOnUpdate = vi.fn();
 
@@ -81,8 +28,8 @@ const initialCompanyData: Company = {
   },
 };
 
-const defaultUserManagementContext = {
-  config: {},
+const defaultUserManagementContext: UserManagementContextValue = {
+  config: { features: {}, auth: {}, profile: {} },
   callbacks: {
     onUserLogin: () => {},
     onUserLogout: () => {},
@@ -95,12 +42,15 @@ const defaultUserManagementContext = {
     useCustomFooter: false,
     footerComponent: null,
     useCustomLayout: false,
-    layoutComponent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    layoutComponent: Object.assign(
+      ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      { displayName: 'MockLayoutComponent' }
+    ),
   },
-  platform: 'web',
+  platform: 'web' as Platform,
   isNative: false,
   ui: {},
-  api: {},
+  api: {} as any, // Adjust as needed for actual API structure
   storageKeyPrefix: 'user',
   i18nNamespace: 'userManagement',
   twoFactor: {
@@ -131,46 +81,62 @@ const defaultUserManagementContext = {
   },
 };
 
+vi.mock('@/components/ui/button', () => ({ Button: (props: any) => <button {...props} /> }));
+vi.mock('@/components/ui/input', () => {
+    const MockInput = React.forwardRef((props: any, ref: any) => <input ref={ref} {...props} />);
+    MockInput.displayName = 'MockInput';
+    return { Input: MockInput };
+});
+vi.mock('@/components/ui/label', () => ({ Label: (props: any) => <label {...props} /> }));
+vi.mock('@/components/ui/card', () => ({
+  Card: ({ children }: { children: React.ReactNode }) => <div data-testid="card">{children}</div>,
+  CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CardTitle: ({ children }: { children: React.ReactNode }) => <h3>{children}</h3>,
+  CardDescription: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
+  CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  CardFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+vi.mock('@/components/ui/separator', () => ({ Separator: () => <hr /> }));
+vi.mock('@/components/ui/alert', () => ({
+  Alert: ({ children }: { children: React.ReactNode }) => <div role="alert">{children}</div>,
+  AlertDescription: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
+}));
+vi.mock('../CompanyLogoUpload', () => {
+    const MockedCompanyLogoUpload = () => <div data-testid="company-logo-upload">Logo Upload</div>;
+    MockedCompanyLogoUpload.displayName = 'MockedCompanyLogoUpload';
+    return { CompanyLogoUpload: MockedCompanyLogoUpload };
+});
+
 describe('CorporateProfileSection Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(UserManagementProvider, 'useUserManagement').mockReturnValue({
       ...defaultUserManagementContext,
       corporateUsers: {
+        ...defaultUserManagementContext.corporateUsers,
         enabled: true,
-        registrationEnabled: true,
-        requireCompanyValidation: false,
-        allowUserTypeChange: false,
-        companyFieldsRequired: ['name'],
-        defaultUserType: UserType.PRIVATE,
       },
-    });
+    } as UserManagementContextValue);
   });
 
   it('should render nothing if corporate users are disabled', async () => {
     vi.spyOn(UserManagementProvider, 'useUserManagement').mockReturnValue({
       ...defaultUserManagementContext,
       corporateUsers: {
+        ...defaultUserManagementContext.corporateUsers,
         enabled: false,
-        registrationEnabled: true,
-        requireCompanyValidation: false,
-        allowUserTypeChange: false,
-        companyFieldsRequired: ['name'],
-        defaultUserType: UserType.PRIVATE,
       },
-    });
-    let container: HTMLElement | null = null;
+    } as UserManagementContextValue);
+    let container: HTMLElement | undefined;
     await act(async () => {
       const result = render(
-        <I18nextProvider i18n={i18next}>
-          <MemoryRouter>
-            <CorporateProfileSection 
-              userType={UserType.CORPORATE} 
-              company={initialCompanyData} 
-              onUpdate={mockOnUpdate} 
-            />
-          </MemoryRouter>
-        </I18nextProvider>
+        <MemoryRouter>
+          <CorporateProfileSection 
+            userType={UserType.CORPORATE} 
+            company={initialCompanyData} 
+            onUpdate={mockOnUpdate} 
+          />
+        </MemoryRouter>
       );
       container = result.container;
     });
@@ -178,18 +144,16 @@ describe('CorporateProfileSection Component', () => {
   });
 
   it('should render nothing if user type is not corporate', async () => {
-    let container: HTMLElement | null = null;
+    let container: HTMLElement | undefined;
     await act(async () => {
       const result = render(
-        <I18nextProvider i18n={i18next}>
-          <MemoryRouter>
-            <CorporateProfileSection 
-              userType={UserType.PRIVATE} // Pass PRIVATE type
-              company={initialCompanyData} 
-              onUpdate={mockOnUpdate} 
-            />
-          </MemoryRouter>
-        </I18nextProvider>
+        <MemoryRouter>
+          <CorporateProfileSection 
+            userType={UserType.PRIVATE} // Pass PRIVATE type
+            company={initialCompanyData} 
+            onUpdate={mockOnUpdate} 
+          />
+        </MemoryRouter>
       );
       container = result.container;
     });
@@ -199,15 +163,13 @@ describe('CorporateProfileSection Component', () => {
   it('should render the form with initial company data', async () => {
     await act(async () => {
       render(
-        <I18nextProvider i18n={i18next}>
-          <MemoryRouter>
-            <CorporateProfileSection 
-              userType={UserType.CORPORATE} 
-              company={initialCompanyData} 
-              onUpdate={mockOnUpdate} 
-            />
-          </MemoryRouter>
-        </I18nextProvider>
+        <MemoryRouter>
+          <CorporateProfileSection 
+            userType={UserType.CORPORATE} 
+            company={initialCompanyData} 
+            onUpdate={mockOnUpdate} 
+          />
+        </MemoryRouter>
       );
     });
 
@@ -231,15 +193,13 @@ describe('CorporateProfileSection Component', () => {
     const user = userEvent.setup();
     await act(async () => {
       render(
-        <I18nextProvider i18n={i18next}>
-          <MemoryRouter>
-            <CorporateProfileSection 
-              userType={UserType.CORPORATE} 
-              company={initialCompanyData} 
-              onUpdate={mockOnUpdate} 
-            />
-          </MemoryRouter>
-        </I18nextProvider>
+        <MemoryRouter>
+          <CorporateProfileSection 
+            userType={UserType.CORPORATE} 
+            company={initialCompanyData} 
+            onUpdate={mockOnUpdate} 
+          />
+        </MemoryRouter>
       );
     });
 
@@ -277,15 +237,13 @@ describe('CorporateProfileSection Component', () => {
     const user = userEvent.setup();
     await act(async () => {
       render(
-        <I18nextProvider i18n={i18next}>
-          <MemoryRouter>
-            <CorporateProfileSection 
-              userType={UserType.CORPORATE} 
-              company={initialCompanyData} // Start with address data
-              onUpdate={mockOnUpdate} 
-            />
-          </MemoryRouter>
-        </I18nextProvider>
+        <MemoryRouter>
+          <CorporateProfileSection 
+            userType={UserType.CORPORATE} 
+            company={initialCompanyData} // Start with address data
+            onUpdate={mockOnUpdate} 
+          />
+        </MemoryRouter>
       );
     });
 

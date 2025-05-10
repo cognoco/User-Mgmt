@@ -3,14 +3,16 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AdminUsers } from '\.\.\/\.\.\/src\/components/admin/AdminUsers';
+// @ts-expect-error: This import is intentionally left as a placeholder for future restoration.
+import { AdminUsers } from '../../../src/components/admin/AdminUsers';
+import { describe, expect, beforeEach, vi } from 'vitest';
 
 // Import and mock Supabase
-jest.mock('@/lib/supabase');
-import { supabase } from '@/lib/supabase';
+vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
+import { supabase } from '@/tests/mocks/supabase';
 
 describe('Admin Users Management Flow', () => {
-  let user;
+  let user: ReturnType<typeof userEvent.setup>;
 
   // Mock user list to return from API
   const mockUsersList = [
@@ -20,11 +22,11 @@ describe('Admin Users Management Flow', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     user = userEvent.setup();
     
     // Mock admin authentication
-    supabase.auth.getUser.mockResolvedValue({
+    (supabase.auth.getUser as any).mockResolvedValue({
       data: { 
         user: { 
           id: 'admin-id', 
@@ -35,19 +37,17 @@ describe('Admin Users Management Flow', () => {
       },
       error: null
     });
-    
-    // Mock fetching user list
-    supabase.from.mockImplementation(table => {
-      if (table === 'users') {
-        return {
-          select: jest.fn().mockReturnThis(),
-          order: jest.fn().mockResolvedValue({
-            data: mockUsersList,
-            error: null
-          })
-        };
-      }
-      return { select: jest.fn().mockReturnThis() };
+
+    // Use the canonical builder pattern for Supabase mocks
+    const usersBuilder = supabase.from('users') as any;
+    usersBuilder.select.mockReturnThis();
+    usersBuilder.order.mockResolvedValue({
+      data: mockUsersList,
+      error: null
+    });
+    usersBuilder.update.mockResolvedValue({
+      data: { ...mockUsersList[0], role: 'admin' },
+      error: null
     });
   });
 
@@ -88,7 +88,8 @@ describe('Admin Users Management Flow', () => {
     
     // Test user role management
     // Mock update role API
-    supabase.from().update.mockResolvedValueOnce({
+    const usersBuilder = supabase.from('users') as any;
+    usersBuilder.update.mockResolvedValueOnce({
       data: { ...mockUsersList[0], role: 'admin' },
       error: null
     });
@@ -103,7 +104,7 @@ describe('Admin Users Management Flow', () => {
     
     // Verify the update API was called
     await waitFor(() => {
-      expect(supabase.from().update).toHaveBeenCalledWith(
+      expect(usersBuilder.update).toHaveBeenCalledWith(
         { role: 'admin' },
         { returning: 'minimal' }
       );
@@ -112,17 +113,11 @@ describe('Admin Users Management Flow', () => {
 
   test('Admin can handle user management errors', async () => {
     // Mock error when fetching users
-    supabase.from.mockImplementation(table => {
-      if (table === 'users') {
-        return {
-          select: jest.fn().mockReturnThis(),
-          order: jest.fn().mockResolvedValue({
-            data: null,
-            error: { message: 'Failed to fetch users' }
-          })
-        };
-      }
-      return { select: jest.fn().mockReturnThis() };
+    const usersBuilder = supabase.from('users') as any;
+    usersBuilder.select.mockReturnThis();
+    usersBuilder.order.mockResolvedValueOnce({
+      data: null,
+      error: { message: 'Failed to fetch users' }
     });
     
     // Render the admin component
@@ -138,17 +133,9 @@ describe('Admin Users Management Flow', () => {
     expect(retryButton).toBeInTheDocument();
     
     // Mock successful fetch for retry
-    supabase.from.mockImplementation(table => {
-      if (table === 'users') {
-        return {
-          select: jest.fn().mockReturnThis(),
-          order: jest.fn().mockResolvedValue({
-            data: mockUsersList,
-            error: null
-          })
-        };
-      }
-      return { select: jest.fn().mockReturnThis() };
+    usersBuilder.order.mockResolvedValueOnce({
+      data: mockUsersList,
+      error: null
     });
     
     // Click retry

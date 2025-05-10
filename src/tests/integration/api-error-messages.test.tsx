@@ -6,14 +6,14 @@ import userEvent from '@testing-library/user-event';
 import { LoginForm } from '\.\.\/\.\.\/src\/components/auth/LoginForm';
 
 // Import our standardized mock
-jest.mock('@/lib/supabase');
+vi.mock('@/lib/supabase');
 import { supabase } from '\.\.\/\.\.\/src\/lib/supabase';
 
 describe('API Error Messages', () => {
   let user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     user = userEvent.setup();
   });
 
@@ -51,7 +51,7 @@ describe('API Error Messages', () => {
     
     for (const scenario of errorScenarios) {
       // Mock API error response
-      supabase.auth.signInWithPassword = jest.fn().mockResolvedValueOnce({
+      supabase.auth.signInWithPassword = vi.fn().mockResolvedValueOnce({
         data: null,
         error: scenario.apiError
       });
@@ -160,7 +160,7 @@ describe('API Error Messages', () => {
     await user.type(screen.getByLabelText(/password/i), 'wrong-password');
     
     // Mock login error
-    supabase.auth.signInWithPassword = jest.fn().mockResolvedValueOnce({
+    supabase.auth.signInWithPassword = vi.fn().mockResolvedValueOnce({
       data: null,
       error: { message: 'Invalid login credentials', code: 'invalid_credentials' }
     });
@@ -181,7 +181,7 @@ describe('API Error Messages', () => {
     await user.type(screen.getByLabelText(/password/i), 'password123');
     
     // Mock verification error
-    supabase.auth.signInWithPassword = jest.fn().mockResolvedValueOnce({
+    supabase.auth.signInWithPassword = vi.fn().mockResolvedValueOnce({
       data: null,
       error: { message: 'Email not confirmed', code: 'email_not_confirmed' }
     });
@@ -204,7 +204,7 @@ describe('API Error Messages', () => {
     await user.type(screen.getByLabelText(/password/i), 'password123');
     
     // Mock unexpected error with no code
-    supabase.auth.signInWithPassword = jest.fn().mockResolvedValueOnce({
+    supabase.auth.signInWithPassword = vi.fn().mockResolvedValueOnce({
       data: null,
       error: { message: 'Unknown server error', status: 500 }
     });

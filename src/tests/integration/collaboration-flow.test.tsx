@@ -4,26 +4,28 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CollaborationWorkspace } from '../../src/components/collaboration/CollaborationWorkspace';
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 
 // Import our standardized mock
-jest.mock('@/lib/supabase');
+vi.mock('@/lib/supabase');
 import { supabase } from '@/lib/supabase';
 
 describe('Collaboration Features Flow', () => {
-  let user;
+  let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     user = userEvent.setup();
     
     // Mock authentication
-    supabase.auth.getUser.mockResolvedValue({
+    (supabase.auth.getUser as any).mockResolvedValue({
       data: { user: { id: 'user-123', email: 'user@example.com' } },
       error: null
     });
     
-    // Mock document data
-    supabase.from().select.mockResolvedValueOnce({
+    // Mock document data using builder pattern
+    const docBuilder = supabase.from('documents') as any;
+    docBuilder.select.mockResolvedValueOnce({
       data: {
         id: 'doc-123',
         title: 'Shared Document',
@@ -41,9 +43,9 @@ describe('Collaboration Features Flow', () => {
     });
     
     // Mock realtime subscription
-    supabase.channel = jest.fn().mockReturnValue({
-      on: jest.fn().mockReturnThis(),
-      subscribe: jest.fn().mockResolvedValue({})
+    supabase.channel = vi.fn().mockReturnValue({
+      on: vi.fn().mockReturnThis(),
+      subscribe: vi.fn().mockResolvedValue({})
     });
   });
 
@@ -62,8 +64,9 @@ describe('Collaboration Features Flow', () => {
     await user.clear(contentArea);
     await user.type(contentArea, 'Updated document content');
     
-    // Mock successful update
-    supabase.from().update.mockResolvedValueOnce({
+    // Mock successful update using builder pattern
+    const docBuilder = supabase.from('documents') as any;
+    docBuilder.update.mockResolvedValueOnce({
       data: {
         id: 'doc-123',
         content: 'Updated document content',
@@ -76,7 +79,7 @@ describe('Collaboration Features Flow', () => {
     await user.click(screen.getByRole('button', { name: /save/i }));
     
     // Verify update was called with correct data
-    expect(supabase.from().update).toHaveBeenCalledWith({
+    expect(docBuilder.update).toHaveBeenCalledWith({
       content: 'Updated document content',
       updated_at: expect.any(String)
     });
@@ -124,9 +127,10 @@ describe('Collaboration Features Flow', () => {
     // Click add collaborator button
     await user.click(screen.getByRole('button', { name: /add collaborator/i }));
     
-    // Mock user search
-    supabase.from().select.mockReset();
-    supabase.from().select.mockResolvedValueOnce({
+    // Mock user search using builder pattern
+    const userBuilder = supabase.from('users') as any;
+    userBuilder.select.mockReset();
+    userBuilder.select.mockResolvedValueOnce({
       data: [
         { id: 'new-user-1', email: 'newuser@example.com', name: 'New User' },
         { id: 'new-user-2', email: 'another@example.com', name: 'Another User' }
@@ -151,7 +155,7 @@ describe('Collaboration Features Flow', () => {
     await user.click(screen.getByText(/editor/i));
     
     // Mock successful addition
-    supabase.rpc = jest.fn().mockResolvedValueOnce({
+    supabase.rpc = vi.fn().mockResolvedValueOnce({
       data: { success: true },
       error: null
     });
@@ -175,13 +179,13 @@ describe('Collaboration Features Flow', () => {
   test('Notifications appear when other users make changes', async () => {
     // Setup realtime channel mock to simulate updates
     const channelMock = {
-      on: jest.fn().mockImplementation((event, callback) => {
+      on: vi.fn().mockImplementation((event, callback) => {
         // Store callback to trigger it later
         channelMock.callbacks = channelMock.callbacks || {};
         channelMock.callbacks[event] = callback;
         return channelMock;
       }),
-      subscribe: jest.fn().mockResolvedValue({})
+      subscribe: vi.fn().mockResolvedValue({})
     };
     
     supabase.channel.mockReturnValue(channelMock);
@@ -225,12 +229,12 @@ describe('Collaboration Features Flow', () => {
   test('Shows presence indicators for active collaborators', async () => {
     // Setup realtime channel mock for presence
     const presenceMock = {
-      on: jest.fn().mockImplementation((event, callback) => {
+      on: vi.fn().mockImplementation((event, callback) => {
         presenceMock.callbacks = presenceMock.callbacks || {};
         presenceMock.callbacks[event] = callback;
         return presenceMock;
       }),
-      subscribe: jest.fn().mockResolvedValue({})
+      subscribe: vi.fn().mockResolvedValue({})
     };
     
     supabase.channel.mockReturnValue(presenceMock);
@@ -277,8 +281,59 @@ describe('Collaboration Features Flow', () => {
   
   test('User can change collaborator permissions', async () => {
     // Render collaboration workspace with owner permissions
-    supabase.from().select.mockReset();
-    supabase.from().select.mockResolvedValueOnce({
+    const docBuilder = supabase.from('documents') as any;
+    docBuilder.select.mockReset();
+    docBuilder.select.mockResolvedValueOnce({
       data: {
         id: 'doc-123',
-        title: 'Shared Do
+        title: 'Shared Document',
+        content: 'Initial document content',
+        owner_id: 'owner-456',
+        created_at: '2023-06-15T10:30:00Z',
+        updated_at: '2023-06-15T10:30:00Z',
+        collaborators: [
+          { id: 'user-123', name: 'Current User', role: 'owner' },
+          { id: 'user-456', name: 'Jane Smith', role: 'editor' },
+          { id: 'user-789', name: 'Bob Johnson', role: 'viewer' }
+        ]
+      },
+      error: null
+    });
+    render(<CollaborationWorkspace documentId="doc-123" />);
+    
+    // Wait for document to load
+    await waitFor(() => {
+      expect(screen.getByText('Shared Document')).toBeInTheDocument();
+    });
+    
+    // Edit document
+    const contentArea = screen.getByRole('textbox');
+    await user.clear(contentArea);
+    await user.type(contentArea, 'Updated document content');
+    
+    // Mock successful update using builder pattern
+    const docBuilder = supabase.from('documents') as any;
+    docBuilder.update.mockResolvedValueOnce({
+      data: {
+        id: 'doc-123',
+        content: 'Updated document content',
+        updated_at: '2023-06-15T11:00:00Z'
+      },
+      error: null
+    });
+    
+    // Save changes
+    await user.click(screen.getByRole('button', { name: /save/i }));
+    
+    // Verify update was called with correct data
+    expect(docBuilder.update).toHaveBeenCalledWith({
+      content: 'Updated document content',
+      updated_at: expect.any(String)
+    });
+    
+    // Verify success message
+    await waitFor(() => {
+      expect(screen.getByText(/saved successfully/i)).toBeInTheDocument();
+    });
+  });
+});

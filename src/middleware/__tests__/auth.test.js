@@ -2,9 +2,10 @@
 
 import { createMocks } from 'node-mocks-http';
 import { withAuth } from '../../middleware/auth';
+import { describe, test, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 
 // Import our standardized mock
-jest.mock('../../src/lib/supabase', () => require('../mocks/supabase'));
+vi.mock('../../src/lib/supabase', () => require('../mocks/supabase'));
 import { supabase } from '../../src/lib/supabase';
 
 // Import utility functions
@@ -25,7 +26,7 @@ describe('Auth Middleware', () => {
   
   beforeEach(() => {
     // Clear all mocks before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('allows authenticated requests to proceed', async () => {
@@ -39,7 +40,7 @@ describe('Auth Middleware', () => {
     });
 
     // Create a mock handler that the middleware will wrap
-    const handler = jest.fn().mockImplementation((req, res) => {
+    const handler = vi.fn().mockImplementation((req, res) => {
       res.status(200).json({ success: true });
     });
 
@@ -73,7 +74,7 @@ describe('Auth Middleware', () => {
 
   test('rejects requests without authorization header', async () => {
     // Create a mock handler that the middleware will wrap
-    const handler = jest.fn().mockImplementation((req, res) => {
+    const handler = vi.fn().mockImplementation((req, res) => {
       res.status(200).json({ success: true });
     });
 
@@ -106,7 +107,7 @@ describe('Auth Middleware', () => {
     });
 
     // Create a mock handler that the middleware will wrap
-    const handler = jest.fn().mockImplementation((req, res) => {
+    const handler = vi.fn().mockImplementation((req, res) => {
       res.status(200).json({ success: true });
     });
 
@@ -142,7 +143,7 @@ describe('Auth Middleware', () => {
     supabase.auth.getUser.mockRejectedValue(new Error('Server error'));
 
     // Create a mock handler that the middleware will wrap
-    const handler = jest.fn().mockImplementation((req, res) => {
+    const handler = vi.fn().mockImplementation((req, res) => {
       res.status(200).json({ success: true });
     });
 
@@ -183,7 +184,7 @@ describe('Auth Middleware', () => {
     });
 
     // Create a mock handler that the middleware will wrap
-    const handler = jest.fn().mockImplementation((req, res) => {
+    const handler = vi.fn().mockImplementation((req, res) => {
       res.status(200).json({ success: true });
     });
 
@@ -222,7 +223,7 @@ describe('Auth Middleware', () => {
     });
 
     // Create a mock handler that the middleware will wrap
-    const handler = jest.fn().mockImplementation((req, res) => {
+    const handler = vi.fn().mockImplementation((req, res) => {
       res.status(200).json({ success: true });
     });
 
@@ -259,7 +260,7 @@ describe('Auth Middleware', () => {
     
     for (const testCase of testCases) {
       // Clear mocks before each test case
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       
       // Create a mock user
       const mockUser = createMockUser();
@@ -272,7 +273,7 @@ describe('Auth Middleware', () => {
         error: null,
       });
       
-      const handler = jest.fn().mockImplementation((req, res) => {
+      const handler = vi.fn().mockImplementation((req, res) => {
         res.status(200).json({ success: true });
       });
       

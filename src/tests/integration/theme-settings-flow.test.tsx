@@ -7,8 +7,8 @@ import { ThemeSettings } from '@/components/common/ThemeSettings';
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 
 // Import our standardized mock
-vi.mock('@/lib/supabase', () => require('../mocks/supabase'));
-import { supabase } from '@/lib/supabase';
+vi.mock('@/tests/mocks/supabase');
+import { supabase } from '@/tests/mocks/supabase';
 
 // Store original implementations to restore later
 const originalLocalStorage = window.localStorage;
@@ -108,7 +108,8 @@ describe('Theme/Appearance Settings Flow', () => {
     await user.click(screen.getByLabelText(/dark/i));
     
     // Mock successful preference update
-    supabase.from().update.mockResolvedValueOnce({
+    const preferencesBuilder = supabase.from('user_preferences') as any;
+    preferencesBuilder.update.mockResolvedValueOnce({
       data: {
         theme: 'dark'
       },
@@ -126,7 +127,7 @@ describe('Theme/Appearance Settings Flow', () => {
     expect(window.localStorage.setItem).toHaveBeenCalledWith('theme', 'dark');
     
     // Verify database update
-    expect(supabase.from().update).toHaveBeenCalledWith(expect.objectContaining({
+    expect(preferencesBuilder.update).toHaveBeenCalledWith(expect.objectContaining({
       theme: 'dark'
     }));
     
@@ -149,7 +150,8 @@ describe('Theme/Appearance Settings Flow', () => {
     await user.click(screen.getByLabelText(/system/i));
     
     // Mock successful preference update
-    supabase.from().update.mockResolvedValueOnce({
+    const preferencesBuilder = supabase.from('user_preferences') as any;
+    preferencesBuilder.update.mockResolvedValueOnce({
       data: {
         theme: 'system'
       },
@@ -167,7 +169,7 @@ describe('Theme/Appearance Settings Flow', () => {
     expect(window.localStorage.setItem).toHaveBeenCalledWith('theme', 'system');
     
     // Verify database update
-    expect(supabase.from().update).toHaveBeenCalledWith(expect.objectContaining({
+    expect(preferencesBuilder.update).toHaveBeenCalledWith(expect.objectContaining({
       theme: 'system'
     }));
   });
@@ -185,7 +187,8 @@ describe('Theme/Appearance Settings Flow', () => {
     await user.click(screen.getByTestId('color-scheme-purple'));
     
     // Mock successful preference update
-    supabase.from().update.mockResolvedValueOnce({
+    const preferencesBuilder = supabase.from('user_preferences') as any;
+    preferencesBuilder.update.mockResolvedValueOnce({
       data: {
         color_scheme: 'purple'
       },

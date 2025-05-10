@@ -33,7 +33,27 @@ function createMockBuilder() {
     'single', 'maybeSingle',
   ];
   methods.forEach((method) => {
-    builder[method] = vi.fn().mockReturnValue(builder);
+    // Create a vi.fn that by default returns the builder (chainable)
+    const fn = vi.fn(function (...args) {
+      // If the mock for this call returns a promise, return it (end chain)
+      const mockImpl = fn.getMockImplementation();
+      if (mockImpl) {
+        const result = mockImpl.apply(this, args);
+        if (result && typeof result.then === 'function') {
+          return result;
+        }
+        return result;
+      }
+      // If a mockReturnValue/mockResolvedValue is set, use it
+      if (fn.mock.results.length > 0) {
+        const lastResult = fn.mock.results[fn.mock.results.length - 1].value;
+        if (lastResult && typeof lastResult.then === 'function') {
+          return lastResult;
+        }
+      }
+      return builder;
+    });
+    builder[method] = fn;
   });
   // Add a .then method to allow awaiting the chain in tests
   builder.then = vi.fn();

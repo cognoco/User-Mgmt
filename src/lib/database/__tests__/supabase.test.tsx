@@ -1,62 +1,53 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 
-// Mock before importing the module that uses it
-jest.mock('@supabase/supabase-js');
+vi.mock('@supabase/supabase-js');
 
 describe('Supabase Client', () => {
   const mockSupabaseUrl = 'https://test.supabase.co';
   const mockSupabaseAnonKey = 'test-anon-key';
   const mockSupabaseServiceKey = 'test-service-key';
   const mockClient = {
-    auth: { signIn: jest.fn(), signUp: jest.fn() },
-    from: jest.fn(),
-    storage: { from: jest.fn() }
+    auth: { signIn: vi.fn(), signUp: vi.fn() },
+    from: vi.fn(),
+    storage: { from: vi.fn() }
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
     process.env.NEXT_PUBLIC_SUPABASE_URL = mockSupabaseUrl;
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = mockSupabaseAnonKey;
     process.env.SUPABASE_SERVICE_KEY = mockSupabaseServiceKey;
-    
-    // Reset the module to force re-creation of the client
-    jest.resetModules();
-    
-    // Mock createClient to return our mock client
-    createClient.mockReturnValue(mockClient);
+    vi.resetModules();
+    (createClient as any).mockReturnValue(mockClient);
   });
 
   afterEach(() => {
-    // Clean up environment variables
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     delete process.env.SUPABASE_SERVICE_KEY;
   });
 
-  it('should create a Supabase client with correct parameters', () => {
-    // Re-import to get fresh instance
-    const { supabase } = require('../../lib/supabase');
+  it('should create a Supabase client with correct parameters', async () => {
+    const mod = await import('../../lib/supabase');
     expect(createClient).toHaveBeenCalledWith(mockSupabaseUrl, mockSupabaseAnonKey);
   });
 
-  it('should create a service role client with correct parameters', () => {
-    // Re-import to get fresh instance
-    const { getServiceSupabase } = require('../../lib/supabase');
-    const serviceClient = getServiceSupabase();
+  it('should create a service role client with correct parameters', async () => {
+    const mod = await import('../../lib/supabase');
+    const serviceClient = mod.getServiceSupabase();
     expect(createClient).toHaveBeenCalledWith(mockSupabaseUrl, mockSupabaseServiceKey);
   });
 
-  it('should throw error when SUPABASE_SERVICE_KEY is missing', () => {
+  it('should throw error when SUPABASE_SERVICE_KEY is missing', async () => {
     delete process.env.SUPABASE_SERVICE_KEY;
-    // Re-import to get fresh instance
-    const { getServiceSupabase } = require('../../lib/supabase');
-    expect(() => getServiceSupabase()).toThrow('SUPABASE_SERVICE_KEY is not set');
+    const mod = await import('../../lib/supabase');
+    expect(() => mod.getServiceSupabase()).toThrow('SUPABASE_SERVICE_KEY is not set');
   });
 
-  it('should throw error when NEXT_PUBLIC_SUPABASE_URL is missing', () => {
+  it('should throw error when NEXT_PUBLIC_SUPABASE_URL is missing', async () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    // Re-import to get fresh instance
-    const { getServiceSupabase } = require('../../lib/supabase');
-    expect(() => getServiceSupabase()).toThrow('NEXT_PUBLIC_SUPABASE_URL is not set');
+    const mod = await import('../../lib/supabase');
+    expect(() => mod.getServiceSupabase()).toThrow('NEXT_PUBLIC_SUPABASE_URL is not set');
   });
 });

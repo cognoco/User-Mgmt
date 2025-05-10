@@ -2,8 +2,6 @@ import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { I18nextProvider } from 'react-i18next';
-import i18n from '@/lib/i18n/index';
 
 import { CompanyLogoUpload } from '../CompanyLogoUpload';
 import { useProfileStore } from '@/lib/stores/profile.store';
@@ -101,11 +99,7 @@ describe('CompanyLogoUpload Component', () => {
     mockUseProfileStoreWithSelector(profileData);
 
     await act(async () => {
-      render(
-        <I18nextProvider i18n={i18n}>
-          <CompanyLogoUpload />
-        </I18nextProvider>
-      );
+      render(<CompanyLogoUpload />);
     });
   };
 
@@ -176,13 +170,4 @@ describe('CompanyLogoUpload Component', () => {
     expect(mockRemoveCompanyLogo).toHaveBeenCalledTimes(1);
   });
 
-}); 
-
-vi.mock('react-i18next', async (importOriginal) => {
-    const actual = await importOriginal();
-    return {
-        ...actual,
-        useTranslation: () => ({ t: (key: string) => key, i18n: { changeLanguage: () => Promise.resolve() } }),
-        initReactI18next: { type: '3rdParty', init: () => {} },
-    };
 }); 

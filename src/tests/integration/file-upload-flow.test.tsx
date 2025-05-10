@@ -4,16 +4,17 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FileManager } from '@/components/common/FileManager';
+import { vi } from 'vitest';
 
 // Import our standardized mock
-jest.mock('@/lib/supabase', () => require('../mocks/supabase'));
+vi.mock('@/lib/supabase', async () => (await import('@/tests/mocks/supabase')));
 import { supabase } from '@/lib/supabase';
 
 describe('File Upload and Management Flow', () => {
   let user;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     user = userEvent.setup();
     
     // Mock authentication
@@ -23,7 +24,7 @@ describe('File Upload and Management Flow', () => {
     });
     
     // Add list method to storage mock
-    supabase.storage.from().list = jest.fn().mockResolvedValueOnce({
+    supabase.storage.from().list = vi.fn().mockResolvedValueOnce({
       data: [],
       error: null
     });
@@ -80,7 +81,7 @@ describe('File Upload and Management Flow', () => {
     await user.click(screen.getByRole('button', { name: /confirm/i }));
     
     // Mock successful deletion
-    supabase.storage.from().remove = jest.fn().mockResolvedValueOnce({
+    supabase.storage.from().remove = vi.fn().mockResolvedValueOnce({
       data: { success: true },
       error: null
     });
@@ -210,7 +211,7 @@ describe('File Upload and Management Flow', () => {
     await user.type(screen.getByLabelText(/new name/i), 'new-name.pdf');
     
     // Mock successful rename (using move)
-    supabase.storage.from().move = jest.fn().mockResolvedValueOnce({
+    supabase.storage.from().move = vi.fn().mockResolvedValueOnce({
       data: { path: 'new-name.pdf' },
       error: null
     });

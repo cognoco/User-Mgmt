@@ -65,6 +65,12 @@ describe('SessionManagement', () => {
     await act(async () => {
       await userEvent.click(revokeBtn);
     });
+    const confirmBtn = screen.getAllByText('Revoke').find(
+      (btn) => btn !== revokeBtn
+    );
+    await act(async () => {
+      await userEvent.click(confirmBtn!);
+    });
     await waitFor(() => {
       expect(revokeSession).toHaveBeenCalledWith('session-2');
     });

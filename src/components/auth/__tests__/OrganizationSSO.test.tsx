@@ -13,15 +13,9 @@ vi.mock('@/lib/api/axios', () => ({
   },
 }));
 
-// Mock translations
+// Mock i18n so t(key) returns the key
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, params?: any) => {
-      if (params?.time) return `Last login: ${params.time}`;
-      if (params?.count !== undefined) return `Logins in last 24h: ${params.count}`;
-      return key;
-    },
-  }),
+  useTranslation: () => ({ t: (key: string) => key }),
 }));
 
 describe('OrganizationSSO', () => {

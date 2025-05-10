@@ -1,8 +1,9 @@
 import { createMocks } from 'node-mocks-http';
 import usersHandler from '../../../../pages/api/admin/users';
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 
 // Import and use our standardized mock
-jest.mock('../../../../lib/supabase', () => require('../../../__mocks__/supabase'));
+vi.mock('../../../../lib/supabase', () => require('../../../__mocks__/supabase'));
 import { getServiceSupabase } from '../../../../lib/supabase';
 
 describe('Admin Users API', () => {
@@ -12,21 +13,21 @@ describe('Admin Users API', () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     
     // Configure the mock for this test suite
     getServiceSupabase.mockImplementation(() => ({
-      from: jest.fn().mockReturnThis(),
-      select: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnThis(),
-      range: jest.fn().mockResolvedValue({
+      from: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      range: vi.fn().mockResolvedValue({
         data: mockUsers,
         error: null,
       }),
     }));
   });
 
-  it('should return users list for GET request', async () => {
+  test('should return users list for GET request', async () => {
     const { req, res } = createMocks({
       method: 'GET',
       headers: {
@@ -43,7 +44,7 @@ describe('Admin Users API', () => {
     expect(getServiceSupabase).toHaveBeenCalled();
   });
 
-  it('should return 405 for non-GET requests', async () => {
+  test('should return 405 for non-GET requests', async () => {
     const methods = ['POST', 'PUT', 'DELETE', 'PATCH'];
 
     for (const method of methods) {
@@ -64,7 +65,7 @@ describe('Admin Users API', () => {
     }
   });
 
-  it('should return 401 when authorization header is missing', async () => {
+  test('should return 401 when authorization header is missing', async () => {
     const { req, res } = createMocks({
       method: 'GET',
     });
@@ -78,12 +79,64 @@ describe('Admin Users API', () => {
     expect(getServiceSupabase).not.toHaveBeenCalled();
   });
 
-  it('should handle Supabase errors', async () => {
+  test('should handle Supabase errors', async () => {
     getServiceSupabase.mockImplementationOnce(() => ({
-      from: jest.fn().mockReturnThis(),
-      select: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnThis(),
-      range: jest.fn().mockResolvedValue({
+      from: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      range: vi.fn().mockResolvedValue({
+        data: null,
+        error: new Error('Database error'),
+      }),
+    }));
+
+    const { req, res } = createMocks({
+      method: 'GET',
+      headers: {
+        authorization: 'Bearer test-token',
+      },
+    });
+
+    await usersHandler(req, res);
+
+    expect(res._getStatusCode()).toBe(500);
+    expect(JSON.parse(res._getData())).toEqual({
+      error: 'Error fetching users',
+    });
+  });
+
+  test('should return an empty array if no users found', async () => {
+    getServiceSupabase.mockImplementationOnce(() => ({
+      from: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      range: vi.fn().mockResolvedValue({
+        data: [],
+        error: null,
+      }),
+    }));
+
+    const { req, res } = createMocks({
+      method: 'GET',
+      headers: {
+        authorization: 'Bearer test-token',
+      },
+    });
+
+    await usersHandler(req, res);
+
+    expect(res._getStatusCode()).toBe(200);
+    expect(JSON.parse(res._getData())).toEqual({
+      users: [],
+    });
+  });
+
+  test('should handle errors gracefully', async () => {
+    getServiceSupabase.mockImplementationOnce(() => ({
+      from: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      range: vi.fn().mockResolvedValue({
         data: null,
         error: new Error('Database error'),
       }),

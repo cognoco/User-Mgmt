@@ -346,6 +346,7 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
                                   accept=".pem,.crt,.cer"
                                   className="hidden"
                                   onChange={handleCertificateUpload}
+                                  aria-label={t('org.sso.saml.certificateLabel')}
                                 />
                               </div>
                             </div>

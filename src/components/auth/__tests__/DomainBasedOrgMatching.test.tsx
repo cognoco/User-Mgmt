@@ -31,7 +31,7 @@ const mockFormState: FormState = {
 const mockFormContext = {
   register: (name: string) => ({
     name,
-    onChange: (_e: any) => {
+    onChange: () => {
       mockFormState.isDirty = true;
       mockFormState.isValid = true;
       mockFormState.errors = {};
@@ -79,21 +79,7 @@ const mockFormContext = {
   }
 };
 
-// Mock translations
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, params?: Record<string, string>) => {
-      if (params) {
-        let text = key;
-        Object.entries(params).forEach(([k, v]) => {
-          text = text.replace(`{{${k}}}`, v);
-        });
-        return text;
-      }
-      return key;
-    },
-  }),
-}));
+
 
 // Mock UI components
 vi.mock('@/components/ui/card', () => ({
@@ -323,6 +309,13 @@ vi.mocked(api).post = mockApiPost;
 vi.mocked(api).delete = mockApiDelete;
 vi.mocked(api).put = mockApiPut;
 
+// Mock skeleton component
+vi.mock('@/components/ui/skeleton', () => ({
+  Skeleton: ({ className }: { className?: string }) => (
+    <div data-testid="skeleton" className={className} />
+  ),
+}));
+
 describe('DomainBasedOrgMatching', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -362,8 +355,9 @@ describe('DomainBasedOrgMatching', () => {
     expect(screen.getByText('org.domains.title')).toBeInTheDocument();
     expect(screen.getByText('org.domains.description')).toBeInTheDocument();
 
-    const switchElement = screen.getByTestId('switch');
-    expect(switchElement).not.toBeChecked();
+    const switches = screen.getAllByTestId('switch');
+    // The first switch is for toggling domain matching
+    expect(switches[0]).not.toBeChecked();
     expect(screen.queryByTestId('form')).toBeNull();
   });
 
@@ -401,8 +395,9 @@ describe('DomainBasedOrgMatching', () => {
       expect(mockApiGet).toHaveBeenCalledWith('/api/organizations/test-org/domains');
     });
 
-    const switchElement = screen.getByTestId('switch');
-    expect(switchElement).toBeChecked();
+    const switches = screen.getAllByTestId('switch');
+    // The first switch is for toggling domain matching
+    expect(switches[0]).toBeChecked();
     expect(screen.getByTestId('form')).toBeInTheDocument();
     expect(screen.getByTestId('table')).toBeInTheDocument();
     
@@ -423,17 +418,18 @@ describe('DomainBasedOrgMatching', () => {
       expect(mockApiGet).toHaveBeenCalledWith('/api/organizations/test-org/domains');
     });
 
-    const switchElement = screen.getByTestId('switch');
-    expect(switchElement).not.toBeChecked();
+    const switches = screen.getAllByTestId('switch');
+    // The first switch is for toggling domain matching
+    expect(switches[0]).not.toBeChecked();
 
-    await userEvent.click(switchElement);
+    await userEvent.click(switches[0]);
     
     expect(mockApiPut).toHaveBeenCalledWith('/api/organizations/test-org/domains/settings', {
       domains_matching_enabled: true,
     });
 
     await waitFor(() => {
-      expect(switchElement).toBeChecked();
+      expect(switches[0]).toBeChecked();
       expect(screen.getByTestId('form')).toBeInTheDocument();
     });
   });

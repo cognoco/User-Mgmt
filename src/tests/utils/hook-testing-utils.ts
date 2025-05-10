@@ -77,7 +77,7 @@ export function renderCustomHook(hook, options = {}) {
  */
 export function createMockState(initialValue) {
   let state = initialValue;
-  const setState = jest.fn().mockImplementation((newValue) => {
+  const setState = vi.fn().mockImplementation((newValue) => {
     if (typeof newValue === 'function') {
       state = newValue(state);
     } else {
@@ -94,7 +94,7 @@ export function createMockState(initialValue) {
  * @returns {Function} Mock useContext hook
  */
 export function createMockContext(contextValue) {
-  return jest.fn().mockReturnValue(contextValue);
+  return vi.fn().mockReturnValue(contextValue);
 }
 
 /**
@@ -113,10 +113,10 @@ export function createMockRef(initialValue) {
  * @param {Function} mockCleanup - Mock function to track cleanup
  * @returns {Object} Test results
  */
-export function testHookCleanup(hook, deps = [], mockCleanup = jest.fn()) {
+export function testHookCleanup(hook, deps = [], mockCleanup = vi.fn()) {
   // Mock useEffect to track cleanup
   const originalUseEffect = React.useEffect;
-  React.useEffect = jest.fn().mockImplementation((callback, effectDeps) => {
+  React.useEffect = vi.fn().mockImplementation((callback, effectDeps) => {
     const cleanup = callback();
     if (typeof cleanup === 'function') {
       mockCleanup.mockImplementation(cleanup);

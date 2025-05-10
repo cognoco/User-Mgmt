@@ -1,9 +1,10 @@
 import { createMocks } from 'node-mocks-http';
 import { NextApiRequest } from 'next';
 import { auditLog } from '../../middleware/audit-log';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Import our standardized mock
-jest.mock('../../lib/supabase', () => require('../mocks/supabase'));
+vi.mock('../../lib/supabase', () => require('../mocks/supabase'));
 import { supabase } from '@/lib/supabase';
 
 // Extend NextApiRequest to include user property
@@ -19,7 +20,7 @@ interface ExtendedRequest extends NextApiRequest {
 
 describe('Audit Log Middleware', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should log successful requests', async () => {
@@ -36,7 +37,7 @@ describe('Audit Log Middleware', () => {
       },
     });
 
-    const next = jest.fn().mockImplementation(() => {
+    const next = vi.fn().mockImplementation(() => {
       res.status(201).json({ id: 1, email: 'test@example.com' });
     });
 
@@ -70,7 +71,7 @@ describe('Audit Log Middleware', () => {
       url: '/api/health',
     });
 
-    const next = jest.fn();
+    const next = vi.fn();
     const middleware = auditLog({
       excludePaths: ['/api/health'],
     });
@@ -93,7 +94,7 @@ describe('Audit Log Middleware', () => {
       },
     });
 
-    const next = jest.fn();
+    const next = vi.fn();
     const middleware = auditLog({
       sensitiveFields: ['password', 'creditCard', 'ssn'],
     });
@@ -125,7 +126,7 @@ describe('Audit Log Middleware', () => {
       app_metadata: { role: 'admin' }
     };
     
-    const next = jest.fn();
+    const next = vi.fn();
     const middleware = auditLog({
       customFields: (req: ExtendedRequest) => ({
         user_id: req.user?.id,
@@ -151,8 +152,8 @@ describe('Audit Log Middleware', () => {
     });
 
     const error = new Error('Test error');
-    const next = jest.fn().mockRejectedValue(error);
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const next = vi.fn().mockRejectedValue(error);
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
     const middleware = auditLog();
 
     await middleware(req, res, next);
@@ -179,11 +180,11 @@ describe('Audit Log Middleware', () => {
     });
 
     const dbError = new Error('Database error');
-    (supabase.from('audit_logs').insert as jest.Mock).mockRejectedValue(dbError);
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    (supabase.from('audit_logs').insert as any).mockRejectedValue(dbError);
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
 
     const middleware = auditLog();
-    const next = jest.fn();
+    const next = vi.fn();
 
     await middleware(req, res, next);
 

@@ -15,6 +15,9 @@ import { UserType } from '@/types/user-type';
 // Mock necessary dependencies
 vi.mock('@/lib/stores/connected-accounts.store');
 vi.mock('@/lib/auth/UserManagementProvider');
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
 
 const mockDisconnectAccount = vi.fn();
 const mockConnectAccount = vi.fn();
@@ -154,9 +157,7 @@ describe('ConnectedAccounts Integration Tests', () => {
 
     // Check for the connect new account section header (i18n fallback or English)
     expect(
-      screen.getByText((content) =>
-        /connect new account/i.test(content) || /\[i18n:settings\.connectedAccounts\.connectNew\]/i.test(content)
-      )
+      screen.getByText('Connect new account')
     ).toBeInTheDocument();
   });
 

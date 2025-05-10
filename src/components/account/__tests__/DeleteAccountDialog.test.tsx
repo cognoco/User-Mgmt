@@ -1,48 +1,24 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { I18nextProvider, initReactI18next } from 'react-i18next';
-import i18n from 'i18next';
 import { vi } from 'vitest'; // Import vi
-import DeleteAccountDialog from './DeleteAccountDialog';
+import DeleteAccountDialog from '@/components/account/DeleteAccountDialog';
 import { useDeleteAccount } from '@/hooks/useDeleteAccount';
-import enTranslations from '@/lib/i18n/locales/en.json';
-import { USER_MANAGEMENT_NAMESPACE } from '@/lib/i18n';
 import { act } from 'react-dom/test-utils';
 
 // Mock the custom hook
 vi.mock('@/hooks/useDeleteAccount');
 
-// Create a dedicated i18next instance for testing
-const testI18nInstance = i18n.createInstance();
-testI18nInstance
-  .use(initReactI18next)
-  .init({
-    lng: 'en',
-    fallbackLng: 'en',
-    ns: [USER_MANAGEMENT_NAMESPACE],
-    defaultNS: USER_MANAGEMENT_NAMESPACE,
-    resources: {
-      en: {
-        [USER_MANAGEMENT_NAMESPACE]: enTranslations,
-      },
-    },
-    interpolation: {
-      escapeValue: false, // Not needed for React
-    },
-  });
-
-
 describe('DeleteAccountDialog', () => {
   let handleClose: ReturnType<typeof vi.fn>;
-  let mockDeleteAccount: ReturnType<typeof vi.fn>;
+  let mockDeleteAccount: vi.Mock<[], Promise<void>>;
   const mockUseDeleteAccount = vi.mocked(useDeleteAccount);
 
   beforeEach(() => {
     // Reset mocks before each test
     handleClose = vi.fn();
-    mockDeleteAccount = vi.fn();
+    mockDeleteAccount = vi.fn<[], Promise<void>>();
     mockUseDeleteAccount.mockReturnValue({
-      deleteAccount: mockDeleteAccount,
+      deleteAccount: mockDeleteAccount as () => Promise<void>,
       isLoading: false,
       error: null,
     });
@@ -50,11 +26,9 @@ describe('DeleteAccountDialog', () => {
 
   const renderComponent = (open = true) => {
     return render(
-      <I18nextProvider i18n={testI18nInstance}>
-        <MemoryRouter>
-          <DeleteAccountDialog open={open} onClose={handleClose} />
-        </MemoryRouter>
-      </I18nextProvider>
+      <MemoryRouter>
+        <DeleteAccountDialog open={open} onClose={handleClose} />
+      </MemoryRouter>
     );
   };
 
@@ -116,7 +90,7 @@ describe('DeleteAccountDialog', () => {
 
    it('should show loading state when isLoading is true', () => {
     mockUseDeleteAccount.mockReturnValue({
-      deleteAccount: mockDeleteAccount,
+      deleteAccount: mockDeleteAccount as () => Promise<void>,
       isLoading: true, // Set loading state
       error: null,
     });

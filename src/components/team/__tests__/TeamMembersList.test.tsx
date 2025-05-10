@@ -72,6 +72,13 @@ const mockTeamMembers = {
   },
 };
 
+// Mock Skeleton component for test selection
+vi.mock('@/components/ui/skeleton', () => ({
+  Skeleton: ({ className }: { className?: string }) => (
+    <div data-testid="skeleton" className={className} />
+  ),
+}));
+
 async function renderWithProviders(ui: React.ReactElement) {
   let result;
   await act(async () => {

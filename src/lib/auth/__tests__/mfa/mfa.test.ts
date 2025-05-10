@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setupMFA, verifyMFAToken, disableMFA } from '@/lib/auth/mfa';
 import { prisma } from '@/lib/prisma';
 
-jest.mock('@/lib/prisma');
+vi.mock('@/lib/prisma');
 
 describe('Multi-Factor Authentication', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('setupMFA', () => {
@@ -36,7 +36,7 @@ describe('Multi-Factor Authentication', () => {
       const userId = 'test-user-id';
       const token = '123456';
       
-      prisma.user.findUnique.mockResolvedValue({
+      (prisma.user.findUnique as any).mockResolvedValue({
         id: userId,
         mfaSecret: 'test-secret',
         mfaEnabled: true
@@ -50,7 +50,7 @@ describe('Multi-Factor Authentication', () => {
       const userId = 'test-user-id';
       const token = 'invalid';
       
-      prisma.user.findUnique.mockResolvedValue({
+      (prisma.user.findUnique as any).mockResolvedValue({
         id: userId,
         mfaSecret: 'test-secret',
         mfaEnabled: true

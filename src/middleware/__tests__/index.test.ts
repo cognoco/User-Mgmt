@@ -1,26 +1,26 @@
 import { createMocks } from 'node-mocks-http';
 import { combineMiddleware, createApiMiddleware, withSecurity } from '@/middleware/index';
 import { rateLimit } from '@/middleware/rate-limit';
-import { securityHeaders } from '@/lib/middleware/security-headers';
+import { securityHeaders } from '@/middleware/security-headers';
 import { auditLog } from '@/middleware/audit-log';
 
 // Mock the individual middleware functions
-jest.mock('@/middleware/rate-limit', () => ({
-  rateLimit: jest.fn(() => async (req: any, res: any, next: any) => {
+vi.mock('@/middleware/rate-limit', () => ({
+  rateLimit: vi.fn(() => async (req: any, res: any, next: any) => {
     res.setHeader('X-RateLimit-Limit', '100');
     await next();
   }),
 }));
 
-jest.mock('@/lib/middleware/security-headers', () => ({
-  securityHeaders: jest.fn(() => async (req: any, res: any, next: any) => {
+vi.mock('@/middleware/security-headers', () => ({
+  securityHeaders: vi.fn(() => async (req: any, res: any, next: any) => {
     res.setHeader('Content-Security-Policy', "default-src 'self'");
     await next();
   }),
 }));
 
-jest.mock('@/middleware/audit-log', () => ({
-  auditLog: jest.fn(() => async (req: any, res: any, next: any) => {
+vi.mock('@/middleware/audit-log', () => ({
+  auditLog: vi.fn(() => async (req: any, res: any, next: any) => {
     res.setHeader('X-Audit-Log', 'enabled');
     await next();
   }),
@@ -28,7 +28,7 @@ jest.mock('@/middleware/audit-log', () => ({
 
 describe('Middleware Integration', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('combineMiddleware', () => {
@@ -47,7 +47,7 @@ describe('Middleware Integration', () => {
       };
 
       const combined = combineMiddleware([middleware1, middleware2]);
-      const next = jest.fn();
+      const next = vi.fn();
 
       await combined(req, res, next);
 
@@ -58,14 +58,14 @@ describe('Middleware Integration', () => {
     it('should handle errors in middleware chain', async () => {
       const { req, res } = createMocks();
       const error = new Error('Test error');
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const errorMiddleware = async () => {
         throw error;
       };
 
       const combined = combineMiddleware([errorMiddleware]);
-      const next = jest.fn();
+      const next = vi.fn();
 
       await combined(req, res, next);
 
@@ -79,7 +79,7 @@ describe('Middleware Integration', () => {
     it('should create middleware with default configuration', async () => {
       const { req, res } = createMocks();
       const middleware = createApiMiddleware();
-      const next = jest.fn();
+      const next = vi.fn();
 
       await middleware(req, res, next);
 
@@ -97,7 +97,7 @@ describe('Middleware Integration', () => {
       const middleware = createApiMiddleware({
         skipMiddlewares: ['rateLimit', 'auditLog'],
       });
-      const next = jest.fn();
+      const next = vi.fn();
 
       await middleware(req, res, next);
 
@@ -114,7 +114,7 @@ describe('Middleware Integration', () => {
         securityHeaders: { xFrameOptions: 'DENY' },
         auditLog: { logHeaders: true },
       });
-      const next = jest.fn();
+      const next = vi.fn();
 
       await middleware(req, res, next);
 
@@ -127,7 +127,7 @@ describe('Middleware Integration', () => {
   describe('withSecurity', () => {
     it('should wrap handler with security middleware', async () => {
       const { req, res } = createMocks();
-      const handler = jest.fn();
+      const handler = vi.fn();
       const secureHandler = withSecurity(handler);
 
       await secureHandler(req, res);
@@ -140,7 +140,7 @@ describe('Middleware Integration', () => {
 
     it('should use custom middleware options', async () => {
       const { req, res } = createMocks();
-      const handler = jest.fn();
+      const handler = vi.fn();
       const secureHandler = withSecurity(handler, {
         rateLimit: { max: 50 },
         skipMiddlewares: ['auditLog'],
@@ -156,7 +156,7 @@ describe('Middleware Integration', () => {
     it('should handle errors in the handler', async () => {
       const { req, res } = createMocks();
       const error = new Error('Handler error');
-      const handler = jest.fn().mockRejectedValue(error);
+      const handler = vi.fn().mockRejectedValue(error);
       const secureHandler = withSecurity(handler);
 
       await expect(secureHandler(req, res)).rejects.toThrow(error);

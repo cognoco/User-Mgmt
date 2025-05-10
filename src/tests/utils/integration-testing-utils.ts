@@ -97,15 +97,15 @@ function createTableMock(data) {
   const mockData = Array.isArray(data) ? data : [data];
   
   return {
-    select: jest.fn().mockReturnThis(),
-    insert: jest.fn().mockResolvedValue({ data: mockData, error: null }),
-    update: jest.fn().mockResolvedValue({ data: mockData, error: null }),
-    upsert: jest.fn().mockResolvedValue({ data: mockData, error: null }),
-    delete: jest.fn().mockResolvedValue({ data: mockData, error: null }),
-    eq: jest.fn().mockReturnThis(),
-    order: jest.fn().mockReturnThis(),
-    range: jest.fn().mockReturnThis(),
-    single: jest.fn().mockResolvedValue({ 
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockResolvedValue({ data: mockData, error: null }),
+    update: vi.fn().mockResolvedValue({ data: mockData, error: null }),
+    upsert: vi.fn().mockResolvedValue({ data: mockData, error: null }),
+    delete: vi.fn().mockResolvedValue({ data: mockData, error: null }),
+    eq: vi.fn().mockReturnThis(),
+    order: vi.fn().mockReturnThis(),
+    range: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue({ 
       data: Array.isArray(data) ? data[0] : data, 
       error: null 
     }),

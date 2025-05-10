@@ -13,13 +13,6 @@ vi.mock('@/lib/api/axios', () => ({
   },
 }));
 
-// Mock translations
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-  }),
-}));
-
 describe('IDPConfiguration', () => {
   const mockProps = {
     orgId: 'org123',

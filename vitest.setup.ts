@@ -7,6 +7,7 @@ import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
 import { createMockAuthStore } from '@/tests/mocks/auth.store.mock';
+import en from '@/lib/i18n/locales/en.json';
 
 // Extend Vitest's expect method with methods from react-testing-library
 expect.extend(matchers);
@@ -32,21 +33,36 @@ const fetchMock = vi.fn(() =>
 vi.stubGlobal('fetch', fetchMock);
 // --- End fetch mock --- 
 
-// --- Mock react-i18next --- 
-vi.mock('react-i18next', async () => {
-  const actual = await import('react-i18next');
+// --- Global mock for react-i18next to ensure consistent translation behavior in all tests ---
+
+function getNestedTranslation(obj: any, key: string): string {
+  return key.split('.').reduce((acc, part) => acc?.[part], obj) ?? key;
+}
+
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = (await importOriginal()) as any;
   return {
     ...actual,
     useTranslation: () => ({
-      t: (key: string) => `[i18n:${key}]`,
-      i18n: {
-        changeLanguage: () => new Promise(() => {}),
-        language: 'en',
-        options: {},
-        isInitialized: true,
+      t: (key: string, params?: Record<string, string>) => {
+        // Handle [i18n:KEY] pattern
+        let lookupKey = key;
+        const i18nMatch = /^\[i18n:(.+)\]$/.exec(key);
+        if (i18nMatch) {
+          lookupKey = i18nMatch[1];
+        }
+        let value = getNestedTranslation(en, lookupKey);
+        if (params) {
+          Object.entries(params).forEach(([k, v]) => {
+            value = value.replace(new RegExp(`{{${k}}}`, 'g'), v);
+          });
+        }
+        return value;
       },
+      i18n: { changeLanguage: () => Promise.resolve() },
     }),
-    Trans: ({ i18nKey }: { i18nKey: string }) => `[i18n:${i18nKey}]`,
+    Trans: ({ i18nKey }: { i18nKey: string }) => getNestedTranslation(en, i18nKey),
+    initReactI18next: { type: '3rdParty', init: () => {} },
   };
 });
 // --- End react-i18next mock ---

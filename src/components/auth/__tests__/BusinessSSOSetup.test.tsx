@@ -32,21 +32,7 @@ function createMockResponse<T>(data: T): AxiosResponse<T> {
   };
 }
 
-// Mock translations to return the key itself
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'org.sso.idpTypeSaml': 'SAML',
-        'org.sso.idpTypeOidc': 'OIDC',
-        'org.sso.saveButton': 'Save',
-        'org.sso.savingButton': 'Saving...',
-        'org.sso.saveError': 'Failed to save SSO settings',
-      };
-      return translations[key] || key;
-    },
-  }),
-}));
+
 
 // Mock UI components
 vi.mock('@/components/ui/card', () => ({

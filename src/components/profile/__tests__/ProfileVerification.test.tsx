@@ -50,7 +50,8 @@ describe('ProfileVerification', () => {
     await act(async () => {
       render(<ProfileVerification />);
     });
-    expect(screen.getByText(/verified/i)).toBeInTheDocument();
+    const verifiedElements = screen.getAllByText(/verified/i);
+    expect(verifiedElements.length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText(/your profile is verified/i)).toBeInTheDocument();
   });
 

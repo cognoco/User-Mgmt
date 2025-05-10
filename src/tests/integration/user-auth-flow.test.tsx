@@ -15,16 +15,9 @@ import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'; // A
 // import { useAuthStore } from '@/lib/stores/auth.store';
 
 // Mock Supabase (using factory with dynamic import)
-vi.mock('@/lib/supabase', async (/* importOriginal */) => {
-  // Import the actual mock implementation using dynamic import
-  const mockModule = await vi.importActual('@/tests/mocks/supabase') as { supabase: any }; 
-  return {
-    supabase: mockModule.supabase, // Return the mocked supabase object
-    // Include other exports from the original module if needed
-  };
-});
+vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
 // Import the mocked supabase instance (Vitest redirects this)
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/tests/mocks/supabase';
 
 // Import Profile type
 import type { Profile } from '@/types/profile'; // Assuming type exists here

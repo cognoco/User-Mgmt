@@ -3,12 +3,17 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SSOAuth } from '@/components/auth/SSOAuth';
+import { BusinessSSOAuth } from '@/components/auth/BusinessSSOAuth';
 import { vi, describe, beforeEach, test, expect } from 'vitest';
 
 // Import our standardized mock using vi.mock
 vi.mock('@/lib/supabase', async () => (await import('@/tests/mocks/supabase')));
 import { supabase } from '@/lib/supabase';
+
+// Mock i18n so t(key) returns the key
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
 
 // Store original window location
 const originalLocation = window.location;
@@ -57,7 +62,7 @@ describe('Personal SSO Authentication Flows', () => {
     });
 
     // Render SSO auth component
-    render(<SSOAuth />);
+    render(<BusinessSSOAuth />);
     
     // Click GitHub button
     await act(async () => {
@@ -84,7 +89,7 @@ describe('Personal SSO Authentication Flows', () => {
     });
 
     // Render SSO auth component
-    render(<SSOAuth />);
+    render(<BusinessSSOAuth />);
     
     // Click Google button
     await act(async () => {
@@ -111,7 +116,7 @@ describe('Personal SSO Authentication Flows', () => {
     });
 
     // Render SSO auth component
-    render(<SSOAuth />);
+    render(<BusinessSSOAuth />);
     
     // Click Facebook button
     await act(async () => {
@@ -135,7 +140,7 @@ describe('Personal SSO Authentication Flows', () => {
     });
 
     // Render SSO auth component
-    render(<SSOAuth />);
+    render(<BusinessSSOAuth />);
     
     // Click Apple button
     await act(async () => {
@@ -162,7 +167,7 @@ describe('Personal SSO Authentication Flows', () => {
     });
 
     // Render SSO auth component with extra scopes
-    render(<SSOAuth providerScopes={{ github: 'repo,user' }} />);
+    render(<BusinessSSOAuth providerScopes={{ github: 'repo,user' }} />);
     
     // Click GitHub button
     await act(async () => {
@@ -201,7 +206,7 @@ describe('Personal SSO Authentication Flows', () => {
     });
     
     // Render SSO auth component with callback detection
-    render(<SSOAuth detectCallback={true} />);
+    render(<BusinessSSOAuth detectCallback={true} />);
     
     // Verify session check was performed
     await waitFor(() => {

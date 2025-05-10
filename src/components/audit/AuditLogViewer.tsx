@@ -565,8 +565,7 @@ export function AuditLogViewer({ isAdmin = true }: { isAdmin?: boolean }) {
                       variant={
                         STATUS_BADGE[log.status]?.color === 'destructive' ? 'destructive' :
                         STATUS_BADGE[log.status]?.color === 'default' ? 'default' :
-                        STATUS_BADGE[log.status]?.color === 'outline' ? 'outline' :
-                        STATUS_BADGE[log.status]?.color === 'secondary' ? 'secondary' :
+                        (STATUS_BADGE[log.status]?.color === 'success' || STATUS_BADGE[log.status]?.color === 'warning') ? 'default' :
                         'default'
                       }
                       aria-label={`Status: ${STATUS_BADGE[log.status]?.label || log.status}`}

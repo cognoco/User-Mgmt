@@ -4,12 +4,17 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BusinessSSOAuth } from '@/components/auth/BusinessSSOAuth';
-import { OrganizationProvider } from '@/context/OrganizationContext';
+import { OrganizationProvider } from '@/lib/context/OrganizationContext';
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 
 // Import our standardized mock using vi.mock with async import
 vi.mock('@/lib/supabase', async () => (await import('@/tests/mocks/supabase')));
 import { supabase } from '@/lib/supabase';
+
+// Mock i18n so t(key) returns the key
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
 
 // Store original window location
 const originalLocation = window.location;

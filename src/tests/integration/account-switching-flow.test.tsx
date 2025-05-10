@@ -36,7 +36,8 @@ describe('Account Switching Flow', () => {
     });
     
     // Mock available accounts
-    (supabase.from('accounts').select as any).mockResolvedValueOnce('*', {
+    const accountsBuilder = supabase.from('accounts') as any;
+    accountsBuilder.select.mockResolvedValueOnce('*', {
       data: mockAccounts,
       error: null
     });
@@ -100,7 +101,8 @@ describe('Account Switching Flow', () => {
     // Fill organization details
     await user.type(screen.getByLabelText(/organization name/i), 'New Organization');
     // Mock successful creation
-    (supabase.from('accounts').insert as any).mockResolvedValueOnce({
+    const accountsBuilder = supabase.from('accounts') as any;
+    accountsBuilder.insert.mockResolvedValueOnce({
       data: { 
         id: 'new-org', 
         name: 'New Organization', 
@@ -112,7 +114,7 @@ describe('Account Switching Flow', () => {
     // Submit form
     await user.click(screen.getByRole('button', { name: /create/i }));
     // Verify insert was called with correct data
-    expect(supabase.from('accounts').insert).toHaveBeenCalledWith({
+    expect(accountsBuilder.insert).toHaveBeenCalledWith({
       name: 'New Organization',
       type: 'organization',
       owner_id: 'user-123'
@@ -140,7 +142,8 @@ describe('Account Switching Flow', () => {
     ];
     
     // Mock members query
-    (supabase.from('organization_members').select as any).mockImplementation((query: string) => {
+    const orgMembersBuilder = supabase.from('organization_members') as any;
+    orgMembersBuilder.select.mockImplementation((query: string) => {
       if (query && query.includes('members')) {
         return Promise.resolve({
           data: mockMembers,
@@ -213,7 +216,8 @@ describe('Account Switching Flow', () => {
     });
     
     // Mock account list refresh - organization removed
-    (supabase.from('accounts').select as any).mockResolvedValueOnce('*', {
+    const accountsBuilder = supabase.from('accounts') as any;
+    accountsBuilder.select.mockResolvedValueOnce('*', {
       data: [mockAccounts[0], mockAccounts[2]], // Work account removed
       error: null
     });

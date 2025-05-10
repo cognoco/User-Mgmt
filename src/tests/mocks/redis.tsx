@@ -2,81 +2,81 @@
 
 // Mock implementation for the Redis client from @upstash/redis
 export const Redis = {
-  fromEnv: jest.fn().mockReturnValue({
+  fromEnv: vi.fn().mockReturnValue({
     // Basic key-value operations
-    get: jest.fn().mockResolvedValue(null),
-    set: jest.fn().mockResolvedValue('OK'),
-    del: jest.fn().mockResolvedValue(1),
-    exists: jest.fn().mockResolvedValue(1),
-    incr: jest.fn().mockResolvedValue(1),
-    incrby: jest.fn().mockResolvedValue(1),
-    decr: jest.fn().mockResolvedValue(0),
-    decrby: jest.fn().mockResolvedValue(0),
-    expire: jest.fn().mockResolvedValue(true),
-    ttl: jest.fn().mockResolvedValue(3600),
+    get: vi.fn().mockResolvedValue(null),
+    set: vi.fn().mockResolvedValue('OK'),
+    del: vi.fn().mockResolvedValue(1),
+    exists: vi.fn().mockResolvedValue(1),
+    incr: vi.fn().mockResolvedValue(1),
+    incrby: vi.fn().mockResolvedValue(1),
+    decr: vi.fn().mockResolvedValue(0),
+    decrby: vi.fn().mockResolvedValue(0),
+    expire: vi.fn().mockResolvedValue(true),
+    ttl: vi.fn().mockResolvedValue(3600),
     
     // Hash operations
-    hget: jest.fn().mockResolvedValue(null),
-    hgetall: jest.fn().mockResolvedValue({}),
-    hset: jest.fn().mockResolvedValue(1),
-    hdel: jest.fn().mockResolvedValue(1),
-    hincrby: jest.fn().mockResolvedValue(1),
-    hexists: jest.fn().mockResolvedValue(1),
+    hget: vi.fn().mockResolvedValue(null),
+    hgetall: vi.fn().mockResolvedValue({}),
+    hset: vi.fn().mockResolvedValue(1),
+    hdel: vi.fn().mockResolvedValue(1),
+    hincrby: vi.fn().mockResolvedValue(1),
+    hexists: vi.fn().mockResolvedValue(1),
     
     // List operations
-    lpush: jest.fn().mockResolvedValue(1),
-    rpush: jest.fn().mockResolvedValue(1),
-    lpop: jest.fn().mockResolvedValue(null),
-    rpop: jest.fn().mockResolvedValue(null),
-    lrange: jest.fn().mockResolvedValue([]),
+    lpush: vi.fn().mockResolvedValue(1),
+    rpush: vi.fn().mockResolvedValue(1),
+    lpop: vi.fn().mockResolvedValue(null),
+    rpop: vi.fn().mockResolvedValue(null),
+    lrange: vi.fn().mockResolvedValue([]),
     
     // Set operations
-    sadd: jest.fn().mockResolvedValue(1),
-    srem: jest.fn().mockResolvedValue(1),
-    smembers: jest.fn().mockResolvedValue([]),
-    sismember: jest.fn().mockResolvedValue(1),
+    sadd: vi.fn().mockResolvedValue(1),
+    srem: vi.fn().mockResolvedValue(1),
+    smembers: vi.fn().mockResolvedValue([]),
+    sismember: vi.fn().mockResolvedValue(1),
     
     // Sorted set operations
-    zadd: jest.fn().mockResolvedValue(1),
-    zrem: jest.fn().mockResolvedValue(1),
-    zrange: jest.fn().mockResolvedValue([]),
-    zrevrange: jest.fn().mockResolvedValue([]),
-    zremrangebyscore: jest.fn().mockResolvedValue(1),
-    zremrangebyrank: jest.fn().mockResolvedValue(1),
-    zcount: jest.fn().mockResolvedValue(5),
-    zscore: jest.fn().mockResolvedValue(1),
+    zadd: vi.fn().mockResolvedValue(1),
+    zrem: vi.fn().mockResolvedValue(1),
+    zrange: vi.fn().mockResolvedValue([]),
+    zrevrange: vi.fn().mockResolvedValue([]),
+    zremrangebyscore: vi.fn().mockResolvedValue(1),
+    zremrangebyrank: vi.fn().mockResolvedValue(1),
+    zcount: vi.fn().mockResolvedValue(5),
+    zscore: vi.fn().mockResolvedValue(1),
     
     // Transaction operations
-    multi: jest.fn().mockReturnThis(),
-    exec: jest.fn().mockResolvedValue([]),
+    multi: vi.fn().mockReturnThis(),
+    exec: vi.fn().mockResolvedValue([]),
     
     // PubSub operations
-    publish: jest.fn().mockResolvedValue(1),
-    subscribe: jest.fn().mockImplementation((channel, callback) => {
-      // Return unsubscribe function
-      return jest.fn();
+    publish: vi.fn().mockResolvedValue(1),
+    subscribe: vi.fn().mockImplementation((channel: string, callback: (...args: any[]) => void) => {
+      void channel; void callback; // suppress unused variable warnings
+      return vi.fn();
     }),
     
     // Scripting
-    eval: jest.fn().mockResolvedValue(null),
+    eval: vi.fn().mockResolvedValue(null),
     
     // Pipeline
-    pipeline: jest.fn().mockReturnThis(),
+    pipeline: vi.fn().mockReturnThis(),
     
     // Database operations
-    select: jest.fn().mockResolvedValue('OK'),
-    flushdb: jest.fn().mockResolvedValue('OK'),
-    flushall: jest.fn().mockResolvedValue('OK'),
+    select: vi.fn().mockResolvedValue('OK'),
+    flushdb: vi.fn().mockResolvedValue('OK'),
+    flushall: vi.fn().mockResolvedValue('OK'),
     
     // Custom response setter for tests
-    __setMockResponse: jest.fn().mockImplementation(function(method, response) {
+    __setMockResponse: vi.fn().mockImplementation(function(this: any, method: string, response: unknown) {
       this[method].mockResolvedValue(response);
       return this;
     })
   }),
   
   // Class-based variant for when Redis is used with 'new'
-  new: jest.fn().mockImplementation(() => Redis.fromEnv())
+  new: vi.fn().mockImplementation(() => Redis.fromEnv())
 };
 
 // Shorthand for configuring mock responses

@@ -57,7 +57,7 @@ export function createTestHandler(handler, middleware = null) {
     
     if (middleware) {
       // Create a simple next function for middleware
-      const next = jest.fn().mockImplementation(async () => {
+      const next = vi.fn().mockImplementation(async () => {
         await handler(req, res);
       });
       

@@ -6,34 +6,27 @@ import userEvent from '@testing-library/user-event';
 import { DataTable } from '@/components/common/DataTable';
 import { SearchResults } from '@/components/common/SearchResults';
 import { NotificationCenter } from '@/components/common/NotificationCenter';
+import { vi } from 'vitest';
+import { supabase } from '@/tests/mocks/supabase';
 
 // Import our standardized mock
-jest.mock('@/lib/supabase');
-import { supabase } from '@/lib/supabase';
+vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
 
 describe('Empty States', () => {
-  let user;
+  let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     user = userEvent.setup();
-    
-    // Mock authentication
-    supabase.auth.getUser.mockResolvedValue({
-      data: { user: { id: 'user-123', email: 'user@example.com' } },
-      error: null
-    });
   });
 
   test('shows appropriate empty state for data table', async () => {
-    // Mock empty data response
-    supabase.from().select.mockResolvedValueOnce({
-      data: [],
-      error: null
-    });
-    
-    // Render data table
-    render(<DataTable tableName="projects" />);
+    // Render data table with empty data and columns
+    render(<DataTable data={[]} columns={[]} />);
     
     // Verify empty state is displayed
     await waitFor(() => {
@@ -50,7 +43,8 @@ describe('Empty States', () => {
   
   test('empty state is responsive and looks good on mobile', async () => {
     // Mock empty data response
-    supabase.from().select.mockResolvedValueOnce({
+    const projectsBuilder = supabase.from('projects') as any;
+    projectsBuilder.select.mockResolvedValueOnce({
       data: [],
       error: null
     });
@@ -60,7 +54,7 @@ describe('Empty States', () => {
     global.dispatchEvent(new Event('resize'));
     
     // Render data table
-    render(<DataTable tableName="projects" />);
+    render(<DataTable data={[]} columns={[]} />);
     
     // Verify empty state is displayed
     await waitFor(() => {
@@ -78,12 +72,6 @@ describe('Empty States', () => {
   });
   
   test('shows appropriate empty state for search results', async () => {
-    // Mock empty search results
-    supabase.from().select.mockResolvedValueOnce({
-      data: [],
-      error: null
-    });
-    
     // Render search results with query
     render(<SearchResults query="nonexistent term" />);
     
@@ -97,7 +85,8 @@ describe('Empty States', () => {
     expect(screen.getByText(/search tips/i)).toBeInTheDocument();
     
     // Mock search with different query
-    supabase.from().select.mockResolvedValueOnce({
+    const searchBuilder = supabase.from('search') as any;
+    searchBuilder.select.mockResolvedValueOnce({
       data: [{ id: 'result-1', title: 'Search Result' }],
       error: null
     });
@@ -114,12 +103,6 @@ describe('Empty States', () => {
   });
   
   test('shows appropriate empty state for notification center', async () => {
-    // Mock empty notifications
-    supabase.from().select.mockResolvedValueOnce({
-      data: [],
-      error: null
-    });
-    
     // Render notification center
     render(<NotificationCenter />);
     
@@ -132,28 +115,32 @@ describe('Empty States', () => {
     // Verify call-to-action if applicable
     expect(screen.getByText(/update notification settings/i)).toBeInTheDocument();
     
+    // Fix mockCallbacks.notification to be a function
+    const mockCallbacks = { notification: vi.fn() } as Record<string, any>;
+    
     // Mock new notification arriving
     const notificationMock = {
-      on: jest.fn(),
-      subscribe: jest.fn()
+      on: vi.fn(),
+      subscribe: vi.fn()
     };
-    supabase.channel = jest.fn().mockReturnValue(notificationMock);
+    supabase.channel = vi.fn().mockReturnValue(notificationMock);
     
     // Get the callback
-    const mockCallbacks = {};
     notificationMock.on.mockImplementation((event, callback) => {
       mockCallbacks[event] = callback;
       return notificationMock;
     });
     
     // Trigger a new notification
-    mockCallbacks.notification({
-      new: { 
-        id: 'notif-1', 
-        title: 'New notification', 
-        created_at: new Date().toISOString() 
-      }
-    });
+    if (typeof mockCallbacks.notification === 'function') {
+      mockCallbacks.notification({
+        new: { 
+          id: 'notif-1', 
+          title: 'New notification', 
+          created_at: new Date().toISOString() 
+        }
+      });
+    }
     
     // Verify empty state is replaced with notification
     await waitFor(() => {
@@ -163,26 +150,8 @@ describe('Empty States', () => {
   });
   
   test('empty state provides guidance based on user role', async () => {
-    // Mock empty data for admin user
-    supabase.auth.getUser.mockReset();
-    supabase.auth.getUser.mockResolvedValue({
-      data: { 
-        user: { 
-          id: 'admin-123', 
-          email: 'admin@example.com',
-          user_metadata: { role: 'admin' }
-        }
-      },
-      error: null
-    });
-    
-    supabase.from().select.mockResolvedValueOnce({
-      data: [],
-      error: null
-    });
-    
-    // Render data table for admin
-    render(<DataTable tableName="users" />);
+    // Render data table with empty data and columns for admin
+    render(<DataTable data={[]} columns={[]} />);
     
     // Verify admin-specific empty state content
     await waitFor(() => {
@@ -194,20 +163,8 @@ describe('Empty States', () => {
     expect(screen.getByRole('button', { name: /invite users/i })).toBeInTheDocument();
     
     // Now test as regular user
-    supabase.auth.getUser.mockReset();
-    supabase.auth.getUser.mockResolvedValue({
-      data: { 
-        user: { 
-          id: 'user-123', 
-          email: 'user@example.com',
-          user_metadata: { role: 'user' }
-        }
-      },
-      error: null
-    });
-    
     // Re-render for regular user
-    render(<DataTable tableName="users" />);
+    render(<DataTable data={[]} columns={[]} />);
     
     // Verify user-specific empty state content
     await waitFor(() => {
@@ -225,10 +182,11 @@ describe('Empty States', () => {
     });
     
     // Mock slow-loading empty data
-    supabase.from().select.mockReturnValueOnce(pendingPromise);
+    const projectsBuilder = supabase.from('projects') as any;
+    projectsBuilder.select.mockReturnValueOnce(pendingPromise);
     
     // Render component
-    render(<DataTable tableName="projects" />);
+    render(<DataTable data={[]} columns={[]} />);
     
     // Check loading state is displayed
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();

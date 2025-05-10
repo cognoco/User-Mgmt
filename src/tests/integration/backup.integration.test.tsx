@@ -5,6 +5,7 @@ import { BackupCodesDisplay } from '@/components/auth/BackupCodesDisplay';
 import { MFAVerificationForm } from '@/components/auth/MFAVerificationForm';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+import { vi } from 'vitest';
 
 const backupCodes = [
   'ABCD-1234',
@@ -62,7 +63,7 @@ describe('Backup Codes Integration', () => {
   });
 
   it('verifies a valid backup code in MFAVerificationForm', async () => {
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     renderWithClient(
       <MFAVerificationForm accessToken="dummy" onSuccess={onSuccess} />
     );
@@ -76,7 +77,7 @@ describe('Backup Codes Integration', () => {
   });
 
   it('shows error for invalid backup code in MFAVerificationForm', async () => {
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     renderWithClient(
       <MFAVerificationForm accessToken="dummy" onSuccess={onSuccess} />
     );

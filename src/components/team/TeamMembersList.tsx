@@ -88,7 +88,8 @@ export function TeamMembersList() {
         sortOrder,
       });
 
-      const response = await fetch(\`/api/team/members?\${params}\`);
+      const response = await fetch(`/api/team/members?${params.toString()}`);
+
       if (!response.ok) {
         throw new Error('Failed to fetch team members');
       }

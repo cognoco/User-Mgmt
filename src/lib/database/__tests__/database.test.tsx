@@ -1,16 +1,27 @@
 // Import our standardized mock
-jest.mock('../../lib/supabase', () => require('../mocks/supabase'));
-import { supabase, getServiceSupabase } from '@/lib/supabase';
+import { describe, test, expect, beforeEach, vi } from 'vitest';
+vi.mock('@/lib/database/supabase', async () => {
+  const mod = await import('@/tests/mocks/supabase');
+  const supabase = mod.supabase;
+  return {
+    supabase,
+    getServiceSupabase: () => supabase,
+  };
+});
+import { supabase, getServiceSupabase } from '@/lib/database/supabase';
 
 describe('Database Operations', () => {
   beforeEach(() => {
     // Clear all mocks before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('can fetch user profile', async () => {
     // Mock successful profile fetch
-    supabase.single.mockResolvedValue({
+    const builder = supabase.from('profiles') as any;
+    builder.select.mockReturnThis();
+    builder.eq.mockReturnThis();
+    builder.single.mockResolvedValue({
       data: {
         id: '123',
         first_name: 'John',
@@ -30,9 +41,9 @@ describe('Database Operations', () => {
 
     // Check if the operation was performed correctly
     expect(supabase.from).toHaveBeenCalledWith('profiles');
-    expect(supabase.select).toHaveBeenCalledWith('*');
-    expect(supabase.eq).toHaveBeenCalledWith('id', userId);
-    expect(supabase.single).toHaveBeenCalled();
+    expect(builder.select).toHaveBeenCalledWith('*');
+    expect(builder.eq).toHaveBeenCalledWith('id', userId);
+    expect(builder.single).toHaveBeenCalled();
 
     // Check the result
     expect(error).toBeNull();
@@ -46,7 +57,10 @@ describe('Database Operations', () => {
 
   test('can update user profile', async () => {
     // Mock successful profile update
-    supabase.single.mockResolvedValue({
+    const builder = supabase.from('profiles') as any;
+    builder.update.mockReturnThis();
+    builder.eq.mockReturnThis();
+    builder.single.mockResolvedValue({
       data: {
         id: '123',
         first_name: 'John',
@@ -67,9 +81,9 @@ describe('Database Operations', () => {
 
     // Check if the operation was performed correctly
     expect(supabase.from).toHaveBeenCalledWith('profiles');
-    expect(supabase.update).toHaveBeenCalledWith(updates);
-    expect(supabase.eq).toHaveBeenCalledWith('id', userId);
-    expect(supabase.single).toHaveBeenCalled();
+    expect(builder.update).toHaveBeenCalledWith(updates);
+    expect(builder.eq).toHaveBeenCalledWith('id', userId);
+    expect(builder.single).toHaveBeenCalled();
 
     // Check the result
     expect(error).toBeNull();
@@ -84,7 +98,8 @@ describe('Database Operations', () => {
   test('admin can fetch all users', async () => {
     // Mock the service client
     const serviceSupabase = getServiceSupabase();
-    serviceSupabase.select.mockResolvedValue({
+    const builder = serviceSupabase.from('profiles') as any;
+    builder.select.mockResolvedValue({
       data: [
         {
           id: '123',
@@ -108,7 +123,7 @@ describe('Database Operations', () => {
     // Check if the operation was performed correctly
     expect(getServiceSupabase).toHaveBeenCalled();
     expect(serviceSupabase.from).toHaveBeenCalledWith('profiles');
-    expect(serviceSupabase.select).toHaveBeenCalledWith('*');
+    expect(builder.select).toHaveBeenCalledWith('*');
 
     // Check the result
     expect(error).toBeNull();
@@ -128,7 +143,10 @@ describe('Database Operations', () => {
 
   test('handles database errors', async () => {
     // Mock database error
-    supabase.single.mockResolvedValue({
+    const builder = supabase.from('profiles') as any;
+    builder.select.mockReturnThis();
+    builder.eq.mockReturnThis();
+    builder.single.mockResolvedValue({
       data: null,
       error: { message: 'Database error' },
     });
@@ -143,9 +161,9 @@ describe('Database Operations', () => {
 
     // Check if the operation was performed correctly
     expect(supabase.from).toHaveBeenCalledWith('profiles');
-    expect(supabase.select).toHaveBeenCalledWith('*');
-    expect(supabase.eq).toHaveBeenCalledWith('id', userId);
-    expect(supabase.single).toHaveBeenCalled();
+    expect(builder.select).toHaveBeenCalledWith('*');
+    expect(builder.eq).toHaveBeenCalledWith('id', userId);
+    expect(builder.single).toHaveBeenCalled();
 
     // Check the result
     expect(data).toBeNull();
@@ -154,7 +172,9 @@ describe('Database Operations', () => {
 
   test('can insert new user data', async () => {
     // Mock successful insert
-    supabase.single.mockResolvedValue({
+    const builder = supabase.from('profiles') as any;
+    builder.insert.mockReturnThis();
+    builder.single.mockResolvedValue({
       data: {
         id: '789',
         first_name: 'Alice',
@@ -180,8 +200,8 @@ describe('Database Operations', () => {
 
     // Check if the operation was performed correctly
     expect(supabase.from).toHaveBeenCalledWith('profiles');
-    expect(supabase.insert).toHaveBeenCalledWith(newUser);
-    expect(supabase.single).toHaveBeenCalled();
+    expect(builder.insert).toHaveBeenCalledWith(newUser);
+    expect(builder.single).toHaveBeenCalled();
 
     // Check the result
     expect(error).toBeNull();
@@ -190,7 +210,10 @@ describe('Database Operations', () => {
 
   test('can delete user data', async () => {
     // Mock successful delete
-    supabase.eq.mockResolvedValue({
+    const builder = supabase.from('profiles') as any;
+    builder.delete.mockReturnThis();
+    builder.eq.mockReturnThis();
+    builder.then.mockResolvedValue({
       data: { success: true },
       error: null,
     });
@@ -204,8 +227,8 @@ describe('Database Operations', () => {
 
     // Check if the operation was performed correctly
     expect(supabase.from).toHaveBeenCalledWith('profiles');
-    expect(supabase.delete).toHaveBeenCalled();
-    expect(supabase.eq).toHaveBeenCalledWith('id', userId);
+    expect(builder.delete).toHaveBeenCalled();
+    expect(builder.eq).toHaveBeenCalledWith('id', userId);
 
     // Check the result
     expect(error).toBeNull();

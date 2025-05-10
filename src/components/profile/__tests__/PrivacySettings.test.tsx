@@ -2,8 +2,6 @@ import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { I18nextProvider } from 'react-i18next';
-import i18n from '@/lib/i18n/index';
 
 import { PrivacySettings } from '../PrivacySettings';
 import { useProfile } from '@/hooks/useProfile';
@@ -104,11 +102,7 @@ describe('PrivacySettings Component', () => {
 
   it('should render current privacy settings from profile store', async () => {
     await act(async () => {
-      render(
-        <I18nextProvider i18n={i18n}>
-          <PrivacySettings />
-        </I18nextProvider>
-      );
+      render(<PrivacySettings />);
     });
 
     // Check profile visibility dropdown
@@ -124,11 +118,7 @@ describe('PrivacySettings Component', () => {
   it('should call updatePrivacySettings with new visibility when dropdown changes', async () => {
     const user = userEvent.setup();
     await act(async () => {
-      render(
-        <I18nextProvider i18n={i18n}>
-          <PrivacySettings />
-        </I18nextProvider>
-      );
+      render(<PrivacySettings />);
     });
 
     const visibilitySelect = screen.getByTestId('profile-visibility-select');
@@ -144,11 +134,7 @@ describe('PrivacySettings Component', () => {
   it('should call updatePrivacySettings with new value when email toggle changes', async () => {
     const user = userEvent.setup();
     await act(async () => {
-      render(
-        <I18nextProvider i18n={i18n}>
-          <PrivacySettings />
-        </I18nextProvider>
-      );
+      render(<PrivacySettings />);
     });
 
     const emailToggle = screen.getByLabelText(/Show Email Address/i);
@@ -164,11 +150,7 @@ describe('PrivacySettings Component', () => {
   it('should call updatePrivacySettings with new value when phone toggle changes', async () => {
     const user = userEvent.setup();
     await act(async () => {
-      render(
-        <I18nextProvider i18n={i18n}>
-          <PrivacySettings />
-        </I18nextProvider>
-      );
+      render(<PrivacySettings />);
     });
 
     const phoneToggle = screen.getByLabelText(/Show Phone Number/i);
