@@ -27,36 +27,38 @@ type SupabaseRpcResponse = { data: unknown | null; error: unknown | null };
 // Helper to create a fully chainable builder
 function createMockBuilder() {
   const builder: any = {};
-  const methods = [
+  const terminalMethods = [
     'select', 'insert', 'update', 'upsert', 'delete',
+  ];
+  const chainableMethods = [
     'eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'ilike', 'in', 'is', 'or', 'filter', 'range', 'order', 'limit',
     'single', 'maybeSingle',
   ];
-  methods.forEach((method) => {
-    // Create a vi.fn that by default returns the builder (chainable)
-    const fn = vi.fn(function (...args) {
-      // If the mock for this call returns a promise, return it (end chain)
-      const mockImpl = fn.getMockImplementation();
-      if (mockImpl) {
-        const result = mockImpl.apply(this, args);
-        if (result && typeof result.then === 'function') {
-          return result;
-        }
-        return result;
+
+  // Terminal methods return a promise by default
+  terminalMethods.forEach((method) => {
+    const fn: any = vi.fn(function (this: any, ...args: any[]) {
+      // If a mockImplementation or mockResolvedValue is set, use it
+      if (fn.getMockImplementation()) {
+        return fn.getMockImplementation()!.apply(this, args);
       }
-      // If a mockReturnValue/mockResolvedValue is set, use it
       if (fn.mock.results.length > 0) {
-        const lastResult = fn.mock.results[fn.mock.results.length - 1].value;
+        const lastResult: any = fn.mock.results[fn.mock.results.length - 1].value;
         if (lastResult && typeof lastResult.then === 'function') {
           return lastResult;
         }
       }
-      return builder;
+      // Default: return a promise resolving to { data: null, error: null }
+      return Promise.resolve({ data: null, error: null });
     });
     builder[method] = fn;
   });
-  // Add a .then method to allow awaiting the chain in tests
-  builder.then = vi.fn();
+
+  // Chainable methods return the builder for chaining
+  chainableMethods.forEach((method) => {
+    builder[method] = vi.fn(() => builder);
+  });
+
   return builder;
 }
 
