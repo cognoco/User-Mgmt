@@ -1,5 +1,6 @@
 // __tests__/auth/sso/business-sso.test.tsx
 
+import '@/tests/i18nTestSetup';
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

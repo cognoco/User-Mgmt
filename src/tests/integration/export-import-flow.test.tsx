@@ -3,12 +3,12 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPreferences from '@/components/common/UserPreferences';
+import { UserPreferencesComponent } from '@/components/common/UserPreferences';
 import { vi } from 'vitest';
 
 // Use the canonical supabase mock
 vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
-import { supabase } from '@/tests/mocks/supabase';
+import { supabase } from '@/lib/supabase';
 
 describe('User Preferences Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;
@@ -53,7 +53,7 @@ describe('User Preferences Flow', () => {
 
   test('User can view and update preferences', async () => {
     // Render user preferences
-    render(<UserPreferences />);
+    render(<UserPreferencesComponent />);
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -122,7 +122,7 @@ describe('User Preferences Flow', () => {
     });
     
     // Render user preferences
-    render(<UserPreferences />);
+    render(<UserPreferencesComponent />);
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -144,7 +144,7 @@ describe('User Preferences Flow', () => {
   
   test('validates items per page input', async () => {
     // Render user preferences
-    render(<UserPreferences />);
+    render(<UserPreferencesComponent />);
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -167,7 +167,7 @@ describe('User Preferences Flow', () => {
   
   test('handles error when saving preferences', async () => {
     // Render user preferences
-    render(<UserPreferences />);
+    render(<UserPreferencesComponent />);
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -194,7 +194,7 @@ describe('User Preferences Flow', () => {
   
   test('can select timezone from dropdown', async () => {
     // Render user preferences
-    render(<UserPreferences />);
+    render(<UserPreferencesComponent />);
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -226,7 +226,7 @@ describe('User Preferences Flow', () => {
   
   test('can select date format', async () => {
     // Render user preferences
-    render(<UserPreferences />);
+    render(<UserPreferencesComponent />);
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -258,7 +258,7 @@ describe('User Preferences Flow', () => {
   
   test('can toggle advanced settings', async () => {
     // Render user preferences
-    render(<UserPreferences />);
+    render(<UserPreferencesComponent />);
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -303,7 +303,7 @@ describe('User Preferences Flow', () => {
   
   test('can reset preferences to defaults', async () => {
     // Render user preferences
-    render(<UserPreferences />);
+    render(<UserPreferencesComponent />);
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -358,7 +358,7 @@ describe('User Preferences Flow', () => {
       update: vi.fn().mockResolvedValue({ data: {}, error: null })
     }));
 
-    render(<UserPreferences />);
+    render(<UserPreferencesComponent />);
     await waitFor(() => {
       expect(screen.getByLabelText(/language/i)).toHaveValue('fr');
       expect(screen.getByLabelText(/timezone/i)).toHaveValue('Europe/Paris');
@@ -380,7 +380,7 @@ describe('User Preferences Flow', () => {
       timeZone: 'Europe/Paris',
     });
 
-    render(<UserPreferences />);
+    render(<UserPreferencesComponent />);
     await waitFor(() => {
       expect(screen.getByLabelText(/theme/i)).toBeInTheDocument();
     });

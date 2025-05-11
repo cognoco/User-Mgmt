@@ -35,6 +35,22 @@ const OrganizationSSO: React.FC<OrganizationSSOProps> = ({ orgId }) => {
     totalSuccessfulLogins24h: 0
   });
 
+  // Fetch initial SSO settings on mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await api.get(`/organizations/${orgId}/sso/settings`);
+        setSsoSettings(response.data);
+      } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to fetch SSO settings:', error);
+        }
+        // Optionally: setSsoSettings({ sso_enabled: false, idp_type: null });
+      }
+    };
+    fetchSettings();
+  }, [orgId]);
+
   // Fetch SSO status periodically
   useEffect(() => {
     const fetchStatus = async () => {
@@ -139,7 +155,7 @@ const OrganizationSSO: React.FC<OrganizationSSOProps> = ({ orgId }) => {
         <IDPConfiguration
           orgId={orgId}
           idpType={ssoSettings.idp_type}
-          onConfigurationUpdate={(success) => {
+          onConfigurationUpdate={() => {
             // You could add additional handling here if needed
             // For example, showing a global notification
           }}

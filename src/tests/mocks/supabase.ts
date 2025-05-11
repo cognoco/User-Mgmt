@@ -35,25 +35,11 @@ function createMockBuilder() {
     'single', 'maybeSingle',
   ];
 
-  // Terminal methods return a promise by default
+  // Terminal methods return the builder for chaining (not a Promise)
   terminalMethods.forEach((method) => {
-    const fn: any = vi.fn(function (this: any, ...args: any[]) {
-      // Recursion guard: Only call mockImplementation if it is not this function
-      const impl = fn.getMockImplementation();
-      if (impl && impl !== fn) {
-        return impl.apply(this, args);
-      }
-      if (fn.mock.results.length > 0) {
-        const lastResult: any = fn.mock.results[fn.mock.results.length - 1].value;
-        if (lastResult && typeof lastResult.then === 'function') {
-          return lastResult;
-        }
-      }
-      // Default: return a promise resolving to { data: null, error: null }
-      return Promise.resolve({ data: null, error: null });
-    });
-    // Usage note: Do NOT set a mockImplementation that calls the same method, to avoid recursion.
-    builder[method] = fn;
+    // All methods return the builder for full chainability in tests.
+    // For promise-based assertions, use .then on the builder in your test.
+    builder[method] = vi.fn(() => builder);
   });
 
   // Chainable methods return the builder for chaining

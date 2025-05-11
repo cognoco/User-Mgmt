@@ -1,3 +1,4 @@
+import '@/tests/i18nTestSetup';
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -206,12 +207,8 @@ describe('OrganizationSSO', () => {
 
     (api.get as Mock).mockImplementation((url: string) => {
       if (url.includes('/sso/settings')) {
-        return Promise.resolve({ 
-          data: { 
-            sso_enabled: true, 
-            idp_type: 'saml' 
-          } 
-        });
+        // Always return enabled
+        return Promise.resolve({ data: { sso_enabled: true, idp_type: 'saml' } });
       }
       if (url.includes('/sso/status')) {
         return Promise.resolve({ data: warningStatus });
@@ -223,6 +220,7 @@ describe('OrganizationSSO', () => {
     });
 
     render(<OrganizationSSO orgId={mockOrgId} />);
+    screen.debug(); // Debug output after render
 
     await waitFor(() => {
       expect(screen.getByText('Warning')).toBeInTheDocument();
@@ -240,12 +238,8 @@ describe('OrganizationSSO', () => {
 
     (api.get as Mock).mockImplementation((url: string) => {
       if (url.includes('/sso/settings')) {
-        return Promise.resolve({ 
-          data: { 
-            sso_enabled: true, 
-            idp_type: 'saml' 
-          } 
-        });
+        // Always return enabled
+        return Promise.resolve({ data: { sso_enabled: true, idp_type: 'saml' } });
       }
       if (url.includes('/sso/status')) {
         return Promise.resolve({ data: errorStatus });
@@ -257,6 +251,7 @@ describe('OrganizationSSO', () => {
     });
 
     render(<OrganizationSSO orgId={mockOrgId} />);
+    screen.debug(); // Debug output after render
 
     await waitFor(() => {
       expect(screen.getByText('Error')).toBeInTheDocument();

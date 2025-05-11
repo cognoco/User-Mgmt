@@ -52,7 +52,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   dateFormat: getLocaleDefaults().dateFormat || 'YYYY-MM-DD',
 };
 
-export const UserPreferences: React.FC<UserPreferencesProps> = ({ onSave, onReset, onError }) => {
+export const UserPreferencesComponent: React.FC<UserPreferencesProps> = ({ onSave, onReset, onError }) => {
   const { t } = useTranslation();
   const { preferences, isLoading, error, fetchPreferences, updatePreferences } = usePreferencesStore();
   const { user } = useAuthStore();
@@ -216,7 +216,7 @@ export const UserPreferences: React.FC<UserPreferencesProps> = ({ onSave, onRese
             type="number"
             min={1}
             max={100}
-            value={form.itemsPerPage}
+            value={String(form.itemsPerPage)}
             onChange={handleChange}
             className="w-full border rounded px-2 py-1"
             aria-describedby="items-per-page-help"
@@ -327,7 +327,6 @@ export const UserPreferences: React.FC<UserPreferencesProps> = ({ onSave, onRese
   );
 };
 
-export default UserPreferences;
 // Props: onSave, onReset, onError for host integration
 // Emits: calls these props on respective actions
 // Accessible: all fields labeled, modal uses Dialog, ARIA roles
