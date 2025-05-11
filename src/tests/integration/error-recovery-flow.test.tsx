@@ -3,7 +3,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FormWithRecovery } from '@/components/common/FormWithRecovery';
+import FormWithRecovery from '@/components/common/FormWithRecovery';
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 
 // Import our standardized mock

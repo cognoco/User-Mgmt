@@ -5,7 +5,7 @@
 //        vi.mock('@/lib/stores/preferences.store', () => ({ usePreferencesStore: vi.fn(() => mockStore) }));
 
 import { vi } from 'vitest';
-import type { UserPreferences } from '../../types/database';
+import type { UserPreferences } from '@/types/database';
 
 // Default initial state matching the real store
 const defaultState = {

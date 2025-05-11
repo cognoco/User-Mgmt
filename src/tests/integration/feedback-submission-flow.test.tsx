@@ -3,17 +3,13 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FeedbackForm } from '@/components/common/FeedbackForm';
+import FeedbackForm from '@/components/common/FeedbackForm';
 import { vi } from 'vitest';
 import { supabase } from '@/tests/mocks/supabase';
 import type { Mock } from 'vitest';
 
 // Import our standardized mock
 vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
-
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
 
 describe('Feedback Submission Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

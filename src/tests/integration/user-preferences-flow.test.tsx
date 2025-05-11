@@ -3,7 +3,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { UserPreferences } from '@/components/common/UserPreferences';
+import UserPreferences from '@/components/common/UserPreferences';
 import { useAuthStore } from '@/lib/stores/auth.store';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
 
@@ -17,10 +17,6 @@ vi.mock('@/lib/stores/auth.store', () => ({
 }));
 vi.mock('@/lib/stores/preferences.store', () => ({
   usePreferencesStore: vi.fn(),
-}));
-
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
 }));
 
 describe('User Preferences Flow', () => {
@@ -77,8 +73,13 @@ describe('User Preferences Flow', () => {
         theme: 'light',
         language: 'en',
         timezone: 'America/New_York',
-        date_format: 'MM/DD/YYYY',
-        items_per_page: 25,
+        dateFormat: 'MM/DD/YYYY',
+        itemsPerPage: 25,
+        notifications: {
+          email: true,
+          push: false,
+          marketing: true,
+        },
         // Ensure all fields from the component's DEFAULTS and actual store are covered
       },
       isLoading: false,
@@ -385,5 +386,77 @@ describe('User Preferences Flow', () => {
       timezone: 'UTC',
       dateFormat: 'YYYY-MM-DD',
     }));
+  });
+
+  test('can toggle notification preferences', async () => {
+    await act(async () => {
+      render(<UserPreferences />);
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByLabelText(/email notifications/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/push notifications/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/marketing notifications/i)).toBeInTheDocument();
+    });
+    
+    await act(async () => {
+      await user.click(screen.getByLabelText(/email notifications/i));
+      await user.click(screen.getByLabelText(/push notifications/i));
+      await user.click(screen.getByLabelText(/marketing notifications/i));
+    });
+
+    mockUpdatePreferences.mockResolvedValueOnce(true);
+    
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByText(/preferences saved/i)).toBeInTheDocument();
+    });
+
+    expect(mockUpdatePreferences).toHaveBeenCalledWith(expect.objectContaining({
+      notifications: expect.objectContaining({
+        email: true,
+        push: true,
+        marketing: true,
+      }),
+    }));
+  });
+
+  test('can export preferences', async () => {
+    await act(async () => {
+      render(<UserPreferences />);
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /export preferences/i })).toBeInTheDocument();
+    });
+    
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /export preferences/i }));
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByText(/preferences exported/i)).toBeInTheDocument();
+    });
+  });
+
+  test('can import preferences', async () => {
+    await act(async () => {
+      render(<UserPreferences />);
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /import preferences/i })).toBeInTheDocument();
+    });
+    
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /import preferences/i }));
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByText(/preferences imported/i)).toBeInTheDocument();
+    });
   });
 });

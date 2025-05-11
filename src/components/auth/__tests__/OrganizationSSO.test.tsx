@@ -13,11 +13,6 @@ vi.mock('@/lib/api/axios', () => ({
   },
 }));
 
-// Mock i18n so t(key) returns the key
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
-
 describe('OrganizationSSO', () => {
   const mockOrgId = 'org123';
 
@@ -50,8 +45,8 @@ describe('OrganizationSSO', () => {
     await act(async () => {
       render(<OrganizationSSO orgId={mockOrgId} />);
     });
-    expect(screen.getByText('org.sso.title')).toBeInTheDocument();
-    expect(screen.getByText('org.sso.description')).toBeInTheDocument();
+    expect(screen.getByText('Single Sign-On')).toBeInTheDocument();
+    expect(screen.getByText('Configure SSO for your organization')).toBeInTheDocument();
   });
 
   it('does not show IDP Configuration when SSO is disabled', async () => {
@@ -63,8 +58,8 @@ describe('OrganizationSSO', () => {
       expect(api.get).toHaveBeenCalledWith(`/organizations/${mockOrgId}/sso/settings`);
     });
 
-    expect(screen.queryByText('org.sso.samlConfigTitle')).not.toBeInTheDocument();
-    expect(screen.queryByText('org.sso.oidcConfigTitle')).not.toBeInTheDocument();
+    expect(screen.queryByText('SAML Configuration')).not.toBeInTheDocument();
+    expect(screen.queryByText('OIDC Configuration')).not.toBeInTheDocument();
   });
 
   it('shows SAML configuration when SSO is enabled with SAML', async () => {
@@ -87,13 +82,13 @@ describe('OrganizationSSO', () => {
     render(<OrganizationSSO orgId={mockOrgId} />);
 
     await waitFor(() => {
-      expect(screen.getByText('org.sso.samlConfigTitle')).toBeInTheDocument();
+      expect(screen.getByText('SAML Configuration')).toBeInTheDocument();
     });
 
     // Help text should be visible
-    expect(screen.getByText('org.sso.helpTitle')).toBeInTheDocument();
-    expect(screen.getByText('org.sso.samlHelpText')).toBeInTheDocument();
-    expect(screen.getByText('org.sso.saml.helpStep1')).toBeInTheDocument();
+    expect(screen.getByText('Need help with SSO setup?')).toBeInTheDocument();
+    expect(screen.getByText('Follow these steps to configure SAML SSO for your organization.')).toBeInTheDocument();
+    expect(screen.getByText('Obtain your SAML IdP metadata from your provider.')).toBeInTheDocument();
   });
 
   it('shows OIDC configuration when SSO is enabled with OIDC', async () => {
@@ -116,13 +111,13 @@ describe('OrganizationSSO', () => {
     render(<OrganizationSSO orgId={mockOrgId} />);
 
     await waitFor(() => {
-      expect(screen.getByText('org.sso.oidcConfigTitle')).toBeInTheDocument();
+      expect(screen.getByText('OIDC Configuration')).toBeInTheDocument();
     });
 
     // Help text should be visible
-    expect(screen.getByText('org.sso.helpTitle')).toBeInTheDocument();
-    expect(screen.getByText('org.sso.oidcHelpText')).toBeInTheDocument();
-    expect(screen.getByText('org.sso.oidc.helpStep1')).toBeInTheDocument();
+    expect(screen.getByText('Need help with SSO setup?')).toBeInTheDocument();
+    expect(screen.getByText('Follow these steps to configure OIDC SSO for your organization.')).toBeInTheDocument();
+    expect(screen.getByText('Obtain your OIDC provider\'s discovery URL.')).toBeInTheDocument();
   });
 
   it('updates IDP Configuration visibility when SSO settings change', async () => {
@@ -137,7 +132,7 @@ describe('OrganizationSSO', () => {
     render(<OrganizationSSO orgId={mockOrgId} />);
 
     // Initially, IDP Configuration should not be visible
-    expect(screen.queryByText('org.sso.samlConfigTitle')).not.toBeInTheDocument();
+    expect(screen.queryByText('SAML Configuration')).not.toBeInTheDocument();
 
     // Mock successful SSO enable with SAML
     (api.put as Mock).mockResolvedValueOnce({});
@@ -149,20 +144,20 @@ describe('OrganizationSSO', () => {
     });
 
     // Enable SSO and select SAML
-    const ssoSwitch = screen.getByLabelText('org.sso.enableLabel');
+    const ssoSwitch = screen.getByLabelText('Enable SSO');
     await userEvent.click(ssoSwitch);
 
-    const idpSelect = screen.getByText('org.sso.idpTypePlaceholder');
+    const idpSelect = screen.getByText('Select an identity provider...');
     await userEvent.click(idpSelect);
-    const samlOption = screen.getByText('org.sso.idpTypeSaml');
+    const samlOption = screen.getByText('SAML');
     await userEvent.click(samlOption);
 
-    const saveButton = screen.getByText('org.sso.saveButton');
+    const saveButton = screen.getByText('Save Settings');
     await userEvent.click(saveButton);
 
     // SAML configuration should now be visible
     await waitFor(() => {
-      expect(screen.getByText('org.sso.samlConfigTitle')).toBeInTheDocument();
+      expect(screen.getByText('SAML Configuration')).toBeInTheDocument();
     });
   });
 
@@ -170,7 +165,7 @@ describe('OrganizationSSO', () => {
     await act(async () => {
       render(<OrganizationSSO orgId={mockOrgId} />);
     });
-    expect(screen.queryByText('org.sso.status.healthy')).not.toBeInTheDocument();
+    expect(screen.queryByText('Healthy')).not.toBeInTheDocument();
   });
 
   it('shows status indicator with healthy status', async () => {
@@ -196,7 +191,7 @@ describe('OrganizationSSO', () => {
     render(<OrganizationSSO orgId={mockOrgId} />);
 
     await waitFor(() => {
-      expect(screen.getByText('org.sso.status.healthy')).toBeInTheDocument();
+      expect(screen.getByText('Healthy')).toBeInTheDocument();
       expect(screen.getByText(/Last login:/)).toBeInTheDocument();
       expect(screen.getByText(/Logins in last 24h: 42/)).toBeInTheDocument();
     });
@@ -230,7 +225,7 @@ describe('OrganizationSSO', () => {
     render(<OrganizationSSO orgId={mockOrgId} />);
 
     await waitFor(() => {
-      expect(screen.getByText('org.sso.status.warning')).toBeInTheDocument();
+      expect(screen.getByText('Warning')).toBeInTheDocument();
       expect(screen.getByText(/Certificate expires soon/)).toBeInTheDocument();
     });
   });
@@ -264,8 +259,8 @@ describe('OrganizationSSO', () => {
     render(<OrganizationSSO orgId={mockOrgId} />);
 
     await waitFor(() => {
-      expect(screen.getByText('org.sso.status.error')).toBeInTheDocument();
-      expect(screen.getByText('org.sso.status.noLogins')).toBeInTheDocument();
+      expect(screen.getByText('Error')).toBeInTheDocument();
+      expect(screen.getByText('No recent logins')).toBeInTheDocument();
       expect(screen.getByText(/Failed to connect to IDP/)).toBeInTheDocument();
       expect(screen.getByText(/Logins in last 24h: 0/)).toBeInTheDocument();
     });

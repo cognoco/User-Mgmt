@@ -8,21 +8,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import ReactCrop, { type Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
+import ReactCrop, { type Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { 
   isValidImage, 
   MAX_FILE_SIZE, 
   ALLOWED_IMAGE_TYPES,
-  createFilePreview,
-  revokeFilePreview,
   formatFileSize,
   canvasPreview
 } from '@/lib/utils/file-upload';
-import { Upload, User, Trash, X, Camera, RotateCw } from 'lucide-react';
-import { getPlatformClasses } from '@/lib/hooks/usePlatformStyles';
-import { useUserManagement } from '@/lib/UserManagementProvider';
-import { useDebounceEffect } from '@/lib/hooks/useDebounceEffect';
+import { Upload, User, Trash, Camera } from 'lucide-react';
+import { getPlatformClasses } from '@/hooks/usePlatformStyles';
+import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 
 async function getCroppedImgBlob(image: HTMLImageElement, crop: PixelCrop): Promise<Blob | null> {
   const canvas = document.createElement('canvas');
@@ -39,16 +36,16 @@ export function AvatarUpload() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const { profile, uploadAvatar, removeAvatar, isLoading: storeLoading, error: storeError } = useProfileStore();
+  const { platform, isNative } = useUserManagement();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imgSrc, setImgSrc] = useState('');
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
-  const [aspect, setAspect] = useState<number | undefined>(1);
+  const [aspect] = useState<number | undefined>(undefined);
   
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isProcessingCrop, setIsProcessingCrop] = useState(false);
-  const { platform } = useUserManagement();
 
   useEffect(() => {
       setUploadError(null);
@@ -137,11 +134,11 @@ export function AvatarUpload() {
   const avatarClasses = getPlatformClasses({
     base: "h-32 w-32 border-4 border-background relative",
     mobile: "h-24 w-24"
-  });
+  }, { platform, isNative });
   const iconButtonClasses = getPlatformClasses({
     base: "absolute -bottom-3 -right-3 rounded-full bg-primary text-primary-foreground h-10 w-10 flex items-center justify-center shadow hover:bg-primary/90",
     mobile: "h-8 w-8 -bottom-2 -right-2"
-  });
+  }, { platform, isNative });
 
   const isLoading = storeLoading || isProcessingCrop;
 
@@ -150,7 +147,7 @@ export function AvatarUpload() {
       <CardContent className="pt-6 flex flex-col items-center space-y-4">
           <div className="relative">
             <Avatar className={avatarClasses}>
-               <AvatarImage src={profile?.avatar_url || undefined} alt={t('profile.avatar')} />
+               <AvatarImage src={profile?.avatarUrl || undefined} alt={t('profile.avatar')} />
                 <AvatarFallback>
                   <User className="h-1/2 w-1/2 text-muted-foreground" />
                 </AvatarFallback>
@@ -174,7 +171,7 @@ export function AvatarUpload() {
             className="hidden"
           />
 
-          {profile?.avatar_url && (
+          {profile?.avatarUrl && (
             <Button
               type="button"
               variant="outline"

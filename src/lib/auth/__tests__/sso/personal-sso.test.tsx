@@ -10,11 +10,6 @@ import { vi, describe, beforeEach, test, expect } from 'vitest';
 vi.mock('@/lib/supabase', async () => (await import('@/tests/mocks/supabase')));
 import { supabase } from '@/lib/supabase';
 
-// Mock i18n so t(key) returns the key
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
-
 // Store original window location
 const originalLocation = window.location;
 

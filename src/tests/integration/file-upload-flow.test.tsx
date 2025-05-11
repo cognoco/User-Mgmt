@@ -3,13 +3,8 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FileManager } from '@/components/common/FileManager';
+import FileManager from '@/components/common/FileManager';
 import { vi } from 'vitest';
-
-// Mock i18n so t(key) returns the key
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
 
 // Import our standardized mock
 vi.mock('@/lib/supabase', async () => (await import('@/tests/mocks/supabase')));

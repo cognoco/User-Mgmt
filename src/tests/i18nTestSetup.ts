@@ -16,6 +16,23 @@ const resources = {
   },
 };
 
+// Helper to resolve nested keys with fallback to key itself
+function resolveKey(key: string, obj: any): string {
+  const value = key.split('.').reduce((o, i) => (o ? o[i] : undefined), obj);
+  return typeof value === 'string' ? value : key;
+}
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => resolveKey(key, en),
+  }),
+  Trans: ({ i18nKey }: { i18nKey: string }) => resolveKey(i18nKey, en),
+  initReactI18next: {
+    type: '3rdParty',
+    init: () => {},
+  },
+}));
+
 i18n.use(initReactI18next).init({
   lng: 'en',
   fallbackLng: 'en',

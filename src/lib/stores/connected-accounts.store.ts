@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
-import { ConnectedAccountsState } from '../types/connected-accounts';
-import { OAuthProvider } from '../../types/oauth';
+import { ConnectedAccountsState } from '@/types/connected-accounts';
+import { OAuthProvider } from '@/types/oauth';
 
-export const useConnectedAccountsStore = create<ConnectedAccountsState>((set) => ({
+export const useConnectedAccountsStore = create<ConnectedAccountsState>((set: (fn: (state: ConnectedAccountsState) => Partial<ConnectedAccountsState> | ConnectedAccountsState) => void) => ({
   accounts: [],
   isLoading: false,
   error: null,
@@ -80,8 +80,8 @@ export const useConnectedAccountsStore = create<ConnectedAccountsState>((set) =>
       await api.delete(`/connected-accounts/${accountId}`);
       
       // Update local state
-      set((state) => ({
-        accounts: state.accounts.filter((account) => account.id !== accountId),
+      set((state: ConnectedAccountsState) => ({
+        accounts: state.accounts.filter((account: ConnectedAccount) => account.id !== accountId),
         isLoading: false,
       }));
     } catch (error: any) {

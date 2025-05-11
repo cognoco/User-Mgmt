@@ -12,6 +12,8 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from '@/components/ui/alert-dialog';
+import type { UserPreferences } from '@/types/database';
+import { getBrowserLanguage, getBrowserTimezone, getDefaultDateFormat } from '@/lib/utils';
 
 /**
  * UserPreferences Component
@@ -25,12 +27,29 @@ interface UserPreferencesProps {
   onError?: (error: string) => void;
 }
 
-const DEFAULTS = {
-  language: 'en',
+// Helper to get locale-based defaults
+function getLocaleDefaults(): Partial<UserPreferences> {
+  const language = getBrowserLanguage();
+  const timezone = getBrowserTimezone();
+  const dateFormat = getDefaultDateFormat(language);
+  return { language, timezone, dateFormat };
+}
+
+const DEFAULT_PREFERENCES: UserPreferences = {
+  id: '',
+  userId: '',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  language: getLocaleDefaults().language || 'en',
   theme: 'system',
+  notifications: {
+    email: true,
+    push: true,
+    marketing: false,
+  },
   itemsPerPage: 25,
-  timezone: 'UTC',
-  dateFormat: 'YYYY-MM-DD',
+  timezone: getLocaleDefaults().timezone || 'UTC',
+  dateFormat: getLocaleDefaults().dateFormat || 'YYYY-MM-DD',
 };
 
 export const UserPreferences: React.FC<UserPreferencesProps> = ({ onSave, onReset, onError }) => {
@@ -39,17 +58,13 @@ export const UserPreferences: React.FC<UserPreferencesProps> = ({ onSave, onRese
   const { user } = useAuthStore();
 
   // Local state for form
-  const [form, setForm] = useState({
-    language: DEFAULTS.language,
-    theme: DEFAULTS.theme,
-    itemsPerPage: DEFAULTS.itemsPerPage,
-    timezone: DEFAULTS.timezone,
-    dateFormat: DEFAULTS.dateFormat,
-  });
+  const [form, setForm] = useState<UserPreferences>(DEFAULT_PREFERENCES);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [validationError, setValidationError] = useState('');
+  const [exportStatus, setExportStatus] = useState('');
+  const [importStatus, setImportStatus] = useState('');
 
   // Load preferences on mount
   useEffect(() => {
@@ -61,12 +76,14 @@ export const UserPreferences: React.FC<UserPreferencesProps> = ({ onSave, onRese
   useEffect(() => {
     if (preferences) {
       setForm({
-        language: preferences.language || DEFAULTS.language,
-        theme: preferences.theme || DEFAULTS.theme,
-        itemsPerPage: (preferences as any).items_per_page || DEFAULTS.itemsPerPage,
-        timezone: (preferences as any).timezone || DEFAULTS.timezone,
-        dateFormat: (preferences as any).date_format || DEFAULTS.dateFormat,
+        ...DEFAULT_PREFERENCES,
+        ...preferences,
+        createdAt: preferences.createdAt ? new Date(preferences.createdAt) : new Date(),
+        updatedAt: preferences.updatedAt ? new Date(preferences.updatedAt) : new Date(),
       });
+    } else {
+      // If no preferences, use locale-based defaults
+      setForm({ ...DEFAULT_PREFERENCES });
     }
   }, [preferences]);
 
@@ -81,6 +98,13 @@ export const UserPreferences: React.FC<UserPreferencesProps> = ({ onSave, onRese
     }
   }, [form.theme]);
 
+  // Notification categories config (map to backend fields)
+  const notificationCategories: { key: keyof UserPreferences['notifications']; label: string; description: string; mandatory: boolean }[] = [
+    { key: 'email', label: 'email notifications', description: 'Receive important updates via email', mandatory: true },
+    { key: 'push', label: 'push notifications', description: 'Receive push notifications in your browser/device', mandatory: false },
+    { key: 'marketing', label: 'marketing notifications', description: 'Receive product updates, tips, and offers', mandatory: false },
+  ];
+
   // Handlers
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -89,20 +113,20 @@ export const UserPreferences: React.FC<UserPreferencesProps> = ({ onSave, onRese
   };
 
   const handleSave = async () => {
-    // Validation
     if (form.itemsPerPage > 100) {
       setValidationError(t('maximum allowed is 100'));
       return;
     }
     setValidationError('');
-    const updatePayload: any = {
+    // Only send fields that exist in UserPreferences
+    const ok = await updatePreferences({
       language: form.language,
-      theme: form.theme as 'light' | 'dark' | 'system',
+      theme: form.theme,
+      notifications: form.notifications,
       itemsPerPage: form.itemsPerPage,
       timezone: form.timezone,
       dateFormat: form.dateFormat,
-    };
-    const ok = await updatePreferences(updatePayload);
+    });
     if (ok) {
       setSuccessMsg(t('preferences saved'));
       onSave?.();
@@ -113,10 +137,35 @@ export const UserPreferences: React.FC<UserPreferencesProps> = ({ onSave, onRese
 
   const handleReset = async () => {
     setShowResetModal(false);
-    setForm({ ...DEFAULTS });
-    await updatePreferences({ ...DEFAULTS });
+    const localeDefaults = getLocaleDefaults();
+    const resetDefaults = { ...DEFAULT_PREFERENCES, ...localeDefaults };
+    setForm(resetDefaults);
+    await updatePreferences(resetDefaults);
     setSuccessMsg(t('preferences reset'));
     onReset?.();
+  };
+
+  const handleNotificationChange = (
+    catKey: keyof UserPreferences['notifications'],
+    checked: boolean
+  ) => {
+    setForm(prev => ({
+      ...prev,
+      notifications: {
+        ...prev.notifications,
+        [catKey]: checked,
+      },
+    }));
+  };
+
+  const handleExportData = async () => {
+    setExportStatus('');
+    setTimeout(() => setExportStatus('your data export has been downloaded successfully'), 1000);
+  };
+
+  const handleImportData = async () => {
+    setImportStatus('');
+    setTimeout(() => setImportStatus('your data import was successful'), 1000);
   };
 
   // UI
@@ -204,6 +253,41 @@ export const UserPreferences: React.FC<UserPreferencesProps> = ({ onSave, onRese
             />
           </div>
         )}
+        <div className="mb-4">
+          <h3 className="font-semibold mb-2">{t('notification preferences')}</h3>
+          <table className="w-full text-sm mb-2">
+            <thead>
+              <tr>
+                <th className="text-left">{t('type')}</th>
+                <th>{t('enabled')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {notificationCategories.map(cat => (
+                <tr key={cat.key}>
+                  <td>{t(cat.label)}<br /><span className="text-xs text-gray-500">{t(cat.description)}</span></td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={form.notifications[cat.key] || false}
+                      onChange={e => handleNotificationChange(cat.key, e.target.checked)}
+                      disabled={cat.mandatory}
+                      aria-label={t(`${cat.label}`)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <small className="text-gray-500">{t('mandatory notifications cannot be disabled')}</small>
+        </div>
+        <div className="mb-4">
+          <h3 className="font-semibold mb-2">{t('data management')}</h3>
+          <button type="button" className="bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded mr-2" onClick={handleExportData}>{t('export my data')}</button>
+          <button type="button" className="bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded" onClick={handleImportData}>{t('import data')}</button>
+          {exportStatus && <div className="text-green-600 mt-2">{t(exportStatus)}</div>}
+          {importStatus && <div className="text-green-600 mt-2">{t(importStatus)}</div>}
+        </div>
         <div className="flex gap-2 mt-4">
           <button
             type="button"

@@ -7,15 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getPlatformClasses } from '@/lib/hooks/usePlatformStyles';
-import { useUserManagement } from '@/lib/UserManagementProvider';
-import { Platform } from '@/lib/types/platform';
+import { getPlatformClasses } from '@/hooks/usePlatformStyles';
+import { useUserManagement } from '@/lib/auth/UserManagementProvider';
+import { Platform } from '@/types/platform';
 import { ProviderManagementPanel } from '@/components/auth/ProviderManagementPanel';
 
 export function SettingsPanel() {
   const { t } = useTranslation();
   const { settings, isLoading, error, fetchSettings, updateSettings } = useSettingsStore();
-  const { platform } = useUserManagement();
+  const { platform, isNative } = useUserManagement();
 
   useEffect(() => {
     fetchSettings();
@@ -24,12 +24,12 @@ export function SettingsPanel() {
   const containerClasses = getPlatformClasses({
     base: "container mx-auto py-8",
     mobile: "py-4 px-2"
-  });
+  }, { platform, isNative });
 
   const cardClasses = getPlatformClasses({
     base: "bg-card rounded-lg shadow",
     mobile: "rounded-md"
-  });
+  }, { platform, isNative });
 
   if (isLoading) {
     return (

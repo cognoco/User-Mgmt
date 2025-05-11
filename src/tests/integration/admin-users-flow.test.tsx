@@ -6,9 +6,9 @@ import userEvent from '@testing-library/user-event';
 import { AdminUsers } from '../../components/admin/AdminUsers';
 import { describe, expect, beforeEach, vi } from 'vitest';
 // Mock i18n so t(key) returns the key
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+// vi.mock('react-i18next', () => ({
+//   useTranslation: () => ({ t: (key: string) => key }),
+// }));
 
 // Import and mock Supabase
 vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));

@@ -130,7 +130,9 @@ describe('RoleManagementPanel', () => {
     });
     (useRBACStore as any).mockReturnValue(rbacMock);
     render(<RoleManagementPanel users={mockUsers} />);
-    expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
+    const errorMessages = screen.getAllByText(/something went wrong/i);
+    expect(errorMessages.length).toBeGreaterThan(1);
+    errorMessages.forEach(el => expect(el).toHaveAttribute('role', 'alert'));
 
     // Empty state
     rbacMock = createRBACStoreMock({

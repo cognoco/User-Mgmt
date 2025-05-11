@@ -5,8 +5,8 @@
 //        vi.mock('@/lib/stores/subscription.store', () => ({ useSubscriptionStore: vi.fn(() => mockStore) }));
 
 import { vi } from 'vitest';
-import type { SubscriptionState, SubscriptionPlan, UserSubscription } from '../../types/subscription';
-import { SubscriptionTier } from '../../types/subscription';
+import type { SubscriptionState, SubscriptionPlan, UserSubscription } from '@/types/subscription';
+import { SubscriptionTier } from '@/types/subscription';
 
 const promisePlans = vi.fn(async () => [] as SubscriptionPlan[]);
 const promiseUserSubscription = vi.fn(async () => null as UserSubscription | null);

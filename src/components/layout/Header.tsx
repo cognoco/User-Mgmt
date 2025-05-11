@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { LanguageSelector } from "@/components/settings/LanguageSelector";
 import { useTranslation } from "react-i18next";
-import { useUserManagement, PlatformComponent } from "@/lib/UserManagementProvider";
+import { useUserManagement } from "@/lib/auth/UserManagementProvider";
 import { Menu, User, LogOut, Settings } from "lucide-react";
 import { 
   DropdownMenu, 
@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { getPlatformClasses } from "@/lib/hooks/usePlatformStyles";
+import { getPlatformClasses } from "@/hooks/usePlatformStyles";
 
 interface HeaderProps {
   type?: 'fixed' | 'static' | 'sticky';
@@ -41,7 +41,7 @@ export function Header({ type = 'fixed' }: HeaderProps) {
     mobile: 'py-2 px-3',
     web: 'py-3 px-4',
     ios: 'pt-safe',
-  });
+  }, { platform, isNative });
 
   if (isNative && platform !== 'web') {
     return (

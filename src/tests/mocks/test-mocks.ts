@@ -1,5 +1,5 @@
 import { vi, Mock } from 'vitest';
-import { AuthState, User } from '../../types/auth';
+import { AuthState, User } from '@/types/auth';
 
 // Type for mocked auth store
 export type MockAuthStore = {
@@ -32,12 +32,12 @@ export const createMockAuthStore = (): MockAuthStore => ({
   token: null,
   error: null,
   isLoading: false,
-  login: vi.fn<[import('../../types/auth').LoginPayload], Promise<import('../../types/auth').AuthResult>>(),
-  register: vi.fn<[import('../../types/auth').RegistrationPayload], Promise<import('../../types/auth').AuthResult>>(),
+  login: vi.fn<[import('@/types/auth').LoginPayload], Promise<import('@/types/auth').AuthResult>>(),
+  register: vi.fn<[import('@/types/auth').RegistrationPayload], Promise<import('@/types/auth').AuthResult>>(),
   logout: vi.fn<[], Promise<void>>(),
   resetPassword: vi.fn<[string], Promise<{ success: boolean; message?: string; error?: string }>>(),
   updatePassword: vi.fn<[string, string], Promise<void>>(),
-  sendVerificationEmail: vi.fn<[string], Promise<import('../../types/auth').AuthResult>>(),
+  sendVerificationEmail: vi.fn<[string], Promise<import('@/types/auth').AuthResult>>(),
   verifyEmail: vi.fn<[string], Promise<void>>(),
   clearError: vi.fn<[], void>(),
   successMessage: null,
@@ -48,11 +48,11 @@ export const createMockAuthStore = (): MockAuthStore => ({
   mfaBackupCodes: null,
   clearSuccessMessage: vi.fn<[], void>(),
   deleteAccount: vi.fn<[string?], Promise<void>>(),
-  setUser: vi.fn<[import('../../types/auth').User | null], void>(),
+  setUser: vi.fn<[import('@/types/auth').User | null], void>(),
   setToken: vi.fn<[string | null], void>(),
-  setupMFA: vi.fn<[], Promise<import('../../types/auth').MFASetupResponse>>(),
-  verifyMFA: vi.fn<[string], Promise<import('../../types/auth').MFAVerifyResponse>>(),
-  disableMFA: vi.fn<[string], Promise<import('../../types/auth').AuthResult>>(),
+  setupMFA: vi.fn<[], Promise<import('@/types/auth').MFASetupResponse>>(),
+  verifyMFA: vi.fn<[string], Promise<import('@/types/auth').MFAVerifyResponse>>(),
+  disableMFA: vi.fn<[string], Promise<import('@/types/auth').AuthResult>>(),
   handleSessionTimeout: vi.fn<[], void>(),
   refreshToken: vi.fn<[], Promise<boolean>>(),
   setLoading: vi.fn<[boolean], void>(),

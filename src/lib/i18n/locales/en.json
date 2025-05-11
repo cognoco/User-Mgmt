@@ -31,7 +31,8 @@
     "status": "Status",
     "actions": "Actions",
     "required": "Required",
-    "optional": "Optional"
+    "optional": "Optional",
+    "comingSoon": "Coming soon"
   },
   "auth": {
     "login": "Login",
@@ -68,6 +69,21 @@
       "serverError": "Server error. Please try again later",
       "invalidToken": "Invalid or expired token",
       "sessionExpired": "Your session has expired. Please login again"
+    },
+    "mfa": {
+      "title": "Multi-Factor Authentication",
+      "enterCodePrompt": "Enter the 6-digit code from your authenticator app.",
+      "enterBackupCodePrompt": "Enter a backup code.",
+      "backupCodeLabel": "Backup Code",
+      "codeLabel": "Authentication Code",
+      "rememberDevice": "Remember this device",
+      "rememberDeviceHelp": "Do not require MFA on this device for 30 days.",
+      "verifyButton": "Verify",
+      "resendCode": "Resend code",
+      "resendSuccess": "A new code has been sent.",
+      "resendError": "Failed to resend code. Please try again.",
+      "useBackupCode": "Use a backup code",
+      "useTOTPInstead": "Use authenticator app instead"
     }
   },
   "profile": {
@@ -250,14 +266,89 @@
     "sso": {
       "title": "Single Sign-On",
       "description": "Configure SSO for your organization",
-      "setup": "Setup SSO",
-      "configure": "Configure SSO",
-      "providers": {
-        "saml": "SAML",
-        "oidc": "OpenID Connect",
-        "azure": "Azure AD",
-        "google": "Google Workspace"
-      }
+      "enableLabel": "Enable SSO",
+      "enableDescription": "Allow users to sign in with your organization's identity provider.",
+      "idpTypeLabel": "Identity Provider Type",
+      "idpTypePlaceholder": "Select an identity provider...",
+      "idpTypeSaml": "SAML",
+      "idpTypeOidc": "OpenID Connect (OIDC)",
+      "idpTypeDescription": "Choose the protocol your identity provider supports.",
+      "footerNote": "Contact your IT administrator for SSO setup assistance.",
+      "saveButton": "Save Settings",
+      "saveSuccess": "SSO settings saved successfully.",
+      "saveError": "Failed to save SSO settings.",
+      "fetchError": "Failed to fetch SSO settings.",
+      "status": {
+        "healthy": "Healthy",
+        "warning": "Warning",
+        "error": "Error",
+        "unknown": "Unknown",
+        "lastLogin": "Last login: {{time}}",
+        "noLogins": "No recent logins",
+        "24hLogins": "Logins in last 24h: {{count}}",
+        "lastError": "Last error"
+      },
+      "helpTitle": "Need help with SSO setup?",
+      "samlHelpText": "Follow these steps to configure SAML SSO for your organization.",
+      "oidcHelpText": "Follow these steps to configure OIDC SSO for your organization.",
+      "saml": {
+        "helpStep1": "Obtain your SAML IdP metadata from your provider.",
+        "helpStep2": "Enter the Entity ID, Sign-in URL, and X.509 certificate.",
+        "helpStep3": "Map the required user attributes (email, name, role).",
+        "helpStep4": "Save and test your SSO configuration.",
+        "entityIdLabel": "Entity ID",
+        "entityIdDescription": "Unique identifier for your SAML service provider.",
+        "signInUrlLabel": "Sign-in URL",
+        "signInUrlDescription": "URL where authentication requests are sent.",
+        "signOutUrlLabel": "Sign-out URL",
+        "signOutUrlDescription": "URL for single logout (optional).",
+        "certificateLabel": "X.509 Certificate",
+        "certificatePlaceholder": "Paste your X.509 certificate here...",
+        "certificateDescription": "Public certificate for verifying SAML assertions.",
+        "uploadCertificate": "Upload Certificate",
+        "emailMappingLabel": "Email Attribute Mapping",
+        "emailMappingDescription": "SAML attribute that contains the user's email.",
+        "nameMappingLabel": "Name Attribute Mapping",
+        "nameMappingDescription": "SAML attribute for the user's full name (optional).",
+        "roleMappingLabel": "Role Attribute Mapping",
+        "roleMappingDescription": "SAML attribute for user roles (optional)."
+      },
+      "oidc": {
+        "helpStep1": "Obtain your OIDC provider's discovery URL.",
+        "helpStep2": "Enter the Client ID and Client Secret.",
+        "helpStep3": "Map the required claims (email, name, role).",
+        "helpStep4": "Save and test your OIDC configuration.",
+        "clientIdLabel": "Client ID",
+        "clientIdDescription": "The client identifier issued by your OIDC provider.",
+        "clientSecretLabel": "Client Secret",
+        "clientSecretDescription": "The client secret issued by your OIDC provider.",
+        "discoveryUrlLabel": "Discovery URL",
+        "discoveryUrlDescription": "URL for OIDC provider configuration (usually ends with /.well-known/openid-configuration).",
+        "scopesLabel": "Scopes",
+        "scopesDescription": "OIDC scopes to request (e.g., openid email profile).",
+        "emailMappingLabel": "Email Claim Mapping",
+        "emailMappingDescription": "OIDC claim that contains the user's email.",
+        "nameMappingLabel": "Name Claim Mapping",
+        "nameMappingDescription": "OIDC claim for the user's full name (optional).",
+        "roleMappingLabel": "Role Claim Mapping",
+        "roleMappingDescription": "OIDC claim for user roles (optional)."
+      },
+      "samlConfigTitle": "SAML Configuration",
+      "samlConfigDescription": "Configure SAML settings for your organization.",
+      "samlConfigFooter": "Contact your IdP administrator for SAML details.",
+      "oidcConfigTitle": "OIDC Configuration",
+      "oidcConfigDescription": "Configure OIDC settings for your organization.",
+      "oidcConfigFooter": "Contact your IdP administrator for OIDC details.",
+      "configTab": "Configuration",
+      "metadataTab": "Metadata",
+      "saveConfigButton": "Save Configuration",
+      "saveConfigSuccess": "Configuration saved successfully.",
+      "fetchConfigError": "Failed to fetch configuration.",
+      "spMetadataTitle": "Service Provider Metadata",
+      "spMetadataDescription": "Use this information to configure your IdP.",
+      "spEntityIdLabel": "SP Entity ID",
+      "spMetadataUrlLabel": "Metadata URL",
+      "spMetadataXmlLabel": "Metadata XML"
     },
     "team": {
       "title": "Team Management",
@@ -296,6 +387,49 @@
       "canceled": "Canceled",
       "expired": "Expired",
       "trial": "Trial"
+    }
+  },
+  "fileManager": {
+    "title": "File Manager",
+    "uploadFile": "Upload File",
+    "home": "Home",
+    "noFiles": "No files",
+    "loading": "Loading...",
+    "uploading": "Uploading...",
+    "retry": "Retry",
+    "errorLoadingFiles": "Error loading files",
+    "errorUploading": "Error uploading file",
+    "errorDeleting": "Error deleting file",
+    "errorRenaming": "Error renaming file",
+    "download": "Download",
+    "rename": "Rename",
+    "delete": "Delete",
+    "openFolder": "Open folder {{folder}}",
+    "confirmDelete": "Confirm Deletion",
+    "confirmDeleteMessage": "Are you sure you want to delete {{file}}?",
+    "renameFile": "Rename File",
+    "newName": "New Name"
+  },
+  "2fa": {
+    "setup": {
+      "title": "Set up Two-Factor Authentication",
+      "selectMethod": "Select a 2FA method",
+      "verify": "Verify your code",
+      "manualCode": "Manual code",
+      "enterCode": "Enter the 6-digit code",
+      "success": "2FA setup successful!"
+    },
+    "methods": {
+      "totp": "Authenticator App",
+      "sms": "SMS",
+      "email": "Email"
+    },
+    "backup": {
+      "title": "Backup Codes",
+      "description": "Save these backup codes in a safe place. Each code can be used once.",
+      "generate": "Generate backup codes",
+      "download": "Download backup codes",
+      "print": "Print backup codes"
     }
   }
 } 

@@ -79,7 +79,7 @@ describe('AdminDashboard', () => {
     expect(screen.getByText('Recent Activity')).toBeInTheDocument();
 
     // Check for loading skeletons
-    const skeletons = document.querySelectorAll('[class*="skeleton"]');
+    const skeletons = document.querySelectorAll('.animate-pulse');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 

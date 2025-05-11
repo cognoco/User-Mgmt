@@ -5,7 +5,7 @@
 //        vi.mock('@/lib/stores/profile.store', () => ({ useProfileStore: vi.fn(() => mockStore) }));
 
 import { vi } from 'vitest';
-import type { Profile, ProfileVerification } from '../../types/profile';
+import type { Profile, ProfileVerification } from '@/types/profile';
 
 // Default initial state matching the real store
 const defaultState = {

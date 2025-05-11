@@ -17,11 +17,6 @@ import { supabase } from '@/lib/supabase';
 // Mock the API instance specifically for these tests
 vi.mock('@/lib/api/axios');
 
-// Mock i18n so t(key) returns the key
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
-
 describe('Multi-Factor Authentication Setup', () => {
   let user: ReturnType<typeof userEvent.setup>;
   

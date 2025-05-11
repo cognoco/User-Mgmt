@@ -6,11 +6,6 @@ import { api } from '@/lib/api/axios';
 import IDPConfiguration from '../IDPConfiguration';
 import { createMockSamlConfig, createMockOidcConfig } from '@/tests/mocks/test-mocks';
 
-// Mock i18n so t(key) returns the key
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
-
 // Mock the api
 vi.mock('@/lib/api/axios', () => ({
   api: {

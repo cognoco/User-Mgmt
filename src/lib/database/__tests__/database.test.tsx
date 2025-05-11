@@ -1,9 +1,5 @@
 // Import our standardized mock
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-// Mock i18n so t(key) returns the key
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
 vi.mock('@/lib/database/supabase', async () => {
   const mod = await import('@/tests/mocks/supabase');
   const supabase = mod.supabase;

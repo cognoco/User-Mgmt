@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { DatabaseProvider, DatabaseConfig } from '../types';
-import { User, Profile, UserPreferences, ActivityLog, UserWithRelations } from '../../types/database';
+import { User, Profile, UserPreferences, ActivityLog, UserWithRelations } from '@/types/database';
 
 export class SupabaseProvider implements DatabaseProvider {
   private client;

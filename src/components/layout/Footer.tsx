@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { useUserManagement } from '@/lib/UserManagementProvider';
-import { getPlatformClasses } from '@/lib/hooks/usePlatformStyles';
+import { useUserManagement } from '@/lib/auth/UserManagementProvider';
+import { getPlatformClasses } from '@/hooks/usePlatformStyles';
 
 interface FooterProps {
   position?: 'static' | 'sticky' | 'fixed';
@@ -19,7 +19,7 @@ export function Footer({ position = 'static' }: FooterProps) {
     base: `w-full py-6 border-t ${position === 'sticky' ? 'sticky bottom-0' : position === 'fixed' ? 'fixed bottom-0' : ''} bg-background`,
     web: 'px-8',
     mobile: 'px-4 py-3',
-  });
+  }, { platform, isNative });
 
   return (
     <footer className={footerClasses}>

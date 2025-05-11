@@ -5,16 +5,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataTable } from '@/components/common/DataTable';
 import { SearchResults } from '@/components/common/SearchResults';
-import { NotificationCenter } from '@/components/common/NotificationCenter';
+import NotificationCenter from '@/components/common/NotificationCenter';
 import { vi } from 'vitest';
 import { supabase } from '@/tests/mocks/supabase';
 
 // Import our standardized mock
 vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
-
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
 
 describe('Empty States', () => {
   let user: ReturnType<typeof userEvent.setup>;

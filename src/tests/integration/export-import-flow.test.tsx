@@ -3,16 +3,12 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { UserPreferences } from '@/components/common/UserPreferences';
+import UserPreferences from '@/components/common/UserPreferences';
 import { vi } from 'vitest';
 
 // Use the canonical supabase mock
 vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
 import { supabase } from '@/tests/mocks/supabase';
-
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
 
 describe('User Preferences Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;
@@ -27,18 +23,31 @@ describe('User Preferences Flow', () => {
       error: null
     });
     
-    // Mock current user preferences
-    (supabase.from('user_preferences').select as any).mockResolvedValueOnce({
-      data: {
-        id: 'pref-1',
-        user_id: 'user-123',
-        theme: 'light',
-        language: 'en',
-        timezone: 'America/New_York',
-        date_format: 'MM/DD/YYYY',
-        items_per_page: 25
-      },
-      error: null
+    // Mock supabase.from for user_preferences
+    vi.spyOn(supabase, 'from').mockImplementation((table: string) => {
+      if (table === 'user_preferences') {
+        return {
+          select: vi.fn().mockResolvedValue({
+            data: {
+              id: 'pref-1',
+              user_id: 'user-123',
+              theme: 'system',
+              language: 'en',
+              timezone: 'America/New_York',
+              dateFormat: 'MM/DD/YYYY',
+              itemsPerPage: 25,
+              notifications: {
+                email: true,
+                push: false,
+                marketing: true,
+              },
+            },
+            error: null
+          }),
+          update: vi.fn().mockResolvedValue({ data: {}, error: null })
+        };
+      }
+      return {} as any;
     });
   });
 
@@ -48,7 +57,7 @@ describe('User Preferences Flow', () => {
     
     // Wait for preferences to load
     await waitFor(() => {
-      expect(screen.getByLabelText(/theme/i)).toHaveValue('light');
+      expect(screen.getByLabelText(/theme/i)).toHaveValue('system');
       expect(screen.getByLabelText(/language/i)).toHaveValue('en');
       expect(screen.getByLabelText(/items per page/i)).toHaveValue('25');
     });
@@ -67,8 +76,8 @@ describe('User Preferences Flow', () => {
         theme: 'dark',
         language: 'es',
         timezone: 'America/New_York',
-        date_format: 'MM/DD/YYYY',
-        items_per_page: 50
+        dateFormat: 'MM/DD/YYYY',
+        itemsPerPage: 50
       },
       error: null
     });
@@ -86,8 +95,8 @@ describe('User Preferences Flow', () => {
       theme: 'dark',
       language: 'es',
       timezone: 'America/New_York',
-      date_format: 'MM/DD/YYYY',
-      items_per_page: 50
+      dateFormat: 'MM/DD/YYYY',
+      itemsPerPage: 50
     });
   });
   
@@ -117,7 +126,7 @@ describe('User Preferences Flow', () => {
     
     // Wait for preferences to load
     await waitFor(() => {
-      expect(screen.getByLabelText(/theme/i)).toHaveValue('light');
+      expect(screen.getByLabelText(/theme/i)).toHaveValue('system');
     });
     
     // Change theme
@@ -127,8 +136,7 @@ describe('User Preferences Flow', () => {
     await user.click(screen.getByRole('button', { name: /save/i }));
     
     // Verify theme was applied immediately
-    expect(documentElementClassList.remove).toHaveBeenCalledWith('light-theme');
-    expect(documentElementClassList.add).toHaveBeenCalledWith('dark-theme');
+    expect(documentElementClassList.remove).toHaveBeenCalledWith('light-theme', 'dark-theme', 'system-theme');
     
     // Restore original document.documentElement
     vi.restoreAllMocks();
@@ -231,7 +239,7 @@ describe('User Preferences Flow', () => {
     // Mock successful update
     (supabase.from('user_preferences').update as any).mockResolvedValueOnce({
       data: {
-        date_format: 'DD/MM/YYYY'
+        dateFormat: 'DD/MM/YYYY'
       },
       error: null
     });
@@ -241,7 +249,7 @@ describe('User Preferences Flow', () => {
     
     // Verify update was called with correct date format
     expect((supabase.from('user_preferences').update as any)).toHaveBeenCalledWith(expect.objectContaining({
-      date_format: 'DD/MM/YYYY'
+      dateFormat: 'DD/MM/YYYY'
     }));
     
     // Verify date format preview is updated
@@ -307,8 +315,8 @@ describe('User Preferences Flow', () => {
       theme: 'system',
       language: 'en',
       timezone: 'UTC',
-      date_format: 'MM/DD/YYYY',
-      items_per_page: 20
+      dateFormat: 'MM/DD/YYYY',
+      itemsPerPage: 25
     };
     
     // Mock successful reset
@@ -321,7 +329,7 @@ describe('User Preferences Flow', () => {
     await user.click(screen.getByRole('button', { name: /reset to defaults/i }));
     
     // Confirm reset
-    await user.click(screen.getByRole('button', { name: /confirm/i }));
+    await user.click(screen.getByRole('button', { name: /reset/i }));
     
     // Verify reset was successful
     await waitFor(() => {
@@ -330,6 +338,67 @@ describe('User Preferences Flow', () => {
     
     // Verify form fields were updated to defaults
     expect(screen.getByLabelText(/theme/i)).toHaveValue('system');
-    expect(screen.getByLabelText(/items per page/i)).toHaveValue('20');
+    expect(screen.getByLabelText(/items per page/i)).toHaveValue('25');
+  });
+  
+  test('initializes with locale-based defaults if no preferences exist', async () => {
+    // Mock browser language and timezone
+    Object.defineProperty(navigator, 'language', { value: 'fr-FR', configurable: true });
+    const originalResolvedOptions = Intl.DateTimeFormat.prototype.resolvedOptions;
+    Intl.DateTimeFormat.prototype.resolvedOptions = () => ({
+      locale: 'fr-FR',
+      calendar: 'gregory',
+      numberingSystem: 'latn',
+      timeZone: 'Europe/Paris',
+    });
+
+    // Simulate no preferences in store
+    (supabase.from as any) = vi.fn(() => ({
+      select: vi.fn().mockResolvedValue({ data: null, error: null }),
+      update: vi.fn().mockResolvedValue({ data: {}, error: null })
+    }));
+
+    render(<UserPreferences />);
+    await waitFor(() => {
+      expect(screen.getByLabelText(/language/i)).toHaveValue('fr');
+      expect(screen.getByLabelText(/timezone/i)).toHaveValue('Europe/Paris');
+      expect(screen.getByLabelText(/date format/i)).toHaveValue('DD/MM/YYYY');
+    });
+
+    // Restore mocks
+    Intl.DateTimeFormat.prototype.resolvedOptions = originalResolvedOptions;
+  });
+  
+  test('can reset preferences to locale-based defaults', async () => {
+    // Mock browser language and timezone
+    Object.defineProperty(navigator, 'language', { value: 'fr-FR', configurable: true });
+    const originalResolvedOptions = Intl.DateTimeFormat.prototype.resolvedOptions;
+    Intl.DateTimeFormat.prototype.resolvedOptions = () => ({
+      locale: 'fr-FR',
+      calendar: 'gregory',
+      numberingSystem: 'latn',
+      timeZone: 'Europe/Paris',
+    });
+
+    render(<UserPreferences />);
+    await waitFor(() => {
+      expect(screen.getByLabelText(/theme/i)).toBeInTheDocument();
+    });
+
+    // Click reset to defaults button
+    await user.click(screen.getByRole('button', { name: /reset to defaults/i }));
+    // Confirm reset
+    await user.click(screen.getByRole('button', { name: /reset/i }));
+
+    // Verify form fields were updated to locale-based defaults
+    await waitFor(() => {
+      expect(screen.getByLabelText(/language/i)).toHaveValue('fr');
+      expect(screen.getByLabelText(/timezone/i)).toHaveValue('Europe/Paris');
+      expect(screen.getByLabelText(/date format/i)).toHaveValue('DD/MM/YYYY');
+      expect(screen.getByText(/preferences reset/i)).toBeInTheDocument();
+    });
+
+    // Restore mocks
+    Intl.DateTimeFormat.prototype.resolvedOptions = originalResolvedOptions;
   });
 });

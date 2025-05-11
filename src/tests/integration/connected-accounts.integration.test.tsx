@@ -15,9 +15,6 @@ import { UserType } from '@/types/user-type';
 // Mock necessary dependencies
 vi.mock('@/lib/stores/connected-accounts.store');
 vi.mock('@/lib/auth/UserManagementProvider');
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
 
 const mockDisconnectAccount = vi.fn();
 const mockConnectAccount = vi.fn();
