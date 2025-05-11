@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 43  |  **Failed Test Files:** 41
+**Passed Test Files:** 44  |  **Failed Test Files:** 40
 
 ## Passing Test Files
 
@@ -38,6 +38,7 @@
 - src\lib\stores\__tests__\user.store.test.ts
 - src\middleware\__tests__\security-headers.test.ts
 - src\tests\integration\account-settings-flow.test.tsx
+- src\tests\integration\connected-accounts.integration.test.tsx
 - src\tests\integration\dashboard-view-flow.test.tsx
 - src\tests\integration\form-validation-errors-isolated.test.tsx
 - src\tests\integration\form-validation-errors.test.tsx
@@ -80,7 +81,6 @@
 - src\tests\integration\api-error-messages.test.tsx
 - src\tests\integration\backup.integration.test.tsx
 - src\tests\integration\collaboration-flow.test.tsx
-- src\tests\integration\connected-accounts.integration.test.tsx
 - src\tests\integration\data-management-flow.test.tsx
 - src\tests\integration\empty-states.test.tsx
 - src\tests\integration\error-recovery-flow.test.tsx

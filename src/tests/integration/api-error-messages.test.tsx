@@ -61,7 +61,7 @@ describe('API Error Messages', () => {
       
       // Verify user-friendly error message is displayed
       await waitFor(() => {
-        expect(screen.getByText(scenario.expectedMessage)).toBeInTheDocument();
+        expect(await screen.findByText(scenario.expectedMessage)).toBeInTheDocument();
       });
       
       // Clear the form for next scenario
@@ -103,8 +103,8 @@ describe('API Error Messages', () => {
       await user.click(screen.getByRole('button', { name: /sign in/i }));
       
       // Verify error message and suggestion are displayed
-      expect(screen.getByText(scenario.expectedError)).toBeInTheDocument();
-      expect(screen.getByText(scenario.expectedSuggestion)).toBeInTheDocument();
+      expect(await screen.findByText(scenario.expectedError)).toBeInTheDocument();
+      expect(await screen.findByText(scenario.expectedSuggestion)).toBeInTheDocument();
     }
   });
   
@@ -119,7 +119,7 @@ describe('API Error Messages', () => {
     await user.click(screen.getByRole('button', { name: /sign in/i }));
     
     // Verify error message has correct aria attributes
-    const errorMessage = screen.getByText(/please enter a valid email address/i);
+    const errorMessage = await screen.findByText(/please enter a valid email address/i);
     expect(errorMessage).toHaveAttribute('role', 'alert');
     expect(errorMessage).toHaveAttribute('aria-live', 'assertive');
     
@@ -134,7 +134,7 @@ describe('API Error Messages', () => {
     render(<LoginForm showRegistration={true} />);
     
     // View registration form
-    await user.click(screen.getByText(/create account/i));
+    await user.click(await screen.findByText(/create account/i));
     
     // Submit empty form
     await user.click(screen.getByRole('button', { name: /sign up/i }));
@@ -170,7 +170,7 @@ describe('API Error Messages', () => {
     
     // Check for recovery options
     await waitFor(() => {
-      expect(screen.getByText(/forgot your password/i)).toBeInTheDocument();
+      expect(await screen.findByText(/forgot your password/i)).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /reset password/i })).toBeInTheDocument();
     });
     
@@ -191,7 +191,7 @@ describe('API Error Messages', () => {
     
     // Check for resend verification option
     await waitFor(() => {
-      expect(screen.getByText(/resend verification email/i)).toBeInTheDocument();
+      expect(await screen.findByText(/resend verification email/i)).toBeInTheDocument();
     });
   });
   
@@ -214,11 +214,11 @@ describe('API Error Messages', () => {
     
     // Check for generic error message
     await waitFor(() => {
-      expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
+      expect(await screen.findByText(/something went wrong/i)).toBeInTheDocument();
     });
     
     // Check for error code information for support
-    expect(screen.getByText(/support reference/i)).toBeInTheDocument();
-    expect(screen.getByText(/500/i)).toBeInTheDocument();
+    expect(await screen.findByText(/support reference/i)).toBeInTheDocument();
+    expect(await screen.findByText(/500/i)).toBeInTheDocument();
   });
 });

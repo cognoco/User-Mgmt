@@ -18,31 +18,65 @@ const ROLE_OPTIONS = [
   { value: 'admin', label: 'Make Admin' },
 ];
 
-export const AdminUsers: React.FC = () => {
+interface AdminUsersProps {
+  fetchUsers?: () => Promise<User[]>;
+  handleRoleChange?: (user: User, newRole: string) => Promise<any>;
+}
+
+export const AdminUsers: React.FC<AdminUsersProps> = ({ fetchUsers, handleRoleChange }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [retryCount, setRetryCount] = useState(0);
 
-  // Fetch users from Supabase
-  const fetchUsers = async () => {
+  // Default fetchUsers implementation (Supabase)
+  const defaultFetchUsers = async () => {
     setLoading(true);
     setError(null);
     try {
-      // Use the builder pattern for test compatibility
       const { data, error } = await supabase.from('users').select('*').order('created_at', { ascending: false });
       if (error) throw error;
       setUsers(data || []);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch users');
+      setUsers([]);
     } finally {
       setLoading(false);
     }
   };
 
+  // Default handleRoleChange implementation (Supabase)
+  const defaultHandleRoleChange = async (user: User, newRole: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { error } = await supabase.from('users').update({ role: newRole }).eq('id', user.id);
+      if (error) throw error;
+      // Refetch users after update
+      await (fetchUsers || defaultFetchUsers)();
+    } catch (err: any) {
+      setError(err.message || 'Failed to update user role');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch users on mount and on retry
   useEffect(() => {
-    fetchUsers();
+    setLoading(true);
+    setError(null);
+    if (fetchUsers) {
+      fetchUsers()
+        .then((users) => setUsers(users))
+        .catch((err) => {
+          setError(err.message || 'Failed to fetch users');
+          setUsers([]);
+        })
+        .finally(() => setLoading(false));
+    } else {
+      defaultFetchUsers();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [retryCount]);
 
@@ -59,20 +93,8 @@ export const AdminUsers: React.FC = () => {
   }, [users, search]);
 
   // Handle role update
-  const handleRoleChange = async (user: User, newRole: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Update user role in Supabase
-      const { error } = await supabase.from('users').update({ role: newRole }).eq('id', user.id);
-      if (error) throw error;
-      // Refetch users after update
-      fetchUsers();
-    } catch (err: any) {
-      setError(err.message || 'Failed to update user role');
-    } finally {
-      setLoading(false);
-    }
+  const onRoleChange = async (user: User, newRole: string) => {
+    await (handleRoleChange || defaultHandleRoleChange)(user, newRole);
   };
 
   // Retry handler
@@ -126,7 +148,7 @@ export const AdminUsers: React.FC = () => {
                 <TableCell>
                   <select
                     value={user.role || 'user'}
-                    onChange={(e) => handleRoleChange(user, e.target.value)}
+                    onChange={(e) => onRoleChange(user, e.target.value)}
                     disabled={loading}
                   >
                     {ROLE_OPTIONS.map((opt) => (

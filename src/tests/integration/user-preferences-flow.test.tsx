@@ -3,13 +3,9 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserPreferences from '@/components/common/UserPreferences';
+import { UserPreferencesComponent } from '@/components/common/UserPreferences';
 import { useAuthStore } from '@/lib/stores/auth.store';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
-
-// Import our standardized mock
-vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
-// import { supabase } from '@/tests/mocks/supabase'; // Not directly used if stores are fully mocked
 
 // Mock Zustand stores
 vi.mock('@/lib/stores/auth.store', () => ({
@@ -107,7 +103,7 @@ describe('User Preferences Flow', () => {
   test('User can view and update preferences', async () => {
     // Render user preferences
     await act(async () => {
-      render(<UserPreferences />);
+      render(<UserPreferencesComponent />);
     });
     
     // Wait for preferences to load
@@ -151,7 +147,7 @@ describe('User Preferences Flow', () => {
     
     // Render user preferences
     await act(async () => {
-      render(<UserPreferences />);
+      render(<UserPreferencesComponent />);
     });
     
     await waitFor(() => {
@@ -182,7 +178,7 @@ describe('User Preferences Flow', () => {
   
   test('validates items per page input', async () => {
     await act(async () => {
-      render(<UserPreferences />);
+      render(<UserPreferencesComponent />);
     });
     
     await waitFor(() => {
@@ -211,7 +207,7 @@ describe('User Preferences Flow', () => {
     mockUpdatePreferences.mockResolvedValueOnce(false); // Simulate failed update
 
     await act(async () => {
-      render(<UserPreferences />);
+      render(<UserPreferencesComponent />);
     });
     
     await waitFor(() => {
@@ -236,7 +232,7 @@ describe('User Preferences Flow', () => {
   
   test('can select timezone from dropdown', async () => {
     await act(async () => {
-      render(<UserPreferences />);
+      render(<UserPreferencesComponent />);
     });
     
     await waitFor(() => {
@@ -273,7 +269,7 @@ describe('User Preferences Flow', () => {
   
   test('can select date format', async () => {
     await act(async () => {
-      render(<UserPreferences />);
+      render(<UserPreferencesComponent />);
     });
 
     await waitFor(() => {
@@ -313,7 +309,7 @@ describe('User Preferences Flow', () => {
   
   test('can toggle advanced settings', async () => {
     await act(async () => {
-      render(<UserPreferences />);
+      render(<UserPreferencesComponent />);
     });
     
     await waitFor(() => {
@@ -347,7 +343,7 @@ describe('User Preferences Flow', () => {
   
   test('can reset preferences to defaults', async () => {
     await act(async () => {
-      render(<UserPreferences />);
+      render(<UserPreferencesComponent />);
     });
     
     await waitFor(() => {
@@ -390,7 +386,7 @@ describe('User Preferences Flow', () => {
 
   test('can toggle notification preferences', async () => {
     await act(async () => {
-      render(<UserPreferences />);
+      render(<UserPreferencesComponent />);
     });
     
     await waitFor(() => {
@@ -426,7 +422,7 @@ describe('User Preferences Flow', () => {
 
   test('can export preferences', async () => {
     await act(async () => {
-      render(<UserPreferences />);
+      render(<UserPreferencesComponent />);
     });
     
     await waitFor(() => {
@@ -444,7 +440,7 @@ describe('User Preferences Flow', () => {
 
   test('can import preferences', async () => {
     await act(async () => {
-      render(<UserPreferences />);
+      render(<UserPreferencesComponent />);
     });
     
     await waitFor(() => {

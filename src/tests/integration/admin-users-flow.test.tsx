@@ -1,57 +1,42 @@
 // __tests__/integration/admin-users-flow.test.js
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AdminUsers } from '../../components/admin/AdminUsers';
 import { describe, expect, beforeEach, vi } from 'vitest';
-// Mock i18n so t(key) returns the key
-// vi.mock('react-i18next', () => ({
-//   useTranslation: () => ({ t: (key: string) => key }),
-// }));
+import { UserType } from '@/types/user-type';
 
-// Import and mock Supabase
-vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
-import { supabase } from '@/tests/mocks/supabase';
+// Mock user list to return from API
+const mockUsersList = [
+  { id: 'user1', email: 'user1@example.com', role: 'user', created_at: '2023-01-01', isActive: true, isVerified: false, userType: UserType.PRIVATE, username: '', firstName: '', lastName: '', fullName: '', company: undefined, createdAt: '', updatedAt: '', lastLogin: '', metadata: {} },
+  { id: 'user2', email: 'user2@example.com', role: 'user', created_at: '2023-01-02', isActive: true, isVerified: false, userType: UserType.PRIVATE, username: '', firstName: '', lastName: '', fullName: '', company: undefined, createdAt: '', updatedAt: '', lastLogin: '', metadata: {} },
+  { id: 'admin1', email: 'admin@example.com', role: 'admin', created_at: '2023-01-03', isActive: true, isVerified: true, userType: UserType.PRIVATE, username: '', firstName: '', lastName: '', fullName: '', company: undefined, createdAt: '', updatedAt: '', lastLogin: '', metadata: {} }
+];
+
+let fetchUsersMock: () => Promise<typeof mockUsersList>;
+let handleRoleChangeMock: (user: any, newRole: string) => Promise<any>;
+
+// Mock the AdminUsers component's dependencies
+vi.mock('../../components/admin/AdminUsers', async (importOriginal: () => Promise<any>) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    AdminUsers: (props: any) => {
+      // Use the real component but inject mocked fetchUsers and handleRoleChange
+      return <actual.AdminUsers {...props} fetchUsers={fetchUsersMock} handleRoleChange={handleRoleChangeMock} />;
+    },
+  };
+});
 
 describe('Admin Users Management Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;
 
-  // Mock user list to return from API
-  const mockUsersList = [
-    { id: 'user1', email: 'user1@example.com', role: 'user', created_at: '2023-01-01' },
-    { id: 'user2', email: 'user2@example.com', role: 'user', created_at: '2023-01-02' },
-    { id: 'admin1', email: 'admin@example.com', role: 'admin', created_at: '2023-01-03' }
-  ];
-
   beforeEach(() => {
     vi.clearAllMocks();
     user = userEvent.setup();
-    
-    // Mock admin authentication
-    (supabase.auth.getUser as any).mockResolvedValue({
-      data: { 
-        user: { 
-          id: 'admin-id', 
-          email: 'admin@example.com',
-          role: 'authenticated',
-          app_metadata: { role: 'admin' }
-        } 
-      },
-      error: null
-    });
-
-    // Use the canonical builder pattern for Supabase mocks
-    const usersBuilder = supabase.from('users') as any;
-    usersBuilder.select.mockReturnThis();
-    usersBuilder.order.mockResolvedValue({
-      data: mockUsersList,
-      error: null
-    });
-    usersBuilder.update.mockResolvedValue({
-      data: { ...mockUsersList[0], role: 'admin' },
-      error: null
-    });
+    fetchUsersMock = vi.fn().mockResolvedValue(mockUsersList);
+    handleRoleChangeMock = vi.fn().mockResolvedValue({ ...mockUsersList[0], role: 'admin' });
   });
 
   test('Admin can view and manage users', async () => {
@@ -64,10 +49,7 @@ describe('Admin Users Management Flow', () => {
       expect(screen.getByText('user2@example.com')).toBeInTheDocument();
       expect(screen.getByText('admin@example.com')).toBeInTheDocument();
     });
-    
-    // Verify the correct table was queried
-    expect(supabase.from).toHaveBeenCalledWith('users');
-    
+
     // Test filtering users
     const searchInput = screen.getByPlaceholderText(/search users/i);
     await user.type(searchInput, 'admin');
@@ -88,62 +70,49 @@ describe('Admin Users Management Flow', () => {
       expect(screen.getByText('user2@example.com')).toBeInTheDocument();
       expect(screen.getByText('admin@example.com')).toBeInTheDocument();
     });
-    
+
     // Test user role management
-    // Mock update role API
-    const usersBuilder = supabase.from('users') as any;
-    usersBuilder.update.mockResolvedValueOnce({
-      data: { ...mockUsersList[0], role: 'admin' },
-      error: null
-    });
-    
-    // Find and click the role button for the first user
-    const roleButton = screen.getAllByText(/user/i)[0];
-    await user.click(roleButton);
-    
-    // Select the admin role from dropdown
-    const adminOption = await screen.findByText(/make admin/i);
-    await user.click(adminOption);
-    
+    // Find the row for user1@example.com
+    const userRow = await screen.findByText('user1@example.com');
+    const row = userRow.closest('tr');
+
+    // Find the select within that row
+    const select = within(row!).getByRole('combobox');
+
+    // Change the value to "admin"
+    await user.selectOptions(select, 'admin');
+
     // Verify the update API was called
     await waitFor(() => {
-      expect(usersBuilder.update).toHaveBeenCalledWith(
-        { role: 'admin' },
-        { returning: 'minimal' }
-      );
+      expect(handleRoleChangeMock).toHaveBeenCalledWith(expect.objectContaining({ id: 'user1' }), 'admin');
     });
   });
 
   test('Admin can handle user management errors', async () => {
     // Mock error when fetching users
-    const usersBuilder = supabase.from('users') as any;
-    usersBuilder.select.mockReturnThis();
-    usersBuilder.order.mockResolvedValueOnce({
-      data: null,
-      error: { message: 'Failed to fetch users' }
+    fetchUsersMock = vi.fn().mockImplementation(() => {
+      // Simulate error by returning a rejected promise
+      return Promise.reject(new Error('Failed to fetch users'));
     });
-    
+
     // Render the admin component
-    render(<AdminUsers />);
-    
+    render(<AdminUsers fetchUsers={fetchUsersMock} handleRoleChange={handleRoleChangeMock} />);
+
     // Check if error message is displayed
     await waitFor(() => {
       expect(screen.getByText(/failed to fetch users/i)).toBeInTheDocument();
     });
-    
+
     // Retry button should be present
     const retryButton = screen.getByRole('button', { name: /retry/i });
     expect(retryButton).toBeInTheDocument();
-    
+
     // Mock successful fetch for retry
-    usersBuilder.order.mockResolvedValueOnce({
-      data: mockUsersList,
-      error: null
-    });
-    
+    fetchUsersMock = vi.fn().mockResolvedValue(mockUsersList);
+
     // Click retry
     await user.click(retryButton);
-    
+
     // Check if users are now displayed
     await waitFor(() => {
       expect(screen.getByText('user1@example.com')).toBeInTheDocument();

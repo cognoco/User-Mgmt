@@ -1,29 +1,53 @@
-import React, { useState, useEffect } from 'react';
-
-// Assume useTheme hook exists and provides theme and setTheme
-// In a real scenario, this would come from your theme context/provider
-const useMockTheme = () => {
-  const [theme, setThemeState] = useState('light');
-  const setTheme = (newTheme: string) => {
-    setThemeState(newTheme);
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(newTheme);
-  };
-  return { theme, setTheme };
-};
+import React, { useEffect, useState } from 'react';
+import { usePreferencesStore } from '@/lib/stores/preferences.store';
 
 /**
  * ThemeSettings Component
  * Placeholder for managing theme settings.
  */
 export const ThemeSettings: React.FC = () => {
-  const { theme, setTheme } = useMockTheme();
+  const { preferences, fetchPreferences, updatePreferences, isLoading, error } = usePreferencesStore();
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState('');
 
-  // Simulate fetching/setting initial theme if needed
+  // Fetch preferences on mount
   useEffect(() => {
-    // In a real app, fetch saved theme preference
-    setTheme('light'); // Default to light for placeholder
-  }, [setTheme]);
+    if (!preferences && !isLoading && !error) {
+      fetchPreferences();
+    }
+  }, [preferences, isLoading, error, fetchPreferences]);
+
+  // Set theme from preferences when loaded
+  useEffect(() => {
+    if (preferences?.theme) {
+      setTheme(preferences.theme as 'light' | 'dark' | 'system');
+      // Apply theme to DOM
+      const root = document.documentElement;
+      root.classList.remove('light-theme', 'dark-theme', 'system-theme');
+      if (preferences.theme === 'light') root.classList.add('light-theme');
+      else if (preferences.theme === 'dark') root.classList.add('dark-theme');
+      else root.classList.add('system-theme');
+    }
+  }, [preferences?.theme]);
+
+  const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
+    setTheme(newTheme);
+    // Apply theme to DOM immediately
+    const root = document.documentElement;
+    root.classList.remove('light-theme', 'dark-theme', 'system-theme');
+    if (newTheme === 'light') root.classList.add('light-theme');
+    else if (newTheme === 'dark') root.classList.add('dark-theme');
+    else root.classList.add('system-theme');
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSuccess('');
+    const ok = await updatePreferences({ theme });
+    if (ok) setSuccess('Theme preference saved!');
+    setSaving(false);
+  };
 
   return (
     <div>
@@ -37,7 +61,7 @@ export const ThemeSettings: React.FC = () => {
             name="theme"
             value="light"
             checked={theme === 'light'}
-            onChange={() => setTheme('light')}
+            onChange={() => handleThemeChange('light')}
           />
           <label htmlFor="light">Light</label>
         </div>
@@ -48,7 +72,7 @@ export const ThemeSettings: React.FC = () => {
             name="theme"
             value="dark"
             checked={theme === 'dark'}
-            onChange={() => setTheme('dark')}
+            onChange={() => handleThemeChange('dark')}
           />
           <label htmlFor="dark">Dark</label>
         </div>
@@ -59,12 +83,16 @@ export const ThemeSettings: React.FC = () => {
             name="theme"
             value="system"
             checked={theme === 'system'}
-            onChange={() => setTheme('system')} // Placeholder: system theme logic needed
+            onChange={() => handleThemeChange('system')}
           />
           <label htmlFor="system">System</label>
         </div>
       </fieldset>
-      <button type="button">Save Theme</button> {/* Placeholder save button */}
+      <button type="button" onClick={handleSave} disabled={saving}>
+        {saving ? 'Saving...' : 'Save Theme'}
+      </button>
+      {success && <div role="status" className="text-green-600">{success}</div>}
+      {error && <div role="alert" className="text-red-600">{error}</div>}
     </div>
   );
 };

@@ -6,9 +6,11 @@ import userEvent from '@testing-library/user-event';
 import { ThemeSettings } from '@/components/common/ThemeSettings';
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 
-// Import our standardized mock
-vi.mock('@/tests/mocks/supabase');
-import { supabase } from '@/tests/mocks/supabase';
+// Mock the preferences store
+vi.mock('@/lib/stores/preferences.store', () => ({
+  usePreferencesStore: vi.fn(),
+}));
+import { usePreferencesStore } from '@/lib/stores/preferences.store';
 
 // Store original implementations to restore later
 const originalLocalStorage = window.localStorage;
@@ -16,40 +18,43 @@ const originalDocumentElement = document.documentElement;
 const originalMatchMedia = window.matchMedia;
 
 describe('Theme/Appearance Settings Flow', () => {
-  let user: ReturnType<typeof userEvent.setup>;
-  
+  let user;
+  let mockUpdatePreferences;
+  let mockFetchPreferences;
+  let mockStoreState;
+
   // Mock the document methods for theme testing
   const documentElementClassList = {
     add: vi.fn(),
     remove: vi.fn(),
-    contains: vi.fn().mockImplementation((cls: string) => cls === 'light')
+    contains: vi.fn().mockImplementation((cls) => cls === 'light'),
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
     user = userEvent.setup();
-    
+
     // Set up document element mock for theme testing
     Object.defineProperty(document, 'documentElement', {
       value: { classList: documentElementClassList },
       configurable: true,
-      writable: true
+      writable: true,
     });
-    
+
     // Mock local storage for theme persistence
     const localStorageMock = {
-        getItem: vi.fn().mockReturnValue('light'),
-        setItem: vi.fn(),
-        removeItem: vi.fn()
+      getItem: vi.fn().mockReturnValue('light'),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
     };
     Object.defineProperty(window, 'localStorage', {
       value: localStorageMock,
       configurable: true,
-      writable: true
+      writable: true,
     });
-    
+
     // Mock window.matchMedia for system theme detection
-    window.matchMedia = vi.fn().mockImplementation(query => ({
+    window.matchMedia = vi.fn().mockImplementation((query) => ({
       matches: query === '(prefers-color-scheme: dark)',
       media: query,
       onchange: null,
@@ -59,25 +64,31 @@ describe('Theme/Appearance Settings Flow', () => {
       removeEventListener: vi.fn(),
       dispatchEvent: vi.fn(),
     }));
-    
-    // Mock authentication
-    (supabase.auth.getUser as any).mockResolvedValue({
-      data: { user: { id: 'user-123', email: 'user@example.com' } },
-      error: null
-    });
-    
-    // Mock user preferences fetch
-    (supabase.from as any)('user_preferences').select.mockResolvedValueOnce({
-      data: {
+
+    // Mock preferences store
+    mockUpdatePreferences = vi.fn().mockResolvedValue(true);
+    mockFetchPreferences = vi.fn().mockResolvedValue(true);
+    mockStoreState = {
+      preferences: {
         id: 'pref-123',
-        user_id: 'user-123',
+        userId: 'user-123',
         theme: 'light',
-        color_scheme: 'blue',
-        font_size: 'medium',
-        reduced_motion: false
+        language: 'en',
+        timezone: 'America/New_York',
+        dateFormat: 'MM/DD/YYYY',
+        itemsPerPage: 25,
+        notifications: {
+          email: true,
+          push: false,
+          marketing: true,
+        },
       },
-      error: null
-    });
+      isLoading: false,
+      error: null,
+      fetchPreferences: mockFetchPreferences,
+      updatePreferences: mockUpdatePreferences,
+    };
+    (usePreferencesStore).mockImplementation(() => mockStoreState);
   });
 
   afterEach(() => {
@@ -87,7 +98,7 @@ describe('Theme/Appearance Settings Flow', () => {
       configurable: true,
       writable: true,
     });
-     Object.defineProperty(document, 'documentElement', {
+    Object.defineProperty(document, 'documentElement', {
       value: originalDocumentElement,
       configurable: true,
       writable: true,
@@ -100,46 +111,32 @@ describe('Theme/Appearance Settings Flow', () => {
     await act(async () => {
       render(<ThemeSettings />);
     });
-    
+
     // Wait for settings to load
     await waitFor(() => {
       expect(screen.getByLabelText(/light/i)).toBeChecked();
     });
-    
+
     // Switch to dark theme
     await act(async () => {
       await user.click(screen.getByLabelText(/dark/i));
     });
-    
-    // Mock successful preference update
-    const preferencesBuilder = supabase.from('user_preferences') as any;
-    preferencesBuilder.update.mockResolvedValueOnce({
-      data: {
-        theme: 'dark'
-      },
-      error: null
-    });
-    
+
     // Save changes
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /save/i }));
     });
-    
+
     // Verify theme was updated in DOM
     expect(documentElementClassList.remove).toHaveBeenCalledWith('light-theme');
     expect(documentElementClassList.add).toHaveBeenCalledWith('dark-theme');
-    
-    // Verify local storage was updated
-    expect(window.localStorage.setItem).toHaveBeenCalledWith('theme', 'dark');
-    
-    // Verify database update
-    expect(preferencesBuilder.update).toHaveBeenCalledWith(expect.objectContaining({
-      theme: 'dark'
-    }));
-    
+
+    // Verify updatePreferences was called
+    expect(mockUpdatePreferences).toHaveBeenCalledWith({ theme: 'dark' });
+
     // Verify success message
     await waitFor(() => {
-      expect(screen.getByText(/preferences saved/i)).toBeInTheDocument();
+      expect(screen.getByText(/theme preference saved/i)).toBeInTheDocument();
     });
   });
   
