@@ -56,4 +56,38 @@ export const createMockAuthStore = (): MockAuthStore => ({
   handleSessionTimeout: vi.fn<[], void>(),
   refreshToken: vi.fn<[], Promise<boolean>>(),
   setLoading: vi.fn<[boolean], void>(),
-}); 
+});
+
+// Shared mock generator for SAML config
+export function createMockSamlConfig(overrides = {}) {
+  return {
+    type: 'saml',
+    entity_id: 'https://test.idp.com',
+    sign_in_url: 'https://test.idp.com/login',
+    sign_out_url: 'https://test.idp.com/logout',
+    certificate: '-----BEGIN CERTIFICATE-----\nMIIC...\n-----END CERTIFICATE-----',
+    attribute_mapping: {
+      email: 'email',
+      name: 'name',
+      role: 'role',
+    },
+    ...overrides,
+  };
+}
+
+// Shared mock generator for OIDC config
+export function createMockOidcConfig(overrides = {}) {
+  return {
+    type: 'oidc',
+    client_id: 'client123',
+    client_secret: 'secret123',
+    discovery_url: 'https://test.idp.com/.well-known/openid-configuration',
+    scopes: 'openid email profile',
+    attribute_mapping: {
+      email: 'email',
+      name: 'name',
+      role: 'role',
+    },
+    ...overrides,
+  };
+} 

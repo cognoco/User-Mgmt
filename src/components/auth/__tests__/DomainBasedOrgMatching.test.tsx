@@ -10,6 +10,11 @@ import { act } from 'react-dom/test-utils';
 // Mock necessary dependencies
 vi.mock('@/lib/api/axios');
 
+// Mock i18n so t(key) returns the key
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
 // Mock form state to match react-hook-form
 interface FormState {
   errors: Record<string, { message: string }>;
@@ -153,7 +158,7 @@ vi.mock('@/components/ui/form', () => ({
   FormField: ({ name, render }: { name: string; render: (props: { field: any; formState: FormState }) => React.ReactNode }) => {
     const field = {
       name,
-      onChange: (_e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange: () => {
         mockFormState.isDirty = true;
         mockFormState.isValid = true;
         mockFormState.errors = {};

@@ -67,6 +67,7 @@ interface IDPConfigurationProps {
 }
 
 const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onConfigurationUpdate }) => {
+  console.log('[DEBUG] IDPConfiguration component mounted', { orgId, idpType });
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -106,8 +107,12 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
     },
   });
 
+  // Add debug before useEffect
+  console.log('[DEBUG] Before useEffect', { orgId, idpType });
+
   // Reset form when IDP type changes
   useEffect(() => {
+    console.log('[DEBUG] useEffect (start)', { orgId, idpType });
     form.reset({
       type: idpType,
       ...(idpType === 'saml' 
@@ -136,11 +141,14 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
     });
     setError(null);
     setSuccess(null);
-    fetchConfiguration();
+    fetchConfiguration().then(() => {
+      console.log('[DEBUG] fetchConfiguration completed', { orgId, idpType });
+    });
   }, [idpType, orgId]);
 
   // Fetch existing configuration
   const fetchConfiguration = async () => {
+    console.log('[DEBUG] fetchConfiguration called', { orgId, idpType });
     setIsLoading(true);
     setError(null);
     try {
@@ -153,6 +161,10 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
           type: 'saml',
           ...configResponse.data,
         } as SamlConfig);
+        // Debug: log form state after reset
+        setTimeout(() => {
+          console.log('Form state after reset:', form.getValues());
+        }, 0);
       } else {
         form.reset({
           type: 'oidc',
@@ -216,6 +228,7 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
   };
 
   if (isLoading) {
+    console.log('[DEBUG] isLoading is true, rendering loading state', { orgId, idpType });
     return (
       <Card>
         <CardHeader>
@@ -233,6 +246,7 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
       </Card>
     );
   }
+  console.log('[DEBUG] isLoading is false, rendering main form', { orgId, idpType });
 
   return (
     <Card>

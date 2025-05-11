@@ -6,6 +6,10 @@ import userEvent from '@testing-library/user-event';
 // @ts-expect-error: This import is intentionally left as a placeholder for future restoration.
 import { AdminUsers } from '../../../src/components/admin/AdminUsers';
 import { describe, expect, beforeEach, vi } from 'vitest';
+// Mock i18n so t(key) returns the key
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
 
 // Import and mock Supabase
 vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));

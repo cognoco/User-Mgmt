@@ -66,7 +66,7 @@ interface TeamMembersResponse {
 
 export function TeamMembersList() {
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit] = useState(10);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<'all' | 'active' | 'pending'>('all');
   const [sortBy, setSortBy] = useState<'name' | 'email' | 'role' | 'status' | 'joinedAt'>('joinedAt');
@@ -255,11 +255,7 @@ export function TeamMembersList() {
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={
-                        member.teamMember.status === 'active'
-                          ? 'success'
-                          : 'warning'
-                      }
+                      variant={member.teamMember.status === 'active' ? 'default' : 'destructive'}
                     >
                       {member.teamMember.status}
                     </Badge>
@@ -288,6 +284,7 @@ export function TeamMembersList() {
               size="sm"
               onClick={() => setPage(page - 1)}
               disabled={!data.pagination.hasPreviousPage}
+              aria-label="Previous page"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -296,6 +293,7 @@ export function TeamMembersList() {
               size="sm"
               onClick={() => setPage(page + 1)}
               disabled={!data.pagination.hasNextPage}
+              aria-label="Next page"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>

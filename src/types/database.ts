@@ -58,6 +58,9 @@ export const userPreferencesSchema = baseEntitySchema.extend({
     push: z.boolean().default(true),
     marketing: z.boolean().default(false),
   }).default({}),
+  itemsPerPage: z.number().min(1).max(100).default(25),
+  timezone: z.string().default('UTC'),
+  dateFormat: z.string().default('YYYY-MM-DD'),
 });
 
 // Activity log schema
