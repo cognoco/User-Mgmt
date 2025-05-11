@@ -1,11 +1,12 @@
 // __tests__/integration/feedback-submission-flow.test.js
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FeedbackForm } from '@/components/common/FeedbackForm';
 import { vi } from 'vitest';
 import { supabase } from '@/tests/mocks/supabase';
+import type { Mock } from 'vitest';
 
 // Import our standardized mock
 vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
@@ -22,7 +23,7 @@ describe('Feedback Submission Flow', () => {
     user = userEvent.setup();
     
     // Mock authentication
-    supabase.auth.getUser.mockResolvedValue({
+    (supabase.auth.getUser as Mock).mockResolvedValueOnce({
       data: { user: { id: 'user-123', email: 'user@example.com' } },
       error: null
     });
@@ -35,17 +36,25 @@ describe('Feedback Submission Flow', () => {
 
   test('User can submit feedback with category and description', async () => {
     // Render feedback form
-    render(<FeedbackForm />);
+    await act(async () => {
+      render(<FeedbackForm />);
+    });
     
     // Select feedback category
-    await user.click(screen.getByLabelText(/feedback type/i));
-    await user.click(screen.getByText(/feature request/i));
+    await act(async () => {
+      await user.click(screen.getByLabelText(/feedback type/i));
+    });
+    await act(async () => {
+      await user.click(screen.getByText(/feature request/i));
+    });
     
     // Enter feedback description
-    await user.type(
-      screen.getByLabelText(/description/i), 
-      'I would like to see a dark mode option in the application.'
-    );
+    await act(async () => {
+      await user.type(
+        screen.getByLabelText(/description/i), 
+        'I would like to see a dark mode option in the application.'
+      );
+    });
     
     // Mock successful submission
     const feedbackBuilder = supabase.from('feedback') as any;
@@ -55,7 +64,9 @@ describe('Feedback Submission Flow', () => {
     });
     
     // Submit form
-    await user.click(screen.getByRole('button', { name: /submit feedback/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /submit feedback/i }));
+    });
     
     // Verify insert was called with correct data
     expect(feedbackBuilder.insert).toHaveBeenCalledWith(expect.objectContaining({
@@ -76,30 +87,40 @@ describe('Feedback Submission Flow', () => {
   
   test('User can attach screenshot to feedback', async () => {
     // Render feedback form
-    render(<FeedbackForm />);
+    await act(async () => {
+      render(<FeedbackForm />);
+    });
     
     // Select feedback category
-    await user.click(screen.getByLabelText(/feedback type/i));
-    await user.click(screen.getByText(/bug report/i));
+    await act(async () => {
+      await user.click(screen.getByLabelText(/feedback type/i));
+    });
+    await act(async () => {
+      await user.click(screen.getByText(/bug report/i));
+    });
     
     // Enter feedback description
-    await user.type(
-      screen.getByLabelText(/description/i), 
-      'The save button is not working properly.'
-    );
+    await act(async () => {
+      await user.type(
+        screen.getByLabelText(/description/i), 
+        'The save button is not working properly.'
+      );
+    });
     
     // Attach screenshot
     const file = new File(['screenshot data'], 'screenshot.png', { type: 'image/png' });
-    await user.upload(screen.getByLabelText(/attach screenshot/i), file);
+    await act(async () => {
+      await user.upload(screen.getByLabelText(/attach screenshot/i), file);
+    });
     
     // Mock successful file upload
-    supabase.storage.from().upload.mockResolvedValueOnce({
+    const storageBuilder = supabase.storage.from() as any;
+    storageBuilder.upload.mockResolvedValueOnce({
       data: { path: 'screenshots/feedback-123/screenshot.png' },
       error: null
     });
-    
     // Mock public URL
-    supabase.storage.from().getPublicUrl.mockReturnValue({
+    storageBuilder.getPublicUrl.mockReturnValue({
       data: { publicUrl: 'https://example.com/screenshots/feedback-123/screenshot.png' }
     });
     
@@ -111,10 +132,12 @@ describe('Feedback Submission Flow', () => {
     });
     
     // Submit form
-    await user.click(screen.getByRole('button', { name: /submit feedback/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /submit feedback/i }));
+    });
     
     // Verify screenshot was uploaded and included in feedback
-    expect(supabase.storage.from().upload).toHaveBeenCalled();
+    expect(storageBuilder.upload).toHaveBeenCalled();
     expect(feedbackBuilder.insert).toHaveBeenCalledWith(expect.objectContaining({
       category: 'bug_report',
       description: 'The save button is not working properly.',
@@ -129,10 +152,14 @@ describe('Feedback Submission Flow', () => {
   
   test('Form validation prevents empty submissions', async () => {
     // Render feedback form
-    render(<FeedbackForm />);
+    await act(async () => {
+      render(<FeedbackForm />);
+    });
     
     // Try to submit without filling required fields
-    await user.click(screen.getByRole('button', { name: /submit feedback/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /submit feedback/i }));
+    });
     
     // Verify validation errors
     expect(screen.getByText(/please select a feedback type/i)).toBeInTheDocument();
@@ -145,23 +172,35 @@ describe('Feedback Submission Flow', () => {
   
   test('User can include contact information for follow-up', async () => {
     // Render feedback form
-    render(<FeedbackForm />);
+    await act(async () => {
+      render(<FeedbackForm />);
+    });
     
     // Select feedback category
-    await user.click(screen.getByLabelText(/feedback type/i));
-    await user.click(screen.getByText(/question/i));
+    await act(async () => {
+      await user.click(screen.getByLabelText(/feedback type/i));
+    });
+    await act(async () => {
+      await user.click(screen.getByText(/question/i));
+    });
     
     // Enter feedback description
-    await user.type(
-      screen.getByLabelText(/description/i), 
-      'How do I export my data?'
-    );
+    await act(async () => {
+      await user.type(
+        screen.getByLabelText(/description/i), 
+        'How do I export my data?'
+      );
+    });
     
     // Toggle contact permission
-    await user.click(screen.getByLabelText(/contact me/i));
+    await act(async () => {
+      await user.click(screen.getByLabelText(/contact me/i));
+    });
     
     // Enter preferred contact method
-    await user.type(screen.getByLabelText(/preferred contact method/i), 'Email');
+    await act(async () => {
+      await user.type(screen.getByLabelText(/preferred contact method/i), 'Email');
+    });
     
     // Mock successful submission
     const feedbackBuilder = supabase.from('feedback') as any;
@@ -171,7 +210,9 @@ describe('Feedback Submission Flow', () => {
     });
     
     // Submit form
-    await user.click(screen.getByRole('button', { name: /submit feedback/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /submit feedback/i }));
+    });
     
     // Verify insert was called with contact information
     expect(feedbackBuilder.insert).toHaveBeenCalledWith(expect.objectContaining({
@@ -185,26 +226,36 @@ describe('Feedback Submission Flow', () => {
   
   test('Anonymous users can submit feedback', async () => {
     // Mock unauthenticated state
-    supabase.auth.getUser.mockResolvedValue({
+    (supabase.auth.getUser as Mock).mockResolvedValueOnce({
       data: { user: null },
       error: null
     });
     
     // Render feedback form
-    render(<FeedbackForm />);
+    await act(async () => {
+      render(<FeedbackForm />);
+    });
     
     // Select feedback category
-    await user.click(screen.getByLabelText(/feedback type/i));
-    await user.click(screen.getByText(/suggestion/i));
+    await act(async () => {
+      await user.click(screen.getByLabelText(/feedback type/i));
+    });
+    await act(async () => {
+      await user.click(screen.getByText(/suggestion/i));
+    });
     
     // Enter feedback description
-    await user.type(
-      screen.getByLabelText(/description/i), 
-      'The UI could be more intuitive.'
-    );
+    await act(async () => {
+      await user.type(
+        screen.getByLabelText(/description/i), 
+        'The UI could be more intuitive.'
+      );
+    });
     
     // Provide email for anonymous user
-    await user.type(screen.getByLabelText(/email \(optional\)/i), 'anonymous@example.com');
+    await act(async () => {
+      await user.type(screen.getByLabelText(/email \(optional\)/i), 'anonymous@example.com');
+    });
     
     // Mock successful submission
     const feedbackBuilder = supabase.from('feedback') as any;
@@ -214,7 +265,9 @@ describe('Feedback Submission Flow', () => {
     });
     
     // Submit form
-    await user.click(screen.getByRole('button', { name: /submit feedback/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /submit feedback/i }));
+    });
     
     // Verify insert was called with appropriate data
     expect(feedbackBuilder.insert).toHaveBeenCalledWith(expect.objectContaining({
@@ -232,15 +285,23 @@ describe('Feedback Submission Flow', () => {
   
   test('Handles submission errors gracefully', async () => {
     // Render feedback form
-    render(<FeedbackForm />);
+    await act(async () => {
+      render(<FeedbackForm />);
+    });
     
     // Fill out form
-    await user.click(screen.getByLabelText(/feedback type/i));
-    await user.click(screen.getByText(/other/i));
-    await user.type(
-      screen.getByLabelText(/description/i), 
-      'General comment about the application.'
-    );
+    await act(async () => {
+      await user.click(screen.getByLabelText(/feedback type/i));
+    });
+    await act(async () => {
+      await user.click(screen.getByText(/other/i));
+    });
+    await act(async () => {
+      await user.type(
+        screen.getByLabelText(/description/i), 
+        'General comment about the application.'
+      );
+    });
     
     // Mock submission error
     const feedbackBuilder = supabase.from('feedback') as any;
@@ -250,7 +311,9 @@ describe('Feedback Submission Flow', () => {
     });
     
     // Submit form
-    await user.click(screen.getByRole('button', { name: /submit feedback/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /submit feedback/i }));
+    });
     
     // Verify error message
     await waitFor(() => {
@@ -267,7 +330,9 @@ describe('Feedback Submission Flow', () => {
     });
     
     // Click retry
-    await user.click(screen.getByRole('button', { name: /try again/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /try again/i }));
+    });
     
     // Verify success after retry
     await waitFor(() => {

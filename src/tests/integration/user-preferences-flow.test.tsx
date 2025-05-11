@@ -1,7 +1,7 @@
 // __tests__/integration/user-preferences-flow.test.tsx
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserPreferences } from '@/components/common/UserPreferences';
 
@@ -56,7 +56,9 @@ describe('User Preferences Flow', () => {
 
   test('User can view and update preferences', async () => {
     // Render user preferences
-    render(<UserPreferences />);
+    await act(async () => {
+      render(<UserPreferences />);
+    });
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -66,10 +68,12 @@ describe('User Preferences Flow', () => {
     });
     
     // Update preferences
-    await user.selectOptions(screen.getByLabelText(/theme/i), 'dark');
-    await user.selectOptions(screen.getByLabelText(/language/i), 'es');
-    await user.clear(screen.getByLabelText(/items per page/i));
-    await user.type(screen.getByLabelText(/items per page/i), '50');
+    await act(async () => {
+      await user.selectOptions(screen.getByLabelText(/theme/i), 'dark');
+      await user.selectOptions(screen.getByLabelText(/language/i), 'es');
+      await user.clear(screen.getByLabelText(/items per page/i));
+      await user.type(screen.getByLabelText(/items per page/i), '50');
+    });
     
     // Mock successful update
     const preferencesBuilder = supabase.from('user_preferences') as any;
@@ -87,7 +91,9 @@ describe('User Preferences Flow', () => {
     });
     
     // Save changes
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // Verify save was successful
     await waitFor(() => {
@@ -127,7 +133,9 @@ describe('User Preferences Flow', () => {
     });
     
     // Render user preferences
-    render(<UserPreferences />);
+    await act(async () => {
+      render(<UserPreferences />);
+    });
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -135,10 +143,14 @@ describe('User Preferences Flow', () => {
     });
     
     // Change theme
-    await user.selectOptions(screen.getByLabelText(/theme/i), 'dark');
+    await act(async () => {
+      await user.selectOptions(screen.getByLabelText(/theme/i), 'dark');
+    });
     
     // Save changes
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // Verify theme was applied immediately
     expect(documentElementClassList.remove).toHaveBeenCalledWith('light-theme');
@@ -150,7 +162,9 @@ describe('User Preferences Flow', () => {
   
   test('validates items per page input', async () => {
     // Render user preferences
-    render(<UserPreferences />);
+    await act(async () => {
+      render(<UserPreferences />);
+    });
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -158,11 +172,15 @@ describe('User Preferences Flow', () => {
     });
     
     // Enter invalid value
-    await user.clear(screen.getByLabelText(/items per page/i));
-    await user.type(screen.getByLabelText(/items per page/i), '500');
+    await act(async () => {
+      await user.clear(screen.getByLabelText(/items per page/i));
+      await user.type(screen.getByLabelText(/items per page/i), '500');
+    });
     
     // Try to save
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // Verify validation error
     expect(screen.getByText(/maximum allowed is 100/i)).toBeInTheDocument();
@@ -173,7 +191,9 @@ describe('User Preferences Flow', () => {
   
   test('handles error when saving preferences', async () => {
     // Render user preferences
-    render(<UserPreferences />);
+    await act(async () => {
+      render(<UserPreferences />);
+    });
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -181,7 +201,9 @@ describe('User Preferences Flow', () => {
     });
     
     // Change theme
-    await user.selectOptions(screen.getByLabelText(/theme/i), 'dark');
+    await act(async () => {
+      await user.selectOptions(screen.getByLabelText(/theme/i), 'dark');
+    });
     
     // Mock error during update
     const preferencesBuilder = supabase.from('user_preferences') as any;
@@ -191,7 +213,9 @@ describe('User Preferences Flow', () => {
     });
     
     // Try to save changes
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // Verify error message is displayed
     await waitFor(() => {
@@ -201,7 +225,9 @@ describe('User Preferences Flow', () => {
   
   test('can select timezone from dropdown', async () => {
     // Render user preferences
-    render(<UserPreferences />);
+    await act(async () => {
+      render(<UserPreferences />);
+    });
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -209,10 +235,14 @@ describe('User Preferences Flow', () => {
     });
     
     // Open timezone dropdown
-    await user.click(screen.getByLabelText(/timezone/i));
+    await act(async () => {
+      await user.click(screen.getByLabelText(/timezone/i));
+    });
     
     // Select a different timezone
-    await user.click(screen.getByText('Europe/London'));
+    await act(async () => {
+      await user.click(screen.getByText('Europe/London'));
+    });
     
     // Mock successful update
     const preferencesBuilder = supabase.from('user_preferences') as any;
@@ -224,7 +254,9 @@ describe('User Preferences Flow', () => {
     });
     
     // Save changes
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // Verify update was called with correct timezone
     expect(preferencesBuilder.update).toHaveBeenCalledWith(expect.objectContaining({
@@ -234,7 +266,9 @@ describe('User Preferences Flow', () => {
   
   test('can select date format', async () => {
     // Render user preferences
-    render(<UserPreferences />);
+    await act(async () => {
+      render(<UserPreferences />);
+    });
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -242,7 +276,9 @@ describe('User Preferences Flow', () => {
     });
     
     // Select a different date format
-    await user.selectOptions(screen.getByLabelText(/date format/i), 'DD/MM/YYYY');
+    await act(async () => {
+      await user.selectOptions(screen.getByLabelText(/date format/i), 'DD/MM/YYYY');
+    });
     
     // Mock successful update
     const preferencesBuilder = supabase.from('user_preferences') as any;
@@ -254,7 +290,9 @@ describe('User Preferences Flow', () => {
     });
     
     // Save changes
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // Verify update was called with correct date format
     expect(preferencesBuilder.update).toHaveBeenCalledWith(expect.objectContaining({
@@ -267,7 +305,9 @@ describe('User Preferences Flow', () => {
   
   test('can toggle advanced settings', async () => {
     // Render user preferences
-    render(<UserPreferences />);
+    await act(async () => {
+      render(<UserPreferences />);
+    });
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -278,14 +318,18 @@ describe('User Preferences Flow', () => {
     expect(screen.queryByLabelText(/keyboard shortcuts/i)).not.toBeInTheDocument();
     
     // Open advanced settings section
-    await user.click(screen.getByRole('button', { name: /advanced settings/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /advanced settings/i }));
+    });
     
     // Verify advanced settings are visible
     expect(screen.getByLabelText(/keyboard shortcuts/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/auto save/i)).toBeInTheDocument();
     
     // Toggle keyboard shortcuts
-    await user.click(screen.getByLabelText(/keyboard shortcuts/i));
+    await act(async () => {
+      await user.click(screen.getByLabelText(/keyboard shortcuts/i));
+    });
     
     // Mock successful update
     const preferencesBuilder = supabase.from('user_preferences') as any;
@@ -300,7 +344,9 @@ describe('User Preferences Flow', () => {
     });
     
     // Save changes
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // Verify update was called with correct advanced settings
     expect(preferencesBuilder.update).toHaveBeenCalledWith(expect.objectContaining({
@@ -313,7 +359,9 @@ describe('User Preferences Flow', () => {
   
   test('can reset preferences to defaults', async () => {
     // Render user preferences
-    render(<UserPreferences />);
+    await act(async () => {
+      render(<UserPreferences />);
+    });
     
     // Wait for preferences to load
     await waitFor(() => {
@@ -337,10 +385,14 @@ describe('User Preferences Flow', () => {
     });
     
     // Click reset to defaults button
-    await user.click(screen.getByRole('button', { name: /reset to defaults/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /reset to defaults/i }));
+    });
     
     // Confirm reset
-    await user.click(screen.getByRole('button', { name: /confirm/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /confirm/i }));
+    });
     
     // Verify reset was successful
     await waitFor(() => {

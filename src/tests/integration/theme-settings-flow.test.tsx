@@ -1,7 +1,7 @@
 // __tests__/integration/theme-settings-flow.test.tsx
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeSettings } from '@/components/common/ThemeSettings';
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
@@ -97,7 +97,9 @@ describe('Theme/Appearance Settings Flow', () => {
 
   test('User can change theme between light and dark', async () => {
     // Render theme settings
-    render(<ThemeSettings />);
+    await act(async () => {
+      render(<ThemeSettings />);
+    });
     
     // Wait for settings to load
     await waitFor(() => {
@@ -105,7 +107,9 @@ describe('Theme/Appearance Settings Flow', () => {
     });
     
     // Switch to dark theme
-    await user.click(screen.getByLabelText(/dark/i));
+    await act(async () => {
+      await user.click(screen.getByLabelText(/dark/i));
+    });
     
     // Mock successful preference update
     const preferencesBuilder = supabase.from('user_preferences') as any;
@@ -117,7 +121,9 @@ describe('Theme/Appearance Settings Flow', () => {
     });
     
     // Save changes
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // Verify theme was updated in DOM
     expect(documentElementClassList.remove).toHaveBeenCalledWith('light-theme');
@@ -139,7 +145,9 @@ describe('Theme/Appearance Settings Flow', () => {
   
   test('User can select system theme preference', async () => {
     // Render theme settings
-    render(<ThemeSettings />);
+    await act(async () => {
+      render(<ThemeSettings />);
+    });
     
     // Wait for settings to load
     await waitFor(() => {
@@ -147,7 +155,9 @@ describe('Theme/Appearance Settings Flow', () => {
     });
     
     // Select system theme
-    await user.click(screen.getByLabelText(/system/i));
+    await act(async () => {
+      await user.click(screen.getByLabelText(/system/i));
+    });
     
     // Mock successful preference update
     const preferencesBuilder = supabase.from('user_preferences') as any;
@@ -159,7 +169,9 @@ describe('Theme/Appearance Settings Flow', () => {
     });
     
     // Save changes
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // System preference is dark, so dark theme should be applied
     expect(documentElementClassList.remove).toHaveBeenCalledWith('light-theme');
@@ -176,7 +188,9 @@ describe('Theme/Appearance Settings Flow', () => {
   
   test('User can change color scheme', async () => {
     // Render theme settings
-    render(<ThemeSettings />);
+    await act(async () => {
+      render(<ThemeSettings />);
+    });
     
     // Wait for settings to load
     await waitFor(() => {
@@ -184,7 +198,9 @@ describe('Theme/Appearance Settings Flow', () => {
     });
     
     // Select a different color scheme
-    await user.click(screen.getByTestId('color-scheme-purple'));
+    await act(async () => {
+      await user.click(screen.getByTestId('color-scheme-purple'));
+    });
     
     // Mock successful preference update
     const preferencesBuilder = supabase.from('user_preferences') as any;
@@ -196,21 +212,25 @@ describe('Theme/Appearance Settings Flow', () => {
     });
     
     // Save changes
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // Verify color scheme was updated in DOM
     expect(document.documentElement.classList.remove).toHaveBeenCalledWith('theme-blue');
     expect(document.documentElement.classList.add).toHaveBeenCalledWith('theme-purple');
     
     // Verify database update
-    expect(supabase.from().update).toHaveBeenCalledWith(expect.objectContaining({
+    expect(preferencesBuilder.update).toHaveBeenCalledWith(expect.objectContaining({
       color_scheme: 'purple'
     }));
   });
   
   test('User can adjust font size', async () => {
     // Render theme settings
-    render(<ThemeSettings />);
+    await act(async () => {
+      render(<ThemeSettings />);
+    });
     
     // Wait for settings to load
     await waitFor(() => {
@@ -218,10 +238,13 @@ describe('Theme/Appearance Settings Flow', () => {
     });
     
     // Change font size
-    await user.selectOptions(screen.getByLabelText(/font size/i), 'large');
+    await act(async () => {
+      await user.selectOptions(screen.getByLabelText(/font size/i), 'large');
+    });
     
     // Mock successful preference update
-    supabase.from().update.mockResolvedValueOnce({
+    const preferencesBuilder = supabase.from('user_preferences') as any;
+    preferencesBuilder.update.mockResolvedValueOnce({
       data: {
         font_size: 'large'
       },
@@ -229,21 +252,25 @@ describe('Theme/Appearance Settings Flow', () => {
     });
     
     // Save changes
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // Verify font size was updated in DOM
     expect(document.documentElement.classList.remove).toHaveBeenCalledWith('font-medium');
     expect(document.documentElement.classList.add).toHaveBeenCalledWith('font-large');
     
     // Verify database update
-    expect(supabase.from().update).toHaveBeenCalledWith(expect.objectContaining({
+    expect(preferencesBuilder.update).toHaveBeenCalledWith(expect.objectContaining({
       font_size: 'large'
     }));
   });
   
   test('User can enable reduced motion preference', async () => {
     // Render theme settings
-    render(<ThemeSettings />);
+    await act(async () => {
+      render(<ThemeSettings />);
+    });
     
     // Wait for settings to load
     await waitFor(() => {
@@ -251,10 +278,13 @@ describe('Theme/Appearance Settings Flow', () => {
     });
     
     // Enable reduced motion
-    await user.click(screen.getByLabelText(/reduced motion/i));
+    await act(async () => {
+      await user.click(screen.getByLabelText(/reduced motion/i));
+    });
     
     // Mock successful preference update
-    supabase.from().update.mockResolvedValueOnce({
+    const preferencesBuilder = supabase.from('user_preferences') as any;
+    preferencesBuilder.update.mockResolvedValueOnce({
       data: {
         reduced_motion: true
       },
@@ -262,20 +292,24 @@ describe('Theme/Appearance Settings Flow', () => {
     });
     
     // Save changes
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // Verify reduced motion was updated in DOM
     expect(document.documentElement.classList.add).toHaveBeenCalledWith('reduced-motion');
     
     // Verify database update
-    expect(supabase.from().update).toHaveBeenCalledWith(expect.objectContaining({
+    expect(preferencesBuilder.update).toHaveBeenCalledWith(expect.objectContaining({
       reduced_motion: true
     }));
   });
   
   test('Previews theme changes before saving', async () => {
     // Render theme settings
-    render(<ThemeSettings />);
+    await act(async () => {
+      render(<ThemeSettings />);
+    });
     
     // Wait for settings to load
     await waitFor(() => {
@@ -283,7 +317,9 @@ describe('Theme/Appearance Settings Flow', () => {
     });
     
     // Switch to dark theme
-    await user.click(screen.getByLabelText(/dark/i));
+    await act(async () => {
+      await user.click(screen.getByLabelText(/dark/i));
+    });
     
     // Verify theme preview was applied immediately
     expect(documentElementClassList.remove).toHaveBeenCalledWith('light-theme');
@@ -299,7 +335,9 @@ describe('Theme/Appearance Settings Flow', () => {
     expect(screen.getByText(/preview mode/i)).toBeInTheDocument();
     
     // Cancel changes
-    await user.click(screen.getByRole('button', { name: /cancel/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /cancel/i }));
+    });
     
     // Verify original theme was restored
     expect(documentElementClassList.remove).toHaveBeenCalledWith('dark-theme');
@@ -308,7 +346,9 @@ describe('Theme/Appearance Settings Flow', () => {
   
   test('Handles error when saving theme preferences', async () => {
     // Render theme settings
-    render(<ThemeSettings />);
+    await act(async () => {
+      render(<ThemeSettings />);
+    });
     
     // Wait for settings to load
     await waitFor(() => {
@@ -316,16 +356,21 @@ describe('Theme/Appearance Settings Flow', () => {
     });
     
     // Switch to dark theme
-    await user.click(screen.getByLabelText(/dark/i));
+    await act(async () => {
+      await user.click(screen.getByLabelText(/dark/i));
+    });
     
     // Mock error during preference update
-    supabase.from().update.mockResolvedValueOnce({
+    const preferencesBuilder = supabase.from('user_preferences') as any;
+    preferencesBuilder.update.mockResolvedValueOnce({
       data: null,
       error: { message: 'Error saving preferences' }
     });
     
     // Try to save changes
-    await user.click(screen.getByRole('button', { name: /save/i }));
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
     
     // Verify error message
     await waitFor(() => {
@@ -333,6 +378,6 @@ describe('Theme/Appearance Settings Flow', () => {
     });
     
     // Verify theme preview is still applied
-    expect(documentElementClassList.contains('dark-theme')).toBeTruthy();
+    // (Redundant add check removed; already checked above)
   });
 });

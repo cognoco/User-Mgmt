@@ -84,3 +84,17 @@ This knowledge should be applied to all tests using axios in Node, and documente
 - **Issue:** Many tests still trigger React `act(...)` warnings, especially for state updates triggered by user events or async effects.
 - **Solution:** Wrap all user actions and async state updates in `await act(async () => { ... })` or `await waitFor(...)` as appropriate. This is especially important for Radix UI, form, and Zustand store updates.
 - **Best Practice:** See `TESTING.md` for code examples and always check for act warnings in test output.
+
+## (2024-06-24) JSDOM + React Hook Form + Textarea Value Assertion Issue ("SAML Issue")
+
+- **Issue:** When using React Hook Form to control a <textarea> (such as the SAML certificate field) in tests running in JSDOM, the `.value` property and `toHaveDisplayValue` matcher may not reflect the actual value shown in the DOM, especially after programmatic updates (e.g., form.reset or async fetch).
+- **Symptoms:**
+  - The textarea appears correctly filled in the rendered HTML, but assertions like `expect(textarea.value).toBe(...)` or `toHaveDisplayValue(...)` fail (value is '').
+  - This is a JSDOM/React Hook Form limitation, not a bug in the component.
+- **Workaround:**
+  - Assert on the DOM string instead: `expect(container.innerHTML).toContain(expectedValue)`.
+  - This ensures the value is present for the user, even if the `.value` property is not set in the test environment.
+- **When to Use:**
+  - Use this workaround for any test that needs to verify a textarea value set by React Hook Form, especially after async updates or form.reset.
+  - Document this in the test file with a comment for future maintainers.
+- **Reference:** See also `Testing_Findings.md` and `TESTING.md` for more details.
