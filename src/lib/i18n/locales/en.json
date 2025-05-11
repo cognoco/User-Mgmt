@@ -192,7 +192,7 @@
         "qrCode": "Scan QR Code",
         "manualEntry": "Manual Entry",
         "recoveryCodes": "Recovery Codes",
-        "selectMethod": "Select a method",
+        "selectMethod": "Select a 2FA method",
         "methods": {
           "authenticator": "Authenticator App",
           "sms": "SMS",
@@ -260,6 +260,10 @@
       "paymentMethods": "Payment Methods",
       "invoices": "Invoices",
       "cancel": "Cancel Account"
+    },
+    "connectedAccounts": {
+      "title": "Connected Accounts",
+      "connectNew": "Connect new account"
     }
   },
   "org": {
