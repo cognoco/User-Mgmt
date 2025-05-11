@@ -3,9 +3,9 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-// import { AccountSettings } from '../../src/components/account/AccountSettings'; // TODO: Update path if file exists
+// import { AccountSettings } from '../../components/account/AccountSettings'; // TODO: Update path if file exists
 import { vi } from 'vitest';
-// import { supabase } from '../../src/lib/supabase'; // TODO: Update path if file exists
+// import { supabase } from '../../lib/supabase'; // TODO: Update path if file exists
 
 // Import and mock Supabase
 vi.mock('@/lib/supabase');

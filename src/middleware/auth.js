@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase.js';
+import { supabase } from '../lib/supabase';
 
 /**
  * Authentication middleware for API routes

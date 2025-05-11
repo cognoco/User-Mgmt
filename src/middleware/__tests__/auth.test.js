@@ -6,11 +6,11 @@ import { describe, test, expect, beforeAll, afterAll, beforeEach, vi } from 'vit
 
 // Import our standardized mock
 vi.mock('../../src/lib/supabase', () => require('../mocks/supabase'));
-import { supabase } from '../../src/lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 // Import utility functions
-import { setupTestEnvironment } from '../utils/environment-setup';
-import { createMockUser, createMockAdminUser } from '../utils/testing-utils';
+import { setupTestEnvironment } from '../../tests/utils/environment-setup';
+import { createMockUser, createMockAdminUser } from '../../tests/utils/testing-utils';
 
 describe('Auth Middleware', () => {
   // Setup test environment

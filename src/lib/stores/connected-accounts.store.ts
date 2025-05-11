@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { api } from '../api/axios';
+import { api } from '@/lib/api/axios';
 import { ConnectedAccountsState } from '../types/connected-accounts';
 import { OAuthProvider } from '../../types/oauth';
 

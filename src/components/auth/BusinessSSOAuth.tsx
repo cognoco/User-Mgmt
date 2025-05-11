@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { OAuthButtons } from './OAuthButtons';
 import { useOrganization } from '@/lib/hooks/useOrganization';
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/lib/supabase';
 import { Provider } from '@supabase/supabase-js';
 
 interface BusinessSSOAuthProps {

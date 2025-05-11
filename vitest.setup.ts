@@ -197,3 +197,86 @@ if (typeof window !== 'undefined' && !window.ResizeObserver) {
   };
 }
 // --- End ResizeObserver mock ---
+
+// --- JSDOM/Browser API Polyfills for Testing ---
+// These mocks/polyfills are required for JSDOM compatibility and to prevent test failures unrelated to app logic.
+
+if (!window.scrollTo) window.scrollTo = () => {};
+if (!window.HTMLElement.prototype.scrollIntoView) window.HTMLElement.prototype.scrollIntoView = () => {};
+if (!window.HTMLElement.prototype.releasePointerCapture) window.HTMLElement.prototype.releasePointerCapture = () => {};
+if (!window.HTMLElement.prototype.hasPointerCapture) window.HTMLElement.prototype.hasPointerCapture = () => false;
+if (!window.HTMLElement.prototype.setPointerCapture) window.HTMLElement.prototype.setPointerCapture = () => {};
+if (!window.HTMLElement.prototype.requestFullscreen) window.HTMLElement.prototype.requestFullscreen = () => Promise.resolve();
+if (!window.ClipboardEvent) window.ClipboardEvent = class ClipboardEvent extends Event { constructor(type: string, eventInitDict?: ClipboardEventInit) { super(type, eventInitDict); } } as any;
+if (!window.DataTransfer) window.DataTransfer = class DataTransfer { constructor() { this.items = []; this.files = []; } items: any[]; files: any[]; } as any;
+if (!window.FileReader) {
+  class MockFileReader {
+    static readonly EMPTY = 0 as const;
+    static readonly LOADING = 1 as const;
+    static readonly DONE = 2 as const;
+    get EMPTY() { return MockFileReader.EMPTY; }
+    get LOADING() { return MockFileReader.LOADING; }
+    get DONE() { return MockFileReader.DONE; }
+    readyState: 0 | 1 | 2 = 0;
+    result: string | ArrayBuffer | null = null;
+    error: DOMException | null = null;
+    onload: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null = null;
+    onerror: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null = null;
+    onloadend: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null = null;
+    onabort: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null = null;
+    onloadstart: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null = null;
+    onprogress: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null = null;
+    abort() { this.readyState = 0; if (this.onabort) this.onabort.call(this, {} as any); }
+    readAsArrayBuffer() { this.readyState = 2; if (this.onload) this.onload.call(this, {} as any); }
+    readAsBinaryString() { this.readyState = 2; if (this.onload) this.onload.call(this, {} as any); }
+    readAsText() { this.readyState = 2; if (this.onload) this.onload.call(this, {} as any); }
+    readAsDataURL() { this.readyState = 2; if (this.onload) this.onload.call(this, {} as any); }
+    addEventListener() {}
+    removeEventListener() {}
+    dispatchEvent() { return true; }
+  }
+  window.FileReader = MockFileReader as any;
+}
+if (!window.URL.createObjectURL) window.URL.createObjectURL = () => 'blob:http://localhost/fake';
+if (!window.URL.revokeObjectURL) window.URL.revokeObjectURL = () => {};
+if (!window.IntersectionObserver) {
+  class MockIntersectionObserver {
+    root: Element | null = null;
+    rootMargin: string = '';
+    thresholds: number[] = [];
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords() { return []; }
+  }
+  window.IntersectionObserver = MockIntersectionObserver as any;
+}
+if (!window.DOMRect) {
+  class MockDOMRect {
+    static fromRect() { return new MockDOMRect(); }
+    x = 0; y = 0; width = 0; height = 0;
+    top = 0; right = 0; bottom = 0; left = 0;
+    toJSON() { return this; }
+  }
+  window.DOMRect = MockDOMRect as any;
+}
+if (!window.getComputedStyle) window.getComputedStyle = () => ({
+  getPropertyValue: () => '',
+  setProperty: () => {},
+  removeProperty: () => '',
+  length: 0,
+  item: () => null,
+  getPropertyPriority: () => '',
+  [Symbol.iterator]: function* () {},
+} as any);
+if (!window.crypto) window.crypto = {} as Crypto;
+if (!window.crypto.getRandomValues) window.crypto.getRandomValues = (arr: ArrayBufferView) => { for (let i = 0; i < arr.byteLength; i++) (arr as any)[i] = Math.floor(Math.random() * 256); return arr; };
+try {
+  Object.defineProperty(window.navigator, 'clipboard', {
+    value: { writeText: async () => {}, readText: async () => '' },
+    configurable: true,
+  });
+} catch {}
+if (!window.ResizeObserver) window.ResizeObserver = class { observe() {}; unobserve() {}; disconnect() {}; };
+
+// --- End JSDOM/Browser API Polyfills ---

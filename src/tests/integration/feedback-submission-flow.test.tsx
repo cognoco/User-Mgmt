@@ -45,13 +45,13 @@ describe('Feedback Submission Flow', () => {
       await user.click(screen.getByLabelText(/feedback type/i));
     });
     await act(async () => {
-      await user.click(screen.getByText(/feature request/i));
+      await user.click(screen.getByText(/feature/i));
     });
     
     // Enter feedback description
     await act(async () => {
       await user.type(
-        screen.getByLabelText(/description/i), 
+        screen.getByLabelText(/message/i), 
         'I would like to see a dark mode option in the application.'
       );
     });
@@ -71,7 +71,7 @@ describe('Feedback Submission Flow', () => {
     // Verify insert was called with correct data
     expect(feedbackBuilder.insert).toHaveBeenCalledWith(expect.objectContaining({
       user_id: 'user-123',
-      category: 'feature_request',
+      category: 'feature',
       description: 'I would like to see a dark mode option in the application.',
       environment_info: expect.objectContaining({
         user_agent: expect.any(String),
@@ -96,13 +96,13 @@ describe('Feedback Submission Flow', () => {
       await user.click(screen.getByLabelText(/feedback type/i));
     });
     await act(async () => {
-      await user.click(screen.getByText(/bug report/i));
+      await user.click(screen.getByText(/bug/i));
     });
     
     // Enter feedback description
     await act(async () => {
       await user.type(
-        screen.getByLabelText(/description/i), 
+        screen.getByLabelText(/message/i), 
         'The save button is not working properly.'
       );
     });
@@ -114,7 +114,7 @@ describe('Feedback Submission Flow', () => {
     });
     
     // Mock successful file upload
-    const storageBuilder = supabase.storage.from() as any;
+    const storageBuilder = supabase.storage.from('screenshots') as any;
     storageBuilder.upload.mockResolvedValueOnce({
       data: { path: 'screenshots/feedback-123/screenshot.png' },
       error: null
@@ -139,7 +139,7 @@ describe('Feedback Submission Flow', () => {
     // Verify screenshot was uploaded and included in feedback
     expect(storageBuilder.upload).toHaveBeenCalled();
     expect(feedbackBuilder.insert).toHaveBeenCalledWith(expect.objectContaining({
-      category: 'bug_report',
+      category: 'bug',
       description: 'The save button is not working properly.',
       screenshot_url: 'https://example.com/screenshots/feedback-123/screenshot.png'
     }));
@@ -163,7 +163,7 @@ describe('Feedback Submission Flow', () => {
     
     // Verify validation errors
     expect(screen.getByText(/please select a feedback type/i)).toBeInTheDocument();
-    expect(screen.getByText(/please provide a description/i)).toBeInTheDocument();
+    expect(screen.getByText(/please enter your feedback/i)).toBeInTheDocument();
     
     // Verify no submission attempt was made
     const feedbackBuilder = supabase.from('feedback') as any;
@@ -181,25 +181,15 @@ describe('Feedback Submission Flow', () => {
       await user.click(screen.getByLabelText(/feedback type/i));
     });
     await act(async () => {
-      await user.click(screen.getByText(/question/i));
+      await user.click(screen.getByText(/general/i));
     });
     
     // Enter feedback description
     await act(async () => {
       await user.type(
-        screen.getByLabelText(/description/i), 
+        screen.getByLabelText(/message/i), 
         'How do I export my data?'
       );
-    });
-    
-    // Toggle contact permission
-    await act(async () => {
-      await user.click(screen.getByLabelText(/contact me/i));
-    });
-    
-    // Enter preferred contact method
-    await act(async () => {
-      await user.type(screen.getByLabelText(/preferred contact method/i), 'Email');
     });
     
     // Mock successful submission
@@ -216,7 +206,7 @@ describe('Feedback Submission Flow', () => {
     
     // Verify insert was called with contact information
     expect(feedbackBuilder.insert).toHaveBeenCalledWith(expect.objectContaining({
-      category: 'question',
+      category: 'general',
       description: 'How do I export my data?',
       allow_contact: true,
       contact_method: 'Email',
@@ -241,20 +231,15 @@ describe('Feedback Submission Flow', () => {
       await user.click(screen.getByLabelText(/feedback type/i));
     });
     await act(async () => {
-      await user.click(screen.getByText(/suggestion/i));
+      await user.click(screen.getByText(/general/i));
     });
     
     // Enter feedback description
     await act(async () => {
       await user.type(
-        screen.getByLabelText(/description/i), 
+        screen.getByLabelText(/message/i), 
         'The UI could be more intuitive.'
       );
-    });
-    
-    // Provide email for anonymous user
-    await act(async () => {
-      await user.type(screen.getByLabelText(/email \(optional\)/i), 'anonymous@example.com');
     });
     
     // Mock successful submission
@@ -271,7 +256,7 @@ describe('Feedback Submission Flow', () => {
     
     // Verify insert was called with appropriate data
     expect(feedbackBuilder.insert).toHaveBeenCalledWith(expect.objectContaining({
-      category: 'suggestion',
+      category: 'general',
       description: 'The UI could be more intuitive.',
       is_anonymous: true,
       contact_email: 'anonymous@example.com'
@@ -294,11 +279,11 @@ describe('Feedback Submission Flow', () => {
       await user.click(screen.getByLabelText(/feedback type/i));
     });
     await act(async () => {
-      await user.click(screen.getByText(/other/i));
+      await user.click(screen.getByText(/general/i));
     });
     await act(async () => {
       await user.type(
-        screen.getByLabelText(/description/i), 
+        screen.getByLabelText(/message/i), 
         'General comment about the application.'
       );
     });

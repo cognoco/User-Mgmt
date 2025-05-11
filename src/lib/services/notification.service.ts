@@ -1,4 +1,4 @@
-import { api } from '../api/axios';
+import { api } from '@/lib/api/axios';
 
 export type Platform = 'web' | 'ios' | 'android' | 'react-native';
 

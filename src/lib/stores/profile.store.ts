@@ -1,12 +1,12 @@
 import { create } from 'zustand';
-import { api } from '../api/axios';
+import { api } from '@/lib/api/axios';
 import { supabase } from '../supabase';
 import { 
     ProfileState, 
     Profile,
 } from '@/types/profile';
-import { fileToBase64 } from '../utils/file-upload';
-import { useAuthStore } from './auth.store';
+import { fileToBase64 } from '@/lib/utils/file-upload';
+import { useAuthStore } from '@/lib/stores/auth.store';
 
 import { Profile as DbProfile } from '@/types/database';
 import type { ProfileVerification } from '@/types/profile';

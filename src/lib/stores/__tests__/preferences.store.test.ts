@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act } from '@testing-library/react';
-import { usePreferencesStore } from '../preferences.store';
-import { useAuthStore } from '../auth.store';
+import { usePreferencesStore } from '@/lib/stores/preferences.store';
+import { useAuthStore } from '@/lib/stores/auth.store';
 import { api } from '../../api/axios';
 import type { UserPreferences } from '@/types/database';
 

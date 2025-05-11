@@ -1,7 +1,7 @@
 import { create } from 'zustand';
-import { api } from '../api/axios';
+import { api } from '@/lib/api/axios';
 import { RBACState, Role, Permission, RoleSchema, UserRoleSchema } from '../types/rbac';
-import { useAuthStore } from './auth.store';
+import { useAuthStore } from '@/lib/stores/auth.store';
 
 export const useRBACStore = create<RBACState>((set, get) => ({
   roles: [],

@@ -156,22 +156,22 @@ describe('User Authentication Flow', () => {
 
       // Fill sign up form
       await act(async () => {
-        await user.type(screen.getByLabelText(/email \*/i), 'test@example.com');
+        await user.type(screen.getByTestId('email-input'), 'test@example.com');
       });
       await act(async () => {
-        await user.type(screen.getByLabelText(/^Password \*$/i), 'Password123');
+        await user.type(screen.getByTestId('password-input'), 'Password123');
       });
       await act(async () => {
-        await user.type(screen.getByLabelText(/first name \*/i), 'Test');
+        await user.type(screen.getByTestId('first-name-input'), 'Test');
       });
       await act(async () => {
-        await user.type(screen.getByLabelText(/last name \*/i), 'User');
+        await user.type(screen.getByTestId('last-name-input'), 'User');
       });
       await act(async () => {
-        await user.type(screen.getByLabelText(/^Confirm Password \*$/i), 'Password123');
+        await user.type(screen.getByTestId('confirm-password-input'), 'Password123');
       });
       await act(async () => {
-        await user.click(screen.getByRole('checkbox', { name: /accept terms/i }));
+        await user.click(screen.getByTestId('accept-terms-checkbox'));
       });
 
       // Submit sign up form 
