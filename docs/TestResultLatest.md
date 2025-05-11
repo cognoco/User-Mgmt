@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 45  |  **Failed Test Files:** 39
+**Passed Test Files:** 41  |  **Failed Test Files:** 43
 
 ## Passing Test Files
 
@@ -18,7 +18,6 @@
 - src\components\profile\__tests__\DataExport.test.tsx
 - src\components\profile\__tests__\NotificationPreferences.test.tsx
 - src\components\profile\__tests__\PrivacySettings.test.tsx
-- src\components\profile\__tests__\Profile.test.tsx
 - src\components\profile\__tests__\ProfileEditor.test.tsx
 - src\components\profile\__tests__\ProfileTypeConversion.test.tsx
 - src\components\profile\__tests__\ProfileVerification.test.tsx
@@ -39,15 +38,12 @@
 - src\lib\stores\__tests__\user.store.test.ts
 - src\middleware\__tests__\security-headers.test.ts
 - src\tests\integration\account-settings-flow.test.tsx
-- src\tests\integration\connected-accounts.integration.test.tsx
-- src\tests\integration\dashboard-view-flow.test.tsx
 - src\tests\integration\form-validation-errors-isolated.test.tsx
 - src\tests\integration\form-validation-errors.test.tsx
 - src\tests\integration\minimal.smoke.test.tsx
 - src\tests\integration\oauth-buttons.integration.test.tsx
 - src\tests\integration\search-filter-flow.test.tsx
 - src\tests\integration\social-sharing-flow.test.tsx
-- src\tests\integration\user-auth-flow.test.tsx
 - src\tests\ui\DuplicateUIElements.test.tsx
 
 ## Failing Test Files
@@ -57,6 +53,7 @@
 - src\components\auth\__tests__\DomainBasedOrgMatching.test.tsx
 - src\components\auth\__tests__\IDPConfiguration.test.tsx
 - src\components\auth\__tests__\OrganizationSSO.test.tsx
+- src\components\profile\__tests__\Profile.test.tsx
 - src\components\profile\__tests__\ProfilePrivacySettings.test.tsx
 - src\hooks\__tests__\usePayment.test.ts
 - src\hooks\__tests__\usePermission.test.tsx
@@ -81,6 +78,8 @@
 - src\tests\integration\api-error-messages.test.tsx
 - src\tests\integration\backup.integration.test.tsx
 - src\tests\integration\collaboration-flow.test.tsx
+- src\tests\integration\connected-accounts.integration.test.tsx
+- src\tests\integration\dashboard-view-flow.test.tsx
 - src\tests\integration\data-management-flow.test.tsx
 - src\tests\integration\empty-states.test.tsx
 - src\tests\integration\error-recovery-flow.test.tsx
@@ -90,4 +89,5 @@
 - src\tests\integration\notification-flow.test.tsx
 - src\tests\integration\password-reset-flow.test.tsx
 - src\tests\integration\theme-settings-flow.test.tsx
+- src\tests\integration\user-auth-flow.test.tsx
 - src\tests\integration\user-preferences-flow.test.tsx

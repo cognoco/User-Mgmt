@@ -87,7 +87,7 @@ describe('User Preferences Flow', () => {
     
     // Verify save was successful
     await waitFor(() => {
-      expect(screen.getByText(/preferences saved/i)).toBeInTheDocument();
+      expect(await screen.findByText(/preferences saved/i)).toBeInTheDocument();
     });
     
     // Verify update was called with correct data
@@ -159,7 +159,7 @@ describe('User Preferences Flow', () => {
     await user.click(screen.getByRole('button', { name: /save/i }));
     
     // Verify validation error
-    expect(screen.getByText(/maximum allowed is 100/i)).toBeInTheDocument();
+    expect(await screen.findByText(/maximum allowed is 100/i)).toBeInTheDocument();
     
     // Verify no update was attempted
     expect((supabase.from('user_preferences').update as any)).not.toHaveBeenCalled();
@@ -187,9 +187,7 @@ describe('User Preferences Flow', () => {
     await user.click(screen.getByRole('button', { name: /save/i }));
     
     // Verify error message is displayed
-    await waitFor(() => {
-      expect(screen.getByText(/error saving preferences/i)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/error saving preferences/i)).toBeInTheDocument();
   });
   
   test('can select timezone from dropdown', async () => {
@@ -205,7 +203,7 @@ describe('User Preferences Flow', () => {
     await user.click(screen.getByLabelText(/timezone/i));
     
     // Select a different timezone
-    await user.click(screen.getByText('Europe/London'));
+    await user.click(await screen.findByText('Europe/London'));
     
     // Mock successful update
     (supabase.from('user_preferences').update as any).mockResolvedValueOnce({
@@ -253,7 +251,7 @@ describe('User Preferences Flow', () => {
     }));
     
     // Verify date format preview is updated
-    expect(screen.getByText(/date format preview/i)).toHaveTextContent(/\d{2}\/\d{2}\/\d{4}/);
+    expect(await screen.findByText(/date format preview/i)).toHaveTextContent(/\d{2}\/\d{2}\/\d{4}/);
   });
   
   test('can toggle advanced settings', async () => {
@@ -332,9 +330,7 @@ describe('User Preferences Flow', () => {
     await user.click(screen.getByRole('button', { name: /reset/i }));
     
     // Verify reset was successful
-    await waitFor(() => {
-      expect(screen.getByText(/preferences reset/i)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/preferences reset/i)).toBeInTheDocument();
     
     // Verify form fields were updated to defaults
     expect(screen.getByLabelText(/theme/i)).toHaveValue('system');
@@ -395,7 +391,7 @@ describe('User Preferences Flow', () => {
       expect(screen.getByLabelText(/language/i)).toHaveValue('fr');
       expect(screen.getByLabelText(/timezone/i)).toHaveValue('Europe/Paris');
       expect(screen.getByLabelText(/date format/i)).toHaveValue('DD/MM/YYYY');
-      expect(screen.getByText(/preferences reset/i)).toBeInTheDocument();
+      expect(await screen.findByText(/preferences reset/i)).toBeInTheDocument();
     });
 
     // Restore mocks

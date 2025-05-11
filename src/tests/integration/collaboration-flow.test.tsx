@@ -54,10 +54,8 @@ describe('Collaboration Features Flow', () => {
     // render(<CollaborationWorkspace documentId="doc-123" />); // TODO: Update usage if component exists
     
     // Wait for document to load
-    await waitFor(() => {
-      expect(screen.getByText('Shared Document')).toBeInTheDocument();
-      expect(screen.getByDisplayValue(/initial document content/i)).toBeInTheDocument();
-    });
+    await screen.findByText('Shared Document');
+    expect(screen.getByDisplayValue(/initial document content/i)).toBeInTheDocument();
     
     // Edit document
     const contentArea = screen.getByRole('textbox');
@@ -85,9 +83,7 @@ describe('Collaboration Features Flow', () => {
     });
     
     // Verify success message
-    await waitFor(() => {
-      expect(screen.getByText(/saved successfully/i)).toBeInTheDocument();
-    });
+    await screen.findByText(/saved successfully/i);
   });
   
   test('Shows list of current collaborators', async () => {
@@ -95,21 +91,19 @@ describe('Collaboration Features Flow', () => {
     // render(<CollaborationWorkspace documentId="doc-123" />); // TODO: Update usage if component exists
     
     // Wait for document to load
-    await waitFor(() => {
-      expect(screen.getByText('Shared Document')).toBeInTheDocument();
-    });
+    await screen.findByText('Shared Document');
     
     // Open collaborators panel
     await user.click(screen.getByRole('button', { name: /collaborators/i }));
     
     // Verify collaborators are displayed
-    expect(screen.getByText('Current User (You)')).toBeInTheDocument();
-    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
-    expect(screen.getByText('Bob Johnson')).toBeInTheDocument();
+    await screen.findByText('Current User (You)');
+    await screen.findByText('Jane Smith');
+    await screen.findByText('Bob Johnson');
     
     // Verify roles are displayed
     expect(screen.getAllByText(/editor/i)).toHaveLength(2);
-    expect(screen.getByText(/viewer/i)).toBeInTheDocument();
+    await screen.findByText(/viewer/i);
   });
   
   test('User can add new collaborators', async () => {
@@ -117,9 +111,7 @@ describe('Collaboration Features Flow', () => {
     // render(<CollaborationWorkspace documentId="doc-123" />); // TODO: Update usage if component exists
     
     // Wait for document to load
-    await waitFor(() => {
-      expect(screen.getByText('Shared Document')).toBeInTheDocument();
-    });
+    await screen.findByText('Shared Document');
     
     // Open collaborators panel
     await user.click(screen.getByRole('button', { name: /collaborators/i }));
@@ -142,17 +134,15 @@ describe('Collaboration Features Flow', () => {
     await user.type(screen.getByLabelText(/search users/i), 'new');
     
     // Wait for search results
-    await waitFor(() => {
-      expect(screen.getByText('New User')).toBeInTheDocument();
-      expect(screen.getByText('Another User')).toBeInTheDocument();
-    });
+    await screen.findByText('New User');
+    await screen.findByText('Another User');
     
     // Select user
-    await user.click(screen.getByText('New User'));
+    await user.click(await screen.findByText('New User'));
     
     // Select role
     await user.click(screen.getByLabelText(/select role/i));
-    await user.click(screen.getByText(/editor/i));
+    await user.click(await screen.findByText(/editor/i));
     
     // Mock successful addition
     supabase.rpc = vi.fn().mockResolvedValueOnce({
@@ -171,9 +161,7 @@ describe('Collaboration Features Flow', () => {
     });
     
     // Verify success message
-    await waitFor(() => {
-      expect(screen.getByText(/invitation sent/i)).toBeInTheDocument();
-    });
+    await screen.findByText(/invitation sent/i);
   });
   
   test('Notifications appear when other users make changes', async () => {
@@ -194,9 +182,7 @@ describe('Collaboration Features Flow', () => {
     // render(<CollaborationWorkspace documentId="doc-123" />); // TODO: Update usage if component exists
     
     // Wait for document to load
-    await waitFor(() => {
-      expect(screen.getByText('Shared Document')).toBeInTheDocument();
-    });
+    await screen.findByText('Shared Document');
     
     // Verify channel was set up
     expect(supabase.channel).toHaveBeenCalledWith(`document_updates:doc-123`);
@@ -218,9 +204,7 @@ describe('Collaboration Features Flow', () => {
     channelMock.callbacks['UPDATE'](updatePayload);
     
     // Verify notification appeared
-    await waitFor(() => {
-      expect(screen.getByText(/bob johnson made changes/i)).toBeInTheDocument();
-    });
+    await screen.findByText(/bob johnson made changes/i);
     
     // Verify content was updated
     expect(screen.getByDisplayValue(/content updated by another user/i)).toBeInTheDocument();
@@ -243,9 +227,7 @@ describe('Collaboration Features Flow', () => {
     // render(<CollaborationWorkspace documentId="doc-123" />); // TODO: Update usage if component exists
     
     // Wait for document to load
-    await waitFor(() => {
-      expect(screen.getByText('Shared Document')).toBeInTheDocument();
-    });
+    await screen.findByText('Shared Document');
     
     // Open collaborators panel
     await user.click(screen.getByRole('button', { name: /collaborators/i }));
@@ -264,19 +246,16 @@ describe('Collaboration Features Flow', () => {
     presenceMock.callbacks['sync'](presenceState);
     
     // Verify presence indicators
-    await waitFor(() => {
-      expect(screen.getByText('Bob Johnson')).toBeInTheDocument();
-      expect(screen.getByTestId('status-user-789')).toHaveClass('status-online');
-    });
+    await screen.findByText('Bob Johnson');
+    expect(screen.getByTestId('status-user-789')).toHaveClass('status-online');
     
     // Simulate user leaving
     const newPresenceState = {};
     presenceMock.callbacks['sync'](newPresenceState);
     
     // Verify user is now shown as offline
-    await waitFor(() => {
-      expect(screen.getByTestId('status-user-789')).toHaveClass('status-offline');
-    });
+    await screen.findByText('Bob Johnson');
+    expect(screen.getByTestId('status-user-789')).toHaveClass('status-offline');
   });
   
   test('User can change collaborator permissions', async () => {
@@ -302,9 +281,7 @@ describe('Collaboration Features Flow', () => {
     // render(<CollaborationWorkspace documentId="doc-123" />); // TODO: Update usage if component exists
     
     // Wait for document to load
-    await waitFor(() => {
-      expect(screen.getByText('Shared Document')).toBeInTheDocument();
-    });
+    await screen.findByText('Shared Document');
     
     // Edit document
     const contentArea = screen.getByRole('textbox');
@@ -332,8 +309,6 @@ describe('Collaboration Features Flow', () => {
     });
     
     // Verify success message
-    await waitFor(() => {
-      expect(screen.getByText(/saved successfully/i)).toBeInTheDocument();
-    });
+    await screen.findByText(/saved successfully/i);
   });
 });

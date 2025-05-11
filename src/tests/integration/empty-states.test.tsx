@@ -26,8 +26,8 @@ describe('Empty States', () => {
     
     // Verify empty state is displayed
     await waitFor(() => {
-      expect(screen.getByText(/no projects found/i)).toBeInTheDocument();
-      expect(screen.getByText(/create your first project/i)).toBeInTheDocument();
+      await screen.findByText(/no projects found/i);
+      await screen.findByText(/create your first project/i);
     });
     
     // Verify create button is displayed
@@ -54,7 +54,7 @@ describe('Empty States', () => {
     
     // Verify empty state is displayed
     await waitFor(() => {
-      expect(screen.getByText(/no projects found/i)).toBeInTheDocument();
+      await screen.findByText(/no projects found/i);
     });
     
     // Verify illustration is present but compact
@@ -73,12 +73,12 @@ describe('Empty States', () => {
     
     // Verify empty search results state is displayed
     await waitFor(() => {
-      expect(screen.getByText(/no results found/i)).toBeInTheDocument();
-      expect(screen.getByText(/try different keywords/i)).toBeInTheDocument();
+      await screen.findByText(/no results found/i);
+      await screen.findByText(/try different keywords/i);
     });
     
     // Verify suggested actions are displayed
-    expect(screen.getByText(/search tips/i)).toBeInTheDocument();
+    await screen.findByText(/search tips/i);
     
     // Mock search with different query
     const searchBuilder = supabase.from('search') as any;
@@ -93,7 +93,7 @@ describe('Empty States', () => {
     
     // Verify results are displayed instead of empty state
     await waitFor(() => {
-      expect(screen.getByText('Search Result')).toBeInTheDocument();
+      await screen.findByText('Search Result');
       expect(screen.queryByText(/no results found/i)).not.toBeInTheDocument();
     });
   });
@@ -104,12 +104,12 @@ describe('Empty States', () => {
     
     // Verify empty notifications state is displayed
     await waitFor(() => {
-      expect(screen.getByText(/no notifications/i)).toBeInTheDocument();
-      expect(screen.getByText(/you're all caught up/i)).toBeInTheDocument();
+      await screen.findByText(/no notifications/i);
+      await screen.findByText(/you're all caught up/i);
     });
     
     // Verify call-to-action if applicable
-    expect(screen.getByText(/update notification settings/i)).toBeInTheDocument();
+    await screen.findByText(/update notification settings/i);
     
     // Fix mockCallbacks.notification to be a function
     const mockCallbacks = { notification: vi.fn() } as Record<string, any>;
@@ -140,7 +140,7 @@ describe('Empty States', () => {
     
     // Verify empty state is replaced with notification
     await waitFor(() => {
-      expect(screen.getByText('New notification')).toBeInTheDocument();
+      await screen.findByText('New notification');
       expect(screen.queryByText(/no notifications/i)).not.toBeInTheDocument();
     });
   });
@@ -151,8 +151,8 @@ describe('Empty States', () => {
     
     // Verify admin-specific empty state content
     await waitFor(() => {
-      expect(screen.getByText(/no users found/i)).toBeInTheDocument();
-      expect(screen.getByText(/invite users/i)).toBeInTheDocument();
+      await screen.findByText(/no users found/i);
+      await screen.findByText(/invite users/i);
     });
     
     // Verify admin action button
@@ -164,9 +164,9 @@ describe('Empty States', () => {
     
     // Verify user-specific empty state content
     await waitFor(() => {
-      expect(screen.getByText(/no users found/i)).toBeInTheDocument();
+      await screen.findByText(/no users found/i);
       // Different message for regular users
-      expect(screen.getByText(/contact your administrator/i)).toBeInTheDocument();
+      await screen.findByText(/contact your administrator/i);
     });
   });
   
@@ -197,7 +197,7 @@ describe('Empty States', () => {
     // Verify loading is replaced by empty state
     await waitFor(() => {
       expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-      expect(screen.getByText(/no projects found/i)).toBeInTheDocument();
+      await screen.findByText(/no projects found/i);
     });
   });
 });

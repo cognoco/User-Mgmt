@@ -107,14 +107,16 @@ describe('ConnectedAccounts Integration Tests', () => {
     });
   });
 
-  it('should render currently connected accounts', () => {
+  it('should render currently connected accounts', async () => {
     // Arrange
     render(<ConnectedAccounts />);
 
     // Assert
     // Use within to scope to each account block
-    const googleAccount = screen.getByText('test@google.com').closest('div');
-    const githubAccount = screen.getByText('test@github.com').closest('div');
+    const googleAccountEl = await screen.findByText('test@google.com');
+    const googleAccount = googleAccountEl.closest('div');
+    const githubAccountEl = await screen.findByText('test@github.com');
+    const githubAccount = githubAccountEl.closest('div');
     expect(googleAccount).toBeInTheDocument();
     expect(githubAccount).toBeInTheDocument();
     // Check provider label within each account
@@ -139,7 +141,7 @@ describe('ConnectedAccounts Integration Tests', () => {
     expect(mockDisconnectAccount).toHaveBeenCalledWith(mockAccounts[0].id);
   });
 
-  it('should render buttons for available providers to connect', () => {
+  it('should render buttons for available providers to connect', async () => {
     // Arrange
     render(<ConnectedAccounts />);
 
@@ -153,9 +155,8 @@ describe('ConnectedAccounts Integration Tests', () => {
     expect(screen.getByRole('button', { name: 'Connect GitHub account' })).toBeDisabled();
 
     // Check for the connect new account section header (i18n fallback or English)
-    expect(
-      screen.getByText('Connect new account')
-    ).toBeInTheDocument();
+    const connectNewAccount = await screen.findByText('Connect new account');
+    expect(connectNewAccount).toBeInTheDocument();
   });
 
   // Add tests for:

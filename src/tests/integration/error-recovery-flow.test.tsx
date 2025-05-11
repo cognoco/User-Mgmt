@@ -64,7 +64,7 @@ describe('Error Recovery Flow', () => {
 
     // Verify error message is displayed
     await waitFor(() => {
-      expect(screen.getByText(/Error: Network error/i)).toBeInTheDocument();
+      expect(screen.findByText(/Error: Network error/i)).toBeInTheDocument();
     });
 
     // Simulate page reload - clear mocks
@@ -113,8 +113,8 @@ describe('Error Recovery Flow', () => {
     });
     
     // Verify recovery message with timestamp is displayed
-    expect(screen.getByText(/we've restored your previous data/i)).toBeInTheDocument();
-    expect(screen.getByText(/from about 1 hour ago/i)).toBeInTheDocument();
+    await screen.findByText(/we've restored your previous data/i);
+    await screen.findByText(/from about 1 hour ago/i);
     
     // Click discard button
     await act(async () => {

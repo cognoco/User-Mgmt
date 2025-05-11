@@ -44,11 +44,9 @@ describe('Admin Users Management Flow', () => {
     render(<AdminUsers />);
     
     // Wait for the user list to load
-    await waitFor(() => {
-      expect(screen.getByText('user1@example.com')).toBeInTheDocument();
-      expect(screen.getByText('user2@example.com')).toBeInTheDocument();
-      expect(screen.getByText('admin@example.com')).toBeInTheDocument();
-    });
+    await screen.findByText('user1@example.com');
+    await screen.findByText('user2@example.com');
+    await screen.findByText('admin@example.com');
 
     // Test filtering users
     const searchInput = screen.getByPlaceholderText(/search users/i);
@@ -58,18 +56,16 @@ describe('Admin Users Management Flow', () => {
     await waitFor(() => {
       expect(screen.queryByText('user1@example.com')).not.toBeInTheDocument();
       expect(screen.queryByText('user2@example.com')).not.toBeInTheDocument();
-      expect(screen.getByText('admin@example.com')).toBeInTheDocument();
+      await screen.findByText('admin@example.com');
     });
     
     // Clear the filter
     await user.clear(searchInput);
     
     // All users should be visible again
-    await waitFor(() => {
-      expect(screen.getByText('user1@example.com')).toBeInTheDocument();
-      expect(screen.getByText('user2@example.com')).toBeInTheDocument();
-      expect(screen.getByText('admin@example.com')).toBeInTheDocument();
-    });
+    await screen.findByText('user1@example.com');
+    await screen.findByText('user2@example.com');
+    await screen.findByText('admin@example.com');
 
     // Test user role management
     // Find the row for user1@example.com
@@ -99,9 +95,7 @@ describe('Admin Users Management Flow', () => {
     render(<AdminUsers fetchUsers={fetchUsersMock} handleRoleChange={handleRoleChangeMock} />);
 
     // Check if error message is displayed
-    await waitFor(() => {
-      expect(screen.getByText(/failed to fetch users/i)).toBeInTheDocument();
-    });
+    await screen.findByText(/failed to fetch users/i);
 
     // Retry button should be present
     const retryButton = screen.getByRole('button', { name: /retry/i });
@@ -114,10 +108,8 @@ describe('Admin Users Management Flow', () => {
     await user.click(retryButton);
 
     // Check if users are now displayed
-    await waitFor(() => {
-      expect(screen.getByText('user1@example.com')).toBeInTheDocument();
-      expect(screen.getByText('user2@example.com')).toBeInTheDocument();
-      expect(screen.getByText('admin@example.com')).toBeInTheDocument();
-    });
+    await screen.findByText('user1@example.com');
+    await screen.findByText('user2@example.com');
+    await screen.findByText('admin@example.com');
   });
 });

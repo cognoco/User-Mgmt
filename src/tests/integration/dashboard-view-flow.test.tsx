@@ -50,18 +50,13 @@ describe('Dashboard and Reporting Flow', () => {
   });
 
   test('Displays loading state initially and then renders dashboard data', async () => {
-    // Render dashboard - Should initially be loading
+    vi.useRealTimers(); // Use real timers for this test only
     render(<ReportingDashboard />);
     expect(screen.getByTestId('loading-indicator')).toHaveTextContent('Loading dashboard data...');
 
-    // Advance timers to trigger useEffect timeout (wrapped in act)
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(500);
-    });
-
-    // Verify successful state is displayed with hardcoded data
+    // Wait for the loading to resolve naturally
+    await screen.findByText('Reporting Dashboard'); // Check title
     expect(screen.queryByTestId('loading-indicator')).not.toBeInTheDocument(); // Loading disappears
-    expect(screen.getByText('Reporting Dashboard')).toBeInTheDocument(); // Check title
     expect(screen.getByTestId('user-count')).toHaveTextContent('Total Users: 1500');
     expect(screen.getByTestId('session-count')).toHaveTextContent('Active Sessions: 120');
     expect(screen.getByTestId('signup-count')).toHaveTextContent('Signups Today: 25');
@@ -69,7 +64,7 @@ describe('Dashboard and Reporting Flow', () => {
     // Check placeholder charts are rendered
     expect(screen.getByTestId('user-chart')).toBeInTheDocument();
     expect(screen.getByTestId('activity-chart')).toBeInTheDocument();
-  });
+  }, 10000);
 
   // Note: The following tests were significantly simplified because the component
   // uses hardcoded data and setTimeout, lacking the interactivity originally assumed.
