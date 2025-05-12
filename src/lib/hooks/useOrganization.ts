@@ -6,7 +6,9 @@ export interface Organization {
   name: string;
   domain: string;
   sso_enabled: boolean;
-  sso_provider?: 'azure' | 'google_workspace' | 'linkedin' | null;
+  sso_provider?: 'azure' | 'google_workspace' | 'linkedin' | 'microsoft' | 'google' | null;
+  sso_forced?: boolean;
+  allow_email_login?: boolean;
 }
 
 export function useOrganization(orgId?: string) {

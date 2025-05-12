@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event';
 import { OrganizationSessionManager } from '@/components/company/OrganizationSessionManager';
 import { OrganizationProvider } from '@/lib/context/OrganizationContext'; // Corrected import path
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
-import { vi, describe, beforeEach, test, expect } from 'vitest'; // Import vi
+import { vi, describe, beforeEach, test, expect, afterEach } from 'vitest'; // Import vi and afterEach
 
 // Import our standardized mock using vi.mock
 vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
@@ -94,30 +94,16 @@ describe('Business-specific Session Controls', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     user = userEvent.setup();
-    
+    globalThis.__TEST_ORG__ = mockOrganization;
     // Mock authentication state
     (supabase.auth.getUser as vi.Mock).mockResolvedValue({
       data: { user: mockAdminUser },
       error: null
     });
-    
-    // Mock organization data fetch
+    // Remove per-test supabase.from mock implementation for organizations (now handled globally)
+    // If needed, keep or add mocks for other tables (e.g., organization_members)
     (supabase.from as vi.Mock).mockImplementation((table: string) => {
-      if (table === 'organizations') {
-        return {
-          select: function() {
-            return {
-              eq: function() {
-                return {
-                  single: function() {
-                    return Promise.resolve({ data: mockOrganization, error: null });
-                  }
-                };
-              }
-            };
-          }
-        };
-      } else if (table === 'organization_members') {
+      if (table === 'organization_members') {
         return {
           select: function() {
             return {
@@ -135,6 +121,11 @@ describe('Business-specific Session Controls', () => {
       };
       return chain;
     });
+  });
+
+  afterEach(() => {
+    delete globalThis.__TEST_ORG__;
+    delete globalThis.__TEST_ORG_ERROR__;
   });
 
   test('Admin can view and configure organization session policies', async () => {

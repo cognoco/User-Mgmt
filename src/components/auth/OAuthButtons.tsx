@@ -34,6 +34,8 @@ export interface OAuthButtonsProps {
   showLabels?: boolean;
   className?: string;
   onSuccess?: (provider: OAuthProvider) => void;
+  onProviderClick?: (provider: OAuthProvider) => void;
+  providers?: { provider: OAuthProvider; [key: string]: any }[];
 }
 
 export function OAuthButtons({
@@ -42,6 +44,8 @@ export function OAuthButtons({
   showLabels = true,
   className = '',
   onSuccess,
+  onProviderClick,
+  providers,
 }: OAuthButtonsProps) {
   const { t } = useTranslation();
   const { oauth } = useUserManagement();
@@ -54,8 +58,8 @@ export function OAuthButtons({
     };
   }, [clearError]);
   
-  // If OAuth is disabled, don't render anything
-  if (!oauth.enabled || oauth.providers.length === 0) {
+  const buttonProviders = providers ?? oauth.providers;
+  if (!oauth.enabled || buttonProviders.length === 0) {
     return null;
   }
   
@@ -117,11 +121,15 @@ export function OAuthButtons({
       )}
       
       <div className={layoutClasses[layout]}>
-        {oauth.providers.map((providerConfig) => (
+        {buttonProviders.map((providerConfig) => (
           <Button
             key={providerConfig.provider}
             className={`${providerColors[providerConfig.provider]} ${!showLabels ? 'px-3' : ''}`}
-            onClick={() => handleLogin(providerConfig.provider)}
+            onClick={() =>
+              onProviderClick
+                ? onProviderClick(providerConfig.provider)
+                : handleLogin(providerConfig.provider)
+            }
             disabled={isLoading}
           >
             {providerIcons[providerConfig.provider]}

@@ -30,6 +30,7 @@ describe('Profile Component', () => {
   });
   
   beforeEach(() => {
+    vi.resetModules();
     vi.clearAllMocks();
     // Always inject a fresh spy for supabase.storage.from
     uploadSpy = vi.fn().mockResolvedValue({ data: { path: 'test-user-id/avatar.jpg' }, error: null });

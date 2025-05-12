@@ -9,6 +9,12 @@ import { vi, describe, beforeEach, test, expect, afterEach } from 'vitest';
 vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
 import { supabase } from '@/lib/database/supabase';
 
+// NOTE: Organization fetches in this test are controlled via globalThis.__TEST_ORG__ and globalThis.__TEST_ORG_ERROR__.
+// Set globalThis.__TEST_ORG__ in beforeEach or a test to control the returned org.
+// Set globalThis.__TEST_ORG_ERROR__ to simulate an error. Clean up in afterEach.
+//
+// See src/tests/mocks/supabase.ts for details.
+
 describe('Business-specific Session Controls', () => {
   let user: any;
   const mockAdminUser = {
@@ -36,67 +42,14 @@ describe('Business-specific Session Controls', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     user = userEvent.setup();
+    globalThis.__TEST_ORG__ = mockOrganization;
     (supabase.auth.getUser as any).mockResolvedValue({
       data: { user: mockAdminUser },
       error: null
     });
-    (supabase.from as any) = vi.fn((table: string) => {
-      if (table === 'organizations') {
-        const orgBuilder: any = {};
-        orgBuilder.select = vi.fn().mockReturnThis();
-        orgBuilder.eq = vi.fn().mockReturnThis();
-        orgBuilder.single = vi.fn().mockResolvedValue({
-          data: mockOrganization,
-          error: null
-        });
-        orgBuilder.update = vi.fn().mockImplementation((data: any) => ({
-          eq: vi.fn().mockResolvedValue({
-            data: { ...mockOrganization, security_settings: { ...mockOrganization.security_settings, ...data } },
-            error: null
-          })
-        }));
-        return orgBuilder;
-      } else if (table === 'organization_members') {
-        const membersBuilder: any = {};
-        membersBuilder.select = vi.fn().mockReturnThis();
-        membersBuilder.eq = vi.fn().mockReturnThis();
-        membersBuilder.order = vi.fn().mockReturnThis();
-        membersBuilder.then = function (resolve: any) {
-          return Promise.resolve({
-            data: [
-              {
-                user_id: 'user-123',
-                email: 'user@example.com',
-                role: 'member',
-                active_sessions: 2,
-                last_active: '2023-06-15T14:30:00Z'
-              },
-              {
-                user_id: 'user-456',
-                email: 'manager@example.com',
-                role: 'manager',
-                active_sessions: 1,
-                last_active: '2023-06-14T16:45:00Z'
-              },
-              {
-                user_id: 'admin-123',
-                email: 'admin@example.com',
-                role: 'admin',
-                active_sessions: 1,
-                last_active: '2023-06-15T09:15:00Z'
-              }
-            ],
-            error: null
-          }).then(resolve);
-        };
-        return membersBuilder;
-      }
-      // Default
-      return {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis()
-      };
-    });
+    // Remove per-test supabase.from mock implementation for organizations (now handled globally)
+    // If needed, keep or add mocks for other tables (e.g., organization_members)
+    // (supabase.from as any) = ...
   });
 
   test('Admin can view and configure organization session policies', async () => {
@@ -314,5 +267,7 @@ describe('Business-specific Session Controls', () => {
 });
 
 afterEach(() => {
+  delete globalThis.__TEST_ORG__;
+  delete globalThis.__TEST_ORG_ERROR__;
   cleanup();
 }); 

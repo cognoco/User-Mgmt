@@ -4,10 +4,8 @@ import type {
   SupabaseClient, 
   AuthResponse, 
   AuthError, 
-  Session, 
   UserResponse, 
   SignInWithPasswordCredentials, 
-  SignInWithOAuthCredentials, 
   SignUpWithPasswordCredentials, 
   AuthTokenResponsePassword, 
   AuthMFAListFactorsResponse, 
@@ -28,32 +26,42 @@ type SupabaseRpcResponse = { data: unknown | null; error: unknown | null };
 function createMockBuilder(table?: string, orgId?: string) {
   const query: any = { table, orgId };
   // The builder is a function so it can be called and is a thenable
-  function builder() {}
-  // Attach all methods as own properties
-  Object.defineProperties(builder, {
-    _query: { value: query, writable: true, enumerable: false },
-    select: { value: vi.fn(function (arg: any) { query.select = arg; return builder; }), writable: true },
-    insert: { value: vi.fn(function (arg: any) { query.insert = arg; return builder; }), writable: true },
-    update: { value: vi.fn(function (arg: any) { query.update = arg; return builder; }), writable: true },
-    upsert: { value: vi.fn(function (arg: any) { query.upsert = arg; return builder; }), writable: true },
-    delete: { value: vi.fn(function (arg: any) { query.delete = arg; return builder; }), writable: true },
-    eq: { value: vi.fn(function (...args: any[]) { query.eq = args; return builder; }), writable: true },
-    neq: { value: vi.fn(function (...args: any[]) { query.neq = args; return builder; }), writable: true },
-    gt: { value: vi.fn(function (...args: any[]) { query.gt = args; return builder; }), writable: true },
-    gte: { value: vi.fn(function (...args: any[]) { query.gte = args; return builder; }), writable: true },
-    lt: { value: vi.fn(function (...args: any[]) { query.lt = args; return builder; }), writable: true },
-    lte: { value: vi.fn(function (...args: any[]) { query.lte = args; return builder; }), writable: true },
-    like: { value: vi.fn(function (...args: any[]) { query.like = args; return builder; }), writable: true },
-    ilike: { value: vi.fn(function (...args: any[]) { query.ilike = args; return builder; }), writable: true },
-    in: { value: vi.fn(function (...args: any[]) { query.in = args; return builder; }), writable: true },
-    is: { value: vi.fn(function (...args: any[]) { query.is = args; return builder; }), writable: true },
-    or: { value: vi.fn(function (...args: any[]) { query.or = args; return builder; }), writable: true },
-    filter: { value: vi.fn(function (...args: any[]) { query.filter = args; return builder; }), writable: true },
-    range: { value: vi.fn(function (...args: any[]) { query.range = args; return builder; }), writable: true },
-    order: { value: vi.fn(function (...args: any[]) { query.order = args; return builder; }), writable: true },
-    limit: { value: vi.fn(function (...args: any[]) { query.limit = args; return builder; }), writable: true },
-    single: { value: vi.fn(function () {
+  const builder: any = function() {};
+  // Attach all methods as own properties (and prototype)
+  const methods = {
+    _query: query,
+    select: vi.fn(function (arg: any) { query.select = arg; return builder; }),
+    insert: vi.fn(function (arg: any) { query.insert = arg; return builder; }),
+    update: vi.fn(function (arg: any) { query.update = arg; return builder; }),
+    upsert: vi.fn(function (arg: any) { query.upsert = arg; return builder; }),
+    delete: vi.fn(function (arg: any) { query.delete = arg; return builder; }),
+    eq: vi.fn(function (...args: any[]) {
+      if (!Array.isArray(query.eqCalls)) query.eqCalls = [];
+      query.eqCalls.push(args);
+      return builder;
+    }),
+    neq: vi.fn(function (...args: any[]) { query.neq = args; return builder; }),
+    gt: vi.fn(function (...args: any[]) { query.gt = args; return builder; }),
+    gte: vi.fn(function (...args: any[]) { query.gte = args; return builder; }),
+    lt: vi.fn(function (...args: any[]) { query.lt = args; return builder; }),
+    lte: vi.fn(function (...args: any[]) { query.lte = args; return builder; }),
+    like: vi.fn(function (...args: any[]) { query.like = args; return builder; }),
+    ilike: vi.fn(function (...args: any[]) { query.ilike = args; return builder; }),
+    in: vi.fn(function (...args: any[]) { query.in = args; return builder; }),
+    is: vi.fn(function (...args: any[]) { query.is = args; return builder; }),
+    or: vi.fn(function (...args: any[]) { query.or = args; return builder; }),
+    filter: vi.fn(function (...args: any[]) { query.filter = args; return builder; }),
+    range: vi.fn(function (...args: any[]) { query.range = args; return builder; }),
+    order: vi.fn(function (...args: any[]) { query.order = args; return builder; }),
+    limit: vi.fn(function (...args: any[]) { query.limit = args; return builder; }),
+    single: vi.fn(function () {
       if (query.table === 'organizations') {
+        if (typeof globalThis !== 'undefined' && Object.prototype.hasOwnProperty.call(globalThis, '__TEST_ORG_ERROR__') && (globalThis as any).__TEST_ORG_ERROR__) {
+          return Promise.resolve({ data: null, error: (globalThis as any).__TEST_ORG_ERROR__ });
+        }
+        if (typeof globalThis !== 'undefined' && Object.prototype.hasOwnProperty.call(globalThis, '__TEST_ORG__') && (globalThis as any).__TEST_ORG__) {
+          return Promise.resolve({ data: (globalThis as any).__TEST_ORG__, error: null });
+        }
         return Promise.resolve({
           data: {
             id: 'org-123',
@@ -67,39 +75,20 @@ function createMockBuilder(table?: string, orgId?: string) {
         });
       }
       return Promise.resolve({ data: null, error: null });
-    }), writable: true },
-    maybeSingle: { value: vi.fn(function () { return builder.single(); }), writable: true },
-    then: { value: function (resolve: any, reject: any) {
+    }),
+    maybeSingle: vi.fn(function () { return builder.single(); }),
+    then: function (resolve: any, reject: any) {
       if (query.table === 'organization_members') {
         if (
           query.select &&
-          query.eq &&
-          query.eq[0] === 'organization_id' &&
-          query.eq[1] === 'org-123'
+          query.eqCalls &&
+          query.eqCalls.some((eq: any[]) => eq[0] === 'organization_id' && eq[1] === 'org-123')
         ) {
           return Promise.resolve({
             data: [
-              {
-                user_id: 'user-123',
-                email: 'user@example.com',
-                role: 'member',
-                active_sessions: 2,
-                last_active: '2023-06-15T14:30:00Z'
-              },
-              {
-                user_id: 'user-456',
-                email: 'manager@example.com',
-                role: 'manager',
-                active_sessions: 1,
-                last_active: '2023-06-14T16:45:00Z'
-              },
-              {
-                user_id: 'admin-123',
-                email: 'admin@example.com',
-                role: 'admin',
-                active_sessions: 1,
-                last_active: '2023-06-15T09:15:00Z'
-              }
+              { user_id: 'user-123', email: 'user@example.com', role: 'member', active_sessions: 2, last_active: '2023-06-15T14:30:00Z' },
+              { user_id: 'user-456', email: 'manager@example.com', role: 'manager', active_sessions: 1, last_active: '2023-06-14T16:45:00Z' },
+              { user_id: 'admin-123', email: 'admin@example.com', role: 'admin', active_sessions: 1, last_active: '2023-06-15T09:15:00Z' }
             ],
             error: null
           }).then(resolve, reject);
@@ -108,8 +97,10 @@ function createMockBuilder(table?: string, orgId?: string) {
         }
       }
       return Promise.resolve({ data: null, error: null }).then(resolve, reject);
-    }, writable: true, enumerable: false }
-  });
+    }
+  };
+  Object.setPrototypeOf(builder, methods);
+  Object.assign(builder, methods);
   return builder;
 }
 
@@ -159,5 +150,15 @@ const mockSupabase = {
 // Cast the whole mock object for better type checking if possible
 // Or rely on casting within tests: (supabase.auth.mfa.enroll as Mock).mockResolvedValueOnce(...)
 export const supabase = mockSupabase as unknown as SupabaseClient; // Use casting carefully
+export { createMockBuilder };
 // Remove CommonJS export
 // module.exports = mockSupabase; 
+
+/*
+  --- GLOBAL ORG MOCK USAGE ---
+  In your tests, you can control the organization returned by supabase.from('organizations').single() or .maybeSingle() by setting:
+    globalThis.__TEST_ORG__ = { ...yourOrgObject };
+    globalThis.__TEST_ORG_ERROR__ = { message: 'Simulated error' };
+  This allows you to simulate different orgs or error states without per-test mock overrides.
+  Clean up these globals in afterEach if needed.
+*/ 

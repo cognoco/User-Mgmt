@@ -21,18 +21,19 @@ import { OAuthProvider } from '@/types/oauth';
 const originalLocation = window.location;
 
 // Mock useOrganization to always return an enabled org
-vi.spyOn(useOrganizationModule, 'useOrganization').mockReturnValue({
-  organization: {
-    id: 'org-123',
-    name: 'Test Org',
-    domain: 'example.com',
-    sso_enabled: true,
-    sso_provider: 'google_workspace',
-  },
+let orgMock: any = {
+  id: 'org-123',
+  name: 'Test Org',
+  domain: 'example.com',
+  sso_enabled: true,
+  sso_provider: 'google',
+};
+vi.spyOn(useOrganizationModule, 'useOrganization').mockImplementation(() => ({
+  organization: orgMock,
   isLoading: false,
   error: null,
   refetch: vi.fn(),
-});
+}));
 
 // Helper to wrap with UserManagementProvider
 function renderWithProvider(ui: ReactElement) {
@@ -78,7 +79,8 @@ describe('Personal SSO Authentication Flows', () => {
       value: {
         assign: mockWindowLocationAssign,
         origin: 'https://app.example.com',
-        href: 'https://app.example.com/auth'
+        href: 'https://app.example.com/auth',
+        hash: '', // Ensure hash is always defined
       },
       writable: true,
       configurable: true
@@ -98,9 +100,11 @@ describe('Personal SSO Authentication Flows', () => {
       writable: true,
       configurable: true
     });
+    window.location.hash = '';
   });
 
   test('User can sign in with GitHub', async () => {
+    orgMock.sso_provider = 'github';
     // Mock successful GitHub auth
     mockSignInWithOAuth.mockResolvedValueOnce({
       data: { provider: 'github', url: 'https://supabase-auth.io/github-redirect' },
@@ -128,6 +132,7 @@ describe('Personal SSO Authentication Flows', () => {
   });
 
   test('User can sign in with Google', async () => {
+    orgMock.sso_provider = 'google';
     // Mock successful Google auth
     mockSignInWithOAuth.mockResolvedValueOnce({
       data: { provider: 'google', url: 'https://supabase-auth.io/google-redirect' },
@@ -155,6 +160,7 @@ describe('Personal SSO Authentication Flows', () => {
   });
 
   test('Handles SSO error gracefully', async () => {
+    orgMock.sso_provider = 'facebook';
     // Mock auth error
     mockSignInWithOAuth.mockResolvedValueOnce({
       data: null,
@@ -179,6 +185,7 @@ describe('Personal SSO Authentication Flows', () => {
   });
 
   test('User can authenticate with Apple', async () => {
+    orgMock.sso_provider = 'apple';
     // Mock successful Apple auth
     mockSignInWithOAuth.mockResolvedValueOnce({
       data: { provider: 'apple', url: 'https://supabase-auth.io/apple-redirect' },
@@ -206,6 +213,7 @@ describe('Personal SSO Authentication Flows', () => {
   });
 
   test('SSO auth with scopes and additional options', async () => {
+    orgMock.sso_provider = 'github';
     // Set test-specific scopes
     (window as any).TEST_SSO_SCOPES = 'repo,user';
     mockSignInWithOAuth.mockResolvedValueOnce({
@@ -231,24 +239,56 @@ describe('Personal SSO Authentication Flows', () => {
   });
 
   test('Handles SSO callback URL parameters correctly', async () => {
+    orgMock.sso_provider = 'github';
     // Set test-specific callback flag
     (window as any).TEST_SSO_CALLBACK = true;
+    // Set window.location.hash to simulate SSO callback
+    window.location.hash = '#access_token=123&type=sso';
     mockSignInWithOAuth.mockResolvedValueOnce({
       data: { provider: 'github', url: 'https://supabase-auth.io/github-redirect' },
       error: null
     });
-    mockGetSession.mockResolvedValueOnce({ data: {}, error: null });
-
-    renderWithProvider(<BusinessSSOAuth />);
-    await act(async () => {
-      await user.click(screen.getByRole('button', { name: /github/i }));
+    // Mock a valid session with user and email
+    mockGetSession.mockResolvedValueOnce({
+      data: {
+        session: {
+          user: {
+            id: 'user-1',
+            email: 'testuser@example.com',
+          },
+        },
+      },
+      error: null,
+    });
+    // Mock supabase.from('organization_domains') to return a verified domain row
+    const mockFrom = vi.spyOn(supabase, 'from');
+    mockFrom.mockImplementationOnce((table: string) => {
+      if (table === 'organization_domains') {
+        return {
+          select: () => ({
+            eq: () => ({
+              eq: () => Promise.resolve({
+                data: [{ domain: 'example.com', is_verified: true, org_id: orgMock.id }],
+                error: null,
+              }),
+            }),
+          }),
+        };
+      }
+      // fallback to default mock
+      return (supabase as any).from.wrappedMethod?.(table) || { select: () => ({ eq: () => ({ eq: () => Promise.resolve({ data: [], error: null }) }) }) };
     });
 
-    // Verify session check was performed
+    renderWithProvider(<BusinessSSOAuth />);
+    // No button click: component is in redirecting state
+    // Assert that session check was performed
     await waitFor(() => {
       expect(mockGetSession).toHaveBeenCalled();
     });
+    // Assert that the redirecting alert is present
+    expect(screen.getByRole('alert')).toHaveTextContent(/redirecting/i);
     // Clean up
     delete (window as any).TEST_SSO_CALLBACK;
+    window.location.hash = '';
   });
 });

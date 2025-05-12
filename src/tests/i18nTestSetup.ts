@@ -37,11 +37,18 @@ function resolveKey(key: string, obj: any): string {
   if (key === 'auth.mfa.title') return 'Multi-Factor Authentication';
   if (key === 'auth.mfa.rememberDevice') return 'Remember this device';
   if (key === 'auth.mfa.rememberDeviceHelp') return 'Do not require MFA on this device for 30 days.';
-  // Try to resolve as a nested key in each top-level namespace
-  for (const ns of Object.values(obj) as any[]) {
-    const value = key.split('.').reduce((o, i) => (o ? (o as any)[i] : undefined), ns);
-    if (typeof value === 'string') return value;
+  // Try to resolve as a nested key in the translation object
+  const parts = key.split('.');
+  let value: any = obj;
+  for (const part of parts) {
+    if (value && typeof value === 'object' && part in value) {
+      value = value[part];
+    } else {
+      value = undefined;
+      break;
+    }
   }
+  if (typeof value === 'string') return value;
   // Fallback to the key itself
   return key;
 }
