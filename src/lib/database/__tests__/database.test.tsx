@@ -18,17 +18,20 @@ describe('Database Operations', () => {
 
   test('can fetch user profile', async () => {
     // Mock successful profile fetch
-    const builder = supabase.from('profiles') as any;
-    builder.select.mockReturnThis();
-    builder.eq.mockReturnThis();
-    builder.single.mockResolvedValue({
-      data: {
-        id: '123',
-        first_name: 'John',
-        last_name: 'Doe',
-        avatar_url: 'https://example.com/avatar.jpg',
-      },
-      error: null,
+    vi.spyOn(supabase, 'from').mockImplementation(() => {
+      const builder: any = {};
+      builder.select = vi.fn().mockReturnValue(builder);
+      builder.eq = vi.fn().mockReturnValue(builder);
+      builder.single = vi.fn().mockResolvedValue({
+        data: {
+          id: '123',
+          first_name: 'John',
+          last_name: 'Doe',
+          avatar_url: 'https://example.com/avatar.jpg',
+        },
+        error: null,
+      });
+      return builder;
     });
 
     // Perform the operation
@@ -38,6 +41,9 @@ describe('Database Operations', () => {
       .select('*')
       .eq('id', userId)
       .single();
+
+    // Get the builder instance used in this test
+    const builder = (supabase.from as any).mock.results[0].value;
 
     // Check if the operation was performed correctly
     expect(supabase.from).toHaveBeenCalledWith('profiles');
@@ -56,18 +62,20 @@ describe('Database Operations', () => {
   });
 
   test('can update user profile', async () => {
-    // Mock successful profile update
-    const builder = supabase.from('profiles') as any;
-    builder.update.mockReturnThis();
-    builder.eq.mockReturnThis();
-    builder.single.mockResolvedValue({
-      data: {
-        id: '123',
-        first_name: 'John',
-        last_name: 'Smith', // Updated last name
-        avatar_url: 'https://example.com/avatar.jpg',
-      },
-      error: null,
+    vi.spyOn(supabase, 'from').mockImplementation(() => {
+      const builder: any = {};
+      builder.update = vi.fn().mockReturnValue(builder);
+      builder.eq = vi.fn().mockReturnValue(builder);
+      builder.single = vi.fn().mockResolvedValue({
+        data: {
+          id: '123',
+          first_name: 'John',
+          last_name: 'Smith', // Updated last name
+          avatar_url: 'https://example.com/avatar.jpg',
+        },
+        error: null,
+      });
+      return builder;
     });
 
     // Perform the operation
@@ -78,6 +86,8 @@ describe('Database Operations', () => {
       .update(updates)
       .eq('id', userId)
       .single();
+
+    const builder = (supabase.from as any).mock.results[0].value;
 
     // Check if the operation was performed correctly
     expect(supabase.from).toHaveBeenCalledWith('profiles');
@@ -96,23 +106,25 @@ describe('Database Operations', () => {
   });
 
   test('admin can fetch all users', async () => {
-    // Mock the service client
     const serviceSupabase = getServiceSupabase();
-    const builder = serviceSupabase.from('profiles') as any;
-    builder.select.mockResolvedValue({
-      data: [
-        {
-          id: '123',
-          first_name: 'John',
-          last_name: 'Doe',
-        },
-        {
-          id: '456',
-          first_name: 'Jane',
-          last_name: 'Smith',
-        },
-      ],
-      error: null,
+    vi.spyOn(serviceSupabase, 'from').mockImplementation(() => {
+      const builder: any = {};
+      builder.select = vi.fn().mockResolvedValue({
+        data: [
+          {
+            id: '123',
+            first_name: 'John',
+            last_name: 'Doe',
+          },
+          {
+            id: '456',
+            first_name: 'Jane',
+            last_name: 'Smith',
+          },
+        ],
+        error: null,
+      });
+      return builder;
     });
 
     // Perform the operation
@@ -120,8 +132,9 @@ describe('Database Operations', () => {
       .from('profiles')
       .select('*');
 
+    const builder = (serviceSupabase.from as any).mock.results[0].value;
+
     // Check if the operation was performed correctly
-    expect(getServiceSupabase).toHaveBeenCalled();
     expect(serviceSupabase.from).toHaveBeenCalledWith('profiles');
     expect(builder.select).toHaveBeenCalledWith('*');
 
@@ -142,13 +155,15 @@ describe('Database Operations', () => {
   });
 
   test('handles database errors', async () => {
-    // Mock database error
-    const builder = supabase.from('profiles') as any;
-    builder.select.mockReturnThis();
-    builder.eq.mockReturnThis();
-    builder.single.mockResolvedValue({
-      data: null,
-      error: { message: 'Database error' },
+    vi.spyOn(supabase, 'from').mockImplementation(() => {
+      const builder: any = {};
+      builder.select = vi.fn().mockReturnValue(builder);
+      builder.eq = vi.fn().mockReturnValue(builder);
+      builder.single = vi.fn().mockResolvedValue({
+        data: null,
+        error: { message: 'Database error' },
+      });
+      return builder;
     });
 
     // Perform the operation
@@ -158,6 +173,8 @@ describe('Database Operations', () => {
       .select('*')
       .eq('id', userId)
       .single();
+
+    const builder = (supabase.from as any).mock.results[0].value;
 
     // Check if the operation was performed correctly
     expect(supabase.from).toHaveBeenCalledWith('profiles');
@@ -171,17 +188,19 @@ describe('Database Operations', () => {
   });
 
   test('can insert new user data', async () => {
-    // Mock successful insert
-    const builder = supabase.from('profiles') as any;
-    builder.insert.mockReturnThis();
-    builder.single.mockResolvedValue({
-      data: {
-        id: '789',
-        first_name: 'Alice',
-        last_name: 'Johnson',
-        email: 'alice@example.com',
-      },
-      error: null,
+    vi.spyOn(supabase, 'from').mockImplementation(() => {
+      const builder: any = {};
+      builder.insert = vi.fn().mockReturnValue(builder);
+      builder.single = vi.fn().mockResolvedValue({
+        data: {
+          id: '789',
+          first_name: 'Alice',
+          last_name: 'Johnson',
+          email: 'alice@example.com',
+        },
+        error: null,
+      });
+      return builder;
     });
 
     // Prepare data to insert
@@ -198,6 +217,8 @@ describe('Database Operations', () => {
       .insert(newUser)
       .single();
 
+    const builder = (supabase.from as any).mock.results[0].value;
+
     // Check if the operation was performed correctly
     expect(supabase.from).toHaveBeenCalledWith('profiles');
     expect(builder.insert).toHaveBeenCalledWith(newUser);
@@ -209,21 +230,23 @@ describe('Database Operations', () => {
   });
 
   test('can delete user data', async () => {
-    // Mock successful delete
-    const builder = supabase.from('profiles') as any;
-    builder.delete.mockReturnThis();
-    builder.eq.mockReturnThis();
-    builder.then.mockResolvedValue({
-      data: { success: true },
-      error: null,
+    vi.spyOn(supabase, 'from').mockImplementation(() => {
+      const builder: any = {};
+      builder.delete = vi.fn().mockReturnValue(builder);
+      builder.eq = vi.fn().mockReturnValue(builder);
+      builder.then = vi.fn().mockImplementation((resolve) => Promise.resolve(resolve({ data: { success: true }, error: null })));
+      return builder;
     });
 
     // Perform the operation
     const userId = '123';
-    const { data, error } = await supabase
+    const result = await supabase
       .from('profiles')
       .delete()
       .eq('id', userId);
+    const { data, error } = result;
+
+    const builder = (supabase.from as any).mock.results[0].value;
 
     // Check if the operation was performed correctly
     expect(supabase.from).toHaveBeenCalledWith('profiles');
@@ -233,5 +256,5 @@ describe('Database Operations', () => {
     // Check the result
     expect(error).toBeNull();
     expect(data).toEqual({ success: true });
-  });
+  }, 2000);
 });

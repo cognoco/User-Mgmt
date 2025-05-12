@@ -3,9 +3,10 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BackupCodesDisplay } from '@/components/auth/BackupCodesDisplay';
 import { MFAVerificationForm } from '@/components/auth/MFAVerificationForm';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { vi } from 'vitest';
+import '@/tests/i18nTestSetup';
 
 const backupCodes = [
   'ABCD-1234',
@@ -21,15 +22,18 @@ const backupCodes = [
 ];
 
 const server = setupServer(
-  rest.post('/api/2fa/backup-codes', (req, res, ctx) => {
-    return res(ctx.json({ codes: backupCodes }));
+  http.post('/api/2fa/backup-codes', () => {
+    return HttpResponse.json({ codes: backupCodes });
   }),
-  rest.post('/api/2fa/backup-codes/verify', (req, res, ctx) => {
-    const { code } = req.body as { code: string };
+  http.post('/api/2fa/backup-codes/verify', async ({ request }) => {
+    const { code } = (await request.json()) as { code: string };
     if (backupCodes.includes(code)) {
-      return res(ctx.json({ success: true }));
+      return HttpResponse.json({ success: true });
     }
-    return res(ctx.status(400), ctx.json({ error: 'Invalid backup code.' }));
+    return new HttpResponse(
+      JSON.stringify({ error: 'Invalid backup code.' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    );
   })
 );
 
@@ -53,10 +57,10 @@ describe('Backup Codes Integration', () => {
       });
     });
     // Simulate download and copy (clipboard API is stubbed in jsdom)
-    fireEvent.click(screen.getByText(/download/i));
-    fireEvent.click(screen.getByText(/copy/i));
+    fireEvent.click(screen.getByText('Download'));
+    fireEvent.click(screen.getByText('Copy'));
     // Regenerate
-    fireEvent.click(screen.getByText(/regenerate/i));
+    fireEvent.click(screen.getByText('Regenerate Codes'));
     await waitFor(() => {
       expect(screen.getByText(backupCodes[0])).toBeInTheDocument();
     });
@@ -68,9 +72,9 @@ describe('Backup Codes Integration', () => {
       <MFAVerificationForm accessToken="dummy" onSuccess={onSuccess} />
     );
     // Switch to backup code mode
-    fireEvent.click(screen.getByText(/use backup code/i));
+    fireEvent.click(screen.getByText('Use a backup code'));
     fireEvent.change(screen.getByPlaceholderText('XXXX-XXXX'), { target: { value: backupCodes[0] } });
-    fireEvent.click(screen.getByText(/verify/i));
+    fireEvent.click(screen.getByText('Verify'));
     await waitFor(() => {
       expect(onSuccess).toHaveBeenCalled();
     });
@@ -81,11 +85,11 @@ describe('Backup Codes Integration', () => {
     renderWithClient(
       <MFAVerificationForm accessToken="dummy" onSuccess={onSuccess} />
     );
-    fireEvent.click(screen.getByText(/use backup code/i));
+    fireEvent.click(screen.getByText('Use a backup code'));
     fireEvent.change(screen.getByPlaceholderText('XXXX-XXXX'), { target: { value: 'WRONG-0000' } });
-    fireEvent.click(screen.getByText(/verify/i));
+    fireEvent.click(screen.getByText('Verify'));
     await waitFor(() => {
-      expect(screen.getByText(/invalid backup code/i)).toBeInTheDocument();
+      expect(screen.getByText('Invalid backup code.')).toBeInTheDocument();
     });
   });
 });

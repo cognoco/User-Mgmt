@@ -1,6 +1,6 @@
 'use client'; // This component uses context and hooks, so it must be a Client Component
 
-import React, { createContext, useContext, ReactNode, useState, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { ThemeProvider } from '@/components/theme-provider';
 // import { Toaster } from '@/components/ui/toaster'; // Comment out unused import
 import { api } from '@/lib/api/axios';
@@ -16,6 +16,7 @@ import { CorporateUserConfig, UserType } from '@/types/user-type';
 import { OAuthModuleConfig } from '@/types/oauth';
 // import { initializeCsrf } from '@/lib/api/axios'; // Removed unused import
 // import { LoginPayload, AuthResult } from '@/types/auth'; // Commented out
+import { PaletteProvider } from '@/components/PaletteProvider';
 
 // Detect platform automatically (can be overridden in config)
 const detectPlatform = (): Platform => {
@@ -391,10 +392,12 @@ export function UserManagementProvider({
 
   return (
     <UserManagementContext.Provider value={value}>
-      <ThemeProvider defaultTheme="light" storageKey={`${config.storageKeyPrefix || 'user-management'}-theme`}>
-        {children}
-        {/* {renderToaster && <Toaster />} */}{/* Keep Toaster commented out */}
-      </ThemeProvider>
+      <PaletteProvider>
+        <ThemeProvider defaultTheme="light" storageKey={`${config.storageKeyPrefix || 'user-management'}-theme`}>
+          {children}
+          {/* {renderToaster && <Toaster />} */}{/* Keep Toaster commented out */}
+        </ThemeProvider>
+      </PaletteProvider>
     </UserManagementContext.Provider>
   );
 } 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useOrganizationPolicies, useOrganizationMembers, useTerminateUserSessions, useReauthentication } from '@/hooks/useOrganizationSession';
+import { useOrganizationPolicies, useOrganizationMembers, useTerminateUserSessions } from '@/hooks/useOrganizationSession';
 import { useOrganization } from '@/lib/context/OrganizationContext';
 
 interface OrganizationSessionManagerProps {
@@ -7,6 +7,7 @@ interface OrganizationSessionManagerProps {
 }
 
 export const OrganizationSessionManager: React.FC<OrganizationSessionManagerProps> = ({ orgId }) => {
+  console.log('[DEBUG] OrganizationSessionManager mounted');
   const { organization } = useOrganization();
   const orgName = organization?.name || 'Organization';
 
@@ -22,6 +23,12 @@ export const OrganizationSessionManager: React.FC<OrganizationSessionManagerProp
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    return () => {
+      console.log('[DEBUG] OrganizationSessionManager unmounted');
+    };
+  }, []);
+
   // Sync editPolicies with fetched policies
   useEffect(() => {
     if (policies) setEditPolicies({ ...policies });
@@ -32,6 +39,10 @@ export const OrganizationSessionManager: React.FC<OrganizationSessionManagerProp
     fetchPolicies();
     refetchMembers();
   }, [fetchPolicies, refetchMembers]);
+
+  React.useEffect(() => {
+    console.log('[DEBUG] activeTab changed:', activeTab);
+  }, [activeTab]);
 
   const handleSavePolicies = async () => {
     if (!editPolicies) return;

@@ -3,8 +3,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { UserEvent } from '@testing-library/user-event/dist/types/setup/setup'; // Import UserEvent type
-// import { OrganizationSessionManager } from '@/components/auth/OrganizationSessionManager'; // TODO: Update path if file exists
+import { OrganizationSessionManager } from '@/components/company/OrganizationSessionManager';
 import { OrganizationProvider } from '@/lib/context/OrganizationContext'; // Corrected import path
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
 import { vi, describe, beforeEach, test, expect } from 'vitest'; // Import vi
@@ -13,8 +12,34 @@ import { vi, describe, beforeEach, test, expect } from 'vitest'; // Import vi
 vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
 import { supabase } from '@/lib/database/supabase';
 
+describe('MOCK DIAGNOSTIC', () => {
+  test('supabase.from returns a function with .select', () => {
+    const builder = supabase.from('organizations');
+    // eslint-disable-next-line no-console
+    console.log('MOCK DIAGNOSTIC builder:', builder, Object.keys(builder));
+    expect(typeof builder).toBe('function');
+    expect(typeof builder.select).toBe('function');
+    expect(typeof builder.eq).toBe('function');
+    expect(typeof builder.single).toBe('function');
+    expect(typeof builder.then).toBe('function');
+  });
+});
+
+describe('DEBUG: Supabase mock shape', () => {
+  test('supabase.from returns an object with .select', () => {
+    const builder = supabase.from('organizations');
+    // Log the builder and its methods
+    // eslint-disable-next-line no-console
+    console.log('DEBUG builder:', builder);
+    expect(typeof builder.select).toBe('function');
+    expect(typeof builder.eq).toBe('function');
+    expect(typeof builder.single).toBe('function');
+    expect(typeof builder.then).toBe('function');
+  });
+});
+
 describe('Business-specific Session Controls', () => {
-  let user: UserEvent; // Type the user variable
+  let user: ReturnType<typeof userEvent.setup>; // Type the user variable
   
   // Mock authenticated user (admin)
   const mockAdminUser = {
@@ -80,26 +105,35 @@ describe('Business-specific Session Controls', () => {
     (supabase.from as vi.Mock).mockImplementation((table: string) => {
       if (table === 'organizations') {
         return {
-          eq: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({
-            data: mockOrganization,
-            error: null
-          })
+          select: function() {
+            return {
+              eq: function() {
+                return {
+                  single: function() {
+                    return Promise.resolve({ data: mockOrganization, error: null });
+                  }
+                };
+              }
+            };
+          }
         };
       } else if (table === 'organization_members') {
         return {
-          eq: vi.fn().mockReturnThis(),
-          select: vi.fn().mockReturnThis(),
-          order: vi.fn().mockResolvedValue({
-            data: mockOrgMembers,
-            error: null
-          })
+          select: function() {
+            return {
+              eq: function() {
+                return Promise.resolve({ data: mockOrgMembers, error: null });
+              }
+            };
+          }
         };
       }
-      return {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis()
+      const chain = {
+        select: function() { return this; },
+        eq: function() { return this; },
+        single: function() { return Promise.resolve({ data: null, error: null }); }
       };
+      return chain;
     });
   });
 
@@ -118,7 +152,7 @@ describe('Business-specific Session Controls', () => {
     render(
       <UserManagementProvider>
         <OrganizationProvider orgId="org-123">
-          {/* TODO: OrganizationSessionManager usages commented out due to missing import. Review and update path if file exists. */}
+          <OrganizationSessionManager orgId="org-123" />
         </OrganizationProvider>
       </UserManagementProvider>
     );
@@ -160,7 +194,7 @@ describe('Business-specific Session Controls', () => {
 
   test('Admin can view and terminate user sessions across organization', async () => {
     // Mock successful session termination
-    (supabase.rpc as vi.Mock).mockImplementation((procedure, params) => {
+    (supabase.rpc as vi.Mock).mockImplementation((procedure: string, params: any) => {
       if (procedure === 'terminate_user_sessions') {
         return Promise.resolve({
           data: { count: params.user_id === 'user-123' ? 2 : 1 },
@@ -174,7 +208,7 @@ describe('Business-specific Session Controls', () => {
     render(
       <UserManagementProvider>
         <OrganizationProvider orgId="org-123">
-          {/* TODO: OrganizationSessionManager usages commented out due to missing import. Review and update path if file exists. */}
+          <OrganizationSessionManager orgId="org-123" />
         </OrganizationProvider>
       </UserManagementProvider>
     );
@@ -224,7 +258,7 @@ describe('Business-specific Session Controls', () => {
     render(
       <UserManagementProvider>
         <OrganizationProvider orgId="org-123">
-          {/* TODO: OrganizationSessionManager usages commented out due to missing import. Review and update path if file exists. */}
+          <OrganizationSessionManager orgId="org-123" />
         </OrganizationProvider>
       </UserManagementProvider>
     );
@@ -280,7 +314,7 @@ describe('Business-specific Session Controls', () => {
     render(
       <UserManagementProvider>
         <OrganizationProvider orgId="org-123">
-          {/* TODO: OrganizationSessionManager usages commented out due to missing import. Review and update path if file exists. */}
+          <OrganizationSessionManager orgId="org-123" />
         </OrganizationProvider>
       </UserManagementProvider>
     );
@@ -322,7 +356,7 @@ describe('Business-specific Session Controls', () => {
     const mockIp = '192.168.1.100'; // Within allowed range
     
     // Mock IP verification RPC
-    supabase.rpc.mockImplementation((procedure, params) => {
+    supabase.rpc.mockImplementation((procedure: string, params: any) => {
       if (procedure === 'check_ip_restrictions') {
         // Check if IP is within allowed ranges
         const allowed = mockOrganization.security_settings.allowed_ip_ranges.some(range => {
@@ -344,7 +378,7 @@ describe('Business-specific Session Controls', () => {
     // Render IP verification component during login
     render(
       <OrganizationProvider orgId="org-123">
-        {/* TODO: OrganizationSessionManager usages commented out due to missing import. Review and update path if file exists. */}
+        <OrganizationSessionManager orgId="org-123" />
       </OrganizationProvider>
     );
     
@@ -364,7 +398,7 @@ describe('Business-specific Session Controls', () => {
     const unauthorizedIp = '203.0.113.1'; // Outside allowed range
     
     // Update mock response for unauthorized IP
-    supabase.rpc.mockImplementation((procedure, params) => {
+    supabase.rpc.mockImplementation((procedure: string, params: any) => {
       if (procedure === 'check_ip_restrictions') {
         return Promise.resolve({
           data: { allowed: false },
@@ -377,7 +411,7 @@ describe('Business-specific Session Controls', () => {
     // Re-render with unauthorized IP
     render(
       <OrganizationProvider orgId="org-123">
-        {/* TODO: OrganizationSessionManager usages commented out due to missing import. Review and update path if file exists. */}
+        <OrganizationSessionManager orgId="org-123" />
       </OrganizationProvider>
     );
     
@@ -398,7 +432,7 @@ describe('Business-specific Session Controls', () => {
     render(
       <UserManagementProvider>
         <OrganizationProvider orgId="org-123">
-          {/* TODO: OrganizationSessionManager usages commented out due to missing import. Review and update path if file exists. */}
+          <OrganizationSessionManager orgId="org-123" />
         </OrganizationProvider>
       </UserManagementProvider>
     );

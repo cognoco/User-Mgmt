@@ -17,7 +17,7 @@ describe('Supabase Client', () => {
     vi.clearAllMocks();
     process.env.NEXT_PUBLIC_SUPABASE_URL = mockSupabaseUrl;
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = mockSupabaseAnonKey;
-    process.env.SUPABASE_SERVICE_KEY = mockSupabaseServiceKey;
+    process.env.SUPABASE_SERVICE_ROLE_KEY = mockSupabaseServiceKey;
     vi.resetModules();
     (createClient as any).mockReturnValue(mockClient);
   });
@@ -25,29 +25,29 @@ describe('Supabase Client', () => {
   afterEach(() => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    delete process.env.SUPABASE_SERVICE_KEY;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
   });
 
   it('should create a Supabase client with correct parameters', async () => {
-    const mod = await import('../../lib/supabase');
+    await import('../supabase');
     expect(createClient).toHaveBeenCalledWith(mockSupabaseUrl, mockSupabaseAnonKey);
   });
 
   it('should create a service role client with correct parameters', async () => {
-    const mod = await import('../../lib/supabase');
-    const serviceClient = mod.getServiceSupabase();
+    const { getServiceSupabase } = await import('../supabase');
+    getServiceSupabase();
     expect(createClient).toHaveBeenCalledWith(mockSupabaseUrl, mockSupabaseServiceKey);
   });
 
-  it('should throw error when SUPABASE_SERVICE_KEY is missing', async () => {
-    delete process.env.SUPABASE_SERVICE_KEY;
-    const mod = await import('../../lib/supabase');
-    expect(() => mod.getServiceSupabase()).toThrow('SUPABASE_SERVICE_KEY is not set');
+  it('should throw error when SUPABASE_SERVICE_ROLE_KEY is missing', async () => {
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const mod = await import('../supabase');
+    expect(() => mod.getServiceSupabase()).toThrow('SUPABASE_SERVICE_ROLE_KEY is not configured.');
   });
 
   it('should throw error when NEXT_PUBLIC_SUPABASE_URL is missing', async () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const mod = await import('../../lib/supabase');
-    expect(() => mod.getServiceSupabase()).toThrow('NEXT_PUBLIC_SUPABASE_URL is not set');
+    const mod = await import('../supabase');
+    expect(() => mod.getServiceSupabase()).toThrow('NEXT_PUBLIC_SUPABASE_URL is not configured.');
   });
 });

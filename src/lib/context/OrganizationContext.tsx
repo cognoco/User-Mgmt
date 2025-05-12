@@ -22,6 +22,7 @@ interface OrganizationProviderProps {
  * Placeholder for managing organization context.
  */
 export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ children, orgId }) => {
+  console.log('[DEBUG] OrganizationProvider mounted with orgId:', orgId);
   const [organization, setOrganization] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -47,7 +48,14 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ chil
       setIsLoading(false);
     }, 100);
 
-    return () => clearTimeout(timer);
+    return () => {
+      console.log('[DEBUG] OrganizationProvider unmounted');
+      clearTimeout(timer);
+    };
+  }, [orgId]);
+
+  useEffect(() => {
+    console.log('[DEBUG] OrganizationProvider orgId changed:', orgId);
   }, [orgId]);
 
   const value = { orgId, organization, isLoading, error };

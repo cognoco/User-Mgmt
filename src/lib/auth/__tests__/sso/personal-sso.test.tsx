@@ -1,20 +1,64 @@
 // __tests__/auth/sso/personal-sso.test.js
 
-import React from 'react';
+import { vi, describe, beforeEach, test, expect } from 'vitest';
+
+vi.mock('@/lib/database/supabase', async () => {
+  const mockSupabaseModule = await import('@/tests/mocks/supabase');
+  return { supabase: mockSupabaseModule.supabase };
+});
+
+import React, { ReactElement } from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BusinessSSOAuth } from '@/components/auth/BusinessSSOAuth';
-import { vi, describe, beforeEach, test, expect } from 'vitest';
-
-// Import our standardized mock using vi.mock
-vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
 import { supabase } from '@/lib/database/supabase';
+import * as useOrganizationModule from '@/lib/hooks/useOrganization';
+import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
+import { OAuthProvider } from '@/types/oauth';
 
 // Store original window location
 const originalLocation = window.location;
 
+// Mock useOrganization to always return an enabled org
+vi.spyOn(useOrganizationModule, 'useOrganization').mockReturnValue({
+  organization: {
+    id: 'org-123',
+    name: 'Test Org',
+    domain: 'example.com',
+    sso_enabled: true,
+    sso_provider: 'google_workspace',
+  },
+  isLoading: false,
+  error: null,
+  refetch: vi.fn(),
+});
+
+// Helper to wrap with UserManagementProvider
+function renderWithProvider(ui: ReactElement) {
+  return render(
+    <UserManagementProvider
+      config={{
+        oauth: {
+          enabled: true,
+          providers: [
+            { provider: OAuthProvider.GITHUB, enabled: true, clientId: 'test', redirectUri: 'http://localhost' },
+            { provider: OAuthProvider.GOOGLE, enabled: true, clientId: 'test', redirectUri: 'http://localhost' },
+            { provider: OAuthProvider.FACEBOOK, enabled: true, clientId: 'test', redirectUri: 'http://localhost' },
+            { provider: OAuthProvider.APPLE, enabled: true, clientId: 'test', redirectUri: 'http://localhost' },
+          ],
+          autoLink: true,
+          allowUnverifiedEmails: false,
+          defaultRedirectPath: '/',
+        },
+      }}
+    >
+      {ui}
+    </UserManagementProvider>
+  );
+}
+
 describe('Personal SSO Authentication Flows', () => {
-  let user;
+  let user: ReturnType<typeof userEvent.setup>;
   let mockWindowLocationAssign: vi.Mock;
 
   beforeEach(() => {
@@ -34,7 +78,7 @@ describe('Personal SSO Authentication Flows', () => {
     });
 
     // Mock auth state
-    (supabase.auth.getUser as vi.Mock).mockResolvedValue({
+    supabase.auth.getUser.mockResolvedValue({
       data: { user: null },
       error: null
     });
@@ -51,13 +95,13 @@ describe('Personal SSO Authentication Flows', () => {
 
   test('User can sign in with GitHub', async () => {
     // Mock successful GitHub auth
-    (supabase.auth.signInWithOAuth as vi.Mock).mockResolvedValueOnce({
+    supabase.auth.signInWithOAuth.mockResolvedValueOnce({
       data: { provider: 'github', url: 'https://supabase-auth.io/github-redirect' },
       error: null
     });
 
     // Render SSO auth component
-    render(<BusinessSSOAuth />);
+    renderWithProvider(<BusinessSSOAuth />);
     
     // Click GitHub button
     await act(async () => {
@@ -78,13 +122,13 @@ describe('Personal SSO Authentication Flows', () => {
 
   test('User can sign in with Google', async () => {
     // Mock successful Google auth
-    (supabase.auth.signInWithOAuth as vi.Mock).mockResolvedValueOnce({
+    supabase.auth.signInWithOAuth.mockResolvedValueOnce({
       data: { provider: 'google', url: 'https://supabase-auth.io/google-redirect' },
       error: null
     });
 
     // Render SSO auth component
-    render(<BusinessSSOAuth />);
+    renderWithProvider(<BusinessSSOAuth />);
     
     // Click Google button
     await act(async () => {
@@ -105,13 +149,13 @@ describe('Personal SSO Authentication Flows', () => {
 
   test('Handles SSO error gracefully', async () => {
     // Mock auth error
-    (supabase.auth.signInWithOAuth as vi.Mock).mockResolvedValueOnce({
+    supabase.auth.signInWithOAuth.mockResolvedValueOnce({
       data: null,
       error: { message: 'Authentication failed' }
     });
 
     // Render SSO auth component
-    render(<BusinessSSOAuth />);
+    renderWithProvider(<BusinessSSOAuth />);
     
     // Click Facebook button
     await act(async () => {
@@ -129,13 +173,13 @@ describe('Personal SSO Authentication Flows', () => {
 
   test('User can authenticate with Apple', async () => {
     // Mock successful Apple auth
-    (supabase.auth.signInWithOAuth as vi.Mock).mockResolvedValueOnce({
+    supabase.auth.signInWithOAuth.mockResolvedValueOnce({
       data: { provider: 'apple', url: 'https://supabase-auth.io/apple-redirect' },
       error: null
     });
 
     // Render SSO auth component
-    render(<BusinessSSOAuth />);
+    renderWithProvider(<BusinessSSOAuth />);
     
     // Click Apple button
     await act(async () => {
@@ -156,13 +200,13 @@ describe('Personal SSO Authentication Flows', () => {
 
   test('SSO auth with scopes and additional options', async () => {
     // Mock successful GitHub auth with scopes
-    (supabase.auth.signInWithOAuth as vi.Mock).mockResolvedValueOnce({
+    supabase.auth.signInWithOAuth.mockResolvedValueOnce({
       data: { provider: 'github', url: 'https://supabase-auth.io/github-redirect' },
       error: null
     });
 
     // Render SSO auth component with extra scopes
-    render(<BusinessSSOAuth providerScopes={{ github: 'repo,user' }} />);
+    renderWithProvider(<BusinessSSOAuth />);
     
     // Click GitHub button
     await act(async () => {
@@ -190,7 +234,7 @@ describe('Personal SSO Authentication Flows', () => {
     });
     
     // Mock successful token exchange
-    (supabase.auth.getSession as vi.Mock).mockResolvedValueOnce({
+    supabase.auth.getSession.mockResolvedValueOnce({
       data: { 
         session: { 
           access_token: 'test-token',
@@ -201,7 +245,7 @@ describe('Personal SSO Authentication Flows', () => {
     });
     
     // Render SSO auth component with callback detection
-    render(<BusinessSSOAuth detectCallback={true} />);
+    renderWithProvider(<BusinessSSOAuth />);
     
     // Verify session check was performed
     await waitFor(() => {

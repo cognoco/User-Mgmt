@@ -1,9 +1,12 @@
 DO NOT CHANGE MORE THAN ONE functionality at the time and then pause to give the user time to check and tell you to move on.  Keep in mind that we need to build this app as a separate building block that can be plugged into any app. It must be versatile and flexible. We currently use Supabase, but we might want to use other database for other services. Contain all code clean and easy to replace. Keep front and back end separated. Always ask if you have several options and you are not sure. This app has to work with both web and mobile application. It has to be plug in into another apps and all functionalities that are not absolute core have to be easy to turn on and off for different apps.  Always check if there are any references to a file which you are changing in all folders, subfolders and files. If there is a reference to a file which does not seem to exist DO NOT automatically create the file! Fist check if the file exists in other location! 
 
 If you are working with a concrete flow or function or test It's crucial to look at the bigger picture and analyze holistically. 
-Read the full code for the core files involved in the flow or test or function to get a complete understanding before suggesting any changes. All changes must make the app more robust. We need it to be production ready at all times! We don't want fixes that fix one thing and break another 5. 
+Read the full code for the core files involved in the flow or test or function to get a complete understanding before suggesting any changes. All changes must make the app more robust. We need it to be production ready at all times! We don't want fixes that fix one thing and break another 5. However, within one test file or file subset (like  src/tests/integration you can do the following:
+1. Fix all issues in this file/flow before reporting back.”
+2. Don’t pause after each fix—just keep going until all tests pass.”
+3. Batch all necessary changes for this test suite and only report when it’s green."
 
- Please NEVER DELETE EXISTING FUNCTIONALITY, NEVER CREATE A NEW FILE before you check the WHOLE code base including ALL Subfolders and ensure that such file is not existing in some other place. We NEED TO  AVOID DUPLICATES. USE THE EXISTING stack, ASK before you introduce a new technology. Do you have some other questions? Please read cursorrules and the two testing.md files before you start.  You can use the MCP tools to access supabase. The project ID is izziigqgdurqsoyvajvu
+ Please NEVER DELETE EXISTING FUNCTIONALITY in an implementation just to please the test file, NEVER CREATE A NEW FILE before you check the WHOLE code base including ALL Subfolders and ensure that such file is not existing in some other place. We NEED TO  AVOID DUPLICATES. USE THE EXISTING stack, ASK before you introduce a new technology. Do you have some other questions? Please read cursorrules and the two testing.md files before you start.  You can use the MCP tools to access supabase. The project ID is izziigqgdurqsoyvajvu
   
 Ensure Test Coverage Mirrors Implementation as closely as possible. DO NOT REWRITE ANY real functionality DUE TO FAILED TEST unless the test found a real bug! DOCUMENT RESULTS OF THE TEST and ask for next action. Once a test fails, the most probable reason for failing is a reference to a file that has been moved. For fixes always review the interdependencies in the files. You want tests that focus on the real functionality and simulate how an end-user would interact with the registration flow, catching bugs that affect the actual user experience, rather than exhaustive tests for every minor detail or internal state change. Please be aware that there are already skeleton files for the missing tests- so before you create a new file, make sure to search in the skeletons. 
 Be aware that it is a complex codebase. Before you change anything, make sure you read other files using the import/component/mock and that you correctly understand that the change will not break anything. For failing tests - read related passing test and search for pattern. What does the passing test do differently? If a similar test is passing, a change in global mock file is usually not the right solution! Think it thorugh thoroughly! 
@@ -27,12 +30,7 @@ Be aware that it is a complex codebase. Before you change anything, make sure yo
 
 **Instructions & Constraints:**
 
-*   **Prioritize the `functionality-features-phase*.md` files** as the source of truth for required features and details. Use `docs/ROADMAP.md` mainly for the overall phase structure/order.
-*   The implementation plan should be specific enough to guide development, referencing details from the phase files where appropriate.
-*   Assume the existing tech stack will be used unless a new feature explicitly requires something different (mention if so).
-*   Refer to existing code patterns and structure within the `project/` directory when planning.
-*   Begin by performing the Gap Analysis based on the phase files and creating `docs/GAP_ANALYSIS.md`. Once reviewed, proceed to create `docs/IMPLEMENTATION_PLAN.md`.
-
+*   **Prioritize the `functionality-features-phase*.md` files** as the source of truth for required features and details. 
 
 
 
@@ -207,4 +205,4 @@ Follow this plan! Remember that we need to build this as a separate building blo
     *   **If a test fails due to a problem within the test file itself** (e.g., incorrect selectors, faulty mocking, async/timing issues, structure not following guidelines): You have permission to modify the test file (`*.test.tsx`, `*.test.ts`, setup files, mocks) to fix the issue. Refer to `docs/TESTING_ISSUES.md` and `docs/TESTING.md` for known issues and best practices.
     *   **If a test fails and you suspect the issue lies within the actual application code** (i.e., the component or function being tested seems broken or doesn't behave as expected): STOP immediately. Report the failing test, the specific discrepancy you observed, and ask me for confirmation and guidance before making any changes to the application source code (`/src/` or `/app/` directories, excluding test files).
 
-There is no project directlory any longer. The project direcoty was in previous root. All the files have been migrated and reorganized into a new root. If there are references to project in the code you can remove them. Also, if test are failing make sure you check the import paths. 
+There is no project directory any longer. The project direcoty was in previous root. All the files have been migrated and reorganized into a new root. If there are references to project in the code you can remove them. Also, if test are failing make sure you check the import paths. 

@@ -3,7 +3,7 @@ import { api } from '@/lib/api/axios';
 import type { UserPreferences } from '@/types/database';
 import { useAuthStore } from '@/lib/stores/auth.store'; // To ensure user is authenticated
 
-interface PreferencesState {
+export interface PreferencesState {
   preferences: UserPreferences | null;
   isLoading: boolean;
   error: string | null;

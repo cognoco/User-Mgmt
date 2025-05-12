@@ -66,12 +66,12 @@ describe('Multi-Factor Authentication Setup', () => {
     
     // Wait for component to load
     await waitFor(() => {
-      expect(screen.getByText('settings.security.twoFactorAuth.selectMethod')).toBeInTheDocument(); 
+      expect(screen.getByText('2fa.setup.selectMethod')).toBeInTheDocument(); 
     });
     
     // Select TOTP option
     await act(async () => {
-      await user.click(screen.getByRole('button', { name: 'settings.security.twoFactorAuth.methods.authenticator' })); 
+      await user.click(screen.getByRole('button', { name: '2fa.methods.totp' })); 
     });
     
     // Verify QR code is displayed
@@ -82,12 +82,12 @@ describe('Multi-Factor Authentication Setup', () => {
     
     // Enter verification code
     await act(async () => {
-        await user.type(screen.getByLabelText('settings.security.twoFactorAuth.setup.authenticator.verifyCode'), '123456'); 
+        await user.type(screen.getByLabelText('2fa.setup.enterCode'), '123456'); 
     });
     
     // Submit verification
     await act(async () => {
-        await user.click(screen.getByRole('button', { name: 'settings.security.twoFactorAuth.verify' })); 
+        await user.click(screen.getByRole('button', { name: '2fa.setup.verify' })); 
     });
     
     // Verify API calls were made and component moved to backup step
@@ -95,7 +95,7 @@ describe('Multi-Factor Authentication Setup', () => {
       expect(api.post).toHaveBeenCalledWith('/api/2fa/setup', { method: 'totp' });
       expect(api.post).toHaveBeenCalledWith('/api/2fa/verify', { method: 'totp', code: '123456' });
       expect(api.post).toHaveBeenCalledWith('/api/2fa/backup-codes');
-      expect(screen.getByText('settings.security.twoFactorAuth.backupCodes')).toBeInTheDocument();
+      expect(screen.getByText('2fa.setup.backupCodes')).toBeInTheDocument();
       expect(screen.getByText('111')).toBeInTheDocument(); // Check if backup code is rendered
     });
   });
