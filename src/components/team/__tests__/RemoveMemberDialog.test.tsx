@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RemoveMemberDialog } from '../RemoveMemberDialog';
@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 // Mock fetch
 const mockFetch = vi.fn();
+const originalFetch = global.fetch;
 global.fetch = mockFetch;
 
 // Create a fresh QueryClient for each test
@@ -189,4 +190,8 @@ describe('RemoveMemberDialog', () => {
     expect(mockProps.onClose).toHaveBeenCalled();
     expect(mockFetch).not.toHaveBeenCalled();
   });
+});
+
+afterAll(() => {
+  global.fetch = originalFetch;
 });

@@ -14,11 +14,19 @@ vi.mock('@/lib/api/axios', () => ({
   },
 }));
 
+vi.mock('@/components/ui/tooltip', () => ({
+  Tooltip: (props: any) => <div data-testid="tooltip">{props.children}</div>,
+  TooltipTrigger: (props: any) => <div data-testid="tooltip-trigger">{props.children}</div>,
+  TooltipContent: (props: any) => <div data-testid="tooltip-content">{props.children}</div>,
+  TooltipProvider: (props: any) => <div data-testid="tooltip-provider">{props.children}</div>,
+}));
+
 beforeAll(() => {
-  Object.assign(navigator, {
-    clipboard: {
+  Object.defineProperty(navigator, 'clipboard', {
+    value: {
       writeText: vi.fn().mockResolvedValue(undefined),
     },
+    configurable: true,
   });
 });
 

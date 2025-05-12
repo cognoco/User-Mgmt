@@ -1,12 +1,11 @@
 # Test Results
 
-**Passed Test Files:** 41  |  **Failed Test Files:** 43
+**Passed Test Files:** 39  |  **Failed Test Files:** 45
 
 ## Passing Test Files
 
 - src\components\account\__tests__\DeleteAccountDialog.test.tsx
 - src\components\admin\__tests__\RoleManagementPanel.test.tsx
-- src\components\auth\__tests__\BusinessSSOSetup.test.tsx
 - src\components\auth\__tests__\LoginForm.test.tsx
 - src\components\auth\__tests__\MinimalTextareaForm.test.tsx
 - src\components\auth\__tests__\ProtectedRoute.test.tsx
@@ -18,14 +17,12 @@
 - src\components\profile\__tests__\DataExport.test.tsx
 - src\components\profile\__tests__\NotificationPreferences.test.tsx
 - src\components\profile\__tests__\PrivacySettings.test.tsx
-- src\components\profile\__tests__\ProfileEditor.test.tsx
 - src\components\profile\__tests__\ProfileTypeConversion.test.tsx
 - src\components\profile\__tests__\ProfileVerification.test.tsx
 - src\components\profile\__tests__\SessionManagement.test.tsx
 - src\components\team\__tests__\InviteMemberForm.test.tsx
 - src\components\team\__tests__\RemoveMemberDialog.test.tsx
 - src\components\team\__tests__\TeamManagement.test.tsx
-- src\components\team\__tests__\TeamMembersList.test.tsx
 - src\hooks\__tests__\useTeamInvite.test.tsx
 - src\lib\__tests__\config.test.js
 - src\lib\auth\__tests__\UserManagementProvider.test.tsx
@@ -38,8 +35,9 @@
 - src\lib\stores\__tests__\user.store.test.ts
 - src\middleware\__tests__\security-headers.test.ts
 - src\tests\integration\account-settings-flow.test.tsx
+- src\tests\integration\connected-accounts.integration.test.tsx
+- src\tests\integration\dashboard-view-flow.test.tsx
 - src\tests\integration\form-validation-errors-isolated.test.tsx
-- src\tests\integration\form-validation-errors.test.tsx
 - src\tests\integration\minimal.smoke.test.tsx
 - src\tests\integration\oauth-buttons.integration.test.tsx
 - src\tests\integration\search-filter-flow.test.tsx
@@ -50,11 +48,14 @@
 
 - src\components\admin\__tests__\AdminDashboard.test.tsx
 - src\components\audit\__tests__\AuditLogViewer.test.tsx
+- src\components\auth\__tests__\BusinessSSOSetup.test.tsx
 - src\components\auth\__tests__\DomainBasedOrgMatching.test.tsx
 - src\components\auth\__tests__\IDPConfiguration.test.tsx
 - src\components\auth\__tests__\OrganizationSSO.test.tsx
 - src\components\profile\__tests__\Profile.test.tsx
+- src\components\profile\__tests__\ProfileEditor.test.tsx
 - src\components\profile\__tests__\ProfilePrivacySettings.test.tsx
+- src\components\team\__tests__\TeamMembersList.test.tsx
 - src\hooks\__tests__\usePayment.test.ts
 - src\hooks\__tests__\usePermission.test.tsx
 - src\hooks\__tests__\useSubscription.test.ts
@@ -78,14 +79,13 @@
 - src\tests\integration\api-error-messages.test.tsx
 - src\tests\integration\backup.integration.test.tsx
 - src\tests\integration\collaboration-flow.test.tsx
-- src\tests\integration\connected-accounts.integration.test.tsx
-- src\tests\integration\dashboard-view-flow.test.tsx
 - src\tests\integration\data-management-flow.test.tsx
 - src\tests\integration\empty-states.test.tsx
 - src\tests\integration\error-recovery-flow.test.tsx
 - src\tests\integration\export-import-flow.test.tsx
 - src\tests\integration\feedback-submission-flow.test.tsx
 - src\tests\integration\file-upload-flow.test.tsx
+- src\tests\integration\form-validation-errors.test.tsx
 - src\tests\integration\notification-flow.test.tsx
 - src\tests\integration\password-reset-flow.test.tsx
 - src\tests\integration\theme-settings-flow.test.tsx

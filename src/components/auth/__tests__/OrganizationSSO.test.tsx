@@ -1,6 +1,6 @@
 import '@/tests/i18nTestSetup';
 import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor, act, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, Mock } from 'vitest';
 import { api } from '@/lib/api/axios';
@@ -12,6 +12,13 @@ vi.mock('@/lib/api/axios', () => ({
     get: vi.fn(),
     put: vi.fn(),
   },
+}));
+
+vi.mock('@/components/ui/tooltip', () => ({
+  Tooltip: (props: any) => <div data-testid="tooltip">{props.children}</div>,
+  TooltipTrigger: (props: any) => <div data-testid="tooltip-trigger">{props.children}</div>,
+  TooltipContent: (props: any) => <div data-testid="tooltip-content">{props.children}</div>,
+  TooltipProvider: (props: any) => <div data-testid="tooltip-provider">{props.children}</div>,
 }));
 
 describe('OrganizationSSO', () => {
@@ -307,5 +314,11 @@ describe('OrganizationSSO', () => {
     });
 
     vi.useRealTimers();
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.useRealTimers();
+    cleanup();
   });
 }); 

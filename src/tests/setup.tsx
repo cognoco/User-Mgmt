@@ -73,6 +73,7 @@ const localStorageMock = {
 
 // Setup MSW
 export const server = setupServer();
+(globalThis as any).server = server;
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterAll(() => server.close());

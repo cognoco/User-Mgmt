@@ -1,10 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { AdminDashboard } from '../AdminDashboard';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act } from 'react-dom/test-utils';
+import { rest } from 'msw';
+const server = (globalThis as any).server;
 
 // Mock data
+const dashboardUrl = '/api/admin/dashboard';
+
 const mockDashboardData = {
   team: {
     activeMembers: 8,
@@ -37,10 +41,6 @@ const mockDashboardData = {
   ],
 };
 
-// Mock fetch function
-const mockFetch = vi.fn();
-vi.stubGlobal('fetch', mockFetch);
-
 // Setup QueryClient for tests
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,71 +59,62 @@ function wrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
+function setupDashboardHandler(response: any, status = 200) {
+  server.use(
+    rest.get(dashboardUrl, (req: any, res: any, ctx: any) => {
+      if (status >= 400) {
+        return res(ctx.status(status));
+      }
+      return res(ctx.status(status), ctx.json(response));
+    })
+  );
+}
+
 describe('AdminDashboard', () => {
   beforeEach(() => {
     queryClient.clear();
-    vi.clearAllMocks();
+    server.resetHandlers();
   });
 
   it('renders loading state initially', async () => {
-    mockFetch.mockImplementationOnce(() => 
-      new Promise(() => {})
+    // Simulate loading by delaying the response
+    server.use(
+      rest.get(dashboardUrl, (req: any, res: any, ctx: any) => {
+        return res(ctx.delay(100), ctx.json(mockDashboardData));
+      })
     );
-
     await act(async () => {
       render(<AdminDashboard />, { wrapper });
     });
-
     expect(screen.getByText('Team Overview')).toBeInTheDocument();
     expect(screen.getByText('Subscription Status')).toBeInTheDocument();
     expect(screen.getByText('Recent Activity')).toBeInTheDocument();
-
-    // Check for loading skeletons
     const skeletons = document.querySelectorAll('.animate-pulse');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it('renders dashboard data successfully', async () => {
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(mockDashboardData),
-      })
-    );
-
+    setupDashboardHandler(mockDashboardData);
     await act(async () => {
       render(<AdminDashboard />, { wrapper });
     });
-
-    // Wait for data to load
     await waitFor(() => {
-      expect(screen.getByText('10')).toBeInTheDocument(); // Total members
-      expect(screen.getByText('8')).toBeInTheDocument(); // Active members
-      expect(screen.getByText('2')).toBeInTheDocument(); // Pending members
-      expect(screen.getByText('10/15')).toBeInTheDocument(); // Seat usage
+      expect(screen.getByText('10')).toBeInTheDocument();
+      expect(screen.getByText('8')).toBeInTheDocument();
+      expect(screen.getByText('2')).toBeInTheDocument();
+      expect(screen.getByText('10/15')).toBeInTheDocument();
     });
-
-    // Check subscription info
     expect(screen.getByText('business')).toBeInTheDocument();
     expect(screen.getByText('active')).toBeInTheDocument();
-
-    // Check recent activity
     expect(screen.getByText('Invited new team member')).toBeInTheDocument();
     expect(screen.getByText(/John Doe/)).toBeInTheDocument();
   });
 
   it('handles API error gracefully', async () => {
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: false,
-        status: 500,
-      })
-    );
-
+    setupDashboardHandler({}, 500);
     await act(async () => {
       render(<AdminDashboard />, { wrapper });
     });
-
     await waitFor(() => {
       expect(screen.getByText('Error Loading Dashboard')).toBeInTheDocument();
       expect(screen.getByText('Failed to load dashboard data. Please try again later.')).toBeInTheDocument();
@@ -135,56 +126,42 @@ describe('AdminDashboard', () => {
       ...mockDashboardData,
       recentActivity: [],
     };
-
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(noActivityData),
-      })
-    );
-
+    setupDashboardHandler(noActivityData);
     await act(async () => {
       render(<AdminDashboard />, { wrapper });
     });
-
     await waitFor(() => {
       expect(screen.getByText('No recent activity to display')).toBeInTheDocument();
     });
   });
 
   it('refreshes data periodically', async () => {
-    mockFetch
-      .mockImplementationOnce(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockDashboardData),
-        })
-      )
-      .mockImplementationOnce(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({
+    let callCount = 0;
+    server.use(
+      rest.get(dashboardUrl, (req: any, res: any, ctx: any) => {
+        callCount++;
+        if (callCount === 1) {
+          return res(ctx.json(mockDashboardData));
+        }
+        return res(
+          ctx.json({
             ...mockDashboardData,
             team: { ...mockDashboardData.team, activeMembers: 9 },
-          }),
-        })
-      );
-
+          })
+        );
+      })
+    );
     await act(async () => {
       render(<AdminDashboard />, { wrapper });
     });
-
-    // Initial data
     await waitFor(() => {
-      expect(screen.getByText('8')).toBeInTheDocument(); // Initial active members
+      expect(screen.getByText('8')).toBeInTheDocument();
     });
-
-    // Wait for refetch and check updated data
     await waitFor(
       () => {
-        expect(screen.getByText('9')).toBeInTheDocument(); // Updated active members
+        expect(screen.getByText('9')).toBeInTheDocument();
       },
-      { timeout: 31000 } // Slightly longer than refetch interval
+      { timeout: 31000 }
     );
   });
 });

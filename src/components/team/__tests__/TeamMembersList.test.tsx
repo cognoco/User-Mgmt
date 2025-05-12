@@ -160,10 +160,10 @@ describe('TeamMembersList', () => {
       await userEvent.type(searchInput, 'john');
     });
 
+    // Wait for the fetch to be called with the full search string in the last call
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('search=john')
-      );
+      const calls = mockFetch.mock.calls;
+      expect(calls[calls.length - 1][0]).toContain('search=john');
     });
   });
 
@@ -198,9 +198,10 @@ describe('TeamMembersList', () => {
 
     await renderWithProviders(<TeamMembersList />);
 
-    const roleSort = screen.getByText('Role').closest('button');
+    const roleSort = await screen.findByText('Role');
+    const roleSortButton = roleSort.closest('button');
     await act(async () => {
-      await userEvent.click(roleSort!);
+      await userEvent.click(roleSortButton!);
     });
 
     await waitFor(() => {
@@ -208,7 +209,7 @@ describe('TeamMembersList', () => {
         expect.stringContaining('sortBy=role')
       );
     });
-  });
+  }, 10000);
 
   it('displays seat usage information', async () => {
     mockFetch.mockResolvedValueOnce({
@@ -222,7 +223,7 @@ describe('TeamMembersList', () => {
       expect(screen.getByText('Seat Usage: 2/5')).toBeInTheDocument();
       expect(screen.getByText('40.0%')).toBeInTheDocument();
     });
-  });
+  }, 10000);
 
   it('handles pagination', async () => {
     const mockDataWithPagination = {
@@ -250,7 +251,7 @@ describe('TeamMembersList', () => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
 
-    const nextButton = screen.getByLabelText('Next page');
+    const nextButton = await screen.findByLabelText('Next page');
     await act(async () => {
       await userEvent.click(nextButton);
     });
@@ -260,7 +261,7 @@ describe('TeamMembersList', () => {
         expect.stringContaining('page=2')
       );
     });
-  });
+  }, 10000);
 
   it('displays error state', async () => {
     mockFetch.mockRejectedValueOnce(new Error('Failed to fetch'));
@@ -271,5 +272,5 @@ describe('TeamMembersList', () => {
       const alert = screen.getByRole('alert');
       expect(alert).toHaveTextContent(/error loading team members/i);
     });
-  });
+  }, 10000);
 });

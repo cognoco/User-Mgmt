@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setupMFA, verifyMFAToken, disableMFA } from '@/lib/auth/mfa';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 
 vi.mock('@/lib/prisma');
 

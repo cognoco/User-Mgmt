@@ -429,4 +429,11 @@ describe('ProfileEditor', () => {
     expect(mockDisconnectAccount).toHaveBeenCalledWith('1');
     vi.resetModules();
   });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.resetAllMocks();
+    vi.restoreAllMocks();
+    vi.resetModules();
+  });
 });
