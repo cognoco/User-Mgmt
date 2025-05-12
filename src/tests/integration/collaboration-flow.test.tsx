@@ -1,14 +1,13 @@
 // __tests__/integration/collaboration-flow.test.js
 
+vi.mock('@/lib/database/supabase');
+import { supabase } from '@/lib/database/supabase';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 // import { CollaborationWorkspace } from '../../components/team/CollaborationWorkspace'; // TODO: Update path if file exists
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-
-// Import our standardized mock
-vi.mock('@/lib/database/supabase');
-import { supabase } from '@/lib/database/supabase';
 
 describe('Collaboration Features Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

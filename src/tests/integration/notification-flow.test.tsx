@@ -1,5 +1,7 @@
 // __tests__/integration/notification-flow.test.tsx
 
+vi.mock('@/lib/database/supabase', () => require('../mocks/supabase'));
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -7,7 +9,6 @@ import { NotificationPreferences } from '@/components/shared/NotificationPrefere
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 
 // Import our standardized mock
-vi.mock('@/lib/database/supabase', () => require('../mocks/supabase'));
 import { supabase } from '@/lib/database/supabase';
 
 describe('Notification Management Flow', () => {

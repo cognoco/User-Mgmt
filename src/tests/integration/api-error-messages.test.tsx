@@ -1,13 +1,12 @@
 // __tests__/integration/api-error-messages.test.js
 
+vi.mock('@/lib/database/supabase');
+import { supabase } from '@/lib/database/supabase';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LoginForm } from '\.\.\/\.\.\/src\/components/auth/LoginForm';
-
-// Import our standardized mock
-vi.mock('@/lib/database/supabase');
-import { supabase } from '\.\.\/\.\.\/src\/lib/supabase';
 
 describe('API Error Messages', () => {
   let user;

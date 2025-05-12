@@ -1,15 +1,14 @@
 // __tests__/integration/feedback-submission-flow.test.js
 
+vi.mock('@/lib/database/supabase', () => import('@/tests/mocks/supabase'));
+import { supabase } from '@/lib/database/supabase';
+
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import FeedbackForm from '@/components/common/FeedbackForm';
 import { vi } from 'vitest';
-import { supabase } from '@/tests/mocks/supabase';
 import type { Mock } from 'vitest';
-
-// Import our standardized mock
-vi.mock('@/lib/database/supabase', () => import('@/tests/mocks/supabase'));
 
 describe('Feedback Submission Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

@@ -1,12 +1,13 @@
 // __tests__/integration/account-switching-flow.test.js
 
+vi.mock('@/lib/database/supabase', () => require('@/tests/mocks/supabase'));
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AccountSwitcher } from '@/components/account/AccountSwitcher';
 
 // Import our standardized mock
-vi.mock('@/lib/database/supabase', () => require('@/tests/mocks/supabase'));
 import { supabase } from '@/lib/database/supabase';
 
 describe('Account Switching Flow', () => {
