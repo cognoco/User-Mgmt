@@ -7,8 +7,8 @@ import FormWithRecovery from '@/components/common/FormWithRecovery';
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 
 // Import our standardized mock
-vi.mock('@/lib/supabase', () => require('@/tests/mocks/supabase'));
-import { supabase } from '@/lib/supabase';
+vi.mock('@/lib/database/supabase', () => require('@/tests/mocks/supabase'));
+import { supabase } from '@/lib/database/supabase';
 
 describe('Error Recovery Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

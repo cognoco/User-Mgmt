@@ -7,8 +7,8 @@ import FileManager from '@/components/common/FileManager';
 import { vi } from 'vitest';
 
 // Import our standardized mock
-vi.mock('@/lib/supabase', async () => (await import('@/tests/mocks/supabase')));
-import { supabase } from '@/lib/supabase';
+vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
+import { supabase } from '@/lib/database/supabase';
 
 describe('File Upload and Management Flow', () => {
   let user;

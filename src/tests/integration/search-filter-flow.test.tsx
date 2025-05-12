@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 
 // --- Define mock structure ENTIRELY INSIDE vi.mock factory ---
 
-vi.mock('@/lib/supabase', () => {
+vi.mock('@/lib/database/supabase', () => {
   // Create a reusable function to generate a query builder mock
   const createQueryBuilderMock = () => ({
     ilike: vi.fn().mockReturnThis(),
@@ -67,7 +67,7 @@ import userEvent from '@testing-library/user-event';
 import SearchPage from '@/components/search/SearchPage'; 
 
 // Import supabase AFTER the mock definition
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/database/supabase';
 
 describe('Search and Filtering Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

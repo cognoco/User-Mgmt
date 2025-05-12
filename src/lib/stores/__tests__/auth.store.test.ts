@@ -19,7 +19,7 @@ viMock.mock('../../api/axios', () => ({
 }));
 
 // Mock Supabase client for registration tests
-viMock.mock('@/lib/supabase', () => ({
+viMock.mock('@/lib/database/supabase', () => ({
   supabase: {
     auth: {
       signUp: vi.fn()
@@ -31,7 +31,7 @@ import { useAuthStore } from '@/lib/stores/auth.store';
 import { User, RegistrationPayload, LoginPayload, AuthResult } from '@/types/auth';
 import { api } from '../../api/axios';
 import { act } from '@testing-library/react';
-import { supabase as supabaseMock } from '@/lib/supabase';
+import { supabase as supabaseMock } from '@/lib/database/supabase';
 
 // Use imported Mock type for assertion
 const mockApiPost = api.post as Mock;

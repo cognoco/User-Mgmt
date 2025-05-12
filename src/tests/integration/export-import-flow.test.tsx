@@ -7,8 +7,8 @@ import { UserPreferencesComponent } from '@/components/common/UserPreferences';
 import { vi } from 'vitest';
 
 // Use the canonical supabase mock
-vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
-import { supabase } from '@/lib/supabase';
+vi.mock('@/lib/database/supabase', () => import('@/tests/mocks/supabase'));
+import { supabase } from '@/lib/database/supabase';
 
 describe('User Preferences Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

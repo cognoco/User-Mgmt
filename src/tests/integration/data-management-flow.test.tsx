@@ -10,9 +10,9 @@ import { describe, test, expect, beforeEach, vi, Mock } from 'vitest';
 // import type { SupabaseClient } from '@supabase/supabase-js'; // Keep type if needed?
 
 // Use top-level vi.mock again
-vi.mock('@/lib/supabase', () => require('@/tests/mocks/supabase'));
+vi.mock('@/lib/database/supabase', () => require('@/tests/mocks/supabase'));
 // Use static import again
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/database/supabase';
 
 describe('Data Management Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;
@@ -22,16 +22,16 @@ describe('Data Management Flow', () => {
   // Remove beforeAll/afterAll blocks
   /*
   beforeAll(async () => {
-    vi.doMock('@/lib/supabase', async () => {
+    vi.doMock('@/lib/database/supabase', async () => {
       const mock = await vi.importActual<object>('@/tests/__mocks__/supabase');
       return mock;
     });
-    const mod = await import('@/lib/supabase');
+    const mod = await import('@/lib/database/supabase');
     supabase = mod.supabase;
   });
 
   afterAll(() => {
-    vi.doUnmock('@/lib/supabase');
+    vi.doUnmock('@/lib/database/supabase');
   });
   */
 

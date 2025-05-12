@@ -7,8 +7,8 @@ import { BusinessSSOAuth } from '@/components/auth/BusinessSSOAuth';
 import { vi, describe, beforeEach, test, expect } from 'vitest';
 
 // Import our standardized mock using vi.mock
-vi.mock('@/lib/supabase', async () => (await import('@/tests/mocks/supabase')));
-import { supabase } from '@/lib/supabase';
+vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
+import { supabase } from '@/lib/database/supabase';
 
 // Store original window location
 const originalLocation = window.location;

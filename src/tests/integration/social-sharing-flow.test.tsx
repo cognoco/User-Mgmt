@@ -9,8 +9,8 @@ import { SocialSharingComponent } from '@/components/sharing/SocialSharingCompon
 import { vi, Mock } from 'vitest'; 
 
 // --- Remove Supabase client mock --- 
-// vi.mock('@/lib/supabase'); 
-// import { supabase } from '@/lib/supabase';
+// vi.mock('@/lib/database/supabase'); 
+// import { supabase } from '@/lib/database/supabase';
 
 import type { UserEvent } from '@testing-library/user-event'; 
 

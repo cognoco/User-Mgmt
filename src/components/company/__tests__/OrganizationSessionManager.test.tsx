@@ -1,36 +1,29 @@
-// __tests__/auth/session/business-policies.test.js
-
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { UserEvent } from '@testing-library/user-event/dist/types/setup/setup'; // Import UserEvent type
-// import { OrganizationSessionManager } from '@/components/auth/OrganizationSessionManager'; // TODO: Update path if file exists
-import { OrganizationProvider } from '@/lib/context/OrganizationContext'; // Corrected import path
+import type { UserEvent } from '@testing-library/user-event/dist/types/setup/setup';
+import { OrganizationSessionManager } from '../OrganizationSessionManager';
+import { OrganizationProvider } from '@/lib/context/OrganizationContext';
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
-import { vi, describe, beforeEach, test, expect } from 'vitest'; // Import vi
+import { vi, describe, beforeEach, test, expect } from 'vitest';
 
-// Import our standardized mock using vi.mock
 vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
 import { supabase } from '@/lib/database/supabase';
 
 describe('Business-specific Session Controls', () => {
-  let user: UserEvent; // Type the user variable
-  
-  // Mock authenticated user (admin)
+  let user: UserEvent;
   const mockAdminUser = {
     id: 'admin-123',
     email: 'admin@example.com',
     role: 'authenticated',
     app_metadata: { role: 'admin' }
   };
-  
-  // Mock organization
   const mockOrganization = {
     id: 'org-123',
     name: 'Acme Inc',
     domain: 'acme.com',
     security_settings: {
-      session_timeout_mins: 60, // 1 hour session timeout
+      session_timeout_mins: 60,
       max_sessions_per_user: 3,
       enforce_ip_restrictions: true,
       allowed_ip_ranges: ['192.168.1.0/24', '10.0.0.0/16'],
@@ -40,8 +33,6 @@ describe('Business-specific Session Controls', () => {
       sensitive_actions: ['payment', 'user_management', 'api_keys']
     }
   };
-  
-  // Mock organization members
   const mockOrgMembers = [
     {
       user_id: 'user-123',
@@ -69,42 +60,13 @@ describe('Business-specific Session Controls', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     user = userEvent.setup();
-    
-    // Mock authentication state
     (supabase.auth.getUser as vi.Mock).mockResolvedValue({
       data: { user: mockAdminUser },
       error: null
     });
-    
-    // Mock organization data fetch
-    (supabase.from as vi.Mock).mockImplementation((table: string) => {
-      if (table === 'organizations') {
-        return {
-          eq: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({
-            data: mockOrganization,
-            error: null
-          })
-        };
-      } else if (table === 'organization_members') {
-        return {
-          eq: vi.fn().mockReturnThis(),
-          select: vi.fn().mockReturnThis(),
-          order: vi.fn().mockResolvedValue({
-            data: mockOrgMembers,
-            error: null
-          })
-        };
-      }
-      return {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis()
-      };
-    });
   });
 
   test('Admin can view and configure organization session policies', async () => {
-    // Mock successful policy update
     (supabase.from as vi.Mock).mockReturnValue({
         update: vi.fn().mockImplementation((data) => ({
             eq: vi.fn().mockResolvedValue({
@@ -113,39 +75,27 @@ describe('Business-specific Session Controls', () => {
             })
         }))
     });
-
-    // Render organization session manager component
     render(
       <UserManagementProvider>
         <OrganizationProvider orgId="org-123">
-          {/* TODO: OrganizationSessionManager usages commented out due to missing import. Review and update path if file exists. */}
+          <OrganizationSessionManager orgId="org-123" />
         </OrganizationProvider>
       </UserManagementProvider>
     );
-    
-    // Wait for component to load with organization data
     await waitFor(() => {
       expect(screen.getByText(/acme inc/i)).toBeInTheDocument();
       expect(screen.getByText(/session policies/i)).toBeInTheDocument();
     });
-    
-    // Current policy values should be displayed
-    expect(screen.getByDisplayValue('60')).toBeInTheDocument(); // Session timeout 60 mins
-    expect(screen.getByDisplayValue('3')).toBeInTheDocument(); // Max 3 sessions per user
-    
-    // Update session timeout policy
+    expect(screen.getByDisplayValue('60')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('3')).toBeInTheDocument();
     const timeoutInput = screen.getByLabelText(/session timeout/i);
     await act(async () => {
         await user.clear(timeoutInput);
         await user.type(timeoutInput, '30');
     });
-    
-    // Save settings
     await act(async () => {
         await user.click(screen.getByRole('button', { name: /save/i }));
     });
-    
-    // Verify update was called with correct data
     await waitFor(() => {
       expect((supabase.from as vi.Mock)('organizations').update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -153,13 +103,10 @@ describe('Business-specific Session Controls', () => {
         })
       );
     });
-    
-    // Success message should be displayed
     expect(screen.getByText(/settings updated/i)).toBeInTheDocument();
   });
 
   test('Admin can view and terminate user sessions across organization', async () => {
-    // Mock successful session termination
     (supabase.rpc as vi.Mock).mockImplementation((procedure, params) => {
       if (procedure === 'terminate_user_sessions') {
         return Promise.resolve({
@@ -169,48 +116,35 @@ describe('Business-specific Session Controls', () => {
       }
       return Promise.resolve({ data: null, error: null });
     });
-
-    // Render organization session manager
     render(
       <UserManagementProvider>
         <OrganizationProvider orgId="org-123">
-          {/* TODO: OrganizationSessionManager usages commented out due to missing import. Review and update path if file exists. */}
+          <OrganizationSessionManager orgId="org-123" />
         </OrganizationProvider>
       </UserManagementProvider>
     );
-    
-    // Wait for component to load with member data
     await waitFor(() => {
       expect(screen.getByText(/organization members/i)).toBeInTheDocument();
       expect(screen.getByText(/user@example.com/i)).toBeInTheDocument();
       expect(screen.getByText(/manager@example.com/i)).toBeInTheDocument();
-      expect(screen.getByText(/2 active sessions/i)).toBeInTheDocument(); // For user-123
+      expect(screen.getByText(/2 active sessions/i)).toBeInTheDocument();
     });
-    
-    // Click to terminate all sessions for first user
     const terminateButtons = screen.getAllByRole('button', { name: /terminate sessions/i });
     await act(async () => {
-        await user.click(terminateButtons[0]); // First user (user-123)
+        await user.click(terminateButtons[0]);
     });
-    
-    // Confirm termination
     await act(async () => {
         await user.click(screen.getByRole('button', { name: /confirm/i }));
     });
-    
-    // Verify RPC call was made with correct user ID
     await waitFor(() => {
       expect(supabase.rpc).toHaveBeenCalledWith('terminate_user_sessions', {
         user_id: 'user-123'
       });
     });
-    
-    // Success message should show count of terminated sessions
     expect(screen.getByText(/2 sessions terminated/i)).toBeInTheDocument();
   });
 
   test('Admin can configure IP restrictions', async () => {
-    // Mock successful policy update
     (supabase.from as vi.Mock).mockReturnValue({
         update: vi.fn().mockImplementation((data) => ({
             eq: vi.fn().mockResolvedValue({
@@ -219,33 +153,23 @@ describe('Business-specific Session Controls', () => {
             })
         }))
     });
-
-    // Render organization session manager
     render(
       <UserManagementProvider>
         <OrganizationProvider orgId="org-123">
-          {/* TODO: OrganizationSessionManager usages commented out due to missing import. Review and update path if file exists. */}
+          <OrganizationSessionManager orgId="org-123" />
         </OrganizationProvider>
       </UserManagementProvider>
     );
-    
-    // Click on IP restrictions tab
     await act(async () => {
         await user.click(screen.getByRole('tab', { name: /ip restrictions/i }));
     });
-    
-    // Wait for IP restriction settings to load
     await waitFor(() => {
       expect(screen.getByText(/allowed ip ranges/i)).toBeInTheDocument();
       expect(screen.getByText(/192.168.1.0\/24/i)).toBeInTheDocument();
     });
-    
-    // Toggle IP restrictions off
     await act(async () => {
         await user.click(screen.getByLabelText(/enforce ip restrictions/i));
     });
-    
-    // Add a new IP range
     await act(async () => {
         await user.click(screen.getByRole('button', { name: /add ip range/i }));
     });
@@ -255,13 +179,9 @@ describe('Business-specific Session Controls', () => {
     await act(async () => {
         await user.click(screen.getByRole('button', { name: /add/i }));
     });
-    
-    // Save settings
     await act(async () => {
         await user.click(screen.getByRole('button', { name: /save/i }));
     });
-    
-    // Verify update was called with correct data
     await waitFor(() => {
       expect((supabase.from as vi.Mock)('organizations').update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -270,44 +190,29 @@ describe('Business-specific Session Controls', () => {
         })
       );
     });
-
-    // Success message should be displayed
     expect(screen.getByText(/settings updated/i)).toBeInTheDocument();
   });
 
   test('Admin can configure reauthentication for sensitive actions', async () => {
-    // Render organization session manager
     render(
       <UserManagementProvider>
         <OrganizationProvider orgId="org-123">
-          {/* TODO: OrganizationSessionManager usages commented out due to missing import. Review and update path if file exists. */}
+          <OrganizationSessionManager orgId="org-123" />
         </OrganizationProvider>
       </UserManagementProvider>
     );
-    
-    // Click on sensitive actions tab
     await user.click(screen.getByRole('tab', { name: /sensitive actions/i }));
-    
-    // Wait for sensitive actions settings to load
     await waitFor(() => {
       expect(screen.getByText(/require reauthentication/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/payment/i)).toBeChecked();
       expect(screen.getByLabelText(/user management/i)).toBeChecked();
       expect(screen.getByLabelText(/api keys/i)).toBeChecked();
     });
-    
-    // Add a custom sensitive action
     await user.click(screen.getByRole('button', { name: /add custom action/i }));
     await user.type(screen.getByPlaceholderText(/action name/i), 'delete_records');
     await user.click(screen.getByRole('button', { name: /add/i }));
-    
-    // Uncheck an existing action
     await user.click(screen.getByLabelText(/payment/i));
-    
-    // Save settings
     await user.click(screen.getByRole('button', { name: /save/i }));
-    
-    // Verify update was called with correct data
     await waitFor(() => {
       expect(supabase.from().update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -318,21 +223,15 @@ describe('Business-specific Session Controls', () => {
   });
 
   test('IP restriction enforcement is applied during login', async () => {
-    // Mock the current IP address
-    const mockIp = '192.168.1.100'; // Within allowed range
-    
-    // Mock IP verification RPC
+    const mockIp = '192.168.1.100';
     supabase.rpc.mockImplementation((procedure, params) => {
       if (procedure === 'check_ip_restrictions') {
-        // Check if IP is within allowed ranges
         const allowed = mockOrganization.security_settings.allowed_ip_ranges.some(range => {
-          // This is a simplified check for test purposes
           if (range === '192.168.1.0/24') {
             return mockIp.startsWith('192.168.1.');
           }
           return false;
         });
-        
         return Promise.resolve({
           data: { allowed },
           error: null
@@ -340,30 +239,20 @@ describe('Business-specific Session Controls', () => {
       }
       return Promise.resolve({ data: null, error: null });
     });
-
-    // Render IP verification component during login
     render(
       <OrganizationProvider orgId="org-123">
-        {/* TODO: OrganizationSessionManager usages commented out due to missing import. Review and update path if file exists. */}
+        <OrganizationSessionManager orgId="org-123" />
       </OrganizationProvider>
     );
-    
-    // Verify IP check was performed
     await waitFor(() => {
       expect(supabase.rpc).toHaveBeenCalledWith('check_ip_restrictions', {
         org_id: 'org-123',
         ip_address: mockIp
       });
     });
-    
-    // Should pass and allow login
     expect(screen.getByText(/ip verification successful/i)).toBeInTheDocument();
-    
-    // Now test with unauthorized IP
     vi.clearAllMocks();
-    const unauthorizedIp = '203.0.113.1'; // Outside allowed range
-    
-    // Update mock response for unauthorized IP
+    const unauthorizedIp = '203.0.113.1';
     supabase.rpc.mockImplementation((procedure, params) => {
       if (procedure === 'check_ip_restrictions') {
         return Promise.resolve({
@@ -373,54 +262,39 @@ describe('Business-specific Session Controls', () => {
       }
       return Promise.resolve({ data: null, error: null });
     });
-    
-    // Re-render with unauthorized IP
     render(
       <OrganizationProvider orgId="org-123">
-        {/* TODO: OrganizationSessionManager usages commented out due to missing import. Review and update path if file exists. */}
+        <OrganizationSessionManager orgId="org-123" />
       </OrganizationProvider>
     );
-    
-    // Should block login
     await waitFor(() => {
       expect(screen.getByText(/unauthorized ip address/i)).toBeInTheDocument();
     });
   });
 
   test('Force reauthentication dialog works correctly for sensitive operations', async () => {
-    // Mock successful reauthentication
     supabase.auth.signInWithPassword.mockResolvedValueOnce({
       data: { user: mockAdminUser, session: { access_token: 'new-token' } },
       error: null
     });
-
-    // Render reauthentication dialog
     render(
       <UserManagementProvider>
         <OrganizationProvider orgId="org-123">
-          {/* TODO: OrganizationSessionManager usages commented out due to missing import. Review and update path if file exists. */}
+          <OrganizationSessionManager orgId="org-123" />
         </OrganizationProvider>
       </UserManagementProvider>
     );
-    
-    // Verify reauthentication dialog is shown
     await waitFor(() => {
       expect(screen.getByText(/this action requires reauthentication/i)).toBeInTheDocument();
     });
-    
-    // Enter password and submit
     await user.type(screen.getByLabelText(/password/i), 'password123');
     await user.click(screen.getByRole('button', { name: /verify/i }));
-    
-    // Verify auth was called
     await waitFor(() => {
       expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({
         email: 'admin@example.com',
         password: 'password123'
       });
     });
-    
-    // Success message should be displayed
     expect(screen.getByText(/verification successful/i)).toBeInTheDocument();
   });
-});
+}); 

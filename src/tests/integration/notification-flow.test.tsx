@@ -7,8 +7,8 @@ import { NotificationPreferences } from '@/components/shared/NotificationPrefere
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 
 // Import our standardized mock
-vi.mock('@/lib/supabase', () => require('../mocks/supabase'));
-import { supabase } from '@/lib/supabase';
+vi.mock('@/lib/database/supabase', () => require('../mocks/supabase'));
+import { supabase } from '@/lib/database/supabase';
 
 describe('Notification Management Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

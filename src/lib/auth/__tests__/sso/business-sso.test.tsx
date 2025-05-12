@@ -9,8 +9,8 @@ import { OrganizationProvider } from '@/lib/context/OrganizationContext';
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 
 // Import our standardized mock using vi.mock with async import
-vi.mock('@/lib/supabase', async () => (await import('@/tests/mocks/supabase')));
-import { supabase } from '@/lib/supabase';
+vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
+import { supabase } from '@/lib/database/supabase';
 
 // Store original window location
 const originalLocation = window.location;

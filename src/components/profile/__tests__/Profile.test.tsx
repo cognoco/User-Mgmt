@@ -11,8 +11,8 @@ import { createMockUser, createMockProfile } from '@/tests/utils/testing-utils';
 
 // Import and use our standardized mock
 import { describe, test, beforeAll, afterAll, beforeEach, expect, vi } from 'vitest';
-vi.mock('@/lib/supabase', async () => await import('@/tests/mocks/supabase'));
-import { supabase } from '@/lib/supabase';
+vi.mock('@/lib/database/supabase', async () => await import('@/tests/mocks/supabase'));
+import { supabase } from '@/lib/database/supabase';
 
 describe('Profile Component', () => {
   // Setup test environment and router

@@ -7,8 +7,8 @@ import userEvent from '@testing-library/user-event';
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 
 // Import our standardized mock
-vi.mock('@/lib/supabase');
-import { supabase } from '@/lib/supabase';
+vi.mock('@/lib/database/supabase');
+import { supabase } from '@/lib/database/supabase';
 
 describe('Collaboration Features Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

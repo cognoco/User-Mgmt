@@ -25,32 +25,85 @@ import type {
 type SupabaseRpcResponse = { data: unknown | null; error: unknown | null };
 
 // Helper to create a fully chainable builder
-function createMockBuilder() {
-  const builder: any = {};
-  const terminalMethods = [
-    'select', 'insert', 'update', 'upsert', 'delete',
-  ];
-  const chainableMethods = [
-    'eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'ilike', 'in', 'is', 'or', 'filter', 'range', 'order', 'limit',
-    'single', 'maybeSingle',
-  ];
+function createMockBuilder(table?: string, orgId?: string) {
+  const query: any = { table, orgId };
+  // Return a plain object with all methods as own properties
+  const builder: any = { _query: query };
 
-  // Terminal methods return the builder for chaining (not a Promise)
-  terminalMethods.forEach((method) => {
-    // All methods return the builder for full chainability in tests.
-    // For promise-based assertions, use .then on the builder in your test.
-    builder[method] = vi.fn(() => builder);
-  });
+  const methods = {
+    select(arg: any) { query.select = arg; return builder; },
+    insert(arg: any) { query.insert = arg; return builder; },
+    update(arg: any) { query.update = arg; return builder; },
+    upsert(arg: any) { query.upsert = arg; return builder; },
+    delete(arg: any) { query.delete = arg; return builder; },
+    eq(...args: any[]) { query.eq = args; return builder; },
+    neq(...args: any[]) { query.neq = args; return builder; },
+    gt(...args: any[]) { query.gt = args; return builder; },
+    gte(...args: any[]) { query.gte = args; return builder; },
+    lt(...args: any[]) { query.lt = args; return builder; },
+    lte(...args: any[]) { query.lte = args; return builder; },
+    like(...args: any[]) { query.like = args; return builder; },
+    ilike(...args: any[]) { query.ilike = args; return builder; },
+    in(...args: any[]) { query.in = args; return builder; },
+    is(...args: any[]) { query.is = args; return builder; },
+    or(...args: any[]) { query.or = args; return builder; },
+    filter(...args: any[]) { query.filter = args; return builder; },
+    range(...args: any[]) { query.range = args; return builder; },
+    order(...args: any[]) { query.order = args; return builder; },
+    limit(...args: any[]) { query.limit = args; return builder; },
+    single() {
+      if (query.table === 'organizations') {
+        return Promise.resolve({
+          data: {
+            security_settings: {
+              session_timeout_mins: 60,
+              max_sessions_per_user: 3,
+              enforce_ip_restrictions: true,
+              allowed_ip_ranges: ['192.168.1.0/24', '10.0.0.0/16'],
+              enforce_device_restrictions: true,
+              allowed_device_types: ['desktop', 'mobile'],
+              require_reauth_for_sensitive: true,
+              sensitive_actions: ['payment', 'user_management', 'api_keys']
+            }
+          },
+          error: null
+        });
+      }
+      if (query.table === 'organization_members') {
+        return Promise.resolve({
+          data: [
+            {
+              user_id: 'user-123',
+              email: 'user@example.com',
+              role: 'member',
+              active_sessions: 2,
+              last_active: '2023-06-15T14:30:00Z'
+            },
+            {
+              user_id: 'user-456',
+              email: 'manager@example.com',
+              role: 'manager',
+              active_sessions: 1,
+              last_active: '2023-06-14T16:45:00Z'
+            },
+            {
+              user_id: 'admin-123',
+              email: 'admin@example.com',
+              role: 'admin',
+              active_sessions: 1,
+              last_active: '2023-06-15T09:15:00Z'
+            }
+          ],
+          error: null
+        });
+      }
+      return Promise.resolve({ data: null, error: null });
+    },
+    maybeSingle() { return builder.single(); },
+    then: undefined // for promise-like chaining if needed
+  };
 
-  // Chainable methods return the builder for chaining
-  chainableMethods.forEach((method) => {
-    builder[method] = vi.fn(() => builder);
-  });
-
-  // Add a .then method to allow promise-like chaining and mocking
-  // Usage: builder.then.mockResolvedValue(...) in tests
-  builder.then = vi.fn();
-
+  Object.assign(builder, methods);
   return builder;
 }
 
@@ -94,7 +147,7 @@ const mockSupabase = {
     on: vi.fn().mockReturnThis(),
     subscribe: vi.fn()
   }),
-  from: vi.fn().mockImplementation(() => createMockBuilder()),
+  from: vi.fn().mockImplementation((table: string) => createMockBuilder(table)),
 };
 
 // Cast the whole mock object for better type checking if possible

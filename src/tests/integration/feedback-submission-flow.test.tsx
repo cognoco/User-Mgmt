@@ -9,7 +9,7 @@ import { supabase } from '@/tests/mocks/supabase';
 import type { Mock } from 'vitest';
 
 // Import our standardized mock
-vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
+vi.mock('@/lib/database/supabase', () => import('@/tests/mocks/supabase'));
 
 describe('Feedback Submission Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

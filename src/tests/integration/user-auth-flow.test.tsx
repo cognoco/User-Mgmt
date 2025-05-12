@@ -15,7 +15,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'; // A
 // import { useAuthStore } from '@/lib/stores/auth.store';
 
 // Mock Supabase (using factory with dynamic import)
-vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
+vi.mock('@/lib/database/supabase', () => import('@/tests/mocks/supabase'));
 // Import the mocked supabase instance (Vitest redirects this)
 import { supabase } from '@/tests/mocks/supabase';
 

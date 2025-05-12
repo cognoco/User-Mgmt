@@ -1,3 +1,5 @@
+import './src/tests/setup';
+
 // Add dummy environment variables for Supabase client initialization
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost:54321'; // Dummy URL
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'dummy-anon-key'; // Dummy key

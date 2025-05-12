@@ -9,29 +9,30 @@ import React from 'react';
 expect.extend(matchers);
 
 // Configure React for testing
-(global as any).React = React;
+// Assign React to globalThis for test environments
+(globalThis as any).React = React;
 
 // Mock components
 vi.mock('@/components/ui/button', () => ({
-  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+  Button: ({ children, ...props }: React.ComponentProps<'button'>) => <button {...props}>{children}</button>,
 }));
 
 vi.mock('@/components/ui/label', () => ({
-  Label: ({ children, ...props }: any) => <label {...props}>{children}</label>,
+  Label: ({ children, ...props }: React.ComponentProps<'label'>) => <label {...props}>{children}</label>,
 }));
 
 vi.mock('@/components/ui/input', () => ({
-  Input: (props: any) => <input {...props} />,
+  Input: (props: React.ComponentProps<'input'>) => <input {...props} />,
 }));
 
 vi.mock('@/components/ui/checkbox', () => ({
-  Checkbox: (props: any) => <input type="checkbox" {...props} />,
+  Checkbox: (props: React.ComponentProps<'input'>) => <input type="checkbox" {...props} />,
 }));
 
 vi.mock('@/components/ui/alert', () => ({
-  Alert: ({ children, ...props }: any) => <div role="alert" {...props}>{children}</div>,
-  AlertTitle: ({ children, ...props }: any) => <h5 {...props}>{children}</h5>,
-  AlertDescription: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  Alert: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => <div role="alert" {...props}>{children}</div>,
+  AlertTitle: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => <h5 {...props}>{children}</h5>,
+  AlertDescription: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => <div {...props}>{children}</div>,
 }));
 
 // Mock Next.js router
@@ -47,20 +48,21 @@ vi.mock('next/router', () => ({
 // Mock Next.js image
 vi.mock('next/image', () => ({
   __esModule: true,
-  default: ({ src, alt, ...props }: any) => <img src={src} alt={alt} {...props} />,
+  default: ({ src, alt, ...props }: { src: string; alt: string } & React.ImgHTMLAttributes<HTMLImageElement>) => <img src={src} alt={alt} {...props} />,
 }));
 
 // Mock localStorage
-const localStorageMock = {
+const localStorageMock: Storage = {
   getItem: vi.fn(),
   setItem: vi.fn(),
   removeItem: vi.fn(),
   clear: vi.fn(),
+  key: vi.fn(),
+  length: 0,
 };
-(global as any).localStorage = localStorageMock;
-
-// Mock matchMedia
-(global as any).matchMedia = vi.fn().mockImplementation(query => ({
+// Assign localStorage and matchMedia mocks directly to globalThis
+(globalThis as any).localStorage = localStorageMock;
+(globalThis as any).matchMedia = vi.fn().mockImplementation((query: string): MediaQueryList => ({
   matches: false,
   media: query,
   onchange: null,
@@ -69,7 +71,7 @@ const localStorageMock = {
   addEventListener: vi.fn(),
   removeEventListener: vi.fn(),
   dispatchEvent: vi.fn(),
-}));
+})) as unknown as typeof window.matchMedia;
 
 // Setup MSW
 export const server = setupServer();

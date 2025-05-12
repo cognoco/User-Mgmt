@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event';
 import { LoginForm } from '\.\.\/\.\.\/src\/components/auth/LoginForm';
 
 // Import our standardized mock
-vi.mock('@/lib/supabase');
+vi.mock('@/lib/database/supabase');
 import { supabase } from '\.\.\/\.\.\/src\/lib/supabase';
 
 describe('API Error Messages', () => {

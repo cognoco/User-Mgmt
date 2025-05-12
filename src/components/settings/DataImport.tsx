@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Spinner } from '@/components/ui/spinner';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/database/supabase';
 
 interface DataImportProps {
   onSuccess?: (summary: any) => void;

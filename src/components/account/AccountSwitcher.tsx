@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Alert } from '@/components/ui/alert';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/database/supabase';
 
 interface AccountSwitcherProps {
   showDetails?: boolean;

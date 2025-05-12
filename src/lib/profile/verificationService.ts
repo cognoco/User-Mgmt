@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase';
+import { createClient } from '@/lib/database/supabase';
 
 export type ProfileVerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
 

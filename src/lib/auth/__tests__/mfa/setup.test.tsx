@@ -8,11 +8,11 @@ import { TwoFactorSetup } from '@/components/auth/TwoFactorSetup';
 import { api } from '@/lib/api/axios';
 
 // Import our standardized mock using vi.mock with async dynamic import and alias (no extension)
-vi.mock('@/lib/supabase', async () => { 
-  const mod = await import('@/tests/mocks/supabase'); // Use path alias, omit extension
+vi.mock('@/lib/database/supabase', async () => { 
+  const mod = await import('@/tests/mocks/supabase');
   return mod; 
 });
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/database/supabase';
 
 // Mock the API instance specifically for these tests
 vi.mock('@/lib/api/axios');

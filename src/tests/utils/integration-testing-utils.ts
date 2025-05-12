@@ -2,7 +2,7 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/database/supabase';
 
 /**
  * Creates a testing environment for integration tests

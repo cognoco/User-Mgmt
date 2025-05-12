@@ -10,7 +10,7 @@ import { vi } from 'vitest';
 import { supabase } from '@/tests/mocks/supabase';
 
 // Import our standardized mock
-vi.mock('@/lib/supabase', () => import('@/tests/mocks/supabase'));
+vi.mock('@/lib/database/supabase', () => import('@/tests/mocks/supabase'));
 
 describe('Empty States', () => {
   let user: ReturnType<typeof userEvent.setup>;

@@ -6,8 +6,8 @@ import userEvent from '@testing-library/user-event';
 import { AccountSwitcher } from '@/components/account/AccountSwitcher';
 
 // Import our standardized mock
-vi.mock('@/lib/supabase', () => require('@/tests/mocks/supabase'));
-import { supabase } from '@/lib/supabase';
+vi.mock('@/lib/database/supabase', () => require('@/tests/mocks/supabase'));
+import { supabase } from '@/lib/database/supabase';
 
 describe('Account Switching Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

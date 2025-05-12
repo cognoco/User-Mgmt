@@ -9,7 +9,7 @@ import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 
 // Mocking supabase is unnecessary for this component, but keep the module mock 
 // in case parent components or wrappers rely on it? Revisit if issues arise.
-vi.mock('@/lib/supabase'); 
+vi.mock('@/lib/database/supabase'); 
 // We don't import or use the supabase client directly in these tests anymore.
 
 // Store original window methods potentially mocked for export tests (though export test is removed)

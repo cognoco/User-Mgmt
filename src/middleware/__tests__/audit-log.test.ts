@@ -4,8 +4,8 @@ import { auditLog } from '../../middleware/audit-log';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Import our standardized mock
-vi.mock('../../lib/supabase', () => require('../mocks/supabase'));
-import { supabase } from '@/lib/supabase';
+vi.mock('@/lib/database/supabase', () => require('../mocks/supabase'));
+import { supabase } from '@/lib/database/supabase';
 
 // Extend NextApiRequest to include user property
 interface ExtendedRequest extends NextApiRequest {
