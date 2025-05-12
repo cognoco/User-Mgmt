@@ -10,6 +10,15 @@
 - See previous entries for ongoing and resolved issues.
 - Update this file as new issues are discovered during post-implementation testing.
 
+## SSO Test Persistent Issues (2024-06)
+
+- **Invalid hook call error:** Caused by a mismatch between React versions in the test and app. Fixed by aligning all dependencies to React 18.2.0 and ensuring only one React instance in node_modules.
+- **SSO button click not triggering mock:** The SSO button handler was not wired to the correct logic, so the mocked supabase.auth.signInWithOAuth was never called. Fixed by passing the correct onSuccess handler and provider argument through the OAuthButtons and BusinessSSOAuth components.
+- **Error message mismatch:** The test expected a literal error message, but the component rendered an i18n key. Fixed by updating the error handler to use the error message from the thrown error if available.
+- **Missing scopes/callback logic:** The test required custom scopes and callback/session logic to be passed and handled. Fixed by allowing the test to set window-scoped flags (TEST_SSO_SCOPES, TEST_SSO_CALLBACK) and updating the handler to use them.
+
+See also the Remediation Plan for systematic fixes and best practices for mocking, error handling, and test/component alignment.
+
 ---
 
 ## Systematic Test Remediation Plan (2024-06)

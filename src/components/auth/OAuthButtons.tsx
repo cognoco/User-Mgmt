@@ -33,6 +33,7 @@ export interface OAuthButtonsProps {
   layout?: 'horizontal' | 'vertical' | 'grid';
   showLabels?: boolean;
   className?: string;
+  onSuccess?: (provider: OAuthProvider) => void;
 }
 
 export function OAuthButtons({
@@ -40,6 +41,7 @@ export function OAuthButtons({
   layout = 'vertical',
   showLabels = true,
   className = '',
+  onSuccess,
 }: OAuthButtonsProps) {
   const { t } = useTranslation();
   const { oauth } = useUserManagement();
@@ -94,6 +96,9 @@ export function OAuthButtons({
   // Handle login with provider
   const handleLogin = (provider: OAuthProvider) => {
     login(provider);
+    if (typeof onSuccess === 'function') {
+      onSuccess(provider);
+    }
   };
   
   // Layout classes

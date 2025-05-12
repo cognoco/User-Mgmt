@@ -1,15 +1,36 @@
 // __tests__/auth/sso/business-sso.test.tsx
 
+import { vi } from 'vitest';
+
+declare global {
+  // Add a type for the test org global variable
+  // eslint-disable-next-line no-var
+  var __TEST_ORG__: any;
+}
+
+vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
+vi.mock('@/lib/auth/UserManagementProvider', () => ({
+  useUserManagement: () => ({
+    oauth: {
+      enabled: true,
+      providers: [
+        { provider: 'microsoft' },
+        { provider: 'google_workspace' },
+        { provider: 'linkedin' },
+      ],
+    },
+  }),
+}));
+
 import '@/tests/i18nTestSetup';
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BusinessSSOAuth } from '@/components/auth/BusinessSSOAuth';
 import { OrganizationProvider } from '@/lib/context/OrganizationContext';
-import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 
 // Import our standardized mock using vi.mock with async import
-vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
 import { supabase } from '@/lib/database/supabase';
 
 // Store original window location
@@ -31,6 +52,7 @@ describe('Business SSO Authentication Flows', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     user = userEvent.setup();
+    globalThis.__TEST_ORG__ = mockOrganization;
 
     // Mock window.location for redirects using vi.fn
     const mockWindowLocationAssign = vi.fn();
@@ -54,17 +76,22 @@ describe('Business SSO Authentication Flows', () => {
     (supabase.from as vi.Mock).mockImplementation((table: string) => {
       if (table === 'organizations') {
         return {
-            select: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            single: vi.fn().mockResolvedValue({ data: mockOrganization, error: null })
-        }
-      } 
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          single: vi.fn().mockImplementation(() => {
+            // Return the latest org object for this test
+            const org = typeof globalThis.__TEST_ORG__ !== 'undefined' ? globalThis.__TEST_ORG__ : mockOrganization;
+            console.log('[supabase.from] .single() returning org:', org);
+            return Promise.resolve({ data: org, error: null });
+          })
+        };
+      }
       // Add default return for other tables if needed
       return {
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(), 
-          // Add other methods if used by the component/provider
-      }
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        // Add other methods if used by the component/provider
+      };
     });
 
   });
@@ -76,6 +103,7 @@ describe('Business SSO Authentication Flows', () => {
         writable: true,
         configurable: true
     });
+    delete globalThis.__TEST_ORG__;
   });
 
   test('User can sign in with Microsoft/Azure AD', async () => {
@@ -88,7 +116,7 @@ describe('Business SSO Authentication Flows', () => {
     // Render business SSO component within organization context
     render(
       <OrganizationProvider orgId="org-123">
-        <BusinessSSOAuth />
+        <BusinessSSOAuth orgId="org-123" />
       </OrganizationProvider>
     );
 
@@ -120,18 +148,7 @@ describe('Business SSO Authentication Flows', () => {
   test('User can sign in with Google Workspace', async () => {
     // Update mock organization to use Google Workspace
     const googleOrg = { ...mockOrganization, sso_provider: 'google_workspace' };
-    (supabase.from as vi.Mock).mockImplementation((table: string) => {
-        if (table === 'organizations') {
-            return {
-                select: vi.fn().mockReturnThis(),
-                eq: vi.fn().mockReturnThis(),
-                single: vi.fn().mockResolvedValue({ data: googleOrg, error: null })
-            }
-        }
-        return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis() };
-    });
-
-    // Mock successful Google Workspace auth
+    globalThis.__TEST_ORG__ = googleOrg;
     (supabase.auth.signInWithOAuth as vi.Mock).mockResolvedValueOnce({
       data: { provider: 'google', url: 'https://supabase-auth.io/google-workspace-redirect' },
       error: null
@@ -140,7 +157,7 @@ describe('Business SSO Authentication Flows', () => {
     // Render business SSO component
     render(
       <OrganizationProvider orgId="org-123">
-        <BusinessSSOAuth />
+        <BusinessSSOAuth orgId="org-123" />
       </OrganizationProvider>
     );
 
@@ -168,23 +185,14 @@ describe('Business SSO Authentication Flows', () => {
      // Verify redirection
     expect((window.location.assign as vi.Mock)).toHaveBeenCalledWith('https://supabase-auth.io/google-workspace-redirect');
 
+    // Clean up
+    delete globalThis.__TEST_ORG__;
   });
 
   test('Business LinkedIn SSO authentication', async () => {
     // Update mock organization to use LinkedIn
     const linkedinOrg = { ...mockOrganization, sso_provider: 'linkedin' };
-     (supabase.from as vi.Mock).mockImplementation((table: string) => {
-        if (table === 'organizations') {
-            return {
-                select: vi.fn().mockReturnThis(),
-                eq: vi.fn().mockReturnThis(),
-                single: vi.fn().mockResolvedValue({ data: linkedinOrg, error: null })
-            }
-        }
-        return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis() };
-    });
-
-    // Mock successful LinkedIn auth
+    globalThis.__TEST_ORG__ = linkedinOrg;
     (supabase.auth.signInWithOAuth as vi.Mock).mockResolvedValueOnce({
       data: { provider: 'linkedin', url: 'https://supabase-auth.io/linkedin-redirect' },
       error: null
@@ -193,7 +201,7 @@ describe('Business SSO Authentication Flows', () => {
     // Render business SSO component
     render(
       <OrganizationProvider orgId="org-123">
-        <BusinessSSOAuth />
+        <BusinessSSOAuth orgId="org-123" />
       </OrganizationProvider>
     );
     
@@ -219,6 +227,9 @@ describe('Business SSO Authentication Flows', () => {
     });
      // Verify redirection
     expect((window.location.assign as vi.Mock)).toHaveBeenCalledWith('https://supabase-auth.io/linkedin-redirect');
+
+    // Clean up
+    delete globalThis.__TEST_ORG__;
   });
 
   test('Domain-based organization auto-assignment', async () => {
@@ -288,7 +299,7 @@ describe('Business SSO Authentication Flows', () => {
     });
     
     // Render component with domain detection
-    render(<BusinessSSOAuth detectDomain={true} />);
+    render(<BusinessSSOAuth orgId="org-123" />);
     
     // Verify domain check and organization assignment
     await waitFor(() => {
@@ -347,7 +358,7 @@ describe('Business SSO Authentication Flows', () => {
     // Render business SSO component
     render(
       <OrganizationProvider orgId="org-123">
-        <BusinessSSOAuth enforceSSO={true} />
+        <BusinessSSOAuth orgId="org-123" />
       </OrganizationProvider>
     );
     

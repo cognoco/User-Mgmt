@@ -1,12 +1,12 @@
 # Test Results
 
-**Passed Test Files:** 44  |  **Failed Test Files:** 40
+**Passed Test Files:** 48  |  **Failed Test Files:** 37
 
 ## Passing Test Files
 
 - src\components\account\__tests__\DeleteAccountDialog.test.tsx
 - src\components\admin\__tests__\RoleManagementPanel.test.tsx
-- src\components\auth\__tests__\BusinessSSOSetup.test.tsx
+- src\components\auth\__tests__\IDPConfiguration.test.tsx
 - src\components\auth\__tests__\LoginForm.test.tsx
 - src\components\auth\__tests__\MinimalTextareaForm.test.tsx
 - src\components\auth\__tests__\ProtectedRoute.test.tsx
@@ -29,7 +29,12 @@
 - src\hooks\__tests__\useTeamInvite.test.tsx
 - src\lib\__tests__\config.test.js
 - src\lib\auth\__tests__\UserManagementProvider.test.tsx
+- src\lib\auth\__tests__\mfa\mfa.test.ts
+- src\lib\auth\__tests__\mfa\setup.test.tsx
 - src\lib\auth\__tests__\mfa\verification.test.tsx
+- src\lib\auth\__tests__\sso\personal-sso.test.tsx
+- src\lib\database\__tests__\database.test.tsx
+- src\lib\database\__tests__\supabase.test.tsx
 - src\lib\stores\__tests__\auth.store.direct.test.ts
 - src\lib\stores\__tests__\auth.store.minimal.test.ts
 - src\lib\stores\__tests__\auth.store.test.ts
@@ -38,7 +43,6 @@
 - src\lib\stores\__tests__\user.store.test.ts
 - src\middleware\__tests__\security-headers.test.ts
 - src\tests\integration\account-settings-flow.test.tsx
-- src\tests\integration\connected-accounts.integration.test.tsx
 - src\tests\integration\dashboard-view-flow.test.tsx
 - src\tests\integration\form-validation-errors-isolated.test.tsx
 - src\tests\integration\form-validation-errors.test.tsx
@@ -53,21 +57,17 @@
 
 - src\components\admin\__tests__\AdminDashboard.test.tsx
 - src\components\audit\__tests__\AuditLogViewer.test.tsx
+- src\components\auth\__tests__\BusinessSSOSetup.test.tsx
 - src\components\auth\__tests__\DomainBasedOrgMatching.test.tsx
-- src\components\auth\__tests__\IDPConfiguration.test.tsx
 - src\components\auth\__tests__\OrganizationSSO.test.tsx
+- src\components\company\__tests__\OrganizationSessionManager.test.tsx
 - src\components\profile\__tests__\Profile.test.tsx
 - src\components\profile\__tests__\ProfilePrivacySettings.test.tsx
 - src\hooks\__tests__\usePayment.test.ts
 - src\hooks\__tests__\usePermission.test.tsx
 - src\hooks\__tests__\useSubscription.test.ts
-- src\lib\auth\__tests__\mfa\mfa.test.ts
-- src\lib\auth\__tests__\mfa\setup.test.tsx
 - src\lib\auth\__tests__\session\business-policies.test.tsx
 - src\lib\auth\__tests__\sso\business-sso.test.tsx
-- src\lib\auth\__tests__\sso\personal-sso.test.tsx
-- src\lib\database\__tests__\database.test.tsx
-- src\lib\database\__tests__\supabase.test.tsx
 - src\lib\rbac\__tests__\roleService.test.ts
 - src\lib\stores\__tests__\subscription.store.test.ts
 - src\middleware\__tests__\audit-log.test.ts
@@ -81,6 +81,7 @@
 - src\tests\integration\api-error-messages.test.tsx
 - src\tests\integration\backup.integration.test.tsx
 - src\tests\integration\collaboration-flow.test.tsx
+- src\tests\integration\connected-accounts.integration.test.tsx
 - src\tests\integration\data-management-flow.test.tsx
 - src\tests\integration\empty-states.test.tsx
 - src\tests\integration\error-recovery-flow.test.tsx

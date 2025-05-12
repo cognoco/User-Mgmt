@@ -1,14 +1,13 @@
 // __tests__/integration/export-import-flow.test.tsx
 
+vi.mock('@/lib/database/supabase', () => import('@/tests/mocks/supabase'));
+import { supabase } from '@/lib/database/supabase';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserPreferencesComponent } from '@/components/common/UserPreferences';
 import { vi } from 'vitest';
-
-// Use the canonical supabase mock
-vi.mock('@/lib/database/supabase', () => import('@/tests/mocks/supabase'));
-import { supabase } from '@/lib/database/supabase';
 
 describe('User Preferences Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

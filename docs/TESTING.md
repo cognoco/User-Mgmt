@@ -116,3 +116,12 @@
 
 - **Pattern:** Always wrap user events and async state updates in `await act(async () => { ... })` or `await waitFor(...)` to avoid act warnings and ensure reliable test results.
 - **Reference:** See `TESTING_ISSUES.md` and `Testing_Findings.md` for more details and examples.
+
+---
+
+## Lessons Learned from SSO Test Remediation (2024-06)
+
+- Always ensure React versions are aligned between app and test environments to avoid invalid hook call errors.
+- Wire test handlers and mocks carefully—pass all necessary props and arguments through UI layers to ensure user actions trigger the correct logic.
+- When asserting on error messages, use the actual user-facing message, not i18n keys or internal codes.
+- For advanced test scenarios (e.g., custom scopes, callback/session logic), allow tests to set window-scoped flags or inject test-specific logic, and document this pattern for future maintainers.

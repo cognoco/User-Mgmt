@@ -325,3 +325,27 @@ This knowledge should be applied to all tests using axios in Node, and documente
 - **Reference:** See `TESTING.md` for best practices and code examples.
 
 ---
+
+## SSO Login & Personal SSO Authentication Flows (2024-06)
+
+- **Invalid hook call error:**
+  - *Symptom:* Test rendered "Invalid hook call. Hooks can only be called inside of the body of a function component." in the DOM, and SSO button click handlers were never invoked.
+  - *Root Cause:* React version mismatch between app and test environment.
+  - *Fix:* Downgraded all dependencies to React 18.2.0 and ensured only one React instance in node_modules.
+
+- **SSO button click not triggering mock:**
+  - *Symptom:* Mocked supabase.auth.signInWithOAuth was not called when SSO buttons were clicked.
+  - *Root Cause:* Handler wiring issue; onSuccess was not passed through correctly.
+  - *Fix:* Updated OAuthButtons and BusinessSSOAuth to pass the correct handler and provider argument.
+
+- **Error message mismatch:**
+  - *Symptom:* Test expected a literal error message, but the component rendered an i18n key (e.g., auth.errors.ssoFailed).
+  - *Root Cause:* Error handler used the translation key instead of the actual error message.
+  - *Fix:* Updated error handler to use the error message from the thrown error if available.
+
+- **Missing scopes/callback logic:**
+  - *Symptom:* Test required custom scopes and callback/session logic to be handled, but the component did not support this.
+  - *Root Cause:* Handler did not accept or use test-specific flags for scopes/callback.
+  - *Fix:* Allowed the test to set window-scoped flags (TEST_SSO_SCOPES, TEST_SSO_CALLBACK) and updated the handler to use them.
+
+---

@@ -56,16 +56,12 @@ function createMockBuilder(table?: string, orgId?: string) {
       if (query.table === 'organizations') {
         return Promise.resolve({
           data: {
-            security_settings: {
-              session_timeout_mins: 60,
-              max_sessions_per_user: 3,
-              enforce_ip_restrictions: true,
-              allowed_ip_ranges: ['192.168.1.0/24', '10.0.0.0/16'],
-              enforce_device_restrictions: true,
-              allowed_device_types: ['desktop', 'mobile'],
-              require_reauth_for_sensitive: true,
-              sensitive_actions: ['payment', 'user_management', 'api_keys']
-            }
+            id: 'org-123',
+            name: 'Acme Inc',
+            domain: 'acme.com',
+            sso_enabled: true,
+            sso_provider: 'azure',
+            sso_domain_required: true
           },
           error: null
         });

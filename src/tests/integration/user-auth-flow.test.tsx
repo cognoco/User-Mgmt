@@ -17,7 +17,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'; // A
 // Mock Supabase (using factory with dynamic import)
 vi.mock('@/lib/database/supabase', () => import('@/tests/mocks/supabase'));
 // Import the mocked supabase instance (Vitest redirects this)
-import { supabase } from '@/tests/mocks/supabase';
+import { supabase } from '@/lib/database/supabase';
 
 // Import Profile type
 import type { Profile } from '@/types/profile'; // Assuming type exists here

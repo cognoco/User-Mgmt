@@ -1,14 +1,13 @@
 // __tests__/integration/password-reset-flow.test.tsx
 
+vi.mock('@/lib/database/supabase', () => require('../mocks/supabase'));
+import { supabase } from '@/lib/database/supabase';
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ResetPasswordForm } from '@/components/auth/ResetPasswordForm';
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
-
-// Import and mock Supabase
-vi.mock('@/lib/database/supabase', () => require('../mocks/supabase'));
-import { supabase } from '@/lib/database/supabase';
 
 // Store original window location
 const originalLocation = window.location;

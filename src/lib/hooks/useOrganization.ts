@@ -25,11 +25,13 @@ export function useOrganization(orgId?: string) {
           return;
         }
 
+        console.log('[useOrganization] Fetching org with id:', orgId);
         const { data, error: fetchError } = await supabase
           .from('organizations')
           .select('*')
           .eq('id', orgId)
           .single();
+        console.log('[useOrganization] Fetched data:', data, 'error:', fetchError);
 
         if (fetchError) throw fetchError;
         setOrganization(data);
