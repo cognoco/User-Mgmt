@@ -44,7 +44,7 @@ export function PasswordRequirements({ password }: PasswordRequirementsProps) {
   return (
     <div 
       role="list"
-      data-testid="password-requirements" 
+      data-testid="password-requirements-helper" 
       className="mt-2 space-y-1 p-3 border rounded bg-slate-50 text-xs"
     >
       {requirements.map((requirement, index) => (

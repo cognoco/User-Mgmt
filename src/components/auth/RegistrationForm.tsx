@@ -16,7 +16,7 @@ import { Check, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/stores/auth.store';
 import { OAuthButtons } from './OAuthButtons';
-// import { PasswordRequirements } from './PasswordRequirements'; // <-- Commented out import
+import { PasswordRequirements } from './PasswordRequirements';
 
 // Base registration schema
 const baseRegistrationSchema = z.object({
@@ -315,6 +315,7 @@ export function RegistrationForm() {
             {form.formState.errors.password && (
                   <p className="text-destructive text-sm mt-1">{form.formState.errors.password.message}</p>
               )}
+            <PasswordRequirements password={form.watch('password') || ''} />
           </div>
           
           <div className="space-y-1.5">

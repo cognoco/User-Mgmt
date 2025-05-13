@@ -8,8 +8,11 @@ import { OrganizationProvider } from '@/lib/context/OrganizationContext'; // Cor
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
 import { vi, describe, beforeEach, test, expect, afterEach } from 'vitest'; // Import vi and afterEach
 
-// Import our standardized mock using vi.mock
-vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
+// IMPORTANT: Mock the real Supabase client before anything else
+vi.mock('@supabase/supabase-js', async () => (await import('@/tests/mocks/supabase')));
+
+// IMPORTANT: Mock must be first to ensure all imports use the mock
+vi.mock('../../../../lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
 import { supabase } from '@/lib/database/supabase';
 
 describe('MOCK DIAGNOSTIC', () => {
@@ -102,42 +105,17 @@ describe('Business-specific Session Controls', () => {
     });
     // Remove per-test supabase.from mock implementation for organizations (now handled globally)
     // If needed, keep or add mocks for other tables (e.g., organization_members)
-    (supabase.from as vi.Mock).mockImplementation((table: string) => {
-      if (table === 'organization_members') {
-        return {
-          select: function() {
-            return {
-              eq: function() {
-                return Promise.resolve({ data: mockOrgMembers, error: null });
-              }
-            };
-          }
-        };
-      }
-      const chain = {
-        select: function() { return this; },
-        eq: function() { return this; },
-        single: function() { return Promise.resolve({ data: null, error: null }); }
-      };
-      return chain;
-    });
   });
 
   afterEach(() => {
     delete globalThis.__TEST_ORG__;
     delete globalThis.__TEST_ORG_ERROR__;
+    delete (globalThis as any).__LAST_ORGANIZATIONS_BUILDER__; // Clean up the stored builder
   });
 
   test('Admin can view and configure organization session policies', async () => {
     // Mock successful policy update
-    (supabase.from as vi.Mock).mockReturnValue({
-        update: vi.fn().mockImplementation((data) => ({
-            eq: vi.fn().mockResolvedValue({
-                data: { ...mockOrganization, security_settings: { ...mockOrganization.security_settings, ...data } },
-                error: null
-            })
-        }))
-    });
+    // REMOVED: (supabase.from as vi.Mock).mockReturnValue({ ... });
 
     // Render organization session manager component
     render(
@@ -172,7 +150,9 @@ describe('Business-specific Session Controls', () => {
     
     // Verify update was called with correct data
     await waitFor(() => {
-      expect((supabase.from as vi.Mock)('organizations').update).toHaveBeenCalledWith(
+      const lastOrgBuilder = (globalThis as any).__LAST_ORGANIZATIONS_BUILDER__;
+      expect(lastOrgBuilder).toBeDefined();
+      expect(lastOrgBuilder.update).toHaveBeenCalledWith(
         expect.objectContaining({
           session_timeout_mins: 30
         })
@@ -236,14 +216,7 @@ describe('Business-specific Session Controls', () => {
 
   test('Admin can configure IP restrictions', async () => {
     // Mock successful policy update
-    (supabase.from as vi.Mock).mockReturnValue({
-        update: vi.fn().mockImplementation((data) => ({
-            eq: vi.fn().mockResolvedValue({
-                data: { ...mockOrganization, security_settings: { ...mockOrganization.security_settings, ...data } },
-                error: null
-            })
-        }))
-    });
+    // REMOVED: (supabase.from as vi.Mock).mockReturnValue({ ... });
 
     // Render organization session manager
     render(
@@ -301,6 +274,9 @@ describe('Business-specific Session Controls', () => {
   });
 
   test('Admin can configure reauthentication for sensitive actions', async () => {
+    // Mock successful policy update
+    // REMOVED: (supabase.from as vi.Mock).mockReturnValue({ ... });
+
     // Render organization session manager
     render(
       <UserManagementProvider>

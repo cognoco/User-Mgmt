@@ -1,0 +1,5 @@
+- Clean up .cursorrules vs .cursor/xxx
+- Consolidate/update product documentation
+    - Create PRD with reference to features documentation
+- Separate product documentation from .cursorrules
+- .env?

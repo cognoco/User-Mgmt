@@ -282,3 +282,35 @@ try {
 if (!window.ResizeObserver) window.ResizeObserver = class { observe() {}; unobserve() {}; disconnect() {}; };
 
 // --- End JSDOM/Browser API Polyfills ---
+
+// --- Global Supabase Mock ---
+// Mock the supabase client for all possible import patterns
+vi.mock('@/lib/database/supabase', async () => {
+  const mod = await import('./src/tests/mocks/supabase');
+  return { 
+    supabase: mod.supabase,
+    createClient: mod.createClient,
+    getServiceSupabase: mod.getServiceSupabase,
+    default: mod.supabase
+  };
+});
+
+// Also mock relative imports that might be used in some tests
+vi.mock('../supabase', async () => {
+  const mod = await import('./src/tests/mocks/supabase');
+  return { 
+    supabase: mod.supabase,
+    createClient: mod.createClient,
+    getServiceSupabase: mod.getServiceSupabase,
+    default: mod.supabase
+  };
+}, { virtual: true });
+
+// Mock the core Supabase library to ensure all instances use our mock
+vi.mock('@supabase/supabase-js', async () => {
+  const mod = await import('./src/tests/mocks/supabase');
+  return {
+    createClient: mod.createClient
+  };
+});
+// --- End Global Supabase Mock ---
