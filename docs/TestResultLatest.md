@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 68  |  **Failed Test Files:** 21
+**Passed Test Files:** 70  |  **Failed Test Files:** 19
 
 ## Passing Test Files
 
@@ -19,7 +19,6 @@
 - src\components\profile\__tests__\DataExport.test.tsx
 - src\components\profile\__tests__\NotificationPreferences.test.tsx
 - src\components\profile\__tests__\PrivacySettings.test.tsx
-- src\components\profile\__tests__\Profile.test.tsx
 - src\components\profile\__tests__\ProfileEditor.test.tsx
 - src\components\profile\__tests__\ProfileTypeConversion.test.tsx
 - src\components\profile\__tests__\ProfileVerification.test.tsx
@@ -55,14 +54,17 @@
 - src\middleware\__tests__\rate-limit.test.ts
 - src\middleware\__tests__\security-headers.test.ts
 - src\tests\integration\account-settings-flow.test.tsx
+- src\tests\integration\account-switching-flow.test.tsx
 - src\tests\integration\collaboration-flow.test.tsx
 - src\tests\integration\connected-accounts.integration.test.tsx
 - src\tests\integration\dashboard-view-flow.test.tsx
 - src\tests\integration\data-management-flow.test.tsx
+- src\tests\integration\feedback-submission-flow.test.tsx
 - src\tests\integration\form-validation-errors-isolated.test.tsx
 - src\tests\integration\form-validation-errors.test.tsx
 - src\tests\integration\minimal.smoke.test.tsx
 - src\tests\integration\oauth-buttons.integration.test.tsx
+- src\tests\integration\password-reset-flow.test.tsx
 - src\tests\integration\search-filter-flow.test.tsx
 - src\tests\integration\social-sharing-flow.test.tsx
 - src\tests\integration\user-auth-flow.test.tsx
@@ -80,19 +82,17 @@
 - src\components\auth\__tests__\DomainBasedOrgMatching.test.tsx
 - src\components\auth\__tests__\IDPConfiguration.test.tsx
 - src\components\company\__tests__\OrganizationSessionManager.test.tsx
+- src\components\profile\__tests__\Profile.test.tsx
 - src\components\profile\__tests__\ProfilePrivacySettings.test.tsx
 - src\lib\auth\__tests__\mfa\setup.test.tsx
 - src\lib\auth\__tests__\session\business-policies.test.tsx
 - src\lib\rbac\__tests__\roleService.test.ts
-- src\tests\integration\account-switching-flow.test.tsx
 - src\tests\integration\admin-users-flow.test.tsx
 - src\tests\integration\api-error-messages.test.tsx
 - src\tests\integration\backup.integration.test.tsx
 - src\tests\integration\empty-states.test.tsx
 - src\tests\integration\error-recovery-flow.test.tsx
 - src\tests\integration\export-import-flow.test.tsx
-- src\tests\integration\feedback-submission-flow.test.tsx
 - src\tests\integration\file-upload-flow.test.tsx
 - src\tests\integration\notification-flow.test.tsx
-- src\tests\integration\password-reset-flow.test.tsx
 - src\tests\integration\theme-settings-flow.test.tsx

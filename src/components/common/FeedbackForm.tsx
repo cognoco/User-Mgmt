@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/database/supabase';
 import { feedbackCategoryEnum } from '@/types/feedback';
 
 interface FeedbackFormProps {

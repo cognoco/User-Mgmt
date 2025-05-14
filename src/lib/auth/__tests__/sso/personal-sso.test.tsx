@@ -21,7 +21,7 @@ import { OAuthProvider } from '@/types/oauth';
 const originalLocation = window.location;
 
 // Mock useOrganization to always return an enabled org
-let orgMock: any = {
+const orgMock: any = {
   id: 'org-123',
   name: 'Test Org',
   domain: 'example.com',
@@ -260,23 +260,11 @@ describe('Personal SSO Authentication Flows', () => {
       },
       error: null,
     });
-    // Mock supabase.from('organization_domains') to return a verified domain row
-    const mockFrom = vi.spyOn(supabase, 'from');
-    mockFrom.mockImplementationOnce((table: string) => {
-      if (table === 'organization_domains') {
-        return {
-          select: () => ({
-            eq: () => ({
-              eq: () => Promise.resolve({
-                data: [{ domain: 'example.com', is_verified: true, org_id: orgMock.id }],
-                error: null,
-              }),
-            }),
-          }),
-        };
-      }
-      // fallback to default mock
-      return (supabase as any).from.wrappedMethod?.(table) || { select: () => ({ eq: () => ({ eq: () => Promise.resolve({ data: [], error: null }) }) }) };
+    // Set global mock data for organization_domains
+    const { setTableMockData } = await import('@/tests/mocks/supabase');
+    setTableMockData('organization_domains', {
+      data: [{ domain: 'example.com', is_verified: true, org_id: orgMock.id }],
+      error: null,
     });
 
     renderWithProvider(<BusinessSSOAuth />);

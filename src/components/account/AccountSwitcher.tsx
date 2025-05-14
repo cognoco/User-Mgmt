@@ -34,16 +34,17 @@ export const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ showDetails = 
       setIsLoadingAccounts(true);
       try {
         const data = await fetchAccounts();
-        setAccounts(data);
-        setCurrentAccountId(data[0]?.id || null);
+        setAccounts(Array.isArray(data) ? data : []);
+        setCurrentAccountId(Array.isArray(data) && data[0]?.id ? data[0].id : null);
       } catch (err: any) {
         setError(err.message || t('error.loadingAccounts'));
+        setAccounts([]); // Defensive: ensure accounts is always an array
       } finally {
         setIsLoadingAccounts(false);
       }
     };
     loadAccounts();
-  }, [t]);
+  }, []);
 
   const handleSwitch = async (account: Account) => {
     setError(null);
@@ -93,7 +94,7 @@ export const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ showDetails = 
     if (account.type === 'organization') {
       try {
         const orgMembers = await fetchOrganizationMembers(account.id);
-        setMembers(orgMembers);
+        setMembers(Array.isArray(orgMembers) ? orgMembers : []);
       } catch {
         setMembers([]);
       }
@@ -119,6 +120,9 @@ export const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ showDetails = 
     }
   };
 
+  // Ensure accounts is always an array for mapping
+  const accountList = Array.isArray(accounts) ? accounts : [];
+
   return (
     <div>
       {error && <Alert variant="destructive">{error}</Alert>}
@@ -127,21 +131,21 @@ export const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ showDetails = 
         <div className="flex items-center justify-center py-8" aria-busy="true">
           <span role="status" aria-live="polite">🔄 {t('accountSwitcher.loading', 'Loading accounts...')}</span>
         </div>
-      ) : (
+      ) : accountList.length > 0 ? (
         <ul className="space-y-2" aria-busy={isLoadingAccounts}>
-          {accounts.map((account) => (
+          {accountList.map((account) => account && account.id ? (
             <li
               key={account.id}
               className={
                 'cursor-pointer p-2 rounded ' +
-                (account.id === currentAccountId ? 'bg-primary text-white active-account' : 'bg-muted')
+                (account && currentAccountId && account.id === currentAccountId ? 'bg-primary text-white active-account' : 'bg-muted')
               }
-              onClick={() => !switchingAccountId && handleSwitch(account)}
-              aria-current={account.id === currentAccountId}
+              onClick={() => !switchingAccountId && account && handleSwitch(account)}
+              aria-current={account && currentAccountId && account.id === currentAccountId ? 'true' : 'false'}
             >
-              <span>{account.name}</span>
-              {account.type === 'organization' && <span className="ml-2 text-xs">({t('accountSwitcher.organization')})</span>}
-              {switchingAccountId === account.id && (
+              <span>{account && account.name}</span>
+              {account && account.type === 'organization' && <span className="ml-2 text-xs">({t('accountSwitcher.organization')})</span>}
+              {account && switchingAccountId === account.id && (
                 <span className="ml-2 animate-spin" role="status" aria-live="polite">🔄</span>
               )}
               {showDetails && (
@@ -151,7 +155,7 @@ export const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ showDetails = 
                   className="ml-4"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleShowDetails(account);
+                    account && handleShowDetails(account);
                   }}
                   disabled={!!switchingAccountId || isLoadingAccounts}
                 >
@@ -159,8 +163,12 @@ export const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ showDetails = 
                 </Button>
               )}
             </li>
-          ))}
+          ) : null)}
         </ul>
+      ) : (
+        <div className="flex items-center justify-center py-8 text-muted-foreground">
+          {t('accountSwitcher.noAccounts', 'No accounts found.')}
+        </div>
       )}
       <Button className="mt-4" onClick={() => setShowOrgDialog(true)} disabled={isLoadingAccounts || !!switchingAccountId}>
         {t('accountSwitcher.createOrganization')}
@@ -205,9 +213,13 @@ export const AccountSwitcher: React.FC<AccountSwitcherProps> = ({ showDetails = 
                 <>
                   <div className="mt-2 font-semibold">{t('accountSwitcher.members')}</div>
                   <ul className="ml-4">
-                    {members.map((m) => (
-                      <li key={m.id}>{m.name} ({m.role})</li>
-                    ))}
+                    {/* Ensure members is always treated as an array */}
+                    {Array.isArray(members) && members.length > 0 ? 
+                      members.map((m) => (
+                        <li key={m.id}>{m.name} ({m.role})</li>
+                      )) : 
+                      <li>{t('accountSwitcher.noMembers', 'No members found')}</li>
+                    }
                   </ul>
                   <Button
                     variant="destructive"

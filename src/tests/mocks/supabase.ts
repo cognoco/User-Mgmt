@@ -125,7 +125,7 @@ function createChainableQueryBuilder(tableName: string) {
     if (state.table === 'organization_members' && DEFAULT_TABLE_RESPONSES[state.table]?.data) {
       debug(`[MembersDataPriority] Using DEFAULT_TABLE_RESPONSES for ${state.table}.`);
       let membersData = JSON.parse(JSON.stringify(DEFAULT_TABLE_RESPONSES[state.table].data));
-      let membersError = DEFAULT_TABLE_RESPONSES[state.table].error || null;
+      const membersError = DEFAULT_TABLE_RESPONSES[state.table].error || null;
 
       // Apply the 'eq' filter for 'organization_id' which is common for this table
       const orgIdFilter = state.filters.find(f => f.type === 'eq' && f.field === 'organization_id');
@@ -517,6 +517,12 @@ const mockSupabase = {
   
   from: vi.fn((tableName: string) => {
     debug(`supabase.from called with table: ${tableName}`);
+    if (!(globalThis as any).__SUPABASE_FEEDBACK_BUILDER__ && tableName === 'feedback') {
+      (globalThis as any).__SUPABASE_FEEDBACK_BUILDER__ = createChainableQueryBuilder(tableName);
+    }
+    if (tableName === 'feedback') {
+      return (globalThis as any).__SUPABASE_FEEDBACK_BUILDER__;
+    }
     const builder = createChainableQueryBuilder(tableName);
     if (tableName === 'organizations') {
       (globalThis as any).__LAST_ORGANIZATIONS_BUILDER__ = builder;
@@ -550,11 +556,11 @@ export const getServiceSupabase = vi.fn().mockImplementation(() => {
 export function resetSupabaseMock() {
   debug('Resetting Supabase mock state');
   vi.clearAllMocks();
-  
   // Clear any global test variables
   if (typeof globalThis !== 'undefined') {
     delete (globalThis as any).__TEST_ORG__;
     delete (globalThis as any).__TEST_ORG_ERROR__;
+    delete (globalThis as any).__SUPABASE_FEEDBACK_BUILDER__;
   }
 }
 

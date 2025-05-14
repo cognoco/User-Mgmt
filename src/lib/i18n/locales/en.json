@@ -464,5 +464,30 @@
         "description": "Flexible role and permission system for controlling user access."
       }
     }
+  },
+  "accountSwitcher": {
+    "createOrganization": "Create Organization",
+    "loading": "Loading accounts...",
+    "personalAccount": "Personal Account",
+    "workAccount": "Work Account",
+    "clientProject": "Client Project",
+    "organizationCreated": "Organization created",
+    "leftOrganization": "Left organization",
+    "accountDetails": "Account details",
+    "owner": "owner",
+    "member": "member",
+    "accountSettings": "Account Settings",
+    "leaveOrganization": "Leave Organization",
+    "confirm": "Confirm",
+    "errorSwitchingAccounts": "Error switching accounts",
+    "details": "Details",
+    "organization": "organization",
+    "create": "Create",
+    "organizationName": "Organization Name",
+    "switched": "Switched to {{name}}",
+    "members": "Members",
+    "accountName": "Account Name",
+    "accountType": "Account Type",
+    "leaveOrganizationConfirm": "Are you sure you want to leave this organization?"
   }
 } 
