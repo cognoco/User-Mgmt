@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 54  |  **Failed Test Files:** 31
+**Passed Test Files:** 58  |  **Failed Test Files:** 31
 
 ## Passing Test Files
 
@@ -43,8 +43,10 @@
 - src\lib\stores\__tests__\preferences.store.test.ts
 - src\lib\stores\__tests__\user.store.test.ts
 - src\middleware\__tests__\audit-log.test.ts
+- src\middleware\__tests__\auth.test.js
 - src\middleware\__tests__\csrf.test.ts
 - src\middleware\__tests__\index.test.ts
+- src\middleware\__tests__\permissions.test.ts
 - src\middleware\__tests__\rate-limit.test.ts
 - src\middleware\__tests__\security-headers.test.ts
 - src\tests\integration\account-settings-flow.test.tsx
@@ -57,6 +59,8 @@
 - src\tests\integration\search-filter-flow.test.tsx
 - src\tests\integration\social-sharing-flow.test.tsx
 - src\tests\integration\user-auth-flow.test.tsx
+- src\tests\smoke\login.smoke.test.tsx
+- src\tests\smoke\registration.smoke.test.tsx
 - src\tests\ui\DuplicateUIElements.test.tsx
 
 ## Failing Test Files
@@ -75,8 +79,6 @@
 - src\lib\auth\__tests__\session\business-policies.test.tsx
 - src\lib\rbac\__tests__\roleService.test.ts
 - src\lib\stores\__tests__\subscription.store.test.ts
-- src\middleware\__tests__\auth.test.js
-- src\middleware\__tests__\permissions.test.ts
 - src\tests\integration\account-switching-flow.test.tsx
 - src\tests\integration\admin-users-flow.test.tsx
 - src\tests\integration\api-error-messages.test.tsx
@@ -92,3 +94,5 @@
 - src\tests\integration\password-reset-flow.test.tsx
 - src\tests\integration\theme-settings-flow.test.tsx
 - src\tests\integration\user-preferences-flow.test.tsx
+- src\tests\smoke\app.smoke.test.tsx
+- src\tests\smoke\profile.smoke.test.tsx

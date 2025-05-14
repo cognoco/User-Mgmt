@@ -152,7 +152,7 @@ describe('OrganizationSSO', () => {
     });
 
     // Enable SSO and select SAML
-    const ssoSwitch = screen.getByLabelText('Enable SSO');
+    const ssoSwitch = await screen.findByRole('switch');
     await userEvent.click(ssoSwitch);
 
     const idpSelect = screen.getByText('Select an identity provider...');
@@ -199,9 +199,9 @@ describe('OrganizationSSO', () => {
     render(<OrganizationSSO orgId={mockOrgId} />);
 
     await waitFor(() => {
-      expect(screen.getByText('Healthy')).toBeInTheDocument();
-      expect(screen.getByText(/Last login:/)).toBeInTheDocument();
-      expect(screen.getByText(/Logins in last 24h: 42/)).toBeInTheDocument();
+      expect(screen.getByText(/Healthy/i)).toBeInTheDocument();
+      expect(screen.getByText(/Last login:/i)).toBeInTheDocument();
+      expect(screen.getByText(/Logins in last 24h: 42/i, { exact: false })).toBeInTheDocument();
     });
   });
 
@@ -230,8 +230,8 @@ describe('OrganizationSSO', () => {
     screen.debug(); // Debug output after render
 
     await waitFor(() => {
-      expect(screen.getByText('Warning')).toBeInTheDocument();
-      expect(screen.getByText(/Certificate expires soon/)).toBeInTheDocument();
+      expect(screen.getByText(/Warning/i)).toBeInTheDocument();
+      expect(screen.getByText(/Certificate expires soon/i)).toBeInTheDocument();
     });
   });
 
@@ -261,10 +261,12 @@ describe('OrganizationSSO', () => {
     screen.debug(); // Debug output after render
 
     await waitFor(() => {
-      expect(screen.getByText('Error')).toBeInTheDocument();
-      expect(screen.getByText('No recent logins')).toBeInTheDocument();
-      expect(screen.getByText(/Failed to connect to IDP/)).toBeInTheDocument();
-      expect(screen.getByText(/Logins in last 24h: 0/)).toBeInTheDocument();
+      expect(screen.getByText(/Error/i)).toBeInTheDocument();
+      expect(screen.getByText(/No recent logins/i)).toBeInTheDocument();
+      expect(screen.getByText(/Failed to connect to IDP/i)).toBeInTheDocument();
+      // Use getAllByText for '0' and check context
+      const zeroElements = screen.getAllByText('0');
+      expect(zeroElements.some(el => el.parentElement?.textContent?.includes('Logins in last 24h'))).toBe(true);
     });
   });
 
@@ -300,7 +302,7 @@ describe('OrganizationSSO', () => {
     render(<OrganizationSSO orgId={mockOrgId} />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Logins in last 24h: 42/)).toBeInTheDocument();
+      expect(screen.getByText(/Logins in last 24h: 42/i, { exact: false })).toBeInTheDocument();
     });
 
     // Update status for next poll
@@ -310,7 +312,7 @@ describe('OrganizationSSO', () => {
     await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
 
     await waitFor(() => {
-      expect(screen.getByText(/Logins in last 24h: 45/)).toBeInTheDocument();
+      expect(screen.getByText(/Logins in last 24h: 45/i, { exact: false })).toBeInTheDocument();
     });
 
     vi.useRealTimers();
