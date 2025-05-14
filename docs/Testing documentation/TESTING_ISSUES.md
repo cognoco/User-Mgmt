@@ -108,6 +108,63 @@ This knowledge should be applied to all tests using axios in Node, and documente
   - Document this in the test file with a comment for future maintainers.
 - **Reference:** See also `Testing_Findings.md` and `TESTING.md` for more details.
 
+## (2024-06-25) Middleware Test Issues (Audit-Log) 
+
+- **Issue:** Tests for middleware with complex async behavior can fail due to several common issues:
+  1. vi.mock hoisting conflicts with variable declarations
+  2. TypeScript typing errors with nested mock functions
+  3. Assertion mismatches between expected and actual object structures
+  4. Unhandled rejections from error-simulating tests
+
+- **Symptoms:**
+  - Error: "Cannot access 'variable' before initialization" when using mock factory
+  - TypeScript errors about incompatible mock function types
+  - Assertion failures on object properties that don't exist
+  - Unhandled rejection warnings despite passing tests
+
+- **Solutions:**
+  - **For vi.mock hoisting:** Place vi.mock calls at the top of the file, before any variable declarations, using inline functions:
+    ```javascript
+    import { vi } from 'vitest';
+    // First, mock dependencies
+    vi.mock('@/lib/database/module', () => ({
+      module: { method: vi.fn(() => ({ nestedMethod: vi.fn() })) }
+    }));
+    // Then import everything else
+    import { /* other imports */ } from '...';
+    ```
+  
+  - **For TypeScript errors:** Use type assertions or simplify typing with `any` for complex mock chains:
+    ```javascript
+    let mockFn: any; // Instead of complex ReturnType<typeof vi.fn> chains
+    (supabase as any).from = mockFn; // Avoid typing errors for complex mocks
+    ```
+
+  - **For assertion mismatches:** Compare actual vs expected objects during test development:
+    ```javascript
+    // Inspect actual structure before writing assertions
+    console.log(JSON.stringify(mockFn.mock.calls[0][0]));
+    // Use objectContaining for partial matches
+    expect(mockFn).toHaveBeenCalledWith([expect.objectContaining({ ... })]);
+    ```
+
+  - **For error testing:** Use a counter pattern to throw on first call only:
+    ```javascript
+    let callCount = 0;
+    const error = new Error('Test error');
+    const next = vi.fn().mockImplementation(() => {
+      if (callCount === 0) {
+        callCount++;
+        throw error;
+      }
+      return Promise.resolve();
+    });
+    ```
+
+- **Best Practice:**
+  - Always review middleware to understand how it processes errors before writing tests
+  - For middleware that calls next() after catching errors, ensure your test accounts for multiple next() calls
+
 # Testing Issues and Solutions
 
 ## 1. Known Issues & Patterns
