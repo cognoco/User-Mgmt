@@ -440,5 +440,29 @@
       "download": "Download backup codes",
       "print": "Print backup codes"
     }
+  },
+  "home": {
+    "title": "Welcome to User Management",
+    "description": "A powerful and flexible user management system that can be integrated into any application.",
+    "featuresTitle": "Key Features",
+    "featuresDescription": "Explore the core capabilities of our user management system.",
+    "getStarted": "Get Started",
+    "signIn": "Sign In",
+    "viewProfile": "View Profile",
+    "settings": "Settings",
+    "feature": {
+      "auth": {
+        "title": "Authentication",
+        "description": "Secure user authentication with email/password, social login, and two-factor authentication."
+      },
+      "profile": {
+        "title": "Profile Management",
+        "description": "Customizable user profiles with avatar support and privacy settings."
+      },
+      "rbac": {
+        "title": "Role-Based Access",
+        "description": "Flexible role and permission system for controlling user access."
+      }
+    }
   }
 } 

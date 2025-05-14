@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 62  |  **Failed Test Files:** 27
+**Passed Test Files:** 66  |  **Failed Test Files:** 23
 
 ## Passing Test Files
 
@@ -45,6 +45,7 @@
 - src\lib\stores\__tests__\auth.store.test.ts
 - src\lib\stores\__tests__\connected-accounts.store.test.ts
 - src\lib\stores\__tests__\preferences.store.test.ts
+- src\lib\stores\__tests__\subscription.store.test.ts
 - src\lib\stores\__tests__\user.store.test.ts
 - src\middleware\__tests__\audit-log.test.ts
 - src\middleware\__tests__\auth.test.js
@@ -63,7 +64,10 @@
 - src\tests\integration\search-filter-flow.test.tsx
 - src\tests\integration\social-sharing-flow.test.tsx
 - src\tests\integration\user-auth-flow.test.tsx
+- src\tests\integration\user-preferences-flow.test.tsx
+- src\tests\smoke\app.smoke.test.tsx
 - src\tests\smoke\login.smoke.test.tsx
+- src\tests\smoke\profile.smoke.test.tsx
 - src\tests\smoke\registration.smoke.test.tsx
 - src\tests\ui\DuplicateUIElements.test.tsx
 
@@ -78,7 +82,6 @@
 - src\lib\auth\__tests__\mfa\setup.test.tsx
 - src\lib\auth\__tests__\session\business-policies.test.tsx
 - src\lib\rbac\__tests__\roleService.test.ts
-- src\lib\stores\__tests__\subscription.store.test.ts
 - src\tests\integration\account-switching-flow.test.tsx
 - src\tests\integration\admin-users-flow.test.tsx
 - src\tests\integration\api-error-messages.test.tsx
@@ -93,6 +96,3 @@
 - src\tests\integration\notification-flow.test.tsx
 - src\tests\integration\password-reset-flow.test.tsx
 - src\tests\integration\theme-settings-flow.test.tsx
-- src\tests\integration\user-preferences-flow.test.tsx
-- src\tests\smoke\app.smoke.test.tsx
-- src\tests\smoke\profile.smoke.test.tsx

@@ -38,10 +38,15 @@ const mockUserState = {
 
 // Mock the auth store to simulate an authenticated user and provide getState
 vi.mock('@/lib/stores/auth.store', () => ({
-  useAuthStore: Object.assign(() => mockUserState, {
-    getState: () => mockUserState,
-    setState: vi.fn(),
-  })
+  useAuthStore: (selector?: any) => {
+    if (!selector) return mockUserState;
+    // Only support the selector used in ProfileForm
+    if (selector.toString().replace(/\s/g, '') === '(state)=>state.user?.email') {
+      return mockUserState.user.email;
+    }
+    // Fallback: return undefined for unsupported selectors
+    return undefined;
+  },
 }));
 
 // Mock the profile store to provide a valid profile and required methods

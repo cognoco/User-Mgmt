@@ -158,14 +158,88 @@ export const UserPreferencesComponent: React.FC<UserPreferencesProps> = ({ onSav
     }));
   };
 
+  // --- Export Preferences as JSON File ---
   const handleExportData = async () => {
     setExportStatus('');
-    setTimeout(() => setExportStatus('your data export has been downloaded successfully'), 1000);
+    try {
+      // Only export relevant fields
+      const exportData = {
+        language: form.language,
+        theme: form.theme,
+        notifications: form.notifications,
+        itemsPerPage: form.itemsPerPage,
+        timezone: form.timezone,
+        dateFormat: form.dateFormat,
+      };
+      const json = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'user-preferences.json';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 0);
+      setExportStatus('your data export has been downloaded successfully');
+    } catch (err) {
+      setExportStatus('failed to export preferences');
+    }
   };
 
+  // --- Import Preferences from JSON File ---
   const handleImportData = async () => {
     setImportStatus('');
-    setTimeout(() => setImportStatus('your data import was successful'), 1000);
+    try {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/json,.json';
+      input.style.display = 'none';
+      document.body.appendChild(input);
+      input.click();
+      input.onchange = async () => {
+        if (!input.files || input.files.length === 0) {
+          setImportStatus('no file selected');
+          document.body.removeChild(input);
+          return;
+        }
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            const text = e.target?.result as string;
+            const data = JSON.parse(text);
+            // Basic validation: check for required fields
+            if (
+              typeof data !== 'object' ||
+              !data.language ||
+              !data.theme ||
+              !data.notifications ||
+              typeof data.itemsPerPage !== 'number'
+            ) {
+              setImportStatus('invalid preferences file');
+              document.body.removeChild(input);
+              return;
+            }
+            // Update preferences
+            await updatePreferences(data);
+            setImportStatus('your data import was successful');
+          } catch (err) {
+            setImportStatus('failed to import preferences');
+          }
+          document.body.removeChild(input);
+        };
+        reader.onerror = () => {
+          setImportStatus('failed to read file');
+          document.body.removeChild(input);
+        };
+        reader.readAsText(file);
+      };
+    } catch (err) {
+      setImportStatus('failed to import preferences');
+    }
   };
 
   // UI

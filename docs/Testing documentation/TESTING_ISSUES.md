@@ -167,6 +167,37 @@
     - For any middleware or function that depends on another function, use DI (pass the dependency as a parameter, with a default). In tests, inject your mock.
     - This is the only robust, future-proof solution for negative-path middleware tests in ESM/Next.js/Vitest environments.
 
+### F. Mocking Context Hooks in Zustand Stores or Non-Component Code
+- **Issue:**
+    - When a Zustand store (or any non-component code) calls a React context hook (e.g., useUserManagement), tests may fail with errors like 'Cannot read properties of null (reading useContext)' if the hook is not properly mocked. This is because the store is not wrapped in a React provider during tests, and the hook expects a valid context.
+    - Attempts to mock the hook using vi.spyOn or require-based mocks in beforeAll may not work reliably, especially with ESM and hoisting.
+- **Solution:**
+    - Use a top-level vi.mock for the module that exports the hook, placed before any imports that use the hook. For example:
+      ```typescript
+      vi.mock('../../auth/UserManagementProvider', () => ({
+        useUserManagement: () => ({
+          userManagement: {
+            subscription: {
+              enabled: true,
+              defaultTier: 'free',
+              features: {
+                premium_feature: {
+                  tier: 'premium',
+                  description: 'Premium feature',
+                },
+              },
+            },
+          },
+        }),
+      }));
+      ```
+    - This ensures that any call to the hook (even from within Zustand or other non-component code) receives the mocked context, preventing invalid hook call errors.
+- **Best Practice:**
+    - Always use top-level vi.mock for context hooks used outside of React components, and place the mock before importing the code under test.
+    - Avoid using require/spyOn for this use case, as it is less reliable with ESM and hoisting.
+- **Example:**
+    - See `src/lib/stores/__tests__/subscription.store.test.ts` for a working example.
+
 ---
 
 ## IV. Environment-Specific Challenges (JSDOM, Node.js)
@@ -203,6 +234,241 @@
   // Restore original (Vitest often handles this automatically, but manual restore is safer)
   vi.stubEnv('NODE_ENV', originalValue || 'test'); // or vi.unstubAllEnvs() if appropriate
   ```
+
+### D. Testing File Export/Import and Timeout-Dependent UI Feedback
+
+- **Issue:** Testing file exports, imports, and any UI that shows feedback after a timeout is challenging in JSDOM because:
+  1. JSDOM doesn't fully support file system operations and DOM manipulations like anchor click events for downloads
+  2. The `URL.createObjectURL()` mock might not be properly reflected in anchor href attributes
+  3. Simulating FileReader behavior with file uploads requires complex mocking
+  4. Testing success/error messages that appear after timeouts leads to race conditions
+
+- **Symptoms:**
+  - Tests timeout even when core functionality works
+  - Assertions on anchor href/download attributes fail after mocking
+  - FileReader mocks don't trigger the expected component behavior
+  - Test assertions run before timeout callbacks complete
+
+- **Solutions:**
+  1. **Focus on Core Logic vs. UI Feedback:**
+     - Test that the correct function is called with the right parameters
+     - Verify the export/download was initiated (mock click was called)
+     - Skip assertions on timeout-dependent UI feedback elements
+     
+  2. **For File Exports:**
+     - Mock `URL.createObjectURL` but also manually set the anchor's `href` attribute
+     - Test that the anchor was created with correct download attribute
+     - Test that click was called, but don't rely on the actual download happening
+     
+  3. **For File Imports:**
+     - Mock FileReader and trigger onload manually
+     - Assert that the parsed data was passed to the update function
+     - Instead of testing for success messages, focus on the data transformation
+     
+  4. **Handling Timeouts:**
+     - Prefer not using fake timers when testing components that mix timeouts with DOM manipulation
+     - If using `vi.useFakeTimers()`, ensure time is advanced with `vi.runAllTimers()` within an `act()` wrapper
+     - Consider replacing component timeouts with immediate callbacks in test mode (via props or context)
+
+- **Example Pattern for File Export:**
+  ```typescript
+  // Component implementation approach that is easier to test:
+  export const UserPreferences = ({ 
+    onExportComplete = () => setTimeout(() => setMessage('Export complete'), 1000) 
+  }) => {
+    // ... normal component code
+    const handleExport = () => {
+      // ... export logic
+      onExportComplete(); // Call the configurable callback
+    }
+  }
+  
+  // In tests:
+  const mockExportComplete = vi.fn();
+  render(<UserPreferences onExportComplete={mockExportComplete} />);
+  // Test that mockExportComplete was called after export
+  ```
+
+- **When to Document/Skip:**
+  - If a test is fundamentally unreliable due to JSDOM limitations, document the issue
+  - Record a direct unit test for the business logic separately from the UI component
+  - In extreme cases, rely on e2e tests for full export/import flows
+
+- **Real-World Examples from UserPreferences Tests:**
+
+  1. **Fixed Export Test Example:**
+     ```typescript
+     test('can export preferences', async () => {
+       // SIMPLIFY: Focus only on verifying that the export function is called correctly
+       // Instead of complex anchor mocks, just verify the URL.createObjectURL is called with correct blob
+       
+       // Mock URL.createObjectURL
+       const mockCreateObjectURL = vi.fn().mockReturnValue('blob:mock-url');
+       const origCreateObjectURL = URL.createObjectURL;
+       URL.createObjectURL = mockCreateObjectURL;
+       
+       // Mock document.createElement to track when anchor is created
+       const realCreateElement = document.createElement.bind(document);
+       const mockAnchorClick = vi.fn();
+       vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+         if (tag === 'a') {
+           const anchor = realCreateElement(tag);
+           // Add a simple click spy
+           anchor.click = mockAnchorClick;
+           return anchor;
+         }
+         return realCreateElement(tag);
+       });
+       
+       // Render component & click export button
+       render(<UserPreferencesComponent />);
+       const exportButton = await screen.findByRole('button', { name: /export my data/i });
+       await act(async () => {
+         await user.click(exportButton);
+       });
+       
+       // Verify a blob was created and download initiated, not the actual file contents
+       expect(mockCreateObjectURL).toHaveBeenCalledWith(expect.any(Blob));
+       expect(mockAnchorClick).toHaveBeenCalled();
+       
+       // Verify success message
+       expect(screen.getByText(/your data export has been downloaded successfully/i)).toBeInTheDocument();
+       
+       // Cleanup
+       URL.createObjectURL = origCreateObjectURL;
+     });
+     ```
+
+  2. **Fixed Import Test Example:**
+     ```typescript
+     test('can import preferences', async () => {
+       // Define test data
+       const mockImportData = {
+         language: 'fr',
+         theme: 'dark',
+         notifications: { email: true, push: true, marketing: false },
+         itemsPerPage: 30,
+         timezone: 'Europe/Paris',
+         dateFormat: 'DD/MM/YYYY',
+       };
+       
+       // Create a file input manually for simulation
+       let fileInput: HTMLInputElement | null = null;
+       
+       // Avoid circular references when mocking document.createElement
+       const originalCreateElement = document.createElement.bind(document);
+       vi.spyOn(document, 'createElement').mockImplementation((tag: string): HTMLElement => {
+         if (tag === 'input') {
+           fileInput = originalCreateElement('input') as HTMLInputElement;
+           fileInput.type = 'file';
+           fileInput.accept = 'application/json,.json';
+           return fileInput;
+         }
+         return originalCreateElement(tag);
+       });
+       
+       // Mock FileReader to directly simulate file content loading
+       const mockFileReader = function(this: any) {
+         this.readAsText = vi.fn(() => {
+           setTimeout(() => {
+             if (this.onload) {
+               this.onload({ target: { result: JSON.stringify(mockImportData) } });
+             }
+           }, 0);
+         });
+       };
+       
+       const OrigFileReader = window.FileReader;
+       window.FileReader = mockFileReader as any;
+       
+       // Render component & click import button
+       render(<UserPreferencesComponent />);
+       const importButton = await screen.findByRole('button', { name: /import data/i });
+       await act(async () => {
+         await user.click(importButton);
+       });
+       
+       // Verify file input was created
+       expect(fileInput).not.toBeNull();
+       
+       // Simulate file selection
+       if (fileInput) {
+         const testFile = new File(
+           [JSON.stringify(mockImportData)], 
+           'user-preferences.json', 
+           { type: 'application/json' }
+         );
+         
+         Object.defineProperty(fileInput, 'files', {
+           value: [testFile],
+           writable: true
+         });
+         
+         await act(async () => {
+           if (fileInput) {
+             fileInput.dispatchEvent(new Event('change'));
+           }
+         });
+       }
+       
+       // Verify updatePreferences was called with the correct data (focus on business logic)
+       await waitFor(() => {
+         expect(mockUpdatePreferences).toHaveBeenCalledWith(expect.objectContaining(mockImportData));
+       });
+       
+       // Clean up properly to avoid affecting other tests
+       window.FileReader = OrigFileReader;
+       vi.restoreAllMocks();
+     });
+     ```
+
+- **Common Pitfalls to Avoid:**
+  1. **Circular References in Mocks:**
+     - **Problem:** When mocking document.createElement, attempting to fallback to the original implementation can create infinite recursion:
+       ```typescript
+       // PROBLEMATIC CODE - WILL CAUSE AN ERROR:
+       const mockCreateElement = vi.spyOn(document, 'createElement');
+       const origCreateElement = mockCreateElement.getMockImplementation();
+       
+       mockCreateElement.mockImplementation((tag: string) => {
+         // This creates infinite recursion if origCreateElement is undefined
+         return origCreateElement ? origCreateElement(tag) : document.createElement(tag);
+       });
+       ```
+     - **Solution:** Always properly bind the original method and avoid direct calls that could create circular references:
+       ```typescript
+       // CORRECT APPROACH:
+       const originalCreateElement = document.createElement.bind(document);
+       vi.spyOn(document, 'createElement').mockImplementation((tag: string): HTMLElement => {
+         if (tag === 'input') {
+           // Custom logic
+         }
+         return originalCreateElement(tag); // Safely call the original
+       });
+       ```
+
+  2. **Type Errors When Mocking DOM Elements:**
+     - **Problem:** TypeScript may report errors when returning DOM elements from mocks due to incorrect typing.
+     - **Solution:** Use proper type assertions to ensure the mock returns the expected element type:
+       ```typescript
+       vi.spyOn(document, 'createElement').mockImplementation((tag: string): HTMLElement => {
+         if (tag === 'input') {
+           return originalCreateElement('input') as HTMLInputElement;
+         }
+         return originalCreateElement(tag);
+       });
+       ```
+
+  3. **Missing Cleanup:**
+     - **Problem:** Failing to restore mocks can affect other tests in unexpected ways.
+     - **Solution:** Always include cleanup code at the end of your test:
+       ```typescript
+       // Restore global mocks
+       window.FileReader = OrigFileReader;
+       vi.restoreAllMocks(); // Restores all spies created with vi.spyOn
+       // or for specific mocks:
+       URL.createObjectURL = origCreateObjectURL;
+       ```
 
 ---
 

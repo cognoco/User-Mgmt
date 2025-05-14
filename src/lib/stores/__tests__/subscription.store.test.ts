@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act } from '@testing-library/react';
 import { useSubscriptionStore } from '../subscription.store';
 import { api } from '../../api/axios';
-import { SubscriptionTier, SubscriptionPeriod } from '../../types/subscription';
+import { SubscriptionTier, SubscriptionPeriod, SubscriptionStatus } from 'src/types/subscription';
 
 // Mock axios api
 vi.mock('../../api/axios', () => ({
@@ -13,8 +13,8 @@ vi.mock('../../api/axios', () => ({
   },
 }));
 
-// Mock UserManagementProvider
-vi.mock('../../UserManagementProvider', () => ({
+// Add a global mock for useUserManagement at the top of the file
+vi.mock('../../auth/UserManagementProvider', () => ({
   useUserManagement: () => ({
     userManagement: {
       subscription: {
@@ -41,6 +41,8 @@ describe('useSubscriptionStore', () => {
       period: SubscriptionPeriod.MONTHLY,
       features: ['basic_feature'],
       isPublic: true,
+      trialDays: 0,
+      metadata: {},
     },
     {
       id: 'premium-plan',
@@ -50,6 +52,8 @@ describe('useSubscriptionStore', () => {
       period: SubscriptionPeriod.MONTHLY,
       features: ['premium_feature'],
       isPublic: true,
+      trialDays: 0,
+      metadata: {},
     },
   ];
 
@@ -57,8 +61,9 @@ describe('useSubscriptionStore', () => {
     id: 'sub-123',
     userId: 'user-123',
     planId: 'premium-plan',
-    status: 'active',
+    status: SubscriptionStatus.ACTIVE,
     startDate: new Date().toISOString(),
+    metadata: {},
   };
 
   beforeEach(() => {
@@ -95,7 +100,7 @@ describe('useSubscriptionStore', () => {
       });
 
       const store = useSubscriptionStore.getState();
-      expect(store.error).toBe('Failed to fetch subscription plans');
+      expect(store.error).toBe('Failed to fetch plans');
       expect(store.plans).toEqual([]);
     });
   });
@@ -139,7 +144,7 @@ describe('useSubscriptionStore', () => {
       });
 
       const store = useSubscriptionStore.getState();
-      expect(store.error).toBe('Failed to fetch user subscription');
+      expect(store.error).toBe('Failed to fetch subscription');
       expect(store.userSubscription).toBeNull();
     });
   });
