@@ -24,6 +24,8 @@ export default function ProfilePage() {
     updateBusinessProfile // Get the new action
   } = useProfileStore();
 
+  const { platform, isNative } = useUserManagement();
+
   useEffect(() => {
     // Fetch profile if not already loaded or loading
     if (!profile && !isLoading && !error) {
@@ -37,17 +39,17 @@ export default function ProfilePage() {
   const containerClasses = getPlatformClasses({
     base: "container mx-auto py-8",
     mobile: "py-4 px-2"
-  });
+  }, { platform, isNative });
 
   const contentClasses = getPlatformClasses({
     base: "max-w-2xl mx-auto space-y-8",
     mobile: "w-full space-y-6"
-  });
+  }, { platform, isNative });
 
   const cardClasses = getPlatformClasses({
     base: "bg-card rounded-lg shadow p-6",
     mobile: "p-4 rounded-md"
-  });
+  }, { platform, isNative });
 
   // Show loading skeleton
   if (isLoading && !profile) {

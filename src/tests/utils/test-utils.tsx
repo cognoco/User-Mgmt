@@ -2,16 +2,20 @@ import React from 'react';
 import { render as rtlRender } from '@testing-library/react';
 import { ThemeProvider } from '@/components/theme-provider';
 import { PaletteProvider } from '@/components/PaletteProvider';
+import '../i18nTestSetup';
+import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
 
 function render(ui: React.ReactElement, { ...renderOptions } = {}) {
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <React.StrictMode>
-        <ThemeProvider>
-          <PaletteProvider>
-            {children}
-          </PaletteProvider>
-        </ThemeProvider>
+        <UserManagementProvider>
+          <ThemeProvider>
+            <PaletteProvider>
+              {children}
+            </PaletteProvider>
+          </ThemeProvider>
+        </UserManagementProvider>
       </React.StrictMode>
     );
   }

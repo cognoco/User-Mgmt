@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
-import { useProfileStore } from '@/lib/stores/profile';
+import { useProfileStore } from '@/lib/stores/profile.store';
 import { useAuthStore, AuthState } from '@/lib/stores/auth.store';
 import { profileSchema, ProfileFormData } from '@/types/profile';
 import { Edit2, XCircle, Save } from 'lucide-react';
