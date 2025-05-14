@@ -7,7 +7,7 @@ process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'dummy-anon-key'; // Dummy key
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
-// Mock Next.js router - updated for Vitest 3.x
+// Mock Next.js router
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: vi.fn(),
@@ -19,7 +19,7 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
-// Mock Prisma client - using modern Vitest 3.x mocking style
+// Mock Prisma client
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     domain: {

@@ -241,8 +241,6 @@ if (!window.FileReader) {
 }
 if (!window.URL.createObjectURL) window.URL.createObjectURL = () => 'blob:http://localhost/fake';
 if (!window.URL.revokeObjectURL) window.URL.revokeObjectURL = () => {};
-
-// In Vitest 3.x, IntersectionObserver polyfill might need to be updated
 if (!window.IntersectionObserver) {
   class MockIntersectionObserver {
     root: Element | null = null;
@@ -255,8 +253,6 @@ if (!window.IntersectionObserver) {
   }
   window.IntersectionObserver = MockIntersectionObserver as any;
 }
-
-// DOMRect is used by many UI libraries, mock it if not available
 if (!window.DOMRect) {
   class MockDOMRect {
     static fromRect() { return new MockDOMRect(); }
@@ -266,6 +262,24 @@ if (!window.DOMRect) {
   }
   window.DOMRect = MockDOMRect as any;
 }
+if (!window.getComputedStyle) window.getComputedStyle = () => ({
+  getPropertyValue: () => '',
+  setProperty: () => {},
+  removeProperty: () => '',
+  length: 0,
+  item: () => null,
+  getPropertyPriority: () => '',
+  [Symbol.iterator]: function* () {},
+} as any);
+if (!window.crypto) window.crypto = {} as Crypto;
+if (!window.crypto.getRandomValues) window.crypto.getRandomValues = (arr: ArrayBufferView) => { for (let i = 0; i < arr.byteLength; i++) (arr as any)[i] = Math.floor(Math.random() * 256); return arr; };
+try {
+  Object.defineProperty(window.navigator, 'clipboard', {
+    value: { writeText: async () => {}, readText: async () => '' },
+    configurable: true,
+  });
+} catch {}
+if (!window.ResizeObserver) window.ResizeObserver = class { observe() {}; unobserve() {}; disconnect() {}; };
 
 // --- End JSDOM/Browser API Polyfills ---
 

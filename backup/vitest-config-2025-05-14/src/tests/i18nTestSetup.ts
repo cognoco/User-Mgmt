@@ -1,7 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import en from '@/lib/i18n/locales/en.json';
-import { vi } from 'vitest';
 
 // If you use namespaces, add them here
 const resources = {

@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 69  |  **Failed Test Files:** 20
+**Passed Test Files:** 70  |  **Failed Test Files:** 19
 
 ## Passing Test Files
 
@@ -59,6 +59,7 @@
 - src\tests\integration\connected-accounts.integration.test.tsx
 - src\tests\integration\dashboard-view-flow.test.tsx
 - src\tests\integration\data-management-flow.test.tsx
+- src\tests\integration\feedback-submission-flow.test.tsx
 - src\tests\integration\form-validation-errors-isolated.test.tsx
 - src\tests\integration\form-validation-errors.test.tsx
 - src\tests\integration\minimal.smoke.test.tsx
@@ -92,7 +93,6 @@
 - src\tests\integration\empty-states.test.tsx
 - src\tests\integration\error-recovery-flow.test.tsx
 - src\tests\integration\export-import-flow.test.tsx
-- src\tests\integration\feedback-submission-flow.test.tsx
 - src\tests\integration\file-upload-flow.test.tsx
 - src\tests\integration\notification-flow.test.tsx
 - src\tests\integration\theme-settings-flow.test.tsx

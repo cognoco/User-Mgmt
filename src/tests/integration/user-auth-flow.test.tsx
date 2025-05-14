@@ -1,4 +1,7 @@
 // __tests__/integration/user-auth-flow.test.tsx
+// This test has been verified to work with Vitest 3.1.3
+// Note: This test relies on proper mock setup for auth stores and Supabase client
+// See vitest.setup.ts and src/tests/mocks/supabase.ts for the required mock implementations
 
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';

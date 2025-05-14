@@ -5,7 +5,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [react(), tsconfigPaths()],
+  plugins: [react() as any, tsconfigPaths()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

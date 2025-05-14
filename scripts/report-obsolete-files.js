@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import stringSimilarity from 'string-similarity';
+import { stringSimilarity } from 'string-similarity-js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -88,7 +88,7 @@ skeletonTests.forEach(skel => {
   // Fuzzy match to real test file names
   const realFileMatches = realTests.map(rt => ({
     file: rt,
-    score: stringSimilarity.compareTwoStrings(skelName, normalizeName(path.basename(rt)))
+    score: stringSimilarity(skelName, normalizeName(path.basename(rt)))
   })).filter(m => m.score >= FUZZY_THRESHOLD);
   // Fuzzy match to describe/test/it block names
   let blockScore = 0;
@@ -97,7 +97,7 @@ skeletonTests.forEach(skel => {
     for (const rt of realTests) {
       const blocks = getTestBlocks(rt);
       for (const b of blocks) {
-        const score = stringSimilarity.compareTwoStrings(skelName, normalizeName(b.name));
+        const score = stringSimilarity(skelName, normalizeName(b.name));
         if (score > blockScore) {
           blockScore = score;
           blockContent = b.content;

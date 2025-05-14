@@ -1,0 +1,65 @@
+// Helper to create a fully chainable builder
+function createMockBuilder() {
+  const builder = {};
+  // List of all chainable/query methods
+  const methods = [
+    'select', 'insert', 'update', 'upsert', 'delete',
+    'eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'like', 'ilike', 'in', 'is', 'or', 'filter', 'range', 'order', 'limit',
+    'single', 'maybeSingle',
+    // Add more as needed
+  ];
+  methods.forEach((method) => {
+    // For methods that should resolve to a value, return a Promise
+    if (['select', 'insert', 'update', 'upsert', 'delete', 'single', 'maybeSingle'].includes(method)) {
+      builder[method] = vi.fn().mockReturnValue(Promise.resolve({ data: [], error: null }));
+    } else {
+      builder[method] = vi.fn().mockReturnValue(builder);
+    }
+  });
+  return builder;
+}
+
+const mockSupabase = {
+  auth: {
+    getUser: vi.fn() as Mock<[], Promise<UserResponse>>,
+    signInWithPassword: vi.fn() as Mock<[SignInWithPasswordCredentials], Promise<AuthTokenResponsePassword>>,
+    signInWithOAuth: vi.fn() as Mock<[SignInWithOAuthCredentials], Promise<AuthResponse>>,
+    signUp: vi.fn() as Mock<[SignUpWithPasswordCredentials], Promise<AuthResponse>>,
+    signOut: vi.fn() as Mock<[], Promise<{ error: AuthError | null }>>,
+    resetPasswordForEmail: vi.fn() as Mock<[string, { redirectTo?: string }], Promise<{ data: Record<string, never>; error: AuthError | null }>>,
+    updateUser: vi.fn() as Mock<[any], Promise<UserResponse>>,
+    onAuthStateChange: vi.fn().mockReturnValue({
+      data: { subscription: { unsubscribe: vi.fn() } },
+      error: null,
+    }),
+    getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }) as Mock<[], Promise<{ data: { session: Session | null }; error: AuthError | null }>>,
+    refreshSession: vi.fn() as Mock<[], Promise<AuthResponse>>,
+    mfa: {
+      listFactors: vi.fn() as Mock<[], Promise<AuthMFAListFactorsResponse>>,
+      challenge: vi.fn() as Mock<[MFAChallengeParams], Promise<AuthMFAChallengeResponse>>,
+      verify: vi.fn() as Mock<[MFAVerifyParams], Promise<AuthMFAVerifyResponse>>,
+      enroll: vi.fn() as Mock<[MFAEnrollParams], Promise<AuthMFAEnrollResponse>>,
+      unenroll: vi.fn() as Mock<[MFAUnenrollParams], Promise<AuthMFAUnenrollResponse>>,
+      updateFactor: vi.fn(),
+      verifyWithBackupCode: vi.fn(),
+    },
+  },
+  storage: {
+    from: vi.fn().mockReturnValue({
+      upload: vi.fn(),
+      download: vi.fn(),
+      getPublicUrl: vi.fn(),
+      remove: vi.fn(),
+      list: vi.fn(),
+      move: vi.fn(),
+    }),
+  },
+  rpc: vi.fn() as Mock<[string, unknown?], Promise<SupabaseRpcResponse>>,
+  channel: vi.fn().mockReturnValue({
+    on: vi.fn().mockReturnThis(),
+    subscribe: vi.fn()
+  }),
+  from: vi.fn().mockImplementation(() => createMockBuilder()),
+};
+
+export const supabase = mockSupabase as unknown as SupabaseClient; 

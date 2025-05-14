@@ -1,5 +1,4 @@
 import { act } from '@testing-library/react';
-import { vi } from 'vitest'; // Added for Vitest 3.x compatibility
 
 /**
  * Helper function to create a clean store for testing
@@ -58,24 +57,4 @@ export function updateStoreState<T>(store: any, partialState: Partial<T>) {
   act(() => {
     store.setState(partialState);
   });
-}
-
-/**
- * Create a mocked version of zustand store
- * Compatible with Vitest 3.x mocking
- *
- * @param initialState - Initial state for the mock store
- * @returns A mocked store with vi.fn() functions
- */
-export function createMockStore<T extends object>(initialState: T) {
-  let state = { ...initialState };
-  
-  return {
-    getState: vi.fn(() => state),
-    setState: vi.fn((newState: Partial<T>, replace = false) => {
-      state = replace ? { ...newState as T } : { ...state, ...newState };
-    }),
-    subscribe: vi.fn(),
-    destroy: vi.fn(),
-  };
 }

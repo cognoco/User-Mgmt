@@ -3,6 +3,7 @@ description: Guidelines for creating and maintaining Roo Code rules to ensure co
 globs: .roo/rules/*.md
 alwaysApply: true
 ---
+READ .Roo Coderules
 
 - **Required Rule Structure:**
   ```markdown
@@ -50,4 +51,5 @@ alwaysApply: true
   - Keep descriptions concise
   - Include both DO and DON'T examples
   - Reference actual code over theoretical examples
+
   - Use consistent formatting across rules 
