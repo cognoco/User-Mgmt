@@ -283,6 +283,39 @@ This knowledge should be applied to all tests using axios in Node, and documente
 ### 6. Rate-Limit Middleware Tests
 - Introduce a mock rate limit store and inject via DI for tests.
 
+#### ⚡ Robust Pattern: Dependency Injection for Middleware Testing (ESM/Closure Issue)
+
+- **Problem:**
+  - In ESM/Next.js/Vitest, if a middleware closes over a function (e.g., `checkRateLimit`) at module load time, mocks (even with `vi.mock` at the top) will NOT affect the reference used by the middleware. The real function is always called, making negative-path tests (e.g., rate limit blocks) impossible to reliably test.
+  - This is due to ESM module closure/hoisting: the middleware "captures" the real function before the mock is applied.
+
+- **Solution: Use Dependency Injection (DI)**
+  - Refactor the middleware to accept the dependency (e.g., `checkRateLimit`) as an optional parameter, defaulting to the real function in production.
+  - In tests, inject your mock function directly.
+
+- **Example:**
+  ```typescript
+  // In middleware (rate-limit.ts):
+  export function rateLimit(options = {}, injectedCheckRateLimit = checkRateLimit) {
+    return async function rateLimitMiddleware(req, res, next) {
+      const isRateLimited = await injectedCheckRateLimit(req, options);
+      // ...
+    }
+  }
+
+  // In test:
+  const middleware = rateLimitModule.rateLimit({ max: 10 }, mockCheckRateLimit);
+  ```
+
+- **Why this works:**
+  - The middleware always uses the function you provide, so mocking is reliable and predictable.
+  - In production, the default is the real function.
+  - This pattern avoids ESM hoisting/closure issues and makes your code more modular and testable.
+
+- **Best Practice:**
+  - For any middleware or function that depends on another function, use DI (pass the dependency as a parameter, with a default). In tests, inject your mock.
+  - This is the only robust, future-proof solution for negative-path middleware tests in ESM/Next.js/Vitest environments.
+
 ### 7. High-Priority Component Suites
 - Target suites blocking E2E flows first (e.g., AdminDashboard, User Preferences Flow, Theme Settings).
 

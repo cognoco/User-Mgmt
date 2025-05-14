@@ -52,6 +52,7 @@ export async function checkRateLimit(
   request: NextRequest, 
   options: RateLimitOptions = {} // Use the new options type
 ): Promise<boolean> {
+  console.log('REAL checkRateLimit CALLED');
   if (!redis) {
     return false; // Not rate limited if Redis is not available
   }
@@ -113,14 +114,14 @@ export function getRateLimitHeaders(key: string, options: RateLimitOptions = {})
     };
 }
 
-export function rateLimit(options: RateLimitOptions = {}) { // Use the new options type
+export function rateLimit(options: RateLimitOptions = {}, injectedCheckRateLimit = checkRateLimit) {
   return async function rateLimitMiddleware(
     req: NextApiRequest,
     res: NextApiResponse,
     next: () => Promise<void>
   ) {
     try {
-      const isRateLimited = await checkRateLimit(req as unknown as NextRequest, options);
+      const isRateLimited = await injectedCheckRateLimit(req as unknown as NextRequest, options);
       
       if (isRateLimited) {
         res.status(429).json({ error: 'Too many requests, please try again later.' });
