@@ -1,0 +1,15 @@
+# Dependencies
+node_modules
+
+# Build directories
+.next
+out
+build
+dist
+
+# Skeleton test files
+src/tests/integration/**/*.Skeleton.integration.test.tsx
+
+# Other test utilities
+src/tests/mocks/**/*
+src/tests/utils/**/* 
