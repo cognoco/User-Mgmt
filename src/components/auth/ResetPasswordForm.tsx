@@ -32,7 +32,11 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ResetPasswordData>({
+  } = useForm<
+    z.input<typeof resetPasswordSchema>,
+    any,
+    z.output<typeof resetPasswordSchema>
+  >({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       password: '',

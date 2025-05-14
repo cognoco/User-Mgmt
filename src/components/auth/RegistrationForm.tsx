@@ -77,7 +77,11 @@ export function RegistrationForm() {
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
   const authStore = useAuthStore();
 
-  const form = useForm<RegistrationFormValues>({
+  const form = useForm<
+    z.input<typeof registrationSchema>,
+    any,
+    z.output<typeof registrationSchema>
+  >({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       userType: userManagement.corporateUsers.defaultUserType,

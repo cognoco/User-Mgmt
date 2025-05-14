@@ -42,7 +42,11 @@ export function MFAVerificationForm({
   const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [rememberDevice, setRememberDevice] = useState(false);
 
-  const form = useForm<MFAFormValues>({
+  const form = useForm<
+    z.input<typeof mfaFormSchema>,
+    any,
+    z.output<typeof mfaFormSchema>
+  >({
     resolver: zodResolver(mfaFormSchema),
     defaultValues: {
       code: '',

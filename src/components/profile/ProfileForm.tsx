@@ -15,6 +15,7 @@ import { useAuthStore, AuthState } from '@/lib/stores/auth.store';
 import { profileSchema, ProfileFormData } from '@/types/profile';
 import { Edit2, XCircle, Save } from 'lucide-react';
 import { api } from '@/lib/api/axios';
+import { z } from 'zod';
 
 const ProfileDisplayField = ({ label, value }: { label: string; value: string | null | undefined }) => {
     if (!value) return null;
@@ -41,7 +42,11 @@ export function ProfileForm() {
     setValue,
     watch,
     formState: { errors, isDirty },
-  } = useForm<ProfileFormData & { is_public?: boolean }>({
+  } = useForm<
+    z.input<typeof profileSchema> & { is_public?: boolean },
+    any,
+    z.output<typeof profileSchema> & { is_public?: boolean }
+  >({
     resolver: zodResolver(profileSchema),
     defaultValues: {
         bio: '',

@@ -36,7 +36,11 @@ export function ChangePasswordForm() {
   const [errorField, setErrorField] = useState<string | null>(null); // For highlighting specific field
   const [success, setSuccess] = useState<string | null>(null);
 
-  const form = useForm<ChangePasswordFormValues>({
+  const form = useForm<
+    z.input<typeof changePasswordSchema>,
+    any,
+    z.output<typeof changePasswordSchema>
+  >({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: {
       currentPassword: '',

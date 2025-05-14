@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 71  |  **Failed Test Files:** 18
+**Passed Test Files:** 69  |  **Failed Test Files:** 20
 
 ## Passing Test Files
 
@@ -19,7 +19,6 @@
 - src\components\profile\__tests__\DataExport.test.tsx
 - src\components\profile\__tests__\NotificationPreferences.test.tsx
 - src\components\profile\__tests__\PrivacySettings.test.tsx
-- src\components\profile\__tests__\Profile.test.tsx
 - src\components\profile\__tests__\ProfileEditor.test.tsx
 - src\components\profile\__tests__\ProfileTypeConversion.test.tsx
 - src\components\profile\__tests__\ProfileVerification.test.tsx
@@ -68,7 +67,6 @@
 - src\tests\integration\password-reset-flow.test.tsx
 - src\tests\integration\search-filter-flow.test.tsx
 - src\tests\integration\social-sharing-flow.test.tsx
-- src\tests\integration\user-auth-flow.test.tsx
 - src\tests\integration\user-preferences-flow.test.tsx
 - src\tests\smoke\app.smoke.test.tsx
 - src\tests\smoke\login.smoke.test.tsx
@@ -83,6 +81,7 @@
 - src\components\auth\__tests__\DomainBasedOrgMatching.test.tsx
 - src\components\auth\__tests__\IDPConfiguration.test.tsx
 - src\components\company\__tests__\OrganizationSessionManager.test.tsx
+- src\components\profile\__tests__\Profile.test.tsx
 - src\components\profile\__tests__\ProfilePrivacySettings.test.tsx
 - src\lib\auth\__tests__\mfa\setup.test.tsx
 - src\lib\auth\__tests__\session\business-policies.test.tsx
@@ -96,3 +95,4 @@
 - src\tests\integration\file-upload-flow.test.tsx
 - src\tests\integration\notification-flow.test.tsx
 - src\tests\integration\theme-settings-flow.test.tsx
+- src\tests\integration\user-auth-flow.test.tsx

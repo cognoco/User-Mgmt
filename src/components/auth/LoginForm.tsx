@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { MFAVerificationForm } from './MFAVerificationForm';
 import { RateLimitFeedback } from '@/components/common/RateLimitFeedback';
 import { OAuthButtons } from './OAuthButtons';
+import { z } from 'zod';
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -43,7 +44,11 @@ export function LoginForm() {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<LoginData>({
+  } = useForm<
+    z.input<typeof loginSchema>,
+    any,
+    z.output<typeof loginSchema>
+  >({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
