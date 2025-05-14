@@ -1,17 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { csrf, getCSRFToken } from '../csrf';
+import { randomBytes } from 'crypto';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-// Mock crypto module properly using importOriginal
-vi.mock('crypto', async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    randomBytes: () => ({
-      toString: () => 'mock-token'
-    })
-  };
-});
+// Fix mocking issue
+vi.mock('crypto', () => ({
+  randomBytes: vi.fn().mockImplementation(() => ({
+    toString: vi.fn().mockReturnValue('mock-token')
+  }))
+}));
 
 // Mock NextApiRequest and NextApiResponse
 const mockReq = (method = 'GET', cookies = {}, headers = {}) => ({
@@ -36,6 +33,7 @@ describe('CSRF Middleware', () => {
 
   beforeEach(() => {
     next = vi.fn().mockResolvedValue(undefined);
+    vi.spyOn(randomBytes as unknown as { toString: () => string }, 'toString').mockReturnValue('mock-token');
   });
 
   afterEach(() => {
@@ -48,8 +46,16 @@ describe('CSRF Middleware', () => {
       const res = mockRes();
       const middleware = csrf();
 
+      // Mock the generateToken function to return a consistent value for testing
+      vi.mock('crypto', () => ({
+        randomBytes: () => ({
+          toString: () => 'mock-token'
+        })
+      }));
+
       await middleware(req, res, next);
 
+      // Check if setHeader was called with a cookie containing a CSRF token
       expect(res.setHeader).toHaveBeenCalledWith('Set-Cookie', expect.arrayContaining([
         expect.stringContaining('csrf-token=')
       ]));
@@ -140,8 +146,7 @@ describe('CSRF Middleware', () => {
     });
 
     it('should set secure flag in production', async () => {
-      // Mock the production environment instead of trying to reassign NODE_ENV
-      const originalNodeEnv = process.env.NODE_ENV;
+      const originalEnv = process.env.NODE_ENV;
       vi.stubEnv('NODE_ENV', 'production');
 
       const req = mockReq('GET');
@@ -154,8 +159,8 @@ describe('CSRF Middleware', () => {
         expect.stringContaining('Secure')
       ]));
 
-      // Restore the environment
-      vi.stubEnv('NODE_ENV', originalNodeEnv || 'test');
+      // Restore the original environment
+      vi.stubEnv('NODE_ENV', originalEnv || 'test');
     });
   });
 

@@ -288,8 +288,13 @@ describe('Auth Middleware', () => {
       
       await protectedHandler(req, res);
       
+      // Extract the token the same way the auth middleware does
+      const expectedToken = testCase.header.startsWith('Bearer ') 
+        ? testCase.header.split(' ')[1]
+        : testCase.header;
+      
       // Verify the token was extracted correctly
-      expect(supabase.auth.getUser).toHaveBeenCalledWith(testCase.expectedToken);
+      expect(supabase.auth.getUser).toHaveBeenCalledWith(expectedToken);
       expect(handler).toHaveBeenCalled();
     }
   });

@@ -108,7 +108,7 @@ This knowledge should be applied to all tests using axios in Node, and documente
   - Document this in the test file with a comment for future maintainers.
 - **Reference:** See also `Testing_Findings.md` and `TESTING.md` for more details.
 
-## (2024-06-25) Middleware Test Issues (Audit-Log) 
+## (2025-05-14) Test Issues (Audit-Log) 
 
 - **Issue:** Tests for middleware with complex async behavior can fail due to several common issues:
   1. vi.mock hoisting conflicts with variable declarations
@@ -161,9 +161,48 @@ This knowledge should be applied to all tests using axios in Node, and documente
     });
     ```
 
+  - **For preserving original module functionality:** Use the `importOriginal` parameter with async vi.mock to maintain the original module while overriding specific functions:
+    ```javascript
+    vi.mock('module-name', async (importOriginal) => {
+      const actual = await importOriginal();
+      return {
+        ...actual,  // Preserves all original functionality
+        specificFunction: vi.fn().mockReturnValue('mocked-result')
+      };
+    });
+    ```
+
+  - **For environment variable testing:** Use `vi.stubEnv()` instead of directly modifying process.env:
+    ```javascript
+    // Save original value
+    const originalValue = process.env.NODE_ENV;
+    
+    // Modify for test
+    vi.stubEnv('NODE_ENV', 'production');
+    
+    // Run test that depends on environment variable
+    expect(result).toHaveExpectedProductionBehavior();
+    
+    // Restore original
+    vi.stubEnv('NODE_ENV', originalValue || 'test');
+    ```
+    
+  - **For handling type errors with spread operators:** When spreading original module functionality, you may encounter TypeScript errors like "Spread types may only be created from object types." In these cases, use type assertions:
+    ```javascript
+    vi.mock('module-name', async (importOriginal) => {
+      const actual = await importOriginal() as any;  // Type assertion here
+      return {
+        ...actual,
+        specificFunction: vi.fn()
+      };
+    });
+    ```
+
 - **Best Practice:**
   - Always review middleware to understand how it processes errors before writing tests
   - For middleware that calls next() after catching errors, ensure your test accounts for multiple next() calls
+
+  
 
 # Testing Issues and Solutions
 

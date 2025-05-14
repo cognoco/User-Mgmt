@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 48  |  **Failed Test Files:** 37
+**Passed Test Files:** 50  |  **Failed Test Files:** 35
 
 ## Passing Test Files
 
@@ -18,6 +18,7 @@
 - src\components\profile\__tests__\DataExport.test.tsx
 - src\components\profile\__tests__\NotificationPreferences.test.tsx
 - src\components\profile\__tests__\PrivacySettings.test.tsx
+- src\components\profile\__tests__\Profile.test.tsx
 - src\components\profile\__tests__\ProfileEditor.test.tsx
 - src\components\profile\__tests__\ProfileTypeConversion.test.tsx
 - src\components\profile\__tests__\ProfileVerification.test.tsx
@@ -34,6 +35,7 @@
 - src\lib\auth\__tests__\sso\business-sso.test.tsx
 - src\lib\auth\__tests__\sso\personal-sso.test.tsx
 - src\lib\database\__tests__\database.test.tsx
+- src\lib\database\__tests__\supabase.test.tsx
 - src\lib\stores\__tests__\auth.store.direct.test.ts
 - src\lib\stores\__tests__\auth.store.minimal.test.ts
 - src\lib\stores\__tests__\auth.store.test.ts
@@ -61,14 +63,12 @@
 - src\components\auth\__tests__\IDPConfiguration.test.tsx
 - src\components\auth\__tests__\OrganizationSSO.test.tsx
 - src\components\company\__tests__\OrganizationSessionManager.test.tsx
-- src\components\profile\__tests__\Profile.test.tsx
 - src\components\profile\__tests__\ProfilePrivacySettings.test.tsx
 - src\hooks\__tests__\usePayment.test.ts
 - src\hooks\__tests__\usePermission.test.tsx
 - src\hooks\__tests__\useSubscription.test.ts
 - src\lib\auth\__tests__\mfa\setup.test.tsx
 - src\lib\auth\__tests__\session\business-policies.test.tsx
-- src\lib\database\__tests__\supabase.test.tsx
 - src\lib\rbac\__tests__\roleService.test.ts
 - src\lib\stores\__tests__\subscription.store.test.ts
 - src\middleware\__tests__\audit-log.test.ts
