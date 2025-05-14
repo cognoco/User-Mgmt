@@ -1,4 +1,4 @@
-import { create, StateCreator } from 'zustand';
+import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
 import { supabase } from '@/lib/database/supabase';
 import { 
@@ -20,8 +20,8 @@ const SESSION_CHECK_INTERVAL = 1 * 60 * 1000; // 1 minute in milliseconds
 // Add a log to check if the import worked at module level
 console.log('[AuthStore Module] Supabase instance imported:', typeof supabase !== 'undefined');
 
-// Explicitly type the state creator function
-const authStoreCreator: StateCreator<AuthState> = (set, get) => {
+// Explicitly type the state creator function - Update for Zustand v5
+export const useAuthStore = create<AuthState>((set, get) => {
   let sessionCheckTimer: NodeJS.Timeout | null = null;
   let tokenRefreshTimer: NodeJS.Timeout | null = null;
 
@@ -537,6 +537,4 @@ const authStoreCreator: StateCreator<AuthState> = (set, get) => {
     setLoading: (isLoading: boolean) => set({ isLoading }),
 
   };
-};
-
-export const useAuthStore = create<AuthState>(authStoreCreator); // Use the typed creator
+});

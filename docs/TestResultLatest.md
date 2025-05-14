@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 69  |  **Failed Test Files:** 20
+**Passed Test Files:** 70  |  **Failed Test Files:** 19
 
 ## Passing Test Files
 
@@ -67,6 +67,7 @@
 - src\tests\integration\password-reset-flow.test.tsx
 - src\tests\integration\search-filter-flow.test.tsx
 - src\tests\integration\social-sharing-flow.test.tsx
+- src\tests\integration\user-auth-flow.test.tsx
 - src\tests\integration\user-preferences-flow.test.tsx
 - src\tests\smoke\app.smoke.test.tsx
 - src\tests\smoke\login.smoke.test.tsx
@@ -95,4 +96,3 @@
 - src\tests\integration\file-upload-flow.test.tsx
 - src\tests\integration\notification-flow.test.tsx
 - src\tests\integration\theme-settings-flow.test.tsx
-- src\tests\integration\user-auth-flow.test.tsx

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { createJSONStorage } from 'zustand/middleware'
 
 interface OnboardingStep {
   id: string;
@@ -101,6 +102,7 @@ export const useOnboarding = create<OnboardingState>()(
     }),
     {
       name: 'onboarding-storage',
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );
