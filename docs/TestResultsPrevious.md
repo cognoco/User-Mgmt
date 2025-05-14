@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 56  |  **Failed Test Files:** 33
+**Passed Test Files:** 58  |  **Failed Test Files:** 31
 
 ## Passing Test Files
 
@@ -43,8 +43,10 @@
 - src\lib\stores\__tests__\preferences.store.test.ts
 - src\lib\stores\__tests__\user.store.test.ts
 - src\middleware\__tests__\audit-log.test.ts
+- src\middleware\__tests__\auth.test.js
 - src\middleware\__tests__\csrf.test.ts
 - src\middleware\__tests__\index.test.ts
+- src\middleware\__tests__\permissions.test.ts
 - src\middleware\__tests__\rate-limit.test.ts
 - src\middleware\__tests__\security-headers.test.ts
 - src\tests\integration\account-settings-flow.test.tsx
@@ -77,8 +79,6 @@
 - src\lib\auth\__tests__\session\business-policies.test.tsx
 - src\lib\rbac\__tests__\roleService.test.ts
 - src\lib\stores\__tests__\subscription.store.test.ts
-- src\middleware\__tests__\auth.test.js
-- src\middleware\__tests__\permissions.test.ts
 - src\tests\integration\account-switching-flow.test.tsx
 - src\tests\integration\admin-users-flow.test.tsx
 - src\tests\integration\api-error-messages.test.tsx

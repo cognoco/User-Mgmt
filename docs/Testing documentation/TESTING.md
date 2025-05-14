@@ -1,5 +1,16 @@
 # Testing Guidelines
 
+## Core Testing Principles & Approach
+
+### A. Production-First, Test-Second Approach
+- The project now follows a production-first, test-second approach for new features.
+- Test skeletons are only created in advance if a feature is high-risk or likely to cause regressions.
+- This ensures that tests are always written against the real, user-facing implementation.
+
+### B. Documenting New Issues (in TESTING_ISSUES.md)
+- For ongoing issues, specific solutions, and advanced patterns learned from troubleshooting, refer to `TESTING_ISSUES.md`.
+- Update `TESTING_ISSUES.md` as new specific issues or complex solutions are discovered during post-implementation testing.
+
 ## Philosophy & Best Practices
 - Focus on user-centric, integration, and E2E tests that reflect real user flows.
 - Avoid over-mocking; prefer real implementations unless isolation is required.
