@@ -1,58 +1,70 @@
 // __tests__/integration/data-management-flow.test.tsx
 
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Dashboard } from '@/components/dashboard/Dashboard';
-// Use static mock import again
-import { describe, test, expect, beforeEach, vi, Mock } from 'vitest'; 
-// Remove beforeAll, afterAll
-// import type { SupabaseClient } from '@supabase/supabase-js'; // Keep type if needed?
+import { describe, test, expect, beforeEach, vi } from 'vitest'; 
 
-// Use top-level vi.mock again
-vi.mock('@/lib/database/supabase', () => require('@/tests/mocks/supabase'));
-// Use static import again
+// Create spy functions that we can control
+const selectSpy = vi.fn();
+const insertSpy = vi.fn();
+const updateSpy = vi.fn();
+const deleteSpy = vi.fn();
+const eqSpy = vi.fn();
+
+// Create chain-returning mock objects for method chaining
+const updateWithEq = {
+  update: vi.fn().mockReturnValue({
+    eq: eqSpy
+  })
+};
+
+const deleteWithEq = {
+  delete: vi.fn().mockReturnValue({
+    eq: eqSpy
+  })
+};
+
+// Fix the mocking approach: make update and delete use their spies and return chainable eq
+vi.mock('@/lib/database/supabase', () => {
+  return {
+    supabase: {
+      from: vi.fn().mockImplementation(() => {
+        return {
+          select: selectSpy,
+          insert: insertSpy,
+          update: updateSpy.mockImplementation(() => ({ eq: eqSpy })),
+          delete: deleteSpy.mockImplementation(() => ({ eq: eqSpy })),
+        };
+      }),
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: 'user-123', email: 'user@example.com' } },
+          error: null
+        })
+      }
+    }
+  };
+});
+
+// Import after mock
 import { supabase } from '@/lib/database/supabase';
 
 describe('Data Management Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;
-  // Remove dynamically imported supabase variable
-  // let supabase: SupabaseClient; 
-
-  // Remove beforeAll/afterAll blocks
-  /*
-  beforeAll(async () => {
-    vi.doMock('@/lib/database/supabase', async () => {
-      const mock = await vi.importActual<object>('@/tests/__mocks__/supabase');
-      return mock;
-    });
-    const mod = await import('@/lib/database/supabase');
-    supabase = mod.supabase;
-  });
-
-  afterAll(() => {
-    vi.doUnmock('@/lib/database/supabase');
-  });
-  */
 
   beforeEach(() => {
-    // supabase should now come from the static import, implicitly mocked
+    // Clear all mocks between tests
     vi.clearAllMocks();
+    
+    // Reset DOM between tests to prevent test bleed
+    document.body.innerHTML = '';
+    
     user = userEvent.setup();
     
-    // Mock authentication
-    (supabase.auth.getUser as Mock).mockResolvedValue({
-      data: { user: { id: 'user-123', email: 'user@example.com' } },
-      error: null
-    });
-    
-    // *** Debug Log ***
-    // console.log('supabase in beforeEach:', supabase);
-    // console.log('supabase.from in beforeEach:', supabase?.from);
-
-    // Mock empty data list initially using the new mock structure and correct return type
-    vi.mocked(supabase.from('items').select).mockClear(); 
-    vi.mocked(supabase.from('items').select).mockResolvedValue({ 
+    // Mock empty data list initially
+    selectSpy.mockResolvedValue({ 
       data: [], 
       error: null, 
       count: 0, 
@@ -60,204 +72,277 @@ describe('Data Management Flow', () => {
       statusText: 'OK' 
     });
     
-    // Mock insert/update/delete with correct return type (data should be null on success)
-    vi.mocked(supabase.from('items').insert).mockResolvedValue({ 
+    // Mock insert/update/delete
+    insertSpy.mockResolvedValue({ 
       data: null, 
       error: null, 
       count: null, 
       status: 201, 
       statusText: 'Created' 
     });
-    vi.mocked(supabase.from('items').update).mockResolvedValue({ 
+    
+    updateSpy.mockResolvedValue({ 
       data: null, 
       error: null, 
       count: null, 
       status: 200, 
       statusText: 'OK' 
     });
-    vi.mocked(supabase.from('items').delete).mockResolvedValue({ 
+    
+    deleteSpy.mockResolvedValue({ 
       data: null,  
       error: null, 
       count: null, 
-      status: 204, // Or 200
-      statusText: 'No Content' // Or OK
+      status: 204,
+      statusText: 'No Content'
+    });
+    
+    eqSpy.mockResolvedValue({
+      data: null,
+      error: null,
+      count: null,
+      status: 200,
+      statusText: 'OK'
     });
   });
 
   test('User can create, view, edit and delete content', async () => {
-    render(<Dashboard />);
-    // Expect initial select call from useEffect
-    expect(supabase.from('items').select).toHaveBeenCalledTimes(1);
+    // Render component
+    await act(async () => {
+      render(<Dashboard />);
+    });
+    
+    // Verify initial state
+    expect(supabase.from).toHaveBeenCalledWith('items');
+    expect(selectSpy).toHaveBeenCalledTimes(1);
     await screen.findByText(/no items found/i);
 
     // --- CREATE --- 
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /create new/i }));
     });
+    
     await act(async () => {
       await user.type(screen.getByLabelText(/title/i), 'Test Item');
     });
+    
     await act(async () => {
       await user.type(screen.getByLabelText(/description/i), 'Test Description');
     });
 
-    // Set up mocks right before the action
-    (supabase.from('items').insert as Mock).mockResolvedValueOnce({ data: [{ id: 'item-1', title: 'Test Item', description: 'Test Description' }], error: null });
-    (supabase.from('items').select as Mock).mockResolvedValueOnce({ data: [{ id: 'item-1', title: 'Test Item', description: 'Test Description' }], error: null });
-
-    // Perform action within act
-    await act(async () => {
-      await user.click(screen.getAllByRole('button', { name: /save/i })[0]);
+    // Set up mocks for save action
+    insertSpy.mockResolvedValueOnce({ 
+      data: [{ id: 'item-1', title: 'Test Item', description: 'Test Description' }], 
+      error: null 
     });
     
-    // *** Verify mock calls after create ***
-    expect(supabase.from('items').insert).toHaveBeenCalledTimes(1);
-    expect(supabase.from('items').select).toHaveBeenCalledTimes(2); // Initial + after create
+    selectSpy.mockResolvedValueOnce({ 
+      data: [{ id: 'item-1', title: 'Test Item', description: 'Test Description' }], 
+      error: null 
+    });
 
-    // Assert result (this might still fail, but we check mocks first)
-    await screen.findByText('Test Item');
+    // Perform save action
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
+    
+    // Verify mock calls
+    expect(insertSpy).toHaveBeenCalledTimes(1);
+    expect(selectSpy).toHaveBeenCalledTimes(2); // Initial + after create
+    
+    // Check UI updated correctly
+    await waitFor(() => {
+      expect(screen.getByText('Test Item')).toBeInTheDocument();
+    });
     expect(screen.queryByText(/no items found/i)).not.toBeInTheDocument();
 
     // --- EDIT --- 
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /edit/i }));
     });
+    
     await act(async () => {
       await user.clear(screen.getByLabelText(/title/i));
     });
+    
     await act(async () => {
       await user.type(screen.getByLabelText(/title/i), 'Updated Item');
     });
 
-    // Set up mocks right before the action
-    (supabase.from('items').update as Mock).mockResolvedValueOnce({ data: [{ id: 'item-1', title: 'Updated Item', description: 'Test Description' }], error: null });
-    (supabase.from('items').select as Mock).mockResolvedValueOnce({ data: [{ id: 'item-1', title: 'Updated Item', description: 'Test Description' }], error: null });
-
-    // Perform action within act
-    await act(async () => {
-      await user.click(screen.getAllByRole('button', { name: /save/i })[0]);
+    // Set up mocks for update
+    eqSpy.mockResolvedValueOnce({ 
+      data: [{ id: 'item-1', title: 'Updated Item', description: 'Test Description' }], 
+      error: null 
+    });
+    
+    selectSpy.mockResolvedValueOnce({ 
+      data: [{ id: 'item-1', title: 'Updated Item', description: 'Test Description' }], 
+      error: null 
     });
 
-    // *** Verify mock calls after update ***
-    expect(supabase.from('items').update).toHaveBeenCalledTimes(1);
-    expect(supabase.from('items').select).toHaveBeenCalledTimes(3); // Initial + after create + after update
+    // Perform update
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
 
-    // Assert result (this might still fail)
-    await screen.findByText('Updated Item');
+    // Verify mock calls
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+    expect(eqSpy).toHaveBeenCalledTimes(1);
+    expect(selectSpy).toHaveBeenCalledTimes(3); // Initial + after create + after update
+    
+    // Check UI updated correctly
+    await waitFor(() => {
+      expect(screen.getByText('Updated Item')).toBeInTheDocument();
+    });
     expect(screen.queryByText('Test Item')).not.toBeInTheDocument();
 
     // --- DELETE --- 
+    vi.spyOn(window, 'confirm').mockReturnValueOnce(true);
+    
+    // Set up mocks for delete
+    eqSpy.mockResolvedValueOnce({ 
+      data: [{ id: 'item-1' }], 
+      error: null 
+    });
+    
+    selectSpy.mockResolvedValueOnce({ 
+      data: [], 
+      error: null 
+    });
+
+    // Perform deletion
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /delete/i }));
     });
 
-    // Set up mocks right before the action
-    vi.spyOn(window, 'confirm').mockReturnValueOnce(true);
-    (supabase.from('items').delete as Mock).mockResolvedValueOnce({ data: [{ id: 'item-1' }], error: null });
-    (supabase.from('items').select as Mock).mockResolvedValueOnce({ data: [], error: null });
-
-    // Perform action within act
-    await act(async () => {
-      await user.click(screen.getAllByRole('button', { name: /confirm/i })[0]);
+    // Verify mock calls
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+    expect(eqSpy).toHaveBeenCalledTimes(2); // update + delete
+    expect(selectSpy).toHaveBeenCalledTimes(4); // Initial + after create + after update + after delete
+    
+    // Check UI updated correctly
+    await waitFor(() => {
+      expect(screen.getByText(/no items found/i)).toBeInTheDocument();
     });
-
-    // *** Verify mock calls after delete ***
-    expect(supabase.from('items').delete).toHaveBeenCalledTimes(1);
-    expect(supabase.from('items').select).toHaveBeenCalledTimes(4); // Initial + after create + after update + after delete
-
-    // Assert result (this might still fail)
-    await screen.findByText(/no items found/i);
     expect(screen.queryByText('Updated Item')).not.toBeInTheDocument();
-
-    // Mock select again for post-creation fetch if necessary
-    vi.mocked(supabase.from('items').select).mockResolvedValueOnce({ 
-      data: [{ id: 'new-item', name: 'Test Item' }], 
-      error: null,
-      count: 1,
-      status: 200,
-      statusText: 'OK'
-    });
   });
 
   test('handles error when creating item', async () => {
-    render(<Dashboard />);
+    // Start with empty data for this test
+    selectSpy.mockResolvedValue({ 
+      data: [], 
+      error: null 
+    });
+    
+    await act(async () => {
+      render(<Dashboard />);
+    });
+    
     await screen.findByText(/no items found/i);
 
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /create new/i }));
     });
+    
     await act(async () => {
       await user.type(screen.getByLabelText(/title/i), 'Test Item');
     });
+    
     await act(async () => {
       await user.type(screen.getByLabelText(/description/i), 'Test Description');
     });
 
-    // Set up mock right before the action
-    (supabase.from('items').insert as Mock).mockResolvedValueOnce({ data: null, error: { message: 'Error creating item' } });
-    // Note: No subsequent select mock needed as fetchItems isn't called on error
-
-    // Perform action within act
-    await act(async () => {
-      await user.click(screen.getAllByRole('button', { name: /save/i })[0]);
+    // Mock error when inserting
+    insertSpy.mockResolvedValueOnce({ 
+      data: null, 
+      error: { message: 'Error creating item' } 
     });
 
-    // Assert result
-    await screen.findByText(/error creating item/i);
+    // Submit form
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
+
+    // Error should be displayed
+    await waitFor(() => {
+      expect(screen.getByText(/error creating item/i)).toBeInTheDocument();
+    });
   });
 
   test('handles error when updating item', async () => {
-    // Mock initial data 
-    (supabase.from('items').select as Mock).mockResolvedValueOnce({ data: [{ id: 'item-1', title: 'Original Item', description: 'Original Description' }], error: null });
+    // Initial data with one item - only for this test
+    selectSpy.mockResolvedValue({ 
+      data: [{ id: 'item-1', title: 'Original Item', description: 'Original Description' }], 
+      error: null 
+    });
 
-    render(<Dashboard />);
-    await screen.findByText('Original Item');
+    await act(async () => {
+      render(<Dashboard />);
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByText('Original Item')).toBeInTheDocument();
+    });
 
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /edit/i }));
     });
+    
     await act(async () => {
       await user.clear(screen.getByLabelText(/title/i));
     });
+    
     await act(async () => {
       await user.type(screen.getByLabelText(/title/i), 'Updated Item');
     });
 
-    // Set up mock right before the action
-    (supabase.from('items').update as Mock).mockResolvedValueOnce({ data: null, error: { message: 'Error updating item' } });
-    // Note: No subsequent select mock needed
-
-    // Perform action within act
-    await act(async () => {
-      await user.click(screen.getAllByRole('button', { name: /save/i })[0]);
+    // Mock error for update
+    eqSpy.mockResolvedValueOnce({ 
+      data: null, 
+      error: { message: 'Error updating item' } 
     });
 
-    // Assert result
-    await screen.findByText(/error updating item/i);
+    // Submit form
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /save/i }));
+    });
+
+    // Error should be displayed
+    await waitFor(() => {
+      expect(screen.getByText(/error updating item/i)).toBeInTheDocument();
+    });
   });
 
   test('handles error when deleting item', async () => {
-    // Mock initial data
-    (supabase.from('items').select as Mock).mockResolvedValueOnce({ data: [{ id: 'item-1', title: 'Test Item', description: 'Test Description' }], error: null });
+    // Initial data with one item - only for this test
+    selectSpy.mockResolvedValue({ 
+      data: [{ id: 'item-1', title: 'Test Item', description: 'Test Description' }], 
+      error: null 
+    });
 
-    render(<Dashboard />);
-    await screen.findByText('Test Item');
+    await act(async () => {
+      render(<Dashboard />);
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByText('Test Item')).toBeInTheDocument();
+    });
+
+    // Set up for delete with error
+    vi.spyOn(window, 'confirm').mockReturnValueOnce(true);
+    
+    eqSpy.mockResolvedValueOnce({ 
+      data: null, 
+      error: { message: 'Error deleting item' } 
+    });
 
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /delete/i }));
     });
 
-    // Set up mocks right before the action
-    vi.spyOn(window, 'confirm').mockReturnValueOnce(true);
-    (supabase.from('items').delete as Mock).mockResolvedValueOnce({ data: null, error: { message: 'Error deleting item' } });
-    // Note: No subsequent select mock needed
-
-    // Perform action within act
-    await act(async () => {
-      await user.click(screen.getAllByRole('button', { name: /confirm/i })[0]);
+    // Error should be displayed
+    await waitFor(() => {
+      expect(screen.getByText(/error deleting item/i)).toBeInTheDocument();
     });
-
-    // Assert result
-    await screen.findByText(/error deleting item/i);
   });
 });

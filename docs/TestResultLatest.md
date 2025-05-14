@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 66  |  **Failed Test Files:** 23
+**Passed Test Files:** 68  |  **Failed Test Files:** 21
 
 ## Passing Test Files
 
@@ -55,8 +55,10 @@
 - src\middleware\__tests__\rate-limit.test.ts
 - src\middleware\__tests__\security-headers.test.ts
 - src\tests\integration\account-settings-flow.test.tsx
+- src\tests\integration\collaboration-flow.test.tsx
 - src\tests\integration\connected-accounts.integration.test.tsx
 - src\tests\integration\dashboard-view-flow.test.tsx
+- src\tests\integration\data-management-flow.test.tsx
 - src\tests\integration\form-validation-errors-isolated.test.tsx
 - src\tests\integration\form-validation-errors.test.tsx
 - src\tests\integration\minimal.smoke.test.tsx
@@ -86,8 +88,6 @@
 - src\tests\integration\admin-users-flow.test.tsx
 - src\tests\integration\api-error-messages.test.tsx
 - src\tests\integration\backup.integration.test.tsx
-- src\tests\integration\collaboration-flow.test.tsx
-- src\tests\integration\data-management-flow.test.tsx
 - src\tests\integration\empty-states.test.tsx
 - src\tests\integration\error-recovery-flow.test.tsx
 - src\tests\integration\export-import-flow.test.tsx

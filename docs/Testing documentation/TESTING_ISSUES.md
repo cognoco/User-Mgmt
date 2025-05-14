@@ -137,7 +137,152 @@
       });
       ```
 
-### E. Dependency Injection for Middleware Testing (ESM/Closure Issue)
+### E. Combined Mocking Techniques for Complex APIs (Supabase Example)
+
+1. **Combined Pattern: Chainable API + Hoisting Solution**
+   - **Issue:** When mocking complex, chainable APIs like Supabase that require both proper method chaining AND proper hoisting, multiple patterns must be combined.
+   - **Solution:** Combine the chainable mock pattern with the vi.mock hoisting pattern by defining all mocks inside the factory function.
+     ```typescript
+     import { vi } from 'vitest';
+     
+     // IMPORTANT: vi.mock must be at the top, BEFORE any variable declarations
+     vi.mock('@/lib/database/supabase', () => {
+       // Define all spies INSIDE the factory to avoid hoisting issues
+       const selectSpy = vi.fn();
+       const updateSpy = vi.fn();
+       const eqSpy = vi.fn();
+       
+       // Build the chainable API structure
+       return {
+         supabase: {
+           from: vi.fn().mockImplementation(() => ({
+             select: selectSpy,
+             update: updateSpy.mockImplementation(() => ({
+               eq: eqSpy.mockImplementation(() => Promise.resolve({ data: {}, error: null }))
+             }))
+           }))
+         }
+       };
+     });
+     
+     // AFTER mocking, import the module
+     import { supabase } from '@/lib/database/supabase';
+     ```
+
+2. **Global Spy Exporting Pattern**
+   - **Issue:** After moving spy definitions inside the mock factory, they become inaccessible to test assertions.
+   - **Solution:** Export the spies through the global object to make them available outside the factory.
+     ```typescript
+     vi.mock('@/lib/database/supabase', () => {
+       const selectSpy = vi.fn();
+       const updateSpy = vi.fn();
+       
+       // Export spies via global for test access
+       (global as any).__supabaseSpies = {
+         selectSpy,
+         updateSpy
+       };
+       
+       return {
+         supabase: {
+           // mock implementation
+         }
+       };
+     });
+     
+     // Access spies in tests
+     const { selectSpy, updateSpy } = (global as any).__supabaseSpies;
+     ```
+   - **Why this works:** The global object lives outside the module system, so it avoids hoisting issues while allowing you to pass objects between the mock factory and your tests.
+
+3. **TypeScript Assertions for Channel APIs and Event Types**
+   - **Issue:** TypeScript errors with Supabase channel events due to strict type checking.
+   - **Solution:** Use type assertions to bypass TypeScript errors for difficult-to-type channel APIs.
+     ```typescript
+     test('Supabase channel can be called properly', () => {
+       const channel = supabase.channel('my-channel');
+       
+       // Use type assertion to avoid TypeScript errors with event types
+       (channel as any).on('*', () => {});
+       expect(onSpy).toHaveBeenCalledWith('*', expect.any(Function));
+       
+       // For chained methods
+       (channel as any).on('*', () => {}).subscribe();
+       expect(subscribeSpy).toHaveBeenCalled();
+     });
+     ```
+   - **When to use:** For complex third-party APIs where TypeScript definitions might be incomplete or very complex. Focus on testing the functionality rather than satisfying the type system.
+
+4. **Complete Supabase Mocking Template**
+   ```typescript
+   import { vi } from 'vitest';
+   
+   vi.mock('@/lib/database/supabase', () => {
+     // 1. Define all spies inside the factory
+     const selectSpy = vi.fn();
+     const updateSpy = vi.fn();
+     const insertSpy = vi.fn();
+     const deleteSpy = vi.fn();
+     const eqSpy = vi.fn();
+     const channelSpy = vi.fn();
+     const onSpy = vi.fn();
+     const subscribeSpy = vi.fn();
+     const rpcSpy = vi.fn();
+   
+     // 2. Export spies via global for test access
+     (global as any).__supabaseSpies = {
+       selectSpy, updateSpy, insertSpy, deleteSpy, eqSpy,
+       channelSpy, onSpy, subscribeSpy, rpcSpy
+     };
+   
+     // 3. Return the chainable mock structure
+     return {
+       supabase: {
+         from: vi.fn().mockImplementation(() => ({
+           select: selectSpy,
+           update: updateSpy.mockImplementation(() => ({
+             eq: eqSpy.mockImplementation(() => 
+               Promise.resolve({ data: { updated: true }, error: null })
+             )
+           })),
+           insert: insertSpy,
+           delete: deleteSpy.mockImplementation(() => ({
+             eq: eqSpy.mockImplementation(() => 
+               Promise.resolve({ data: { deleted: true }, error: null })
+             )
+           })),
+         })),
+         auth: {
+           getUser: vi.fn().mockResolvedValue({
+             data: { user: { id: 'test-id' } }, error: null
+           })
+         },
+         channel: channelSpy.mockImplementation(() => ({
+           on: onSpy.mockImplementation(() => ({
+             subscribe: subscribeSpy.mockResolvedValue({})
+           }))
+         })),
+         rpc: rpcSpy
+       }
+     };
+   });
+   
+   // Import AFTER mocking
+   import { supabase } from '@/lib/database/supabase';
+   import { describe, test, expect } from 'vitest';
+   
+   // Get the exported spies
+   const { selectSpy, updateSpy, /* other spies */ } = (global as any).__supabaseSpies;
+   
+   // Now you can use these in your tests
+   test('example test', async () => {
+     await supabase.from('table').update({ field: 'value' }).eq('id', '123');
+     expect(updateSpy).toHaveBeenCalledWith({ field: 'value' });
+     expect(eqSpy).toHaveBeenCalledWith('id', '123');
+   });
+   ```
+
+### F. Dependency Injection for Middleware Testing (ESM/Closure Issue)
 - **Problem:**
     - In ESM/Next.js/Vitest, if a middleware closes over a function (e.g., `checkRateLimit`) at module load time, mocks (even with `vi.mock` at the top) will NOT affect the reference used by the middleware. The real function is always called, making negative-path tests (e.g., rate limit blocks) impossible to reliably test.
     - This is due to ESM module closure/hoisting: the middleware "captures" the real function before the mock is applied.
@@ -167,7 +312,7 @@
     - For any middleware or function that depends on another function, use DI (pass the dependency as a parameter, with a default). In tests, inject your mock.
     - This is the only robust, future-proof solution for negative-path middleware tests in ESM/Next.js/Vitest environments.
 
-### F. Mocking Context Hooks in Zustand Stores or Non-Component Code
+### G. Mocking Context Hooks in Zustand Stores or Non-Component Code
 - **Issue:**
     - When a Zustand store (or any non-component code) calls a React context hook (e.g., useUserManagement), tests may fail with errors like 'Cannot read properties of null (reading useContext)' if the hook is not properly mocked. This is because the store is not wrapped in a React provider during tests, and the hook expects a valid context.
     - Attempts to mock the hook using vi.spyOn or require-based mocks in beforeAll may not work reliably, especially with ESM and hoisting.
