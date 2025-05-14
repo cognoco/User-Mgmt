@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor, act } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useSession } from 'next-auth/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { usePermission, withPermission } from '@/hooks/usePermission';
 import { checkRolePermission } from '@/lib/rbac/roleService';
+import { render } from '@testing-library/react';
 
 // Mocks
 vi.mock('next-auth/react', () => ({
@@ -161,10 +162,7 @@ describe('withPermission HOC', () => {
       update: vi.fn(),
     });
 
-    const { getByText } = renderHook(() => WrappedComponent({}), {
-      wrapper,
-    }).result.current;
-
+    const { getByText } = render(<WrappedComponent />, { wrapper });
     expect(getByText('Loading permissions...')).toBeInTheDocument();
   });
 
@@ -182,13 +180,7 @@ describe('withPermission HOC', () => {
 
     vi.mocked(checkRolePermission).mockResolvedValueOnce(false);
 
-    let container: HTMLElement;
-    await act(async () => {
-      container = renderHook(() => WrappedComponent({}), {
-        wrapper,
-      }).result.current.container;
-    });
-
+    const { container } = render(<WrappedComponent />, { wrapper });
     await waitFor(() => {
       expect(container.firstChild).toBeNull();
     });
@@ -208,13 +200,7 @@ describe('withPermission HOC', () => {
 
     vi.mocked(checkRolePermission).mockResolvedValueOnce(true);
 
-    let getByText: (text: string) => HTMLElement;
-    await act(async () => {
-      getByText = renderHook(() => WrappedComponent({}), {
-        wrapper,
-      }).result.current.getByText;
-    });
-
+    const { getByText } = render(<WrappedComponent />, { wrapper });
     await waitFor(() => {
       expect(getByText('Test Component')).toBeInTheDocument();
     });

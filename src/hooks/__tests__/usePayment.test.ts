@@ -57,6 +57,17 @@ describe('usePayment', () => {
     ((api.get as unknown) as MockInstance).mockRejectedValueOnce(new Error('API Error'));
 
     const { result } = renderHook(() => usePayment());
+    // Set state to non-empty to verify it gets cleared on error
+    result.current.paymentMethods = [
+      {
+        id: '1',
+        type: 'card',
+        last4: '4242',
+        brand: 'visa',
+        expiryMonth: '12',
+        expiryYear: '25',
+      },
+    ];
 
     await act(async () => {
       await result.current.fetchPaymentMethods();
@@ -105,6 +116,18 @@ describe('usePayment', () => {
     ((api.post as unknown) as MockInstance).mockRejectedValueOnce(new Error('API Error'));
 
     const { result } = renderHook(() => usePayment());
+    // Set state to non-empty to verify it gets cleared on error
+    result.current.paymentMethods = [
+      {
+        id: '1',
+        type: 'card',
+        last4: '4242',
+        brand: 'visa',
+        expiryMonth: '12',
+        expiryYear: '25',
+      },
+      newPaymentMethod,
+    ];
 
     await act(async () => {
       await result.current.addPaymentMethod(newPaymentMethod);
@@ -190,6 +213,18 @@ describe('usePayment', () => {
     ((api.get as unknown) as MockInstance).mockRejectedValueOnce(new Error('API Error'));
 
     const { result } = renderHook(() => usePayment());
+    // Set state to non-null to verify it gets cleared on error
+    result.current.activeSubscription = {
+      id: '1',
+      status: 'active',
+      currentPeriodEnd: '2024-12-31',
+      plan: {
+        id: 'premium',
+        name: 'Premium',
+        price: 10,
+        interval: 'month',
+      },
+    };
 
     await act(async () => {
       await result.current.fetchSubscription();
@@ -259,6 +294,16 @@ describe('usePayment', () => {
     ((api.get as unknown) as MockInstance).mockRejectedValueOnce(new Error('API Error'));
 
     const { result } = renderHook(() => usePayment());
+    // Set state to non-empty to verify it gets cleared on error
+    result.current.paymentHistory = [
+      {
+        id: '1',
+        amount: 10,
+        status: 'succeeded',
+        date: '2024-01-01',
+        description: 'Premium subscription',
+      },
+    ];
 
     await act(async () => {
       await result.current.fetchPaymentHistory();

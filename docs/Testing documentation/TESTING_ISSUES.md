@@ -26,6 +26,32 @@
 - **Issue:** Caused by a mismatch between React versions in the test and app (e.g., in SSO tests).
 - **Solution:** Fixed by aligning all dependencies to React 18.2.0 and ensuring only one React instance in `node_modules`.
 
+### C. JSX, File Extensions, and Testing Library Usage
+- **JSX in `.ts` Files Causes Build/Test Failures**
+  - **Issue:** Using JSX in a `.ts` file (instead of `.tsx`) causes esbuild/Vitest to throw syntax errors like "Expected '>' but found 'className'".
+  - **Solution:** Always use the `.tsx` extension for any file containing JSX, including hooks and utilities.
+  - **Best Practice:** If you see a JSX parse error, check the file extension first.
+
+- **Use `render` for Components/HOCs, `renderHook` for Hooks**
+  - **Issue:** Using `renderHook` to test components or HOCs leads to runtime errors or inability to query the DOM.
+  - **Solution:** Use `render` from `@testing-library/react` for components/HOCs, and `renderHook` for hooks.
+  - **Best Practice:** If you need to query the DOM, use `render`.
+
+- **Always Wrap Hooks/Components with Required Providers**
+  - **Issue:** React Query hooks/components require a `QueryClientProvider` in tests.
+  - **Solution:** Use a wrapper with `QueryClientProvider` for all such tests.
+  - **Best Practice:** Centralize provider wrappers in test utilities.
+
+- **Mock All Global/Module Dependencies**
+  - **Issue:** Missing or inconsistent mocks for globals (like `fetch`) or modules (like `useSession`) cause test flakiness.
+  - **Solution:** Use `vi.stubGlobal` and `vi.mock` at the top of test files or in global setup.
+  - **Best Practice:** Centralize and document common mocks.
+
+- **Use `waitFor` for Async State Assertions**
+  - **Issue:** Asserting on async state (e.g., permissions, session) without `waitFor` leads to flaky tests.
+  - **Solution:** Use `waitFor` for all async state assertions.
+  - **Best Practice:** Prefer final, user-visible state assertions.
+
 ---
 
 ## III. Mocking Techniques & Best Practices
@@ -311,6 +337,26 @@
   // For middleware that calls next() after catching errors, ensure your test accounts for multiple next() calls.
   ```
 - **Best Practice:** Always review middleware/functions to understand how they process errors before writing tests.
+
+### D. Spy/Mock Function Not Called (e.g., API call, handler, or callback)
+- **Issue:** Tests using `expect(spy).toHaveBeenCalled()` or `toHaveBeenCalledWith(...)` fail because the spy/mock function was not called as expected.
+- **Common Causes:**
+  - The user event (e.g., button click, form submit) did not actually trigger the handler due to validation, disabled state, or incorrect setup.
+  - The spy/mock was not injected into the component or was shadowed by a different instance.
+  - The component logic short-circuited (e.g., early return, failed validation, missing required props).
+  - The test did not await async actions or state updates, so the call happened after the assertion.
+- **Debugging Steps:**
+  1. **Check that the user event is firing as expected.** Use `screen.debug()` before and after the event to inspect the DOM.
+  2. **Ensure the spy/mock is the actual function used by the component.** If using dependency injection or context, confirm the test is passing the spy.
+  3. **Check for validation or disabled state.** If the form is invalid or the button is disabled, the handler will not be called.
+  4. **Await all async actions.** Use `await act(async () => { ... })` or `await waitFor(...)` after the event.
+  5. **Log spy calls.** Use `console.log(spy.mock.calls)` to inspect what was called and with what arguments.
+- **Best Practices:**
+  - Always simulate the full user flow, including filling required fields and passing validation.
+  - Prefer `waitFor` when asserting on async side effects (e.g., API calls, state updates).
+  - If multiple mocks/spies exist, use descriptive names and assert on the correct one.
+  - If the handler is passed via props/context, ensure the test passes the spy, not a default or unrelated function.
+  - For complex forms, assert on visible validation errors if the handler is not called.
 
 ---
 

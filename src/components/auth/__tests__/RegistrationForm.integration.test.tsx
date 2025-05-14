@@ -320,7 +320,13 @@ describe('RegistrationForm Integration Flow', () => {
     const submitButton = screen.getByTestId('submit-button');
     await user.click(submitButton);
     await waitFor(() => {
-      expect(screen.getByText(/company name is required/i)).toBeInTheDocument();
+      // Find all elements with the error text
+      const errorMessages = screen.getAllByText(/company name is required/i);
+      // Filter out any that are inside the debug <pre> block
+      const visibleError = errorMessages.find(
+        (el) => el.closest('pre[data-testid="form-debug"]') === null
+      );
+      expect(visibleError).toBeInTheDocument();
     });
   });
 

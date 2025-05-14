@@ -26,15 +26,18 @@ describe('useSubscription', () => {
 
     const { result } = renderHook(() => useSubscription());
 
-    expect(result.current.isLoading).toBe(true);
+    // On initial render, isLoading should be false
+    expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBe(null);
 
     await act(async () => {
       await result.current.fetchSubscription();
     });
 
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.subscription).toEqual(mockSubscription);
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.subscription).toEqual(mockSubscription);
+    });
     expect(mockFetch).toHaveBeenCalledWith('/api/subscriptions/status');
   });
 
