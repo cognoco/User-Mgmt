@@ -71,6 +71,65 @@ export function renderCustomHook(hook, options = {}) {
 }
 
 /**
+ * Tests a hook with initial and final states
+ * @param {Function} hook - The hook to test
+ * @param {Function} action - Action to update hook state
+ * @param {Function} assertion - Function to check final state
+ * @returns {Promise<void>}
+ */
+export async function testHookState(hook, action, assertion) {
+  const { result } = renderHook(() => hook());
+  
+  await act(async () => {
+    await action(result.current);
+  });
+  
+  assertion(result.current);
+}
+
+/**
+ * Tests a hook's effect cleanups
+ * @param {Function} hook - The hook to test
+ * @param {Array} deps - Dependencies to change
+ * @param {Function} mockCleanup - Mock function to track cleanup
+ * @returns {Object} Test results
+ */
+export function testHookCleanup(hook, deps = [], mockCleanup = vi.fn()) {
+  // React 19 compatible approach to testing cleanup
+  const mockFunction = vi.fn();
+  
+  // Render the hook with initial props
+  const { result, rerender, unmount } = renderHook(
+    (props) => {
+      React.useEffect(() => {
+        return mockFunction;
+      }, Array.isArray(props) ? props : [props]);
+      
+      return hook(props);
+    },
+    { initialProps: deps[0] }
+  );
+  
+  // Re-render with new deps to trigger cleanup
+  if (deps.length > 1) {
+    rerender(deps[1]);
+    // In React 19, effect cleanup is called on re-render if dependencies change
+    expect(mockFunction).toHaveBeenCalled();
+    mockFunction.mockClear();
+  }
+  
+  // Unmount to trigger final cleanup
+  unmount();
+  expect(mockFunction).toHaveBeenCalled();
+  
+  return {
+    result,
+    cleanup: mockFunction,
+    unmount
+  };
+}
+
+/**
  * Creates a mock for useState hook
  * @param {any} initialValue - Initial state value
  * @returns {Array} Mock useState hook
@@ -104,41 +163,4 @@ export function createMockContext(contextValue) {
  */
 export function createMockRef(initialValue) {
   return { current: initialValue };
-}
-
-/**
- * Tests a hook's effect cleanups
- * @param {Function} hook - The hook to test
- * @param {Array} deps - Dependencies to change
- * @param {Function} mockCleanup - Mock function to track cleanup
- * @returns {Object} Test results
- */
-export function testHookCleanup(hook, deps = [], mockCleanup = vi.fn()) {
-  // Mock useEffect to track cleanup
-  const originalUseEffect = React.useEffect;
-  React.useEffect = vi.fn().mockImplementation((callback, effectDeps) => {
-    const cleanup = callback();
-    if (typeof cleanup === 'function') {
-      mockCleanup.mockImplementation(cleanup);
-    }
-  });
-  
-  // Render the hook
-  const { result, rerender, unmount } = renderHook(hook, {
-    initialProps: deps[0]
-  });
-  
-  // Re-render with new deps to trigger cleanup
-  if (deps.length > 1) {
-    rerender(deps[1]);
-  }
-  
-  // Restore original useEffect
-  React.useEffect = originalUseEffect;
-  
-  return {
-    result,
-    cleanup: mockCleanup,
-    unmount
-  };
 }

@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 
 // Restore the usePermission mock
 vi.mock('@/hooks/usePermission', () => ({
@@ -11,7 +12,6 @@ vi.mock('@/hooks/usePermission', () => ({
 
 import { TeamMembersList as TeamMembersListComponent } from '@/components/team/TeamMembersList';
 import { usePermission } from '@/hooks/usePermission';
-import userEvent from '@testing-library/user-event';
 
 // Explicitly type the component
 const TeamMembersList: React.FC = TeamMembersListComponent;
@@ -79,14 +79,11 @@ vi.mock('@/components/ui/skeleton', () => ({
   ),
 }));
 
-async function renderWithProviders(ui: React.ReactElement) {
-  let result;
-  await act(async () => {
-    result = render(
-      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-    );
-  });
-  return result;
+// Simple render function without act wrapper for React 19
+function renderWithProviders(ui: React.ReactElement) {
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+  );
 }
 
 describe('TeamMembersList', () => {
@@ -99,9 +96,9 @@ describe('TeamMembersList', () => {
     });
   });
 
-  it('renders loading state initially', async () => {
+  it('renders loading state initially', () => {
     mockFetch.mockImplementationOnce(() => new Promise(() => {}));
-    await renderWithProviders(<TeamMembersList />);
+    renderWithProviders(<TeamMembersList />);
 
     expect(screen.getAllByRole('row')[0]).toHaveTextContent('Member');
     expect(screen.getAllByRole('row')[0]).toHaveTextContent('Role');
@@ -119,7 +116,7 @@ describe('TeamMembersList', () => {
       json: () => Promise.resolve(mockTeamMembers),
     });
 
-    await renderWithProviders(<TeamMembersList />);
+    renderWithProviders(<TeamMembersList />);
 
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
@@ -140,7 +137,7 @@ describe('TeamMembersList', () => {
       json: () => Promise.resolve(mockTeamMembers),
     });
 
-    await renderWithProviders(<TeamMembersList />);
+    renderWithProviders(<TeamMembersList />);
 
     await waitFor(() => {
       expect(screen.getByText('Invite Member')).toBeInTheDocument();
@@ -148,23 +145,38 @@ describe('TeamMembersList', () => {
   });
 
   it('handles search input', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockTeamMembers),
-    });
+    // Setup mock with multiple responses for original and debounced search
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockTeamMembers),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          ...mockTeamMembers,
+          users: mockTeamMembers.users.filter(user => 
+            user.name.toLowerCase().includes('john') || 
+            user.email.toLowerCase().includes('john')
+          ),
+        }),
+      });
 
-    await renderWithProviders(<TeamMembersList />);
+    // Setup user event for React 19
+    const user = userEvent.setup();
+    
+    renderWithProviders(<TeamMembersList />);
 
     const searchInput = screen.getByPlaceholderText('Search members...');
-    await act(async () => {
-      await userEvent.type(searchInput, 'john');
-    });
+    
+    // Type in the search input
+    await user.type(searchInput, 'john');
 
-    // Wait for the fetch to be called with the full search string in the last call
+    // Wait for the debounced fetch to be called (we need to account for the debounce timer)
     await waitFor(() => {
       const calls = mockFetch.mock.calls;
       expect(calls[calls.length - 1][0]).toContain('search=john');
-    });
+    }, { timeout: 500 }); // Increase timeout for debounce
   });
 
   // Radix UI Select does not work with JSDOM/Testing Library due to pointer event limitations.
@@ -175,13 +187,12 @@ describe('TeamMembersList', () => {
       json: () => Promise.resolve(mockTeamMembers),
     });
 
-    await renderWithProviders(<TeamMembersList />);
+    const user = userEvent.setup();
+    renderWithProviders(<TeamMembersList />);
 
     const statusSelect = screen.getByRole('combobox');
-    await act(async () => {
-      await userEvent.click(statusSelect);
-      await userEvent.click(screen.getByText('Active'));
-    });
+    await user.click(statusSelect);
+    await user.click(screen.getByText('Active'));
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
@@ -196,20 +207,20 @@ describe('TeamMembersList', () => {
       json: () => Promise.resolve(mockTeamMembers),
     });
 
-    await renderWithProviders(<TeamMembersList />);
+    const user = userEvent.setup();
+    renderWithProviders(<TeamMembersList />);
 
     const roleSort = await screen.findByText('Role');
     const roleSortButton = roleSort.closest('button');
-    await act(async () => {
-      await userEvent.click(roleSortButton!);
-    });
+    
+    await user.click(roleSortButton!);
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('sortBy=role')
       );
     });
-  }, 10000);
+  });
 
   it('displays seat usage information', async () => {
     mockFetch.mockResolvedValueOnce({
@@ -217,13 +228,13 @@ describe('TeamMembersList', () => {
       json: () => Promise.resolve(mockTeamMembers),
     });
 
-    await renderWithProviders(<TeamMembersList />);
+    renderWithProviders(<TeamMembersList />);
 
     await waitFor(() => {
       expect(screen.getByText('Seat Usage: 2/5')).toBeInTheDocument();
       expect(screen.getByText('40.0%')).toBeInTheDocument();
     });
-  }, 10000);
+  });
 
   it('handles pagination', async () => {
     const mockDataWithPagination = {
@@ -245,32 +256,34 @@ describe('TeamMembersList', () => {
         json: () => Promise.resolve(mockDataWithPagination),
       });
 
-    await renderWithProviders(<TeamMembersList />);
+    const user = userEvent.setup();
+    renderWithProviders(<TeamMembersList />);
 
-    await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-    });
-
+    // Wait for the pagination controls to appear
     const nextButton = await screen.findByLabelText('Next page');
-    await act(async () => {
-      await userEvent.click(nextButton);
-    });
+    
+    await user.click(nextButton);
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('page=2')
       );
     });
-  }, 10000);
+  });
 
-  it('displays error state', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Failed to fetch'));
+  it('handles errors', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+    });
 
-    await renderWithProviders(<TeamMembersList />);
+    renderWithProviders(<TeamMembersList />);
 
     await waitFor(() => {
-      const alert = screen.getByRole('alert');
-      expect(alert).toHaveTextContent(/error loading team members/i);
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'Error loading team members'
+      );
     });
-  }, 10000);
+  });
 });

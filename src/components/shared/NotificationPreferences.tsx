@@ -27,7 +27,13 @@ export function NotificationPreferences({
 }: NotificationPreferencesProps) {
   const { t } = useTranslation();
   const { platform } = useUserManagement();
-  const { preferences, isLoading, error, fetchPreferences, updatePreferences } = usePreferencesStore();
+  
+  // Update to use individual selectors for React 19 compatibility
+  const preferences = usePreferencesStore(state => state.preferences);
+  const isLoading = usePreferencesStore(state => state.isLoading);
+  const error = usePreferencesStore(state => state.error);
+  const fetchPreferences = usePreferencesStore(state => state.fetchPreferences);
+  const updatePreferences = usePreferencesStore(state => state.updatePreferences);
 
   useEffect(() => {
       if (!preferences && !isLoading && !error) {

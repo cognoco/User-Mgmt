@@ -8,8 +8,8 @@ const ssoSettingsSchema = z.object({
 });
 
 // Mock data store - in production, this would be a database
-let mockSSOSettings: Record<string, z.infer<typeof ssoSettingsSchema>> = {};
-let mockSSOStatus: Record<string, {
+const mockSSOSettings: Record<string, z.infer<typeof ssoSettingsSchema>> = {};
+const mockSSOStatus: Record<string, {
   status: 'healthy' | 'warning' | 'error' | 'unknown';
   lastSuccessfulLogin: string | null;
   lastError: string | null;

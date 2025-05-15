@@ -56,7 +56,7 @@ export const GET = middleware(
       });
 
       // RBAC: Users can only see their own logs unless they have permission
-      let targetUserId = userId || user.id;
+      const targetUserId = userId || user.id;
       if (userId && userId !== user.id) {
         // Only allow admins to view other users' logs
         if (!await hasPermission(user.id, 'VIEW_ALL_USER_ACTION_LOGS')) {

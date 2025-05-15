@@ -1,5 +1,333 @@
+# Remaining Actions & Audit Summary: Major Package Upgrade
+
+## Deferred Tasks
+
+### Tailwind CSS v4 Migration (from Task 5)
+- **Update tailwindcss to v4 and Configure tailwind.config.js** (5.3) — deferred
+- **Migrate Tailwind Utility Classes and Fix Breaking Changes** (5.4) — deferred
+
+**Reason:** The tailwindcss major version upgrade is complex and has been postponed to a dedicated future task. All lucide-react upgrades are complete.
+
+---
+
+## Blocked or Incomplete Subtasks from Task 10
+
+### Task 10.2: Manual Testing of Critical User Flows
+- **Status:** Blocked
+- **Reason:** No user interface is available for manual testing. All manual test plans for i18next and nodemailer (language switching, email flows, etc.) remain unexecuted.
+
+### Task 10.4: Measure and Validate Performance Metrics
+- **Status:** Blocked
+- **Reason:** No accessible UI or running application instance. Cannot measure page load, TTI, memory, API response, i18next/nodemailer/ESLint impact. Only static ESLint timing could be measured, which is insufficient.
+
+### Task 10.3: Cross-browser and Cross-device Compatibility Testing
+- **Status:** Done (with limitations)
+- **What was not done:**  
+  - No manual or automated cross-browser/device UI testing (no UI available).
+  - No intentional ESLint violation suite, browser/dev tool error display verification, or ESLint performance metrics.
+  - No compatibility matrix created.
+  - Only static ESLint checks on individual files were performed.
+
+---
+
+## Pending Finalization Tasks
+
+### Task 10.5: Document and Resolve Identified Issues
+- **Status:** Pending
+- **Action:** Compile all issues discovered during testing, prioritize, and implement fixes for critical problems before finalizing the package update process.
+
+### Task 10.6: Create Package Update Documentation
+- **Status:** Pending
+- **Action:** Develop comprehensive documentation of the package updates, testing results, and implementation guidelines. Clearly separate package-specific information from React 19 upgrade concerns.
+
+---
+
+## General Comments from Tasks 1–10
+
+- All backup, minor dependency, and core package upgrades (Tasks 1–9) are complete.
+- Automated test suite was executed; 65/89 test files passed, 24 failed (failures related to React 19 upgrade are out of scope for this upgrade).
+- i18next and nodemailer upgrades are in place, but manual and E2E validation is pending due to lack of UI.
+- ESLint upgrade is complete and static checks are working, but full code quality and compatibility checks are deferred.
+- Performance and cross-browser/device testing are blocked until a UI is available.
+- All critical issues discovered during testing must be documented and resolved before final sign-off.
+
+---
+
+## Next Steps
+
+1. **Complete and document all remaining issues (Task 10.5).**
+2. **Prepare and finalize package update documentation (Task 10.6).**
+3. **Schedule deferred Tailwind CSS v4 migration as a future task.**
+4. **Revisit blocked testing and performance tasks when a UI or staging environment is available.**
+5. **Ensure all findings, blockers, and deferred actions are clearly communicated to stakeholders.**
+
+---
+
+*This document summarizes the current state and remaining actions for the major package upgrade. Update as new blockers are resolved or as the environment changes.*
+
 - Clean up .cursorrules vs .cursor/xxx
 - Consolidate/update product documentation
     - Create PRD with reference to features documentation
 - Separate product documentation from .cursorrules
 - .env?
+
+# Task ID: 11
+# Title: Task #11: Implement Comprehensive Testing Strategy for React 19 and Next.js 15 Upgrade
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Develop and execute a comprehensive testing strategy for the React 19 and Next.js 15 upgrade, including fixing failing tests, updating E2E tests, and implementing cross-browser, mobile, performance, and accessibility testing.
+# Details:
+This task involves implementing the testing strategy outlined in docs/react19-nextjs15-upgrade.md with the following components:
+
+1. **Prerequisite**: Verify that the existing ESLint configuration from Task #8 (which has already been completed) works correctly with the React 19 and Next.js 15 upgrade.
+
+2. **Fix Failing Tests**:
+   - Identify and fix all unit tests that broke during the React 19 upgrade
+   - Resolve integration test failures related to React 19's new rendering behavior
+   - Update test mocks to accommodate React 19's new APIs and behaviors
+
+3. **Update E2E Tests**:
+   - Systematically fix widespread E2E test failures across critical user flows
+   - Group failures by root cause and user flow for efficient resolution
+   - Prioritize fixes for critical flows (authentication, registration, team management)
+   - Update selectors that may have been affected by React 19's changes to component structure
+   - Resolve timing issues related to React 19's concurrent rendering
+   - Fix OAuth provider redirects and account linking flows
+   - Address error handling and notification-related test failures
+
+4. **Cross-Browser Testing**:
+   - Test the application across Chrome, Firefox, Safari, Edge, Opera, and Samsung Internet
+   - Document any browser-specific issues and their resolutions
+   - Ensure consistent behavior across all supported browsers
+
+5. **Mobile Device Testing**:
+   - Test on iOS devices (iPhone and iPad with latest iOS versions)
+   - Test on Android devices (multiple screen sizes and OS versions)
+   - Test on Windows devices (Surface and other Windows tablets)
+   - Verify touch interactions and responsive layouts
+
+6. **Performance Testing**:
+   - Measure Core Web Vitals before and after the upgrade
+   - Compare LCP, FID/INP, CLS metrics between versions
+   - Document performance improvements or regressions
+   - Optimize any performance regressions introduced by the upgrade
+
+7. **Accessibility Testing**:
+   - Test with React 19's new focus management features
+   - Verify screen reader compatibility
+   - Check keyboard navigation throughout the application
+   - Ensure WCAG 2.1 AA compliance is maintained
+
+8. **Documentation Updates**:
+   - Update the upgrade documentation with actual test results
+   - Document any workarounds or fixes implemented
+   - Provide recommendations for future upgrades based on findings
+
+**IMPORTANT: All work must be performed in the current branch without creating new branches.** All fixes, analysis, and documentation updates must be committed to the current working branch only. This constraint applies to all subtasks in this task. This task has a high priority and depends on Task #9 being completed first.
+
+# Test Strategy:
+The completion of this task will be verified through the following approach:
+
+1. **Test Failure Resolution Verification**:
+   - Run the complete test suite and confirm all tests are passing
+   - Review test modifications to ensure they properly test the intended functionality
+   - Verify test coverage has not decreased from pre-upgrade levels
+
+2. **E2E Test Verification**:
+   - Execute the full E2E test suite on a staging environment
+   - Confirm all user flows work as expected, with special attention to previously failing flows
+   - Verify that critical paths (authentication, registration, team management) function correctly
+   - Ensure OAuth flows, account linking, and error handling work properly
+   - Confirm all timeouts and selector issues have been resolved
+
+3. **Cross-Browser Compatibility Verification**:
+   - Review screenshots and test reports from each browser
+   - Manually verify critical paths in each browser
+   - Confirm any browser-specific issues have been resolved
+
+4. **Mobile Testing Verification**:
+   - Review mobile testing reports for each platform
+   - Verify responsive design works correctly across device sizes
+   - Confirm touch interactions function properly
+
+5. **Performance Metrics Verification**:
+   - Compare before/after Lighthouse scores
+   - Review Core Web Vitals reports from real user monitoring
+   - Confirm performance meets or exceeds pre-upgrade metrics
+   - Verify any performance regressions have been addressed
+
+6. **Accessibility Verification**:
+   - Review accessibility audit reports
+   - Verify screen reader compatibility through manual testing
+   - Confirm keyboard navigation works throughout the application
+   - Check that focus management improvements have been properly implemented
+
+7. **Documentation Review**:
+   - Verify docs/react19-nextjs15-upgrade.md has been updated with test results
+   - Confirm all findings and workarounds are properly documented
+   - Review recommendations for completeness and relevance
+
+8. **Final Validation**:
+   - Conduct a team review of the testing results
+   - Verify all high-priority issues have been addressed
+   - Confirm the application is ready for production deployment with React 19 and Next.js 15
+
+The task will be considered complete when all verification steps pass and the documentation has been updated with comprehensive test results.
+
+# Subtasks:
+## 1. Verify ESLint Compatibility with React 19 and Next.js 15 [pending]
+### Dependencies: None
+### Description: Verify that the existing ESLint configuration from Task #8 works correctly with the React 19 and Next.js 15 upgrade, ensuring all linting rules are compatible and passing.
+### Details:
+Run linting across the codebase with the existing ESLint configuration from Task #8. Verify that all React 19 and Next.js 15 specific code patterns are properly linted. Identify and resolve any new linting issues that may have emerged due to the upgrade. Ensure there are no false positives from outdated rules.
+<info added on 2025-05-15T08:03:07.641Z>
+This subtask focuses on verification of the existing ESLint configuration's compatibility with React 19 and Next.js 15, not implementing a new ESLint setup. The verification process should include:
+
+1. Run the existing ESLint configuration against code that uses new React 19 and Next.js 15 features and patterns to verify compatibility
+2. Check for any false positives or negatives in the linting results when applied to the upgraded codebase
+3. Research and identify any new React 19 or Next.js 15 specific ESLint rules or plugins that might enhance code quality
+4. Test the ESLint configuration against examples of new syntax or patterns introduced in React 19 (such as use client/server directives, new hooks, etc.)
+5. Verify that the existing configuration correctly handles any deprecated patterns or APIs that React 19 or Next.js 15 might flag
+
+Document any compatibility issues found and recommendations for rule adjustments, but do not implement major changes to the ESLint configuration as that was already completed in Task #8.
+</info added on 2025-05-15T08:03:07.641Z>
+
+## 2. Fix Failing Unit and Integration Tests for React 19 Upgrade [pending]
+### Dependencies: 11.1
+### Description: Identify and resolve all failing unit and integration tests caused by the React 19 upgrade, with a focus on component lifecycle changes, form validation, and authentication flows.
+### Details:
+Run the full test suite using Jest or the project's test runner. Pay special attention to failures related to React 19's new rendering behavior, lifecycle changes, and updated APIs. Update test mocks and assertions as needed. For integration tests, prioritize fixing issues in form validation and authentication flows.
+
+**IMPORTANT: All work must be performed in the current branch without creating new branches.** All fixes must be committed directly to the current working branch.
+
+## 3. Update E2E Test Framework and Test Files for React 19 and Next.js 15 [pending]
+### Dependencies: 11.2
+### Description: Update the E2E test framework configuration (e.g., Cypress, Playwright) and modify E2E test files and selectors to ensure compatibility with React 19 and Next.js 15.
+### Details:
+Review and update E2E test framework configuration files for compatibility with React 19 and Next.js 15. Update selectors and timing logic in E2E test files to account for changes in component structure and concurrent rendering. Ensure all critical user flows are covered.
+
+**IMPORTANT: All work must be performed in the current branch without creating new branches.** All framework updates and configuration changes must be committed directly to the current working branch.
+
+## 4. Perform Cross-Browser and Mobile Device Testing [pending]
+### Dependencies: 11.3
+### Description: Test the upgraded application across all supported browsers and mobile devices as outlined in the testing plan, documenting any issues and ensuring consistent behavior.
+### Details:
+Test the application on Chrome, Firefox, Safari, Edge, Opera, and Samsung Internet. For mobile, test on iOS (iPhone/iPad), Android (various devices), and Windows tablets. Verify touch interactions, responsive layouts, and document any browser- or device-specific issues and their resolutions.
+
+**IMPORTANT: All work must be performed in the current branch without creating new branches.** All fixes for browser-specific or device-specific issues must be committed directly to the current working branch.
+
+## 5. Conduct Performance and Accessibility Testing, and Update Documentation [pending]
+### Dependencies: 11.4
+### Description: Measure performance metrics before and after the upgrade, perform accessibility testing with React 19, and update the upgrade documentation with all test results and recommendations.
+### Details:
+Measure Core Web Vitals (LCP, FID/INP, CLS) before and after the upgrade. Perform accessibility testing focusing on React 19's focus management, screen reader compatibility, keyboard navigation, and WCAG 2.1 AA compliance. Update the upgrade guide with test results, workarounds, and recommendations for future upgrades.
+
+**IMPORTANT: All work must be performed in the current branch without creating new branches.** All performance optimizations, accessibility fixes, and documentation updates must be committed directly to the current working branch.
+
+## 6. Analyze and Categorize E2E Test Failures [pending]
+### Dependencies: 11.2
+### Description: Analyze all E2E test failures across browsers and devices, categorizing them by root cause and user flow to create a systematic approach for fixing them.
+### Details:
+Run the full E2E test suite and document all failures. Group failures into categories such as:
+1. Selector-related failures (elements not found)
+2. Timing issues (timeouts, premature assertions)
+3. Navigation problems (redirects not completing)
+4. OAuth and authentication flow issues
+5. UI element state issues (buttons not enabled/visible)
+6. Error handling and notification failures
+
+For each category, document affected test files, specific failures, and potential root causes. Create a prioritized list of fixes based on critical user flows (authentication, registration, team management).
+
+**IMPORTANT: All work must be performed in the current branch without creating new branches.** All analysis, documentation, and any fixes must be committed directly to the current working branch.
+
+## 7. Fix Authentication and Registration E2E Tests [pending]
+### Dependencies: 11.6
+### Description: Resolve E2E test failures in authentication and registration flows, including login, SSO (OAuth), signup, and email verification.
+### Details:
+Focus on fixing the following test files:
+- sso-login-oauth.e2e.test.ts
+- sso-signup-oauth.e2e.test.ts
+- registration.spec.ts
+- email-verification.e2e.test.ts
+
+For each file:
+1. Update selectors to match React 19's new component structure
+2. Adjust timing expectations for concurrent rendering
+3. Fix OAuth provider redirect handling
+4. Ensure proper waiting for UI elements to be interactive
+5. Update error handling assertions
+6. Verify account linking flows work correctly
+
+Test each fix individually before moving to the next file.
+
+**IMPORTANT: All work must be performed in the current branch without creating new branches.** All test fixes must be committed directly to the current working branch.
+
+## 8. Fix Team Management and User Profile E2E Tests [pending]
+### Dependencies: 11.7
+### Description: Resolve E2E test failures in team management, profile updates, and related user settings flows.
+### Details:
+Focus on fixing the following test files:
+- team-management.e2e.test.ts
+- profile-update.e2e.test.ts
+- user-settings.e2e.test.ts
+
+For each file:
+1. Update selectors for team management UI elements
+2. Fix timing issues with team creation, invitation, and acceptance flows
+3. Ensure profile update confirmations are properly detected
+4. Update selectors for settings panels and toggles
+5. Fix any navigation issues between settings pages
+
+Test each fix individually and verify that changes don't break related functionality.
+
+**IMPORTANT: All work must be performed in the current branch without creating new branches.** All test fixes must be committed directly to the current working branch.
+
+## 9. Fix Business SSO, Data Export, and Notification Preference E2E Tests [pending]
+### Dependencies: 11.8
+### Description: Resolve E2E test failures in business SSO configuration, data export, backup codes, and notification preference settings.
+### Details:
+Focus on fixing the following test files:
+- business-sso.e2e.test.ts
+- data-export.e2e.test.ts
+- backup-codes.e2e.test.ts
+- notification-preferences.e2e.test.ts
+
+For each file:
+1. Update selectors for business SSO configuration UI
+2. Fix timing issues with data export generation and download
+3. Ensure backup code generation and verification work correctly
+4. Update selectors for notification preference toggles and confirmations
+5. Fix any navigation issues between these advanced settings
+
+Test each fix individually and verify that changes don't break related functionality.
+
+**IMPORTANT: All work must be performed in the current branch without creating new branches.** All test fixes must be committed directly to the current working branch.
+
+## 10. Implement Robust E2E Test Helpers and Utilities [pending]
+### Dependencies: 11.9
+### Description: Create or update E2E test helpers and utilities to make tests more resilient to React 19 and Next.js 15 changes.
+### Details:
+Develop or update helper functions and utilities to improve E2E test reliability:
+1. Create robust selector strategies that are less brittle to DOM changes
+2. Implement smart waiting functions that handle React 19's concurrent rendering
+3. Develop helpers for common flows (login, navigation, form submission)
+4. Create utilities for handling OAuth redirects and callbacks
+5. Implement better error reporting for test failures
+
+Refactor existing tests to use these new helpers where appropriate, ensuring tests are more maintainable and less prone to breaking with future React or Next.js updates.
+
+**IMPORTANT: All work must be performed in the current branch without creating new branches.** All helper functions, utilities, and test refactoring must be committed directly to the current working branch.
+
+## 11. Verify All E2E Tests Across Browsers and Devices [pending]
+### Dependencies: 11.10
+### Description: Run the complete E2E test suite across all supported browsers and devices to verify all fixes are working consistently.
+### Details:
+Run the full E2E test suite on:
+1. Desktop browsers: Chrome, Firefox, Safari, Edge, Opera, and Samsung Internet
+2. Mobile devices: iOS (iPhone/iPad), Android (various devices), and Windows tablets
+
+Document any remaining browser-specific or device-specific issues. Address any inconsistencies or failures that only appear on specific platforms. Ensure all critical user flows work consistently across all supported environments.
+
+**IMPORTANT: All work must be performed in the current branch without creating new branches.** All final fixes and documentation must be committed directly to the current working branch.
+

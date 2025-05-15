@@ -3,7 +3,14 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useState } from 'react';
+import { ErrorBoundary, DefaultErrorFallback } from '@/components/common/ErrorBoundary';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { PasswordRequirements } from '@/components/auth/PasswordRequirements';
+import { api } from '@/lib/api/axios';
 
 const resetPasswordSchema = z.object({
   password: z
@@ -26,75 +33,113 @@ interface ResetPasswordFormProps {
 }
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
-  const { updatePassword, isLoading, error } = useAuthStore();
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<
-    z.input<typeof resetPasswordSchema>,
-    any,
-    z.output<typeof resetPasswordSchema>
-  >({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  
+  const form = useForm<ResetPasswordData>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       password: '',
       confirmPassword: '',
     },
+    mode: 'onChange',
   });
-
-  const onSubmit = async (data: ResetPasswordData) => {
-    await updatePassword(token, data.password);
+  
+  const handleSubmit = async (data: ResetPasswordData) => {
+    setIsSubmitting(true);
+    setError(null);
+    setSuccess(null);
+    
+    try {
+      // Call the API to update password with token
+      await api.post('/api/auth/reset-password/confirm', {
+        token,
+        newPassword: data.password
+      });
+      
+      setSuccess('Your password has been successfully reset. You can now log in with your new password.');
+      form.reset();
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || err.message || 'An unexpected error occurred';
+      setError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {error && (
-        <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
-          {error}
+    <ErrorBoundary fallback={DefaultErrorFallback}>
+      <div className="w-full max-w-md mx-auto space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Reset your password</h2>
+          <p className="text-muted-foreground mt-2">
+            Enter a new password for your account.
+          </p>
         </div>
-      )}
-
-      <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium">
-          New Password
-        </label>
-        <input
-          {...register('password')}
-          id="password"
-          type="password"
-          className="w-full px-3 py-2 border rounded-md"
-          disabled={isLoading}
-        />
-        {errors.password && (
-          <p className="text-sm text-red-500">{errors.password.message}</p>
+        
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
+        {success ? (
+          <Alert>
+            <AlertDescription>{success}</AlertDescription>
+          </Alert>
+        ) : (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New Password</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder="Enter new password" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    
+                    <PasswordRequirements password={field.value} />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder="Confirm your password" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isSubmitting || !form.formState.isValid}
+              >
+                {isSubmitting ? 'Resetting Password...' : 'Reset Password'}
+              </Button>
+            </form>
+          </Form>
         )}
       </div>
-
-      <div className="space-y-2">
-        <label htmlFor="confirmPassword" className="text-sm font-medium">
-          Confirm New Password
-        </label>
-        <input
-          {...register('confirmPassword')}
-          id="confirmPassword"
-          type="password"
-          className="w-full px-3 py-2 border rounded-md"
-          disabled={isLoading}
-        />
-        {errors.confirmPassword && (
-          <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
-        )}
-      </div>
-
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
-      >
-        {isLoading ? 'Resetting password...' : 'Reset Password'}
-      </button>
-    </form>
+    </ErrorBoundary>
   );
 } 

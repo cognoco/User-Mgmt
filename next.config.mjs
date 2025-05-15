@@ -1,15 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // We might need to add configuration here later,
-  // for example, for environment variables, images, etc.
-  // For now, keep it simple.
-
-  // If using App Router, this might be needed depending on setup
-  // experimental: {
-  //   appDir: true, 
-  // },
-
+  // Next.js 15 configuration
+  // The appDir option is no longer necessary in Next.js 15 as App Router is the default
+  
   // If we need Tailwind integration (likely, given dependencies)
   // postcss: {
   //   plugins: {

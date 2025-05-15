@@ -1,17 +1,12 @@
 # Test Results
 
-**Passed Test Files:** 69  |  **Failed Test Files:** 20
+**Passed Test Files:** 61  |  **Failed Test Files:** 28
 
 ## Passing Test Files
 
 - src\components\account\__tests__\DeleteAccountDialog.test.tsx
-- src\components\admin\__tests__\RoleManagementPanel.test.tsx
-- src\components\auth\__tests__\BusinessSSOSetup.test.tsx
-- src\components\auth\__tests__\LoginForm.test.tsx
 - src\components\auth\__tests__\MinimalTextareaForm.test.tsx
 - src\components\auth\__tests__\OrganizationSSO.test.tsx
-- src\components\auth\__tests__\ProtectedRoute.test.tsx
-- src\components\auth\__tests__\RegistrationForm.integration.test.tsx
 - src\components\profile\__tests__\ActivityLog.test.tsx
 - src\components\profile\__tests__\CompanyDataExport.test.tsx
 - src\components\profile\__tests__\CompanyLogoUpload.test.tsx
@@ -60,26 +55,28 @@
 - src\tests\integration\dashboard-view-flow.test.tsx
 - src\tests\integration\data-management-flow.test.tsx
 - src\tests\integration\feedback-submission-flow.test.tsx
-- src\tests\integration\form-validation-errors-isolated.test.tsx
 - src\tests\integration\form-validation-errors.test.tsx
 - src\tests\integration\minimal.smoke.test.tsx
 - src\tests\integration\oauth-buttons.integration.test.tsx
-- src\tests\integration\password-reset-flow.test.tsx
 - src\tests\integration\search-filter-flow.test.tsx
 - src\tests\integration\social-sharing-flow.test.tsx
 - src\tests\integration\user-preferences-flow.test.tsx
 - src\tests\smoke\app.smoke.test.tsx
 - src\tests\smoke\login.smoke.test.tsx
-- src\tests\smoke\profile.smoke.test.tsx
 - src\tests\smoke\registration.smoke.test.tsx
 - src\tests\ui\DuplicateUIElements.test.tsx
 
 ## Failing Test Files
 
 - src\components\admin\__tests__\AdminDashboard.test.tsx
+- src\components\admin\__tests__\RoleManagementPanel.test.tsx
 - src\components\audit\__tests__\AuditLogViewer.test.tsx
+- src\components\auth\__tests__\BusinessSSOSetup.test.tsx
 - src\components\auth\__tests__\DomainBasedOrgMatching.test.tsx
 - src\components\auth\__tests__\IDPConfiguration.test.tsx
+- src\components\auth\__tests__\LoginForm.test.tsx
+- src\components\auth\__tests__\ProtectedRoute.test.tsx
+- src\components\auth\__tests__\RegistrationForm.integration.test.tsx
 - src\components\company\__tests__\OrganizationSessionManager.test.tsx
 - src\components\profile\__tests__\Profile.test.tsx
 - src\components\profile\__tests__\ProfilePrivacySettings.test.tsx
@@ -93,6 +90,9 @@
 - src\tests\integration\error-recovery-flow.test.tsx
 - src\tests\integration\export-import-flow.test.tsx
 - src\tests\integration\file-upload-flow.test.tsx
+- src\tests\integration\form-validation-errors-isolated.test.tsx
 - src\tests\integration\notification-flow.test.tsx
+- src\tests\integration\password-reset-flow.test.tsx
 - src\tests\integration\theme-settings-flow.test.tsx
 - src\tests\integration\user-auth-flow.test.tsx
+- src\tests\smoke\profile.smoke.test.tsx

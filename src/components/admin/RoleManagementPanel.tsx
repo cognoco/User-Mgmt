@@ -40,7 +40,13 @@ export interface RoleManagementPanelProps {
 }
 
 const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ users }) => {
-  const { roles, userRoles, isLoading, error, assignRole, removeRole } = useRBACStore();
+  // React 19 compatibility - Use individual selectors
+  const roles = useRBACStore(state => state.roles);
+  const userRoles = useRBACStore(state => state.userRoles);
+  const isLoading = useRBACStore(state => state.isLoading);
+  const error = useRBACStore(state => state.error);
+  const assignRole = useRBACStore(state => state.assignRole);
+  const removeRole = useRBACStore(state => state.removeRole);
 
   // Helper to get role assignments for a user
   const getUserRoleAssignments = (userId: string | number): UserRoleSchema[] =>
@@ -194,7 +200,6 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ users }) => {
           </ul>
         )}
       </div>
-      {/* TODO: Ensure accessibility and responsive design */}
     </div>
   );
 };

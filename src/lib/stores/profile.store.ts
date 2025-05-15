@@ -30,7 +30,7 @@ export const useProfileStore = create<ExtendedProfileState & {
   verificationError: string | null;
   fetchVerificationStatus: () => Promise<void>;
   requestVerification: (document?: File) => Promise<void>;
-}>((set, get) => ({
+}>()((set, get) => ({
   profile: null,
   isLoading: false,
   error: null,

@@ -3,8 +3,12 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '../ProtectedRoute';
 import { useAuthStore } from '@/lib/stores/auth.store';
-import { useRBACStore } from '@/lib/stores/rbac.store';
-import { createRBACStoreMock } from '@/tests/mocks/rbac.store.mock';
+import { Mock } from 'vitest';
+
+// Utility function to make Zustand mocks work with selectors in React 19+
+function setupZustandSelectorMock(store: any) {
+  return (selector: any) => (typeof selector === 'function' ? selector(store) : store);
+}
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -16,13 +20,56 @@ vi.mock('next/navigation', () => ({
   }))
 }));
 
+// Define types for our mocks
+interface RBACMockStore {
+  isLoading: boolean;
+  hasRole: Mock;
+  hasPermission: Mock;
+  fetchUserRoles: Mock;
+  roles: any[];
+  userRoles: any[];
+}
+
 // Use robust mock for useAuthStore
-vi.mock('@/lib/stores/auth.store', async () => {
-  const { createMockAuthStore } = await import('@/tests/mocks/auth.store.mock');
-  return { useAuthStore: createMockAuthStore() };
+vi.mock('@/lib/stores/auth.store', () => {
+  const mockStore = {
+    isAuthenticated: false,
+    user: null,
+    isLoading: false
+  };
+  
+  // Create a mock function that supports selectors
+  const useAuthStoreMock: any = vi.fn(setupZustandSelectorMock(mockStore));
+  
+  // Add setState method to update the mock store
+  useAuthStoreMock.setState = (newState: any) => {
+    Object.assign(mockStore, newState);
+  };
+  
+  return { useAuthStore: useAuthStoreMock };
 });
 
-vi.mock('@/lib/stores/rbac.store');
+// Create RBAC store mock with selector support
+const rbacStoreMock: RBACMockStore = {
+  isLoading: false,
+  hasRole: vi.fn(() => false),
+  hasPermission: vi.fn(() => false),
+  fetchUserRoles: vi.fn(async () => {}),
+  roles: [],
+  userRoles: []
+};
+
+// Setup RBAC store with selector support
+vi.mock('@/lib/stores/rbac.store', () => {
+  const useRBACStoreMock: any = vi.fn(setupZustandSelectorMock(rbacStoreMock));
+  
+  // Add setState method to update the mock store
+  useRBACStoreMock.setState = (newState: any) => {
+    Object.assign(rbacStoreMock, newState);
+  };
+  
+  return { useRBACStore: useRBACStoreMock };
+});
 
 describe('ProtectedRoute', () => {
   const mockRouter = {
@@ -34,25 +81,42 @@ describe('ProtectedRoute', () => {
 
   const MockComponent = () => <div>Protected Content</div>;
 
-  let rbacMock: ReturnType<typeof createRBACStoreMock>;
-
   beforeEach(() => {
     vi.clearAllMocks();
     (useRouter as any).mockImplementation(() => mockRouter);
-    // Set default state for useAuthStore
+    
+    // Reset auth store state
     useAuthStore.setState({
       isAuthenticated: false,
       user: null,
       isLoading: false
     });
-    // Set default state for useRBACStore
-    rbacMock = createRBACStoreMock();
-    (useRBACStore as any).mockReturnValue(rbacMock);
+    
+    // Reset RBAC store state
+    Object.assign(rbacStoreMock, {
+      isLoading: false,
+      hasRole: vi.fn(() => false),
+      hasPermission: vi.fn(() => false),
+      fetchUserRoles: vi.fn(async (userId: string) => {
+        rbacStoreMock.isLoading = true;
+        await new Promise(res => setTimeout(res, 0));
+        if (userId) {
+          rbacStoreMock.userRoles = [
+            { userId, roleId: 'admin' },
+            { userId, roleId: 'editor' }
+          ];
+        }
+        rbacStoreMock.isLoading = false;
+      }),
+      roles: [],
+      userRoles: []
+    });
   });
 
   it('should show loading state when authentication is being checked', async () => {
     useAuthStore.setState({ isAuthenticated: false, user: null, isLoading: true });
-    rbacMock.isLoading = false;
+    rbacStoreMock.isLoading = false;
+    
     await act(async () => {
       render(
         <ProtectedRoute>
@@ -66,6 +130,9 @@ describe('ProtectedRoute', () => {
   });
 
   it('should redirect to login when user is not authenticated', async () => {
+    useAuthStore.setState({ isAuthenticated: false, user: null, isLoading: false });
+    rbacStoreMock.isLoading = false;
+    
     await act(async () => {
       render(
         <ProtectedRoute>
@@ -82,19 +149,30 @@ describe('ProtectedRoute', () => {
 
   it('should render children when user is authenticated', async () => {
     useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+    rbacStoreMock.isLoading = false;
+    
+    // Explicitly simulate fetchUserRoles effect
     await act(async () => {
+      // Call with userId argument
+      await rbacStoreMock.fetchUserRoles('1');
       render(
         <ProtectedRoute>
           <MockComponent />
         </ProtectedRoute>
       );
     });
-
+    
+    // Wait for loading to finish
+    await waitFor(() => expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument());
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
     expect(mockRouter.push).not.toHaveBeenCalled();
   });
 
   it('should handle custom redirect paths', async () => {
+    useAuthStore.setState({ isAuthenticated: false, user: null, isLoading: false });
+    rbacStoreMock.isLoading = false;
+    
+    // Explicitly simulate fetchUserRoles effect
     await act(async () => {
       render(
         <ProtectedRoute redirectPath="/custom/login">
@@ -102,7 +180,7 @@ describe('ProtectedRoute', () => {
         </ProtectedRoute>
       );
     });
-
+    
     await waitFor(() => {
       expect(mockRouter.push).toHaveBeenCalledWith('/custom/login');
     });
@@ -111,7 +189,16 @@ describe('ProtectedRoute', () => {
   describe('Role-based access control', () => {
     it('should allow access when user has required role', async () => {
       useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
-      rbacMock.hasRole = vi.fn(() => true);
+      
+      // Simulate roles and userRoles
+      Object.assign(rbacStoreMock, {
+        roles: [{ id: 'admin', name: 'admin', permissions: [] }],
+        userRoles: [{ userId: '1', roleId: 'admin' }],
+        hasRole: vi.fn((role) => role === 'admin'),
+        isLoading: false
+      });
+      
+      // Explicitly simulate fetchUserRoles effect
       await act(async () => {
         render(
           <ProtectedRoute requiredRoles={['admin']}>
@@ -119,13 +206,23 @@ describe('ProtectedRoute', () => {
           </ProtectedRoute>
         );
       });
-
+      
+      await waitFor(() => expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument());
       expect(screen.getByText('Protected Content')).toBeInTheDocument();
     });
 
     it('should deny access when user lacks required role', async () => {
       useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
-      rbacMock.hasRole = vi.fn(() => false);
+      
+      // Simulate roles and userRoles
+      Object.assign(rbacStoreMock, {
+        roles: [{ id: 'admin', name: 'admin', permissions: [] }],
+        userRoles: [{ userId: '1', roleId: 'user' }],
+        hasRole: vi.fn(() => false),
+        isLoading: false
+      });
+      
+      // Explicitly simulate fetchUserRoles effect
       await act(async () => {
         render(
           <ProtectedRoute requiredRoles={['admin']}>
@@ -133,14 +230,30 @@ describe('ProtectedRoute', () => {
           </ProtectedRoute>
         );
       });
-
+      
+      await waitFor(() => expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument());
       expect(screen.getByText(/access denied/i)).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
 
     it('should handle multiple required roles', async () => {
       useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
-      rbacMock.hasRole = vi.fn((role) => role === 'user' || role === 'editor');
+      
+      // Simulate roles and userRoles
+      Object.assign(rbacStoreMock, {
+        roles: [
+          { id: 'editor', name: 'editor', permissions: [] },
+          { id: 'user', name: 'user', permissions: [] }
+        ],
+        userRoles: [
+          { userId: '1', roleId: 'editor' },
+          { userId: '1', roleId: 'user' }
+        ],
+        hasRole: vi.fn((role) => role === 'user' || role === 'editor'),
+        isLoading: false
+      });
+      
+      // Explicitly simulate fetchUserRoles effect
       await act(async () => {
         render(
           <ProtectedRoute requiredRoles={['editor', 'user']}>
@@ -148,15 +261,25 @@ describe('ProtectedRoute', () => {
           </ProtectedRoute>
         );
       });
-
+      
+      await waitFor(() => expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument());
       expect(screen.getByText('Protected Content')).toBeInTheDocument();
     });
 
     it('should handle custom access denied component', async () => {
       useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
-      rbacMock.hasRole = vi.fn(() => false);
+      
+      // Simulate roles and userRoles
+      Object.assign(rbacStoreMock, {
+        roles: [{ id: 'admin', name: 'admin', permissions: [] }],
+        userRoles: [{ userId: '1', roleId: 'user' }],
+        hasRole: vi.fn(() => false),
+        isLoading: false
+      });
+      
       const CustomDenied = () => <div>Custom Access Denied</div>;
-
+      
+      // Explicitly simulate fetchUserRoles effect
       await act(async () => {
         render(
           <ProtectedRoute 
@@ -167,7 +290,8 @@ describe('ProtectedRoute', () => {
           </ProtectedRoute>
         );
       });
-
+      
+      await waitFor(() => expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument());
       expect(screen.getByText('Custom Access Denied')).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
@@ -176,7 +300,16 @@ describe('ProtectedRoute', () => {
   describe('Permission-based access control', () => {
     it('should allow access when user has required permission', async () => {
       useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
-      rbacMock.hasPermission = vi.fn(() => true);
+      
+      // Simulate roles and userRoles
+      Object.assign(rbacStoreMock, {
+        roles: [{ id: 'admin', name: 'admin', permissions: ['create:post'] }],
+        userRoles: [{ userId: '1', roleId: 'admin' }],
+        hasPermission: vi.fn((permission) => permission === 'create:post'),
+        isLoading: false
+      });
+      
+      // Explicitly simulate fetchUserRoles effect
       await act(async () => {
         render(
           <ProtectedRoute requiredPermissions={['create:post']}>
@@ -184,13 +317,23 @@ describe('ProtectedRoute', () => {
           </ProtectedRoute>
         );
       });
-
+      
+      await waitFor(() => expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument());
       expect(screen.getByText('Protected Content')).toBeInTheDocument();
     });
 
     it('should deny access when user lacks required permission', async () => {
       useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
-      rbacMock.hasPermission = vi.fn(() => false);
+      
+      // Simulate roles and userRoles
+      Object.assign(rbacStoreMock, {
+        roles: [{ id: 'admin', name: 'admin', permissions: ['create:post'] }],
+        userRoles: [{ userId: '1', roleId: 'admin' }],
+        hasPermission: vi.fn(() => false),
+        isLoading: false
+      });
+      
+      // Explicitly simulate fetchUserRoles effect
       await act(async () => {
         render(
           <ProtectedRoute requiredPermissions={['create:post']}>
@@ -198,14 +341,26 @@ describe('ProtectedRoute', () => {
           </ProtectedRoute>
         );
       });
-
+      
+      await waitFor(() => expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument());
       expect(screen.getByText(/access denied/i)).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
 
     it('should handle multiple required permissions', async () => {
       useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
-      rbacMock.hasPermission = vi.fn((permission) => permission === 'read:post' || permission === 'create:post');
+      
+      // Simulate roles and userRoles
+      Object.assign(rbacStoreMock, {
+        roles: [
+          { id: 'admin', name: 'admin', permissions: ['read:post', 'create:post'] }
+        ],
+        userRoles: [{ userId: '1', roleId: 'admin' }],
+        hasPermission: vi.fn((permission) => permission === 'read:post' || permission === 'create:post'),
+        isLoading: false
+      });
+      
+      // Explicitly simulate fetchUserRoles effect
       await act(async () => {
         render(
           <ProtectedRoute requiredPermissions={['read:post', 'create:post']}>
@@ -213,7 +368,8 @@ describe('ProtectedRoute', () => {
           </ProtectedRoute>
         );
       });
-
+      
+      await waitFor(() => expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument());
       expect(screen.getByText('Protected Content')).toBeInTheDocument();
     });
   });

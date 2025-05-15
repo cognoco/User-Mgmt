@@ -435,20 +435,6 @@ export function RegistrationForm() {
           </p>
         </form>
       )}
-      {/* DEBUG: Render form state for E2E diagnosis */}
-      <pre data-testid="form-debug" style={{ background: '#fee', color: '#900', fontSize: 12, padding: 8, marginBottom: 8 }}>
-        {(() => {
-          try {
-            return JSON.stringify({
-              isValid: form.formState.isValid,
-              errors: form.formState.errors,
-              values: form.getValues(),
-            }, null, 2);
-          } catch (err) {
-            return 'DEBUG: Could not serialize form state';
-          }
-        })()}
-      </pre>
     </div>
   );
 } 

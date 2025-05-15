@@ -20,6 +20,6 @@ export function useDebounceEffect(
     return () => clearTimeout(handler);
     
     // eslint-disable-next-line react-hooks/exhaustive-deps 
-    // We need to spread the dependencies array here along with the delay
-  }, [...(deps || []), delay]);
+    // We need to include all the dependencies here, including the delay
+  }, [...deps, delay]);
 } 

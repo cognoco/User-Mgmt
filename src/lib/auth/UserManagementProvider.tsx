@@ -1,6 +1,6 @@
 'use client'; // This component uses context and hooks, so it must be a Client Component
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect, useMemo } from 'react';
 import { ThemeProvider } from '@/components/theme-provider';
 // import { Toaster } from '@/components/ui/toaster'; // Comment out unused import
 import { api } from '@/lib/api/axios';
@@ -226,13 +226,13 @@ export function UserManagementProvider({
   const isNative = config.isNative || detectedPlatform !== 'web';
 
   // Initialize API effect
-  React.useEffect(() => {
+  useEffect(() => {
     console.log("[PROVIDER_DEBUG] useEffect - initializeApi");
     initializeApi(config.apiBaseUrl);
   }, [config.apiBaseUrl]);
 
   // Initialize notifications effect
-  React.useEffect(() => {
+  useEffect(() => {
     console.log("[PROVIDER_DEBUG] useEffect - initializeNotifications");
     if (config.notifications) {
       // const notificationConfig = { /* ... */ };
@@ -298,7 +298,7 @@ export function UserManagementProvider({
   // --- End temporary disable --- 
 
   // Create context value
-  const value = React.useMemo(() => {
+  const value = useMemo(() => {
     console.log('[PROVIDER_DEBUG] useMemo - calculating context value START');
     const mergedConfig = {
       ...config,

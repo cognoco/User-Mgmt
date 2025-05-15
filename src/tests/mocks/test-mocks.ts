@@ -9,21 +9,21 @@ export type MockAuthStore = {
 };
 
 // Helper type for creating mock store state
-export type MockAuthState = {
+export interface MockAuthState {
   isAuthenticated: boolean;
   user: User | null;
   token: string | null;
   error: string | null;
   isLoading: boolean;
-};
+}
 
 // Type for API response mocks
-export type MockAuthResponse = {
+export interface MockAuthResponse {
   data: {
     user: User;
     token: string;
   };
-};
+}
 
 // Helper function to create a typed mock auth store
 export const createMockAuthStore = (): MockAuthStore => ({

@@ -21,7 +21,10 @@ interface HeaderProps {
 
 export function Header({ type = 'fixed' }: HeaderProps) {
   const { t } = useTranslation();
-  const { user, logout, isLoading } = useAuthStore();
+  const user = useAuthStore(state => state.user);
+  const logout = useAuthStore(state => state.logout);
+  const isLoading = useAuthStore(state => state.isLoading);
+  
   const { isNative, platform } = useUserManagement();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();

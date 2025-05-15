@@ -21,15 +21,53 @@ Call log:
 # Page snapshot
 
 ```yaml
-- alert
+- button "Open Next.js Dev Tools":
+  - img
+- button "Open issues overlay": 2 Issue
+- button "Collapse issues badge":
+  - img
+- navigation:
+  - button "previous" [disabled]:
+    - img "previous"
+  - text: 1/2
+  - button "next":
+    - img "next"
 - img
-- heading "Check Your Inbox" [level=1]
-- paragraph:
-  - text: Registration successful! We've sent a verification link to
-  - strong: jorn.jorgensen@cognoco.com
-  - text: . Please click the link in the email to activate your account.
-- button "Resend Verification Email"
-- button "Return to Login"
+- img
+- text: Next.js 15.3.2 Webpack
+- img
+- dialog "Console Error":
+  - text: Console Error
+  - button "Copy Stack Trace":
+    - img
+  - button "No related documentation found" [disabled]:
+    - img
+  - link "Learn more about enabling Node.js inspector for server code with Chrome DevTools":
+    - /url: https://nextjs.org/docs/app/building-your-application/configuring/debugging#server-side-code
+    - img
+  - paragraph: The result of getSnapshot should be cached to avoid an infinite loop
+  - paragraph:
+    - img
+    - text: app\check-email\page.tsx (24:21) @ CheckEmailPage
+    - button "Open in editor":
+      - img
+  - text: "22 | clearError, 23 | clearSuccessMessage > 24 | } = useAuthStore((state) => ({ | ^ 25 | sendVerificationEmail: state.sendVerificationEmail, 26 | isLoading: state.isLoading, 27 | error: state.error,"
+  - paragraph: Call Stack 10
+  - button "Show 9 ignore-listed frame(s)":
+    - text: Show 9 ignore-listed frame(s)
+    - img
+  - text: CheckEmailPage
+  - button:
+    - img
+  - text: app\check-email\page.tsx (24:21)
+- contentinfo:
+  - region "Error feedback":
+    - paragraph:
+      - link "Was this helpful?":
+        - /url: https://nextjs.org/telemetry#error-feedback
+    - button "Mark as helpful"
+    - button "Mark as not helpful"
+- 'heading "Application error: a client-side exception has occurred while loading localhost (see the browser console for more information)." [level=2]'
 ```
 
 # Test source

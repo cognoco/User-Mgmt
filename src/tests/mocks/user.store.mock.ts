@@ -1,4 +1,4 @@
-type UserStoreMockState = {
+interface UserStoreMockState {
   profile: any;
   settings: any;
   isLoading: boolean;
@@ -11,7 +11,7 @@ type UserStoreMockState = {
   fetchUserAuditLogs: (filters: any) => Promise<any>;
   exportUserAuditLogs: (filters: any) => Promise<Blob>;
   [key: string]: any;
-};
+}
 
 export function createUserStoreMock(overrides = {}) {
   let state: UserStoreMockState = {

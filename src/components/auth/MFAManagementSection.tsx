@@ -8,13 +8,14 @@ import { api } from '@/lib/api/axios';
 import { useAuthStore } from '@/lib/stores/auth.store';
 import { TwoFactorSetup } from './TwoFactorSetup';
 import { BackupCodesDisplay } from './BackupCodesDisplay';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 export function MFAManagementSection() {
   const { t } = useTranslation();
-  const { user } = useAuthStore();
+  const user = useAuthStore(state => state.user);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -66,21 +67,6 @@ export function MFAManagementSection() {
     } finally {
       setIsLoading(false);
       setPassword('');
-    }
-  };
-
-  const fetchBackupCodes = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const response = await api.post('/api/2fa/backup-codes');
-      setBackupCodes(response.data.codes);
-      setShowBackupCodes(true);
-    } catch (error: any) {
-      setError(error.response?.data?.error || t('mfa.management.backupCodesError'));
-    } finally {
-      setIsLoading(false);
     }
   };
 

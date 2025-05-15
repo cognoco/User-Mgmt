@@ -33,7 +33,8 @@
         "name": "next"
       }
     ],
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "jsxImportSource": "react"
   },
   "include": [
     "next-env.d.ts",

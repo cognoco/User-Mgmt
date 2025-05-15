@@ -1,5 +1,5 @@
 // Color palette type for consistent theming
-export type ColorPalette = {
+export interface ColorPalette {
   primary: string;
   secondary: string;
   tertiary: string;
@@ -8,7 +8,7 @@ export type ColorPalette = {
   accent2: string;
   background: string;
   surface: string;
-};
+}
 
 // Palette 1 - Earth Tones
 export const palette1: ColorPalette = {

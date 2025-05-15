@@ -1,4 +1,4 @@
-type TwoFAStoreMockState = {
+interface TwoFAStoreMockState {
   config: any;
   isLoading: boolean;
   error: any;
@@ -8,7 +8,7 @@ type TwoFAStoreMockState = {
   generateBackupCodes: () => Promise<string[]>;
   clearError: () => void;
   [key: string]: any;
-};
+}
 
 export function create2FAStoreMock(overrides = {}) {
   let state: TwoFAStoreMockState = {

@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
-import { RBACState, Role, Permission, RoleSchema, UserRoleSchema } from '../types/rbac';
+import { RBACState, Role, Permission, RoleSchema, UserRoleSchema } from '../../types/rbac';
 import { useAuthStore } from '@/lib/stores/auth.store';
 
-export const useRBACStore = create<RBACState>((set, get) => ({
+export const useRBACStore = create<RBACState>()((set, get) => ({
   roles: [],
   userRoles: [],
   isLoading: false,
@@ -40,7 +40,7 @@ export const useRBACStore = create<RBACState>((set, get) => ({
       set({ isLoading: true, error: null });
       const response = await api.post(`/users/${userId}/roles`, { roleId });
       
-      // Update local state
+      // Update local state with stable object
       set((state) => ({
         userRoles: [...state.userRoles, response.data],
         isLoading: false,
@@ -58,7 +58,7 @@ export const useRBACStore = create<RBACState>((set, get) => ({
       set({ isLoading: true, error: null });
       await api.delete(`/users/${userId}/roles/${roleId}`);
       
-      // Update local state
+      // Update local state with stable selector
       set((state) => ({
         userRoles: state.userRoles.filter(
           (userRole) => !(userRole.userId === userId && userRole.roleId === roleId)

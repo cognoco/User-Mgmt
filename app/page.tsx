@@ -11,10 +11,9 @@ import { Shield, UserCircle, KeyRound } from 'lucide-react';
 // Replaces the previous placeholder HomePage
 export default function HomePage() { 
   const { t } = useTranslation(); // Assuming i18n setup works
-  // Get auth state directly from store
-  const { isAuthenticated } = useAuthStore((state) => ({ 
-      isAuthenticated: state.isAuthenticated 
-  }));
+  
+  // React 19 compatibility - Use a primitive selector
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
   // Feature grid for this app
   const features: FeatureItem[] = [

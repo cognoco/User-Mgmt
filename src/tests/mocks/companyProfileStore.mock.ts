@@ -1,6 +1,6 @@
 import { CompanyProfile, CompanyAddress, AddressType } from '@/types/company';
 
-type CompanyProfileStoreMockState = {
+interface CompanyProfileStoreMockState {
   profile: any;
   addresses: any[];
   isLoading: boolean;
@@ -11,7 +11,7 @@ type CompanyProfileStoreMockState = {
   updateAddress: (id: string, data: any) => Promise<void>;
   deleteAddress: (id: string) => Promise<void>;
   [key: string]: any;
-};
+}
 
 export function createCompanyProfileStoreMock(overrides = {}) {
   let state: CompanyProfileStoreMockState = {

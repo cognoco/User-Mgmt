@@ -19,8 +19,17 @@ export function ProtectedRoute({
   accessDeniedComponent,
 }: ProtectedRouteProps) {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading, user } = useAuthStore();
-  const { hasRole, hasPermission, fetchUserRoles, isLoading: rbacLoading } = useRBACStore();
+  
+  // Update to use individual selectors for React 19 compatibility
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  const authLoading = useAuthStore(state => state.isLoading);
+  const user = useAuthStore(state => state.user);
+  
+  // Update to use individual selectors for RBAC store
+  const hasRole = useRBACStore(state => state.hasRole);
+  const hasPermission = useRBACStore(state => state.hasPermission);
+  const fetchUserRoles = useRBACStore(state => state.fetchUserRoles);
+  const rbacLoading = useRBACStore(state => state.isLoading);
 
   useEffect(() => {
     if (user) {

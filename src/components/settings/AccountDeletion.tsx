@@ -11,7 +11,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 export function AccountDeletion() {
   const { t } = useTranslation();
-  const { deleteAccount, isLoading, error } = useAuthStore();
+  const deleteAccount = useAuthStore(state => state.deleteAccount);
+  const isLoading = useAuthStore(state => state.isLoading);
+  const error = useAuthStore(state => state.error);
+  
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmText, setConfirmText] = useState('');

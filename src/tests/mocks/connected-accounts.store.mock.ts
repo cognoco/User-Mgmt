@@ -1,4 +1,4 @@
-type ConnectedAccountsStoreMockState = {
+interface ConnectedAccountsStoreMockState {
   accounts: any[];
   isLoading: boolean;
   error: any;
@@ -7,7 +7,7 @@ type ConnectedAccountsStoreMockState = {
   disconnectAccount: (accountId: string) => Promise<void>;
   clearError: () => void;
   [key: string]: any;
-};
+}
 
 export function createConnectedAccountsStoreMock(overrides = {}) {
   let state: ConnectedAccountsStoreMockState = {

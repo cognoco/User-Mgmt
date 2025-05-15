@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore } from '@/lib/stores/auth.store';
-import type { AuthState } from '@/types/auth';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -18,14 +17,13 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordData = z.infer<typeof forgotPasswordSchema>;
 
 export function ForgotPasswordForm() {
-  const { resetPassword, isLoading, error, clearError, successMessage, clearSuccessMessage } = useAuthStore((state: AuthState) => ({
-      resetPassword: state.resetPassword,
-      isLoading: state.isLoading,
-      error: state.error,
-      clearError: state.clearError,
-      successMessage: state.successMessage,
-      clearSuccessMessage: state.clearSuccessMessage,
-  }));
+  // Update to use individual selectors for React 19 compatibility
+  const resetPassword = useAuthStore(state => state.resetPassword);
+  const isLoading = useAuthStore(state => state.isLoading);
+  const error = useAuthStore(state => state.error);
+  const clearError = useAuthStore(state => state.clearError);
+  const successMessage = useAuthStore(state => state.successMessage);
+  const clearSuccessMessage = useAuthStore(state => state.clearSuccessMessage);
   
   const [submitted, setSubmitted] = useState(false);
 
@@ -46,7 +44,7 @@ export function ForgotPasswordForm() {
       clearSuccessMessage();
       setSubmitted(false);
       
-      const result = await resetPassword(data.email);
+      await resetPassword(data.email);
       setSubmitted(true); 
     } catch (error) {
       if (process.env.NODE_ENV === 'development') { console.error("Unexpected error during password reset submission:", error) }

@@ -1,4 +1,7 @@
-type RBACStoreMockState = {
+import { create } from 'zustand';
+import { vi } from 'vitest';
+
+interface RBACStoreMockState {
   roles: any[];
   userRoles: any[];
   isLoading: boolean;
@@ -11,10 +14,11 @@ type RBACStoreMockState = {
   hasRole: (role: any) => boolean;
   clearError: () => void;
   [key: string]: any;
-};
+}
 
 export function createRBACStoreMock(overrides = {}) {
-  let state: RBACStoreMockState = {
+  // Use Zustand to create a real store instance
+  const useRBACStore = create<RBACStoreMockState>((set, get) => ({
     roles: [],
     userRoles: [],
     isLoading: false,
@@ -25,19 +29,8 @@ export function createRBACStoreMock(overrides = {}) {
     removeRole: vi.fn(async () => {}),
     hasPermission: vi.fn(() => false),
     hasRole: vi.fn(() => false),
-    clearError: vi.fn(() => { state.error = null; }),
+    clearError: vi.fn(() => { set({ error: null }); }),
     ...overrides,
-  };
-  const subscribers = new Set<(state: RBACStoreMockState) => void>();
-  const getState = () => state;
-  const setState = (partial: Partial<RBACStoreMockState> | ((state: RBACStoreMockState) => Partial<RBACStoreMockState>)) => {
-    state = { ...state, ...(typeof partial === 'function' ? partial(state) : partial) };
-    subscribers.forEach((cb) => cb(state));
-  };
-  const subscribe = (cb: (state: RBACStoreMockState) => void) => {
-    subscribers.add(cb);
-    return () => subscribers.delete(cb);
-  };
-  const destroy = () => subscribers.clear();
-  return { ...state, getState, setState, subscribe, destroy };
+  }));
+  return useRBACStore;
 } 

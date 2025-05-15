@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Table,
@@ -67,6 +67,7 @@ interface TeamMembersResponse {
 export function TeamMembersList() {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<'all' | 'active' | 'pending'>('all');
   const [sortBy, setSortBy] = useState<'name' | 'email' | 'role' | 'status' | 'joinedAt'>('joinedAt');
@@ -75,6 +76,15 @@ export function TeamMembersList() {
   const { hasPermission: canInvite } = usePermission({
     required: 'team.members.invite',
   });
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const { data, isLoading, error } = useQuery<TeamMembersResponse>({
     queryKey: ['team-members', page, limit, search, status, sortBy, sortOrder],
@@ -97,14 +107,31 @@ export function TeamMembersList() {
     },
   });
 
-  const handleSort = (column: typeof sortBy) => {
+  // Memoize handlers to prevent recreation on each render
+  const handleSort = useCallback((column: typeof sortBy) => {
     if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+      setSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortBy(column);
       setSortOrder('asc');
     }
-  };
+  }, [sortBy]);
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
+  }, []);
+
+  const handleStatusChange = useCallback((value: any) => {
+    setStatus(value);
+  }, []);
+
+  const handlePrevPage = useCallback(() => {
+    setPage(prev => prev - 1);
+  }, []);
+
+  const handleNextPage = useCallback(() => {
+    setPage(prev => prev + 1);
+  }, []);
 
   if (error) {
     return (
@@ -123,12 +150,12 @@ export function TeamMembersList() {
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search members..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={handleSearchChange}
               className="pl-8"
             />
           </div>
-          <Select value={status} onValueChange={(value: any) => setStatus(value)}>
+          <Select value={status} onValueChange={handleStatusChange}>
             <SelectTrigger className="w-[130px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -282,7 +309,7 @@ export function TeamMembersList() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPage(page - 1)}
+              onClick={handlePrevPage}
               disabled={!data.pagination.hasPreviousPage}
               aria-label="Previous page"
             >
@@ -291,7 +318,7 @@ export function TeamMembersList() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPage(page + 1)}
+              onClick={handleNextPage}
               disabled={!data.pagination.hasNextPage}
               aria-label="Next page"
             >

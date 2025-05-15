@@ -20,8 +20,8 @@ const SESSION_CHECK_INTERVAL = 1 * 60 * 1000; // 1 minute in milliseconds
 // Add a log to check if the import worked at module level
 console.log('[AuthStore Module] Supabase instance imported:', typeof supabase !== 'undefined');
 
-// Explicitly type the state creator function - Update for Zustand v5
-export const useAuthStore = create<AuthState>((set, get) => {
+// Explicitly type the state creator function - Update for Zustand v5 and React 19
+export const useAuthStore = create<AuthState>()((set, get) => {
   let sessionCheckTimer: NodeJS.Timeout | null = null;
   let tokenRefreshTimer: NodeJS.Timeout | null = null;
 
@@ -88,7 +88,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
     mfaQrCode: null,
     mfaBackupCodes: null,
 
-    // Add new methods for session and token management
+    setLoading: (isLoading: boolean) => set({ isLoading }),
+
     handleSessionTimeout: () => {
       cleanupTimers();
       set({ 
@@ -122,7 +123,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
       }
     },
 
-    // Modify existing login method to handle session and token management
     login: async (data: LoginPayload): Promise<AuthResult> => {
       set({ isLoading: true, error: null });
       console.log('[DEBUG AuthStore] login called with:', data);
@@ -200,7 +200,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
       }
     },
 
-    // Modify existing logout method to clean up timers
     logout: async () => {
       try {
         await api.post('/api/auth/logout');
@@ -532,9 +531,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
       }
     },
     // --- End of Added Stubs ---
-    
-    // Action to explicitly set loading state
-    setLoading: (isLoading: boolean) => set({ isLoading }),
 
   };
 });

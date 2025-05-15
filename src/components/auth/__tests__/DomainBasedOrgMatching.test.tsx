@@ -40,13 +40,13 @@ const domainSchema = z.object({
 type DomainFormValues = z.infer<typeof domainSchema>;
 
 // Mock form state for form component mocks
-type FormState = {
+interface FormState {
   errors: { domain: undefined | { message: string } };
   isValid: boolean;
   isDirty: boolean;
   isSubmitting: boolean;
   isLoading: boolean;
-};
+}
 const mockFormState: FormState = {
   errors: { domain: undefined },
   isValid: true,

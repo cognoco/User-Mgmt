@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 import { useProfileStore } from '@/lib/stores/profile.store';
-import { useAuthStore, AuthState } from '@/lib/stores/auth.store';
+import { useAuthStore } from '@/lib/stores/auth.store';
 import { profileSchema, ProfileFormData } from '@/types/profile';
 import { Edit2, XCircle, Save } from 'lucide-react';
 import { api } from '@/lib/api/axios';
@@ -29,8 +29,13 @@ const ProfileDisplayField = ({ label, value }: { label: string; value: string | 
 
 export function ProfileForm() {
   const { toast } = useToast();
-  const { profile, isLoading: isProfileLoading, error: profileError, fetchProfile, updateProfile } = useProfileStore();
-  const userEmail = useAuthStore((state: AuthState) => state.user?.email);
+  const profile = useProfileStore(state => state.profile);
+  const isProfileLoading = useProfileStore(state => state.isLoading);
+  const profileError = useProfileStore(state => state.error);
+  const fetchProfile = useProfileStore(state => state.fetchProfile);
+  const updateProfile = useProfileStore(state => state.updateProfile);
+  
+  const userEmail = useAuthStore(state => state.user?.email);
   
   const [isEditing, setIsEditing] = useState(false);
   const [isPrivacyLoading, setIsPrivacyLoading] = useState(false);
@@ -249,17 +254,16 @@ export function ProfileForm() {
                     id="is_public" 
                     checked={watch('is_public') ?? true}
                     onCheckedChange={handlePrivacyChange}
-                    disabled={isLoading} 
-                    aria-label="Make profile public"
+                    disabled={isLoading}
                 />
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4 border-t mt-4">
-                <Button variant="outline" type="button" onClick={handleEditToggle} disabled={isLoading}> 
-                    <XCircle className="mr-2 h-4 w-4" /> Cancel Edit
+            <div className="flex justify-end gap-2">
+               <Button type="button" variant="outline" onClick={handleEditToggle} disabled={isLoading}>
+                 <XCircle className="mr-2 h-4 w-4" /> Cancel
                 </Button>
-                <Button type="submit" disabled={isLoading || !isDirty}> 
-                     <Save className="mr-2 h-4 w-4" /> {isProfileLoading ? 'Saving...' : 'Save Profile Changes'}
+                <Button type="submit" className="gap-1" disabled={isLoading || !isDirty}>
+                  <Save className="mr-2 h-4 w-4" /> {isLoading ? 'Saving...' : 'Save Changes'}
                 </Button>
             </div>
         </form>

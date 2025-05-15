@@ -21,7 +21,7 @@ import type {
 } from '@supabase/supabase-js';
 
 // Define a type for the RPC response structure
-type SupabaseRpcResponse = { data: unknown | null; error: unknown | null };
+interface SupabaseRpcResponse { data: unknown | null; error: unknown | null }
 
 // Enable or disable mock debug logging
 const ENABLE_DEBUG = true;

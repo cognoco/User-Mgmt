@@ -1,4 +1,4 @@
-type OAuthStoreMockState = {
+interface OAuthStoreMockState {
   isLoading: boolean;
   error: any;
   connectedProviders: any[];
@@ -8,7 +8,7 @@ type OAuthStoreMockState = {
   isConnected: (provider: any) => boolean;
   clearError: () => void;
   [key: string]: any;
-};
+}
 
 export function createOAuthStoreMock(overrides = {}) {
   let state: OAuthStoreMockState = {

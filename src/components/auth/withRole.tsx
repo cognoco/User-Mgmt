@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRBACStore } from '@/lib/stores/rbac.store';
-import { WithRoleProps } from '@/lib/types/rbac';
+import { WithRoleProps } from '@/types/rbac';
 import { useAuthStore } from '@/lib/stores/auth.store';
 
 export function withRole<P extends object>(
@@ -8,8 +8,13 @@ export function withRole<P extends object>(
   { requiredRole, requiredPermissions, fallback }: WithRoleProps = {}
 ) {
   return function WithRoleComponent(props: P) {
-    const { hasRole, hasPermission, fetchUserRoles } = useRBACStore();
-    const { user } = useAuthStore();
+    // Update to use individual selectors for React 19 compatibility
+    const hasRole = useRBACStore(state => state.hasRole);
+    const hasPermission = useRBACStore(state => state.hasPermission);
+    const fetchUserRoles = useRBACStore(state => state.fetchUserRoles);
+    
+    // Use a single primitive selector for the user
+    const user = useAuthStore(state => state.user);
 
     useEffect(() => {
       if (user) {

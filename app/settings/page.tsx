@@ -16,10 +16,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function SettingsPage() {
   const { t } = useTranslation();
-  const profile = useProfileStore((state) => state.profile);
-  const isLoading = useProfileStore((state) => state.isLoading);
-  const error = useProfileStore((state) => state.error);
-  const fetchProfile = useProfileStore((state) => state.fetchProfile);
+  const profile = useProfileStore(state => state.profile);
+  const isLoading = useProfileStore(state => state.isLoading);
+  const error = useProfileStore(state => state.error);
+  const fetchProfile = useProfileStore(state => state.fetchProfile);
 
   useEffect(() => {
     if (!profile && !isLoading && !error) {
