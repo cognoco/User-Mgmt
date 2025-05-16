@@ -5,17 +5,23 @@ import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { act } from 'react'; // Import from React instead of react-dom/test-utils
 
 // Mock the auth store first
-vi.mock('@/lib/stores/auth.store', () => ({
-  useAuthStore: vi.fn(() => ({
+vi.mock('@/lib/stores/auth.store', () => {
+  // Zustand selector-compatible mock
+  const store = {
     resetPassword: vi.fn().mockResolvedValue({ success: true, message: 'Reset email sent' }),
     updatePassword: vi.fn().mockResolvedValue(undefined),
     isLoading: false,
     error: null,
-    successMessage: 'Password reset email sent. Check your inbox.',
+    successMessage: null,
     clearError: vi.fn(),
     clearSuccessMessage: vi.fn()
-  }))
-}));
+  };
+  const useAuthStoreMock: any = vi.fn((selector: any) => (typeof selector === 'function' ? selector(store) : store));
+  useAuthStoreMock.setState = (newState: any) => {
+    Object.assign(store, newState);
+  };
+  return { useAuthStore: useAuthStoreMock };
+});
 
 // Then mock the Supabase client
 vi.mock('@/lib/database/supabase', () => {
@@ -43,6 +49,10 @@ vi.mock('@/lib/database/supabase', () => {
     }
   };
 });
+
+// Mock api.post for password reset confirmation
+import * as apiModule from '@/lib/api/axios';
+const apiPostSpy = vi.spyOn(apiModule.api, 'post');
 
 // Import after mocks
 import { useAuthStore } from '@/lib/stores/auth.store';
@@ -74,6 +84,18 @@ describe('Password Reset Flow', () => {
       writable: true,
       configurable: true
     });
+
+    // Always reset useAuthStore mock to have successMessage: null before each test
+    if ((useAuthStore as any).setState) {
+      (useAuthStore as any).setState({
+        resetPassword: vi.fn().mockResolvedValue({ success: true, message: 'Reset email sent' }),
+        isLoading: false,
+        error: null,
+        successMessage: null,
+        clearError: vi.fn(),
+        clearSuccessMessage: vi.fn()
+      });
+    }
   });
 
   afterEach(() => {
@@ -90,19 +112,27 @@ describe('Password Reset Flow', () => {
     const mockResetPassword = vi.fn().mockResolvedValue({ success: true, message: 'Reset email sent' });
     
     // Update the mock to return our specific function
-    (useAuthStore as any).mockReturnValue({
-      resetPassword: mockResetPassword,
-      isLoading: false,
-      error: null,
-      successMessage: null,
-      clearError: vi.fn(),
-      clearSuccessMessage: vi.fn()
-    });
+    if ((useAuthStore as any).setState) {
+      (useAuthStore as any).setState({
+        resetPassword: mockResetPassword,
+        isLoading: false,
+        error: null,
+        successMessage: null,
+        clearError: vi.fn(),
+        clearSuccessMessage: vi.fn()
+      });
+    }
 
     // Render forgot password component
     await act(async () => {
       render(<ForgotPasswordForm />);
     });
+
+    // Debug: check if form is rendered
+    if (!screen.queryByLabelText(/email address/i)) {
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: ForgotPasswordForm did not render email input. DOM:', document.body.innerHTML);
+    }
 
     // Fill in email 
     const emailInput = screen.getByLabelText(/email address/i);
@@ -120,14 +150,16 @@ describe('Password Reset Flow', () => {
     expect(mockResetPassword).toHaveBeenCalledWith('user@example.com');
 
     // After form submission, update the mock to show success message
-    (useAuthStore as any).mockReturnValue({
-      resetPassword: mockResetPassword,
-      isLoading: false,
-      error: null,
-      successMessage: 'Password reset email sent. Check your inbox.',
-      clearError: vi.fn(),
-      clearSuccessMessage: vi.fn()
-    });
+    if ((useAuthStore as any).setState) {
+      (useAuthStore as any).setState({
+        resetPassword: mockResetPassword,
+        isLoading: false,
+        error: null,
+        successMessage: 'Password reset email sent. Check your inbox.',
+        clearError: vi.fn(),
+        clearSuccessMessage: vi.fn()
+      });
+    }
 
     // Rerender to show success state
     await act(async () => {
@@ -153,19 +185,26 @@ describe('Password Reset Flow', () => {
       error: 'Email not found' 
     });
     
-    (useAuthStore as any).mockReturnValue({
-      resetPassword: mockResetPassword,
-      isLoading: false,
-      error: 'Email not found',
-      successMessage: null,
-      clearError: vi.fn(),
-      clearSuccessMessage: vi.fn()
-    });
+    if ((useAuthStore as any).setState) {
+      (useAuthStore as any).setState({
+        resetPassword: mockResetPassword,
+        isLoading: false,
+        error: 'Email not found',
+        successMessage: null,
+        clearError: vi.fn(),
+        clearSuccessMessage: vi.fn()
+      });
+    }
     
     // Render forgot password component
     await act(async () => {
       render(<ForgotPasswordForm />);
     });
+    // Debug: check if form is rendered
+    if (!screen.queryByLabelText(/email address/i)) {
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: ForgotPasswordForm did not render email input. DOM:', document.body.innerHTML);
+    }
     
     // Fill in email
     const emailInput = screen.getByLabelText(/email address/i);
@@ -193,15 +232,8 @@ describe('Password Reset Flow', () => {
     // Mock URL with reset token
     window.location.hash = '#access_token=test-token&type=recovery';
     
-    // Mock successful password update
-    const mockUpdatePassword = vi.fn().mockResolvedValue(undefined);
-    
-    // Set up auth store mock for the ResetPasswordForm
-    (useAuthStore as any).mockReturnValue({
-      updatePassword: mockUpdatePassword,
-      isLoading: false,
-      error: null
-    });
+    // Mock api.post for password reset confirmation
+    apiPostSpy.mockResolvedValueOnce({ data: {}, error: null });
     
     // Render password reset component with token
     await act(async () => {
@@ -210,7 +242,15 @@ describe('Password Reset Flow', () => {
     
     // Fill in new password using more specific queries
     const newPasswordInput = screen.getByLabelText('New Password');
-    const confirmPasswordInput = screen.getByLabelText('Confirm New Password');
+    let confirmPasswordInput;
+    try {
+      confirmPasswordInput = screen.getByLabelText('Confirm Password');
+    } catch (e) {
+      // Debug output if selector fails
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: Could not find Confirm Password label. Current DOM:', document.body.innerHTML);
+      throw e;
+    }
     
     await act(async () => {
       await user.type(newPasswordInput, 'NewPassword123!');
@@ -223,8 +263,11 @@ describe('Password Reset Flow', () => {
       await user.click(submitButton);
     });
     
-    // Verify our mock function was called with the right parameters
-    expect(mockUpdatePassword).toHaveBeenCalledWith('test-token', 'NewPassword123!');
+    // Verify api.post was called with the right parameters
+    expect(apiPostSpy).toHaveBeenCalledWith('/api/auth/reset-password/confirm', {
+      token: 'test-token',
+      newPassword: 'NewPassword123!'
+    });
     
     // Clean up
     window.location.hash = '';
@@ -238,11 +281,13 @@ describe('Password Reset Flow', () => {
     const mockUpdatePassword = vi.fn().mockResolvedValue(undefined);
     
     // Set up auth store mock
-    (useAuthStore as any).mockReturnValue({
-      updatePassword: mockUpdatePassword,
-      isLoading: false,
-      error: null
-    });
+    if ((useAuthStore as any).setState) {
+      (useAuthStore as any).setState({
+        updatePassword: mockUpdatePassword,
+        isLoading: false,
+        error: null
+      });
+    }
     
     // Render password reset component with token
     await act(async () => {
@@ -251,11 +296,19 @@ describe('Password Reset Flow', () => {
     
     // Fill in mismatched passwords
     const newPasswordInput = screen.getByLabelText('New Password');
-    const confirmPasswordInput = screen.getByLabelText('Confirm New Password');
+    let confirmPasswordInput2;
+    try {
+      confirmPasswordInput2 = screen.getByLabelText('Confirm Password');
+    } catch (e) {
+      // Debug output if selector fails
+      // eslint-disable-next-line no-console
+      console.log('DEBUG: Could not find Confirm Password label. Current DOM:', document.body.innerHTML);
+      throw e;
+    }
     
     await act(async () => {
       await user.type(newPasswordInput, 'Password123!');
-      await user.type(confirmPasswordInput, 'DifferentPassword123!');
+      await user.type(confirmPasswordInput2, 'DifferentPassword123!');
     });
     
     // Submit form

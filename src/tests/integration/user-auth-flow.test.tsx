@@ -64,53 +64,60 @@ vi.mock('@/lib/stores/connected-accounts.store', () => ({
 }));
 // --- End Connected Accounts Store Mock ---
 
-// --- Revert to vi.mock for Auth Store with exported mock state ---
-const mockAuthStoreActions = {
-  user: null as User | null, // Use type assertion for initial null
-  token: null as string | null,
-  isLoading: false,
-  isAuthenticated: false,
-  error: null as string | null,
-  successMessage: null as string | null, // Allow string type
-  rateLimitInfo: null as RateLimitInfo | null,
-  mfaEnabled: false,
-  mfaSecret: null as string | null,
-  mfaQrCode: null as string | null,
-  mfaBackupCodes: null as string[] | null,
-  // Remove explicit function types - let TS infer from vi.fn()
-  login: vi.fn().mockImplementation(async (payload) => {
-    console.log('[DEBUG] Mocked login via exported state CALLED:', payload);
-    mockAuthStoreActions.user = { id: 'test-user-id', email: payload.email } as User;
-    mockAuthStoreActions.isAuthenticated = true;
-    return { success: true, requiresMfa: false };
-  }),
-  logout: vi.fn().mockResolvedValue(undefined),
-  register: vi.fn().mockImplementation(async (payload) => {
-    console.log('[DEBUG] Mocked register via exported state CALLED:', payload);
-    mockAuthStoreActions.successMessage = 'Registration successful. Please check your email.';
-    return { success: true };
-  }),
-  refreshToken: vi.fn().mockResolvedValue(true),
-  handleSessionTimeout: vi.fn(),
-  clearError: vi.fn().mockImplementation(() => { mockAuthStoreActions.error = null; }),
-  clearSuccessMessage: vi.fn().mockImplementation(() => { mockAuthStoreActions.successMessage = null; }),
-  setUser: vi.fn((user: User | null) => { mockAuthStoreActions.user = user; }),
-  setToken: vi.fn((token: string | null) => { mockAuthStoreActions.token = token; }),
-  setupMFA: vi.fn().mockResolvedValue({ success: true }),
-  verifyMFA: vi.fn().mockResolvedValue({ success: true }),
-  disableMFA: vi.fn().mockResolvedValue({ success: true }),
-  sendVerificationEmail: vi.fn().mockResolvedValue({ success: true }),
-  setLoading: vi.fn((loading: boolean) => { mockAuthStoreActions.isLoading = loading; }),
-  resetPassword: vi.fn().mockResolvedValue({ success: true }),
-  updatePassword: vi.fn().mockResolvedValue({ success: true }),
-  deleteAccount: vi.fn().mockResolvedValue({ success: true }),
-  verifyEmail: vi.fn().mockResolvedValue({ success: true }),
-};
-
-vi.mock('@/lib/stores/auth.store', () => ({
-  useAuthStore: vi.fn(() => mockAuthStoreActions)
-}));
-// --- End Auth Store Mock ---
+// Zustand selector-compatible mock for useAuthStore, defined at the top for Vitest hoisting
+vi.mock('@/lib/stores/auth.store', () => {
+  const createAuthStoreState = () => ({
+    user: null as User | null,
+    token: null as string | null,
+    isLoading: false,
+    isAuthenticated: false,
+    error: null as string | null,
+    successMessage: null as string | null,
+    rateLimitInfo: null as RateLimitInfo | null,
+    mfaEnabled: false,
+    mfaSecret: null as string | null,
+    mfaQrCode: null as string | null,
+    mfaBackupCodes: null as string[] | null,
+    login: vi.fn().mockImplementation(async (payload) => {
+      // eslint-disable-next-line no-console
+      console.log('[DEBUG] Mocked login via exported state CALLED:', payload);
+      authStoreState.user = { id: 'test-user-id', email: payload.email } as User;
+      authStoreState.isAuthenticated = true;
+      return { success: true, requiresMfa: false };
+    }),
+    logout: vi.fn().mockResolvedValue(undefined),
+    register: vi.fn().mockImplementation(async (payload) => {
+      // eslint-disable-next-line no-console
+      console.log('[DEBUG] Mocked register via exported state CALLED:', payload);
+      authStoreState.successMessage = 'Registration successful. Please check your email.';
+      return { success: true };
+    }),
+    refreshToken: vi.fn().mockResolvedValue(true),
+    handleSessionTimeout: vi.fn(),
+    clearError: vi.fn().mockImplementation(() => { authStoreState.error = null; }),
+    clearSuccessMessage: vi.fn().mockImplementation(() => { authStoreState.successMessage = null; }),
+    setUser: vi.fn((user: User | null) => { authStoreState.user = user; }),
+    setToken: vi.fn((token: string | null) => { authStoreState.token = token; }),
+    setupMFA: vi.fn().mockResolvedValue({ success: true }),
+    verifyMFA: vi.fn().mockResolvedValue({ success: true }),
+    disableMFA: vi.fn().mockResolvedValue({ success: true }),
+    sendVerificationEmail: vi.fn().mockResolvedValue({ success: true }),
+    setLoading: vi.fn((loading: boolean) => { authStoreState.isLoading = loading; }),
+    resetPassword: vi.fn().mockResolvedValue({ success: true }),
+    updatePassword: vi.fn().mockResolvedValue({ success: true }),
+    deleteAccount: vi.fn().mockResolvedValue({ success: true }),
+    verifyEmail: vi.fn().mockResolvedValue({ success: true }),
+  });
+  let authStoreState = createAuthStoreState();
+  const useAuthStoreMock: any = vi.fn((selector: any) => (typeof selector === 'function' ? selector(authStoreState) : authStoreState));
+  useAuthStoreMock.setState = (newState: any) => {
+    authStoreState = { ...createAuthStoreState(), ...newState };
+  };
+  (global as any).__useAuthStoreMock = useAuthStoreMock;
+  return {
+    useAuthStore: useAuthStoreMock
+  };
+});
 
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
 import { OAuthProvider } from '@/types/oauth';
@@ -123,13 +130,10 @@ describe('User Authentication Flow', () => {
   beforeEach(() => {
     // Clear mock call history and reset state if necessary
     vi.clearAllMocks(); 
-    // Reset mock state manually if needed between tests
-    mockAuthStoreActions.user = null;
-    mockAuthStoreActions.token = null;
-    mockAuthStoreActions.isAuthenticated = false;
-    mockAuthStoreActions.error = null;
-    mockAuthStoreActions.successMessage = null;
-    mockAuthStoreActions.isLoading = false;
+    // Reset Zustand selector-compatible auth store mock
+    if ((global as any).__useAuthStoreMock?.setState) {
+      (global as any).__useAuthStoreMock.setState({});
+    }
     // Reset connected accounts store state
     mockConnectedAccountsStoreActions = createConnectedAccountsStoreMock();
     // Reset profile store state
@@ -147,9 +151,9 @@ describe('User Authentication Flow', () => {
 
   test('User can sign up, login, and update profile', async () => {
     try {
-      // Get refs to mock functions from the exported objects
-      const mockLogin = mockAuthStoreActions.login;
-      const mockRegister = mockAuthStoreActions.register;
+      // Get refs to mock functions from the selector-compatible mock
+      const mockLogin = (global as any).__useAuthStoreMock().login;
+      const mockRegister = (global as any).__useAuthStoreMock().register;
       const mockUpdateProfile = mockProfileStoreActions.updateProfile;
       // Add mockUploadAvatar if we want to test that too
       // const mockUploadAvatar = mockProfileStoreActions.uploadAvatar;
@@ -194,7 +198,7 @@ describe('User Authentication Flow', () => {
         }));
       }, { timeout: 2000 });
       // Check for success message (can check state or UI)
-      // expect(mockAuthStoreActions.successMessage).toContain(...); // Check state
+      expect((global as any).__useAuthStoreMock().successMessage).toContain('Registration successful'); // Check state
       expect(await screen.findByRole('alert')).toHaveTextContent(/Registration successful/i); // Check UI
 
       unmountSignup();

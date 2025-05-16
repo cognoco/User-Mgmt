@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '../utils/test-utils';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import ProfilePage from '../../../app/profile/page';
 
 // Define the mock user state
@@ -36,49 +36,113 @@ const mockUserState = {
   successMessage: null,
 };
 
+// Timer and memory debug helpers
+const start = Date.now();
+function logDebug(msg: string) {
+  // eslint-disable-next-line no-console
+  console.log(`[DEBUG][${((Date.now() - start) / 1000).toFixed(2)}s][${process.pid}] ${msg}`);
+  if (global.gc) {
+    global.gc();
+  }
+  if (typeof process !== 'undefined' && process.memoryUsage) {
+    const mem = process.memoryUsage();
+    console.log(`[MEMORY] rss: ${(mem.rss / 1024 / 1024).toFixed(2)}MB heapUsed: ${(mem.heapUsed / 1024 / 1024).toFixed(2)}MB heapTotal: ${(mem.heapTotal / 1024 / 1024).toFixed(2)}MB`);
+  }
+}
+
+beforeEach(() => {
+  logDebug('Test started');
+});
+afterEach(() => {
+  logDebug('Test finished');
+});
+
 // Mock the auth store to simulate an authenticated user and provide getState
-vi.mock('@/lib/stores/auth.store', () => ({
-  useAuthStore: (selector?: any) => {
-    if (!selector) return mockUserState;
-    // Only support the selector used in ProfileForm
-    if (selector.toString().replace(/\s/g, '') === '(state)=>state.user?.email') {
-      return mockUserState.user.email;
+const authStoreState = { ...mockUserState };
+function useAuthStoreMock(selector?: any) {
+  logDebug('useAuthStore called');
+  if (!selector) return authStoreState;
+  if (typeof selector === 'function') {
+    try {
+      return selector(authStoreState);
+    } catch (e) {
+      logDebug('useAuthStore selector threw: ' + (e instanceof Error ? e.message : String(e)));
+      return undefined;
     }
-    // Fallback: return undefined for unsupported selectors
-    return undefined;
-  },
+  }
+  return undefined;
+}
+useAuthStoreMock.getState = () => authStoreState;
+useAuthStoreMock.setState = (partial: any) => Object.assign(authStoreState, typeof partial === 'function' ? partial(authStoreState) : partial);
+
+vi.mock('@/lib/stores/auth.store', () => ({
+  useAuthStore: useAuthStoreMock,
 }));
 
-// Mock the profile store to provide a valid profile and required methods
+// Mock the profile store to provide a valid profile and required methods with robust debugging
+const profileStoreState = {
+  profile: {
+    id: 'test-user',
+    first_name: 'Test',
+    last_name: 'User',
+    email: 'test@example.com',
+    userType: 'PRIVATE',
+    companyName: '',
+    companySize: null,
+    industry: '',
+    companyWebsite: '',
+    position: '',
+    department: '',
+    vatId: '',
+    address: null,
+  },
+  isLoading: false,
+  error: null,
+  fetchProfile: vi.fn(() => { logDebug('[MOCK] fetchProfile called'); }),
+  updateBusinessProfile: vi.fn(() => { logDebug('[MOCK] updateBusinessProfile called'); }),
+  updateProfile: vi.fn(() => { logDebug('[MOCK] updateProfile called'); }),
+  convertToBusinessProfile: vi.fn(() => { logDebug('[MOCK] convertToBusinessProfile called'); }),
+  uploadAvatar: vi.fn(() => { logDebug('[MOCK] uploadAvatar called'); }),
+  removeAvatar: vi.fn(() => { logDebug('[MOCK] removeAvatar called'); }),
+  uploadCompanyLogo: vi.fn(() => { logDebug('[MOCK] uploadCompanyLogo called'); }),
+  removeCompanyLogo: vi.fn(() => { logDebug('[MOCK] removeCompanyLogo called'); }),
+  clearError: vi.fn(() => { logDebug('[MOCK] clearError called'); }),
+  verification: null,
+  verificationLoading: false,
+  verificationError: null,
+  fetchVerificationStatus: vi.fn(() => { logDebug('[MOCK] fetchVerificationStatus called'); }),
+  requestVerification: vi.fn(() => { logDebug('[MOCK] requestVerification called'); }),
+};
+function useProfileStoreMock(selector?: any) {
+  logDebug('useProfileStore called');
+  if (!selector) return profileStoreState;
+  if (typeof selector === 'function') {
+    try {
+      const result = selector(profileStoreState);
+      logDebug(`[MOCK] useProfileStore called with selector: ${selector.toString()} Result: ${JSON.stringify(result)}`);
+      return result;
+    } catch (e) {
+      logDebug('useProfileStore selector threw: ' + (e instanceof Error ? e.message : String(e)));
+      return undefined;
+    }
+  }
+  return undefined;
+}
+useProfileStoreMock.getState = () => profileStoreState;
+useProfileStoreMock.setState = (partial: any) => Object.assign(profileStoreState, typeof partial === 'function' ? partial(profileStoreState) : partial);
+
 vi.mock('@/lib/stores/profile.store', () => ({
-  useProfileStore: () => ({
-    profile: {
-      id: 'test-user',
-      first_name: 'Test',
-      last_name: 'User',
-      email: 'test@example.com',
-      userType: 'PRIVATE',
-      companyName: '',
-      companySize: null,
-      industry: '',
-      companyWebsite: '',
-      position: '',
-      department: '',
-      vatId: '',
-      address: null,
-    },
-    isLoading: false,
-    error: null,
-    fetchProfile: vi.fn(),
-    updateBusinessProfile: vi.fn(),
-  })
+  useProfileStore: useProfileStoreMock,
 }));
 
 describe('Smoke: Profile Page', () => {
   it('renders profile page for authenticated user', () => {
+    logDebug('Test: render ProfilePage');
     render(<ProfilePage />);
-    // Check for a heading or user info
-    expect(screen.getByRole('heading', { name: /profile/i })).toBeInTheDocument();
+    logDebug('After render');
+    // Check for the main page heading (h1)
+    expect(screen.getByRole('heading', { name: /profile settings/i, level: 1 })).toBeInTheDocument();
+    logDebug('After expect');
     // Optionally check for user email or avatar if present
   });
 }); 
