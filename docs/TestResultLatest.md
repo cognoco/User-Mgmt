@@ -1,6 +1,6 @@
 # Test Results
 
-**Passed Test Files:** 68  |  **Failed Test Files:** 22
+**Passed Test Files:** 69  |  **Failed Test Files:** 21
 
 ## Passing Test Files
 
@@ -10,6 +10,7 @@
 - src\components\auth\__tests__\MinimalTextareaForm.test.tsx
 - src\components\auth\__tests__\OrganizationSSO.test.tsx
 - src\components\auth\__tests__\ProtectedRoute.test.tsx
+- src\components\auth\__tests__\RegistrationForm.integration.test.tsx
 - src\components\profile\__tests__\ActivityLog.test.tsx
 - src\components\profile\__tests__\CompanyDataExport.test.tsx
 - src\components\profile\__tests__\CompanyLogoUpload.test.tsx
@@ -80,7 +81,6 @@
 - src\components\audit\__tests__\AuditLogViewer.test.tsx
 - src\components\auth\__tests__\DomainBasedOrgMatching.test.tsx
 - src\components\auth\__tests__\IDPConfiguration.test.tsx
-- src\components\auth\__tests__\RegistrationForm.integration.test.tsx
 - src\components\company\__tests__\OrganizationSessionManager.test.tsx
 - src\components\profile\__tests__\Profile.test.tsx
 - src\components\profile\__tests__\ProfilePrivacySettings.test.tsx
