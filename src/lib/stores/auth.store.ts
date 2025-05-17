@@ -222,83 +222,15 @@ export const useAuthStore = create<AuthState>()((set, get) => {
 
     register: async (data: RegistrationPayload): Promise<AuthResult> => {
       set({ isLoading: true, error: null });
-
-      // ---> ADDED LOGGING TO CHECK INSTANCE <--- 
-      console.log('[AuthStore Register] Checking Supabase instance before use:', supabase);
-      if (!supabase || typeof supabase.auth?.signUp !== 'function') {
-        console.error('[AuthStore Register] CRITICAL: Supabase client or supabase.auth.signUp is not available!');
-        set({ isLoading: false, error: 'Internal Registration Error: Supabase client failed.' });
-        return { success: false, error: 'Internal registration error.' };
-      }
-      // --- END ADDED LOGGING ---
-
       try {
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email: data.email,
-          password: data.password,
-          options: {
-            data: {
-              first_name: data.firstName,
-              last_name: data.lastName,
-            },
-            emailRedirectTo: process.env.NEXT_PUBLIC_VERIFICATION_REDIRECT_URL, 
-          },
-        });
-
-        if (signUpError) {
-            console.error('[AuthStore Register Error]', signUpError);
-            // Add debug log for the exact error message
-            console.error('[DEBUG] Supabase signUpError.message:', signUpError.message);
-            const errorMessage = signUpError.message || 'Registration failed';
-            if (signUpError.status === 429) {
-                set({ isLoading: false, error: 'Too many registration attempts. Please try again later.', rateLimitInfo: { windowMs: 60000} });
-                return { success: false, error: errorMessage, code: 'RATE_LIMIT_EXCEEDED' };
-            }
-            if (
-                /already registered|already exists|email in use|account exists|already been registered/i.test(signUpError.message)
-            ) {
-                set({ 
-                    isLoading: false, 
-                    error: 'This user already exists - please use the log in (with link to log in front page)',
-                    successMessage: null
-                });
-                return { success: false, error: 'This user already exists - please use the log in (with link to log in front page)' };
-            }
-
-            set({ isLoading: false, error: errorMessage });
-            return { success: false, error: errorMessage };
-        }
-
-        if (signUpData.user && signUpData.user.email_confirmed_at) {
-            console.error('[DEBUG] Already registered/verified user path hit in register:', signUpData.user);
-            set({ isLoading: false, error: 'Email already exists and is verified. Try logging in.', successMessage: null });
-            return { success: false, error: 'Email already exists and is verified. Try logging in.' };
-        }
-
-        if (signUpData.user && !signUpData.user.email_confirmed_at) {
-            set({ 
-                isLoading: false, 
-                error: null, 
-                successMessage: 'Registration successful! Please check your email to verify your account.' 
-            });
-            return { success: true };
-        } else if (signUpData.user) {
-             console.warn('Registration successful, but user is already confirmed.');
-             set({ 
-                isLoading: false, 
-                error: null, 
-                successMessage: 'Account exists and is verified. Try logging in.' 
-            });
-            return { success: true };
-        } else {
-            console.error('Registration completed without user data or error.');
-             set({ isLoading: false, error: 'An unexpected issue occurred during registration.' });
-            return { success: false, error: 'An unexpected issue occurred.' };
-        }
-
+        // Use the API route instead of Supabase directly
+        const response = await api.post('/api/auth/register', data);
+        // Success: API returns { message, user }
+        set({ isLoading: false, error: null, successMessage: response.data.message });
+        return { success: true };
       } catch (error: any) {
-        console.error('[AuthStore Register Catch]', error);
-        const errorMessage = error.message || 'An unexpected registration error occurred.';
+        // Handle API error response
+        const errorMessage = error.response?.data?.error || error.message || 'Registration failed';
         set({ isLoading: false, error: errorMessage });
         return { success: false, error: errorMessage };
       }

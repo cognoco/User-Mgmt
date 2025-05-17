@@ -1,0 +1,67 @@
+import { ReactNode } from 'react';
+import { redirect } from 'next/navigation';
+import { getUser } from '@/lib/auth/getUser';
+import { hasPermission } from '@/lib/auth/hasPermission';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Users, List, Home, BarChart3, Settings, ShieldCheck } from 'lucide-react';
+
+interface AdminLayoutProps {
+  children: ReactNode;
+}
+
+export default async function AdminLayout({ children }: AdminLayoutProps) {
+  // Get current user and check permissions
+  const user = await getUser();
+  
+  if (!user) {
+    redirect('/login');
+  }
+  
+  // Check if user has admin access
+  const isAdmin = await hasPermission(user.id, 'ADMIN_ACCESS');
+  
+  if (!isAdmin) {
+    redirect('/dashboard');
+  }
+
+  return (
+    <div className="flex min-h-screen">
+      {/* Admin sidebar */}
+      <aside className="hidden md:flex w-64 flex-col bg-muted/40 border-r">
+        <div className="p-4 border-b">
+          <h2 className="font-semibold text-lg">Admin Portal</h2>
+        </div>
+        <nav className="flex-1 p-4 space-y-2">
+          <Button asChild variant="ghost" className="w-full justify-start">
+            <Link href="/admin/dashboard">
+              <Home className="mr-2 h-5 w-5" />
+              Dashboard
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" className="w-full justify-start">
+            <Link href="/admin/users">
+              <Users className="mr-2 h-5 w-5" />
+              Users
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" className="w-full justify-start">
+            <Link href="/admin/audit-logs">
+              <List className="mr-2 h-5 w-5" />
+              Audit Logs
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" className="w-full justify-start">
+            <Link href="/admin/settings">
+              <Settings className="mr-2 h-5 w-5" />
+              Settings
+            </Link>
+          </Button>
+        </nav>
+      </aside>
+      
+      {/* Main content */}
+      <main className="flex-1">{children}</main>
+    </div>
+  );
+} 

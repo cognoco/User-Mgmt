@@ -1,4 +1,5 @@
 'use client'; // Required for useTranslation and likely ProfileCompletion component
+import '@/lib/i18n';
 
 import { useTranslation } from 'react-i18next';
 import { ProfileCompletion } from '@/components/registration/ProfileCompletion'; // Adjust path if needed

@@ -28,6 +28,28 @@
 
 ### Testing Rules
 
+FOR E2E tests -
+Before you run the E2E for any feature, first read the expected implementation that is described in one of the relevant files under docs/Product documentation/functionality-features-phase...
+Find the correct file and identify the relevant end user flows and features. Then read the full application implementation and ensure that all expected features are covered. If not - expand the implementation! 
+After this read the test file and ensure all tests are there and cover all expected features and flows. If not, expand the file. 
+Read file called TESTING ISSUES-E2E
+Only then run the test suite. 
+Be aware that a lot of the ui is missing and if the test fails it might be a real bug. 
+Dont run the whole test file after each change. Run only the failing tests you are trying to fix - you can only run for separate browsers. Some of the full test files are large and take long time to run. Only run them at important points - once you believe they should all pass or if you are not sure if you broke some. At the end of each bug fixing run the full test file. It is your responsibility to fix these tests so that they are passing. Run the test, continue debugging and then run again until all tests in the file pass. 
+You dont have to update the user with bugs/issues etc, but update the user once all tests in the file are passing. Skipped test count as failed unless there is a very good reason that they are skipped. 
+Never run the whole E2E suite.
+Once all tests in the file you are working on are passing update the documentation in TESTING ISSUES-E2E if you encountered some issues that can be relevant for future bug fixing. 
+
+Command examples:
+To run the whole file: 
+ npx playwright test e2e/auth/registration.spec.ts 
+ to run one test: 
+ npx playwright test e2e/auth/registration.spec.ts --grep="should disable submit button when form is invalid|should show error for invalid email format"
+To run one type of browser:
+npx playwright test e2e/auth/registration.spec.ts:219 --project="Desktop Chrome" --headed
+
+
+
 - **Testing Focus:**  
   - Prioritize end-user flows and critical functionality (e.g., registration, login, profile update, MFA setup).
   - Avoid exhaustive low-level/unit tests unless necessary for complex logic.

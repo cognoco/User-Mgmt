@@ -1,4 +1,5 @@
 'use client'; // Required for hooks
+import '@/lib/i18n';
 
 import { useEffect } from 'react';
 import { ProfileForm } from '@/components/profile/ProfileForm';

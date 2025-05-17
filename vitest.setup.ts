@@ -9,7 +9,7 @@ import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
 import { createMockAuthStore } from '@/tests/mocks/auth.store.mock';
-import en from '@/lib/i18n/locales/en.json';
+import en from '@/lib/i18n/locales/en.json' assert { type: 'json' };
 
 // Extend Vitest's expect method with methods from react-testing-library
 expect.extend(matchers);

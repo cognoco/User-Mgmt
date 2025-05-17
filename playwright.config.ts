@@ -4,12 +4,21 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   timeout: 30 * 1000,
-  retries: 1,
+  retries: 0,
+  globalSetup: './e2e/utils/global-setup.ts',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3001',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+  },
+  webServer: {
+    command: process.platform === 'win32'
+      ? 'set NODE_ENV=development&& set PORT=3001&& npm run dev'
+      : 'NODE_ENV=development PORT=3001 npm run dev',
+    url: 'http://localhost:3001',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
   },
   projects: [
     {

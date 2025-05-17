@@ -1,11 +1,13 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
+import enTranslations from './locales/en';
+// TODO: migrate es and fr to .ts and import here
+// import esTranslations from './locales/es';
+// import frTranslations from './locales/fr';
+const esTranslations = {};
+const frTranslations = {};
 
-// Import translations
-import enTranslations from './locales/en.json';
-import esTranslations from './locales/es.json';
-import frTranslations from './locales/fr.json';
+let LanguageDetector: any;
 
 // Available languages
 export const languages = [
@@ -26,14 +28,14 @@ export const initializeI18n = (options?: {
   defaultLanguage?: LanguageCode;
 }) => {
   const namespace = options?.namespace || USER_MANAGEMENT_NAMESPACE;
-  
+
   // Default resources with our translations under specified namespace
   const defaultResources = {
     en: { [namespace]: enTranslations },
     es: { [namespace]: esTranslations },
     fr: { [namespace]: frTranslations },
   };
-  
+
   // Merge with additional resources if provided
   const resources = options?.resources 
     ? Object.entries(defaultResources).reduce((acc, [lang, translations]) => {
@@ -45,24 +47,50 @@ export const initializeI18n = (options?: {
       }, {} as Record<string, Record<string, any>>)
     : defaultResources;
 
-  // Initialize i18next
+  // SSR-safe language detector: use browser detector on client, dummy on server
   if (!i18n.isInitialized) {
-    i18n
-      .use(LanguageDetector)
-      .use(initReactI18next)
-      .init({
-        resources,
-        fallbackLng: options?.defaultLanguage || 'en',
-        defaultNS: namespace,
-        ns: [namespace],
-        interpolation: {
-          escapeValue: false,
-        },
-        detection: {
-          order: ['localStorage', 'navigator'],
-          caches: ['localStorage'],
-        },
-      });
+    if (typeof window !== 'undefined') {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      LanguageDetector = require('i18next-browser-languagedetector').default;
+      i18n
+        .use(LanguageDetector)
+        .use(initReactI18next)
+        .init({
+          resources,
+          fallbackLng: options?.defaultLanguage || 'en',
+          defaultNS: namespace,
+          ns: [namespace],
+          interpolation: {
+            escapeValue: false,
+          },
+          detection: {
+            order: ['localStorage', 'navigator'],
+            caches: ['localStorage'],
+          },
+        });
+    } else {
+      // SSR: use a dummy detector, set default language
+      const DummyDetector = {
+        type: 'languageDetector',
+        async: false,
+        detect: () => options?.defaultLanguage || 'en',
+        init: () => {},
+        cacheUserLanguage: () => {},
+      };
+      i18n
+        .use(DummyDetector as any)
+        .use(initReactI18next)
+        .init({
+          resources,
+          fallbackLng: options?.defaultLanguage || 'en',
+          lng: options?.defaultLanguage || 'en',
+          defaultNS: namespace,
+          ns: [namespace],
+          interpolation: {
+            escapeValue: false,
+          },
+        });
+    }
   } else {
     // If already initialized, just add the resources
     Object.entries(resources).forEach(([language, namespaces]) => {
@@ -75,7 +103,7 @@ export const initializeI18n = (options?: {
   return i18n;
 };
 
-// Initialize with default configuration
+// Always initialize i18n (SSR + client)
 initializeI18n();
 
 export default i18n; 

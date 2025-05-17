@@ -12,6 +12,7 @@ function PasswordRequirement({ meets, text }: PasswordRequirementProps) {
       role="listitem"
       className="flex items-center space-x-2" 
       data-met={meets.toString()}
+      data-testid={`password-requirement-${text.toLowerCase().replace(/\s+/g, '-')}`}
     >
       {meets ? (
         <Check className="h-4 w-4 text-green-500" />
@@ -29,14 +30,14 @@ interface PasswordRequirementsProps {
 
 export function PasswordRequirements({ password }: PasswordRequirementsProps) {
   const requirements = [
-    { meets: password.length >= 8, text: 'At least 8 characters' },
-    { meets: /[A-Z]/.test(password), text: 'At least one uppercase letter' },
-    { meets: /[a-z]/.test(password), text: 'At least one lowercase letter' },
-    { meets: /[0-9]/.test(password), text: 'At least one number' },
-    { meets: /[!@#$%^&*(),.?":{}|<>]/.test(password), text: 'At least one special character' }
+    { meets: password.length >= 8, text: 'Password must be at least 8 characters' },
+    { meets: /[A-Z]/.test(password), text: 'Password must contain at least one uppercase letter' },
+    { meets: /[a-z]/.test(password), text: 'Password must contain at least one lowercase letter' },
+    { meets: /[0-9]/.test(password), text: 'Password must contain at least one number' },
+    { meets: /[!@#$%^&*(),.?":{}|<>]/.test(password), text: 'Password must contain at least one special character' }
   ];
 
-  // Show during tests or when password is not empty
+  // Show requirements when password field is active or has content
   if (password.length === 0 && process.env.NODE_ENV !== 'test') {
     return null;
   }

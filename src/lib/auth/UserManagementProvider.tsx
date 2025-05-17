@@ -154,7 +154,7 @@ const UserManagementContext = createContext<UserManagementContextValue>({
     enableBilling: false,
   },
   corporateUsers: {
-    enabled: false,
+    enabled: true,
     registrationEnabled: true,
     requireCompanyValidation: false,
     allowUserTypeChange: false,
@@ -320,7 +320,7 @@ export function UserManagementProvider({
         enableBilling: false,
       },
       corporateUsers: config.corporateUsers || {
-        enabled: false,
+        enabled: true,
         registrationEnabled: true,
         requireCompanyValidation: false,
         allowUserTypeChange: false,
@@ -360,7 +360,7 @@ export function UserManagementProvider({
         enableBilling: false,
       },
       corporateUsers: config.corporateUsers || {
-        enabled: false,
+        enabled: true,
         registrationEnabled: true,
         requireCompanyValidation: false,
         allowUserTypeChange: false,

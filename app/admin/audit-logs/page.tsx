@@ -1,0 +1,46 @@
+import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+import { getUser } from '@/lib/auth/getUser';
+import { hasPermission } from '@/lib/auth/hasPermission';
+import { AdminAuditLogs } from '@/components/admin/audit-logs/AdminAuditLogs';
+
+export const metadata: Metadata = {
+  title: 'Admin Audit Logs',
+  description: 'View and manage system audit logs',
+};
+
+export default async function AdminAuditLogsPage() {
+  // Get current user and check permissions
+  const user = await getUser();
+  
+  if (!user) {
+    redirect('/login');
+  }
+  
+  // Check if user has admin permissions to view audit logs
+  const canViewAuditLogs = await hasPermission(user.id, 'VIEW_ALL_USER_ACTION_LOGS');
+  
+  if (!canViewAuditLogs) {
+    return (
+      <div className="container py-10">
+        <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
+          <h2 className="text-lg font-semibold text-destructive mb-2">Access denied</h2>
+          <p>You do not have permission to view audit logs.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container py-6 space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Audit Logs</h1>
+        <p className="text-muted-foreground">
+          View and manage system activity logs
+        </p>
+      </div>
+      
+      <AdminAuditLogs />
+    </div>
+  );
+} 

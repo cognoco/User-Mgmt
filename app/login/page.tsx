@@ -1,4 +1,5 @@
 'use client'; // Required for hooks like useTranslation
+import '@/lib/i18n';
 
 import { useTranslation } from 'react-i18next';
 import { LoginForm } from '@/components/auth/LoginForm';

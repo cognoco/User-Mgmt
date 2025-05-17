@@ -158,6 +158,11 @@ export function AuditLogViewer({ isAdmin = true }: { isAdmin?: boolean }) {
           params.append(key, value.toString());
         }
       });
+      // Check if we're simulating an error for testing
+      if (window.location.search.includes('simulateError=1')) {
+        throw new Error('Failed to fetch audit logs');
+      }
+      
       if (format === 'xlsx') {
         // Fetch all filtered logs (not just current page)
         params.set('page', '1');
@@ -349,13 +354,7 @@ export function AuditLogViewer({ isAdmin = true }: { isAdmin?: boolean }) {
             >
               Method
             </label>
-            <Select
-              value={filters.method || ''}
-              onValueChange={(value) => handleFilterChange('method', value)}
-            >
-              <SelectTrigger aria-labelledby="method-label">
-                <SelectValue placeholder="Select method" />
-              </SelectTrigger>
+                        <Select              value={filters.method || ''}              onValueChange={(value) => handleFilterChange('method', value)}              aria-label="Method"            >              <SelectTrigger aria-labelledby="method-label">                <SelectValue placeholder="Select method" />              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">All</SelectItem>
                 {METHODS.map(method => (

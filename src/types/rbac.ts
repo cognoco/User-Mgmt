@@ -1,50 +1,60 @@
 import { z } from 'zod';
 
-// Define available permissions
-export enum Permission {
-  // User management
-  READ_USERS = 'read:users',
-  CREATE_USERS = 'create:users',
-  UPDATE_USERS = 'update:users',
-  DELETE_USERS = 'delete:users',
-  
-  // Profile management
-  READ_PROFILES = 'read:profiles',
-  UPDATE_PROFILES = 'update:profiles',
-  DELETE_PROFILES = 'delete:profiles',
-  
-  // Settings management
-  READ_SETTINGS = 'read:settings',
-  UPDATE_SETTINGS = 'update:settings',
-  
-  // Role management
-  READ_ROLES = 'read:roles',
-  CREATE_ROLES = 'create:roles',
-  UPDATE_ROLES = 'update:roles',
-  DELETE_ROLES = 'delete:roles',
-  ASSIGN_ROLES = 'assign:roles',
-  
-  // System management
-  MANAGE_SYSTEM = 'manage:system',
-}
+/**
+ * System permissions as string literals
+ */
+export const PermissionValues = {
+  ADMIN_ACCESS: 'ADMIN_ACCESS',
+  VIEW_ALL_USER_ACTION_LOGS: 'VIEW_ALL_USER_ACTION_LOGS',
+  EDIT_USER_PROFILES: 'EDIT_USER_PROFILES',
+  DELETE_USER_ACCOUNTS: 'DELETE_USER_ACCOUNTS',
+  MANAGE_ROLES: 'MANAGE_ROLES',
+  VIEW_ANALYTICS: 'VIEW_ANALYTICS',
+  EXPORT_DATA: 'EXPORT_DATA',
+  MANAGE_SETTINGS: 'MANAGE_SETTINGS',
+  MANAGE_API_KEYS: 'MANAGE_API_KEYS',
+  INVITE_USERS: 'INVITE_USERS',
+  MANAGE_TEAMS: 'MANAGE_TEAMS',
+  MANAGE_BILLING: 'MANAGE_BILLING',
+  MANAGE_SUBSCRIPTIONS: 'MANAGE_SUBSCRIPTIONS',
+} as const;
 
-// Define available roles
-export enum Role {
-  SUPER_ADMIN = 'super_admin',
-  ADMIN = 'admin',
-  MODERATOR = 'moderator',
-  USER = 'user',
-}
+/**
+ * Permission type
+ */
+export type Permission = typeof PermissionValues[keyof typeof PermissionValues];
 
-// Role schema with permissions
+/**
+ * User roles in the system
+ */
+export const RoleValues = {
+  SUPER_ADMIN: 'SUPER_ADMIN',
+  ADMIN: 'ADMIN',
+  MANAGER: 'MANAGER',
+  USER: 'USER',
+  VIEWER: 'VIEWER',
+} as const;
+
+/**
+ * Role type
+ */
+export type Role = typeof RoleValues[keyof typeof RoleValues];
+
+/**
+ * Role-Permission mapping type
+ */
+export type RolePermissions = {
+  [key in Role]: Permission[];
+};
+
+// Define the role schema for validation
 export const roleSchema = z.object({
   id: z.string(),
-  name: z.nativeEnum(Role),
+  name: z.enum(Object.values(RoleValues) as [string, ...string[]]),
   description: z.string().optional(),
-  permissions: z.array(z.nativeEnum(Permission)),
-  isSystem: z.boolean().default(false),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  permissions: z.array(z.enum(Object.values(PermissionValues) as [string, ...string[]])),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
 });
 
 export type RoleSchema = z.infer<typeof roleSchema>;

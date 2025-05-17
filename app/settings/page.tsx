@@ -1,4 +1,5 @@
 'use client';
+import '@/lib/i18n';
 
 import { useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
