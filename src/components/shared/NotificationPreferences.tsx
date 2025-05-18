@@ -44,9 +44,9 @@ export function NotificationPreferences({
   if (isLoading && !preferences) {
     return (
         <div className="space-y-6 p-4">
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-6 w-1/2" />
-            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-6 w-3/4" data-testid="notification-preference-skeleton" />
+            <Skeleton className="h-6 w-1/2" data-testid="notification-preference-skeleton" />
+            <Skeleton className="h-6 w-3/4" data-testid="notification-preference-skeleton" />
         </div>
     );
   }

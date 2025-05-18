@@ -17,6 +17,8 @@ import { OAuthModuleConfig } from '@/types/oauth';
 // import { initializeCsrf } from '@/lib/api/axios'; // Removed unused import
 // import { LoginPayload, AuthResult } from '@/types/auth'; // Commented out
 import { PaletteProvider } from '@/components/PaletteProvider';
+import { initializeNotifications } from '../services/notification.service';
+import { notificationPreferencesService } from '../services/notification-preferences.service';
 
 // Detect platform automatically (can be overridden in config)
 const detectPlatform = (): Platform => {
@@ -235,8 +237,16 @@ export function UserManagementProvider({
   useEffect(() => {
     console.log("[PROVIDER_DEBUG] useEffect - initializeNotifications");
     if (config.notifications) {
-      // const notificationConfig = { /* ... */ };
-      // initializeNotifications(notificationConfig); // <-- ONLY comment out the call
+      const notificationConfig = {
+        ...config.notifications,
+        platform: detectedPlatform,
+        enabled: true
+      };
+      initializeNotifications(notificationConfig);
+      
+      // Initialize notification preferences
+      notificationPreferencesService.initializeFromStore()
+        .catch(error => console.error("Failed to initialize notification preferences:", error));
     }
   }, [config.notifications, detectedPlatform]);
 

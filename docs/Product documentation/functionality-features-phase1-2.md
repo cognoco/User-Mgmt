@@ -307,31 +307,7 @@ This phase allows logged-in personal users to view, manage, and customize their 
 *   **Accidental Navigation Away:** If the user navigates away with unsaved changes, the browser might prompt "Leave site? Changes you made may not be saved."
 *   **Clearing Required Fields:** If 'Name' is required, trying to save with an empty name field results in a validation error.
 
-### 2.3 Avatar Upload (`/api/profile/avatar`)
-
-**Goal:** User wants to set or change their profile picture.
-
-**User Journey & Expectations:**
-
-1.  **Access:** In the profile view (2.1) or edit mode (2.2), the user clicks on their current avatar image, a placeholder avatar, or a dedicated "Change Avatar" / "Upload Photo" button/link.
-2.  **File Selection:** The operating system's file browser opens, prompting the user to select an image file.
-    *   **Guidance:** Clear instructions should be visible *before* selection regarding allowed file types (e.g., JPG, PNG, GIF) and maximum file size (e.g., "Max 5MB").
-3.  **Cropping/Preview (Highly Recommended):** After selecting a valid file, a modal window or dedicated area appears showing the selected image.
-    *   **Tool:** An interactive cropping tool (e.g., a square or circular overlay) allows the user to select the portion of the image they want to use as their avatar. A preview of the final circular/square avatar is shown.
-    *   **Controls:** Options to zoom, rotate (optional), confirm ("Save", "Apply Crop"), or cancel/re-select file.
-4.  **Submission:** User adjusts the crop and clicks "Save" or "Apply".
-5.  **Feedback:**
-    *   **Success:** The new avatar image appears immediately in the profile section (can be optimistic UI update) and persists after page refresh. A success message like "Avatar updated successfully" might briefly appear.
-    *   **Invalid File Type/Size (Client-side):** If the user selects an invalid file, an immediate error message appears: "Invalid file type. Please upload a JPG, PNG, or GIF." or "File size exceeds the maximum limit of 5MB." The file selection is rejected.
-    *   **Upload/Processing Error (Server-side):** "Failed to upload avatar. Please try again." or "Could not process image."
-    *   **Network Error:** "Network error during upload. Please try again."
-
-**Edge Cases (User Perspective):**
-
-*   **Selecting Non-Image File:** Client-side validation prevents selection or shows an immediate error.
-*   **File Too Large:** Client-side validation prevents selection/upload or shows immediate error.
-*   **Skipping Crop:** If no cropping tool is implemented, the image might be automatically resized/cropped, which should be communicated. User control via cropping is much preferred.
-*   **Upload Cancellation:** User closes the cropper modal or clicks cancel; no changes are made.
+### 2.3 Profile Picture Management (`/api/profile/avatar`)**Goal:** User wants to set or change their profile picture, either by uploading a custom photo or selecting from predefined avatars.**User Journey & Expectations:**1.  **Access:** In the profile view (2.1) or edit mode (2.2), the user clicks on their current profile picture, a placeholder image, or a dedicated "Change Profile Picture" button/link.2.  **Selection Options:** A modal dialog opens with two tabs or sections:    *   **Predefined Avatars:** A grid of predefined avatars/images that the user can select from.    *   **Custom Upload:** Option to upload their own photo from their device.3.  **Option A - Select Predefined Avatar:**    *   User browses the available avatar options and clicks on their preferred choice.    *   A visual indication (highlight, border, etc.) shows which avatar is selected.    *   User clicks "Apply Selected Avatar" to confirm their choice.4.  **Option B - Upload Custom Photo:**    *   User clicks on "Upload" or similar button to open the device's file browser.    *   **Guidance:** Clear instructions regarding allowed file types (e.g., JPG, PNG, GIF) and maximum file size (e.g., "Max 5MB").    *   After selecting a valid file, the image appears with a cropping tool.    *   **Cropping:** An interactive tool allows the user to select the portion of the image to use, with a preview of the final circular/square result.    *   **Controls:** Options to zoom, adjust, confirm ("Save", "Apply Crop"), or cancel/re-select.    *   User clicks "Upload & Save" to confirm their custom photo.5.  **Feedback (Both Options):**    *   **Success:** The new profile picture appears immediately in the profile section and persists after page refresh. A brief success message might appear.    *   **Invalid File (For Custom Upload):** For invalid files, an error appears: "Invalid file type. Please upload a JPG, PNG, or GIF." or "File size exceeds the maximum limit of 5MB."    *   **Processing Error:** "Failed to update profile picture. Please try again." or "Could not process image."    *   **Network Error:** "Network error. Please try again."6.  **Remove Option:** If a profile picture is already set, a "Remove" button allows the user to clear it, returning to a default avatar/placeholder.**Edge Cases (User Perspective):***   **No Predefined Avatars Available:** If the predefined avatars fail to load, an error message appears with the option to try again or proceed to custom upload.*   **Selecting Non-Image File:** Client-side validation prevents selection or shows an immediate error.*   **File Too Large:** Client-side validation prevents selection/upload or shows immediate error.*   **Switching Between Tabs:** User can freely switch between predefined avatars and custom upload options before making a final choice.*   **Cancellation:** User closes the modal or clicks cancel; no changes are made to their current profile picture.
 
 ### 2.4 Profile Visibility (`/api/profile/privacy`)
 

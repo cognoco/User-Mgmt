@@ -245,4 +245,57 @@ This phase introduces alternative ways for users to log in (SSO) and enhances ac
 *   **Password Change/MFA Disabled:** Changing password or disabling/resetting MFA should ideally invalidate "Remember Me" sessions on all devices for security, forcing re-authentication everywhere.
 *   **Session Revocation (Admin Action):** If an admin revokes user sessions (Phase 7), "Remember Me" sessions should also be terminated.
 
+### 4.9 Organization Security Policy (`/api/admin/security-policy`)
+
+**Goal:** A business administrator wants to define and enforce security standards for all members of their organization/team.
+
+**User Journey & Expectations:**
+
+1.  **Access:** Admin navigates to the Admin Console -> "Security Settings" or "Policies" section.
+2.  **Display:** A page showing configurable security policies for the organization, organized into tabs:
+    *   **Session Policies Tab:**
+        *   **Session Timeout:** Input field to set maximum session duration for team members (in minutes).
+        *   **Max Sessions Per User:** Input field to limit concurrent sessions a user can have.
+    *   **Password Policies Tab:**
+        *   **Minimum Password Length:** Input field for minimum character count.
+        *   **Password Complexity Rules:** Checkboxes for requiring uppercase letters, lowercase letters, numbers, and special characters.
+        *   **Password Expiry Days:** Input to enforce password changes every X days (0 means never).
+        *   **Password History Count:** Input for the number of previous passwords that cannot be reused.
+    *   **MFA Requirements Tab:**
+        *   **Require Multi-Factor Authentication (MFA):** Toggle Switch (On/Off). If On, all team members will be required to set up MFA upon their next login.
+        *   **Allowed MFA Methods:** Checkboxes for authenticator app (TOTP), SMS, and email verification.
+    *   **IP Restrictions Tab:**
+        *   **Enable IP Restrictions:** Toggle to turn on IP-based access control.
+        *   **Allowed IP Addresses:** Textarea for whitelisting IP addresses/ranges.
+        *   **Denied IP Addresses:** Textarea for blacklisting IP addresses/ranges.
+    *   **Sensitive Actions Tab:**
+        *   **Require Reauthentication:** Toggle to require password re-entry for sensitive operations.
+        *   **Reauthentication Timeout:** How long a reauthentication is valid (in minutes).
+        *   **Sensitive Actions List:** List of actions requiring reauthentication, with ability to add/remove.
+3.  **Action:** Admin modifies the desired policy settings (e.g., toggles "Require MFA" to On, sets password rotation to 90 days).
+4.  **Submission:** Admin clicks the "Save" button in each tab to update those specific settings.
+5.  **Feedback:**
+    *   **Success:** "Settings updated" message appears. The page reflects the saved settings.
+    *   **Validation Error:** If invalid values are entered (e.g., non-numeric session timeout): Specific error messages appear.
+    *   **Server Error:** "Failed to update settings due to a server error. Please try again."
+
+**Impact on Team Members:**
+
+*   **MFA Requirement:** On next login, users without MFA will be forced into the MFA setup flow before they can proceed.
+*   **Password Rules:** New passwords (during reset or change) must meet the org policy. Existing passwords might be grandfathered until next change/rotation.
+*   **Password Rotation:** Users will be prompted to change their password upon login after the defined period.
+*   **Session Timeout:** Users will be logged out automatically after the specified duration of inactivity or total session time.
+*   **IP Restrictions:** Users connecting from non-allowed IPs will be denied access.
+
+**User Session Management:**
+
+*   The page also displays a table of all users with active sessions and allows admins to terminate sessions for specific users.
+*   A confirmation dialog appears before terminating sessions, warning that users will be forced to log in again.
+
+**Edge Cases (User Perspective):**
+
+*   **Conflicting Policies:** Platform defaults vs. stricter org policies – the stricter policy should always apply to members of that org.
+*   **Immediate Enforcement:** Policy changes like session timeouts might apply immediately, while MFA requirements take effect at next login.
+*   **Admin Self-Impact:** Admins are warned when settings may affect their own access (e.g., enabling IP restrictions).
+
 --- 

@@ -176,7 +176,7 @@ test.describe('Phase 2: Personal User Profile & Account Management (Complete Jou
   });
 
   // Test version for non-Safari browsers
-  test('2.3: User can upload an avatar (Chrome/Firefox)', async ({ browserName }) => {
+  test('2.3: User can manage profile picture (Chrome/Firefox)', async ({ browserName }) => {
     if (browserName === 'webkit') {
       // Don't run this test for Safari
       return;
@@ -185,76 +185,207 @@ test.describe('Phase 2: Personal User Profile & Account Management (Complete Jou
     // Navigate to profile page
     await navigateWithFallback(page, PROFILE_URL);
     
-    // Different upload mechanisms might be used, try multiple selectors
-    const avatarSelectors = [
-      'input[type="file"][accept*="image"]',
-      '[data-testid="avatar-upload"]',
-      'input[aria-label*="avatar" i]',
-      'label[for*="avatar"] input'
-    ];
-    
-    let uploadInput = null;
-    for (const selector of avatarSelectors) {
-      const inputs = await page.$$(selector);
-      if (inputs.length > 0) {
-        uploadInput = inputs[0];
-        break;
-      }
-    }
-    
-    if (!uploadInput) {
-      console.log('No avatar upload input found, trying to click avatar to trigger upload');
-      try {
-        // Try clicking the avatar image to trigger file selection
-        await page.click('img[alt*="avatar" i], [data-testid="avatar-image"]');
-        
-        // Look for file input that might have appeared
-        uploadInput = await page.$('input[type="file"]');
-      } catch (e) {
-        console.log('Could not find avatar upload mechanism');
-      }
-    }
-    
-    // If we found an upload input, set the file
-    if (uploadInput) {
-      await uploadInput.setInputFiles(TEST_IMAGE_PATH);
-      
-      // Handle potential cropping dialog
-      try {
-        const cropConfirmButton = page.getByRole('button', { name: /save|apply|crop|confirm/i });
-        if (await cropConfirmButton.isVisible({ timeout: 5000 })) {
-          await cropConfirmButton.click();
-        }
-      } catch (e) {
-        console.log('No crop dialog appeared or it was automatically handled');
-      }
-      
-      // Wait for upload/processing
-      await page.waitForTimeout(3000);
-      
-      // Check for avatar update success indicators
-      const successIndicators = [
-        page.getByText(/avatar updated|profile updated|uploaded|success/i),
-        page.locator('img[src*="blob:" i]'),
-        page.locator('img[src*="avatars" i]')
+    // First approach: Try to open the profile picture modal
+    let profilePictureModalOpened = false;
+    try {
+      // Attempt to click on the avatar or avatar change button
+      const avatarSelectors = [
+        'img[alt*="avatar" i], [data-testid="avatar-image"]',
+        'button[aria-label*="profile picture" i], button[aria-label*="avatar" i]',
+        '.avatar-container button, .avatar button'
       ];
       
-      let avatarUpdated = false;
-      for (const indicator of successIndicators) {
-        try {
-          if (await indicator.isVisible({ timeout: 3000 })) {
-            avatarUpdated = true;
+      for (const selector of avatarSelectors) {
+        const elements = await page.$$(selector);
+        if (elements.length > 0) {
+          await elements[0].click();
+          await page.waitForTimeout(1000);
+          
+          // Check if a dialog/modal appeared
+          const dialogVisible = await page.isVisible('dialog, [role="dialog"], .dialog, .modal');
+          if (dialogVisible) {
+            profilePictureModalOpened = true;
             break;
           }
+        }
+      }
+    } catch (e) {
+      console.log('Could not open profile picture modal via direct click:', e);
+    }
+    
+    // If we couldn't open the modal via avatar click, try to find and click a dedicated button
+    if (!profilePictureModalOpened) {
+      try {
+        const buttonSelectors = [
+          'button:has-text("Change Profile Picture")',
+          'button:has-text("Change Avatar")',
+          'button:has-text("Upload")',
+          '[data-testid="change-avatar-button"]'
+        ];
+        
+        for (const selector of buttonSelectors) {
+          const button = page.locator(selector).first();
+          if (await button.count() > 0) {
+            await button.click();
+            await page.waitForTimeout(1000);
+            const dialogVisible = await page.isVisible('dialog, [role="dialog"], .dialog, .modal');
+            if (dialogVisible) {
+              profilePictureModalOpened = true;
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Could not open profile picture modal via button:', e);
+      }
+    }
+    
+    // Test approach based on whether the modal opened
+    if (profilePictureModalOpened) {
+      // APPROACH 1: Modal opened - We can test both the predefined avatar and custom upload
+      console.log('Profile picture modal opened, testing selection and upload options');
+      
+      // First, try selecting a predefined avatar if that tab/option is available
+      let predefinedAvatarSelected = false;
+      try {
+        // Check for "Gallery" or "Select" tab and click it if found
+        const galleryTabSelectors = [
+          'button:has-text("Gallery")', 
+          'button:has-text("Select Avatar")',
+          '[data-tab="gallery"]',
+          '[role="tab"]:has-text("Select")'
+        ];
+        
+        for (const selector of galleryTabSelectors) {
+          const galleryTab = page.locator(selector).first();
+          if (await galleryTab.count() > 0) {
+            await galleryTab.click();
+            await page.waitForTimeout(500);
+            
+            // Look for avatar grid items and click the first one
+            const avatarItems = await page.$$('.avatar, [role="img"], img[src*="avatar"]');
+            if (avatarItems.length > 0) {
+              await avatarItems[0].click();
+              await page.waitForTimeout(500);
+              
+              // Click the apply/select button
+              const applyButton = page.getByRole('button', { name: /apply|select|choose/i });
+              if (await applyButton.isVisible({ timeout: 1000 })) {
+                await applyButton.click();
+                predefinedAvatarSelected = true;
+                console.log('Selected a predefined avatar');
+                await page.waitForTimeout(2000); // Wait for avatar to be applied
+              }
+            }
+            break;
+          }
+        }
+      } catch (e) {
+        console.log('Could not select predefined avatar:', e);
+      }
+      
+      // If predefined avatar selection failed, try custom upload
+      if (!predefinedAvatarSelected) {
+        try {
+          // Check for "Upload" tab and click it if found
+          const uploadTabSelectors = [
+            'button:has-text("Upload")', 
+            '[data-tab="upload"]',
+            '[role="tab"]:has-text("Upload")'
+          ];
+          
+          for (const selector of uploadTabSelectors) {
+            const uploadTab = page.locator(selector).first();
+            if (await uploadTab.count() > 0) {
+              await uploadTab.click();
+              await page.waitForTimeout(500);
+              break;
+            }
+          }
+          
+          // Find the file input in the upload tab
+          const fileInput = await page.$('input[type="file"]');
+          if (fileInput) {
+            await fileInput.setInputFiles(TEST_IMAGE_PATH);
+            
+            // Handle potential cropping dialog
+            try {
+              const cropConfirmButton = page.getByRole('button', { name: /save|apply|crop|upload|confirm/i });
+              if (await cropConfirmButton.isVisible({ timeout: 5000 })) {
+                await cropConfirmButton.click();
+              }
+            } catch (e) {
+              console.log('No crop dialog appeared or it was automatically handled');
+            }
+            
+            await page.waitForTimeout(3000); // Wait for upload to complete
+          }
         } catch (e) {
-          // Continue to next indicator
+          console.log('Could not upload custom avatar:', e);
+        }
+      }
+    } else {
+      // APPROACH 2: If modal didn't open, fall back to direct file upload if available
+      console.log('No modal found, falling back to direct file upload');
+      
+      // Look for file input
+      const fileInputSelectors = [
+        'input[type="file"][accept*="image"]',
+        '[data-testid="avatar-upload"]',
+        'input[aria-label*="avatar" i]',
+        'label[for*="avatar"] input'
+      ];
+      
+      let uploadInput = null;
+      for (const selector of fileInputSelectors) {
+        const inputs = await page.$$(selector);
+        if (inputs.length > 0) {
+          uploadInput = inputs[0];
+          break;
         }
       }
       
-      expect(avatarUpdated).toBe(true);
-    } else {
-      console.log('Skipping avatar upload verification as no upload input was found');
+      // If we found an upload input, set the file
+      if (uploadInput) {
+        await uploadInput.setInputFiles(TEST_IMAGE_PATH);
+        
+        // Handle potential cropping dialog
+        try {
+          const cropConfirmButton = page.getByRole('button', { name: /save|apply|crop|confirm/i });
+          if (await cropConfirmButton.isVisible({ timeout: 5000 })) {
+            await cropConfirmButton.click();
+          }
+        } catch (e) {
+          console.log('No crop dialog appeared or it was automatically handled');
+        }
+        
+        await page.waitForTimeout(3000); // Wait for upload/processing
+      } else {
+        console.log('No upload input found, skipping avatar upload test');
+      }
     }
+    
+    // Check for profile picture update success indicators
+    const successIndicators = [
+      page.getByText(/avatar updated|profile updated|uploaded|success/i),
+      page.locator('img[src*="blob:" i]'),
+      page.locator('img[src*="avatars" i]'),
+      page.locator('.avatar img[src]:not([src=""])')
+    ];
+    
+    let profilePictureUpdated = false;
+    for (const indicator of successIndicators) {
+      try {
+        if (await indicator.isVisible({ timeout: 3000 })) {
+          profilePictureUpdated = true;
+          break;
+        }
+      } catch (e) {
+        // Continue to next indicator
+      }
+    }
+    
+    expect(profilePictureUpdated).toBe(true);
   });
 
   test('2.4: User can toggle profile privacy settings', async () => {

@@ -194,20 +194,27 @@ export const useProfileStore = create<ExtendedProfileState & {
     try {
       set({ isLoading: true, error: null });
       
-      let base64Image: string;
-      let filename: string | undefined;
+      let payload: { avatar?: string; avatarId?: string; filename?: string };
       
-      if (fileOrBase64 instanceof File) {
-        base64Image = await fileToBase64(fileOrBase64);
-        filename = fileOrBase64.name;
+      if (typeof fileOrBase64 === 'string' && fileOrBase64.startsWith('avatar')) {
+        // This is a predefined avatar ID
+        payload = { avatarId: fileOrBase64 };
       } else {
-        base64Image = fileOrBase64;
+        // This is a custom uploaded image
+        let base64Image: string;
+        let filename: string | undefined;
+        
+        if (fileOrBase64 instanceof File) {
+          base64Image = await fileToBase64(fileOrBase64);
+          filename = fileOrBase64.name;
+        } else {
+          base64Image = fileOrBase64;
+        }
+        
+        payload = { avatar: base64Image, filename };
       }
       
-      const response = await api.post('/api/profile/avatar', {
-        avatar: base64Image,
-        filename
-      });
+      const response = await api.post('/api/profile/avatar', payload);
       
       const newAvatarUrl = response.data.avatarUrl;
       set((state) => ({

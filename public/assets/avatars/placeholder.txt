@@ -1,0 +1,18 @@
+This directory should contain predefined avatar images for users to select.
+
+Expected files:
+- avatar1.png
+- avatar2.png
+- avatar3.png
+- avatar4.png
+- avatar5.png
+- avatar6.png
+
+For a production application, you should replace these placeholder files with actual avatar images.
+For testing purposes, you can use any placeholder avatar services or create custom avatars.
+
+Example sources for avatar images:
+- UI Avatar: https://ui-avatars.com/
+- Dicebear: https://www.dicebear.com/
+- Gravatar: https://gravatar.com/
+- Custom designed avatars 

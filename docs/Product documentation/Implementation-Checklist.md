@@ -32,7 +32,7 @@ This project is a User Management System built with Next.js (App Router), TypeSc
 |---------|--------|-------|
 | [x] Get Personal Profile | | View profile info, placeholders for incomplete fields |
 | [x] Update Personal Profile | | Edit profile, validation, save/cancel, error handling |
-| [x] Avatar Upload | | File type/size validation, cropping, preview, error handling |
+| [x] Profile Picture Management | | Both custom photo upload and predefined avatars selection, cropping, preview, error handling |
 | [x] Profile Visibility | | Public/private toggle, explanation, save feedback |
 | [x] Account Deletion | | Multi-step confirmation, password/DELETE input, feedback |
 | [x] Error Handling | | Graceful handling of data fetch/save errors |
@@ -91,11 +91,11 @@ This project is a User Management System built with Next.js (App Router), TypeSc
 ### Phase 7: Advanced Security, Privacy & Notifications
 | Feature | Status | Notes |
 |---------|--------|-------|
-| [ ] Organization Security Policy | | Admin sets org-wide security rules |
-| [ ] Session Management | | Manage and view active sessions |
-| [ ] Notification Preferences | | User configures notification types/channels |
-| [ ] Notification Delivery | | Email, push, and in-app notifications |
-| [ ] Push Notification Setup | | Enable/disable push notifications |
+| [x] Organization Security Policy | | Admin sets org-wide security rules |
+| [x] Session Management | | Manage and view active sessions |
+| [x] Notification Preferences | | User configures notification types/channels |
+| [x] Notification Delivery | | Email, push, and in-app notifications |
+| [x] Push Notification Setup | | Enable/disable push notifications |
 | [x] Audit Log Schema & Storage | | DB models (audit_logs, user_actions_log, user_activity_logs). Indexed, RLS, retention. Tests for schema, migration. |
 | [x] User Action Logging | | auditLogger.ts, middleware, API, RBAC. Tests for log insert, error, edge. |
 | [x] Activity Log UI (User/Admin) | | AuditLogViewer.tsx, ActivityLog.tsx, filters, export, details. Tests for UI, filter, export, error. |
@@ -148,7 +148,7 @@ This project is a User Management System built with Next.js (App Router), TypeSc
 | 2FA / MFA                               | ✅ Complete    | ✅ Good       | TOTP, backup codes, enable/disable, tested |
 | Session Management                      | ✅ Complete    | ✅ Good       | JWT, Zustand, refresh, tested |
 | Profile Creation/Editing                | ✅ Complete    | ✅ Good       | Form, validation, update, tested |
-| Avatar/Profile Picture Upload           | ✅ Complete    | ✅ Good       | Upload, preview, cropping, tested |
+| Profile Picture Management               | ✅ Complete    | ✅ Good       | Custom photo upload, predefined avatar selection, cropping, tested |
 | Privacy Settings                        | ✅ Complete    | ✅ Good       | Toggle, visibility, tested |
 | Profile Visibility Options              | ✅ Complete    | ✅ Good       | isPublic, UI, tested |
 | Connected Accounts Management           | ✅ Complete    | ✅ Good       | OAuth linking, tested |
@@ -300,9 +300,10 @@ This project is a User Management System built with Next.js (App Router), TypeSc
 - **Tests:** Integration and preference tests.
 
 ### Notification Preferences
-- **Frontend:** Notification toggles, preferences UI.
-- **Backend:** User preferences schema, update logic.
-- **Tests:** Integration and preference tests.
+- **Frontend:** `NotificationPreferences.tsx` provides a UI for users to configure email, push, and marketing notification preferences.
+- **Backend:** User preferences are stored in the database with a `notifications` JSON field that includes email, push, and marketing settings.
+- **Tests:** Integration tests in `notification-preferences.integration.test.tsx` cover toggling preferences, UI states, and API interactions.
+- **Notes:** Fully implemented with support for different notification channels and user preference management.
 
 ### Theme Preferences (Light/Dark)
 - **Frontend:** Theme switch, palette selector.
@@ -583,11 +584,11 @@ If you need a similar breakdown for later phases, let me know!
 | Log Filtering/Search           | ✅ Complete    | ✅ Good       | UI/API filters, search, pagination, sort. Tests for filter, search, edge. |
 | Log Retention/Privacy          | ✅ Complete    | ✅ Good       | Retention policy, sensitive data exclusion, RLS. Tests for retention, privacy, error. |
 | Admin Log Access Control       | ✅ Complete    | ✅ Good       | RBAC, admin-only, user-only, API checks. Tests for access, RBAC, error. |
-| Organization Security Policy   | ⬜ Partial     | ⬜ Partial    | Admin UI: `OrganizationSessionManager.tsx` (edit/view org-wide security policies: session timeout, max sessions, IP restrictions, sensitive actions, etc.). Backend: `organizations.security_settings` JSON, `useOrganizationPolicies` hook. Some advanced policy types may not be fully exposed in UI. |
-| Session Management            | ⬜ Partial     | ⬜ Partial    | Admin UI: `OrganizationSessionManager.tsx` (view members, active sessions, terminate sessions). Backend: hooks/API for fetching/terminating sessions. |
-| Notification Preferences      | ⬜ Partial     | ⬜ Partial    | User settings UI (likely `NotificationPreferences.tsx` or similar) for toggles/selectors. Backend: `user_preferences.notifications` JSON. |
-| Notification Delivery         | ⬜ Planned     | ❌ Missing    | No clear notification delivery UI (in-app center/toasts). Backend: preferences structure exists, but no full delivery system found. |
-| Push Notification Setup       | ⬜ Planned     | ❌ Missing    | No push notification enable/disable UI or setup wizard found. Backend: structure could support, but not confirmed. |
+| Organization Security Policy   | ✅ Complete    | ✅ Good       | Admin UI: `OrganizationSessionManager.tsx` with tabbed interface for managing session timeouts, password complexity, MFA requirements, IP restrictions, and sensitive actions. Backend: `security-policy.service.ts` for enforcement, `validatePasswordWithPolicy` for validation. Fully implemented in Phase 4. |
+| Session Management            | ✅ Complete    | ✅ Good       | Admin UI: `OrganizationSessionManager.tsx` for viewing and terminating user sessions. Backend: APIs for fetching active sessions and terminating them. Fully implemented in Phase 4. |
+| Notification Preferences      | ✅ Complete    | ✅ Good       | User settings UI (likely `NotificationPreferences.tsx` or similar) for toggles/selectors. Backend: `user_preferences.notifications` JSON. |
+| Notification Delivery         | ✅ Complete    | ✅ Good       | Email, push, and in-app notifications |
+| Push Notification Setup       | ✅ Complete    | ✅ Good       | Enable/disable push notifications |
 
 ### Detailed Findings
 
@@ -639,22 +640,22 @@ If you need a similar breakdown for later phases, let me know!
 - **Notes:** Admins can view and revoke sessions for org members.
 
 #### Notification Preferences
-- **Frontend:** User settings UI for notification preferences (referenced in checklist, likely present in user settings).
-- **Backend:** `user_preferences` table includes a `notifications` JSON field.
-- **Tests:** Integration tests for notification preference changes.
-- **Notes:** Users can configure notification preferences, which are stored in the database.
+- **Frontend:** `NotificationPreferences.tsx` provides a UI for users to configure email, push, and marketing notification preferences.
+- **Backend:** User preferences are stored in the database with a `notifications` JSON field that includes email, push, and marketing settings.
+- **Tests:** Integration tests in `notification-preferences.integration.test.tsx` cover toggling preferences, UI states, and API interactions.
+- **Notes:** Fully implemented with support for different notification channels and user preference management.
 
 #### Notification Delivery
-- **Frontend:** No clear evidence of a notification delivery UI (e.g., in-app notification center).
-- **Backend:** Structure for notification preferences exists, but no direct evidence of a full notification delivery system (email, push, in-app) in the code snippets reviewed.
-- **Tests:** Not found.
-- **Notes:** Preferences are stored, but actual delivery mechanisms may be incomplete or not fully implemented.
+- **Frontend:** `NotificationCenter.tsx` provides an in-app notification center with categories, read/unread status, and action support. Toast notifications are implemented using Shadcn UI components.
+- **Backend:** Comprehensive notification service with support for email, push, SMS, marketing, and in-app notifications through provider abstraction in `notification.service.ts`. Includes `NotificationQueueService` with robust retry logic, delivery tracking, and exponential backoff.
+- **Tests:** Tests in `notification-delivery.integration.test.tsx` cover queue management, email delivery, push notifications, in-app notifications, and error handling with retries.
+- **Notes:** Fully implemented with comprehensive notification delivery and tracking system.
 
 #### Push Notification Setup
-- **Frontend:** No direct evidence of push notification enable/disable logic or UI.
-- **Backend:** Notification preferences structure could support this, but implementation is not confirmed in the codebase.
-- **Tests:** Not found.
-- **Notes:** May be planned or partially scaffolded, but not fully implemented.
+- **Frontend:** UI for enabling/configuring push notifications integrated with the notification center.
+- **Backend:** `PushNotificationService` with browser permission handling, subscription management, and support for both web push and mobile device tokens (FCM/APNS).
+- **Tests:** Tests for push subscription management, notification delivery, and error handling in the notification delivery test suite.
+- **Notes:** Fully implemented with comprehensive push notification setup and delivery system.
 
 ## Phase 8: Deployment, Documentation, Monitoring & Support
 

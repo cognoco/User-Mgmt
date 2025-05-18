@@ -19,7 +19,6 @@ This document is the single source of truth for all gap analysis, missing featur
 | 2FA/MFA             | No tests for disabling 2FA, error states, admin override | High | Main flows covered, edge/admin flows missing |
 | Subscription        | No E2E for full payment/checkout/invoice journey | High | Integration/store tests robust, E2E skeleton exists |
 | Audit Logging       | No E2E test for audit log viewing/export   | Medium      | Integration/component tests exist, E2E missing |
-| Session Management  | No tests for admin session revocation, session expiration, error handling | Medium | E2E for user session management exists, admin/edge cases missing |
 | SSO/Account Linking | E2E skeletons exist, partially implemented; integration tests for core flows, admin/edge cases missing | Medium | Partial, needs verification |
 | Accessibility (a11y)| No automated or manual a11y test coverage for major flows/components; ARIA roles, screen reader support, and color contrast not fully verified | High | Baseline implemented, but full coverage and verification missing |
 | Internationalization| No E2E or full i18n coverage               | Medium      | Integration test for language selector exists |

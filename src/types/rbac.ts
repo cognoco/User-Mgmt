@@ -17,12 +17,35 @@ export const PermissionValues = {
   MANAGE_TEAMS: 'MANAGE_TEAMS',
   MANAGE_BILLING: 'MANAGE_BILLING',
   MANAGE_SUBSCRIPTIONS: 'MANAGE_SUBSCRIPTIONS',
+  ACCESS_ADMIN_DASHBOARD: 'ACCESS_ADMIN_DASHBOARD',
+  VIEW_ADMIN_DASHBOARD: 'VIEW_ADMIN_DASHBOARD',
 } as const;
 
 /**
- * Permission type
+ * Zod schema for validating permissions
  */
-export type Permission = typeof PermissionValues[keyof typeof PermissionValues];
+export const PermissionSchema = z.enum([
+  PermissionValues.ADMIN_ACCESS,
+  PermissionValues.VIEW_ALL_USER_ACTION_LOGS,
+  PermissionValues.EDIT_USER_PROFILES,
+  PermissionValues.DELETE_USER_ACCOUNTS,
+  PermissionValues.MANAGE_ROLES,
+  PermissionValues.VIEW_ANALYTICS,
+  PermissionValues.EXPORT_DATA,
+  PermissionValues.MANAGE_SETTINGS,
+  PermissionValues.MANAGE_API_KEYS,
+  PermissionValues.INVITE_USERS,
+  PermissionValues.MANAGE_TEAMS,
+  PermissionValues.MANAGE_BILLING,
+  PermissionValues.MANAGE_SUBSCRIPTIONS,
+  PermissionValues.ACCESS_ADMIN_DASHBOARD,
+  PermissionValues.VIEW_ADMIN_DASHBOARD,
+]);
+
+/**
+ * Type representing all possible permissions
+ */
+export type Permission = z.infer<typeof PermissionSchema>;
 
 /**
  * User roles in the system
@@ -91,4 +114,14 @@ export interface WithRoleProps {
   requiredRole?: Role;
   requiredPermissions?: Permission[];
   fallback?: React.ReactNode;
+}
+
+/**
+ * Map of role features
+ */
+export interface RoleFeatures {
+  [roleName: string]: {
+    permissions: Permission[];
+    description: string;
+  };
 } 

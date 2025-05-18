@@ -8,7 +8,6 @@ import { OAuthProvider } from '@/types/oauth';
 import { createConnectedAccountsStoreMock } from '@/tests/mocks/connected-accounts.store.mock';
 import { vi, Mock } from 'vitest';
 import type { UserEvent } from '@testing-library/user-event';
-import { fireEvent } from '@testing-library/react';
 
 // Mock the profile store using vi.mock
 vi.mock('@/lib/stores/profile.store', () => ({
@@ -238,6 +237,22 @@ describe('ProfileEditor', () => {
     const mockUploadAvatar = vi.fn().mockResolvedValue({
       avatarUrl: 'https://example.com/new-avatar.jpg'
     });
+    
+    // Mock API call to get predefined avatars
+    vi.mock('@/lib/api/axios', () => ({
+      api: {
+        get: vi.fn().mockResolvedValue({
+          data: {
+            avatars: [
+              { id: 'avatar1', url: '/assets/avatars/avatar1.png', name: 'Default 1' },
+              { id: 'avatar2', url: '/assets/avatars/avatar2.png', name: 'Default 2' }
+            ]
+          }
+        }),
+        post: vi.fn()
+      }
+    }));
+    
     // Local mock ProfileEditor with robust react-cropper mock
     const MockCropper = React.forwardRef((props, ref) => {
       const cropperObj = {
@@ -251,10 +266,18 @@ describe('ProfileEditor', () => {
       return React.createElement('div', { 'data-testid': 'mock-cropper' });
     });
     MockCropper.displayName = 'MockCropper';
+    
     const MockProfileEditor = () => {
       const [avatarDialogOpen, setAvatarDialogOpen] = React.useState(false);
+      const [activeTab, setActiveTab] = React.useState('upload');
+      const [selectedAvatarId, setSelectedAvatarId] = React.useState<string | null>(null);
       const cropperRef = React.useRef<any>(null);
-      const handleFileChange = () => setAvatarDialogOpen(true);
+      
+      const handleFileChange = () => {
+        setAvatarDialogOpen(true);
+        setActiveTab('upload');
+      };
+      
       const handleCropComplete = () => {
         if (cropperRef.current) {
           const croppedCanvas = cropperRef.current.getCroppedCanvas();
@@ -262,34 +285,143 @@ describe('ProfileEditor', () => {
           setAvatarDialogOpen(false);
         }
       };
+      
+      const handleAvatarSelect = (id: string) => {
+        setSelectedAvatarId(id);
+      };
+      
+      const handleApplySelectedAvatar = () => {
+        if (selectedAvatarId) {
+          mockUploadAvatar(selectedAvatarId);
+          setAvatarDialogOpen(false);
+        }
+      };
+      
+      const handleOpenModal = () => {
+        setAvatarDialogOpen(true);
+        setActiveTab('gallery');
+      };
+      
       return (
         <div>
+          <div data-testid="avatar-container" onClick={handleOpenModal}>
+            <img src="https://example.com/avatar.jpg" alt="profile" />
+          </div>
           <input data-testid="avatar-upload" type="file" onChange={handleFileChange} />
+          
           {avatarDialogOpen && (
-            <div>
-              <MockCropper ref={cropperRef} />
-              <button onClick={handleCropComplete}>Save</button>
+            <div data-testid="avatar-dialog" role="dialog">
+              <div data-testid="tabs">
+                <button 
+                  data-testid="gallery-tab" 
+                  onClick={() => setActiveTab('gallery')}
+                  data-active={activeTab === 'gallery'}
+                >
+                  Select Avatar
+                </button>
+                <button 
+                  data-testid="upload-tab" 
+                  onClick={() => setActiveTab('upload')}
+                  data-active={activeTab === 'upload'}
+                >
+                  Upload Photo
+                </button>
+              </div>
+              
+              {activeTab === 'upload' && (
+                <div>
+                  <MockCropper ref={cropperRef} />
+                  <button onClick={handleCropComplete}>Save</button>
+                </div>
+              )}
+              
+              {activeTab === 'gallery' && (
+                <div>
+                  <div data-testid="avatar-grid">
+                    <div 
+                      data-testid="avatar-item-1" 
+                      onClick={() => handleAvatarSelect('avatar1')}
+                      data-selected={selectedAvatarId === 'avatar1'}
+                    >
+                      <img src="/assets/avatars/avatar1.png" alt="Default 1" />
+                    </div>
+                    <div 
+                      data-testid="avatar-item-2" 
+                      onClick={() => handleAvatarSelect('avatar2')}
+                      data-selected={selectedAvatarId === 'avatar2'}
+                    >
+                      <img src="/assets/avatars/avatar2.png" alt="Default 2" />
+                    </div>
+                  </div>
+                  <button 
+                    onClick={handleApplySelectedAvatar}
+                    disabled={!selectedAvatarId}
+                  >
+                    Apply Selected Avatar
+                  </button>
+                </div>
+              )}
+              
+              <button onClick={() => setAvatarDialogOpen(false)}>Cancel</button>
             </div>
           )}
         </div>
       );
     };
+    
     await act(async () => {
       render(<MockProfileEditor />);
     });
+    
+    // Test 1: Custom photo upload flow
     const file = new File(['test'], 'new-avatar.jpg', { type: 'image/jpeg' });
     const fileInput = screen.getByTestId('avatar-upload');
     await act(async () => {
       await user.upload(fileInput, file);
     });
+    
+    // Should open the dialog with upload tab active
+    expect(screen.getByTestId('avatar-dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('upload-tab').getAttribute('data-active')).toBe('true');
+    
     // Simulate clicking the Save button in the crop dialog
     const saveButton = await screen.findByRole('button', { name: /save/i });
     await act(async () => {
-      fireEvent.click(saveButton);
+      await user.click(saveButton);
     });
-    await waitFor(() => {
-      expect(mockUploadAvatar).toHaveBeenCalled();
+    
+    // Verify uploadAvatar was called with base64 data
+    expect(mockUploadAvatar).toHaveBeenCalledWith('data:image/png;base64,mock');
+    
+    // Reset
+    mockUploadAvatar.mockClear();
+    
+    // Test 2: Predefined avatar selection flow
+    const avatarContainer = screen.getByTestId('avatar-container');
+    await act(async () => {
+      await user.click(avatarContainer);
     });
+    
+    // Should open the dialog with gallery tab active
+    expect(screen.getByTestId('avatar-dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('gallery-tab').getAttribute('data-active')).toBe('true');
+    
+    // Select an avatar
+    const avatarItem = screen.getByTestId('avatar-item-1');
+    await act(async () => {
+      await user.click(avatarItem);
+    });
+    
+    // Apply the selected avatar
+    const applyButton = screen.getByRole('button', { name: /apply selected avatar/i });
+    await act(async () => {
+      await user.click(applyButton);
+    });
+    
+    // Verify uploadAvatar was called with the avatar ID
+    expect(mockUploadAvatar).toHaveBeenCalledWith('avatar1');
+    
+    // Reset
     vi.resetModules();
   });
 

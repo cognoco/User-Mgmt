@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/index';
 import { prisma } from '@/lib/database/prisma';
 import { checkRolePermission } from '@/lib/rbac/roleService';
+import { Role } from '@/types/rbac';
 
 export async function GET() {
   try {
@@ -13,7 +14,10 @@ export async function GET() {
     }
 
     // Check if user has admin permission
-    const hasAdminAccess = await checkRolePermission(session.user.role, 'VIEW_ADMIN_DASHBOARD');
+    const hasAdminAccess = await checkRolePermission(
+      session.user.role as Role, 
+      'ACCESS_ADMIN_DASHBOARD'
+    );
     if (!hasAdminAccess) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -74,8 +78,8 @@ export async function GET() {
     });
 
     // Calculate team member status counts
-    const activeMembers = teamStats.find(stat => stat.status === 'ACTIVE')?._count._all ?? 0;
-    const pendingMembers = teamStats.find(stat => stat.status === 'PENDING')?._count._all ?? 0;
+    const activeMembers = teamStats.find((stat: any) => stat.status === 'ACTIVE')?._count._all ?? 0;
+    const pendingMembers = teamStats.find((stat: any) => stat.status === 'PENDING')?._count._all ?? 0;
     const totalMembers = activeMembers + pendingMembers;
 
     // Calculate seat usage
