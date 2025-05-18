@@ -4,7 +4,7 @@ import { getUser } from '@/lib/auth/getUser';
 import { hasPermission } from '@/lib/auth/hasPermission';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Users, List, Home, BarChart3, Settings, ShieldCheck } from 'lucide-react';
+import { Users, List, Home, Settings, ShieldCheck } from 'lucide-react';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -43,6 +43,12 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
             <Link href="/admin/users">
               <Users className="mr-2 h-5 w-5" />
               Users
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" className="w-full justify-start">
+            <Link href="/admin/roles">
+              <ShieldCheck className="mr-2 h-5 w-5" />
+              Roles
             </Link>
           </Button>
           <Button asChild variant="ghost" className="w-full justify-start">

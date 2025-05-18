@@ -40,11 +40,27 @@ export const profileSchema = baseEntitySchema.extend({
   department: z.string().nullable().optional(),
   vatId: z.string().nullable().optional(),
   address: z.object({
-    street: z.string().optional(),
-    city: z.string().optional(),
-    state: z.string().optional(),
-    postalCode: z.string().optional(),
-    country: z.string().optional(),
+    street_line1: z.string().min(1, { message: 'Street address is required' }),
+    street_line2: z.string().optional().nullable(),
+    city: z.string().min(1, { message: 'City is required' }),
+    state: z.string().optional().nullable(),
+    postal_code: z.string().min(1, { message: 'Postal code is required' }),
+    country: z.string().min(2, { message: 'Country code is required' }),
+    validated: z.boolean().optional().nullable(),
+  }).superRefine((data, ctx) => {
+    const countrySpecifics: Record<string, { stateRequired: boolean, stateLabel: string }> = {
+      US: { stateRequired: true, stateLabel: 'State' },
+      CA: { stateRequired: true, stateLabel: 'Province' },
+      DEFAULT: { stateRequired: false, stateLabel: 'State / Province / Region' }
+    };
+    const terms = countrySpecifics[data.country] || countrySpecifics.DEFAULT;
+    if (terms.stateRequired && (!data.state || data.state.trim() === '')) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `${terms.stateLabel} is required for country ${data.country}.`,
+        path: ['state'],
+      });
+    }
   }).nullable().optional(),
 });
 

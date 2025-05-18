@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Check, X } from 'lucide-react';
+import { Check, X, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/stores/auth.store';
 import { OAuthButtons } from './OAuthButtons';
@@ -46,8 +46,13 @@ const corporateUserSchema = baseRegistrationSchema.extend({
   lastName: z.string().optional(),
   companyName: z.string().min(1, 'Company name is required'),
   position: z.string().optional(),
+  department: z.string().optional(),
   industry: z.string().optional(),
-  companySize: z.enum(['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+']).optional(),
+  companySize: z.enum(['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+', 'Other/Not Specified']).optional(),
+  companyWebsite: z.string().optional().refine(
+    (val) => !val || /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/\S*)?$/.test(val),
+    { message: 'Please enter a valid website URL' }
+  ),
 });
 
 // Combined schema with refinement for password matching
@@ -71,6 +76,8 @@ export function RegistrationForm() {
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [conflictingEmail, setConflictingEmail] = useState<string | null>(null);
   const authStore = useAuthStore();
 
   const form = useForm<
@@ -89,7 +96,10 @@ export function RegistrationForm() {
       confirmPassword: '',
       companyName: '',
       position: '',
+      department: '',
       industry: '',
+      companySize: undefined,
+      companyWebsite: '',
     },
     mode: 'onChange',
   });
@@ -106,6 +116,8 @@ export function RegistrationForm() {
     if (form.formState.isDirty) {
       setApiError(null);
       setApiSuccess(null);
+      setShowUpgradePrompt(false);
+      setConflictingEmail(null);
     }
   }, [form.formState.isDirty]);
   
@@ -188,6 +200,8 @@ export function RegistrationForm() {
     setApiError(null);
     setApiSuccess(null);
     setShouldRedirect(false);
+    setShowUpgradePrompt(false);
+    setConflictingEmail(null);
 
     try {
       const result = await authStore.register({
@@ -204,7 +218,17 @@ export function RegistrationForm() {
         // Set the flag to trigger redirect after showing success message
         setShouldRedirect(true);
       } else {
-        setApiError(result.error || 'Registration failed. Please try again.');
+        if (
+          data.userType === UserType.CORPORATE &&
+          result.error &&
+          (result.error.includes('EMAIL_EXISTS_PERSONAL_ACCOUNT') || result.error.toLowerCase().includes('email already registered for a personal account'))
+        ) {
+          setConflictingEmail(data.email);
+          setShowUpgradePrompt(true);
+          setApiError(null);
+        } else {
+          setApiError(result.error || 'Registration failed. Please try again.');
+        }
         setApiSuccess(null);
       }
     } catch (error: any) {
@@ -226,8 +250,10 @@ export function RegistrationForm() {
     if (type === UserType.PRIVATE) {
       form.resetField('companyName');
       form.resetField('position');
+      form.resetField('department');
       form.resetField('industry');
       form.resetField('companySize');
+      form.resetField('companyWebsite');
     } else {
       form.clearErrors(['firstName', 'lastName']);
     }
@@ -260,7 +286,41 @@ export function RegistrationForm() {
           <AlertDescription>{apiError}</AlertDescription>
         </Alert>
       )}
-      {!shouldRedirect && (
+      {/* Upgrade to Business Account Prompt */}
+      {showUpgradePrompt && conflictingEmail && (
+        <Alert variant="info" className="bg-blue-50 border-blue-300 text-blue-800" role="status">
+          <AlertTitle>Account Exists</AlertTitle>
+          <AlertDescription>
+            The email address <strong className="font-semibold">{conflictingEmail}</strong> is already registered for a personal account.
+            <div className="mt-2">
+              Would you like to upgrade to a Business Account or use a different email address?
+            </div>
+            <div className="mt-3 flex flex-col sm:flex-row gap-2">
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={() => router.push(`/account/upgrade-to-business?email=${encodeURIComponent(conflictingEmail)}`)}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Upgrade to Business Account
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  setShowUpgradePrompt(false);
+                  setConflictingEmail(null);
+                  form.setFocus('email');
+                }}
+              >
+                Use Different Email
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+      {!shouldRedirect && !showUpgradePrompt && (
         <form onSubmit={form.handleSubmit(onSubmit, onValidationErrors)} className="space-y-4" data-testid="registration-form">
           {showUserTypeSelection && (
             <div className="space-y-2">
@@ -384,31 +444,72 @@ export function RegistrationForm() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="industry">Industry</Label>
+                  <Label htmlFor="department">Department</Label>
                   <Input 
-                    id="industry" 
-                    {...form.register('industry')} 
-                    data-testid="industry-input"
+                    id="department" 
+                    {...form.register('department')} 
+                    data-testid="department-input"
                   />
                 </div>
               </div>
               
               <div className="space-y-1.5">
-                <Label htmlFor="companySize">Company Size</Label>
-                <select
-                  id="companySize"
-                  className="w-full px-3 py-2 border rounded-md bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  {...form.register('companySize')}
-                  data-testid="company-size-select"
-                >
-                  <option value="">Select Company Size...</option>
-                  <option value="1-10">1-10 employees</option>
-                  <option value="11-50">11-50 employees</option>
-                  <option value="51-200">51-200 employees</option>
-                  <option value="201-500">201-500 employees</option>
-                  <option value="501-1000">501-1000 employees</option>
-                  <option value="1000+">1000+ employees</option>
-                </select>
+                <Label htmlFor="companyWebsite">Company Website</Label>
+                <Input 
+                  id="companyWebsite" 
+                  placeholder="https://example.com" 
+                  {...form.register('companyWebsite')} 
+                  aria-invalid={!!(form.formState.errors as any).companyWebsite}
+                  data-testid="company-website-input"
+                />
+                <span className="text-xs text-muted-foreground">Include http(s):// or www. (optional)</span>
+                {userType === UserType.CORPORATE && (form.formState.errors as any).companyWebsite && (
+                  <p className="text-destructive text-sm mt-1" data-testid="company-website-error">{(form.formState.errors as any).companyWebsite?.message}</p>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="companySize">Company Size</Label>
+                  <select
+                    id="companySize"
+                    {...form.register('companySize')}
+                    data-testid="company-size-select"
+                    className="input"
+                  >
+                    <option value="">Select size</option>
+                    <option value="1-10">1-10 employees</option>
+                    <option value="11-50">11-50 employees</option>
+                    <option value="51-200">51-200 employees</option>
+                    <option value="201-500">201-500 employees</option>
+                    <option value="501-1000">501-1000 employees</option>
+                    <option value="1000+">1000+ employees</option>
+                    <option value="Other/Not Specified">Other/Not Specified</option>
+                  </select>
+                  {userType === UserType.CORPORATE && (form.formState.errors as any).companySize && (
+                    <p className="text-destructive text-sm mt-1" data-testid="company-size-error">{(form.formState.errors as any).companySize?.message}</p>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="industry">Industry</Label>
+                  <select
+                    id="industry"
+                    {...form.register('industry')}
+                    data-testid="industry-select"
+                    className="input"
+                  >
+                    <option value="">Select industry</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Education">Education</option>
+                    <option value="Retail">Retail</option>
+                    <option value="Other/Not Specified">Other/Not Specified</option>
+                  </select>
+                  {userType === UserType.CORPORATE && (form.formState.errors as any).industry && (
+                    <p className="text-destructive text-sm mt-1" data-testid="industry-error">{(form.formState.errors as any).industry?.message}</p>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -431,10 +532,7 @@ export function RegistrationForm() {
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                 data-testid="terms-label"
               >
-                I agree to the 
-                <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-4 hover:text-primary/90"> Terms and Conditions</a>
-                 and 
-                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline underline-offset-4 hover:text-primary/90"> Privacy Policy</a>.
+                I accept the <a href="/terms" target="_blank" rel="noopener noreferrer" data-testid="terms-link">Terms and Conditions</a> and <a href="/privacy" target="_blank" rel="noopener noreferrer" data-testid="privacy-link">Privacy Policy</a>
               </label>
               {form.formState.errors.acceptTerms && (
                 <p className="text-destructive text-sm mt-1" data-testid="terms-error">{form.formState.errors.acceptTerms.message}</p>
@@ -457,6 +555,13 @@ export function RegistrationForm() {
             Already have an account? <a href="/login" className="font-medium text-primary underline underline-offset-4 hover:text-primary/90">Sign in</a>
           </p>
         </form>
+      )}
+      {(shouldRedirect || showUpgradePrompt) && apiSuccess && !apiError && (
+        <Alert variant="default" className="bg-green-100 border-green-300 text-green-800 mt-4" role="alert">
+           <Check className="h-4 w-4" />
+          <AlertTitle>Success!</AlertTitle>
+          <AlertDescription>{apiSuccess}</AlertDescription>
+        </Alert>
       )}
     </div>
   );

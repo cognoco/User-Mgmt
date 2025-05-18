@@ -1,3 +1,5 @@
+"use client";
+
 import { AuditLogViewer } from '@/components/audit/AuditLogViewer';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';

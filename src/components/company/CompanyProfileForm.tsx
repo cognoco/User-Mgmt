@@ -58,7 +58,18 @@ const companyProfileSchema = z.object({
     state: z.string().optional(),
     postal_code: z.string().min(1, { message: 'Postal code is required' }),
     country: z.string().min(1, { message: 'Country is required' }),
-    validated: z.boolean().optional()
+    validated: z.boolean().optional(),
+  }).superRefine((data, ctx) => {
+    if (data.country) {
+      const countryTerms = ADDRESS_TERMS_BY_COUNTRY[data.country] || ADDRESS_TERMS_BY_COUNTRY.DEFAULT;
+      if (countryTerms.stateRequired && (!data.state || data.state.trim() === '')) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `${countryTerms.stateLabel} is required.`,
+          path: ['state'],
+        });
+      }
+    }
   }).optional(),
 });
 
@@ -110,6 +121,19 @@ const COUNTRIES = [
   // Add more countries as needed or replace with a library later
 ];
 
+// New: Configuration for dynamic address field labels and requirements
+const ADDRESS_TERMS_BY_COUNTRY: Record<string, { stateLabel: string; postalCodeLabel: string; stateRequired?: boolean }> = {
+  US: { stateLabel: 'State', postalCodeLabel: 'ZIP Code', stateRequired: true },
+  CA: { stateLabel: 'Province', postalCodeLabel: 'Postal Code', stateRequired: true },
+  GB: { stateLabel: 'County', postalCodeLabel: 'Postcode', stateRequired: false },
+  AU: { stateLabel: 'State / Territory', postalCodeLabel: 'Postcode', stateRequired: true },
+  DE: { stateLabel: 'State (Bundesland)', postalCodeLabel: 'Postal Code (PLZ)', stateRequired: true },
+  FR: { stateLabel: 'Region', postalCodeLabel: 'Postal Code (Code Postal)', stateRequired: false }, // Departments are more common for addresses, but Region is an admin area.
+  JP: { stateLabel: 'Prefecture', postalCodeLabel: 'Postal Code (郵便番号)', stateRequired: true },
+  // Add more as needed
+  DEFAULT: { stateLabel: 'State / Province / Region', postalCodeLabel: 'Postal Code', stateRequired: false },
+};
+
 interface ValidationStatus {
   status: 'idle' | 'loading' | 'valid' | 'invalid' | 'error';
   message?: string;
@@ -143,7 +167,6 @@ export function CompanyProfileForm({
   // Add state for address validation
   const [addressValidationStatus, setAddressValidationStatus] = useState<AddressValidationStatus>('idle');
   const [addressValidationError, setAddressValidationError] = useState<string | null>(null);
-  const [addressSuggestions, setAddressSuggestions] = useState<any | null>(null); // Store suggestions if needed later
   const [addressValidatedSuccessfully, setAddressValidatedSuccessfully] = useState(false);
 
   const form = useForm<CompanyProfileFormData>({
@@ -176,7 +199,6 @@ export function CompanyProfileForm({
   useEffect(() => {
     setAddressValidationStatus('idle');
     setAddressValidationError(null);
-    setAddressSuggestions(null);
     setAddressValidatedSuccessfully(false);
   }, [addressWatch]);
 
@@ -285,7 +307,6 @@ export function CompanyProfileForm({
   const handleAddressValidation = async () => {
     setAddressValidationStatus('loading');
     setAddressValidationError(null);
-    setAddressSuggestions(null);
     setAddressValidatedSuccessfully(false);
 
     const addressData = form.getValues('address');
@@ -293,6 +314,7 @@ export function CompanyProfileForm({
     if (!addressData?.country || !addressData?.street_line1 || !addressData?.city || !addressData?.postal_code) {
         setAddressValidationError('Please fill in required address fields (Street, City, Postal Code, Country) before validating.');
         setAddressValidationStatus('error');
+        toast({ title: 'Missing Information', description: 'Please fill in all required address fields before validating.', variant: 'default' });
         return;
     }
 
@@ -312,16 +334,34 @@ export function CompanyProfileForm({
         if (isValid) {
             setAddressValidationStatus('valid');
             setAddressValidatedSuccessfully(true);
-            toast({ title: 'Address Validated', description: message });
-            // Optionally update form fields if suggestions refine them?
-            // For now, just mark as valid.
-        } else {
-            setAddressValidationStatus('invalid');
-            setAddressValidationError(message || 'Address seems invalid or requires correction.');
-            // TODO: Display suggestions UI if needed
-            setAddressSuggestions(suggestions); // Store suggestions for potential future UI
-            // Use default toast for warning
-            toast({ title: 'Address Invalid', description: message }); 
+            form.setValue('address.validated', true, { shouldValidate: true });
+            if (response.data.validatedAddress) {
+                const currentAddr = form.getValues('address');
+                const newAddr = response.data.validatedAddress;
+                if (currentAddr) {
+                  form.setValue('address', { 
+                      ...currentAddr, 
+                      street_line1: newAddr.street_line1 || currentAddr.street_line1,
+                      street_line2: newAddr.street_line2 || currentAddr.street_line2,
+                      city: newAddr.city || currentAddr.city,
+                      state: newAddr.state || currentAddr.state,
+                      postal_code: newAddr.postal_code || currentAddr.postal_code,
+                      country: newAddr.country || currentAddr.country,
+                      validated: true 
+                  }, { shouldValidate: true });
+                  toast({ title: 'Address Validated', description: response.data.message || 'Address details confirmed and updated.'});
+                } else {
+                  form.setValue('address', { ...newAddr, validated: true }, { shouldValidate: true });
+                  toast({ title: 'Address Validated', description: response.data.message || 'Address details populated.'});
+                }
+            } else {
+                toast({ title: 'Address Validated', description: response.data.message || 'Address details confirmed.'});
+            }
+        } else if (response.data.status === 'needs_correction' || response.data.status === 'invalid') {
+            setAddressValidationStatus(response.data.status);
+            setAddressValidationError(response.data.message || 'Address requires correction or is invalid.');
+            form.setValue('address.validated', false, { shouldValidate: true });
+            toast({ title: 'Address Validation Issue', description: response.data.message || 'Address requires correction.', variant: 'default' });
         }
     } catch (error: any) {
         const errMsg = error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to validate address.';
@@ -344,6 +384,14 @@ export function CompanyProfileForm({
           };
       }
       
+      // Before submitting, ensure state is emptied if not required for the country and not provided
+      if (submitData.address && submitData.address.country) {
+        const countryTerms = ADDRESS_TERMS_BY_COUNTRY[submitData.address.country] || ADDRESS_TERMS_BY_COUNTRY.DEFAULT;
+        if (!countryTerms.stateRequired && !submitData.address.state) {
+          submitData.address.state = ''; // Set to empty string if not required and not provided, to avoid issues with optional empty strings vs undefined.
+        }
+      }
+
       await onSubmit(submitData); // Pass potentially modified data
       toast({
         title: 'Success',
@@ -359,6 +407,10 @@ export function CompanyProfileForm({
       setIsSaving(false);
     }
   };
+
+  // Watch selected country to update labels
+  const selectedCountry = form.watch('address.country');
+  const currentAddressTerms = ADDRESS_TERMS_BY_COUNTRY[selectedCountry || ''] || ADDRESS_TERMS_BY_COUNTRY.DEFAULT;
 
   return (
     <Form {...form}>
@@ -666,7 +718,10 @@ export function CompanyProfileForm({
               name="address.state"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>State / Province (Optional)</FormLabel>
+                  <FormLabel>
+                    {currentAddressTerms.stateLabel}
+                    {currentAddressTerms.stateRequired && <span className="text-destructive"> *</span>}
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., CA" {...field} />
                   </FormControl>
@@ -680,7 +735,10 @@ export function CompanyProfileForm({
               name="address.postal_code"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Postal Code</FormLabel>
+                  <FormLabel>
+                    {currentAddressTerms.postalCodeLabel}
+                    <span className="text-destructive"> *</span>
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., 94107" {...field} />
                   </FormControl>
@@ -731,7 +789,15 @@ export function CompanyProfileForm({
               variant="outline" 
               size="sm" 
               onClick={handleAddressValidation}
-              disabled={addressValidationStatus === 'loading'}
+              disabled={
+                addressValidationStatus === 'loading' || 
+                !form.getValues('address.street_line1') || 
+                !form.getValues('address.city') || 
+                !form.getValues('address.postal_code') || 
+                !form.getValues('address.country')
+              }
+              data-testid="validate-address-button"
+              className="mt-2"
             >
               {addressValidationStatus === 'loading' ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -740,16 +806,16 @@ export function CompanyProfileForm({
               )}
               Validate Address
             </Button>
-            {addressValidationStatus === 'valid' && (
-                <span className="text-sm text-green-600 flex items-center"><CheckCircle className="h-4 w-4 mr-1"/> Valid</span>
-            )}
-            {(addressValidationStatus === 'invalid' || (addressValidationStatus === 'error' && addressValidationError)) && (
-                <span className="text-sm text-destructive flex items-center"><ShieldAlert className="h-4 w-4 mr-1"/> Invalid/Error</span>
+            {addressValidationStatus !== 'idle' && addressValidationStatus !== 'loading' && (
+              <div className={`mt-2 text-sm flex items-center ${addressValidatedSuccessfully ? 'text-green-600' : 'text-destructive'}`}>
+                {addressValidatedSuccessfully ? 
+                  <CheckCircle className="mr-2 h-4 w-4" /> : 
+                  <XCircle className="mr-2 h-4 w-4" />
+                }
+                {addressValidationError || (addressValidatedSuccessfully ? (form.getValues('address.validated') ? 'Address successfully validated.' : 'Address appears valid.') : 'Address validation issue.')}
+              </div>
             )}
           </div>
-          {addressValidationError && (
-              <p className="text-sm text-destructive mt-1">{addressValidationError}</p>
-          )}
           {/* TODO: Display suggestions if addressSuggestions is not null */}
 
         </div>

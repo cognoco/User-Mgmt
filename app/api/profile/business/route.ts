@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { profileSchema } from '@/types/database'; // Corrected import path
@@ -89,8 +88,6 @@ const BusinessProfileUpdateSchema = profileSchema.pick({
     phoneNumber: true,
 }).partial(); // Allow partial updates
 
-type BusinessProfileUpdate = z.infer<typeof BusinessProfileUpdateSchema>;
-
 export async function PATCH(request: NextRequest) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
@@ -116,7 +113,7 @@ export async function PATCH(request: NextRequest) {
     // 3. Fetch existing profile to check userType and permissions (basic check for now)
     const { data: existingProfile, error: fetchError } = await supabaseService
         .from('profiles')
-        .select('userId, userType') // Select only necessary fields
+        .select('userId, userType, isAdmin, vatId, companyName, verificationStatus') // Add isAdmin, vatId, companyName, verificationStatus
         .eq('userId', user.id)
         .single();
 
@@ -125,10 +122,10 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json({ error: 'Profile not found or error checking permissions.' }, { status: fetchError?.code === 'PGRST116' ? 404 : 500 });
     }
 
-    // Basic Permission Check: Ensure user is a corporate type
+    // Basic Permission Check: Ensure user is a corporate type and isAdmin
     // TODO: Replace with proper RBAC check in Phase 6 (e.g., check if user is admin of the company)
-    if (existingProfile.userType !== 'corporate') {
-        return NextResponse.json({ error: 'Permission denied. Only corporate users can update business profiles.' }, { status: 403 });
+    if (existingProfile.userType !== 'corporate' || !existingProfile.isAdmin) {
+        return NextResponse.json({ error: 'Permission denied. Only company admins can update business profiles.' }, { status: 403 });
     }
 
     // 4. Parse and Validate Body
@@ -150,6 +147,13 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json({ error: 'No valid fields provided for update.' }, { status: 400 });
     }
     
+    // If vatId or companyName changes, set verificationStatus to 'pending'
+    let verificationStatusUpdate = {};
+    if ((profileUpdates.vatId && profileUpdates.vatId !== existingProfile.vatId) ||
+        (profileUpdates.companyName && profileUpdates.companyName !== existingProfile.companyName)) {
+      verificationStatusUpdate = { verificationStatus: 'pending' };
+    }
+
     console.log(`Updating business profile for user ${user.id}:`, profileUpdates);
 
     // 5. Update Profile Table
@@ -157,6 +161,7 @@ export async function PATCH(request: NextRequest) {
       .from('profiles')
       .update({ 
           ...profileUpdates,
+          ...verificationStatusUpdate,
           updatedAt: new Date().toISOString() // Update timestamp
       })
       .eq('userId', user.id) // Match based on userId
@@ -182,6 +187,7 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json({ message: 'Business profile updated successfully, but response validation failed.' });
     } 
     
+    // TODO: Add optimistic locking or last-write-wins for concurrent edits in future
     return NextResponse.json(validatedUpdatedProfile.data); // Return the full updated profile
 
   } catch (error) {

@@ -7,12 +7,37 @@ import { withSecurity } from '@/middleware/with-security';
 import { logUserAction } from '@/lib/audit/auditLogger';
 
 // Zod schema for registration data (matches original)
-const RegistrationSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address' }),
-  password: z.string().min(8, { message: 'Password must be at least 8 characters long' }),
-  firstName: z.string().min(1, { message: 'First name is required' }),
-  lastName: z.string().min(1, { message: 'Last name is required' }),
-});
+const RegistrationSchema = z.discriminatedUnion('userType', [
+  z.object({
+    userType: z.literal('private'),
+    email: z.string().email({ message: 'Invalid email address' }),
+    password: z.string().min(8, { message: 'Password must be at least 8 characters long' }),
+    firstName: z.string().min(1, { message: 'First name is required' }),
+    lastName: z.string().min(1, { message: 'Last name is required' }),
+    acceptTerms: z.boolean().refine(val => val === true, {
+      message: 'You must accept the terms and conditions and privacy policy',
+    }),
+  }),
+  z.object({
+    userType: z.literal('corporate'),
+    email: z.string().email({ message: 'Invalid email address' }),
+    password: z.string().min(8, { message: 'Password must be at least 8 characters long' }),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    companyName: z.string().min(1, { message: 'Company name is required' }),
+    companyWebsite: z.string().optional().refine(
+      (val) => !val || /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/\S*)?$/.test(val),
+      { message: 'Please enter a valid website URL' }
+    ),
+    department: z.string().optional(),
+    industry: z.string().optional(),
+    companySize: z.enum(['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+', 'Other/Not Specified']).optional(),
+    position: z.string().optional(),
+    acceptTerms: z.boolean().refine(val => val === true, {
+      message: 'You must accept the terms and conditions and privacy policy',
+    }),
+  })
+]);
 
 async function handler(request: NextRequest): Promise<NextResponse> {
   // Get IP and User Agent early
@@ -47,26 +72,38 @@ async function handler(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Validation failed', details: errors }, { status: 400 });
     }
 
-    const { email, password, firstName, lastName } = parseResult.data;
-    emailForLogging = email; // Store email for logging
+    const regData = parseResult.data;
+    emailForLogging = regData.email;
     const supabaseService = getServiceSupabase();
 
     // 3. Call Supabase Auth signUp (using Service Client)
-    // Note: Using service client for signUp might bypass email verification flow depending on Supabase settings.
-    // If email verification MUST happen, signUp might need to be called client-side, 
-    // OR use admin.createUser which doesn't send verification, requiring a separate send.
-    // Let's assume service client signUp works as intended for now.
+    // Prepare user metadata for Supabase
+    let userMetadata: Record<string, any> = {};
+    if (regData.userType === 'private') {
+      userMetadata = {
+        user_type: 'private',
+        first_name: regData.firstName,
+        last_name: regData.lastName,
+      };
+    } else if (regData.userType === 'corporate') {
+      userMetadata = {
+        user_type: 'corporate',
+        first_name: regData.firstName || '',
+        last_name: regData.lastName || '',
+        company_name: regData.companyName,
+        company_website: regData.companyWebsite || '',
+        department: regData.department || '',
+        industry: regData.industry || '',
+        company_size: regData.companySize || '',
+        position: regData.position || '',
+      };
+    }
+
     const { data, error: signUpError } = await supabaseService.auth.signUp({
-      email,
-      password,
+      email: regData.email,
+      password: regData.password,
       options: {
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          // Add role if applicable, e.g., role: 'user' 
-          // Ensure 'role' exists in your user metadata schema in Supabase
-        },
-        // Use environment variable for redirect URL, default to typical local dev setup
+        data: userMetadata,
         emailRedirectTo: process.env.NEXT_PUBLIC_VERIFICATION_REDIRECT_URL || `${request.nextUrl.origin}/verify-email`,
       }
     });
@@ -83,7 +120,7 @@ async function handler(request: NextRequest): Promise<NextResponse> {
           ipAddress: ipAddress,
           userAgent: userAgent,
           targetResourceType: 'auth',
-          targetResourceId: email, // Log the email attempted
+          targetResourceId: emailForLogging, // Use stored email if available
           details: { 
               reason: signUpError.message, 
               code: signUpError.code, 
@@ -111,7 +148,7 @@ async function handler(request: NextRequest): Promise<NextResponse> {
           ipAddress: ipAddress,
           userAgent: userAgent,
           targetResourceType: 'auth',
-          targetResourceId: email, 
+          targetResourceId: emailForLogging, 
           details: { message: 'Registration successful but no user data returned' }
       });
       console.error('Registration successful but no user data returned');

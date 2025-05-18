@@ -224,4 +224,175 @@ describe('/api/auth/register', () => {
     expect(res._getJSONData().error).toBe('Internal server error during registration');
     expect(mockSignUp).toHaveBeenCalledTimes(1);
   });
+});
+
+describe('/api/auth/register - Business Registration', () => {
+  it('should return 200 and success message on successful business registration', async () => {
+    const mockUserData = { id: 'user-456', email: 'biz@example.com' };
+    mockSignUp.mockResolvedValueOnce({ data: { user: mockUserData }, error: null });
+
+    const { req, res } = createMocks({
+      method: 'POST',
+      body: {
+        userType: 'corporate',
+        email: 'biz@example.com',
+        password: 'Password123!',
+        companyName: 'Acme Corp',
+        companyWebsite: 'https://acme.com',
+        department: 'Sales',
+        industry: 'Technology',
+        companySize: '11-50',
+        position: 'Manager',
+        acceptTerms: true,
+      },
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(200);
+    const jsonResponse = res._getJSONData();
+    expect(jsonResponse.message).toBe('Registration successful. Please check your email to verify your account.');
+    expect(jsonResponse.user).toEqual(mockUserData);
+    expect(mockSignUp).toHaveBeenCalledTimes(1);
+    expect(mockSignUp).toHaveBeenCalledWith({
+      email: 'biz@example.com',
+      password: 'Password123!',
+      options: expect.objectContaining({
+        data: expect.objectContaining({
+          user_type: 'corporate',
+          company_name: 'Acme Corp',
+          company_website: 'https://acme.com',
+          department: 'Sales',
+          industry: 'Technology',
+          company_size: '11-50',
+          position: 'Manager',
+        }),
+        emailRedirectTo: expect.any(String),
+      }),
+    });
+  });
+
+  it('should return 400 if companyName is missing for business registration', async () => {
+    const { req, res } = createMocks({
+      method: 'POST',
+      body: {
+        userType: 'corporate',
+        email: 'biz@example.com',
+        password: 'Password123!',
+        // companyName missing
+        companyWebsite: 'https://acme.com',
+        acceptTerms: true,
+      },
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(400);
+    const jsonResponse = res._getJSONData();
+    expect(jsonResponse.error).toBe('Validation failed');
+    expect(jsonResponse.details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ field: 'companyName', message: 'Company name is required' }),
+      ])
+    );
+  });
+
+  it('should return 400 for invalid company website URL', async () => {
+    const { req, res } = createMocks({
+      method: 'POST',
+      body: {
+        userType: 'corporate',
+        email: 'biz@example.com',
+        password: 'Password123!',
+        companyName: 'Acme Corp',
+        companyWebsite: 'not-a-url',
+        acceptTerms: true,
+      },
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(400);
+    const jsonResponse = res._getJSONData();
+    expect(jsonResponse.error).toBe('Validation failed');
+    expect(jsonResponse.details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ field: 'companyWebsite', message: 'Please enter a valid website URL' }),
+      ])
+    );
+  });
+
+  it('should return 400 if userType is missing', async () => {
+    const { req, res } = createMocks({
+      method: 'POST',
+      body: {
+        email: 'biz@example.com',
+        password: 'Password123!',
+        companyName: 'Acme Corp',
+        acceptTerms: true,
+      },
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(400);
+    const jsonResponse = res._getJSONData();
+    expect(jsonResponse.error).toBe('Validation failed');
+  });
+
+  it('should return 400 if userType is invalid', async () => {
+    const { req, res } = createMocks({
+      method: 'POST',
+      body: {
+        userType: 'unknown',
+        email: 'biz@example.com',
+        password: 'Password123!',
+        companyName: 'Acme Corp',
+        acceptTerms: true,
+      },
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(400);
+    const jsonResponse = res._getJSONData();
+    expect(jsonResponse.error).toBe('Validation failed');
+  });
+
+  it('should still allow personal registration', async () => {
+    const mockUserData = { id: 'user-789', email: 'personal@example.com' };
+    mockSignUp.mockResolvedValueOnce({ data: { user: mockUserData }, error: null });
+
+    const { req, res } = createMocks({
+      method: 'POST',
+      body: {
+        userType: 'private',
+        email: 'personal@example.com',
+        password: 'Password123!',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        acceptTerms: true,
+      },
+    });
+
+    await handler(req, res);
+
+    expect(res._getStatusCode()).toBe(200);
+    const jsonResponse = res._getJSONData();
+    expect(jsonResponse.message).toBe('Registration successful. Please check your email to verify your account.');
+    expect(jsonResponse.user).toEqual(mockUserData);
+    expect(mockSignUp).toHaveBeenCalledTimes(1);
+    expect(mockSignUp).toHaveBeenCalledWith({
+      email: 'personal@example.com',
+      password: 'Password123!',
+      options: expect.objectContaining({
+        data: expect.objectContaining({
+          user_type: 'private',
+          first_name: 'Jane',
+          last_name: 'Doe',
+        }),
+        emailRedirectTo: expect.any(String),
+      }),
+    });
+  });
 }); 

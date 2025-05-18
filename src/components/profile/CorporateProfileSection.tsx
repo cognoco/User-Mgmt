@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
-import { UserType, companySchema, Company } from '@/types/user-type';
+import { UserType, Company } from '@/types/user-type';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,10 +11,11 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { z } from 'zod';
 import { CompanyLogoUpload } from './CompanyLogoUpload';
+import { useState } from 'react';
 
 interface CorporateProfileSectionProps {
   userType: UserType;
-  company?: Company;
+  company?: Company & { verificationStatus?: string; isAdmin?: boolean };
   onUpdate: (company: Company) => Promise<void>;
   isLoading?: boolean;
   error?: string | null;
@@ -48,12 +49,12 @@ export function CorporateProfileSection({
 }: CorporateProfileSectionProps) {
   const { t } = useTranslation();
   const { corporateUsers } = useUserManagement();
-  
-  // Only show if corporate users is enabled and user is a corporate user
-  if (!corporateUsers.enabled || userType !== UserType.CORPORATE) {
-    return null;
-  }
-  
+  const [editMode, setEditMode] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const isAdmin = company?.isAdmin ?? true; // Default to true if not provided
+
+  // Move useForm above early returns to avoid conditional hook call
   const form = useForm<CorporateFormValues>({
     resolver: zodResolver(corporateFormSchema),
     defaultValues: {
@@ -73,8 +74,18 @@ export function CorporateProfileSection({
       },
     },
   });
+
+  if (!corporateUsers.enabled || userType !== UserType.CORPORATE) {
+    return null;
+  }
   
+  // Track original values for re-verification logic
+  const originalVatId = company?.vatId;
+  const originalName = company?.name;
+
   const onSubmit = async (data: CorporateFormValues) => {
+    setSuccess(null);
+    setPendingVerification(false);
     // Map form data before sending, ensuring address is object or undefined
     const updatePayload: Partial<Company> = {
       ...data,
@@ -83,25 +94,148 @@ export function CorporateProfileSection({
                  : undefined, 
       size: data.size || undefined, 
     };
-    if (process.env.NODE_ENV === 'development') {
-      console.error("Error calling onUpdate for corporate profile:", error);
+    // If VAT ID or name changed, trigger re-verification
+    if (data.vatId !== originalVatId || data.name !== originalName) {
+      setPendingVerification(true);
     }
     try {
       await onUpdate(updatePayload as Company);
+      setSuccess(t('profile.corporate.updateSuccess', 'Company profile updated successfully.'));
+      setEditMode(false);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error("Error calling onUpdate for corporate profile:", error);
+        console.error('Error calling onUpdate for corporate profile:', error);
       }
     }
   };
   
+  // View mode: show fields as text, placeholders for missing fields, Edit button if admin
+  if (!editMode) {
+    return (
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>{t('profile.corporate.title')}</CardTitle>
+          <CardDescription>{t('profile.corporate.description')}</CardDescription>
+        </CardHeader>
+        {success && (
+          <CardContent>
+            <Alert variant="default" role="alert">
+              <AlertDescription>{success}</AlertDescription>
+            </Alert>
+          </CardContent>
+        )}
+        {error && (
+          <CardContent>
+            <Alert variant="destructive" role="alert">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          </CardContent>
+        )}
+        <CardContent className="flex flex-col items-center pt-0 pb-6">
+          <h3 className="text-lg font-medium mb-4 self-start">{t('profile.corporate.companyLogo')}</h3>
+          <CompanyLogoUpload />
+          <Separator className="mt-6" />
+        </CardContent>
+        <CardContent className="space-y-6 pt-0">
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">{t('profile.corporate.companyDetails')}</h3>
+            <div className="space-y-2">
+              <Label>{t('profile.corporate.companyName')} *</Label>
+              <div>{company?.name || <span className="text-muted-foreground">{t('profile.corporate.missing', 'Not set')}</span>}</div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t('profile.corporate.industry')}</Label>
+                <div>{company?.industry || <span className="text-muted-foreground">{t('profile.corporate.missing', 'Not set')}</span>}</div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t('profile.corporate.companySize')}</Label>
+                <div>{company?.size || <span className="text-muted-foreground">{t('profile.corporate.missing', 'Not set')}</span>}</div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>{t('profile.corporate.website')}</Label>
+              <div>{company?.website || <span className="text-muted-foreground">{t('profile.corporate.missing', 'Not set')}</span>}</div>
+            </div>
+            <div className="space-y-2">
+              <Label>{t('profile.corporate.vatId')}</Label>
+              <div>{company?.vatId || <span className="text-muted-foreground">{t('profile.corporate.missing', 'Not set')}</span>}</div>
+            </div>
+          </div>
+          <Separator />
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">{t('profile.corporate.yourPosition')}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t('profile.corporate.position')}</Label>
+                <div>{company?.position || <span className="text-muted-foreground">{t('profile.corporate.missing', 'Not set')}</span>}</div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t('profile.corporate.department')}</Label>
+                <div>{company?.department || <span className="text-muted-foreground">{t('profile.corporate.missing', 'Not set')}</span>}</div>
+              </div>
+            </div>
+          </div>
+          <Separator />
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">{t('profile.corporate.companyAddress')}</h3>
+            <div className="space-y-2">
+              <Label>{t('profile.corporate.street')}</Label>
+              <div>{company?.address?.street || <span className="text-muted-foreground">{t('profile.corporate.missing', 'Not set')}</span>}</div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t('profile.corporate.city')}</Label>
+                <div>{company?.address?.city || <span className="text-muted-foreground">{t('profile.corporate.missing', 'Not set')}</span>}</div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t('profile.corporate.state')}</Label>
+                <div>{company?.address?.state || <span className="text-muted-foreground">{t('profile.corporate.missing', 'Not set')}</span>}</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t('profile.corporate.postalCode')}</Label>
+                <div>{company?.address?.postalCode || <span className="text-muted-foreground">{t('profile.corporate.missing', 'Not set')}</span>}</div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t('profile.corporate.country')}</Label>
+                <div>{company?.address?.country || <span className="text-muted-foreground">{t('profile.corporate.missing', 'Not set')}</span>}</div>
+              </div>
+            </div>
+          </div>
+          <Separator />
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">{t('profile.corporate.verificationStatus')}</h3>
+            <div>{company?.verificationStatus || <span className="text-muted-foreground">{t('profile.corporate.verificationUnknown', 'Unknown')}</span>}</div>
+            {pendingVerification && (
+              <div className="text-warning text-sm mt-2">{t('profile.corporate.pendingVerification', 'Changes require re-verification.')}</div>
+            )}
+          </div>
+        </CardContent>
+        {isAdmin && (
+          <CardFooter className="flex justify-end">
+            <Button type="button" onClick={() => setEditMode(true)}>{t('common.edit', 'Edit')}</Button>
+          </CardFooter>
+        )}
+      </Card>
+    );
+  }
+
+  // Edit mode: show form as before, with Save/Cancel
   return (
     <Card className="mt-6">
       <CardHeader>
         <CardTitle>{t('profile.corporate.title')}</CardTitle>
         <CardDescription>{t('profile.corporate.description')}</CardDescription>
       </CardHeader>
-      
+      {success && (
+        <CardContent>
+          <Alert variant="default" role="alert">
+            <AlertDescription>{success}</AlertDescription>
+          </Alert>
+        </CardContent>
+      )}
       {error && (
         <CardContent>
           <Alert variant="destructive" role="alert">
@@ -109,13 +243,11 @@ export function CorporateProfileSection({
           </Alert>
         </CardContent>
       )}
-      
       <CardContent className="flex flex-col items-center pt-0 pb-6">
-         <h3 className="text-lg font-medium mb-4 self-start">{t('profile.corporate.companyLogo')}</h3>
-         <CompanyLogoUpload />
-         <Separator className="mt-6" />
+        <h3 className="text-lg font-medium mb-4 self-start">{t('profile.corporate.companyLogo')}</h3>
+        <CompanyLogoUpload />
+        <Separator className="mt-6" />
       </CardContent>
-
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <CardContent className="space-y-6 pt-0">
           <div className="space-y-4">
@@ -250,8 +382,10 @@ export function CorporateProfileSection({
             </div>
           </div>
         </CardContent>
-        
-        <CardFooter className="flex justify-end">
+        <CardFooter className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={() => { setEditMode(false); setSuccess(null); form.reset(); }} disabled={isLoading}>
+            {t('common.cancel', 'Cancel')}
+          </Button>
           <Button type="submit" disabled={isLoading}>
             {isLoading ? t('common.saving') : t('common.save')}
           </Button>

@@ -13,7 +13,7 @@ const LogoUploadSchema = z.object({
 
 type LogoUploadRequest = z.infer<typeof LogoUploadSchema>;
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB limit
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const STORAGE_BUCKET = 'company-logos'; // Define Supabase storage bucket name
 
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Validation failed', details: parseResult.error.format() }, { status: 400 });
     }
     
-    const { logo: base64Logo, filename } = parseResult.data;
+    const { logo: base64Logo } = parseResult.data;
 
     // Extract mime type and decode base64
     const mimeMatch = base64Logo.match(/^data:(.+);base64,/);
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     const uniqueFilename = `${user.id}-${uuidv4()}.${fileExtension}`;
     const filePath = `${user.id}/${uniqueFilename}`; // Store under user-specific folder
 
-    const { data: uploadData, error: uploadError } = await supabaseService.storage
+    const { error: uploadError } = await supabaseService.storage
       .from(STORAGE_BUCKET)
       .upload(filePath, fileBuffer, {
         contentType: mimeType,

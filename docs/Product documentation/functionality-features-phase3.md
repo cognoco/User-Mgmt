@@ -21,6 +21,8 @@ This phase introduces the distinct flow for business/corporate users, allowing t
     *   **User Fields:** First Name, Last Name, Email Address, Password, Confirm Password (same requirements and dynamic helper behavior as personal registration - see Phase 1, Section 1.1).
     *   **Company Fields:** Company Name, Company Size (e.g., dropdown: 1-10 employees, 11-50, 51-200, 201+), Industry (e.g., dropdown or searchable list), Company Website (optional, validated for URL format).
     *   **User Role within Company:** Position/Job Title, Department (optional).
+    *   **Contact Fields:** State/Province, City, Contact Email, Contact Phone (all required).
+    *   **VAT ID:** Optional field, not validated or required for registration.
     *   **Terms & Conditions:** The same mandatory T&C checkbox and **clickable links** as in personal registration are required.
 3.  **Submission:** User fills in all required fields, ensuring password requirements are met and T&C are accepted. User clicks "Register Business Account" or similar.
 4.  **Feedback:**
@@ -49,7 +51,7 @@ This phase introduces the distinct flow for business/corporate users, allowing t
 1.  **Access:** User logs in (potentially via business SSO later) and navigates to their "Profile" or "Company Settings" page.
 2.  **Display:** The page displays information related to both the user and their associated company.
     *   **User Info Section:** Name, Job Title, Department, Email Address (read-only), User Avatar (if set - see 2.3).
-    *   **Company Info Section:** Company Name, Company Logo (if set - see 3.4), Company Size, Industry, Website, Business Contact Number (if set), Business Address (if set), VAT ID (if set).
+    *   **Company Info Section:** Company Name, Company Logo (if set - see 3.4), Company Size, Industry, Website, Business Contact Number (required), State/Province (required), City (required), Contact Email (required), VAT ID (optional, not validated), Business Address (optional, for display only).
     *   **Verification Status:** Any company or domain verification status (see 3.6, 3.7) should be clearly displayed (e.g., "Verified", "Pending Verification", "Verification Required").
     *   **Layout:** Information is clearly separated and labeled (e.g., "Your Details", "Company Details").
     *   **Edit Button(s):** Clear "Edit Profile" / "Edit Company Details" button(s) are visible, likely requiring specific permissions (e.g., only company admin can edit company details).
@@ -69,7 +71,7 @@ This phase introduces the distinct flow for business/corporate users, allowing t
 
 1.  **Access:** From the business profile view (3.2), the user (assuming they have permissions) clicks "Edit Company Details".
 2.  **Form Display:** The company-specific fields become editable inputs, pre-filled with current data.
-    *   **Editable Fields:** Company Name, Company Size, Industry, Website, Business Contact Number, Business Address (could be structured fields: Street, City, Postal Code, Country), VAT ID.
+    *   **Editable Fields:** Company Name, Company Size, Industry, Website, Business Contact Number (required), State/Province (required), City (required), Contact Email (required), VAT ID (optional, not validated), Business Address (optional).
     *   **Controls:** Text inputs, dropdowns, potentially address lookup/validation integrations.
     *   **Save/Cancel Buttons:** "Save Company Changes" and "Cancel" buttons appear.
 3.  **Input:** User modifies the desired company fields. Real-time validation applies (e.g., URL format, VAT ID format if applicable).
@@ -79,7 +81,7 @@ This phase introduces the distinct flow for business/corporate users, allowing t
 5.  **Feedback (On Save):**
     *   **Success:** "Company profile updated successfully." The page switches back to the read-only view, displaying the new information.
     *   **Permission Error:** If a non-admin user somehow tries to access or save: "You do not have permission to edit company details."
-    *   **Validation Error:** Server-side validation catches errors (e.g., invalid VAT ID format). Specific messages shown near fields.
+    *   **Validation Error:** Server-side validation catches errors (e.g., missing required contact fields, invalid email/phone format). VAT ID is not validated.
     *   **Network/Server Error:** "Failed to update company profile due to a network/server error. Please try again." Input retains attempted changes.
 
 **Edge Cases (User Perspective):**
@@ -113,30 +115,27 @@ This phase introduces the distinct flow for business/corporate users, allowing t
 
 ### 3.5 Business Address Management (`/api/profile/business` - Part of Update)
 
-**Goal:** User wants to add or edit the company's physical address.
+**Goal:** User wants to add or edit the company's contact and address information.
 
 **User Journey & Expectations:**
 
 1.  **Access:** This is handled within the "Update Business Profile" flow (Section 3.3).
-2.  **Form Display:** Dedicated fields for the address are presented in the edit mode.
-    *   **Expected Fields:** Street Address Line 1, Street Address Line 2 (optional), City, State/Province/Region, Postal Code, Country (dropdown).
-    *   **Address Validation/Lookup (Optional but helpful):** Integration with services like Google Places API could provide address suggestions and validation as the user types, improving accuracy.
-3.  **Input:** User enters or modifies the address components.
+2.  **Form Display:** Dedicated fields for contact and address are presented in the edit mode.
+    *   **Expected Fields:** State/Province (required), City (required), Contact Email (required), Contact Phone (required), VAT ID (optional), Business Address (optional, e.g., Street Address Line 1/2, Postal Code, Country).
+    *   **No address or business existence validation is performed.**
+3.  **Input:** User enters or modifies the contact and address components.
 4.  **Submission:** Saved along with other company details via "Save Company Changes".
 5.  **Feedback:** Success/error messages are part of the main profile update feedback.
-    *   **Validation:** Specific errors if required address fields are missing or formats are incorrect (e.g., postal code format for the selected country).
+    *   **Validation:** Specific errors if required contact fields are missing or formats are incorrect (e.g., email/phone format). VAT ID is not validated.
 
 **Edge Cases (User Perspective):**
 
 *   **International Addresses:** Form must accommodate various global address formats. Country selection might dynamically change required fields or labels (e.g., State vs. Province vs. County, Postal Code vs. ZIP Code).
-*   **Address Lookup Failure:** If an optional lookup service fails, manual input should still work perfectly.
 *   **PO Boxes:** Ensure the fields allow for PO Box information if applicable.
 
 ### 3.6 Company Validation (`/api/company/validate` - Trigger/Status Check)
 
-**Goal:** Initiate or check the status of a defined company validation process (e.g., verifying VAT ID, checking against a business registry).
-
-*Note: The exact user experience depends heavily on the *specific* validation method chosen, which needs further definition.*
+**No company existence or VAT ID validation is performed at this stage. VAT ID is optional and not validated.**
 
 **Possible User Journey & Expectations (Example: VAT ID Check):**
 
