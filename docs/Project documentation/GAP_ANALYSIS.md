@@ -1,122 +1,178 @@
-# GAP_ANALYSIS.md
+# GAP ANALYSIS
 
----
-**Summary:**
-This document is the single source of truth for all gap analysis, missing features, and open issues in the User Management System. All gaps, missing features, and enhancements are tracked here. For implementation status, see the Implementation-Checklist.md. For action plans and next steps, see IMPLEMENTATION_PLAN.md.
----
+## Overview
+This document serves as the single source of truth for all gaps, missing features, and open issues in the User Management System. It provides a structured analysis of what needs to be implemented, organized by category and priority.
 
-**Development & Testing Approach:**
-- The project now uses a production-first, test-second approach for all new features.
-- Tests are written after the production code is complete, unless a feature is high-risk or likely to cause regressions.
-- This ensures that tests always reflect the real, user-facing implementation.
+## Development & Testing Approach
+- The project uses a production-first, test-second approach for all new features
+- Tests are written after production code is complete, unless a feature is high-risk
+- This ensures tests always reflect the real, user-facing implementation
 
-## Gap Analysis & Open Issues
+## Implementation Priorities
 
+### Priority 1: Core Authentication & Security
+1. **Mobile/PWA Implementation**
+   - Missing manifest.json file for installability
+   - Missing service worker file (/push-notification-sw.js)
+   - No PWA configuration in Next.js config
+   - Missing app icons for different device sizes
+   - No offline support
+
+2. **Security Gaps**
+   - Account Activity Timeline - No UI showing recent account activity
+   - Security Health Dashboard - Missing UI showing overall security status
+   - Session Management UI - Missing interface for viewing and managing active sessions
+   - Multi-device Authorization UI - No interface for authorizing new devices
+
+3. **Account Management**
+   - Account Recovery Options UI - Missing UI for setting up recovery options
+   - Account Reactivation UI - No interface for reactivating deactivated accounts
+   - Custom Attribute Management UI - No interface for managing custom user attributes
+
+### Priority 2: Team & Organization Management
+1. **Team Management UI**
+   - Team Creation UI - Missing UI for creating new teams
+   - Team Member Management Dashboard - Incomplete UI for viewing and managing team members
+   - Role Assignment Interface - No UI for assigning roles to team members
+   - Team Settings Page - Missing UI for configuring team settings
+   - Team Invitation Flow UI - Incomplete UI for inviting team members
+   - Team Permissions UI - Missing interface for managing team permissions
+
+2. **Missing Pages/Routes**
+   - /teams/create - Team creation
+   - /teams/[teamId]/settings - Team settings
+
+### Priority 3: Subscription & Billing
+1. **Stripe API Integration**
+   - Missing API Routes:
+     - /api/payments/checkout or /api/subscriptions/checkout
+     - /api/payments/portal or /api/subscriptions/portal
+     - /api/subscriptions/status
+     - /api/subscriptions/cancel
+     - /api/webhooks/stripe
+   - Incomplete Stripe SDK Setup
+   - Missing server-side Stripe API initialization
+
+2. **Subscription & Billing UI**
+   - Plan Selection Page - No dedicated page to show pricing tiers
+   - Checkout Process UI - Missing components for payment information collection
+   - Subscription Management Dashboard - Incomplete UI for managing current subscription
+   - Billing History/Invoice Viewer - No UI for viewing past invoices
+   - Plan Upgrade/Downgrade Flow - Missing UI for changing subscription tiers
+   - Payment Method Management UI - No interface for adding/removing payment methods
+
+3. **Subscription Backend Logic**
+   - No implementation of Stripe subscription creation
+   - Missing subscription status syncing mechanism
+   - No handling of subscription plan changes
+   - Missing trial period management
+   - No implementation of metered billing or seat-based licensing
+
+4. **Missing Pages/Routes**
+   - /pricing - Plan selection and comparison
+   - /billing - Billing management
+
+### Priority 4: API & Developer Tools
+1. **API & Integration UI**
+   - API Key Management Dashboard - No UI for creating, viewing, and revoking API keys
+   - Webhook Configuration UI - Missing interface for setting up and managing webhooks
+   - Connected Services Dashboard - Incomplete UI for managing connected third-party services
+   - Developer Settings Page - No dedicated page for developer-specific settings
+   - API Usage Stats/Metrics UI - Missing UI for viewing API usage metrics
+
+2. **Webhooks and API Key Management**
+   - No implementation found for custom webhooks
+   - No implementation found for API key management
+   - Stripe webhook handling for subscriptions may exist but lacks specific tests
+
+3. **Missing Pages/Routes**
+   - /developer - Developer settings and API management
+   - /api-keys - API key management
+   - /webhooks - Webhook configuration
+
+### Priority 5: Compliance & Legal
+1. **Legal/Compliance UI**
+   - Terms & Policy Updates UI - Missing interface for notifying and accepting updated terms
+   - Personal Data Privacy Dashboard - No comprehensive privacy settings dashboard
+   - Data Export Interface - Incomplete UI for exporting user data
+   - Profile Verification Status UI - Missing UI elements showing verification status
+
+2. **Consent/Terms of Service**
+   - No actual implementation for ToS acceptance/updates
+   - No tests found for ToS/privacy acceptance
+   - No tests for residency/location-based compliance
+
+3. **Missing Pages/Routes**
+   - /privacy-dashboard - Privacy controls
+
+### Priority 6: User Support & Communication
+1. **User Support & Feedback**
+   - Support/Contact Page - No UI for contacting support or submitting tickets
+   - Feedback Submission UI - Missing UI for submitting feedback
+   - Help/Documentation Portal - No in-app help or documentation browser
+
+2. **Notification & Communication**
+   - Notification Center - Missing central UI for viewing all notifications
+   - Communication Preferences UI - Incomplete interface for managing communication preferences
+   - In-app Messaging UI - No UI for in-app messaging between users/teams
+   - Alert Configuration UI - Missing interface for setting up custom alerts
+   - Email Template Previews - No UI for previewing email templates
+
+3. **Missing Pages/Routes**
+   - /support - Support and help
+   - /notifications - Notification center
+
+### Priority 7: Administrative Features
+1. **Administrative UI**
+   - Admin Dashboard - Incomplete admin dashboard UI
+   - User Management Admin Panel - Missing UI for administrators to manage users
+   - Audit Log Visualization Tools - Incomplete UI for visualizing audit logs
+   - System Health Monitoring UI - No interface for monitoring system health
+   - Configuration Management UI - Missing interface for system-wide configuration
+
+2. **Missing Pages/Routes**
+   - /admin/users - User management for admins
+   - /activity - Account activity
+
+### Priority 8: Accessibility & Internationalization
+1. **Accessibility & Internationalization UI**
+   - Accessibility Preferences UI - Missing interface for accessibility settings
+   - Language Selector - Incomplete UI for selecting display language
+   - Regional Format Settings - No UI for configuring date/time/number formats
+   - RTL Support Components - Missing UI components optimized for RTL languages
+   - Assistive Technology Support UI - Incomplete UI optimized for screen readers
+
+2. **Mobile/Responsive UI Components**
+   - Mobile Navigation - Missing mobile-specific navigation components
+   - Touch-optimized Input Controls - Missing touch-friendly UI elements for mobile users
+   - Mobile Form Factor UI - No responsive design components for small screens
+   - Native-feeling Mobile Elements - Missing components that feel like native mobile UI
+   - PWA Installation UI - No components for promoting/guiding PWA installation
+
+## Missing or Incomplete APIs
+- Tax ID validation - Commented as TODO implementation
+- Company registration validation - Commented as TODO implementation
+- Subscription and Billing APIs - Referenced in documentation but not implemented
+- Webhook delivery APIs - Directory exists but implementation seems incomplete
+- SSO provider configuration APIs - Mentioned in documentation but not implemented
+
+## Missing or Incomplete Hooks
+- SSO provider management hooks - Mentioned in documentation
+- MFA provider hooks - Mentioned as pluggable but implementation unclear
+- API keys management hook - No dedicated hook for API key functionality
+- Webhook configuration hook - No dedicated hook for webhook functionality
+- Authentication events/hooks - Mentioned in documentation but not fully implemented
+- Team-scoped API token hooks - Mentioned but not implemented
+- Custom roles/permissions hooks - Mentioned but implementation unclear
+
+## Testing Coverage Gaps
 | Area                | Potential Gap / Enhancement                | Criticality | Coverage Status |
 |---------------------|--------------------------------------------|-------------|----------------|
-| Mobile/PWA          | No PWA features (manifest, service worker, offline, installable, push notifications) | High | Responsive UI only; not installable, no offline support |
-| Onboarding          | No test coverage for onboarding, checklists, first-time user flows | Medium | No tests found |
 | Integrations        | No test coverage for webhooks, API key management | Medium | No tests found |
 | Legal/Compliance    | No test coverage for ToS/privacy acceptance, residency | Medium | No tests found |
 | SSO Edge Cases      | Some SSO edge cases (revoked access, missing email, provider outage) are not covered | Medium | Partially covered |
 
-**Note:** Some features have partial test coverage (integration/component), but E2E or edge-case coverage is still missing. See `Testing_Findings.md` for detailed findings and `TESTING_ISSUES.md` for the remediation plan.
-
----
-
-## Not Verified but Likely Gaps
-
-| Feature Area         | Notes |
-|----------------------|-------|
-| Onboarding           | No onboarding/checklists/first-time user flows implemented or tested. |
-| Integrations         | No webhooks/API key management implemented or tested. |
-| Legal/Compliance     | No ToS/privacy acceptance, residency logic implemented or tested. |
-
----
-
-## Manual Verification & Automated Test Coverage Gaps
-
-The following gaps were identified during manual verification (see MANUAL_VERIFICATION_CHECKLIST.md for details). These represent areas where automated test coverage is missing or incomplete, or where manual verification revealed untested or partially tested flows.
-
-### Registration Flow
-- **No E2E test for "Get Started" button navigation**
-  - E2E test needed: Navigate to `/`, click "Get Started", verify redirect/prompt.
-- **No test for password requirements helper text**
-  - Test needed: Verify the *exact* content and requirements listed in the helper text below the password field.
-- **No E2E test for email delivery/verification**
-  - E2E test needed: Use a tool like MailHog/Mailosaur to intercept and check email content/links.
-
-### Other Flows
-- **Onboarding/Setup Wizard**
-  - E2E test needed: New user login, verify onboarding shown.
-  - E2E test needed: Complete profile, verify step completion.
-  - E2E test needed: Navigate feature tour, verify content.
-  - E2E test needed: Set preferences, verify persistence.
-  - E2E test needed: Complete onboarding, verify redirect.
-  - E2E test needed: Skip/reset onboarding, verify state.
-- **Terms & Policy Updates/Consent**
-  - E2E test needed: Trigger update, verify prompt.
-  - E2E test needed: Accept terms, verify consent.
-  - E2E test needed: Decline terms, verify restriction.
-  - E2E test needed: Simulate error, check message.
-- **User Support/Contact/Feedback**
-  - E2E test needed: Navigate to support/contact, verify option.
-  - E2E test needed: Submit request, verify confirmation.
-  - E2E test needed: View status, verify update.
-  - E2E test needed: Simulate error, check message.
-- **Account Reactivation**
-  - E2E test needed: Navigate to reactivation, verify option.
-  - E2E test needed: Submit reactivation, verify confirmation.
-  - E2E test needed: Simulate error, check message.
-
-**For full details and step-by-step manual verification, see MANUAL_VERIFICATION_CHECKLIST.md.**
-
----
-
-## Skeleton Test Files: Feature & Test Coverage Audit
-
-The following table summarizes the status of features and tests for each skeleton test file that still needs implementation:
-
-```
-| Skeleton Test File / Feature                        | Feature in Place? | Test in Place? | Notes                                                                                       |
-|-----------------------------------------------------|-------------------|---------------|---------------------------------------------------------------------------------------------|
-| src/tests/integration/consent.Skeleton.integration.test.tsx |   No        |      No       | Consent/ToS update feature not implemented, no real test                                    |
-| src/tests/integration/approve-reject.Skeleton.integration.test.tsx | Yes |      No       | Approve/reject flows exist, but real test missing                                           |
-| src/tests/integration/accept.Skeleton.integration.test.tsx |   Yes        |      No       | Accept/invite flows exist, but real test missing                                            |
-| src/tests/integration/decline.Skeleton.integration.test.tsx |  Yes        |      No       | Decline/invite flows exist, but real test missing                                           |
-| src/tests/integration/enable.Skeleton.integration.test.tsx |   Yes        |      No       | Enable/feature flows exist, but real test missing                                           |
-| src/tests/integration/disable.Skeleton.integration.test.tsx |  Yes        |      No       | Disable/feature flows exist, but real test missing                                          |
-| src/tests/integration/remove.Skeleton.integration.test.tsx |   Yes        |      No       | Remove/delete flows exist, but real test missing                                            |
-| src/tests/integration/revoke.Skeleton.integration.test.tsx |   Yes        |      No       | Revoke flows exist, but real test missing                                                   |
-| src/tests/integration/save.Skeleton.integration.test.tsx   |   Yes        |      No       | Save flows exist, but real test missing                                                     |
-| src/tests/integration/download.Skeleton.integration.test.tsx | Yes        |      No       | Download/export flows exist, but real test missing                                          |
-| src/tests/integration/setup.Skeleton.integration.test.tsx  |   Yes        |      No       | Setup/onboarding flows exist, but real test missing                                         |
-| src/tests/integration/welcome.Skeleton.integration.test.tsx | Yes        |      No       | Welcome/onboarding flows exist, but real test missing                                       |
-| src/tests/integration/feature.Skeleton.integration.test.tsx | Yes        |      No       | Feature toggle/flag flows exist, but real test missing                                      |
-| src/tests/integration/general.Skeleton.integration.test.tsx | Yes        |      No       | General settings flows exist, but real test missing                                         |
-| src/tests/integration/point.Skeleton.integration.test.tsx   | Yes        |      No       | Point/score flows exist, but real test missing                                              |
-| src/tests/integration/position.Skeleton.integration.test.tsx | Yes       |      No       | Position/role flows exist, but real test missing                                            |
-| src/tests/integration/industry.Skeleton.integration.test.tsx | Yes       |      No       | Industry/company flows exist, but real test missing                                         |
-| src/tests/integration/select-upgrade-downgrade.Skeleton.integration.test.tsx | Yes | No | Plan selection/upgrade/downgrade flows exist, but real test missing                         |
-| src/tests/integration/format.Skeleton.integration.test.tsx  | Yes        |      No       | Format/export flows exist, but real test missing                                            |
-| src/tests/integration/confirmation.Skeleton.integration.test.tsx | Yes   |      No       | Confirmation/verify flows exist, but real test missing                                      |
-| src/tests/integration/completion.Skeleton.integration.test.tsx | Yes     |      No       | Completion/onboarding flows exist, but real test missing                                    |
-| src/tests/integration/configure.Skeleton.integration.test.tsx | Yes      |      No       | Configure/settings flows exist, but real test missing                                       |
-| src/tests/integration/direct.Skeleton.integration.test.tsx   | Yes        |      No       | Direct navigation/flow exists, but real test missing                                        |
-| src/tests/integration/home.Skeleton.integration.test.tsx     | Yes        |      No       | Home/dashboard flows exist, but real test missing                                           |
-| src/tests/integration/add.Skeleton.integration.test.tsx      | Yes        |      No       | Add/invite flows exist, but real test missing                                               |
-| src/tests/integration/misc.Skeleton.integration.test.tsx     | Yes        |      No       | Miscellaneous flows exist, but real test missing                                            |
-```
-
-**Legend:**
-- Yes = Implemented/Present
-- No = Missing/Not Implemented
-
-For any row with 'No' in 'Test in Place?', prioritize writing a real test. For any row with 'No' in 'Feature in Place?', decide if/when to implement the feature.
-
----
-
-**Completed Implementations:**
+## Completed Implementations
 - **Company Profile**: Fully implemented with E2E tests for company profile CRUD, validation, and edge cases
 - **User Preferences**: Implementation complete with comprehensive E2E tests
 - **2FA/MFA**: Complete implementation including tests for setup, verification, disabling, error states, and admin override
@@ -128,7 +184,7 @@ For any row with 'No' in 'Test in Place?', prioritize writing a real test. For a
 - **Internationalization (i18n)**: Complete implementation with E2E tests for language selection, content translation, persistence, form validation, and RTL support
 - **Accessibility (a11y)**: Implementation complete with E2E tests for ARIA attributes, keyboard navigation, focus management, screen reader compatibility, and form accessibility
 
----
-
 ## References
 - For detailed findings and actionable recommendations, see `Testing_Findings.md`
+- For implementation status, see the `Implementation-Checklist.md`
+- For action plans and next steps, see `IMPLEMENTATION_PLAN.md`
