@@ -117,7 +117,7 @@ const OrganizationSSO: React.FC<OrganizationSSOProps> = ({ orgId }) => {
     <div className="space-y-8">
       {/* SSO Status Indicator */}
       {ssoSettings.sso_enabled && (
-        <div className={`rounded-lg border p-4 ${getStatusColor()}`}>
+        <div className={`rounded-lg border p-4 ${getStatusColor()}`} data-testid="sso-status-indicator">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               {getStatusIcon()}

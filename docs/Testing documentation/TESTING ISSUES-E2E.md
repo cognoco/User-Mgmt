@@ -1547,3 +1547,57 @@ These patterns allow for more resilient E2E testing of the role management funct
     ```
 
 By addressing these issues systematically, we've improved the reliability of the audit log tests and created documentation that will help maintain and expand tests in the future.
+
+### 44. Using Tests to Document and Drive Implementation Gaps
+- **Issue**: Tests written against requirements expose missing implementations that need to be addressed
+- **Problem details**:
+  - Tests like business-sso-status.e2e.test.ts are failing because required UI elements or APIs don't exist
+  - There's a temptation to make tests pass by mocking missing functionality, which hides actual gaps
+  - Implementation gaps need to be visible, documented, and tracked until properly fixed
+- **Solution**:
+  - Keep tests failing until proper implementation is complete:
+    ```javascript
+    /**
+     * IMPLEMENTATION GAP: Test will fail until these components are implemented:
+     * - Missing route: /admin/organizations/:orgId/settings/sso
+     * - Missing component: BusinessSSOStatus
+     * - Missing API: GET /api/organizations/:orgId/sso/status
+     * 
+     * DO NOT mock or work around these gaps. This test should fail until
+     * the actual implementation is completed.
+     */
+    test('Business SSO status is displayed correctly', async ({ page }) => {
+      // Navigate to the page that should exist but doesn't yet
+      await page.goto('/admin/organizations/123/settings/sso');
+      
+      // Look for components that should exist
+      await expect(page.locator('[data-testid="sso-status-indicator"]'))
+        .toBeVisible({ timeout: 5000 });
+        
+      // Test will fail here until implementation is complete
+    });
+    ```
+  - Use test failures as a gap tracking mechanism:
+    - Create tests based on requirements, even if implementation doesn't exist yet
+    - Let failing tests serve as documentation of what needs to be built
+    - Use skipped tests only when a deliberate decision is made to delay implementation
+  - Add clear comments documenting implementation gaps, as in the example above in Docs/Project/GAP_ANALYSIS together with the link to failing test
+
+  - Only mark a test as `.skip()` if the feature is explicitly deprioritized, and document why:
+    ```javascript
+    /**
+     * DEPRIORITIZED: This feature is planned for Phase 2 per product decision.
+     * Test is skipped until Phase 2 implementation begins.
+     * Tracking issue: JIRA-1234
+     */
+    test.skip('Advanced SSO configurations can be adjusted', async ({ page }) => {
+      // Test skipped because feature is deliberately postponed
+    });
+    ```
+  - When implementing a feature to fix a gap:
+    1. Run the failing test to understand what needs to be built
+    2. Implement the required components/routes/APIs
+    3. Add it into gap documentation Docs/Project/GAP_ANALYSIS
+    4. Use the test as validation that the implementation meets requirements
+
+This approach uses tests as they're intended - to identify gaps and drive implementation - rather than working around missing functionality. Failed tests become a visible reminder of work that remains to be completed, ensuring gaps don't get overlooked or forgotten.
