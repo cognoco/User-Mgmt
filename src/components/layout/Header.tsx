@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { LanguageSelector } from "@/components/settings/LanguageSelector";
 import { useTranslation } from "react-i18next";
 import { useUserManagement } from "@/lib/auth/UserManagementProvider";
-import { Menu, User, LogOut, Settings } from "lucide-react";
+import { Menu, X, User, LogOut, Settings, Home } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { getPlatformClasses } from "@/hooks/usePlatformStyles";
+import { useIsMobile } from "@/lib/utils/responsive";
 
 interface HeaderProps {
   type?: 'fixed' | 'static' | 'sticky';
@@ -28,6 +29,25 @@ export function Header({ type = 'fixed' }: HeaderProps) {
   const { isNative, platform } = useUserManagement();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMobile = useIsMobile();
+
+  // Close mobile menu on location change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location]);
+
+  // Prevent body scrolling when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
 
   const handleLogout = async () => {
     try {
@@ -72,21 +92,30 @@ export function Header({ type = 'fixed' }: HeaderProps) {
     );
   }
 
+  const mainNavItems = [
+    { to: "/", label: t('common.home'), icon: <Home className="h-4 w-4 mr-2" /> },
+    { to: "/settings", label: t('settings.title'), icon: <Settings className="h-4 w-4 mr-2" /> },
+    { to: "/profile", label: t('profile.title'), icon: <User className="h-4 w-4 mr-2" /> },
+  ];
+
   return (
     <header className={headerClasses}>
       <div className="container mx-auto flex items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2">
+        <Link to="/" className="flex items-center space-x-2 relative z-20">
           <span className="font-bold text-xl">User Management</span>
         </Link>
         
         <div className="hidden md:flex items-center space-x-6">
           <nav className="flex items-center space-x-4">
-            <Link to="/settings" className="text-sm font-medium transition-colors hover:text-primary">
-              {t('settings.title')}
-            </Link>
-            <Link to="/profile" className="text-sm font-medium transition-colors hover:text-primary">
-              {t('profile.title')}
-            </Link>
+            {mainNavItems.slice(1).map(item => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="text-sm font-medium transition-colors hover:text-primary"
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
           
           <div className="flex items-center space-x-4">
@@ -95,7 +124,7 @@ export function Header({ type = 'fixed' }: HeaderProps) {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" disabled={isLoading}>
+                  <Button variant="ghost" size="icon" disabled={isLoading} aria-label={t('profile.menu')}>
                     <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -127,58 +156,73 @@ export function Header({ type = 'fixed' }: HeaderProps) {
           </div>
         </div>
         
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-3">
+          <LanguageSelector minimal={true} />
           <Button 
             variant="ghost" 
             size="icon"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             disabled={isLoading}
+            aria-label={mobileMenuOpen ? t('common.close') : t('common.menu')}
+            className="relative z-20"
           >
-            <Menu className="h-6 w-6" />
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6 transition-transform duration-300" />
+            ) : (
+              <Menu className="h-6 w-6 transition-transform duration-300" />
+            )}
           </Button>
         </div>
       </div>
       
-      {mobileMenuOpen && (
-        <div className="container mx-auto py-4 md:hidden">
-          <nav className="flex flex-col space-y-4">
-            <Link 
-              to="/profile" 
-              className="px-2 py-1 text-sm font-medium transition-colors hover:text-primary"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t('profile.title')}
-            </Link>
-            <Link 
-              to="/settings" 
-              className="px-2 py-1 text-sm font-medium transition-colors hover:text-primary"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t('settings.title')}
-            </Link>
+      {/* Mobile Menu - Full Screen Overlay */}
+      <div 
+        className={`fixed inset-0 z-10 bg-background transition-transform duration-300 ease-in-out pt-16 ${
+          mobileMenuOpen ? 'translate-y-0' : 'translate-y-full'
+        } md:hidden`}
+      >
+        <div className="container mx-auto py-6 h-full overflow-y-auto">
+          <nav className="flex flex-col space-y-6">
+            {mainNavItems.map(item => (
+              <Link 
+                key={item.to}
+                to={item.to} 
+                className="px-2 py-3 text-lg font-medium flex items-center transition-colors hover:text-primary border-b border-border/30"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+            ))}
+            
             {user ? (
               <Button 
                 variant="ghost" 
-                className="justify-start px-2"
+                className="justify-start px-2 py-6 h-auto text-lg"
                 onClick={() => {
                   setMobileMenuOpen(false);
                   handleLogout();
                 }}
                 disabled={isLoading}
               >
-                <LogOut className="mr-2 h-4 w-4" />
+                <LogOut className="mr-2 h-5 w-5" />
                 {t('auth.logout')}
               </Button>
             ) : (
               <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="default" size="sm" disabled={isLoading}>
+                <Button 
+                  variant="default" 
+                  size="lg" 
+                  disabled={isLoading}
+                  className="w-full mt-4"
+                >
                   {t('auth.login')}
                 </Button>
               </Link>
             )}
           </nav>
         </div>
-      )}
+      </div>
     </header>
   );
 }
