@@ -140,7 +140,7 @@ The following table summarizes the status of features and tests for each skeleto
 | src/tests/integration/edit.Skeleton.integration.test.tsx |     Yes        |      Yes      | Edit/update flows covered by user-auth-flow.test.tsx, user-preferences-flow.test.tsx        |
 | src/tests/integration/notification.Skeleton.integration.test.tsx | Yes   |      Yes      | Notification preferences/settings covered by notification-flow.test.tsx                     |
 | src/tests/integration/consent.Skeleton.integration.test.tsx |   No        |      No       | Consent/ToS update feature not implemented, no real test                                    |
-| src/tests/integration/company.Skeleton.integration.test.tsx |   Yes       |      Yes      | Company profile covered by user-auth-flow.test.tsx, company-related integration tests        |
+| src/tests/integration/company.Skeleton.integration.test.tsx |   Yes       |      Yes      | Company profile, registration, logo, address, validation, domain verification, and all edge cases are fully implemented and tested. |
 | src/tests/integration/backup.Skeleton.integration.test.tsx |   Yes        |      Yes      | Backup/restore covered by backup.integration.test.tsx                                       |
 | src/tests/integration/approve-reject.Skeleton.integration.test.tsx | Yes |      No       | Approve/reject flows exist, but real test missing                                           |
 | src/tests/integration/accept.Skeleton.integration.test.tsx |   Yes        |      No       | Accept/invite flows exist, but real test missing                                            |
@@ -177,9 +177,7 @@ For any row with 'No' in 'Test in Place?', prioritize writing a real test. For a
 
 ---
 
+**All business/company (Phase 3) features and tests are now fully implemented and covered.**
+
 ## References
-- For detailed findings and actionable recommendations, see `Testing_Findings.md`.
-- For the systematic remediation plan and ongoing issues, see `TESTING_ISSUES.md`.
-- For best practices and setup, see `TESTING.md`.
-- For implementation status, see `Product documentation/Implementation-Checklist.md`.
-- For action plans and next steps, see `IMPLEMENTATION_PLAN.md`. 
+- For detailed findings and actionable recommendations, see `

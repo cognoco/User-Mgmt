@@ -8,6 +8,7 @@ import { useAuthStore } from '@/lib/stores/auth.store';
 import { User } from '@/types/auth';
 import toast, { Toaster } from 'react-hot-toast';
 import { OAuthProvider } from '@/types/oauth';
+import { SessionPolicyEnforcer } from '@/components/session/SessionPolicyEnforcer';
 
 // Define the callbacks inside the Client Component
 const clientCallbacks: Required<IntegrationCallbacks> = {
@@ -160,7 +161,9 @@ export function UserManagementClientBoundary({ children }: UserManagementClientB
   return (
     <UserManagementProvider config={clientConfig}>
       <Toaster position="top-center" reverseOrder={false} />
-      {children}
+      <SessionPolicyEnforcer>
+        {children}
+      </SessionPolicyEnforcer>
     </UserManagementProvider>
   );
 } 

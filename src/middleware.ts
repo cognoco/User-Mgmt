@@ -1,5 +1,6 @@
-import * as SupabaseSSR from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { getSessionTimeout } from '@/lib/security/security-policy.service';
 
 // Define paths that require authentication
 const protectedPaths = ['/profile', '/settings', '/complete-profile']; 
@@ -10,13 +11,21 @@ export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
 
   // Create a Supabase client configured to use cookies
-  const supabase = SupabaseSSR.createMiddlewareClient({
-    req,
-    res,
-  }, {
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  });
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name) => req.cookies.get(name)?.value,
+        set: (name, value, options) => {
+          res.cookies.set({ name, value, ...options });
+        },
+        remove: (name, options) => {
+          res.cookies.set({ name, value: '', ...options });
+        },
+      },
+    }
+  );
 
   // Refresh session if expired - important!
   const { data: { session }, error } = await supabase.auth.getSession();
@@ -39,6 +48,48 @@ export async function middleware(req: NextRequest) {
     redirectUrl.pathname = '/login';
     redirectUrl.searchParams.set('redirectedFrom', pathname); // Optional: add redirect origin
     return NextResponse.redirect(redirectUrl);
+  }
+
+  // If we have a session, check the session timeout policy
+  if (session) {
+    try {
+      // Try to get organization ID from session metadata or user metadata
+      const orgId = session.user?.user_metadata?.current_organization_id;
+      
+      if (orgId) {
+        // Get session timeout from policy
+        const timeoutMinutes = await getSessionTimeout(orgId);
+        
+        if (timeoutMinutes > 0) {
+          // Check if session exceeds timeout based on last activity
+          const lastActivity = session.user?.user_metadata?.last_activity;
+          if (lastActivity) {
+            const lastActivityTime = new Date(lastActivity).getTime();
+            const currentTime = Date.now();
+            const timeoutMs = timeoutMinutes * 60 * 1000;
+            
+            if (currentTime - lastActivityTime > timeoutMs) {
+              // Session has timed out, sign out the user
+              await supabase.auth.signOut();
+              
+              // Redirect to login
+              const redirectUrl = req.nextUrl.clone();
+              redirectUrl.pathname = '/login';
+              redirectUrl.searchParams.set('reason', 'session_timeout');
+              return NextResponse.redirect(redirectUrl);
+            }
+          }
+        }
+      }
+      
+      // Update last activity timestamp
+      await supabase.auth.updateUser({
+        data: { last_activity: new Date().toISOString() }
+      });
+    } catch (err) {
+      console.error('Error enforcing session policies:', err);
+      // Continue with the request even if policy enforcement fails
+    }
   }
 
   // Optional: Redirect authenticated users away from login/register pages

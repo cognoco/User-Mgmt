@@ -10,13 +10,14 @@ const mfaVerifySchema = z.object({
   code: z.string().min(6).max(8),
   method: z.nativeEnum(TwoFactorMethod).default(TwoFactorMethod.TOTP),
   accessToken: z.string(), // Temporary access token from initial login
+  rememberDevice: z.boolean().optional(),
 });
 
 export async function POST(request: Request) {
   try {
     // Parse and validate request body
     const body = await request.json();
-    const { code, method, accessToken } = mfaVerifySchema.parse(body);
+    const { code, method, accessToken, rememberDevice } = mfaVerifySchema.parse(body);
 
     // Initialize Supabase client
     const cookieStore = cookies();
@@ -94,13 +95,100 @@ export async function POST(request: Request) {
         break;
       }
       
-      case TwoFactorMethod.SMS:
+      case TwoFactorMethod.SMS: {
+        // Verify SMS code against metadata
+        if (!user.user_metadata?.mfaSmsVerified) {
+          return NextResponse.json(
+            { error: 'SMS MFA is not enabled for this account.' },
+            { status: 400 }
+          );
+        }
+        
+        // Check if there's a valid verification code for login
+        const storedCode = user.user_metadata?.mfaLoginSmsCode;
+        const expiresAt = user.user_metadata?.mfaLoginSmsCodeExpiresAt;
+        
+        if (!storedCode || !expiresAt) {
+          return NextResponse.json(
+            { error: 'No SMS verification code was sent. Please request a code.' },
+            { status: 400 }
+          );
+        }
+        
+        // Check if code is expired
+        const now = new Date();
+        if (now > new Date(expiresAt)) {
+          return NextResponse.json(
+            { error: 'Verification code expired. Please request a new code.' },
+            { status: 400 }
+          );
+        }
+        
+        // Check if code matches
+        if (code !== storedCode) {
+          return NextResponse.json(
+            { error: 'Invalid verification code. Please try again.' },
+            { status: 400 }
+          );
+        }
+        
+        // Clear the SMS code after successful verification
+        await supabase.auth.updateUser({
+          data: {
+            mfaLoginSmsCode: null,
+            mfaLoginSmsCodeExpiresAt: null
+          }
+        });
+        
+        break;
+      }
+      
       case TwoFactorMethod.EMAIL: {
-        // Not implemented yet
-        return NextResponse.json(
-          { error: `${method} verification not implemented yet.` },
-          { status: 501 }
-        );
+        // Verify Email code against metadata
+        if (!user.user_metadata?.mfaEmailVerified) {
+          return NextResponse.json(
+            { error: 'Email MFA is not enabled for this account.' },
+            { status: 400 }
+          );
+        }
+        
+        // Check if there's a valid verification code for login
+        const storedCode = user.user_metadata?.mfaLoginEmailCode;
+        const expiresAt = user.user_metadata?.mfaLoginEmailCodeExpiresAt;
+        
+        if (!storedCode || !expiresAt) {
+          return NextResponse.json(
+            { error: 'No Email verification code was sent. Please request a code.' },
+            { status: 400 }
+          );
+        }
+        
+        // Check if code is expired
+        const now = new Date();
+        if (now > new Date(expiresAt)) {
+          return NextResponse.json(
+            { error: 'Verification code expired. Please request a new code.' },
+            { status: 400 }
+          );
+        }
+        
+        // Check if code matches
+        if (code !== storedCode) {
+          return NextResponse.json(
+            { error: 'Invalid verification code. Please try again.' },
+            { status: 400 }
+          );
+        }
+        
+        // Clear the Email code after successful verification
+        await supabase.auth.updateUser({
+          data: {
+            mfaLoginEmailCode: null,
+            mfaLoginEmailCodeExpiresAt: null
+          }
+        });
+        
+        break;
       }
       
       default:
@@ -108,6 +196,21 @@ export async function POST(request: Request) {
           { error: `Unsupported MFA method: ${method}` },
           { status: 400 }
         );
+    }
+
+    // Handle "Remember Device" feature
+    let sessionExpirySeconds = 3600; // Default 1 hour
+    if (rememberDevice) {
+      sessionExpirySeconds = 30 * 24 * 60 * 60; // 30 days
+      
+      // Update user preferences to remember this device
+      await supabase.auth.updateUser({
+        data: {
+          rememberDevice: true,
+          lastMFAVerification: new Date().toISOString(),
+          sessionExpirySeconds
+        }
+      });
     }
 
     // MFA verified successfully, create a new session
@@ -125,7 +228,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       user,
       token: session.session.access_token,
-      expiresAt: session.session.expires_at
+      expiresAt: session.session.expires_at,
+      rememberDevice: !!rememberDevice
     });
   } catch (error) {
     console.error('Error in MFA verification:', error);

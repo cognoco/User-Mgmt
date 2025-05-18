@@ -9,6 +9,8 @@ import { TwoFactorMethod } from '@/types/2fa';
 // Request schema
 const setupRequestSchema = z.object({
   method: z.nativeEnum(TwoFactorMethod),
+  phone: z.string().optional(),
+  email: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -85,21 +87,95 @@ export async function POST(request: Request) {
       }
       
       case TwoFactorMethod.SMS: {
-        // TODO: Implement SMS-based MFA
-        // For now, return a not implemented response
-        return NextResponse.json(
-          { error: 'SMS-based MFA not implemented yet' },
-          { status: 501 }
-        );
+        // Accept phone number from request (if not present in user metadata)
+        let phone = user.user_metadata?.mfaPhone;
+        if (!phone) {
+          phone = body.phone;
+        }
+        if (!phone) {
+          return NextResponse.json(
+            { error: 'Phone number is required for SMS MFA setup.' },
+            { status: 400 }
+          );
+        }
+
+        // Generate a 6-digit code
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 min expiry
+
+        // Send SMS (mock)
+        const { sendSms } = await import('@/lib/sms/sendSms');
+        await sendSms({ to: phone, message: `Your verification code is: ${code}` });
+
+        // Store code, expiry, and phone in user metadata
+        const { error: updateError } = await supabase.auth.updateUser({
+          data: {
+            mfaSmsCode: code,
+            mfaSmsCodeExpiresAt: expiresAt,
+            mfaPhone: phone,
+            mfaSmsVerified: false,
+          },
+        });
+        if (updateError) {
+          console.error('Failed to update user metadata:', updateError);
+          return NextResponse.json(
+            { error: updateError.message },
+            { status: 400 }
+          );
+        }
+        return NextResponse.json({ success: true });
       }
       
       case TwoFactorMethod.EMAIL: {
-        // TODO: Implement email-based MFA
-        // For now, return a not implemented response
-        return NextResponse.json(
-          { error: 'Email-based MFA not implemented yet' },
-          { status: 501 }
-        );
+        // Accept email from request or use user's email
+        let email = user.user_metadata?.mfaEmail;
+        if (!email) {
+          email = body.email || user.email;
+        }
+        if (!email) {
+          return NextResponse.json(
+            { error: 'Email address is required for Email MFA setup.' },
+            { status: 400 }
+          );
+        }
+
+        // Generate a 6-digit code
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 min expiry
+
+        // Send Email (abstracted)
+        try {
+          const { sendEmail } = await import('@/lib/email/sendEmail');
+          await sendEmail({
+            to: email,
+            subject: 'Your MFA Verification Code',
+            html: `<p>Your verification code is: <b>${code}</b></p>`
+          });
+        } catch (err) {
+          console.error('Failed to send email:', err);
+          return NextResponse.json(
+            { error: 'Failed to send verification email.' },
+            { status: 500 }
+          );
+        }
+
+        // Store code, expiry, and email in user metadata
+        const { error: updateError } = await supabase.auth.updateUser({
+          data: {
+            mfaEmailCode: code,
+            mfaEmailCodeExpiresAt: expiresAt,
+            mfaEmail: email,
+            mfaEmailVerified: false,
+          },
+        });
+        if (updateError) {
+          console.error('Failed to update user metadata:', updateError);
+          return NextResponse.json(
+            { error: updateError.message },
+            { status: 400 }
+          );
+        }
+        return NextResponse.json({ success: true, testid: 'email-mfa-setup-success' });
       }
       
       default:

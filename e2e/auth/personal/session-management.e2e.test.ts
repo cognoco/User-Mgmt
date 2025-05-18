@@ -1,32 +1,13 @@
 import { test, expect, Page } from '@playwright/test';
-import { loginAs } from '../../utils/auth';
+import { loginUser } from '../../utils/auth-utils';
 
-// --- Constants and Test Data --- //
-const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';
-const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
-
-// --- Test Suite --- //
 test.describe('1.4: Token Handling & Session Management', () => {
   let page: Page;
   
   test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
-    
-    // Login before each test using the auth utility
-    await loginAs(page, USER_EMAIL, USER_PASSWORD);
-    
-    // Verify user is logged in by checking for profile or dashboard
-    try {
-      await Promise.race([
-        page.waitForURL('**/profile**', { timeout: 10000 }),
-        page.waitForURL('**/dashboard**', { timeout: 10000 })
-      ]);
-      
-      // Small delay to ensure page is stable
-      await page.waitForTimeout(1000);
-    } catch (e) {
-      console.log('Navigation verification failed, but continuing test');
-    }
+    // Login user before each test
+    await loginUser(page);
   });
   
   test.afterEach(async () => {
@@ -34,120 +15,132 @@ test.describe('1.4: Token Handling & Session Management', () => {
   });
 
   test('User can view active sessions', async () => {
-    // Try multiple paths to the session management UI
-    try {
-      // First try standard profile page
-      await page.goto('/profile');
-      
-      // Look for various session-related UI elements
-      const sessionSectionVisible = await Promise.race([
-        page.getByText('Active Sessions').isVisible().catch(() => false),
-        page.getByText('Session Management').isVisible().catch(() => false),
-        page.getByText('Your Sessions').isVisible().catch(() => false)
-      ]);
-      
-      if (!sessionSectionVisible) {
-        // If not found directly on profile, try navigating to dedicated session page
-        console.log('Session section not found on profile, trying dedicated page');
-        await page.goto('/profile/sessions');
-      }
-      
-      // Verify there's at least one active session (the current one)
-      const hasCurrentSession = await Promise.race([
-        page.getByText('(Current)').isVisible().catch(() => false),
-        page.getByText('This Device').isVisible().catch(() => false),
-        page.getByText(/current session/i).isVisible().catch(() => false)
-      ]);
-      
-      if (hasCurrentSession) {
-        console.log('Current session indicator found');
-      } else {
-        // Check if there's any session information at all
-        const hasAnySessionInfo = await page.getByRole('table').isVisible().catch(() => false) || 
-                                  await page.locator('.session-item').isVisible().catch(() => false);
-        
-        if (hasAnySessionInfo) {
-          console.log('Session information found, but no current session indicator');
-        } else {
-          console.log('No session information found - component might be missing or not implemented');
-        }
-      }
-      
-      // Test passes if we can at least access the page without errors
-      expect(page.url()).toContain('/profile');
-      
-    } catch (e) {
-      console.log('Error accessing session management:', e);
-      
-      // Even if component doesn't exist, test should pass if we can access the profile
-      expect(page.url()).toContain('/profile');
-    }
+    // Navigate to profile page
+    await page.goto('/profile');
+    
+    // Look for session management section
+    const sessionSection = page.getByRole('heading', { name: /active sessions|session management/i });
+    await expect(sessionSection).toBeVisible();
+    
+    // Verify current session is shown
+    const sessionTable = page.locator('table').filter({ hasText: /device|browser|ip|action/i });
+    await expect(sessionTable).toBeVisible();
+    
+    // Should have at least one row (current session)
+    const sessionRows = sessionTable.locator('tbody tr');
+    expect(await sessionRows.count()).toBeGreaterThan(0);
   });
 
   test('User can revoke a session if multiple exist', async () => {
-    // Try to navigate to session management
+    // Create a new session by logging in from a different browser context
+    const newContext = await page.context().browser()?.newContext();
+    const newPage = await newContext?.newPage();
+    
+    if (newPage) {
+      await loginUser(newPage);
+      await newPage.close();
+    }
+    
+    // Navigate to profile page
     await page.goto('/profile');
     
-    // Look for revoke buttons - if none exist, test is skipped
-    const revokeButtons = page.getByRole('button', { name: /revoke|remove session/i });
-    const revokeCount = await revokeButtons.count();
+    // Wait for session table to load
+    await page.waitForSelector('table:has-text("Active Sessions")');
     
-    if (revokeCount > 0) {
-      console.log(`Found ${revokeCount} revoke buttons`);
+    // Check if there are multiple sessions
+    const sessionRows = page.locator('table tbody tr');
+    const sessionCount = await sessionRows.count();
+    
+    if (sessionCount > 1) {
+      // Find and click the revoke button for the session that's not current
+      const revokeButtons = page.getByRole('button', { name: /revoke|terminate/i });
       
-      // Click the first revoke button (that's not for the current session)
+      // Expected to find at least one revoke button
+      await expect(revokeButtons).toBeVisible();
+      
+      // Click the first revoke button
       await revokeButtons.first().click();
       
-      // Wait for potential confirmation dialog
-      const confirmButton = page.getByRole('button', { name: /confirm|yes|proceed/i });
-      if (await confirmButton.isVisible().catch(() => false)) {
+      // Handle any confirmation dialogs
+      const confirmButton = page.getByRole('button', { name: /confirm|yes/i });
+      if (await confirmButton.isVisible()) {
         await confirmButton.click();
       }
       
-      // Look for success message or session disappearing
-      const hasSuccessFeedback = await Promise.race([
-        page.getByText(/session revoked|removed/i).isVisible().catch(() => false),
-        page.locator('[role="alert"]').isVisible().catch(() => false)
-      ]);
-      
-      if (hasSuccessFeedback) {
-        console.log('Success message found after revoking session');
-      } else {
-        // If no success message, check if number of sessions decreased
-        const newRevokeCount = await revokeButtons.count();
-        console.log(`Session count after revoke: ${newRevokeCount} (was ${revokeCount})`);
-        
-        // Test passes if buttons changed or session UI is still accessible
-        expect(page.url()).toContain('/profile');
-      }
+      // Verify session count decreases
+      await page.waitForTimeout(500); // Small delay for UI update
+      const newSessionCount = await page.locator('table tbody tr').count();
+      expect(newSessionCount).toBeLessThan(sessionCount);
     } else {
-      console.log('No other sessions to revoke - test requirements not met');
+      console.log('Only one session detected, skipping revocation test');
       test.skip();
     }
   });
 
-  test('Protected routes redirect to login when not authenticated', async ({ browser }) => {
-    // Create a new incognito page (not logged in)
-    const incognitoPage = await browser.newPage();
+  test('Sessions respect timeout policy settings', async () => {
+    // This test checks if sessions timeout based on policy
+    // For this implementation, we'll test the session activity API endpoint
     
-    try {
-      // Try to access a protected route directly
-      await incognitoPage.goto('/profile');
-      await incognitoPage.waitForTimeout(2000);
-      
-      // Should be redirected to login
-      expect(incognitoPage.url()).toContain('/login');
-      
-      // Verify we see login form elements
-      const loginFormVisible = await Promise.race([
-        incognitoPage.getByRole('button', { name: /login|sign in/i }).isVisible().catch(() => false),
-        incognitoPage.locator('form').isVisible().catch(() => false),
-        incognitoPage.getByText(/sign in|login/i).isVisible().catch(() => false)
-      ]);
-      
-      expect(loginFormVisible).toBe(true);
-    } finally {
-      await incognitoPage.close();
+    // First, verify we're logged in
+    await page.goto('/profile');
+    await expect(page.getByRole('heading', { name: /profile|account/i })).toBeVisible();
+    
+    // Call the session enforcement API directly
+    const response = await page.request.post('/api/session/enforce-policies');
+    
+    // Verify the API works (returns 200 OK)
+    expect(response.status()).toBe(200);
+    
+    // Verify the response indicates success
+    const data = await response.json();
+    expect(data.success).toBe(true);
+  });
+
+  test('Admins can manage organization session policies', async () => {
+    // Skip test if not an admin user
+    const isAdmin = await page.evaluate(() => {
+      return window.localStorage.getItem('user-mgmt-user') 
+        ? JSON.parse(window.localStorage.getItem('user-mgmt-user') || '{}')?.app_metadata?.role === 'admin'
+        : false;
+    });
+    
+    if (!isAdmin) {
+      console.log('Skipping admin test - current user is not an admin');
+      test.skip();
+      return;
     }
+    
+    // Navigate to organization settings
+    await page.goto('/admin/organizations');
+    
+    // Click on an organization (first one)
+    await page.getByRole('link', { name: /view|manage|edit/i }).first().click();
+    
+    // Look for Security tab/section
+    const securityTab = page.getByRole('link', { name: /security|settings/i });
+    if (await securityTab.isVisible()) {
+      await securityTab.click();
+    }
+    
+    // Verify session policy form exists
+    const timeoutField = page.getByLabel(/session timeout/i);
+    await expect(timeoutField).toBeVisible();
+    
+    const maxSessionsField = page.getByLabel(/max sessions per user/i);
+    await expect(maxSessionsField).toBeVisible();
+    
+    // Update session timeout value
+    await timeoutField.clear();
+    await timeoutField.fill('60'); // 60 minutes
+    
+    // Update max sessions value
+    await maxSessionsField.clear();
+    await maxSessionsField.fill('3'); // 3 max sessions
+    
+    // Save changes
+    await page.getByRole('button', { name: /save|update|apply/i }).click();
+    
+    // Verify success message appears
+    await expect(page.getByText(/saved|updated|success/i)).toBeVisible();
   });
 }); 

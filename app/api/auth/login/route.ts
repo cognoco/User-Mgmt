@@ -1,9 +1,8 @@
-import { type NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getServiceSupabase } from '@/lib/database/supabase'; // Corrected import path
-import { checkRateLimit } from '@/middleware/rate-limit'; // Corrected import path
-import { logUserAction } from '@/lib/audit/auditLogger'; // Added audit logger import
-// Removed SupabaseAuthError import
+import { getServiceSupabase } from '@/lib/database/supabase';
+import { checkRateLimit } from '@/middleware/rate-limit';
+import { logUserAction } from '@/lib/audit/auditLogger';
 
 // Zod schema for login data (matches original)
 const LoginSchema = z.object({
@@ -14,8 +13,8 @@ const LoginSchema = z.object({
 
 export async function POST(request: NextRequest) {
   // Get IP and User Agent early
-  const ipAddress = request.ip;
-  const userAgent = request.headers.get('user-agent');
+  const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
+  const userAgent = request.headers.get('user-agent') || 'unknown';
 
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
@@ -95,6 +94,23 @@ export async function POST(request: NextRequest) {
     if (!data.session || !data.user) {
         console.error('Login successful but no session/user returned');
         return NextResponse.json({ error: 'Login failed unexpectedly after authentication.' }, { status: 500 });
+    }
+
+    // If login successful, handle session policies
+    if (data && data.user && data.session) {
+      try {
+        // Update the user metadata with last login time and last activity
+        await supabaseService.auth.admin.updateUserById(data.user.id, {
+          user_metadata: {
+            ...data.user.user_metadata,
+            last_login: new Date().toISOString(),
+            last_activity: new Date().toISOString()
+          }
+        });
+      } catch (error) {
+        console.error('Error updating user metadata:', error);
+        // Continue with login regardless
+      }
     }
 
     // If rememberMe is true, extend the session

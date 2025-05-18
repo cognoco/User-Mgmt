@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
-import { use2FAStore } from '@/lib/stores/2fa.store';
-import { TwoFactorMethod, type TwoFactorFactor } from '@/types/2fa';
+// import { use2FAStore } from '@/lib/stores/2fa.store'; // Unused
+import { TwoFactorMethod } from '@/types/2fa';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api/axios';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, CheckCircle, XCircle, QrCode, Smartphone, KeyRound, Trash2, Edit, Save, Copy } from "lucide-react";
-import { useUserManagement } from "@/lib/auth/UserManagementProvider";
+// import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"; // Unused
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Unused
+// import { Loader2, CheckCircle, XCircle, QrCode, Smartphone, KeyRound, Trash2, Edit, Save, Copy } from "lucide-react"; // Unused
+// import { useUserManagement } from "@/lib/auth/UserManagementProvider"; // Unused
 // import { useAuthStore } from "@/lib/stores/auth.store"; // Keep commented if unused
 
 interface TwoFactorSetupProps {
@@ -28,22 +28,63 @@ export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [secret, setSecret] = useState<string | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<TwoFactorMethod | null>(null);
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [showPhoneInput, setShowPhoneInput] = useState(false);
+  const [showEmailInput, setShowEmailInput] = useState(false);
 
   const handleMethodSelect = async (method: TwoFactorMethod) => {
+    setSelectedMethod(method);
+    setError(null);
+    if (method === TwoFactorMethod.SMS) {
+      setShowPhoneInput(true);
+      setShowEmailInput(false);
+      setStep('method');
+      return;
+    }
+    if (method === TwoFactorMethod.EMAIL) {
+      setShowEmailInput(true);
+      setShowPhoneInput(false);
+      setStep('method');
+      return;
+    }
     try {
       setIsLoading(true);
-      setError(null);
-
       const response = await api.post('/api/2fa/setup', { method });
-      
       if (method === TwoFactorMethod.TOTP) {
         setQrCode(response.data.qrCode);
         setSecret(response.data.secret);
       }
-      
       setStep('verify');
     } catch (error: any) {
       setError(error.response?.data?.error || 'Failed to set up 2FA');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSmsSetup = async () => {
+    setError(null);
+    try {
+      setIsLoading(true);
+      await api.post('/api/2fa/setup', { method: TwoFactorMethod.SMS, phone });
+      setStep('verify');
+    } catch (error: any) {
+      setError(error.response?.data?.error || 'Failed to send SMS code');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailSetup = async () => {
+    setError(null);
+    try {
+      setIsLoading(true);
+      await api.post('/api/2fa/setup', { method: TwoFactorMethod.EMAIL, email });
+      setStep('verify');
+    } catch (error: any) {
+      setError(error.response?.data?.error || 'Failed to send email code');
     } finally {
       setIsLoading(false);
     }
@@ -53,16 +94,13 @@ export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
     try {
       setIsLoading(true);
       setError(null);
-
       await api.post('/api/2fa/verify', {
-        method: TwoFactorMethod.TOTP,
+        method: selectedMethod || TwoFactorMethod.TOTP,
         code: verificationCode,
       });
-      
       // Generate backup codes
       const backupResponse = await api.post('/api/2fa/backup-codes');
       setBackupCodes(backupResponse.data.codes);
-      
       setStep('backup');
     } catch (error: any) {
       setError(error.response?.data?.error || 'Failed to verify 2FA');
@@ -133,25 +171,60 @@ export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
             <Button
               variant="outline"
               onClick={() => handleMethodSelect(TwoFactorMethod.SMS)}
-              disabled={isLoading || true} // Disabled until implemented
+              disabled={isLoading}
             >
-              {t('2fa.methods.sms')} ({t('common.comingSoon')})
+              {t('2fa.methods.sms')}
             </Button>
             <Button
               variant="outline"
               onClick={() => handleMethodSelect(TwoFactorMethod.EMAIL)}
-              disabled={isLoading || true} // Disabled until implemented
+              disabled={isLoading}
             >
-              {t('2fa.methods.email')} ({t('common.comingSoon')})
+              {t('2fa.methods.email')}
             </Button>
           </div>
+          {showPhoneInput && (
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="phone">{t('2fa.setup.sms.enterPhone')}</Label>
+              <Input
+                id="phone"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                placeholder="+1234567890"
+                disabled={isLoading}
+              />
+              <Button onClick={handleSmsSetup} disabled={isLoading || !phone}>
+                {t('2fa.setup.sms.sendCode') || 'Send Code'}
+              </Button>
+              <Button variant="outline" onClick={() => setShowPhoneInput(false)}>
+                {t('common.back')}
+              </Button>
+            </div>
+          )}
+          {showEmailInput && (
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="email">{t('2fa.setup.email.enterEmail')}</Label>
+              <Input
+                id="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="user@example.com"
+                disabled={isLoading}
+              />
+              <Button onClick={handleEmailSetup} disabled={isLoading || !email}>
+                {t('2fa.setup.email.sendCode') || 'Send Code'}
+              </Button>
+              <Button variant="outline" onClick={() => setShowEmailInput(false)}>
+                {t('common.back')}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
       {step === 'verify' && (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">{t('2fa.setup.verify')}</h3>
-          
           {qrCode && (
             <div className="flex flex-col items-center mb-4">
               <img src={qrCode} alt="QR Code" className="mb-2 w-48 h-48" />
@@ -163,14 +236,13 @@ export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
               )}
             </div>
           )}
-          
           <div className="space-y-2">
-            <Label htmlFor="code">{t('2fa.setup.enterCode')}</Label>
+            <Label htmlFor="code">{selectedMethod === TwoFactorMethod.SMS ? t('2fa.setup.sms.verifyCode') : selectedMethod === TwoFactorMethod.EMAIL ? t('2fa.setup.email.verifyCode') : t('2fa.setup.enterCode')}</Label>
             <Input
               id="code"
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value)}
-              placeholder="000000"
+              placeholder={selectedMethod === TwoFactorMethod.SMS ? '000000' : selectedMethod === TwoFactorMethod.EMAIL ? 'user@example.com' : '000000'}
               maxLength={6}
               disabled={isLoading}
             />

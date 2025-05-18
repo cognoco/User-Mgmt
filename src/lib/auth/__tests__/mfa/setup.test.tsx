@@ -100,7 +100,81 @@ describe('Multi-Factor Authentication Setup', () => {
     });
   });
 
-  // test('User can setup SMS authentication', async () => { ... });
+  test('User can setup SMS (text message) authentication', async () => {
+    // Mock the specific API calls for SMS setup
+    (api.post as Mock).mockImplementation(async (url: string, body: any) => {
+      if (url === '/api/2fa/setup') {
+        // Step 1: User selects SMS and enters phone
+        if (body.method === 'sms') {
+          return Promise.resolve({ data: { phone: '+1234567890' } });
+        }
+      }
+      if (url === '/api/2fa/send-sms') {
+        // Step 2: Send code to phone
+        return Promise.resolve({ data: { sent: true } });
+      }
+      if (url === '/api/2fa/verify') {
+        // Step 3: User enters code and verifies
+        if (body.method === 'sms' && body.code === '654321') {
+          return Promise.resolve({ data: {} });
+        } else {
+          return Promise.reject({ response: { data: { error: 'Invalid code' } } });
+        }
+      }
+      if (url === '/api/2fa/backup-codes') {
+        // Step 4: Generate backup codes
+        return Promise.resolve({ data: { codes: ['444','555','666'] } });
+      }
+      return Promise.reject(new Error(`Unhandled API POST call to ${url}`));
+    });
+
+    render(<TwoFactorSetup />);
+
+    // Wait for component to load
+    await waitFor(() => {
+      expect(screen.getByText('2fa.setup.selectMethod')).toBeInTheDocument();
+    });
+
+    // Select SMS option
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: '2fa.methods.sms' }));
+    });
+
+    // Enter phone number
+    await act(async () => {
+      await user.type(screen.getByLabelText('2fa.setup.enterPhone'), '+1234567890');
+    });
+
+    // Submit phone number to send code
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: '2fa.setup.sendCode' }));
+    });
+
+    // Wait for code entry UI
+    await waitFor(() => {
+      expect(screen.getByLabelText('2fa.setup.enterCode')).toBeInTheDocument();
+    });
+
+    // Enter the received code
+    await act(async () => {
+      await user.type(screen.getByLabelText('2fa.setup.enterCode'), '654321');
+    });
+
+    // Submit verification
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: '2fa.setup.verify' }));
+    });
+
+    // Verify API calls were made and backup codes are shown
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith('/api/2fa/setup', { method: 'sms', phone: '+1234567890' });
+      expect(api.post).toHaveBeenCalledWith('/api/2fa/send-sms', { phone: '+1234567890' });
+      expect(api.post).toHaveBeenCalledWith('/api/2fa/verify', { method: 'sms', code: '654321' });
+      expect(api.post).toHaveBeenCalledWith('/api/2fa/backup-codes');
+      expect(screen.getByText('2fa.setup.backupCodes')).toBeInTheDocument();
+      expect(screen.getByText('444')).toBeInTheDocument();
+    });
+  });
 
   // test('User can generate and view backup codes', async () => { ... });
 
