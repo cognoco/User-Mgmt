@@ -5,6 +5,7 @@ import { checkRateLimit } from '@/middleware/rate-limit';
 import { withAuthRateLimit } from '@/middleware/with-auth-rate-limit';
 import { withSecurity } from '@/middleware/with-security';
 import { logUserAction } from '@/lib/audit/auditLogger';
+import { associateUserWithCompanyByDomain } from '@/lib/auth/domainMatcher';
 
 // Zod schema for registration data (matches original)
 const RegistrationSchema = z.discriminatedUnion('userType', [
@@ -41,7 +42,9 @@ const RegistrationSchema = z.discriminatedUnion('userType', [
 
 async function handler(request: NextRequest): Promise<NextResponse> {
   // Get IP and User Agent early
-  const ipAddress = request.ip;
+  const ipAddress = request.headers.get('x-forwarded-for') || 
+                    request.headers.get('x-real-ip') || 
+                    'unknown';
   const userAgent = request.headers.get('user-agent');
   let emailForLogging: string | null = null; // Variable to hold email for logging
 
@@ -168,13 +171,45 @@ async function handler(request: NextRequest): Promise<NextResponse> {
         details: { email: data.user.email } // Log email as detail
     });
 
+    // 6. Handle domain-based company association for private users
+    let domainAssociationResult = null;
+    if (regData.userType === 'private') {
+      domainAssociationResult = await associateUserWithCompanyByDomain(
+        data.user.id,
+        data.user.email || ''
+      );
+      
+      if (domainAssociationResult.matched) {
+        // If a domain match was found, log the association
+        await logUserAction({
+          client: supabaseService,
+          userId: data.user.id,
+          action: 'COMPANY_DOMAIN_ASSOCIATION',
+          status: domainAssociationResult.success ? 'SUCCESS' : 'FAILURE',
+          ipAddress: ipAddress,
+          userAgent: userAgent,
+          targetResourceType: 'company',
+          targetResourceId: domainAssociationResult.companyId || '',
+          details: { 
+            success: domainAssociationResult.success,
+            companyName: domainAssociationResult.companyName,
+            error: domainAssociationResult.error
+          }
+        });
+      }
+    }
+
     // Return success message and user data (without session if verification is needed)
     return NextResponse.json({
       message: 'Registration successful. Please check your email to verify your account.',
-      user: data.user, 
+      user: data.user,
+      companyAssociation: domainAssociationResult?.matched ? {
+        success: domainAssociationResult.success,
+        companyName: domainAssociationResult.companyName
+      } : null
     }); // Default 200 OK
   } catch (error) {
-    // 6. Handle Unexpected Errors
+    // 7. Handle Unexpected Errors
     console.error('Registration error:', error);
     const message = error instanceof Error ? error.message : 'An unexpected error occurred';
     

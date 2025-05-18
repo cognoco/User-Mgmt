@@ -19,6 +19,8 @@ export interface CompanyProfile {
   domain_verification_token?: string | null;
   domain_verified?: boolean;
   domain_last_checked?: string | null; // ISO string timestamp
+  // New fields for multiple domains
+  domains?: CompanyDomain[];
 }
 
 export type AddressType = 'billing' | 'shipping' | 'legal';
@@ -52,4 +54,61 @@ export interface CompanyDocument {
   created_at: string;
   updated_at: string;
   signedUrl?: string | null;
+}
+
+// New type for company domains
+export interface CompanyDomain {
+  id: string;
+  company_id: string;
+  domain: string;
+  is_primary: boolean;
+  verification_token?: string | null;
+  is_verified: boolean;
+  verification_method: 'dns_txt' | string;
+  verification_date?: string | null; // ISO string timestamp
+  last_checked?: string | null; // ISO string timestamp
+  created_at: string;
+  updated_at: string;
+}
+
+// Notification types
+export type NotificationType = 'new_member_domain' | 'domain_verified' | 'domain_verification_failed' | 'security_alert';
+export type NotificationChannel = 'email' | 'in_app' | 'both';
+
+// Company notification preferences
+export interface CompanyNotificationPreference {
+  id: string;
+  company_id: string;
+  notification_type: NotificationType;
+  enabled: boolean;
+  channel: NotificationChannel;
+  created_at: string;
+  updated_at: string;
+  recipients?: CompanyNotificationRecipient[];
+}
+
+// Company notification recipients
+export interface CompanyNotificationRecipient {
+  id: string;
+  preference_id: string;
+  user_id?: string;
+  email?: string;
+  is_admin: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Company notification logs
+export interface CompanyNotificationLog {
+  id: string;
+  preference_id?: string;
+  recipient_id?: string;
+  notification_type: NotificationType;
+  channel: NotificationChannel;
+  content: any; // JSONB content
+  status: 'pending' | 'sent' | 'failed' | 'delivered';
+  error_message?: string;
+  sent_at?: string;
+  created_at: string;
+  updated_at: string;
 } 

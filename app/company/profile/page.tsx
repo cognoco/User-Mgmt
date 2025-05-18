@@ -3,11 +3,13 @@
 import { useEffect } from 'react';
 import { CompanyProfileForm } from '@/components/company/CompanyProfileForm';
 import { useCompanyProfileStore } from '@/lib/stores/companyProfileStore';
-import { DomainVerification } from '@/components/company/DomainVerification';
+import { DomainManagement } from '@/components/company/DomainManagement';
+import { CompanyNotificationPreferences } from '@/components/company/NotificationPreferences';
 import { CompanyProfile } from '@/types/company';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function CompanyProfilePage() {
   const { profile, isLoading, error, fetchProfile, updateProfile } = useCompanyProfileStore();
@@ -34,14 +36,6 @@ export default function CompanyProfilePage() {
       </Alert>
     );
   }
-
-  const relevantProfileData = profile ? {
-    id: profile.id,
-    domain_name: profile.domain_name,
-    domain_verified: profile.domain_verified,
-    domain_verification_token: profile.domain_verification_token,
-    website: profile.website
-  } : null;
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -78,11 +72,28 @@ export default function CompanyProfilePage() {
       </Card>
 
       {profile && (
-        <DomainVerification 
-          profile={relevantProfileData} 
-          onVerificationChange={handleVerificationChange} 
-        />
+        <Tabs defaultValue="domains" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="domains">Domain Management</TabsTrigger>
+            <TabsTrigger value="notifications">Notification Preferences</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="domains" className="space-y-4">
+            <DomainManagement 
+              companyId={profile.id} 
+              website={profile.website}
+              onVerificationChange={handleVerificationChange} 
+            />
+          </TabsContent>
+          
+          <TabsContent value="notifications" className="space-y-4">
+            <CompanyNotificationPreferences
+              companyId={profile.id}
+            />
+          </TabsContent>
+        </Tabs>
       )}
+      
       {(isLoading && !profile) && (
         <Card>
           <CardHeader>
