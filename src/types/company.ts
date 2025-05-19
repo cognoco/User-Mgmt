@@ -72,7 +72,7 @@ export interface CompanyDomain {
 }
 
 // Notification types
-export type NotificationType = 'new_member_domain' | 'domain_verified' | 'domain_verification_failed' | 'security_alert';
+export type NotificationType = 'new_member_domain' | 'domain_verified' | 'domain_verification_failed' | 'security_alert' | 'sso_event';
 export type NotificationChannel = 'email' | 'in_app' | 'both';
 
 // Company notification preferences

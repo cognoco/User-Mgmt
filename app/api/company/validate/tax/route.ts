@@ -10,6 +10,38 @@ const ValidationRequestSchema = z.object({
 
 type ValidationRequest = z.infer<typeof ValidationRequestSchema>;
 
+type ValidationResult = {
+  isValid: boolean;
+  details: any;
+  status: 'valid' | 'invalid' | 'not_supported' | 'error';
+  message: string;
+};
+
+// --- Country-specific validation strategies ---
+const countryValidators: Record<string, (taxId: string) => Promise<ValidationResult>> = {
+  // EU VAT (mock VIES)
+  'DE': async (taxId) => ({
+    isValid: /^DE[0-9]{9}$/.test(taxId),
+    details: { system: 'VIES', country: 'DE' },
+    status: /^DE[0-9]{9}$/.test(taxId) ? 'valid' : 'invalid',
+    message: /^DE[0-9]{9}$/.test(taxId) ? 'Valid German VAT ID' : 'Invalid German VAT ID',
+  }),
+  'FR': async (taxId) => ({
+    isValid: /^FR[0-9A-Z]{2}[0-9]{9}$/.test(taxId),
+    details: { system: 'VIES', country: 'FR' },
+    status: /^FR[0-9A-Z]{2}[0-9]{9}$/.test(taxId) ? 'valid' : 'invalid',
+    message: /^FR[0-9A-Z]{2}[0-9]{9}$/.test(taxId) ? 'Valid French VAT ID' : 'Invalid French VAT ID',
+  }),
+  // US EIN (mock)
+  'US': async (taxId) => ({
+    isValid: /^[0-9]{2}-[0-9]{7}$/.test(taxId),
+    details: { system: 'IRS', country: 'US' },
+    status: /^[0-9]{2}-[0-9]{7}$/.test(taxId) ? 'valid' : 'invalid',
+    message: /^[0-9]{2}-[0-9]{7}$/.test(taxId) ? 'Valid US EIN' : 'Invalid US EIN',
+  }),
+  // Add more countries here as needed
+};
+
 export async function POST(request: NextRequest) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
@@ -47,41 +79,34 @@ export async function POST(request: NextRequest) {
     
     const { taxId, countryCode } = parseResult.data;
 
-    // --- TODO: Implement Country-Specific Validation Logic (e.g., VIES for EU VAT) ---
-    console.warn(`Tax ID (${taxId}) validation for ${countryCode} not implemented yet.`);
-    
-    // For now, return a placeholder indicating it's not implemented for this country
-    return NextResponse.json({ 
-        status: 'error', // Or 'pending', 'not_supported'
-        message: `Validation for country ${countryCode} is not yet implemented.` 
-    }, { status: 501 }); // 501 Not Implemented
-
-    /* 
-    // --- Example of Future Implementation ---
-    
-    let validationResult = { isValid: false, details: { message: 'Not implemented' } };
-    if (['DE', 'FR', 'ES'].includes(countryCode)) { // Example EU countries
-       // validationResult = await callVIESApi(taxId, countryCode);
+    const validator = countryValidators[countryCode.toUpperCase()];
+    let validationResult: ValidationResult;
+    if (validator) {
+      validationResult = await validator(taxId);
     } else {
-       // validationResult = { isValid: false, details: { message: 'Validation not supported for this country yet.' } };
+      validationResult = {
+        isValid: false,
+        details: { message: 'Validation not supported for this country.' },
+        status: 'not_supported',
+        message: `Validation for country ${countryCode} is not yet implemented.`
+      };
     }
 
-    // Update company_profiles table in Supabase
+    // Update company_profiles
     await supabaseService
-        .from('company_profiles')
-        .update({
-            tax_id_verified: validationResult.isValid,
-            tax_id_last_checked: new Date().toISOString(),
-            tax_id_validation_details: validationResult.details,
-         })
-        .eq('user_id', user.id); // Assuming company_profiles has a user_id link
+      .from('company_profiles')
+      .update({
+        tax_id_verified: validationResult.isValid,
+        tax_id_last_checked: new Date().toISOString(),
+        tax_id_validation_details: validationResult.details,
+      })
+      .eq('user_id', user.id);
 
-    // Return result to frontend
     return NextResponse.json({
-       status: validationResult.isValid ? 'valid' : 'invalid',
-       message: validationResult.details.message
-    }); 
-    */
+      status: validationResult.status,
+      message: validationResult.message,
+      details: validationResult.details,
+    });
 
   } catch (error) {
     console.error('Unexpected error in POST /api/company/validate/tax:', error);

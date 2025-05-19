@@ -2,7 +2,7 @@ import { getServiceSupabase } from '@/lib/database/supabase';
 
 interface NotificationOptions {
   companyId: string;
-  notificationType: 'new_member_domain' | 'domain_verified' | 'domain_verification_failed' | 'security_alert';
+  notificationType: 'new_member_domain' | 'domain_verified' | 'domain_verification_failed' | 'security_alert' | 'sso_event';
   subject: string;
   content: string;
   data?: Record<string, any>; // Optional additional data for templating

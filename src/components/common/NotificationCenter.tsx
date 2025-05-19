@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Bell, Check, RefreshCw, Info, ShieldAlert, Settings, MessageSquare } from 'lucide-react';
+import { Bell, Check, RefreshCw, Info, ShieldAlert, Settings, MessageSquare, KeyRound } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import {
   Popover,
@@ -13,6 +13,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
+import { useAuthStore } from '@/lib/stores/auth.store';
+import type { CompanyNotificationLog } from '@/types/company';
 
 // Notification type with more details
 interface Notification {
@@ -20,7 +22,7 @@ interface Notification {
   userId: string;
   title: string;
   message: string;
-  category: 'system' | 'security' | 'account' | 'promotional' | 'updates' | 'activity';
+  category: 'system' | 'security' | 'account' | 'promotional' | 'updates' | 'activity' | 'sso';
   isRead: boolean;
   created_at: string;
   action?: {
@@ -32,6 +34,8 @@ interface Notification {
 
 const getIconForCategory = (category: Notification['category']) => {
   switch (category) {
+    case 'sso':
+      return <KeyRound className="h-4 w-4 text-indigo-500" />;
     case 'security':
       return <ShieldAlert className="h-4 w-4 text-red-500" />;
     case 'system':
@@ -106,49 +110,60 @@ const NotificationItem: React.FC<{
  * Displays user notifications with multiple categories and real-time updates.
  */
 export const NotificationCenter: React.FC = () => {
+  const { user } = useAuthStore();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Fetch notifications from the backend
+  // Fetch notifications from company_notification_logs for the current user
   const fetchNotifications = useCallback(async () => {
+    if (!user?.id) return;
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('notifications')
+        .from('company_notification_logs')
         .select('*')
+        .eq('recipient_id', user.id)
+        .eq('channel', 'in_app')
         .order('created_at', { ascending: false });
-      
-      if (error) {
-        throw error;
-      }
-      
-      setNotifications(data || []);
-      setUnreadCount(data?.filter(notif => !notif.isRead).length || 0);
+      if (error) throw error;
+      // Map company_notification_logs to Notification type
+      const mapped: Notification[] = (data as (CompanyNotificationLog & { is_read?: boolean; })[]).map((log) => {
+        let category: Notification['category'] = 'system';
+        if (log.notification_type === 'sso_event') category = 'sso';
+        else if (log.notification_type === 'security_alert') category = 'security';
+        else if (log.notification_type === 'new_member_domain' || log.notification_type === 'domain_verified' || log.notification_type === 'domain_verification_failed') category = 'account';
+        return {
+          id: log.id,
+          userId: log.recipient_id || '',
+          title: log.content?.subject || 'Notification',
+          message: log.content?.content || '',
+          category,
+          isRead: !!log.is_read,
+          created_at: log.created_at,
+        };
+      });
+      setNotifications(mapped);
+      setUnreadCount(mapped.filter(n => !n.isRead).length);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user]);
 
   // Mark a notification as read
   const markAsRead = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('notifications')
-        .update({ isRead: true })
+        .from('company_notification_logs')
+        .update({ is_read: true })
         .eq('id', id);
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Update local state
-      setNotifications(prevNotifications => 
-        prevNotifications.map(notif => 
+      if (error) throw error;
+      setNotifications(prevNotifications =>
+        prevNotifications.map(notif =>
           notif.id === id ? { ...notif, isRead: true } : notif
         )
       );
@@ -161,17 +176,14 @@ export const NotificationCenter: React.FC = () => {
   // Mark all notifications as read
   const markAllAsRead = async () => {
     try {
+      const unreadIds = notifications.filter(n => !n.isRead).map(n => n.id);
+      if (unreadIds.length === 0) return;
       const { error } = await supabase
-        .from('notifications')
-        .update({ isRead: true })
-        .eq('isRead', false);
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Update local state
-      setNotifications(prevNotifications => 
+        .from('company_notification_logs')
+        .update({ is_read: true })
+        .in('id', unreadIds);
+      if (error) throw error;
+      setNotifications(prevNotifications =>
         prevNotifications.map(notif => ({ ...notif, isRead: true }))
       );
       setUnreadCount(0);
@@ -235,7 +247,13 @@ export const NotificationCenter: React.FC = () => {
     ? notifications
     : activeTab === 'unread'
       ? notifications.filter(n => !n.isRead)
-      : notifications.filter(n => n.category === activeTab);
+      : activeTab === 'security'
+        ? notifications.filter(n => n.category === 'security')
+        : activeTab === 'account'
+          ? notifications.filter(n => n.category === 'account')
+          : activeTab === 'sso'
+            ? notifications.filter(n => n.category === 'sso')
+            : notifications;
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -282,6 +300,7 @@ export const NotificationCenter: React.FC = () => {
             <TabsTrigger value="unread" className="text-xs">Unread {unreadCount > 0 && `(${unreadCount})`}</TabsTrigger>
             <TabsTrigger value="security" className="text-xs">Security</TabsTrigger>
             <TabsTrigger value="account" className="text-xs">Account</TabsTrigger>
+            <TabsTrigger value="sso" className="text-xs">SSO Events</TabsTrigger>
           </TabsList>
           
           <TabsContent value={activeTab} className="p-0 m-0">

@@ -10,6 +10,44 @@ const ValidationRequestSchema = z.object({
 
 type ValidationRequest = z.infer<typeof ValidationRequestSchema>;
 
+type ValidationResult = {
+  isValid: boolean;
+  details: any;
+  status: 'valid' | 'invalid' | 'not_supported' | 'error';
+  message: string;
+};
+
+// --- Country-specific validation strategies ---
+const countryValidators: Record<string, (registrationNumber: string) => Promise<ValidationResult>> = {
+  // UK Companies House (mock)
+  'GB': async (registrationNumber) => ({
+    isValid: /^[0-9]{8}$/.test(registrationNumber),
+    details: { system: 'Companies House', country: 'GB' },
+    status: /^[0-9]{8}$/.test(registrationNumber) ? 'valid' : 'invalid',
+    message: /^[0-9]{8}$/.test(registrationNumber) ? 'Valid UK registration number' : 'Invalid UK registration number',
+  }),
+  // Germany, France, Spain (mock EU registry)
+  'DE': async (registrationNumber) => ({
+    isValid: /^[A-Z0-9]{9}$/.test(registrationNumber),
+    details: { system: 'EU Registry', country: 'DE' },
+    status: /^[A-Z0-9]{9}$/.test(registrationNumber) ? 'valid' : 'invalid',
+    message: /^[A-Z0-9]{9}$/.test(registrationNumber) ? 'Valid German registration number' : 'Invalid German registration number',
+  }),
+  'FR': async (registrationNumber) => ({
+    isValid: /^[A-Z0-9]{9}$/.test(registrationNumber),
+    details: { system: 'EU Registry', country: 'FR' },
+    status: /^[A-Z0-9]{9}$/.test(registrationNumber) ? 'valid' : 'invalid',
+    message: /^[A-Z0-9]{9}$/.test(registrationNumber) ? 'Valid French registration number' : 'Invalid French registration number',
+  }),
+  'ES': async (registrationNumber) => ({
+    isValid: /^[A-Z0-9]{9}$/.test(registrationNumber),
+    details: { system: 'EU Registry', country: 'ES' },
+    status: /^[A-Z0-9]{9}$/.test(registrationNumber) ? 'valid' : 'invalid',
+    message: /^[A-Z0-9]{9}$/.test(registrationNumber) ? 'Valid Spanish registration number' : 'Invalid Spanish registration number',
+  }),
+  // Add more countries here as needed
+};
+
 export async function POST(request: NextRequest) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
@@ -47,45 +85,34 @@ export async function POST(request: NextRequest) {
     
     const { registrationNumber, countryCode } = parseResult.data;
 
-    // --- TODO: Implement Country-Specific Validation Logic ---
-    console.warn(`Registration number (${registrationNumber}) validation for ${countryCode} not implemented yet.`);
-    
-    // Placeholder: Update DB as 'unchecked' or similar? Or wait for real validation?
-    // For now, return a placeholder indicating it's not implemented for this country
-    
-    return NextResponse.json({ 
-        status: 'error', // Or 'pending', 'not_supported'
-        message: `Validation for country ${countryCode} is not yet implemented.` 
-    }, { status: 501 }); // 501 Not Implemented
-
-    /* 
-    // --- Example of Future Implementation ---
-    
-    let validationResult = { isValid: false, details: { message: 'Not implemented' } };
-    if (countryCode === 'GB') {
-       // validationResult = await callCompaniesHouseAPI(registrationNumber);
-    } else if (['DE', 'FR', 'ES'].includes(countryCode)) {
-       // validationResult = await callEURegistryAPI(registrationNumber, countryCode);
+    const validator = countryValidators[countryCode.toUpperCase()];
+    let validationResult: ValidationResult;
+    if (validator) {
+      validationResult = await validator(registrationNumber);
     } else {
-       // validationResult = { isValid: false, details: { message: 'Validation not supported for this country yet.' } };
+      validationResult = {
+        isValid: false,
+        details: { message: 'Validation not supported for this country.' },
+        status: 'not_supported',
+        message: `Validation for country ${countryCode} is not yet implemented.`
+      };
     }
 
-    // Update company_profiles table in Supabase
+    // Update company_profiles
     await supabaseService
-        .from('company_profiles')
-        .update({
-            registration_number_verified: validationResult.isValid,
-            registration_number_last_checked: new Date().toISOString(),
-            registration_number_validation_details: validationResult.details,
-         })
-        .eq('user_id', user.id); // Assuming company_profiles has a user_id link
+      .from('company_profiles')
+      .update({
+        registration_number_verified: validationResult.isValid,
+        registration_number_last_checked: new Date().toISOString(),
+        registration_number_validation_details: validationResult.details,
+      })
+      .eq('user_id', user.id);
 
-    // Return result to frontend
     return NextResponse.json({
-       status: validationResult.isValid ? 'valid' : 'invalid',
-       message: validationResult.details.message
-    }); 
-    */
+      status: validationResult.status,
+      message: validationResult.message,
+      details: validationResult.details,
+    });
 
   } catch (error) {
     console.error('Unexpected error in POST /api/company/validate/registration:', error);

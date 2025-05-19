@@ -4,6 +4,142 @@ Below you will find a variety of important rules spanning:
 - the template to follow when modifying or adding new sections/rules to this document.
 
 ---
+
+## General Principles
+
+- **Modular & Pluggable:**  
+  Build the app as a standalone, modular block that can be easily integrated into any web or mobile application. All non-core features must be easy to enable/disable for different host apps.
+
+- **Database Agnostic:**  
+  While Supabase is currently used, all code must be cleanly separated and easy to adapt to other databases in the future.
+
+- **Separation of Concerns:**  
+  Keep frontend and backend code strictly separated.
+
+- **Code Quality:**  
+  All changes must make the app more robust and production-ready. Never introduce fixes that solve one problem but create others.
+
+- **Change Management:**  
+  Only change one functionality at a time, then pause for user review before proceeding (except when fixing all issues within a single test file or suite).
+
+- **File & Reference Hygiene:**  
+  - Before creating or moving any file, check the entire codebase (including all subfolders) to avoid duplicates.
+  - If a file is referenced but missing, search for it elsewhere before creating a new one.
+  - Remove or update references to the old `/project` directory, as all code now resides in the root.
+  - **When creating any new file (not just for testing), strictly follow the conventions in `docs/File structure guidelines.md`.**
+
+- **Tech Stack:**  
+  Use only the established stack (Next.js, TypeScript, React, Supabase, Zustand, Tailwind CSS, Shadcn UI, Vitest, React Testing Library, User Event, MSW, JSDOM, Testing Library Jest DOM). Ask before introducing new technologies.
+
+### Testing Rules
+
+FOR E2E tests - THESE TESTS ARE MADE TO DISCOVER BUGS. DO NOT FIX A TEST IF UI/API/HOOK or some other functionality is missing! Keep them as close to reality and avoid mockings where possilble. DO not fix the test so that it passes when it points to missing/wrong implementation. 
+Before you run the E2E for any feature, first read the expected implementation that is described in one of the relevant files under docs/Product documentation/functionality-features-phase...
+Find the correct file and identify the relevant end user flows and features. Then read the full application implementation and ensure that all expected features are covered. If not - expand the implementation! 
+After this read the test file and ensure all tests are there and cover all expected features and flows. If not, expand the file. 
+Read file called TESTING ISSUES-E2E
+Only then run the test suite. 
+Be aware that a lot of the ui is missing and if the test fails it might be a real bug. 
+Dont run the whole test file after each change. Run only the failing tests you are trying to fix - you can only run for separate browsers. Some of the full test files are large and take long time to run. Only run them at important points - once you believe they should all pass or if you are not sure if you broke some. At the end of each bug fixing run the full test file. It is your responsibility to fix these tests so that they are passing. Run the test, continue debugging and then run again until all tests in the file pass. 
+You dont have to update the user with bugs/issues etc, but update the user once all tests in the file are passing. Skipped test count as failed unless there is a very good reason that they are skipped. 
+Never run the whole E2E suite.
+Once all tests in the file you are working on are passing update the documentation in TESTING ISSUES-E2E if you encountered some issues that can be relevant for future bug fixing. 
+
+Command examples:
+To run the whole file: 
+ npx playwright test e2e/auth/registration.spec.ts 
+ to run one test: 
+ npx playwright test e2e/auth/registration.spec.ts --grep="should disable submit button when form is invalid|should show error for invalid email format"
+To run one type of browser:
+npx playwright test e2e/auth/registration.spec.ts:219 --project="Desktop Chrome" --headed
+
+
+
+- **Testing Focus:**  
+  - Prioritize end-user flows and critical functionality (e.g., registration, login, profile update, MFA setup).
+  - Avoid exhaustive low-level/unit tests unless necessary for complex logic.
+  - Ensure test coverage mirrors real implementation and user experience.
+
+- **Test File Management:**  
+  - Strictly follow the file structure in `docs/File structure guidelines.md`.
+  - Before creating a new test or mock file, check for existing skeletons or similar files to prevent duplication.
+  - All mocking must be global—do not use local mocks.
+
+- **Test Failures:**  
+  - If a test fails due to an issue in the test file (selectors, mocks, async, etc.), you may fix the test.
+  - If a test fails due to a suspected bug in the application code, stop and report the issue for confirmation before making changes.
+  - For failing tests, check for import path issues and references to moved files before making other changes.
+  - Never delete or simplify real functionality just to make a test pass.
+
+- **Batching Test Fixes:**  
+  - Within a single test file or suite (e.g., `src/tests/integration`), fix all issues before reporting back. Batch all necessary changes and only report when the suite is green.
+
+### Documentation & Process
+
+- **Source of Truth:**  
+  - Prioritize `functionality-features-phase*.md` files for feature requirements.
+  - Use `docs/ROADMAP.md` for phase structure, but defer to the phase files for specifics.
+  - Refer to `docs/TESTING.md` and `docs/TESTING_ISSUES.md` for testing setup and known issues.
+  - Use `docs/auth-roles.md` for role definitions.
+
+- **Implementation Checklist:**  
+  - Track progress using the provided checklist, marking features as complete and noting dependencies, issues, and improvements.
+
+- **Continuous Improvement:**  
+  - Regularly review and update rules to reflect new patterns, best practices, and lessons learned.
+
+---
+
+**Summary:**  
+Build a robust, modular, and production-ready user management system that is easy to integrate, adapt, and test. Maintain strict discipline in file management, code quality, and testing focus. Always check for existing files and references, use only the approved tech stack, and prioritize real user flows in testing.
+
+---
+
+Please NEVER DELETE EXISTING FUNCTIONALITY in an implementation just to please the test file, NEVER CREATE A NEW FILE before you check the WHOLE code base including ALL Subfolders and ensure that such file is not existing in some other place. We NEED TO  AVOID DUPLICATES. USE THE EXISTING stack, ASK before you introduce a new technology. Do you have some other questions? Please read cursorrules and the two testing.md files before you start.  You can use the MCP tools to access supabase. The project ID is izziigqgdurqsoyvajvu
+  
+Ensure Test Coverage Mirrors Implementation as closely as possible. DO NOT REWRITE ANY real functionality ONLY DUE TO FAILED TEST unless the test found a real bug!The real component can be rewritten to be more robust or if it misses features it should have.  DOCUMENT RESULTS OF THE TEST and ask for next action. Once a test fails, the most probable reason for failing is a reference to a file that has been moved. For fixes always review the interdependencies in the files. You want tests that focus on the real functionality and simulate how an end-user would interact with the registration flow, catching bugs that affect the actual user experience, rather than exhaustive tests for every minor detail or internal state change. Please be aware that there are already skeleton files for the missing tests- so before you create a new file, make sure to search in the skeletons. 
+Be aware that it is a complex codebase. Before you change anything, make sure you read other files using the import/component/mock and that you correctly understand that the change will not break anything. For failing tests - read related passing test and search for pattern. What does the passing test do differently? If a similar test is passing, a change in global mock file is usually not the right solution! Think it thorugh thoroughly! NO LOCAL MOCKS. ALL mocking is done globally. 
+
+
+**Project Context:**
+
+*   The project is a User Management System built with Next.js (App Router), TypeScript, React, Supabase, Zustand, Tailwind CSS, and Shadcn UI. Testing uses Vitest and React Testing Library.
+*   The codebase resides entirely within the `/project` subdirectory of the workspace.
+*   A significant migration from an older Vite/Next.js split structure to this unified Next.js app in `/project` has been completed.
+*   Core personal authentication and basic profile/settings API/UI are implemented, roughly corresponding to Phases 1 & 2 outlined in the previous plans.
+*   API routes are located in `project/app/api/`, pages in `project/app/`, components in `project/src/components/`, stores/libs in `project/src/lib/`.
+*   Key documentation files include:
+    *  all files ending with .md  
+    *   `docs/ROADMAP.md`: Provides a higher-level overview of phases (extracted from an older plan). Use this for phase structure but rely on the `functionality-features-phase*.md` files for feature specifics.
+    *   `docs/TESTING.md`: Describes the current testing setup.
+    *   `docs/TESTING_ISSUES.md`: Details known testing issues.
+    *   `docs/auth-roles.md`: Defines role structure.
+
+
+
+**Instructions & Constraints:**
+
+*   **Prioritize the `functionality-features-phase*.md` files** as the source of truth for required features and details. 
+
+
+
+  
+  If we focus on testing Please follow these instructions carefully throughout our session:
+
+**Core Goal:** Implement robust tests focusing on end-user perspective and critical user flows.
+
+**Instructions & Constraints:**
+
+1.  **File System Diligence:** Before creating ANY new file (including test files, mocks, or helper utilities), YOU MUST thoroughly check all directories within the workspace to ensure a similar file doesn't already exist elsewhere. Prevent file duplication at all costs.
+2.  **Strict File Structure:** Adhere strictly to the conventions outlined in `docs/File structure guidelines.md` when creating necessary test files, mocks, or related artifacts.
+3.  **Existing Tech Stack Only:** Use only the established testing stack (Vitest, React Testing Library, User Event, MSW, JSDOM, Testing Library Jest DOM). If you believe a new technology is absolutely necessary, you MUST ask me before introducing it.
+4.  **Testing Priority:** Focus testing efforts on end-user scenarios. Test the application from the user's perspective, verifying complete user flows (e.g., registration, login, profile update, MFA setup). Prioritize tests that cover critical functionality over low-level unit tests, unless those unit tests are essential for complex logic.
+5.  **No Simplification for Passing Tests:** Do NOT simplify application code, remove features, or alter core functionality just to make tests pass. The application's intended behavior is paramount.
+6.  **Handling Test Failures:**
+    *   **If a test fails due to a problem within the test file itself** (e.g., incorrect selectors, faulty mocking, async/timing issues, structure not following guidelines): You have permission to modify the test file (`*.test.tsx`, `*.test.ts`, setup files, mocks) to fix the issue. Refer to `docs/TESTING_ISSUES.md` and `docs/TESTING.md` for known issues and best practices.
+    *   **If a test fails and you suspect the issue lies within the actual application code** (i.e., the component or function being tested seems broken or doesn't behave as expected): STOP immediately. Report the failing test, the specific discrepancy you observed, and ask me for confirmation and guidance before making any changes to the application source code (`/src/` or `/app/` directories, excluding test files).
+
+There is no project directory any longer. The project direcoty was in previous root. All the files have been migrated and reorganized into a new root. If there are references to project in the code you can remove them. Also, if test are failing make sure you check the import paths. 
 DEV_WORKFLOW
 ---
 description: Guide for using meta-development script (scripts/dev.js) to manage task-driven development workflows

@@ -10,6 +10,7 @@ import { describe, test, expect, beforeEach, vi } from 'vitest';
 
 // Import our standardized mock
 import { supabase } from '@/lib/database/supabase';
+import { NotificationCenter } from '@/components/common/NotificationCenter';
 
 describe('Notification Management Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;
@@ -320,5 +321,45 @@ describe('Notification Management Flow', () => {
         end_time: '07:00'
       }
     }));
+  });
+
+  test('Admin receives and views SSO event notification end-to-end', async () => {
+    // Mock SSO event notification in company_notification_logs
+    (supabase.from as any)('company_notification_logs').select.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'notif-sso-1',
+          recipient_id: 'user-123',
+          notification_type: 'sso_event',
+          channel: 'in_app',
+          content: { subject: 'SSO Configuration Updated', content: 'The SSO configuration for your organization has been updated.' },
+          is_read: false,
+          created_at: new Date().toISOString(),
+        }
+      ],
+      error: null
+    });
+    // Mock user context
+    (supabase.auth.getUser as any).mockResolvedValue({
+      data: { user: { id: 'user-123', email: 'admin@example.com' } },
+      error: null
+    });
+    // Render NotificationCenter
+    render(<NotificationCenter />);
+    // Wait for SSO notification to appear
+    await waitFor(() => {
+      expect(screen.getByText('SSO Configuration Updated')).toBeInTheDocument();
+    });
+    // Switch to SSO Events tab
+    await userEvent.click(screen.getByRole('tab', { name: /SSO Events/i }));
+    // Assert SSO notification is visible in SSO tab
+    expect(screen.getByText('SSO Configuration Updated')).toBeInTheDocument();
+    expect(screen.getByText('The SSO configuration for your organization has been updated.')).toBeInTheDocument();
+    // Mark as read
+    await userEvent.click(screen.getByRole('button', { name: /Mark as read/i }));
+    // Notification should now be marked as read (opacity or other UI change)
+    await waitFor(() => {
+      expect(screen.getByText('SSO Configuration Updated').closest('div')).toHaveClass('opacity-60');
+    });
   });
 });
