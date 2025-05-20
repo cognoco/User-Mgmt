@@ -1,0 +1,176 @@
+/**
+ * Permission Data Provider Interface
+ * 
+ * This file defines the interface for permission data providers.
+ * Following the adapter pattern, this interface abstracts the data access
+ * layer for permission and role operations, making the core business logic
+ * database-agnostic.
+ */
+
+import { 
+  Permission, 
+  Role, 
+  RoleWithPermissions, 
+  UserRole,
+  PermissionAssignment,
+  RoleCreationPayload,
+  RoleUpdatePayload
+} from '../../core/permission/models';
+import { PermissionEventHandler } from '../../core/permission/events';
+
+/**
+ * Permission data provider interface
+ * 
+ * This interface defines all permission and role-related data operations.
+ * Any implementation of this interface must provide all these methods.
+ */
+export interface PermissionDataProvider {
+  /**
+   * Check if a user has a specific permission
+   * 
+   * @param userId The user ID to check permissions for
+   * @param permission The permission to check
+   * @returns A boolean indicating if the user has the permission
+   */
+  hasPermission(userId: string, permission: Permission): Promise<boolean>;
+  
+  /**
+   * Check if a user has a specific role
+   * 
+   * @param userId The user ID to check roles for
+   * @param role The role to check
+   * @returns A boolean indicating if the user has the role
+   */
+  hasRole(userId: string, role: Role): Promise<boolean>;
+  
+  /**
+   * Get all roles with their permissions
+   * 
+   * @returns An array of all roles with their permissions
+   */
+  getAllRoles(): Promise<RoleWithPermissions[]>;
+  
+  /**
+   * Get a specific role by ID
+   * 
+   * @param roleId The ID of the role to get
+   * @returns The role with its permissions, or null if not found
+   */
+  getRoleById(roleId: string): Promise<RoleWithPermissions | null>;
+  
+  /**
+   * Create a new role
+   * 
+   * @param roleData The data for the new role
+   * @returns The created role with its permissions
+   */
+  createRole(roleData: RoleCreationPayload): Promise<RoleWithPermissions>;
+  
+  /**
+   * Update an existing role
+   * 
+   * @param roleId The ID of the role to update
+   * @param roleData The updated data for the role
+   * @returns The updated role with its permissions
+   */
+  updateRole(roleId: string, roleData: RoleUpdatePayload): Promise<RoleWithPermissions>;
+  
+  /**
+   * Delete a role
+   * 
+   * @param roleId The ID of the role to delete
+   * @returns A boolean indicating if the deletion was successful
+   */
+  deleteRole(roleId: string): Promise<boolean>;
+  
+  /**
+   * Get all roles assigned to a user
+   * 
+   * @param userId The ID of the user to get roles for
+   * @returns An array of user role assignments
+   */
+  getUserRoles(userId: string): Promise<UserRole[]>;
+  
+  /**
+   * Assign a role to a user
+   * 
+   * @param userId The ID of the user to assign the role to
+   * @param roleId The ID of the role to assign
+   * @param assignedBy The ID of the user assigning the role
+   * @param expiresAt Optional expiration date for the role assignment
+   * @returns The created user role assignment
+   */
+  assignRoleToUser(
+    userId: string, 
+    roleId: string, 
+    assignedBy: string, 
+    expiresAt?: Date
+  ): Promise<UserRole>;
+  
+  /**
+   * Remove a role from a user
+   * 
+   * @param userId The ID of the user to remove the role from
+   * @param roleId The ID of the role to remove
+   * @returns A boolean indicating if the removal was successful
+   */
+  removeRoleFromUser(userId: string, roleId: string): Promise<boolean>;
+  
+  /**
+   * Check if a role has a specific permission
+   * 
+   * @param roleId The ID of the role to check
+   * @param permission The permission to check for
+   * @returns A boolean indicating if the role has the permission
+   */
+  roleHasPermission(roleId: string, permission: Permission): Promise<boolean>;
+  
+  /**
+   * Add a permission to a role
+   * 
+   * @param roleId The ID of the role to add the permission to
+   * @param permission The permission to add
+   * @returns The updated permission assignment
+   */
+  addPermissionToRole(roleId: string, permission: Permission): Promise<PermissionAssignment>;
+  
+  /**
+   * Remove a permission from a role
+   * 
+   * @param roleId The ID of the role to remove the permission from
+   * @param permission The permission to remove
+   * @returns A boolean indicating if the removal was successful
+   */
+  removePermissionFromRole(roleId: string, permission: Permission): Promise<boolean>;
+  
+  /**
+   * Get all permissions in the system
+   * 
+   * @returns An array of all available permissions
+   */
+  getAllPermissions(): Promise<Permission[]>;
+  
+  /**
+   * Get all permissions assigned to a role
+   * 
+   * @param roleId The ID of the role to get permissions for
+   * @returns An array of permissions assigned to the role
+   */
+  getRolePermissions(roleId: string): Promise<Permission[]>;
+  
+  /**
+   * Sync role permissions with the database
+   * This ensures the database matches the defined permissions
+   * 
+   * @returns A boolean indicating if the sync was successful
+   */
+  syncRolePermissions(): Promise<boolean>;
+  
+  /**
+   * Subscribe to permission events
+   * 
+   * @param handler Function to call when a permission event occurs
+   * @returns Unsubscribe function
+   */
+  onPermissionEvent(handler: PermissionEventHandler): () => void;
+}

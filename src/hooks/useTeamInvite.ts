@@ -1,39 +1,77 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+/**
+ * Team Invite Hook
+ * 
+ * This hook provides functionality for inviting users to a team.
+ * It follows the architecture principles by connecting the UI layer to the service layer.
+ */
 
-interface InviteData {
-  email: string;
-  role: 'admin' | 'member' | 'viewer';
-  teamLicenseId: string;
-}
+import { useState, useCallback } from 'react';
+import { TeamService } from '@/core/team/interfaces';
+import { TeamInvitationPayload, TeamInvitationResult } from '@/core/team/models';
+import { UserManagementConfiguration } from '@/core/config';
 
-async function inviteTeamMember(data: InviteData): Promise<void> {
-  const response = await fetch('/api/team/invites/create', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to send invitation');
-  }
-}
-
+/**
+ * Hook for team invitation functionality
+ * 
+ * @returns Team invitation state and methods
+ */
 export function useTeamInvite() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: inviteTeamMember,
-    onSuccess: () => {
-      // Invalidate team members list query to refresh the data
-      queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
-      toast.success('Invitation sent successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to send invitation');
-    },
-  });
+  // Get the team service from the service provider registry
+  const teamService = UserManagementConfiguration.getServiceProvider<TeamService>('teamService');
+  
+  if (!teamService) {
+    throw new Error('TeamService is not registered in the service provider registry');
+  }
+  
+  // Local state for invitation
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  
+  // Send invitation
+  const inviteToTeam = useCallback(async (teamId: string, invitationData: TeamInvitationPayload): Promise<TeamInvitationResult> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const result = await teamService.inviteToTeam(teamId, invitationData);
+      
+      setIsLoading(false);
+      
+      if (result.success) {
+        setSuccessMessage('Invitation sent successfully');
+      } else if (result.error) {
+        setError(result.error);
+      }
+      
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send invitation';
+      
+      setIsLoading(false);
+      setError(errorMessage);
+      
+      return {
+        success: false,
+        error: errorMessage
+      };
+    }
+  }, [teamService]);
+  
+  // Clear any error or success messages
+  const clearMessages = useCallback(() => {
+    setError(null);
+    setSuccessMessage(null);
+  }, []);
+  
+  return {
+    // State
+    isLoading,
+    error,
+    successMessage,
+    
+    // Methods
+    inviteToTeam,
+    clearMessages
+  };
 }

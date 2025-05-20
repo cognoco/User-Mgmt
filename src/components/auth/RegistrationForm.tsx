@@ -244,11 +244,16 @@ export function RegistrationForm() {
   };
 
   const handleUserTypeChange = (type: UserType) => {
-    setUserType(type);
-    form.setValue('userType', type);
+    // Only update if the type is actually changing
+    if (type === userType) return;
     
+    setUserType(type);
+    form.setValue('userType', type, { shouldValidate: true });
+    
+    // Reset fields that are specific to the previous user type
     if (type === UserType.PRIVATE) {
       form.resetField('companyName');
+      form.clearErrors('companyName');
       form.resetField('position');
       form.resetField('department');
       form.resetField('industry');
@@ -257,7 +262,11 @@ export function RegistrationForm() {
     } else {
       form.clearErrors(['firstName', 'lastName']);
     }
-    form.trigger(); 
+    
+    // Trigger validation after a small delay to ensure state is updated
+    setTimeout(() => {
+      form.trigger();
+    }, 0);
   };
   
   // Modified line to force-enable user type selection for tests
@@ -326,20 +335,28 @@ export function RegistrationForm() {
             <div className="space-y-2">
               <Label>User Type</Label>
               <RadioGroup 
-                defaultValue={userManagement.corporateUsers.defaultUserType} 
                 value={userType}
                 onValueChange={(value) => handleUserTypeChange(value as UserType)}
-                className="flex space-x-4"
+                className="space-y-2"
                 aria-label="User Type"
                 data-testid="user-type-radio-group"
+                name="userType"
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value={UserType.PRIVATE} id="private" data-testid="user-type-private" />
-                  <Label htmlFor="private">Personal</Label>
+                  <RadioGroupItem 
+                    value={UserType.PRIVATE} 
+                    id="private" 
+                    data-testid="user-type-private"
+                  />
+                  <label htmlFor="private" className="text-sm font-medium leading-none cursor-pointer">Personal</label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value={UserType.CORPORATE} id="corporate" data-testid="user-type-corporate" />
-                  <Label htmlFor="corporate">Business</Label>
+                  <RadioGroupItem 
+                    value={UserType.CORPORATE} 
+                    id="corporate" 
+                    data-testid="user-type-corporate"
+                  />
+                  <label htmlFor="corporate" className="text-sm font-medium leading-none cursor-pointer">Business</label>
                 </div>
               </RadioGroup>
             </div>
@@ -515,17 +532,20 @@ export function RegistrationForm() {
           )}
           
           <div className="items-top flex space-x-2 pt-2"> 
-            <Checkbox 
-              id="acceptTerms"
-              aria-label="Accept terms and conditions and privacy policy"
-              checked={form.watch('acceptTerms')}
-              onCheckedChange={(checked) => {
-                form.setValue('acceptTerms', checked === true, { shouldValidate: true }); 
-              }}
-              aria-invalid={form.formState.errors.acceptTerms ? "true" : "false"}
-              data-testid="terms-checkbox"
-              className="w-5 h-5 cursor-pointer"
-            />
+            <div className="flex items-center h-5">
+              <input
+                type="checkbox"
+                id="acceptTerms"
+                aria-label="Accept terms and conditions and privacy policy"
+                checked={form.watch('acceptTerms')}
+                onChange={(e) => {
+                  form.setValue('acceptTerms', e.target.checked, { shouldValidate: true }); 
+                }}
+                aria-invalid={form.formState.errors.acceptTerms ? "true" : "false"}
+                data-testid="terms-checkbox"
+                className="w-4 h-4 text-primary bg-background border-primary rounded focus:ring-primary cursor-pointer"
+              />
+            </div>
             <div className="grid gap-1.5 leading-none"> 
               <label 
                 htmlFor="acceptTerms" 

@@ -1,0 +1,130 @@
+/**
+ * User Data Provider Interface
+ * 
+ * This file defines the interface for user data providers.
+ * Following the adapter pattern, this interface abstracts the data access
+ * layer for user management operations, making the core business logic
+ * database-agnostic.
+ */
+
+import { 
+  UserProfile, 
+  ProfileUpdatePayload, 
+  UserPreferences,
+  PreferencesUpdatePayload,
+  UserProfileResult,
+  UserSearchParams,
+  UserSearchResult,
+  ProfileVisibility
+} from '../../core/user/models';
+
+/**
+ * User data provider interface
+ * 
+ * This interface defines all user management data operations.
+ * Any implementation of this interface must provide all these methods.
+ */
+export interface UserDataProvider {
+  /**
+   * Get the profile of a user by ID
+   * 
+   * @param userId ID of the user to fetch
+   * @returns User profile data or null if not found
+   */
+  getUserProfile(userId: string): Promise<UserProfile | null>;
+  
+  /**
+   * Update a user's profile
+   * 
+   * @param userId ID of the user to update
+   * @param profileData Updated profile data
+   * @returns Result object with success status and updated profile or error
+   */
+  updateUserProfile(userId: string, profileData: ProfileUpdatePayload): Promise<UserProfileResult>;
+  
+  /**
+   * Get a user's preferences
+   * 
+   * @param userId ID of the user to fetch preferences for
+   * @returns User preferences or default preferences if not set
+   */
+  getUserPreferences(userId: string): Promise<UserPreferences>;
+  
+  /**
+   * Update a user's preferences
+   * 
+   * @param userId ID of the user to update preferences for
+   * @param preferences Updated preferences data
+   * @returns Result object with success status and updated preferences or error
+   */
+  updateUserPreferences(userId: string, preferences: PreferencesUpdatePayload): Promise<{ success: boolean; preferences?: UserPreferences; error?: string }>;
+  
+  /**
+   * Upload a profile picture for a user
+   * 
+   * @param userId ID of the user
+   * @param imageData Image data as a File or Blob
+   * @returns Result object with success status and image URL or error
+   */
+  uploadProfilePicture(userId: string, imageData: Blob): Promise<{ success: boolean; imageUrl?: string; error?: string }>;
+  
+  /**
+   * Delete a user's profile picture
+   * 
+   * @param userId ID of the user
+   * @returns Result object with success status or error
+   */
+  deleteProfilePicture(userId: string): Promise<{ success: boolean; error?: string }>;
+  
+  /**
+   * Update a user's profile visibility settings
+   * 
+   * @param userId ID of the user
+   * @param visibility Profile visibility settings
+   * @returns Result object with success status and updated visibility settings or error
+   */
+  updateProfileVisibility(userId: string, visibility: ProfileVisibility): Promise<{ success: boolean; visibility?: ProfileVisibility; error?: string }>;
+  
+  /**
+   * Search for users based on search parameters
+   * 
+   * @param params Search parameters
+   * @returns Search results with pagination
+   */
+  searchUsers(params: UserSearchParams): Promise<UserSearchResult>;
+  
+  /**
+   * Deactivate a user account
+   * 
+   * @param userId ID of the user to deactivate
+   * @param reason Optional reason for deactivation
+   * @returns Result object with success status or error
+   */
+  deactivateUser(userId: string, reason?: string): Promise<{ success: boolean; error?: string }>;
+  
+  /**
+   * Reactivate a previously deactivated user account
+   * 
+   * @param userId ID of the user to reactivate
+   * @returns Result object with success status or error
+   */
+  reactivateUser(userId: string): Promise<{ success: boolean; error?: string }>;
+  
+  /**
+   * Convert a user's account type (e.g., from private to corporate)
+   * 
+   * @param userId ID of the user
+   * @param newType New account type
+   * @param additionalData Additional data required for the new account type
+   * @returns Result object with success status and updated profile or error
+   */
+  convertUserType(userId: string, newType: string, additionalData?: Record<string, any>): Promise<UserProfileResult>;
+  
+  /**
+   * Subscribe to user profile changes
+   * 
+   * @param callback Function to call when a user profile changes
+   * @returns Unsubscribe function
+   */
+  onUserProfileChanged(callback: (profile: UserProfile) => void): () => void;
+}

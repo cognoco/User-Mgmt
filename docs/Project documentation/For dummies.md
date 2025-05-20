@@ -1,10 +1,18 @@
 # 1. Development: What is this app, what's done, what's missing, and why does it matter?
 
+> **IMPORTANT:** This app follows strict [Architecture Guidelines](../Product%20documentation/Architecture%20Guidelines.md) and [Architecture Rules](../Product%20documentation/Architecture%20Rules.md) to ensure it remains fully modular and pluggable into any host application. Always review these documents before making changes.
+
 ## What is the primary task of this app?
 
 Imagine you're building a clubhouse for a group of friends.
 The User Management System is like the front desk of the clubhouse.
 Its job is to let people in (register), check who they are (log in), let them update their info (profile), and sometimes give them special keys (roles or permissions).
+
+Critically, this clubhouse is designed to be installed in ANY building. This means:
+- The clubhouse has no opinions about what the building looks like
+- The building owner can replace any part of the clubhouse's appearance
+- The clubhouse's functionality works regardless of the building's design
+- The building owner can disable certain clubhouse features they don't need
 
 ---
 
@@ -34,10 +42,18 @@ They're not needed for a basic club, but very important if you want a safe, well
 
 # 2. How is it implemented? What are the central files? How is the file structure organized? Can I use just registration/login? What is middleware?
 
+> **CRITICAL ARCHITECTURE PRINCIPLE:** This app follows a strict separation between business logic and UI. UI components MUST NEVER contain business logic, and business logic MUST NEVER render UI components. See the [Architecture Rules](../Product%20documentation/Architecture%20Rules.md) for details.
+
 ## How is it implemented?
 
 The app is built with Next.js (think of it as the building's blueprint), React (the furniture and decorations), and Supabase (the club's member list stored in a safe).
 TypeScript is used to make sure everyone follows the rules (like a strict club manager).
+
+The most important architectural principle is that this app can be plugged into ANY host application. This means:
+1. Business logic is completely separate from UI components
+2. UI components use the "headless" pattern with render props
+3. Database code is isolated in adapter interfaces that can be replaced
+4. Features can be enabled/disabled through configuration
 
 ---
 
@@ -56,8 +72,14 @@ Think of the app as a well-organized clubhouse:
 - `/app/api/`: The front desk and security guards (API routes).
 - `/app/`: The rooms and hallways (pages you visit).
 - `/src/components/`: The furniture (forms, buttons, etc.).
+  - `/src/components/ui/headless/`: Behavior-only components (like furniture frames)
+  - `/src/components/ui/styled/`: Default styled components (complete furniture)
+- `/src/core/`: Core business rules and interfaces (the clubhouse's rulebook)
+- `/src/adapters/`: External service connections (phone lines to different services)
 - `/src/lib/`: The club's memory and helpers (state, utilities).
 - `/tests/`: The inspectors who check if everything works.
+
+This structure follows our [File Structure Guidelines](../Product%20documentation/File%20structure%20guidelines.md) and [Architecture Guidelines](../Product%20documentation/Architecture%20Guidelines.md).
 
 ---
 

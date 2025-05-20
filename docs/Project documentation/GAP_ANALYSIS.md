@@ -188,3 +188,43 @@ This document serves as the single source of truth for all gaps, missing feature
 - For detailed findings and actionable recommendations, see `Testing_Findings.md`
 - For implementation status, see the `Implementation-Checklist.md`
 - For action plans and next steps, see `IMPLEMENTATION_PLAN.md`
+
+## Unlisted or Discovered Gaps (from Codebase Search)
+
+The following gaps were discovered via codebase search for TODOs, stubs, and test skeletons. These may not have been explicitly listed in the original gap analysis but are present as missing or incomplete features or tests in the codebase.
+
+| Area/Feature                | Potential Gap / Enhancement                | Criticality | Coverage Status |
+|-----------------------------|--------------------------------------------|-------------|----------------|
+| Preferences API             | API route /api/preferences (GET, PATCH/PUT) is marked as TODO in code; may be missing or incomplete even if UI is present | Medium | No/Partial |
+| Industry Field              | Test skeleton exists, but feature/test not explicitly listed | Low | No test |
+| Position Field              | Test skeleton exists, but feature/test not explicitly listed | Low | No test |
+| Format Selection            | Test skeleton exists, but feature/test not explicitly listed | Low | No test |
+| Feature Tour                | Test skeleton exists, but feature/test not explicitly listed | Low | No test |
+| General Tab                 | Test skeleton exists, but feature/test not explicitly listed | Low | No test |
+| Home Page                   | Test skeleton exists, but feature/test not explicitly listed | Low | No test |
+| Welcome Screen              | Test skeleton exists, but feature/test not explicitly listed | Low | No test |
+| Direct Navigation           | Test skeleton exists, but feature/test not explicitly listed | Low | No test |
+| Misc flows                  | Test skeleton exists, but feature/test not explicitly listed | Low | No test |
+
+> **Note:** These items were discovered by searching for TODOs, stubs, and unimplemented test skeletons in the codebase. They may represent either missing features, incomplete implementations, or simply missing test coverage. Review and triage as needed.
+
+ecommended Changes
+These components should be redesigned to:
+
+Separate UI from Business Logic
+Use hooks or services to handle data fetching/updating
+Move business logic out of UI components
+Create Interface-Based Components
+Define interfaces for data requirements
+Allow host applications to provide implementations
+Use Component Composition
+Make UI components accept custom renderers or children
+Allow host applications to replace UI while keeping functionality
+Implement Pattern Libraries
+Use adapters for different UI frameworks
+Create headless UI components that focus on behavior, not appearance
+This approach would allow host applications to:
+
+Replace the UI components with their own designs
+Keep the core functionality intact
+Easily disable specific features

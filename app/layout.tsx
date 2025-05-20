@@ -1,10 +1,10 @@
 // import '@/lib/i18n';
-import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css"; // Import the new global CSS file
-import { UserManagementClientBoundary } from "@/lib/auth/UserManagementClientBoundary"; // Import the new boundary component
+import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { UserManagementClientBoundary } from '@/lib/auth/UserManagementClientBoundary';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
 // Define viewport configuration
 export const viewport: Viewport = {
@@ -12,28 +12,25 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  viewportFit: 'cover',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: '#111111' },
-  ],
+  viewportFit: 'cover'
 };
 
-// TODO: Add proper metadata
 export const metadata: Metadata = {
-  title: "User Management",
-  description: "User Management Module",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'User Management',
+  title: 'User Management',
+  description: 'User Management Module',
+  generator: 'Next.js',
+  keywords: ['user management', 'authentication'],
+  authors: [{ name: 'Your Company' }],
+  openGraph: {
+    type: 'website',
+    siteName: 'User Management',
+    title: 'User Management System',
+    description: 'Advanced user management system',
   },
-  formatDetection: {
-    telephone: true,
-    email: true,
-    address: true,
-    date: true,
-    url: true,
+  twitter: {
+    card: 'summary_large_image',
+    title: 'User Management',
+    description: 'Advanced user management system',
   },
 };
 
@@ -44,6 +41,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="antialiased">
+      <head />
       <body className={inter.className}>
         <UserManagementClientBoundary>
           {children}
@@ -51,4 +49,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-} 
+}
