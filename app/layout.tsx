@@ -2,6 +2,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { AppInitializer } from '@/components/AppInitializer';
 import { UserManagementClientBoundary } from '@/lib/auth/UserManagementClientBoundary';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -43,9 +44,11 @@ export default function RootLayout({
     <html lang="en" className="antialiased">
       <head />
       <body className={inter.className}>
-        <UserManagementClientBoundary>
-          {children}
-        </UserManagementClientBoundary>
+        <AppInitializer>
+          <UserManagementClientBoundary>
+            {children}
+          </UserManagementClientBoundary>
+        </AppInitializer>
       </body>
     </html>
   );

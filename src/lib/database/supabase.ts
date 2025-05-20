@@ -21,6 +21,23 @@ export const supabase = createClient(
 // }
 // ---> END REMOVAL <---
 
+/**
+ * Create a Supabase client instance
+ * This function is used by the app-init.ts file
+ */
+export function createSupabaseClient() {
+  console.log('[Supabase Client] Creating new client instance');
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.error('Supabase environment variables are not configured properly');
+    throw new Error('Supabase configuration missing');
+  }
+  
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+}
+
 // Get a Supabase instance with the service role key for admin operations (Server-side)
 export function getServiceSupabase() {
   console.log('[Supabase Service] Creating service-side instance for URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);

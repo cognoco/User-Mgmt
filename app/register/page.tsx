@@ -3,7 +3,7 @@ import '@/lib/i18n';
 
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link'; // Import from next/link
-import { RegistrationForm } from '@/src/ui/styled/auth/RegistrationForm';
+import { RegistrationForm } from '@/ui/styled/auth/RegistrationForm';
 
 export default function RegisterPage() { // Use default export for Next.js pages
   const { t } = useTranslation();

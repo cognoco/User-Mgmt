@@ -5,7 +5,7 @@
  * It uses the headless component for behavior and adds UI rendering with Shadcn UI components.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { RegistrationForm as HeadlessRegistrationForm, RegistrationFormProps } from '../../headless/auth/RegistrationForm';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -61,16 +61,22 @@ export function RegistrationForm({
       {...headlessProps}
       render={({
         handleSubmit,
-        formValues,
-        setFormValue,
+        emailValue,
+        setEmailValue,
+        passwordValue,
+        setPasswordValue,
+        confirmPasswordValue,
+        setConfirmPasswordValue,
+        firstNameValue,
+        setFirstNameValue,
+        lastNameValue,
+        setLastNameValue,
+        acceptTermsValue,
+        setAcceptTermsValue,
         isSubmitting,
         errors,
         touched,
-        handleBlur,
-        passwordStrength,
-        passwordRequirements,
-        termsAccepted,
-        setTermsAccepted
+        handleBlur
       }) => (
         <Card className={className}>
           <CardHeader>
@@ -84,8 +90,8 @@ export function RegistrationForm({
                   <Label htmlFor="firstName">First Name</Label>
                   <Input
                     id="firstName"
-                    value={formValues.firstName}
-                    onChange={(e) => setFormValue('firstName', e.target.value)}
+                    value={firstNameValue}
+                    onChange={(e) => setFirstNameValue(e.target.value)}
                     onBlur={() => handleBlur('firstName')}
                     disabled={isSubmitting}
                     aria-invalid={touched.firstName && !!errors.firstName}
@@ -100,8 +106,8 @@ export function RegistrationForm({
                   <Label htmlFor="lastName">Last Name</Label>
                   <Input
                     id="lastName"
-                    value={formValues.lastName}
-                    onChange={(e) => setFormValue('lastName', e.target.value)}
+                    value={lastNameValue}
+                    onChange={(e) => setLastNameValue(e.target.value)}
                     onBlur={() => handleBlur('lastName')}
                     disabled={isSubmitting}
                     aria-invalid={touched.lastName && !!errors.lastName}
@@ -118,8 +124,8 @@ export function RegistrationForm({
                 <Input
                   id="email"
                   type="email"
-                  value={formValues.email}
-                  onChange={(e) => setFormValue('email', e.target.value)}
+                  value={emailValue}
+                  onChange={(e) => setEmailValue(e.target.value)}
                   onBlur={() => handleBlur('email')}
                   disabled={isSubmitting}
                   aria-invalid={touched.email && !!errors.email}
@@ -135,8 +141,8 @@ export function RegistrationForm({
                 <Input
                   id="password"
                   type="password"
-                  value={formValues.password}
-                  onChange={(e) => setFormValue('password', e.target.value)}
+                  value={passwordValue}
+                  onChange={(e) => setPasswordValue(e.target.value)}
                   onBlur={() => handleBlur('password')}
                   disabled={isSubmitting}
                   aria-invalid={touched.password && !!errors.password}
@@ -144,38 +150,65 @@ export function RegistrationForm({
                 />
                 
                 {/* Password strength indicator */}
-                {formValues.password && (
-                  <div className="mt-2">
-                    <div className="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full ${
-                          passwordStrength === 'strong' ? 'bg-green-500' : 
-                          passwordStrength === 'medium' ? 'bg-yellow-500' : 
-                          'bg-red-500'
-                        }`}
-                        style={{ width: `${
-                          passwordStrength === 'strong' ? '100%' : 
-                          passwordStrength === 'medium' ? '66%' : 
-                          '33%'
-                        }` }}
-                      />
-                    </div>
-                    <p className="text-xs mt-1">
-                      Password strength: {passwordStrength}
-                    </p>
+                {passwordValue && (() => {
+                  // Calculate password strength
+                  const passwordStrength = useMemo(() => {
+                    if (passwordValue.length < 8) return 'weak';
                     
-                    {/* Password requirements */}
-                    <ul className="text-xs mt-2 space-y-1">
-                      {passwordRequirements.map((req) => (
-                        <li key={req.text} className="flex items-center">
-                          <span className={req.valid ? 'text-green-500' : 'text-gray-500'}>
-                            {req.valid ? '✓' : '○'} {req.text}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                    let score = 0;
+                    if (passwordValue.length >= 10) score += 1;
+                    if (/[A-Z]/.test(passwordValue)) score += 1;
+                    if (/[a-z]/.test(passwordValue)) score += 1;
+                    if (/[0-9]/.test(passwordValue)) score += 1;
+                    if (/[^A-Za-z0-9]/.test(passwordValue)) score += 1;
+                    
+                    if (score >= 4) return 'strong';
+                    if (score >= 2) return 'medium';
+                    return 'weak';
+                  }, [passwordValue]);
+                  
+                  // Define password requirements
+                  const passwordRequirements = [
+                    { text: 'At least 8 characters', valid: passwordValue.length >= 8 },
+                    { text: 'Contains uppercase letter', valid: /[A-Z]/.test(passwordValue) },
+                    { text: 'Contains lowercase letter', valid: /[a-z]/.test(passwordValue) },
+                    { text: 'Contains number', valid: /[0-9]/.test(passwordValue) },
+                    { text: 'Contains special character', valid: /[^A-Za-z0-9]/.test(passwordValue) }
+                  ];
+                  
+                  return (
+                    <div className="mt-2">
+                      <div className="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full ${
+                            passwordStrength === 'strong' ? 'bg-green-500' : 
+                            passwordStrength === 'medium' ? 'bg-yellow-500' : 
+                            'bg-red-500'
+                          }`}
+                          style={{ width: `${
+                            passwordStrength === 'strong' ? '100%' : 
+                            passwordStrength === 'medium' ? '66%' : 
+                            '33%'
+                          }` }}
+                        />
+                      </div>
+                      <p className="text-xs mt-1">
+                        Password strength: {passwordStrength}
+                      </p>
+                      
+                      {/* Password requirements */}
+                      <ul className="text-xs mt-2 space-y-1">
+                        {passwordRequirements.map((req) => (
+                          <li key={req.text} className="flex items-center">
+                            <span className={req.valid ? 'text-green-500' : 'text-gray-500'}>
+                              {req.valid ? '✓' : '○'} {req.text}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })()}
                 
                 {touched.password && errors.password && (
                   <p className="text-sm text-red-500">{errors.password}</p>
@@ -187,8 +220,8 @@ export function RegistrationForm({
                 <Input
                   id="confirmPassword"
                   type="password"
-                  value={formValues.confirmPassword}
-                  onChange={(e) => setFormValue('confirmPassword', e.target.value)}
+                  value={confirmPasswordValue}
+                  onChange={(e) => setConfirmPasswordValue(e.target.value)}
                   onBlur={() => handleBlur('confirmPassword')}
                   disabled={isSubmitting}
                   aria-invalid={touched.confirmPassword && !!errors.confirmPassword}
@@ -202,8 +235,8 @@ export function RegistrationForm({
               <div className="flex items-start space-x-2 pt-2">
                 <Checkbox
                   id="terms"
-                  checked={termsAccepted}
-                  onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+                  checked={acceptTermsValue}
+                  onCheckedChange={(checked) => setAcceptTermsValue(checked === true)}
                   disabled={isSubmitting}
                 />
                 <Label htmlFor="terms" className="text-sm font-normal">
@@ -231,7 +264,7 @@ export function RegistrationForm({
               <Button 
                 type="submit" 
                 className="w-full"
-                disabled={isSubmitting || !termsAccepted}
+                disabled={isSubmitting || !acceptTermsValue}
               >
                 {isSubmitting ? 'Creating Account...' : 'Create Account'}
               </Button>

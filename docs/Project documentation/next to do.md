@@ -253,6 +253,31 @@ This document outlines the step-by-step tasks required to refactor the User Mana
   - [ ] Document available hooks
   - [ ] Document component props
 
+- [ ] Import path reference
+  - [ ] Document all import path changes
+    - [ ] Core layer imports: `@/core/{domain}/{file}`
+    - [ ] Adapter layer imports: `@/adapters/{domain}/{file}`
+    - [ ] Service layer imports: `@/services/{domain}/{file}`
+    - [ ] Hook layer imports: `@/hooks/{domain}/{file}`
+    - [ ] UI layer imports: `@/ui/headless/{domain}/{file}` and `@/ui/styled/{domain}/{file}`
+  - [ ] Common import path examples:
+    - [ ] Auth components: `@/ui/styled/auth/LoginForm`, `@/ui/styled/auth/RegistrationForm`, etc.
+    - [ ] User components: `@/ui/styled/user/ProfileForm`, `@/ui/styled/user/AccountSettings`, etc.
+    - [ ] Team components: `@/ui/styled/team/TeamList`, `@/ui/styled/team/MemberManager`, etc.
+    - [ ] Auth hooks: `@/hooks/auth/useAuth`, `@/hooks/auth/useRegistration`, etc.
+    - [ ] User hooks: `@/hooks/user/useUserProfile`, `@/hooks/user/useAccountSettings`, etc.
+    - [ ] Team hooks: `@/hooks/team/useTeams`, `@/hooks/team/useTeamMembers`, etc.
+    - [ ] Auth services: `@/services/auth/AuthService`, `@/services/auth/DefaultAuthService`, etc.
+    - [ ] User services: `@/services/user/UserService`, `@/services/user/DefaultUserService`, etc.
+    - [ ] Team services: `@/services/team/TeamService`, `@/services/team/DefaultTeamService`, etc.
+    - [ ] Auth adapters: `@/adapters/auth/AuthDataProvider`, `@/adapters/auth/SupabaseAuthProvider`, etc.
+    - [ ] User adapters: `@/adapters/user/UserDataProvider`, `@/adapters/user/SupabaseUserProvider`, etc.
+    - [ ] Team adapters: `@/adapters/team/TeamDataProvider`, `@/adapters/team/SupabaseTeamProvider`, etc.
+  - [ ] Create a comprehensive import path migration guide for developers
+    - [ ] List common incorrect paths and their correct replacements
+    - [ ] Provide search patterns for finding incorrect imports
+    - [ ] Document any special cases or exceptions
+
 ## Phase 12: Host Integration Examples
 
 - [ ] Create sample integrations
