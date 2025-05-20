@@ -2,68 +2,44 @@
 import '@/lib/i18n';
 
 import { useEffect } from 'react';
-import { ProfileForm } from '@/components/profile/ProfileForm';
-import { AvatarUpload } from '@/components/profile/AvatarUpload';
-import { ChangePasswordForm } from '@/components/auth/ChangePasswordForm';
-import { AccountDeletion } from '@/components/account/AccountDeletion';
-import { CorporateProfileSection } from '@/components/profile/CorporateProfileSection';
 import { useTranslation } from 'react-i18next';
-import { getPlatformClasses } from '@/hooks/usePlatformStyles'; // Corrected path
-import { useUserManagement } from '@/lib/auth/UserManagementProvider'; // Corrected path
-import { useProfileStore } from '@/lib/stores/profile.store'; // Use updated store
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { UserType } from '@/types/user-type'; // Corrected path
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+// Import from our new architecture
+import { ProfileEditor } from '@/src/ui/styled/profile/ProfileEditor';
+import { useUserProfile } from '@/src/hooks/profile/useUserProfile';
+import { useAccountSettings } from '@/src/hooks/profile/useAccountSettings';
 
 export default function ProfilePage() {
   const { t } = useTranslation();
+  
+  // Use our hooks from the new architecture
   const { 
     profile, 
     isLoading, 
     error, 
-    fetchProfile, 
-    updateBusinessProfile // Get the new action
-  } = useProfileStore();
-
-  const { platform, isNative } = useUserManagement();
-
-  useEffect(() => {
-    // Fetch profile if not already loaded or loading
-    if (!profile && !isLoading && !error) {
-      fetchProfile();
-    }
-  }, [profile, isLoading, error, fetchProfile]);
-
-  // TODO: Implement route protection - redirect if not authenticated
-
-  // Keeping platform classes for now, review usePlatformStyles hook if needed
-  const containerClasses = getPlatformClasses({
-    base: "container mx-auto py-8",
-    mobile: "py-4 px-2"
-  }, { platform, isNative });
-
-  const contentClasses = getPlatformClasses({
-    base: "max-w-2xl mx-auto space-y-8",
-    mobile: "w-full space-y-6"
-  }, { platform, isNative });
-
-  const cardClasses = getPlatformClasses({
-    base: "bg-card rounded-lg shadow p-6",
-    mobile: "p-4 rounded-md"
-  }, { platform, isNative });
+    updateProfile,
+    uploadAvatar,
+    removeAvatar
+  } = useUserProfile();
+  
+  const {
+    changePassword,
+    deleteAccount
+  } = useAccountSettings();
 
   // Show loading skeleton
   if (isLoading && !profile) {
     return (
-      <div className={containerClasses}>
-        <div className={contentClasses}>
+      <div className="container mx-auto py-8">
+        <div className="max-w-2xl mx-auto space-y-8">
           <h1 className="text-2xl font-bold"><Skeleton className="h-8 w-48" /></h1>
-          <Skeleton className={`${cardClasses} h-32`} />
-          <Skeleton className={`${cardClasses} h-64`} />
-          {/* Add skeleton for potential Corporate section */}
-          <Skeleton className={`${cardClasses} h-96`} /> 
-          <Skeleton className={`${cardClasses} h-48`} />
-          <Skeleton className={`${cardClasses} h-48`} />
+          <Skeleton className="h-32 w-full rounded-lg" />
+          <Skeleton className="h-64 w-full rounded-lg" />
+          <Skeleton className="h-48 w-full rounded-lg" />
         </div>
       </div>
     );
@@ -72,8 +48,8 @@ export default function ProfilePage() {
   // Show error message
   if (error && !profile) {
      return (
-      <div className={containerClasses}>
-        <div className={contentClasses}>
+      <div className="container mx-auto py-8">
+        <div className="max-w-2xl mx-auto space-y-8">
            <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -87,55 +63,61 @@ export default function ProfilePage() {
       return null; // Or a specific "No profile data" message
   }
 
-  // Extract company data for the corporate section prop
-  const companyData = {
-      name: profile.companyName || '',
-      size: profile.companySize === null ? undefined : profile.companySize,
-      industry: profile.industry || '',
-      website: profile.companyWebsite || '', 
-      position: profile.position || '',
-      department: profile.department || '',
-      vatId: profile.vatId || '',
-      address: profile.address === null ? undefined : profile.address,
-  };
-
   return (
-    <div className={containerClasses}>
-      <div className={contentClasses}>
-        <h1 className="text-2xl font-bold">{t('profile.title', 'Manage Your Profile')}</h1>
+    <div className="container mx-auto py-8">
+      <div className="max-w-3xl mx-auto space-y-8">
+        <h1 className="text-2xl font-bold text-center md:text-left">
+          {t('profile.title', 'Manage Your Profile')}
+        </h1>
         
-        <div className={cardClasses}>
-          <h2 className="text-lg font-semibold mb-4">{t('profile.avatar.title', 'Profile Picture')}</h2>
-          <AvatarUpload />
-        </div>
+        {/* Use our new ProfileEditor component */}
+        <ProfileEditor 
+          title={t('profile.details.title', 'Profile Details')}
+          description={t('profile.details.description', 'Update your personal information and preferences')}
+          profile={profile}
+          onUpdateProfile={updateProfile}
+          onAvatarUpload={uploadAvatar}
+          onAvatarRemove={removeAvatar}
+        />
         
-        <div className={cardClasses}>
-          <h2 className="text-lg font-semibold mb-4">{t('profile.details.title', 'Profile Details')}</h2>
-          <ProfileForm />
-        </div>
-
-        {/* Conditionally render CorporateProfileSection */}
-        {profile.userType === UserType.CORPORATE && (
-          <CorporateProfileSection 
-            userType={UserType.CORPORATE} 
-            company={companyData} 
-            onUpdate={updateBusinessProfile}
-            isLoading={isLoading}
-            error={error}
-          />
-        )}
-
-        <div className={cardClasses}>
-          <h2 className="text-lg font-semibold mb-4">{t('profile.changePassword.title', 'Change Password')}</h2>
-          <ChangePasswordForm />
-        </div>
+        {/* Password Change Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('profile.changePassword.title', 'Change Password')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              {t('profile.changePassword.description', 'Update your password to keep your account secure')}
+            </p>
+            <Button 
+              variant="outline"
+              onClick={() => window.location.href = '/settings'}
+            >
+              {t('profile.changePassword.goToSettings', 'Manage in Settings')}
+            </Button>
+          </CardContent>
+        </Card>
         
-         <div className={`${cardClasses} border border-destructive/50 bg-destructive/5`}> {/* Emphasize danger */} 
-           <h2 className="text-lg font-semibold mb-4 text-destructive">{t('profile.deleteAccount.title', 'Delete Account')}</h2>
-           <AccountDeletion />
-         </div>
-
+        {/* Account Deletion Section */}
+        <Card className="border border-destructive/50 bg-destructive/5">
+          <CardHeader>
+            <CardTitle className="text-destructive">
+              {t('profile.deleteAccount.title', 'Delete Account')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              {t('profile.deleteAccount.warning', 'Permanently delete your account and all associated data. This action cannot be undone.')}
+            </p>
+            <Button 
+              variant="destructive"
+              onClick={() => window.location.href = '/settings'}
+            >
+              {t('profile.deleteAccount.goToSettings', 'Manage in Settings')}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
-} 
+}

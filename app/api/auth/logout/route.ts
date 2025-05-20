@@ -1,8 +1,13 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { getApiAuthService } from '@/lib/api/auth/factory';
+import { logUserAction } from '@/lib/audit/auditLogger';
 
 export async function POST(request: NextRequest) {
+  // Get IP and User Agent early for logging
+  const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
+  const userAgent = request.headers.get('user-agent') || 'unknown';
+  
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
@@ -10,41 +15,48 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // 2. Extract Token (assuming client sends it)
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Missing or invalid authorization token' }, { status: 401 });
+    // 2. Get AuthService
+    const authService = getApiAuthService();
+    
+    // Get current user for logging purposes
+    const currentUser = authService.getCurrentUser();
+    const userId = currentUser?.id;
+    
+    // 3. Call logout method on AuthService
+    await authService.logout();
+    
+    // 4. Log the successful logout
+    if (userId) {
+      await logUserAction({
+        userId,
+        action: 'LOGOUT_SUCCESS',
+        status: 'SUCCESS',
+        ipAddress,
+        userAgent,
+        targetResourceType: 'auth',
+        targetResourceId: userId
+      });
     }
-    const token = authHeader.split(' ')[1];
-
-    // 3. Call Supabase Admin SignOut (using Service Client)
-    const supabaseService = getServiceSupabase();
-    // Attempt to invalidate the session/token using admin API
-    // Note: supabase.auth.signOut() is primarily client-side.
-    // admin.signOut(token) might be the intended way for backend invalidation, 
-    // but docs are unclear. Alternative: admin.updateUserById(userId, { revoke_refresh_tokens: true })
-    // if you can get the user ID from the token first.
-    // Let's try admin.signOut and see.
-    const { error: signOutError } = await supabaseService.auth.admin.signOut(token);
-
-    // 4. Handle Errors
-    if (signOutError) {
-      console.error('Supabase admin signout error:', signOutError);
-      // Don't necessarily fail the logout on the client if the backend revoke fails
-      // Log the error, but potentially still return success to the client?
-      // Or return a specific error if needed.
-      // Let's return 500 for now if backend signout fails.
-      return NextResponse.json({ error: signOutError.message || 'Backend logout failed.' }, { status: 500 });
-    }
-
+    
     // 5. Handle Success
-    console.log('Backend logout successful (token invalidation attempted).');
+    console.log('Logout successful');
     return NextResponse.json({ message: 'Successfully logged out' }); // 200 OK
 
   } catch (error) {
     // 6. Handle Unexpected Errors
     console.error('Unexpected Logout API error:', error);
     const message = error instanceof Error ? error.message : 'An unexpected error occurred';
+    
+    // Log the error
+    await logUserAction({
+      action: 'LOGOUT_ERROR',
+      status: 'FAILURE',
+      ipAddress,
+      userAgent,
+      targetResourceType: 'auth',
+      details: { error: message }
+    });
+    
     return NextResponse.json({ error: 'An internal server error occurred.', details: message }, { status: 500 });
   }
-} 
+}

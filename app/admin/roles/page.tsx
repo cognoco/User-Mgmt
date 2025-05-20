@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { Metadata } from 'next';
-import { RoleManagementPanel } from '@/components/admin/RoleManagementPanel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { User } from '@/types/user';
+
+// Import from our new architecture
+import { RoleManager } from '@/src/ui/styled/permission/RoleManager';
+import { useRoles } from '@/src/hooks/permission/useRoles';
+import { usePermissions } from '@/src/hooks/permission/usePermissions';
 
 export const metadata: Metadata = {
   title: 'Role Management',
@@ -13,41 +16,35 @@ export const metadata: Metadata = {
 };
 
 export default function RolesManagementPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        const response = await fetch('/api/admin/users');
-        
-        if (!response.ok) {
-          throw new Error(`Error fetching users: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        setUsers(data.users || []);
-      } catch (err) {
-        console.error('Failed to fetch users:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load users');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchUsers();
-  }, []);
+  // Use our hooks from the new architecture
+  const {
+    roles,
+    isLoading: rolesLoading,
+    error: rolesError,
+    createRole,
+    updateRole,
+    deleteRole,
+    selectedRole,
+    setSelectedRole
+  } = useRoles();
+  
+  const {
+    permissions,
+    permissionCategories,
+    isLoading: permissionsLoading,
+    error: permissionsError
+  } = usePermissions();
+  
+  // Combine loading and error states
+  const isLoading = rolesLoading || permissionsLoading;
+  const error = rolesError || permissionsError;
 
   return (
     <div className="container py-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Role Management</h1>
         <p className="text-muted-foreground">
-          Assign roles and manage permissions for users
+          Create, edit, and manage roles and their permissions
         </p>
       </div>
       
@@ -61,8 +58,17 @@ export default function RolesManagementPage() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : (
-        <RoleManagementPanel users={users} />
+        <RoleManager
+          roles={roles}
+          permissions={permissions}
+          permissionCategories={permissionCategories}
+          selectedRole={selectedRole}
+          setSelectedRole={setSelectedRole}
+          onCreateRole={createRole}
+          onUpdateRole={updateRole}
+          onDeleteRole={deleteRole}
+        />
       )}
     </div>
   );
-} 
+}

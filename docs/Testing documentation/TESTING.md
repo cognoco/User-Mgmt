@@ -7,7 +7,7 @@
 - Test skeletons are only created in advance if a feature is high-risk or likely to cause regressions.
 - This ensures that tests are always written against the real, user-facing implementation.
 
-### B. Documenting New Issues (in TESTING_ISSUES.md)
+### B. Documenting New Issues (in TESTING_ISSUES-UnitTests.md or TESTING_ISSUES-E2E.md )
 - For ongoing issues, specific solutions, and advanced patterns learned from troubleshooting, refer to `TESTING_ISSUES.md`.
 - Update `TESTING_ISSUES.md` as new specific issues or complex solutions are discovered during post-implementation testing.
 
@@ -16,6 +16,9 @@
 - Avoid over-mocking; prefer real implementations unless isolation is required.
 - Use robust selectors (getByRole, getByLabelText) and avoid implementation details.
 - Align Zod schemas with rendered form fields to prevent validation/test failures.
+- When refactoring a test, keep all current functionality! 
+- The tests are working tool- their main task is to find bugs. Do not fix tests in such ways that they pass even with missing or wrong app codebase, apis, hook implementaions.
+-Use mocks as little as possilbe, use the real thing! 
 
 ## Stack & Tooling
 - **Unit/Integration:** Vitest, React Testing Library, User Event, MSW, JSDOM, Jest-DOM.
@@ -55,20 +58,48 @@
 ## References
 - For ongoing issues, solutions, and remediation plans, see `Testing Issues and Solutions.md`.
 
-## Project-Specific Testing Rules (from .cursorrules)
+## Project-Specific Testing Rules
 
-- **File System Diligence:** Before creating ANY new file (including test files, mocks, or helper utilities), you MUST thoroughly check all directories within the workspace to ensure a similar file doesn't already exist elsewhere. Prevent file duplication at all costs.
-- **Strict File Structure:** Adhere strictly to the conventions outlined in `docs/File structure guidelines.md` when creating necessary test files, mocks, or related artifacts.
-- **Existing Tech Stack Only:** Use only the established testing stack (Vitest, React Testing Library, User Event, MSW, JSDOM, Testing Library Jest DOM). If a new technology is absolutely necessary, you MUST ask before introducing it.
-- **Testing Priority:** Focus testing efforts on end-user scenarios. Test the application from the user's perspective, verifying complete user flows (e.g., registration, login, profile update, MFA setup). Prioritize tests that cover critical functionality over low-level unit tests, unless those unit tests are essential for complex logic.
-- **No Simplification for Passing Tests:** Do NOT simplify application code, remove features, or alter core functionality just to make tests pass. The application's intended behavior is paramount.
-- **Handling Test Failures:**
-    - If a test fails due to a problem within the test file itself (e.g., incorrect selectors, faulty mocking, async/timing issues, structure not following guidelines): You have permission to modify the test file (`*.test.tsx`, `*.test.ts`, setup files, mocks) to fix the issue. Refer to `docs/TESTING_ISSUES.md` and this file for known issues and best practices.
-    - If a test fails and you suspect the issue lies within the actual application code (i.e., the component or function being tested seems broken or doesn't behave as expected): STOP immediately. Report the failing test, the specific discrepancy you observed, and ask for confirmation and guidance before making any changes to the application source code (`/src/` or `/app/` directories, excluding test files).
-- **Global Mocking Policy:** NO LOCAL MOCKS. ALL mocking is done globally. Avoid local mocks in test files; use or extend the global mocks provided in the test setup files.
-- **Test Coverage:** Ensure test coverage mirrors implementation as closely as possible. Do not rewrite real functionality only due to failed tests unless the test found a real bug. The real component can be rewritten to be more robust or if it misses features it should have.
-- **Documentation:** Document results of the test and ask for next action if unsure. Once a test fails, the most probable reason for failing is a reference to a file that has been moved. For fixes, always review the interdependencies in the files.
-- **Skeleton Files:** There are already skeleton files for missing tests—before you create a new file, make sure to search in the skeletons.
-- **Complex Codebase Awareness:** Before you change anything, make sure you read other files using the import/component/mock and that you correctly understand that the change will not break anything. For failing tests, read related passing tests and search for patterns. If a similar test is passing, a change in a global mock file is usually not the right solution. Think it through thoroughly!
+### File Organization & Naming
+- **Prevent Duplication:** Before creating ANY new test file, thoroughly check all directories to ensure a similar file doesn't already exist elsewhere.
+- **Consistent Structure:** Place tests in `__tests__` directories alongside the code they test, following the architecture layers:
+  ```
+  /src/core/auth/__tests__/           # Tests for core interfaces and models
+  /src/adapters/supabase/__tests__/   # Tests for Supabase adapters
+  /src/services/auth/__tests__/       # Tests for service implementations
+  /src/hooks/auth/__tests__/          # Tests for React hooks
+  /src/ui/headless/auth/__tests__/    # Tests for headless components
+  /src/ui/styled/auth/__tests__/      # Tests for styled components
+  ```
+- **Naming Convention:** Use kebab-case for test files with `.test.ts` or `.test.tsx` extension:
+  ```
+  auth-service.test.ts
+  supabase-auth-provider.test.ts
+  use-auth.test.ts
+  login-form.test.tsx
+  ```
 
-For further context and the most up-to-date rules, see `.cursorrules` in the project root.
+### Testing Approach & Priorities
+- **Architecture-Aligned Testing:** Test each layer of the architecture in isolation.
+- **Interface-Based Testing:** Test against interfaces, not implementations.
+- **End-User Focus:** Prioritize tests that verify complete user flows.
+- **Critical Path Coverage:** Ensure all critical functionality has comprehensive test coverage.
+- **No Implementation Simplification:** Never simplify application code just to make tests pass.
+
+### Mocking Strategy
+- **Global Mocking Only:** Use only global mocks from `/src/tests/mocks/`. NO LOCAL MOCKS.
+- **Interface-Based Mocks:** Create mock implementations of interfaces for testing.
+- **Centralized Mock Factories:** Use factory functions to create consistent mocks.
+- **Realistic Test Data:** Provide valid, realistic mock data for all required props.
+
+### Handling Test Failures
+- **Test File Issues:** You may modify test files to fix issues with selectors, mocking, or timing.
+- **Application Code Issues:** If you suspect the application code is broken, report the failing test and wait for guidance.
+- **Documentation:** Document test results and any issues encountered.
+- **Interdependency Awareness:** Before changing anything, understand how it affects other parts of the codebase.
+
+### Technology & Tools
+- **Approved Stack Only:** Use only the established testing stack (Vitest, React Testing Library, User Event, MSW, JSDOM, Testing Library Jest DOM).
+- **Standard Utilities:** Use the provided test utilities and helpers consistently.
+
+For further context and the most up-to-date rules, see `.cursorrules` in the project root and `TESTING_ISSUES-UnitTests.md` for specific patterns and solutions.

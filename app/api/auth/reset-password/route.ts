@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getServiceSupabase } from '@/lib/database/supabase';
 import { withAuthRateLimit } from '@/middleware/with-auth-rate-limit';
 import { withSecurity } from '@/middleware/with-security';
 import { logUserAction } from '@/lib/audit/auditLogger';
+import { getApiAuthService } from '@/lib/api/auth/factory';
 
 // Zod schema for password reset request
 const ResetRequestSchema = z.object({
@@ -39,30 +39,29 @@ async function handler(request: NextRequest): Promise<NextResponse> {
 
     const { email } = parseResult.data;
     emailForLogging = email; // Store for logging
-    const supabase = getServiceSupabase();
+    
+    // Get AuthService and call resetPassword method
+    const authService = getApiAuthService();
+    
+    // Send password reset email using the AuthService
+    const resetResult = await authService.resetPassword(email);
 
-    // Send password reset email
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: process.env.NEXT_PUBLIC_PASSWORD_RESET_REDIRECT_URL || 
-                 `${request.nextUrl.origin}/reset-password`,
-    });
-
-    // Log the attempt regardless of Supabase error, due to email enumeration prevention
+    // Log the attempt regardless of result, due to email enumeration prevention
     await logUserAction({
         action: 'PASSWORD_RESET_REQUEST',
-        status: resetError ? 'FAILURE' : 'INITIATED', // Mark as failure only if Supabase errored explicitly
+        status: resetResult.success ? 'INITIATED' : 'FAILURE',
         ipAddress: ipAddress,
         userAgent: userAgent,
         targetResourceType: 'auth',
         targetResourceId: email, // Log the email attempted
         details: { 
-            supabaseError: resetError ? { message: resetError.message, code: resetError.code, status: resetError.status } : null 
+            error: resetResult.error || null
         }
     });
 
-    if (resetError) {
+    if (!resetResult.success) {
       // Logged above, now just return standard response
-      console.error('Supabase password reset error (will still return generic success):', resetError);
+      console.error('Password reset error (will still return generic success):', resetResult.error);
     }
 
     // Always return success to prevent email enumeration

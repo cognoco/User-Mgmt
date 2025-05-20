@@ -1,7 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod'; // Import Zod
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { z } from 'zod';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { getApiAuthService } from '@/lib/api/auth/factory';
+import { logUserAction } from '@/lib/audit/auditLogger';
 
 // Zod schema for the request body
 const ResendEmailSchema = z.object({
@@ -9,6 +10,10 @@ const ResendEmailSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // Get IP and User Agent early for logging
+  const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
+  const userAgent = request.headers.get('user-agent') || 'unknown';
+  
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
@@ -37,29 +42,31 @@ export async function POST(request: NextRequest) {
     const { email } = parseResult.data;
     console.log(`Verification email resend request for email: ${email}`);
 
-    // 3. Call Supabase Auth Resend
-    const supabaseService = getServiceSupabase();
-    const redirectUrl = process.env.NEXT_PUBLIC_VERIFICATION_REDIRECT_URL || `${request.nextUrl.origin}/verify-email`;
+    // 3. Get AuthService and call sendVerificationEmail method
+    const authService = getApiAuthService();
+    const result = await authService.sendVerificationEmail(email);
     
-    const { error: resendError } = await supabaseService.auth.resend({
-      type: 'signup',
-      email: email, // Use email from request body
-      options: {
-        emailRedirectTo: redirectUrl, 
+    // Log the attempt
+    await logUserAction({
+      action: 'VERIFICATION_EMAIL_REQUEST',
+      status: result.success ? 'SUCCESS' : 'FAILURE',
+      ipAddress,
+      userAgent,
+      targetResourceType: 'auth',
+      targetResourceId: email,
+      details: { 
+        error: result.error || null
       }
     });
 
     // 4. Handle Errors
-    if (resendError) {
-      console.error('Supabase verification email resend error:', resendError);
-      // Consider specific errors like rate limits from Supabase
-      // Avoid leaking user existence info here if possible, but log the error server-side.
-      // Maybe return a generic error message to the client regardless of the specific Supabase error?
-      // For now, we return the Supabase error, but consider security implications.
-      return NextResponse.json({ error: resendError.message || 'Failed to send verification email.' }, { status: resendError.status || 400 });
+    if (!result.success) {
+      console.error('Verification email resend error:', result.error);
+      // For security reasons, we don't want to leak information about whether an email exists
+      // So we'll return a generic success message even in case of error
     }
 
-    // 5. Handle Success
+    // 5. Handle Success - always return the same message for security (prevent email enumeration)
     return NextResponse.json({ 
       message: 'If an account exists with this email, a verification email has been sent.' // Generic success message
     }); // 200 OK
@@ -68,6 +75,20 @@ export async function POST(request: NextRequest) {
     // 6. Handle Unexpected Errors
     console.error('Unexpected send verification email API error:', error);
     const message = error instanceof Error ? error.message : 'An unexpected error occurred';
-    return NextResponse.json({ error: 'An internal server error occurred.', details: message }, { status: 500 });
+    
+    // Log the error
+    await logUserAction({
+      action: 'VERIFICATION_EMAIL_UNEXPECTED_ERROR',
+      status: 'FAILURE',
+      ipAddress,
+      userAgent,
+      targetResourceType: 'auth',
+      details: { error: message }
+    });
+    
+    // For security reasons, still return the generic success message
+    return NextResponse.json({ 
+      message: 'If an account exists with this email, a verification email has been sent.'
+    }, { status: 200 });
   }
-} 
+}

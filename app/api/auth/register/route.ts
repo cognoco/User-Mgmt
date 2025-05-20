@@ -1,11 +1,12 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { withAuthRateLimit } from '@/middleware/with-auth-rate-limit';
 import { withSecurity } from '@/middleware/with-security';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { associateUserWithCompanyByDomain } from '@/lib/auth/domainMatcher';
+import { getApiAuthService } from '@/lib/api/auth/factory';
+import { RegistrationPayload } from '@/core/auth/models';
 
 // Zod schema for registration data (matches original)
 const RegistrationSchema = z.discriminatedUnion('userType', [
@@ -77,76 +78,63 @@ async function handler(request: NextRequest): Promise<NextResponse> {
 
     const regData = parseResult.data;
     emailForLogging = regData.email;
-    const supabaseService = getServiceSupabase();
-
-    // 3. Call Supabase Auth signUp (using Service Client)
-    // Prepare user metadata for Supabase
-    let userMetadata: Record<string, any> = {};
-    if (regData.userType === 'private') {
-      userMetadata = {
-        user_type: 'private',
-        first_name: regData.firstName,
-        last_name: regData.lastName,
-      };
-    } else if (regData.userType === 'corporate') {
-      userMetadata = {
-        user_type: 'corporate',
-        first_name: regData.firstName || '',
-        last_name: regData.lastName || '',
-        company_name: regData.companyName,
-        company_website: regData.companyWebsite || '',
-        department: regData.department || '',
-        industry: regData.industry || '',
-        company_size: regData.companySize || '',
-        position: regData.position || '',
-      };
-    }
-
-    const { data, error: signUpError } = await supabaseService.auth.signUp({
+    
+    // 3. Get AuthService and prepare registration payload
+    const authService = getApiAuthService();
+    
+    // Prepare registration payload for the AuthService
+    const registrationPayload: RegistrationPayload = {
       email: regData.email,
       password: regData.password,
-      options: {
-        data: userMetadata,
-        emailRedirectTo: process.env.NEXT_PUBLIC_VERIFICATION_REDIRECT_URL || `${request.nextUrl.origin}/verify-email`,
-      }
-    });
+      userType: regData.userType,
+      firstName: regData.userType === 'private' ? regData.firstName : (regData.firstName || ''),
+      lastName: regData.userType === 'private' ? regData.lastName : (regData.lastName || ''),
+      acceptTerms: regData.acceptTerms,
+      // Add corporate-specific fields if applicable
+      ...(regData.userType === 'corporate' && {
+        companyName: regData.companyName,
+        companyWebsite: regData.companyWebsite || '',
+        department: regData.department || '',
+        industry: regData.industry || '',
+        companySize: regData.companySize || 'Other/Not Specified',
+        position: regData.position || ''
+      }),
+      // Add redirect URL for email verification
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?source=registration`
+    };
 
-    // 4. Handle Supabase Errors
-    if (signUpError) {
-      console.error('Supabase registration error:', signUpError);
-      
-      // Log the failed registration attempt using the service client
+    // Call AuthService register method
+    const authResult = await authService.register(registrationPayload);
+
+    // 4. Handle Registration Errors
+    if (!authResult.success) {
+      // Log the failed registration attempt
       await logUserAction({
-          client: supabaseService, // Pass service client
           action: 'REGISTER_FAILURE',
           status: 'FAILURE',
           ipAddress: ipAddress,
           userAgent: userAgent,
           targetResourceType: 'auth',
-          targetResourceId: emailForLogging, // Use stored email if available
+          targetResourceId: regData.email,
           details: { 
-              reason: signUpError.message, 
-              code: signUpError.code, 
-              status: signUpError.status 
+              reason: authResult.error
           }
       });
 
-      // Check status code and message content
-      if (signUpError.status === 409 || (signUpError.status === 400 && signUpError.message.includes('User already registered'))) {
-          return NextResponse.json({ error: 'Email already exists' }, { status: 409 });
+      // Handle specific error cases
+      if (authResult.error?.includes('already exists')) {
+        return NextResponse.json({ error: 'An account with this email already exists.' }, { status: 409 });
       }
-      // Add specific checks for weak password etc. if needed based on Supabase response
       
-      // Generic error
-      return NextResponse.json({ error: signUpError.message || 'Registration failed.' }, { status: signUpError.status || 400 });
+      // Generic registration failure
+      return NextResponse.json({ error: authResult.error || 'Registration failed.' }, { status: 400 });
     }
 
     // 5. Handle Success
-    if (!data.user) {
-      // Log this unexpected success state using the service client
+    if (!authResult.user) {
+      // Log the unexpected error
       await logUserAction({
-          client: supabaseService, // Pass service client
-          action: 'REGISTER_UNEXPECTED_NO_USER',
+          action: 'REGISTER_UNEXPECTED_ERROR',
           status: 'FAILURE',
           ipAddress: ipAddress,
           userAgent: userAgent,
@@ -158,32 +146,30 @@ async function handler(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Registration failed unexpectedly.' }, { status: 500 });
     }
 
-    // Log successful registration using the service client
+    // Log successful registration
     await logUserAction({
-        client: supabaseService, // Pass service client
-        userId: data.user.id,
+        userId: authResult.user.id,
         action: 'REGISTER_SUCCESS',
         status: 'SUCCESS',
         ipAddress: ipAddress,
         userAgent: userAgent,
         targetResourceType: 'auth',
-        targetResourceId: data.user.id,
-        details: { email: data.user.email } // Log email as detail
+        targetResourceId: authResult.user.id,
+        details: { email: authResult.user.email } // Log email as detail
     });
 
     // 6. Handle domain-based company association for private users
     let domainAssociationResult = null;
     if (regData.userType === 'private') {
       domainAssociationResult = await associateUserWithCompanyByDomain(
-        data.user.id,
-        data.user.email || ''
+        authResult.user.id,
+        authResult.user.email || ''
       );
       
       if (domainAssociationResult.matched) {
         // If a domain match was found, log the association
         await logUserAction({
-          client: supabaseService,
-          userId: data.user.id,
+          userId: authResult.user.id,
           action: 'COMPANY_DOMAIN_ASSOCIATION',
           status: domainAssociationResult.success ? 'SUCCESS' : 'FAILURE',
           ipAddress: ipAddress,
@@ -202,7 +188,7 @@ async function handler(request: NextRequest): Promise<NextResponse> {
     // Return success message and user data (without session if verification is needed)
     return NextResponse.json({
       message: 'Registration successful. Please check your email to verify your account.',
-      user: data.user,
+      user: authResult.user,
       companyAssociation: domainAssociationResult?.matched ? {
         success: domainAssociationResult.success,
         companyName: domainAssociationResult.companyName
@@ -213,27 +199,16 @@ async function handler(request: NextRequest): Promise<NextResponse> {
     console.error('Registration error:', error);
     const message = error instanceof Error ? error.message : 'An unexpected error occurred';
     
-    // Log the unexpected error using the service client if available, otherwise default
-    // Note: supabaseService might not be initialized if error happened before its creation
-    // We need a way to get the service client here reliably if possible
-    // For now, let's assume we might not have it and let it use the default anon client
-    // OR explicitly try to get it again (might fail if env vars missing)
-    try {
-      const serviceClientForCatch = getServiceSupabase(); // Try getting it again
-      await logUserAction({
-          client: serviceClientForCatch, // Pass service client
-          action: 'REGISTER_UNEXPECTED_ERROR',
-          status: 'FAILURE',
-          ipAddress: ipAddress,
-          userAgent: userAgent,
-          targetResourceType: 'auth',
-          targetResourceId: emailForLogging, // Use stored email if available
-          details: { error: message }
-      });
-    } catch (logError) {
-        console.error('Failed to log unexpected registration error using service client:', logError);
-        // Fallback logging attempt potentially without service client if needed
-    }
+    // Log the unexpected error
+    await logUserAction({
+        action: 'REGISTER_UNEXPECTED_ERROR',
+        status: 'FAILURE',
+        ipAddress: ipAddress,
+        userAgent: userAgent,
+        targetResourceType: 'auth',
+        targetResourceId: emailForLogging, // Use stored email if available
+        details: { error: message }
+    });
 
     return NextResponse.json({ error: 'Registration failed. Please try again.', details: message }, { status: 500 });
   }

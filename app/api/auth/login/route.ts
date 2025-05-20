@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
+import { getApiAuthService } from '@/lib/api/auth/factory';
+import { LoginPayload } from '@/core/auth/models';
 
 // Zod schema for login data (matches original)
 const LoginSchema = z.object({
@@ -47,17 +48,20 @@ export async function POST(request: NextRequest) {
 
     const { email, password, rememberMe } = parseResult.data;
     emailForLogging = email; // Store email for potential error logging
-    const supabaseService = getServiceSupabase();
-
-    // 3. Call Supabase Auth (using Service Client)
-    const { data, error: signInError } = await supabaseService.auth.signInWithPassword({
+    
+    // 3. Get AuthService and call login method
+    const authService = getApiAuthService();
+    const loginPayload: LoginPayload = {
       email,
       password,
-    });
+      rememberMe: rememberMe || false
+    };
+    
+    const authResult = await authService.login(loginPayload);
 
-    // 4. Handle Supabase Errors
-    if (signInError) {
-      console.error('Supabase login error:', signInError.message, 'Status:', signInError.status);
+    // 4. Handle Login Errors
+    if (!authResult.success) {
+      console.error('Login error:', authResult.error);
       
       // Log the failed login attempt
       await logUserAction({
@@ -68,93 +72,53 @@ export async function POST(request: NextRequest) {
           targetResourceType: 'auth',
           targetResourceId: email, // Log the email attempted
           details: { 
-              reason: signInError.message, 
-              code: signInError.code, // Include Supabase error code if available
-              status: signInError.status 
+              reason: authResult.error
           }
       });
 
-      // Check status code and message content
-      if (signInError.status === 400 && signInError.message.includes('Invalid login credentials')) {
-         return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 }); // Return 401 for invalid creds
+      // Handle specific error cases
+      if (authResult.error?.includes('Invalid login credentials')) {
+         return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
       } 
-      if (signInError.status === 400 && signInError.message.includes('Email not confirmed')) {
+      if (authResult.error?.includes('Email not confirmed')) {
          return NextResponse.json({ 
             error: 'Email address not verified.', 
             code: 'EMAIL_NOT_VERIFIED' 
          }, { status: 403 });
       }
-      // Add other specific error checks if needed
       
       // Generic authentication failure
-      return NextResponse.json({ error: signInError.message || 'Authentication failed.' }, { status: signInError.status || 401 });
+      return NextResponse.json({ error: authResult.error || 'Authentication failed.' }, { status: 401 });
     }
 
     // 5. Handle Success
-    if (!data.session || !data.user) {
-        console.error('Login successful but no session/user returned');
+    if (!authResult.user) {
+        console.error('Login successful but no user returned');
         return NextResponse.json({ error: 'Login failed unexpectedly after authentication.' }, { status: 500 });
     }
 
-    // If login successful, handle session policies
-    if (data && data.user && data.session) {
-      try {
-        // Update the user metadata with last login time and last activity
-        await supabaseService.auth.admin.updateUserById(data.user.id, {
-          user_metadata: {
-            ...data.user.user_metadata,
-            last_login: new Date().toISOString(),
-            last_activity: new Date().toISOString()
-          }
-        });
-      } catch (error) {
-        console.error('Error updating user metadata:', error);
-        // Continue with login regardless
-      }
-    }
-
-    // If rememberMe is true, extend the session
-    if (rememberMe && data.session) {
-      try {
-        // Create a new session with longer expiry
-        const { data: extendedSession, error: refreshError } = await supabaseService.auth.setSession({
-          refresh_token: data.session.refresh_token!,
-          access_token: data.session.access_token
-        });
-        
-        if (refreshError) {
-          console.error('Failed to extend session:', refreshError);
-        } else if (extendedSession && extendedSession.session) {
-          // Use the extended session data instead
-          data.session = extendedSession.session;
-        }
-      } catch (sessionError) {
-        console.error('Error extending session:', sessionError);
-      }
-    }
-
     // Check if user has MFA enabled
-    const hasMfaEnabled = data.user.user_metadata?.totpEnabled === true;
+    const hasMfaEnabled = authResult.user.mfaEnabled;
     
     // Log successful login
     await logUserAction({
-        userId: data.user.id,
+        userId: authResult.user.id,
         action: 'LOGIN_SUCCESS',
         status: 'SUCCESS',
         ipAddress: ipAddress,
         userAgent: userAgent,
         targetResourceType: 'auth',
-        targetResourceId: data.user.id,
+        targetResourceId: authResult.user.id,
         details: { requiresMfa: hasMfaEnabled }
     });
 
     // Include MFA status in response
     console.log('Login successful for:', email, rememberMe ? '(with extended session)' : '');
     return NextResponse.json({
-      user: data.user,
-      token: data.session.access_token,
+      user: authResult.user,
+      token: authResult.token,
       requiresMfa: hasMfaEnabled,
-      expiresAt: data.session.expires_at
+      expiresAt: authResult.expiresAt
     }); 
     
   } catch (error) {
@@ -175,4 +139,4 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ error: 'An internal server error occurred during login.', details: message }, { status: 500 });
   }
-} 
+}

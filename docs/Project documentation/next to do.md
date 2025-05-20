@@ -134,65 +134,70 @@ This document outlines the step-by-step tasks required to refactor the User Mana
 
 ## Phase 7: Default Styled Components
 
-- [ ] Authentication UI components
-  - [ ] Create styled `LoginForm` component
-  - [ ] Create styled `RegistrationForm` component
-  - [ ] Create styled `PasswordResetForm` component
-  - [ ] Create styled `MFASetup` component
+- [x] Authentication UI components
+  - [x] Create styled `LoginForm` component
+  - [x] Create styled `RegistrationForm` component
+  - [x] Create styled `PasswordResetForm` component
+  - [x] Create styled `MFASetup` component
 
-- [ ] User profile UI components
-  - [ ] Create styled `ProfileEditor` component
-  - [ ] Create styled `AccountSettings` component
+- [x] User profile UI components
+  - [x] Create styled `ProfileEditor` component
+  - [x] Create styled `AccountSettings` component
 
-- [ ] Team management UI components
-  - [ ] Create styled `TeamCreator` component
-  - [ ] Create styled `TeamMemberManager` component
-  - [ ] Create styled `InvitationManager` component
+- [x] Team management UI components
+  - [x] Create styled `TeamCreator` component
+  - [x] Create styled `TeamMemberManager` component
+  - [x] Create styled `InvitationManager` component
 
-- [ ] Permission UI components
-  - [ ] Create styled `RoleManager` component
-  - [ ] Create styled `PermissionEditor` component
+- [x] Permission UI components
+  - [x] Create styled `RoleManager` component
+  - [x] Create styled `PermissionEditor` component
 
 ## Phase 8: Page Integration
 
-- [ ] Authentication pages
-  - [ ] Update login page with new components
-  - [ ] Update registration page with new components
-  - [ ] Update password reset page with new components
-  - [ ] Update MFA setup page with new components
+- [x] Authentication pages
+  - [x] Update login page with new components
+  - [x] Update registration page with new components
+  - [x] Update password reset page with new components
+  - [x] Update MFA setup page with new components
 
-- [ ] User profile pages
-  - [ ] Update profile page with new components
-  - [ ] Update settings page with new components
+- [x] User profile pages
+  - [x] Update profile page with new components
+  - [x] Update settings page with new components
 
-- [ ] Team management pages
-  - [ ] Update team dashboard with new components
-  - [ ] Update team management page with new components
-  - [ ] Update invitation page with new components
+- [x] Team management pages
+  - [x] Update team dashboard with new components
+  - [x] Update team management page with new components
+  - [x] Update invitation page with new components
 
-- [ ] Permission pages
-  - [ ] Update role management page with new components
-  - [ ] Update permission editor page with new components
+- [x] Permission pages
+  - [x] Update role management page with new components
+  - [x] Update permission editor page with new components
 
 ## Phase 9: API Integration
 
-- [ ] Authentication API
-  - [ ] Update login endpoint to use new architecture
-  - [ ] Update registration endpoint to use new architecture
-  - [ ] Update password reset endpoint to use new architecture
+- [x] Authentication API
+  - [x] Update login endpoint to use new architecture
+  - [x] Update registration endpoint to use new architecture
+  - [x] Update password reset endpoint to use new architecture
+  - [x] Update logout endpoint to use new architecture
+  - [x] Update send-verification-email endpoint to use new architecture
+  - [x] Update MFA verification endpoints to use new architecture
+  - [x] Update account endpoints to use new architecture
+  - [x] Update CSRF token endpoint to use new architecture
 
-- [ ] User profile API
-  - [ ] Update profile endpoints to use new architecture
-  - [ ] Update settings endpoints to use new architecture
+- [x] User profile API
+  - [x] Update profile endpoints to use new architecture
+  - [x] Update settings endpoints to use new architecture
 
-- [ ] Team management API
-  - [ ] Update team endpoints to use new architecture
-  - [ ] Update member endpoints to use new architecture
-  - [ ] Update invitation endpoints to use new architecture
+- [x] Team management API
+  - [x] Update team endpoints to use new architecture
+  - [x] Update member endpoints to use new architecture
+  - [x] Update invitation endpoints to use new architecture
 
-- [ ] Permission API
-  - [ ] Update role endpoints to use new architecture
-  - [ ] Update permission endpoints to use new architecture
+- [x] Permission API
+  - [x] Update role endpoints to use new architecture
+  - [x] Update permission endpoints to use new architecture
 
 ## Phase 10: Testing
 

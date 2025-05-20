@@ -210,6 +210,63 @@ This directory holds testing assets that are **not specific to Playwright E2E te
   /src/tests/integration/profile-update-flow.test.tsx # Testing form -> store -> mock API
   ```
 
+## Tests Organization
+
+### Global Test Utilities (`/src/tests`)
+
+- **Test Utilities**: Shared test utilities should be in `/src/tests/utils`.
+  ```
+  /src/tests/utils/render-with-providers.tsx
+  /src/tests/utils/test-helpers.ts
+  ```
+
+- **Test Mocks**: Shared mock data and mock implementations should be in `/src/tests/mocks`.
+  ```
+  /src/tests/mocks/handlers.ts              # MSW request handlers
+  /src/tests/mocks/auth-service.mock.ts     # Mock AuthService implementation
+  /src/tests/mocks/supabase-auth-provider.mock.ts # Mock SupabaseAuthProvider
+  ```
+
+- **Integration Tests**: Complex integration tests that don't fit into a specific feature's `__tests__` directory.
+  ```
+  /src/tests/integration/auth-flow.test.tsx  # Testing login -> profile -> settings flow
+  /src/tests/integration/profile-update-flow.test.tsx # Testing form -> store -> mock API
+  ```
+
+### Layer-Specific Tests
+
+Tests should be organized according to the architecture layers, with `__tests__` directories adjacent to the code they test:
+
+- **Core Layer Tests**:
+  ```
+  /src/core/auth/__tests__/models.test.ts    # Tests for auth entities/models
+  /src/core/user/__tests__/events.test.ts    # Tests for user events
+  ```
+
+- **Adapter Layer Tests**:
+  ```
+  /src/adapters/supabase/auth/__tests__/supabase-auth-provider.test.ts
+  /src/adapters/supabase/user/__tests__/supabase-user-provider.test.ts
+  ```
+
+- **Service Layer Tests**:
+  ```
+  /src/services/auth/__tests__/default-auth-service.test.ts
+  /src/services/user/__tests__/default-user-service.test.ts
+  ```
+
+- **Hook Layer Tests**:
+  ```
+  /src/hooks/auth/__tests__/use-auth.test.ts
+  /src/hooks/user/__tests__/use-user-profile.test.ts
+  ```
+
+- **UI Layer Tests**:
+  ```
+  /src/ui/headless/auth/__tests__/login-form.test.tsx
+  /src/ui/styled/auth/__tests__/login-form.test.tsx
+  ```
+
 ## Import Path Guidelines
 
 1. **Absolute Imports**: Use absolute imports for project modules to avoid "../../../" paths.

@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getServiceSupabase } from '@/lib/database/supabase';
 import { withAuthRateLimit } from '@/middleware/with-auth-rate-limit';
 import { withSecurity } from '@/middleware/with-security';
 import { logUserAction } from '@/lib/audit/auditLogger';
-import { User } from '@supabase/supabase-js';
+import { getApiAuthService } from '@/lib/api/auth/factory';
+import { User } from '@/core/auth/models';
 
 // Zod schema for password update
 const UpdatePasswordSchema = z.object({
@@ -27,12 +27,13 @@ async function handler(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const supabase = getServiceSupabase();
+    // Get AuthService
+    const authService = getApiAuthService();
 
-    // Get the current user from the session/token
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Get the current user
+    const currentUser = authService.getCurrentUser();
 
-    if (userError || !user) {
+    if (!currentUser) {
       // Log unauthorized attempt if possible
       await logUserAction({
           action: 'PASSWORD_UPDATE_UNAUTHORIZED',
@@ -40,11 +41,11 @@ async function handler(request: NextRequest): Promise<NextResponse> {
           ipAddress: ipAddress,
           userAgent: userAgent,
           targetResourceType: 'auth',
-          details: { reason: userError?.message ?? 'No user session found' }
+          details: { reason: 'No user session found' }
       });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    userIdForLogging = user.id; // Store for logging
+    userIdForLogging = currentUser.id; // Store for logging
 
     const body = await request.json();
     
@@ -60,12 +61,14 @@ async function handler(request: NextRequest): Promise<NextResponse> {
 
     const { password } = parseResult.data;
 
-    // Update password
-    const { error: updateError } = await supabase.auth.updateUser({
-      password: password,
-    });
-
-    if (updateError) {
+    try {
+      // Update password using AuthService
+      // Since we're setting a new password without knowing the old one (password reset flow),
+      // we'll pass an empty string as the old password
+      await authService.updatePassword('', password);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update password';
+      
       // Log the failed password update
       await logUserAction({
           userId: userIdForLogging,
@@ -75,13 +78,9 @@ async function handler(request: NextRequest): Promise<NextResponse> {
           userAgent: userAgent,
           targetResourceType: 'auth',
           targetResourceId: userIdForLogging,
-          details: { 
-              reason: updateError.message, 
-              code: updateError.code, 
-              status: updateError.status 
-          }
+          details: { reason: errorMessage }
       });
-      return NextResponse.json({ error: updateError.message }, { status: updateError.status || 400 });
+      return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
     // Log successful password update

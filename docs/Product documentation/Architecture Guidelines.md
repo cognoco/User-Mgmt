@@ -276,6 +276,69 @@ export function LoginForm(props) {
 }
 ```
 
+## Testing Architecture
+
+### 1. Layer-Specific Testing Approach
+
+**✅ REQUIRED:**
+- Tests MUST be organized according to the same layered architecture as the code
+- Each layer MUST be tested in isolation from other layers
+- Tests MUST use mock implementations of dependencies from lower layers
+- Test files MUST use consistent naming conventions (kebab-case with `.test.ts` or `.test.tsx` extension)
+
+**❌ FORBIDDEN:**
+- Tests MUST NOT have direct dependencies on implementation details of other layers
+- Tests MUST NOT use local mocks; all mocks MUST be defined in global mock files
+- Test must have generic import paths where possibl so that it is possible to move them without import path changes
+
+### 2. Test Directory Structure
+
+**✅ REQUIRED:**
+- Tests MUST be placed in `__tests__` directories adjacent to the code they test
+- Mock implementations MUST be placed in `/src/tests/mocks` with clear naming conventions
+- Test utilities MUST be placed in `/src/tests/utils`
+- Use mocks minimally, use the real implementation to find missing elements and bugs! 
+
+**Example:**
+```
+/src/core/auth/__tests__/                # Core layer tests
+/src/adapters/supabase/__tests__/        # Adapter layer tests
+/src/services/auth/__tests__/            # Service layer tests
+/src/hooks/auth/__tests__/               # Hook layer tests
+/src/ui/headless/auth/__tests__/         # UI layer tests (headless)
+/src/ui/styled/auth/__tests__/           # UI layer tests (styled)
+/src/tests/mocks/auth-service.mock.ts    # Mock AuthService implementation
+/src/tests/utils/render-with-providers.tsx # Test utility
+```
+
+### 3. Testing Patterns by Layer
+
+**Core Layer Tests:**
+- Test interfaces for correctness
+- Test models/entities for business rule validation
+- Test events for proper structure
+
+**Adapter Layer Tests:**
+- Mock external dependencies (database, API)
+- Test adapter implementation against its interface
+- Test error handling and edge cases
+
+**Service Layer Tests:**
+- Mock adapter dependencies
+- Test business logic implementation
+- Test service factory functions
+
+**Hook Layer Tests:**
+- Mock service dependencies
+- Test state management
+- Test side effects
+
+**UI Layer Tests:**
+- Mock hook dependencies
+- Test rendering logic
+- Test user interactions
+- Test prop handling
+
 ## Compliance Checklist
 
 Before committing any code, ask yourself:
@@ -288,5 +351,8 @@ Before committing any code, ask yourself:
 6. Are all dependencies injectable and replaceable?
 7. Does my code assume specific implementation details?
 8. Is my code testable in isolation?
+9. Do my tests follow the layered architecture?
+10. Are my tests using the correct naming conventions?
+11. Are my tests using global mocks instead of local mocks?
 
 Following these guidelines ensures the User Management Module remains truly modular, pluggable, and easy to integrate into any host application.
