@@ -1,4 +1,4 @@
-// src/tests/mocks/auth.store.mock.ts
+// src/services/auth/__tests__/mocks/auth.store.mock.ts
 // Robust mock factory for useAuthStore (Zustand)
 // Usage: import { createMockAuthStore } from './auth.store.mock';
 //        const mockStore = createMockAuthStore({ user: { ... } }, { login: vi.fn() });

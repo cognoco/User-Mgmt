@@ -578,7 +578,7 @@ export function setTableMockData(tableName: string, mockData: any) {
   
   2. Test-specific overrides:
      ```
-     import { supabase, resetSupabaseMock, setTableMockData } from '@/tests/mocks/supabase';
+     import { supabase, resetSupabaseMock, setTableMockData } from '@/adapters/__tests__/mocks/supabase.mock';
      
      beforeEach(() => {
        resetSupabaseMock();

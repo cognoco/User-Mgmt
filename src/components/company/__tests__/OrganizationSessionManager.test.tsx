@@ -6,14 +6,14 @@ import { OrganizationProvider } from '@/lib/context/OrganizationContext';
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
 import { vi, describe, beforeEach, test, expect, afterEach } from 'vitest';
 
-vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
+vi.mock('@/lib/database/supabase', async () => (await import('@/adapters/__tests__/mocks/supabase.mock')));
 import { supabase } from '@/lib/database/supabase';
 
 // NOTE: Organization fetches in this test are controlled via globalThis.__TEST_ORG__ and globalThis.__TEST_ORG_ERROR__.
 // Set globalThis.__TEST_ORG__ in beforeEach or a test to control the returned org.
 // Set globalThis.__TEST_ORG_ERROR__ to simulate an error. Clean up in afterEach.
 //
-// See src/tests/mocks/supabase.ts for details.
+// See src/adapters/__tests__/mocks/supabase.mock.ts for details.
 
 describe('Business-specific Session Controls', () => {
   let user: any;

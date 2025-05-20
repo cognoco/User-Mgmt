@@ -4,7 +4,7 @@ import { vi, describe, beforeEach, test, expect } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('@/lib/database/supabase', async () => {
-  const mockSupabaseModule = await import('@/tests/mocks/supabase');
+  const mockSupabaseModule = await import('@/adapters/__tests__/mocks/supabase.mock');
   return { supabase: mockSupabaseModule.supabase };
 });
 
@@ -261,7 +261,7 @@ describe('Personal SSO Authentication Flows', () => {
       error: null,
     });
     // Set global mock data for organization_domains
-    const { setTableMockData } = await import('@/tests/mocks/supabase');
+    const { setTableMockData } = await import('@/adapters/__tests__/mocks/supabase.mock');
     setTableMockData('organization_domains', {
       data: [{ domain: 'example.com', is_verified: true, org_id: orgMock.id }],
       error: null,

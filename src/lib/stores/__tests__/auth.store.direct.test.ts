@@ -25,7 +25,7 @@ Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
 // Patch: Use robust mock for useAuthStore
 viMock.mock('@/lib/stores/auth.store', async () => {
-  const { createMockAuthStore } = await import('@/tests/mocks/auth.store.mock');
+  const { createMockAuthStore } = await import('@/services/auth/__tests__/mocks/auth.store.mock');
   return { useAuthStore: createMockAuthStore() };
 });
 

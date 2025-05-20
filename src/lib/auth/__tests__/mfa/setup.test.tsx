@@ -9,7 +9,7 @@ import { api } from '@/lib/api/axios';
 
 // Import our standardized mock using vi.mock with async dynamic import and alias (no extension)
 vi.mock('@/lib/database/supabase', async () => { 
-  const mod = await import('@/tests/mocks/supabase');
+  const mod = await import('@/adapters/__tests__/mocks/supabase.mock');
   return mod; 
 });
 import { supabase } from '@/lib/database/supabase';

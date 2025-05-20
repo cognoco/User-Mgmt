@@ -9,7 +9,7 @@ import { api } from '@/lib/api/axios';
 import type { UserEvent } from '@testing-library/user-event';
 
 // Import our standardized mock using vi.mock with dynamic import
-vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
+vi.mock('@/lib/database/supabase', async () => (await import('@/adapters/__tests__/mocks/supabase.mock')));
 import { supabase } from '@/lib/database/supabase';
 
 describe('MFA Verification During Login', () => {

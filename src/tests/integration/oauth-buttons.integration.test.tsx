@@ -6,7 +6,7 @@ import { OAuthButtons } from '@/components/auth/OAuthButtons';
 import { useOAuthStore } from '@/lib/stores/oauth.store';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { OAuthProvider } from '@/types/oauth';
-import { createOAuthStoreMock } from '@/tests/mocks/oauth.store.mock';
+import { createOAuthStoreMock } from '@/services/auth/__tests__/mocks/oauth.store.mock';
 
 // Mock the hooks
 vi.mock('@/lib/stores/oauth.store');

@@ -1,7 +1,7 @@
 // Import our standardized mock
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 vi.mock('@/lib/database/supabase', async () => {
-  const mod = await import('@/tests/mocks/supabase');
+  const mod = await import('@/adapters/__tests__/mocks/supabase.mock');
   const supabase = mod.supabase;
   return {
     supabase,

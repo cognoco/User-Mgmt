@@ -6,7 +6,7 @@ import RoleManagementPanel from '../RoleManagementPanel';
 import { useRBACStore } from '@/lib/stores/rbac.store';
 import { User } from '@/types/user';
 import { RoleSchema, UserRoleSchema, Role, Permission } from '@/types/rbac';
-import { createRBACStoreMock } from '@/tests/mocks/rbac.store.mock';
+import { createRBACStoreMock } from '@/services/permission/__tests__/mocks/rbac.store.mock';
 
 vi.mock('@/lib/stores/rbac.store');
 

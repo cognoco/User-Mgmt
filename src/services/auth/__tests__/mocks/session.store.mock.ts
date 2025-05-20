@@ -1,4 +1,4 @@
-// src/tests/mocks/session.store.mock.ts
+// src/services/auth/__tests__/mocks/session.store.mock.ts
 // Robust mock factory for useSessionStore (Zustand)
 // Usage: import { createMockSessionStore } from './session.store.mock';
 //        const mockStore = createMockSessionStore({ sessions: [...] }, { revokeSession: vi.fn() });

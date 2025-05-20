@@ -9,10 +9,10 @@ import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
 import { vi, describe, beforeEach, test, expect, afterEach } from 'vitest'; // Import vi and afterEach
 
 // IMPORTANT: Mock the real Supabase client before anything else
-vi.mock('@supabase/supabase-js', async () => (await import('@/tests/mocks/supabase')));
+vi.mock('@supabase/supabase-js', async () => (await import('@/adapters/__tests__/mocks/supabase.mock')));
 
 // IMPORTANT: Mock must be first to ensure all imports use the mock
-vi.mock('../../../../lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
+vi.mock('../../../../lib/database/supabase', async () => (await import('@/adapters/__tests__/mocks/supabase.mock')));
 import { supabase } from '@/lib/database/supabase';
 
 describe('MOCK DIAGNOSTIC', () => {

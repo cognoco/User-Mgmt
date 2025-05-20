@@ -1,6 +1,6 @@
 // __tests__/integration/empty-states.test.js
 
-vi.mock('@/lib/database/supabase', () => import('@/tests/mocks/supabase'));
+vi.mock('@/lib/database/supabase', () => import('@/adapters/__tests__/mocks/supabase.mock'));
 import { supabase } from '@/lib/database/supabase';
 
 import React from 'react';

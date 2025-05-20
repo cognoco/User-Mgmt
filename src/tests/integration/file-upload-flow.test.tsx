@@ -7,7 +7,7 @@ import FileManager from '@/components/common/FileManager';
 import { vi, Mock } from 'vitest';
 
 // Import our standardized mock
-vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
+vi.mock('@/lib/database/supabase', async () => (await import('@/adapters/__tests__/mocks/supabase.mock')));
 import { supabase } from '@/lib/database/supabase';
 
 // Cast storage methods to Mock for linter compliance

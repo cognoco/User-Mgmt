@@ -9,7 +9,7 @@ declare global {
   var __TEST_ORG__: import('@/lib/hooks/useOrganization').Organization | undefined;
 }
 
-vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
+vi.mock('@/lib/database/supabase', async () => (await import('@/adapters/__tests__/mocks/supabase.mock')));
 vi.mock('@/lib/auth/UserManagementProvider', () => ({
   useUserManagement: () => ({
     oauth: {
@@ -230,7 +230,7 @@ describe('Business SSO Authentication Flows', () => {
     });
     
     // Mock organization domains query
-    const { createMockBuilder } = await import('@/tests/mocks/supabase');
+    const { createMockBuilder } = await import('@/adapters/__tests__/mocks/supabase.mock');
     (supabase.from as vi.Mock).mockImplementation((table: string) => {
       if (table === 'organization_domains') {
         const builder: any = createMockBuilder(table);

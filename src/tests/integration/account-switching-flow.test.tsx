@@ -1,12 +1,12 @@
 // __tests__/integration/account-switching-flow.test.tsx
 import { vi, beforeEach, describe, expect, test, afterEach } from 'vitest';
 import '@/tests/i18nTestSetup';
-import { supabase, setTableMockData } from '@/tests/mocks/supabase';
+import { supabase, setTableMockData } from '@/adapters/__tests__/mocks/supabase.mock';
 
 // IMPORTANT: vi.mock must be at the top, BEFORE any variable declarations
-vi.mock('@/lib/database/supabase', async () => await import('../../tests/mocks/supabase'));
+vi.mock('@/lib/database/supabase', async () => await import('@/adapters/__tests__/mocks/supabase.mock'));
 // Mock the accountSwitcherApi module
-vi.mock('@/lib/accountSwitcherApi', async () => await import('../../tests/mocks/accountSwitcherApi.mock'));
+vi.mock('@/lib/accountSwitcherApi', async () => await import('@/tests/utils/accountSwitcherApi-mock'));
 
 // Type definitions for the Dialog components props
 import { render, screen, waitFor } from '@testing-library/react';

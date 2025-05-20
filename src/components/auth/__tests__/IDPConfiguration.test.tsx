@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { vi, MockInstance } from 'vitest';
 import { api } from '@/lib/api/axios';
 import IDPConfiguration from '../IDPConfiguration';
-import { createMockSamlConfig, createMockOidcConfig } from '@/tests/mocks/test-mocks';
+import { createMockSamlConfig, createMockOidcConfig } from '@/tests/utils/test-mocks';
 
 // Mock the api
 vi.mock('@/lib/api/axios', () => ({
