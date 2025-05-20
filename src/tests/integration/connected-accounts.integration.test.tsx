@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ConnectedAccounts } from '@/components/shared/ConnectedAccounts'; // Corrected import path
 import { useConnectedAccountsStore } from '@/lib/stores/connected-accounts.store'; // CORRECT STORE
-import { createConnectedAccountsStoreMock } from '@/tests/mocks/connected-accounts.store.mock';
+import { createConnectedAccountsStoreMock } from '@/services/user/__tests__/mocks/connected-accounts.store.mock';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { OAuthProvider } from '@/types/oauth'; // Import OAuthProvider if needed
 import { ConnectedAccount } from '@/types/connected-accounts'; // Import ConnectedAccount type

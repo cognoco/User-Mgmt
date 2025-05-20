@@ -1,7 +1,7 @@
 // __tests__/integration/user-auth-flow.test.tsx
 // This test has been verified to work with Vitest 3.1.3
 // Note: This test relies on proper mock setup for auth stores and Supabase client
-// See vitest.setup.ts and src/tests/mocks/supabase.ts for the required mock implementations
+// See vitest.setup.ts and s@/adapters/__tests__/mocks/supabase.mock.ts for the required mock implementations
 
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
@@ -18,7 +18,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'; // A
 // import { useAuthStore } from '@/lib/stores/auth.store';
 
 // Mock Supabase (using factory with dynamic import)
-vi.mock('@/lib/database/supabase', () => import('@/tests/mocks/supabase'));
+vi.mock('@/lib/database/supabase', () => import('@/adapters/__tests__/mocks/supabase.mock'));
 // Import the mocked supabase instance (Vitest redirects this)
 import { supabase } from '@/lib/database/supabase';
 
@@ -55,7 +55,7 @@ vi.mock('@/lib/stores/profile.store', () => ({
 // import { ConnectedAccount } from '@/types/connected-accounts';
 // import { OAuthProvider } from '@/types/oauth';
 
-import { createConnectedAccountsStoreMock } from '@/tests/mocks/connected-accounts.store.mock';
+import { createConnectedAccountsStoreMock } from '@/services/user/__tests__/mocks/connected-accounts.store.mock';
 
 let mockConnectedAccountsStoreActions = createConnectedAccountsStoreMock();
 

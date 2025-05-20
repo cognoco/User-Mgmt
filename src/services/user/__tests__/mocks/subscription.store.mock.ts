@@ -1,4 +1,4 @@
-// src/tests/mocks/subscription.store.mock.ts
+// src/services/user/__tests__/mocks/subscription.store.mock.ts
 // Robust mock factory for useSubscriptionStore (Zustand)
 // Usage: import { createMockSubscriptionStore } from './subscription.store.mock';
 //        const mockStore = createMockSubscriptionStore({ userSubscription: { ... } }, { subscribe: vi.fn() });

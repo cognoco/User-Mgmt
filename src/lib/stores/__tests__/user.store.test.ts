@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
-import createUserStoreMock from '@/tests/mocks/user.store.mock';
+import createUserStoreMock from '@/services/user/__tests__/mocks/user.store.mock';
 
 vi.mock('@/lib/stores/user.store', () => {
   return { useUserStore: createUserStoreMock() };
