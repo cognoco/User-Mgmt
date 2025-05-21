@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         const supabase = createClient();
         const fileExt = file.name.split('.').pop();
         const filePath = `profile-verification/${user.id}/${Date.now()}.${fileExt}`;
-        const { data, error } = await supabase.storage.from('profile-verification').upload(filePath, file, {
+        const { error } = await supabase.storage.from('profile-verification').upload(filePath, file, {
           cacheControl: '3600',
           upsert: true,
         });

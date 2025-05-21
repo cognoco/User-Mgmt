@@ -8,14 +8,14 @@ const ValidationRequestSchema = z.object({
   countryCode: z.string().min(2).max(3), // ISO 3166-1 alpha-2 or alpha-3
 });
 
-type ValidationRequest = z.infer<typeof ValidationRequestSchema>;
+interface ValidationRequest extends z.infer<typeof ValidationRequestSchema> {}
 
-type ValidationResult = {
+interface ValidationResult {
   isValid: boolean;
   details: any;
   status: 'valid' | 'invalid' | 'not_supported' | 'error';
   message: string;
-};
+}
 
 // --- Country-specific validation strategies ---
 const countryValidators: Record<string, (registrationNumber: string) => Promise<ValidationResult>> = {

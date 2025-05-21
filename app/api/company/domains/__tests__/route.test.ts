@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { GET, POST, DELETE, PATCH } from '../route';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { z } from 'zod';
@@ -70,7 +70,6 @@ describe('Company Domains API', () => {
   const mockCompanyId = 'company-123';
   const mockDomainId = 'domain-123';
   const mockDomain = 'example.com';
-  const mockToken = 'verification-token-123';
   
   const mockUser = { id: mockUserId };
   const mockCompanyProfile = { id: mockCompanyId, user_id: mockUserId };
@@ -412,7 +411,6 @@ describe('Company Domains API', () => {
       // Mock update implementation to handle dual updates
       let updateCallCount = 0;
       let updatePrimaryCallParams: any = null;
-      let updateOthersCallParams: any = null;
       
       supabase.update.mockImplementation((params: any) => {
         updateCallCount++;
@@ -427,7 +425,6 @@ describe('Company Domains API', () => {
           };
         } else {
           // Second call - updating other domains to not be primary
-          updateOthersCallParams = params;
           return {
             eq: vi.fn().mockReturnThis(),
             neq: vi.fn().mockResolvedValue({
