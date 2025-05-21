@@ -3,7 +3,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest'; // Import vi
 import DeleteAccountDialog from '@/ui/styled/account/DeleteAccountDialog';
 import { useDeleteAccount } from '@/hooks/useDeleteAccount';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 // Mock the custom hook
 vi.mock('@/hooks/useDeleteAccount');
