@@ -2,7 +2,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { AppInitializer } from '@/components/AppInitializer';
+import { AppInitializer } from '@/core/config/AppInitializer';
 import { UserManagementClientBoundary } from '@/lib/auth/UserManagementClientBoundary';
 
 const inter = Inter({ subsets: ['latin'] });

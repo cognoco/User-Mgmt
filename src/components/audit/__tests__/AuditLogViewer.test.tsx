@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
-import { AuditLogViewer } from '../AuditLogViewer';
+import { AuditLogViewer } from '../../../ui/styled/audit/AuditLogViewer';
 import { act } from 'react-dom/test-utils';
 
 const mockLogs = [

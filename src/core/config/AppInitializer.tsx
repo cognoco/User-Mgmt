@@ -9,7 +9,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import initializeApp from '@/app-init';
+import initializeApp from '@/core/initialization/app-init';
 
 export function AppInitializer({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
