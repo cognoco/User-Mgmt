@@ -1,6 +1,6 @@
 'use client';
 
-import { ResponsiveExample } from '@/components/common/ResponsiveExample';
+import { ResponsiveExample } from '@/ui/styled/common/ResponsiveExample';
 
 export default function ResponsiveDemoPage() {
   return <ResponsiveExample />;

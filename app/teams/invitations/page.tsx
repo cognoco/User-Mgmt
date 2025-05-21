@@ -2,15 +2,15 @@
 
 import { useEffect } from 'react';
 import { Metadata } from 'next';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/ui/primitives/skeleton';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
+import { Button } from '@/ui/primitives/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 // Import from our new architecture
-import { InvitationManager } from '@/src/ui/styled/team/InvitationManager';
-import { useTeams } from '@/src/hooks/team/useTeams';
-import { useTeamInvitations } from '@/src/hooks/team/useTeamInvitations';
+import { InvitationManager } from '@/ui/styled/team/InvitationManager';
+import { useTeams } from '@/hooks/team/use-teams';
+import { useTeamInvitations } from '@/hooks/team/use-team-invitations';
 
 export const metadata: Metadata = {
   title: 'Team Invitations',

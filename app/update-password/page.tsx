@@ -7,12 +7,12 @@ import { useTranslation } from 'react-i18next';
 import '@/lib/i18n';
 
 // Import from our new architecture
-import { usePasswordReset } from '@/src/hooks/auth/usePasswordReset';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { usePasswordReset } from '@/hooks/auth/use-password-reset';
+import { Button } from '@/ui/primitives/button';
+import { Input } from '@/ui/primitives/input';
+import { Label } from '@/ui/primitives/label';
+import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/primitives/card';
 
 export default function UpdatePasswordPage() {
   const router = useRouter();

@@ -1,12 +1,12 @@
 'use client';
 
 import { Metadata } from 'next';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/ui/primitives/skeleton';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
 
 // Import from our new architecture
-import { PermissionEditor } from '@/src/ui/styled/permission/PermissionEditor';
-import { usePermissions } from '@/src/hooks/permission/usePermissions';
+import { PermissionEditor } from '@/ui/styled/permission/PermissionEditor';
+import { usePermissions } from '@/hooks/permission/use-permissions';
 
 export const metadata: Metadata = {
   title: 'Permission Management',

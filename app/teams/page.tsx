@@ -2,17 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { Metadata } from 'next';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/ui/primitives/skeleton';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/primitives/card';
 
 // Import from our new architecture
-import { TeamCreator } from '@/src/ui/styled/team/TeamCreator';
-import { TeamMemberManager } from '@/src/ui/styled/team/TeamMemberManager';
-import { useTeams } from '@/src/hooks/team/useTeams';
-import { useTeamMembers } from '@/src/hooks/team/useTeamMembers';
-import { useTeamInvitations } from '@/src/hooks/team/useTeamInvitations';
+import { TeamCreator } from '@/ui/styled/team/TeamCreator';
+import { TeamMemberManager } from '@/ui/styled/team/TeamMemberManager';
+import { useTeams } from '@/hooks/team/use-teams';
+import { useTeamMembers } from '@/hooks/team/use-team-members';
+import { useTeamInvitations } from '@/hooks/team/use-team-invitations';
 
 export const metadata: Metadata = {
   title: 'Team Dashboard',

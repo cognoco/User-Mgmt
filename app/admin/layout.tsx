@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { getUser } from '@/lib/auth/getUser';
 import { hasPermission } from '@/lib/auth/hasPermission';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/ui/primitives/button';
 import { Users, List, Home, Settings, ShieldCheck } from 'lucide-react';
 
 interface AdminLayoutProps {

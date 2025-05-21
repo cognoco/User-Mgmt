@@ -6,10 +6,10 @@ import { useCompanyProfileStore } from '@/lib/stores/companyProfileStore';
 import { DomainManagement } from '@/ui/styled/company/DomainManagement';
 import { CompanyNotificationPreferences } from '@/ui/styled/company/NotificationPreferences';
 import { CompanyProfile } from '@/types/company';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
+import { Skeleton } from '@/ui/primitives/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
 
 export default function CompanyProfilePage() {
   const { profile, isLoading, error, fetchProfile, updateProfile } = useCompanyProfileStore();

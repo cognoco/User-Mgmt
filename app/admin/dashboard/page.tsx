@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { AdminDashboard } from '@/ui/styled/admin/AdminDashboard';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/ui/primitives/button';
 import Link from 'next/link';
 
 export const metadata: Metadata = {

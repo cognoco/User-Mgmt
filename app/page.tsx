@@ -3,10 +3,10 @@ import '@/lib/i18n';
 
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link'; // Use next/link
-import { Button } from '@/components/ui/button';
+import { Button } from '@/ui/primitives/button';
 import { useAuthStore } from '@/lib/stores/auth.store';
-import { Hero } from '@/components/layout/Hero';
-import { Features, FeatureItem } from '@/components/layout/Features';
+import { Hero } from '@/ui/styled/layout/Hero';
+import { Features, FeatureItem } from '@/ui/styled/layout/Features';
 import { Shield, UserCircle, KeyRound } from 'lucide-react';
 
 // Replaces the previous placeholder HomePage

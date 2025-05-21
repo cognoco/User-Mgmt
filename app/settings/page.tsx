@@ -2,14 +2,14 @@
 import '@/lib/i18n';
 
 import { useEffect } from 'react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/ui/primitives/use-toast';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from '@/ui/primitives/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 
 // Import from our new architecture
-import { AccountSettings } from '@/src/ui/styled/profile/AccountSettings';
+import { AccountSettings } from '@/ui/styled/profile/AccountSettings';
 import { useAccountSettings } from '@/src/hooks/profile/useAccountSettings';
 import { useUserProfile } from '@/src/hooks/profile/useUserProfile';
 

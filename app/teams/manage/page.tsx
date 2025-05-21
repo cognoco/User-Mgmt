@@ -2,17 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { Metadata } from 'next';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/ui/primitives/skeleton';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/primitives/card';
+import { Button } from '@/ui/primitives/button';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 // Import from our new architecture
-import { TeamMemberManager } from '@/src/ui/styled/team/TeamMemberManager';
-import { useTeams } from '@/src/hooks/team/useTeams';
-import { useTeamMembers } from '@/src/hooks/team/useTeamMembers';
+import { TeamMemberManager } from '@/ui/styled/team/TeamMemberManager';
+import { useTeams } from '@/hooks/team/use-teams';
+import { useTeamMembers } from '@/hooks/team/use-team-members';
 
 export const metadata: Metadata = {
   title: 'Team Management',

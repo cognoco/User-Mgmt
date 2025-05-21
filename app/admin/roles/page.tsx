@@ -1,13 +1,13 @@
 'use client';
 
 import { Metadata } from 'next';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/ui/primitives/skeleton';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
 
 // Import from our new architecture
-import { RoleManager } from '@/src/ui/styled/permission/RoleManager';
-import { useRoles } from '@/src/hooks/permission/useRoles';
-import { usePermissions } from '@/src/hooks/permission/usePermissions';
+import { RoleManager } from '@/ui/styled/permission/RoleManager';
+import { useRoles } from '@/hooks/permission/use-roles';
+import { usePermissions } from '@/hooks/permission/use-permissions';
 
 export const metadata: Metadata = {
   title: 'Role Management',

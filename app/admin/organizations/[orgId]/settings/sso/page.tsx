@@ -1,7 +1,7 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import OrganizationSSO from '@/components/auth/OrganizationSSO';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import OrganizationSSO from '@/ui/styled/auth/OrganizationSSO';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 
 interface SSOSettingsPageProps {
   params: {
