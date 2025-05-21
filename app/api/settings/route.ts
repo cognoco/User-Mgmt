@@ -14,7 +14,6 @@ const SettingsSchema = z.object({
   // visibility: z.enum(['public', 'private']).optional(), 
 }).partial(); 
 
-type UserSettings = z.infer<typeof SettingsSchema>;
 
 // Fields to select/update in the profiles/user_preferences table
 // Need to decide if this API updates profiles OR user_preferences, or both?

@@ -28,8 +28,6 @@ export default function TeamDashboardPage() {
     selectedTeam,
     setSelectedTeam,
     createTeam,
-    updateTeam,
-    deleteTeam,
     isLoading: teamsLoading,
     error: teamsError
   } = useTeams();
@@ -45,7 +43,6 @@ export default function TeamDashboardPage() {
   
   const {
     invitations,
-    createInvitation,
     cancelInvitation,
     resendInvitation,
     isLoading: invitationsLoading,
@@ -201,7 +198,7 @@ export default function TeamDashboardPage() {
             <Card>
               <CardContent className="pt-6">
                 <p className="text-center text-muted-foreground">
-                  You don't have any teams yet. Create a team to get started.
+                  You don&apos;t have any teams yet. Create a team to get started.
                 </p>
               </CardContent>
             </Card>

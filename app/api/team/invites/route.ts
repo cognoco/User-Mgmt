@@ -7,7 +7,6 @@ import { createProtectedHandler } from '@/middleware/permissions';
 import { Permission } from '@/lib/rbac/roles';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/index';
-import { checkRolePermission } from '@/lib/rbac/roleService';
 
 const inviteSchema = z.object({
   email: z.string().email(),
@@ -15,7 +14,6 @@ const inviteSchema = z.object({
   teamLicenseId: z.string(),
 });
 
-type InviteRequest = z.infer<typeof inviteSchema>;
 
 // Define the main handler logic
 async function handler(req: NextRequest) {
@@ -38,7 +36,6 @@ async function handler(req: NextRequest) {
       return NextResponse.json({ error: 'Invoking user not found or not part of any team' }, { status: 403 });
     }
     // Assuming user belongs to one team for this context
-    const invokingUserRole = invokingUser.teamMemberships[0].role;
     const invokingUserTeamId = invokingUser.teamMemberships[0].teamId;
 
     const body = await req.json();
@@ -106,7 +103,7 @@ async function handler(req: NextRequest) {
 
     // Create invite
     const inviteToken = generateInviteToken();
-    const invite = await prisma.teamMember.create({
+    await prisma.teamMember.create({
       data: {
         teamLicenseId: validatedData.teamLicenseId,
         role: validatedData.role,

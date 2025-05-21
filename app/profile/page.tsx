@@ -1,7 +1,6 @@
 'use client'; // Required for hooks
 import '@/lib/i18n';
 
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/ui/primitives/skeleton';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
@@ -26,10 +25,7 @@ export default function ProfilePage() {
     removeAvatar
   } = useUserProfile();
   
-  const {
-    changePassword,
-    deleteAccount
-  } = useAccountSettings();
+  useAccountSettings();
 
   // Show loading skeleton
   if (isLoading && !profile) {

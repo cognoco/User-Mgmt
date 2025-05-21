@@ -20,7 +20,6 @@ export default function SecuritySettingsPage() {
     setupMFA,
     verifyMFA,
     disableMFA,
-    setupData,
     isLoading,
     error,
     isMFAEnabled
