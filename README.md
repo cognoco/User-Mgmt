@@ -120,6 +120,46 @@ See [Deployment Guide](./DEPLOYMENT.md) for production deployment instructions.
 5. Submit pull requests
 
 
+# User Management
+
+This project provides the User Management system used to manage authentication and related features. For a more detailed technical guide see [docs/Product documentation/SETUP.md](docs/Product%20documentation/SETUP.md).
+
+IT IS MODULAR, PLUG IN INTO ANY APP system! Keep it in mind while working on any task or folder structure! 
+
+## Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd User-Mgmt
+   ```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+3. **Configure environment variables**
+   Copy the example file and fill in your credentials.
+   ```bash
+   cp .env.example .env.local
+   ```
+   Required variables include:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_API_URL`
+   - `NEXT_PUBLIC_APP_URL`
+
+See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more details.
+
+## Scripts
+
+- **Lint**: run ESLint to check the code style.
+  ```bash
+  npm run lint
+  ```
+- **Test**: run the test suite with Vitest.
+  ```bash
+  npm test
+
  .backend-port
 ├── .cursor
     └── rules
