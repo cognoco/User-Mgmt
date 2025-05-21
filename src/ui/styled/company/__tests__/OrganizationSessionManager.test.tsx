@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor, act, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { OrganizationSessionManager } from '../OrganizationSessionManager';
+import { OrganizationSessionManager } from '@/ui/styled/company/OrganizationSessionManager';
 import { OrganizationProvider } from '@/lib/context/OrganizationContext';
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
 import { vi, describe, beforeEach, test, expect, afterEach } from 'vitest';
