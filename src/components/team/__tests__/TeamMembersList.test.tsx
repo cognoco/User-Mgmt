@@ -179,25 +179,29 @@ describe('TeamMembersList', () => {
     }, { timeout: 500 }); // Increase timeout for debounce
   });
 
-  // Radix UI Select does not work with JSDOM/Testing Library due to pointer event limitations.
-  // This should be covered by E2E tests in a real browser environment.
-  it.skip('handles status filter', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockTeamMembers),
-    });
+  it('handles status filter', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockTeamMembers),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockTeamMembers),
+      });
 
     const user = userEvent.setup();
     renderWithProviders(<TeamMembersList />);
 
     const statusSelect = screen.getByRole('combobox');
     await user.click(statusSelect);
-    await user.click(screen.getByText('Active'));
+
+    const activeOption = await screen.findByRole('option', { name: /active/i });
+    await user.click(activeOption);
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('status=active')
-      );
+      const calls = mockFetch.mock.calls;
+      expect(calls[calls.length - 1][0]).toContain('status=active');
     });
   });
 
