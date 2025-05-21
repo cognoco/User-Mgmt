@@ -5,10 +5,12 @@
  * It provides the default implementation for authentication operations.
  */
 
-import { 
-  AuthService, 
-  AuthState 
+import {
+  AuthService,
+  AuthState
 } from '@/core/auth/interfaces';
+import type { AxiosInstance } from 'axios';
+import type { AuthDataProvider } from '@/adapters/auth/interfaces';
 import { 
   AuthResult, 
   LoginPayload, 
@@ -44,8 +46,8 @@ export class DefaultAuthService implements AuthService {
    * @param apiClient - The API client for making HTTP requests
    */
   constructor(
-    private apiClient: any, // This would be replaced with a proper API client interface
-    private authDataProvider: any // This would be replaced with a proper auth data provider interface
+    private apiClient: AxiosInstance,
+    private authDataProvider: AuthDataProvider
   ) {
     // Initialize session check if there's a stored token
     this.initializeFromStorage();

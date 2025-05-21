@@ -5,7 +5,7 @@
  * It provides the default implementation for team management operations.
  */
 
-import { 
+import {
   TeamService
 } from '@/core/team/interfaces';
 import { 
@@ -25,6 +25,8 @@ import {
   TeamVisibility
 } from '@/core/team/models';
 import { TeamEventType } from '@/core/team/events';
+import type { AxiosInstance } from 'axios';
+import type { TeamDataProvider } from '@/adapters/team/interfaces';
 
 /**
  * Default implementation of the TeamService interface
@@ -39,8 +41,8 @@ export class DefaultTeamService implements TeamService {
    * @param teamDataProvider - The data provider for team operations
    */
   constructor(
-    private apiClient: any, // This would be replaced with a proper API client interface
-    private teamDataProvider: any // This would be replaced with a proper team data provider interface
+    private apiClient: AxiosInstance,
+    private teamDataProvider: TeamDataProvider
   ) {}
 
   /**

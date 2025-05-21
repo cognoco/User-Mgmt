@@ -5,7 +5,7 @@
  * It provides the default implementation for permission and role management operations.
  */
 
-import { 
+import {
   PermissionService
 } from '@/core/permission/interfaces';
 import { 
@@ -19,10 +19,12 @@ import {
   RoleUpdatePayload,
   DefaultRoleDefinitions
 } from '@/core/permission/models';
-import { 
-  PermissionEventTypes, 
-  PermissionEventHandler 
+import {
+  PermissionEventTypes,
+  PermissionEventHandler
 } from '@/core/permission/events';
+import type { AxiosInstance } from 'axios';
+import type { PermissionDataProvider } from '@/adapters/permission/interfaces';
 
 /**
  * Default implementation of the PermissionService interface
@@ -37,8 +39,8 @@ export class DefaultPermissionService implements PermissionService {
    * @param permissionDataProvider - The data provider for permission operations
    */
   constructor(
-    private apiClient: any, // This would be replaced with a proper API client interface
-    private permissionDataProvider: any // This would be replaced with a proper permission data provider interface
+    private apiClient: AxiosInstance,
+    private permissionDataProvider: PermissionDataProvider
   ) {}
   
   /**
