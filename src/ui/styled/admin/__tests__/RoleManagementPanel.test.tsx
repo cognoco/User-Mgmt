@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import RoleManagementPanel from '../RoleManagementPanel';
 import { useRBACStore } from '@/lib/stores/rbac.store';
 import { User } from '@/types/user';
-import { RoleSchema, UserRoleSchema, Role, Permission } from '@/types/rbac';
+import { RoleSchema, UserRoleSchema, RoleValues, PermissionValues } from '@/types/rbac';
 import { createRBACStoreMock } from '@/tests/mocks/rbac.store.mock';
 
 vi.mock('@/lib/stores/rbac.store');
@@ -16,8 +16,24 @@ const mockUsers: User[] = [
 ];
 
 const mockRoles: RoleSchema[] = [
-  { id: 'r1', name: Role.ADMIN, description: 'Admin role', permissions: [Permission.READ_USERS, Permission.ASSIGN_ROLES], isSystem: false, createdAt: '', updatedAt: '' },
-  { id: 'r2', name: Role.USER, description: 'User role', permissions: [Permission.READ_USERS], isSystem: false, createdAt: '', updatedAt: '' },
+  {
+    id: 'r1',
+    name: RoleValues.ADMIN,
+    description: 'Admin role',
+    permissions: [PermissionValues.MANAGE_ROLES, PermissionValues.ADMIN_ACCESS],
+    isSystem: false,
+    createdAt: '',
+    updatedAt: ''
+  },
+  {
+    id: 'r2',
+    name: RoleValues.USER,
+    description: 'User role',
+    permissions: [PermissionValues.VIEW_ANALYTICS],
+    isSystem: false,
+    createdAt: '',
+    updatedAt: ''
+  },
 ];
 
 const mockUserRoles: UserRoleSchema[] = [
@@ -28,7 +44,9 @@ const mockUserRoles: UserRoleSchema[] = [
 // Patch for Zustand selector compatibility in React 19+
 function setupRBACStoreMock(rbacMock: any) {
   // useRBACStore is a function that takes a selector and returns selector(state)
-  (useRBACStore as any).mockImplementation((selector: any) => selector(rbacMock));
+  (useRBACStore as any).mockImplementation((selector: any) =>
+    selector(rbacMock.getState())
+  );
 }
 
 describe('RoleManagementPanel', () => {
@@ -52,8 +70,8 @@ describe('RoleManagementPanel', () => {
     expect(screen.getByText('Admin User')).toBeInTheDocument();
     expect(screen.getByText('Regular User')).toBeInTheDocument();
     expect(screen.getAllByRole('row')).toHaveLength(3); // header + 2 users
-    expect(screen.getAllByText('admin').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('user').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/admin/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/user/i).length).toBeGreaterThan(0);
   });
 
   it('assigns a role to a user', async () => {
@@ -108,8 +126,8 @@ describe('RoleManagementPanel', () => {
     // Use getAllByText to find all summary elements (role names)
     const summaries = screen.getAllByText(/admin|user/i, { selector: 'summary' });
     summaries.forEach((summary) => fireEvent.click(summary));
-    expect(screen.getAllByText('read:users').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('assign:roles').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('MANAGE_ROLES').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('ADMIN_ACCESS').length).toBeGreaterThan(0);
   });
 
   it('handles loading, error, and empty states', () => {
