@@ -75,8 +75,8 @@ function useAuthStoreMock(selector?: any) {
 useAuthStoreMock.getState = () => authStoreState;
 useAuthStoreMock.setState = (partial: any) => Object.assign(authStoreState, typeof partial === 'function' ? partial(authStoreState) : partial);
 
-vi.mock('@/lib/stores/auth.store', () => ({
-  useAuthStore: useAuthStoreMock,
+vi.mock('@/hooks/auth/use-auth', () => ({
+  useAuth: useAuthStoreMock,
 }));
 
 // Mock the profile store to provide a valid profile and required methods with robust debugging

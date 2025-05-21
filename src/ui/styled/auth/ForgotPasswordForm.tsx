@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -18,12 +18,12 @@ type ForgotPasswordData = z.infer<typeof forgotPasswordSchema>;
 
 export function ForgotPasswordForm() {
   // Update to use individual selectors for React 19 compatibility
-  const resetPassword = useAuthStore(state => state.resetPassword);
-  const isLoading = useAuthStore(state => state.isLoading);
-  const error = useAuthStore(state => state.error);
-  const clearError = useAuthStore(state => state.clearError);
-  const successMessage = useAuthStore(state => state.successMessage);
-  const clearSuccessMessage = useAuthStore(state => state.clearSuccessMessage);
+  const resetPassword = useAuth().resetPassword;
+  const isLoading = useAuth().isLoading;
+  const error = useAuth().error;
+  const clearError = useAuth().clearError;
+  const successMessage = useAuth().successMessage;
+  const clearSuccessMessage = useAuth().clearSuccessMessage;
   
   const [submitted, setSubmitted] = useState(false);
 

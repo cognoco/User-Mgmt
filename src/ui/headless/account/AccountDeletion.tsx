@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export interface AccountDeletionProps {
   /**
@@ -29,7 +29,7 @@ export interface AccountDeletionProps {
 }
 
 export function AccountDeletion({ render }: AccountDeletionProps) {
-  const { deleteAccount, isLoading, error } = useAuthStore();
+  const { deleteAccount, isLoading, error } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmText, setConfirmText] = useState('');

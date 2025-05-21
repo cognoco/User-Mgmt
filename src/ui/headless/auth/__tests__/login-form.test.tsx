@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LoginForm } from '../LoginForm';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import type { LoginData } from '@/types/auth';
 import * as React from 'react';
 
@@ -16,8 +16,8 @@ class ResizeObserver {
 window.ResizeObserver = ResizeObserver;
 
 // Mock the auth store
-vi.mock('@/lib/stores/auth.store', () => ({
-  useAuthStore: vi.fn()
+vi.mock('@/hooks/auth/use-auth', () => ({
+  useAuth: vi.fn()
 }));
 
 // Mock next/navigation
@@ -113,7 +113,7 @@ describe('LoginForm', () => {
   const mockLogin = vi.fn();
 
   // Helper to reset and setup mocks with specific state
-  const setupMocks = (authState: Partial<ReturnType<typeof useAuthStore>> = {}, formState: Partial<typeof mockFormState> = {}) => {
+  const setupMocks = (authState: Partial<ReturnType<typeof useAuth>> = {}, formState: Partial<typeof mockFormState> = {}) => {
     vi.clearAllMocks();
     mockLogin.mockReset().mockResolvedValue({ success: true }); 
     mockRouterPush.mockReset(); 

@@ -13,7 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import type { CompanyNotificationLog } from '@/types/company';
 
 // Notification type with more details
@@ -110,7 +110,7 @@ const NotificationItem: React.FC<{
  * Displays user notifications with multiple categories and real-time updates.
  */
 export const NotificationCenter: React.FC = () => {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');

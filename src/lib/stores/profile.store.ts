@@ -6,7 +6,7 @@ import {
     Profile,
 } from '@/types/profile';
 import { fileToBase64 } from '@/lib/utils/file-upload';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 import { Profile as DbProfile } from '@/types/database';
 import type { ProfileVerification } from '@/types/profile';

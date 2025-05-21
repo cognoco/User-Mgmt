@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shield, ShieldAlert, ShieldCheck, KeyRound } from 'lucide-react';
 import { api } from '@/lib/api/axios';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { TwoFactorSetup } from './TwoFactorSetup';
 import { BackupCodesDisplay } from './BackupCodesDisplay';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 
 export function MFAManagementSection() {
   const { t } = useTranslation();
-  const user = useAuthStore(state => state.user);
+  const user = useAuth().user;
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

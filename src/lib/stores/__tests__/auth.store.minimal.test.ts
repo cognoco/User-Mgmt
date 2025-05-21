@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 describe('Auth Store Minimal Test', () => {
   it('should expose all action functions through getState()', () => {

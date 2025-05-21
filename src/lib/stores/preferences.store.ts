@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
 import type { UserPreferences } from '@/types/database';
-import { useAuthStore } from '@/lib/stores/auth.store'; // To ensure user is authenticated
+import { useAuth } from '@/hooks/auth/useAuth'; // To ensure user is authenticated
 
 export interface PreferencesState {
   preferences: UserPreferences | null;

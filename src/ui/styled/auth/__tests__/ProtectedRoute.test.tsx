@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '../ProtectedRoute';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -15,7 +15,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 // Use robust mock for useAuthStore
-vi.mock('@/lib/stores/auth.store', () => {
+vi.mock('@/hooks/auth/use-auth', () => {
   // Move setupZustandSelectorMock inside the factory
   function setupZustandSelectorMock(store: any) {
     return (selector: any) => (typeof selector === 'function' ? selector(store) : store);
@@ -31,7 +31,7 @@ vi.mock('@/lib/stores/auth.store', () => {
   useAuthStoreMock.setState = (newState: any) => {
     Object.assign(mockStore, newState);
   };
-  return { useAuthStore: useAuthStoreMock };
+  return { useAuth: useAuthStoreMock };
 });
 
 // Setup RBAC store with selector support
