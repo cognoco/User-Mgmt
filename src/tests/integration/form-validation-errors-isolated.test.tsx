@@ -46,7 +46,7 @@ import { RegistrationForm } from '@/ui/styled/auth/RegistrationForm';
 import { describe, test, expect, beforeEach } from 'vitest';
 // Import necessary providers and types
 import { UserManagementProvider, type UserManagementConfig } from '@/lib/auth/UserManagementProvider';
-import { ThemeProvider } from '@/components/ui/theme-provider';
+import { ThemeProvider } from '@/ui/primitives/theme-provider';
 import { UserType } from '@/types/user-type';
 // Import SubscriptionTier type
 import { SubscriptionTier } from '@/types/subscription'; // Import enum itself

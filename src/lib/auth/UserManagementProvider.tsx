@@ -1,7 +1,7 @@
 'use client'; // This component uses context and hooks, so it must be a Client Component
 
 import React, { createContext, useContext, ReactNode, useEffect, useMemo } from 'react';
-import { ThemeProvider } from '@/components/ui/theme-provider';
+import { ThemeProvider } from '@/ui/primitives/theme-provider';
 // import { Toaster } from '@/components/ui/toaster'; // Comment out unused import
 import { api } from '@/lib/api/axios';
 // import { useAuthStore } from '@/lib/stores/auth.store'; // Commented out

@@ -1,5 +1,5 @@
 import { usePalette, PaletteKey } from '@/components/ui/PaletteProvider';
-import { useTheme } from '@/components/ui/theme-provider';
+import { useTheme } from '@/ui/primitives/theme-provider';
 
 /**
  * Headless Palette/Theme Switcher
