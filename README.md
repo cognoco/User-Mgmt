@@ -160,7 +160,7 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
   ```bash
   npm test
 
- .backend-port
+ ── .backend-port
 ├── .cursor
     └── rules
     │   ├── cursor_rules.mdc
@@ -195,6 +195,7 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
 ├── .taskmasterconfig
 ├── .windsurfrules
 ├── OrganizationSSO.test.tsx.bak
+├── README.md
 ├── anonymize_user_function.sql
 ├── app
     ├── admin
@@ -562,14 +563,17 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   ├── Architecture Guidelines.md
     │   ├── Architecture Rules References.md
     │   ├── Architecture Rules.md
+    │   ├── Clean Structure Proposal.md
     │   ├── DATA_RETENTION_POLICY.md
     │   ├── DEPLOYMENT.md
     │   ├── File structure guidelines.md
+    │   ├── Ideal Structure.md
     │   ├── Implementation-Checklist.md
     │   ├── Master-List-of-all-features.md
     │   ├── PRD.md
     │   ├── PRIVACY_POLICY.md
     │   ├── SETUP.md
+    │   ├── Simple Pluggable Structure.md
     │   ├── auth-roles.md
     │   ├── functionality-features-phase1-2.md
     │   ├── functionality-features-phase3.md
@@ -584,10 +588,10 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   ├── GAP_ANALYSIS.md
     │   ├── IMPLEMENTATION_PLAN.md
     │   ├── Implementation plan phase 8.md
-    │   ├── README.md
     │   ├── Skeleton_tests that need to be redone.md
     │   ├── USER_TODO.md
     │   ├── moving test.md
+    │   ├── new import paths.md
     │   ├── next to do.md
     │   ├── react19-compatibility.md
     │   └── react19-nextjs15-upgrade.md
@@ -748,19 +752,30 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     ├── copy-api-routes-2.ps1
     ├── copy-api-routes-3.ps1
     ├── copy-api-routes.ps1
+    ├── copy-auth-components.cjs
+    ├── create-headless-auth-components.cjs
     ├── e2e_report.ps1
     ├── example_prd.txt
     ├── find-failing-tests.ps1
     ├── find-i18nerrors.ps1
+    ├── fix-useauth-imports.cjs
     ├── generate-test-skeletons.js
     ├── get-backend-port.js
     ├── kill-node.js
     ├── map-sso-functionality.mjs
+    ├── migrate-audit-components.cjs
+    ├── migrate-auth-components.cjs
+    ├── migrate-auth-imports-enhanced.cjs
+    ├── migrate-auth-imports.cjs
+    ├── migrate-auth-imports.js
+    ├── migrate-components.cjs
+    ├── migrate-imports.js
     ├── prd.txt
     ├── report-obsolete-files.js
     ├── run-tests.js
     ├── runtest.js
     ├── save-last-playwright-output.ps1
+    ├── test-migrate-audit.cjs
     └── update-test-results.js
 ├── src
     ├── adapters
@@ -771,6 +786,7 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   │   ├── factory.ts
     │   │   ├── index.ts
     │   │   ├── interfaces.ts
+    │   │   ├── middleware.ts
     │   │   └── supabase-auth-provider.ts
     │   ├── index.ts
     │   ├── permission
@@ -789,7 +805,6 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   │   ├── interfaces.ts
     │   │   └── supabase-user-provider.ts
     ├── components
-    │   ├── PaletteProvider.tsx
     │   ├── account
     │   │   ├── AccountDeletion.tsx
     │   │   ├── AccountSwitcher.tsx
@@ -807,16 +822,17 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   │   └── audit-logs
     │   │   │   └── AdminAuditLogs.tsx
     │   ├── audit
-    │   │   ├── AuditLogViewer.tsx
     │   │   └── __tests__
     │   │   │   └── AuditLogViewer.test.tsx
     │   ├── auth
+    │   │   ├── AccountLockout.tsx
     │   │   ├── Auth.js
     │   │   ├── BackupCodesDisplay.tsx
     │   │   ├── BusinessSSOAuth.tsx
     │   │   ├── BusinessSSOSetup.tsx
     │   │   ├── ChangePasswordForm.tsx
     │   │   ├── DomainBasedOrgMatching.tsx
+    │   │   ├── EmailVerification.tsx
     │   │   ├── ForgotPasswordForm.tsx
     │   │   ├── IDPConfiguration.tsx
     │   │   ├── LoginForm.tsx
@@ -827,10 +843,13 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   │   ├── OAuthCallback.tsx
     │   │   ├── OrganizationSSO.tsx
     │   │   ├── PasswordRequirements.tsx
+    │   │   ├── PasswordlessLogin.tsx
     │   │   ├── ProtectedRoute.tsx
     │   │   ├── ProviderManagementPanel.tsx
     │   │   ├── RegistrationForm.tsx
+    │   │   ├── RememberMeToggle.tsx
     │   │   ├── ResetPasswordForm.tsx
+    │   │   ├── SocialLoginCallbacks.tsx
     │   │   ├── TwoFactorSetup.tsx
     │   │   ├── __mocks__
     │   │   │   └── LoginForm.tsx
@@ -861,20 +880,6 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   │   ├── ThemeSettings.tsx
     │   │   ├── ThemeSwitcher.tsx
     │   │   └── UserPreferences.tsx
-    │   ├── company
-    │   │   ├── AddressCard.tsx
-    │   │   ├── AddressDialog.tsx
-    │   │   ├── CompanyProfileForm.tsx
-    │   │   ├── DomainManagement.tsx
-    │   │   ├── DomainVerification.tsx
-    │   │   ├── NotificationPreferences.tsx
-    │   │   ├── OrganizationSessionManager.tsx
-    │   │   ├── SingleDomainVerification.tsx
-    │   │   ├── VerificationStatus.tsx
-    │   │   └── __tests__
-    │   │   │   ├── DomainVerification.integration.test.tsx
-    │   │   │   ├── OrganizationSessionManager.test.tsx
-    │   │   │   └── SingleDomainVerification.test.tsx
     │   ├── dashboard
     │   │   └── Dashboard.tsx
     │   ├── forms
@@ -882,6 +887,7 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   │   │   └── BusinessFormErrorHandling.test.tsx
     │   ├── gdpr
     │   │   ├── AccountDeletion.tsx
+    │   │   ├── ConsentManagement.tsx
     │   │   └── DataExport.tsx
     │   ├── layout
     │   │   ├── Features.tsx
@@ -938,7 +944,8 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   ├── search
     │   │   └── SearchPage.tsx
     │   ├── session
-    │   │   └── SessionPolicyEnforcer.tsx
+    │   │   ├── SessionPolicyEnforcer.tsx
+    │   │   └── SessionTimeout.tsx
     │   ├── settings
     │   │   ├── AccountDeletion.tsx
     │   │   ├── DataExport.tsx
@@ -966,11 +973,11 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   │   │   ├── RemoveMemberDialog.test.tsx
     │   │   │   ├── TeamManagement.test.tsx
     │   │   │   └── TeamMembersList.test.tsx
-    │   ├── theme-provider.tsx
     │   ├── theme
     │   │   └── theme-provider.tsx
     │   └── ui
     │   │   ├── FileTypeIcon.tsx
+    │   │   ├── PaletteProvider.tsx
     │   │   ├── accordion.tsx
     │   │   ├── alert-dialog.tsx
     │   │   ├── alert.tsx
@@ -1019,6 +1026,7 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   │   ├── table.tsx
     │   │   ├── tabs.tsx
     │   │   ├── textarea.tsx
+    │   │   ├── theme-provider.tsx
     │   │   ├── toast.tsx
     │   │   ├── toaster.tsx
     │   │   ├── toggle-group.tsx
@@ -1035,8 +1043,12 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   │   ├── interfaces.ts
     │   │   └── models.ts
     │   ├── config
+    │   │   ├── AppInitializer.tsx
     │   │   ├── index.ts
     │   │   └── interfaces.ts
+    │   ├── initialization
+    │   │   ├── app-init.ts
+    │   │   └── config.ts
     │   ├── notification
     │   │   ├── events.ts
     │   │   ├── index.ts
@@ -1235,7 +1247,6 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   │       └── webhook-sender.test.ts
     │   │   ├── triggerWebhook.ts
     │   │   └── webhook-sender.ts
-    ├── middleware.ts
     ├── middleware
     │   ├── __tests__
     │   │   ├── audit-log.test.ts
@@ -1401,43 +1412,364 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   └── user.ts
     ├── ui
     │   ├── headless
+    │   │   ├── account
+    │   │   │   ├── AccountDeletion.tsx
+    │   │   │   ├── AccountSwitcher.tsx
+    │   │   │   └── DeleteAccountDialog.tsx
+    │   │   ├── admin
+    │   │   │   ├── AdminDashboard.tsx
+    │   │   │   ├── AdminUsers.tsx
+    │   │   │   ├── RetentionDashboard.tsx
+    │   │   │   ├── RoleManagementPanel.tsx
+    │   │   │   └── audit-logs
+    │   │   │   │   └── AdminAuditLogs.tsx
+    │   │   ├── audit
+    │   │   │   └── AuditLogViewer.tsx
     │   │   ├── auth
+    │   │   │   ├── AccountLockout.tsx
+    │   │   │   ├── Auth.js
+    │   │   │   ├── BackupCodesDisplay.tsx
+    │   │   │   ├── BusinessSSOAuth.tsx
+    │   │   │   ├── BusinessSSOSetup.tsx
+    │   │   │   ├── ChangePasswordForm.tsx
+    │   │   │   ├── DomainBasedOrgMatching.tsx
+    │   │   │   ├── EmailVerification.tsx
+    │   │   │   ├── ForgotPasswordForm.tsx
+    │   │   │   ├── IDPConfiguration.tsx
     │   │   │   ├── LoginForm.tsx
+    │   │   │   ├── LoginFormReact19.tsx
+    │   │   │   ├── MFAManagementSection.tsx
     │   │   │   ├── MFASetup.tsx
+    │   │   │   ├── MFAVerificationForm.tsx
+    │   │   │   ├── OAuthButtons.tsx
+    │   │   │   ├── OAuthCallback.tsx
+    │   │   │   ├── OrganizationSSO.tsx
+    │   │   │   ├── PasswordRequirements.tsx
     │   │   │   ├── PasswordResetForm.tsx
+    │   │   │   ├── PasswordlessLogin.tsx
+    │   │   │   ├── ProtectedRoute.tsx
+    │   │   │   ├── ProviderManagementPanel.tsx
     │   │   │   ├── RegistrationForm.tsx
-    │   │   │   └── __tests__
+    │   │   │   ├── RememberMeToggle.tsx
+    │   │   │   ├── ResetPasswordForm.tsx
+    │   │   │   ├── SocialLoginCallbacks.tsx
+    │   │   │   ├── TwoFactorSetup.tsx
+    │   │   │   ├── __tests__
     │   │   │   │   ├── login-form.test.tsx
     │   │   │   │   └── registration-form.test.tsx
+    │   │   │   └── withRole.tsx
+    │   │   ├── common
+    │   │   │   ├── DataTable.tsx
+    │   │   │   ├── ErrorBoundary.tsx
+    │   │   │   ├── FeedbackForm.tsx
+    │   │   │   ├── FileManager.tsx
+    │   │   │   ├── FormWithRecovery.tsx
+    │   │   │   ├── NotificationCenter.tsx
+    │   │   │   ├── PaletteThemeSwitcher.tsx
+    │   │   │   ├── RateLimitFeedback.tsx
+    │   │   │   ├── ReportingDashboard.tsx
+    │   │   │   ├── ResponsiveExample.tsx
+    │   │   │   ├── SearchResults.tsx
+    │   │   │   ├── ThemeSettings.tsx
+    │   │   │   ├── ThemeSwitcher.tsx
+    │   │   │   └── UserPreferences.tsx
+    │   │   ├── company
+    │   │   │   ├── AddressCard.tsx
+    │   │   │   ├── AddressDialog.tsx
+    │   │   │   ├── CompanyProfileForm.tsx
+    │   │   │   ├── DomainManagement.tsx
+    │   │   │   ├── DomainVerification.tsx
+    │   │   │   ├── NotificationPreferences.tsx
+    │   │   │   ├── OrganizationSessionManager.tsx
+    │   │   │   ├── SingleDomainVerification.tsx
+    │   │   │   └── VerificationStatus.tsx
+    │   │   ├── dashboard
+    │   │   │   └── Dashboard.tsx
+    │   │   ├── gdpr
+    │   │   │   └── ConsentManagement.tsx
+    │   │   ├── layout
+    │   │   │   ├── Features.tsx
+    │   │   │   ├── Footer.tsx
+    │   │   │   ├── Header.tsx
+    │   │   │   ├── Hero.tsx
+    │   │   │   ├── Layout.tsx
+    │   │   │   └── UserLayout.tsx
+    │   │   ├── payment
+    │   │   │   ├── InvoiceGenerator.tsx
+    │   │   │   ├── PaymentForm.tsx
+    │   │   │   ├── PaymentHistory.tsx
+    │   │   │   ├── PaymentMethodList.tsx
+    │   │   │   └── SubscriptionManager.tsx
     │   │   ├── permission
     │   │   │   ├── PermissionEditor.tsx
     │   │   │   └── RoleManager.tsx
     │   │   ├── profile
     │   │   │   ├── AccountSettings.tsx
     │   │   │   └── ProfileEditor.tsx
+    │   │   ├── registration
+    │   │   │   ├── MultiStepRegistration.tsx
+    │   │   │   └── ProfileCompletion.tsx
+    │   │   ├── search
+    │   │   │   └── SearchPage.tsx
+    │   │   ├── session
+    │   │   │   ├── SessionPolicyEnforcer.tsx
+    │   │   │   └── SessionTimeout.tsx
+    │   │   ├── settings
+    │   │   │   ├── AccountDeletion.tsx
+    │   │   │   ├── DataExport.tsx
+    │   │   │   ├── DataImport.tsx
+    │   │   │   ├── LanguageSelector.tsx
+    │   │   │   └── SettingsPanel.tsx
+    │   │   ├── shared
+    │   │   │   ├── ConnectedAccounts.tsx
+    │   │   │   └── NotificationPreferences.tsx
+    │   │   ├── sharing
+    │   │   │   └── SocialSharingComponent.tsx
+    │   │   ├── subscription
+    │   │   │   ├── SubscriptionBadge.tsx
+    │   │   │   ├── SubscriptionPlans.tsx
+    │   │   │   └── withSubscription.tsx
     │   │   ├── team
     │   │   │   ├── InvitationManager.tsx
     │   │   │   ├── TeamCreator.tsx
     │   │   │   └── TeamMemberManager.tsx
+    │   │   ├── theme
+    │   │   │   └── theme-provider.tsx
     │   │   └── user
     │   │   │   └── __tests__
     │   │   │       └── profile.test.tsx
+    │   ├── primitives
+    │   │   ├── FileTypeIcon.tsx
+    │   │   ├── PaletteProvider.tsx
+    │   │   ├── accordion.tsx
+    │   │   ├── alert-dialog.tsx
+    │   │   ├── alert.tsx
+    │   │   ├── aspect-ratio.tsx
+    │   │   ├── avatar.tsx
+    │   │   ├── badge.tsx
+    │   │   ├── breadcrumb.tsx
+    │   │   ├── button.tsx
+    │   │   ├── calendar.tsx
+    │   │   ├── card.tsx
+    │   │   ├── carousel.tsx
+    │   │   ├── chart.tsx
+    │   │   ├── checkbox.tsx
+    │   │   ├── collapsible.tsx
+    │   │   ├── command.tsx
+    │   │   ├── context-menu.tsx
+    │   │   ├── copy-button.tsx
+    │   │   ├── dialog.tsx
+    │   │   ├── drawer.tsx
+    │   │   ├── dropdown-menu.tsx
+    │   │   ├── error-boundary.tsx
+    │   │   ├── form-responsive.tsx
+    │   │   ├── form-with-recovery.tsx
+    │   │   ├── form.tsx
+    │   │   ├── hover-card.tsx
+    │   │   ├── icons-test-page.tsx
+    │   │   ├── input-otp.tsx
+    │   │   ├── input.tsx
+    │   │   ├── label.tsx
+    │   │   ├── menubar.tsx
+    │   │   ├── navigation-menu.tsx
+    │   │   ├── pagination.tsx
+    │   │   ├── popover.tsx
+    │   │   ├── progress.tsx
+    │   │   ├── radio-group.tsx
+    │   │   ├── resizable.tsx
+    │   │   ├── scroll-area.tsx
+    │   │   ├── select.tsx
+    │   │   ├── separator.tsx
+    │   │   ├── sheet.tsx
+    │   │   ├── skeleton.tsx
+    │   │   ├── slider.tsx
+    │   │   ├── sonner.tsx
+    │   │   ├── spinner.tsx
+    │   │   ├── switch.tsx
+    │   │   ├── table.tsx
+    │   │   ├── tabs.tsx
+    │   │   ├── textarea.tsx
+    │   │   ├── theme-provider.tsx
+    │   │   ├── toast.tsx
+    │   │   ├── toaster.tsx
+    │   │   ├── toggle-group.tsx
+    │   │   ├── toggle.tsx
+    │   │   ├── tooltip.tsx
+    │   │   └── use-toast.ts
     │   └── styled
+    │   │   ├── account
+    │   │       ├── AccountDeletion.tsx
+    │   │       ├── AccountSwitcher.tsx
+    │   │       ├── DeleteAccountDialog.tsx
+    │   │       └── __tests__
+    │   │       │   └── DeleteAccountDialog.test.tsx
+    │   │   ├── admin
+    │   │       ├── AdminDashboard.tsx
+    │   │       ├── AdminUsers.tsx
+    │   │       ├── RetentionDashboard.tsx
+    │   │       ├── RoleManagementPanel.tsx
+    │   │       ├── __tests__
+    │   │       │   ├── AdminDashboard.test.tsx
+    │   │       │   └── RoleManagementPanel.test.tsx
+    │   │       └── audit-logs
+    │   │       │   └── AdminAuditLogs.tsx
+    │   │   ├── audit
+    │   │       ├── AuditLogViewer.tsx
+    │   │       └── __tests__
+    │   │       │   └── AuditLogViewer.test.tsx
     │   │   ├── auth
+    │   │       ├── AccountLockout.tsx
+    │   │       ├── Auth.js
+    │   │       ├── BackupCodesDisplay.tsx
+    │   │       ├── BusinessSSOAuth.tsx
+    │   │       ├── BusinessSSOSetup.tsx
+    │   │       ├── ChangePasswordForm.tsx
+    │   │       ├── DomainBasedOrgMatching.tsx
+    │   │       ├── EmailVerification.tsx
+    │   │       ├── ForgotPasswordForm.tsx
+    │   │       ├── IDPConfiguration.tsx
     │   │       ├── LoginForm.tsx
+    │   │       ├── LoginFormReact19.tsx
+    │   │       ├── MFAManagementSection.tsx
     │   │       ├── MFASetup.tsx
+    │   │       ├── MFAVerificationForm.tsx
+    │   │       ├── OAuthButtons.tsx
+    │   │       ├── OAuthCallback.tsx
+    │   │       ├── OrganizationSSO.tsx
+    │   │       ├── PasswordRequirements.tsx
     │   │       ├── PasswordResetForm.tsx
-    │   │       └── RegistrationForm.tsx
+    │   │       ├── PasswordlessLogin.tsx
+    │   │       ├── ProtectedRoute.tsx
+    │   │       ├── ProviderManagementPanel.tsx
+    │   │       ├── RegistrationForm.tsx
+    │   │       ├── RememberMeToggle.tsx
+    │   │       ├── ResetPasswordForm.tsx
+    │   │       ├── SocialLoginCallbacks.tsx
+    │   │       ├── TwoFactorSetup.tsx
+    │   │       ├── __tests__
+    │   │       │   ├── BusinessSSOSetup.test.tsx
+    │   │       │   ├── DomainBasedOrgMatching.test.tsx
+    │   │       │   ├── IDPConfiguration.test.tsx
+    │   │       │   ├── LoginForm.test.tsx
+    │   │       │   ├── MFAManagementSection.test.tsx
+    │   │       │   ├── MinimalTextareaForm.test.tsx
+    │   │       │   ├── OrganizationSSO.test.tsx
+    │   │       │   ├── ProtectedRoute.test.tsx
+    │   │       │   ├── RegistrationForm.integration.test.tsx
+    │   │       │   └── UpgradeToBusinessFlow.test.tsx
+    │   │       └── withRole.tsx
+    │   │   ├── common
+    │   │       ├── DataTable.tsx
+    │   │       ├── ErrorBoundary.tsx
+    │   │       ├── FeedbackForm.tsx
+    │   │       ├── FileManager.tsx
+    │   │       ├── FormWithRecovery.tsx
+    │   │       ├── NotificationCenter.tsx
+    │   │       ├── PaletteThemeSwitcher.tsx
+    │   │       ├── RateLimitFeedback.tsx
+    │   │       ├── ReportingDashboard.tsx
+    │   │       ├── ResponsiveExample.tsx
+    │   │       ├── SearchResults.tsx
+    │   │       ├── ThemeSettings.tsx
+    │   │       ├── ThemeSwitcher.tsx
+    │   │       └── UserPreferences.tsx
+    │   │   ├── company
+    │   │       ├── AddressCard.tsx
+    │   │       ├── AddressDialog.tsx
+    │   │       ├── CompanyProfileForm.tsx
+    │   │       ├── DomainManagement.tsx
+    │   │       ├── DomainVerification.tsx
+    │   │       ├── NotificationPreferences.tsx
+    │   │       ├── OrganizationSessionManager.tsx
+    │   │       ├── SingleDomainVerification.tsx
+    │   │       ├── VerificationStatus.tsx
+    │   │       └── __tests__
+    │   │       │   ├── DomainVerification.integration.test.tsx
+    │   │       │   ├── OrganizationSessionManager.test.tsx
+    │   │       │   └── SingleDomainVerification.test.tsx
+    │   │   ├── dashboard
+    │   │       └── Dashboard.tsx
+    │   │   ├── gdpr
+    │   │       ├── AccountDeletion.tsx
+    │   │       ├── ConsentManagement.tsx
+    │   │       └── DataExport.tsx
+    │   │   ├── layout
+    │   │       ├── Features.tsx
+    │   │       ├── Footer.tsx
+    │   │       ├── Header.tsx
+    │   │       ├── Hero.tsx
+    │   │       ├── Layout.tsx
+    │   │       └── UserLayout.tsx
+    │   │   ├── onboarding
+    │   │       ├── FeatureTour.tsx
+    │   │       ├── ProgressTracker.tsx
+    │   │       ├── SetupWizard.tsx
+    │   │       └── WelcomeScreen.tsx
+    │   │   ├── payment
+    │   │       ├── InvoiceGenerator.tsx
+    │   │       ├── PaymentForm.tsx
+    │   │       ├── PaymentHistory.tsx
+    │   │       ├── PaymentMethodList.tsx
+    │   │       └── SubscriptionManager.tsx
     │   │   ├── permission
     │   │       ├── PermissionEditor.tsx
     │   │       └── RoleManager.tsx
     │   │   ├── profile
     │   │       ├── AccountSettings.tsx
-    │   │       └── ProfileEditor.tsx
-    │   │   └── team
+    │   │       ├── ActivityLog.tsx
+    │   │       ├── AvatarUpload.tsx
+    │   │       ├── CompanyDataExport.tsx
+    │   │       ├── CompanyLogoUpload.tsx
+    │   │       ├── CorporateProfileSection.tsx
+    │   │       ├── DataExport.tsx
+    │   │       ├── NotificationPreferences.tsx
+    │   │       ├── PrivacySettings.tsx
+    │   │       ├── Profile.jsx
+    │   │       ├── ProfileEditor.tsx
+    │   │       ├── ProfileForm.tsx
+    │   │       ├── ProfileTypeConversion.tsx
+    │   │       ├── ProfileVerification.tsx
+    │   │       ├── SecuritySettings.tsx
+    │   │       ├── SessionManagement.tsx
+    │   │       └── __tests__
+    │   │       │   ├── ActivityLog.test.tsx
+    │   │       │   ├── AvatarUpload.test.tsx
+    │   │       │   ├── CompanyDataExport.test.tsx
+    │   │       │   ├── CompanyLogoUpload.test.tsx
+    │   │       │   ├── CorporateProfileSection.test.tsx
+    │   │       │   ├── DataExport.test.tsx
+    │   │       │   ├── NotificationPreferences.test.tsx
+    │   │       │   ├── PrivacySettings.test.tsx
+    │   │       │   ├── Profile.test.tsx
+    │   │       │   ├── ProfileEditor.test.tsx
+    │   │       │   ├── ProfilePrivacySettings.test.tsx
+    │   │       │   ├── ProfileTypeConversion.test.tsx
+    │   │       │   ├── ProfileVerification.test.tsx
+    │   │       │   └── SessionManagement.test.tsx
+    │   │   ├── registration
+    │   │       ├── MultiStepRegistration.tsx
+    │   │       └── ProfileCompletion.tsx
+    │   │   ├── search
+    │   │       └── SearchPage.tsx
+    │   │   ├── session
+    │   │       └── SessionTimeout.tsx
+    │   │   ├── settings
+    │   │       ├── AccountDeletion.tsx
+    │   │       ├── DataExport.tsx
+    │   │       ├── DataImport.tsx
+    │   │       ├── LanguageSelector.tsx
+    │   │       └── SettingsPanel.tsx
+    │   │   ├── shared
+    │   │       ├── ConnectedAccounts.tsx
+    │   │       └── NotificationPreferences.tsx
+    │   │   ├── sharing
+    │   │       └── SocialSharingComponent.tsx
+    │   │   ├── team
     │   │       ├── InvitationManager.tsx
     │   │       ├── TeamCreator.tsx
     │   │       └── TeamMemberManager.tsx
+    │   │   └── theme
+    │   │       └── theme-provider.tsx
     └── utils
     │   └── __tests__
     │       └── domain-validation.test.ts
