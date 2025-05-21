@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Check if preference already exists
-    const { data: existingPreference, error: existingError } = await supabaseService
+    const { data: existingPreference } = await supabaseService
       .from('company_notification_preferences')
       .select('id')
       .eq('company_id', company_id)

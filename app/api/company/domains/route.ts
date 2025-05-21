@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Check if domain already exists for this company
-    const { data: existingDomain, error: existingError } = await supabaseService
+    const { data: existingDomain } = await supabaseService
       .from('company_domains')
       .select('id')
       .eq('company_id', companyId)
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. Check if this is the first domain and set as primary if so
-    const { data: domainCount, error: countError } = await supabaseService
+    const { data: domainCount } = await supabaseService
       .from('company_domains')
       .select('id', { count: 'exact' })
       .eq('company_id', companyId);
