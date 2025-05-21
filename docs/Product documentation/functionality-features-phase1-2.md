@@ -1,6 +1,6 @@
 # End-User Functionality & Expected Experience
 
-This document details the expected end-user experience for each feature of the User Management System. It adopts the perspective of a typical user (Personal or Business/Admin) interacting with the application, outlining the ideal flow, expected feedback, user interface elements, and potential edge cases for each functionality described in `docs/development-plan.md` and `Cursorrules.md`.
+This document details the expected end-user experience for each feature of the User Management System. It adopts the perspective of a typical user (Personal or Business/Admin) interacting with the application, outlining the ideal flow, expected feedback, user interface elements, and potential edge cases for each functionality described in `docs/development-plan.md` and [.cursorrules](../../.cursorrules).
 
 ---
 
