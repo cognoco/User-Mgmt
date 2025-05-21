@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DomainVerification } from '../DomainVerification';
+import { DomainVerification } from '@/ui/styled/company/DomainVerification';
 import { api } from '@/lib/api';
 import { act } from 'react-dom/test-utils';
 

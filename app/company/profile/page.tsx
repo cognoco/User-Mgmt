@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import { CompanyProfileForm } from '@/components/company/CompanyProfileForm';
+import { CompanyProfileForm } from '@/ui/styled/company/CompanyProfileForm';
 import { useCompanyProfileStore } from '@/lib/stores/companyProfileStore';
-import { DomainManagement } from '@/components/company/DomainManagement';
-import { CompanyNotificationPreferences } from '@/components/company/NotificationPreferences';
+import { DomainManagement } from '@/ui/styled/company/DomainManagement';
+import { CompanyNotificationPreferences } from '@/ui/styled/company/NotificationPreferences';
 import { CompanyProfile } from '@/types/company';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
