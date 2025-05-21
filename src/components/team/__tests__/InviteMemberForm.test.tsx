@@ -55,7 +55,7 @@ describe('InviteMemberForm', () => {
     expect(mockSendInvite).not.toHaveBeenCalled(); 
   });
 
-  // Un-skip the test and fix interaction with Radix UI Select
+  // Test form submission with valid data and correct Radix UI Select interaction
   it('submits form with valid data', async () => {
     const user = userEvent.setup();
     await act(async () => {
