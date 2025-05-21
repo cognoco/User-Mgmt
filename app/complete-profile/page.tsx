@@ -2,7 +2,7 @@
 import '@/lib/i18n';
 
 import { useTranslation } from 'react-i18next';
-import { ProfileCompletion } from '@/components/registration/ProfileCompletion'; // Adjust path if needed
+import { ProfileCompletion } from '@/ui/styled/registration/ProfileCompletion';
 
 export default function ProfileCompletionPage() {
   const { t } = useTranslation();

@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/ui/primitives/button';
 import { ShieldCheck, Users, Lock, Key, Bell, Settings, HomeIcon } from 'lucide-react';
 
 interface SettingsLayoutProps {

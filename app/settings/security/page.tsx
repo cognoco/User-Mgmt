@@ -2,15 +2,15 @@
 import '@/lib/i18n';
 
 import { useTranslation } from 'react-i18next';
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Skeleton } from '@/ui/primitives/skeleton';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/primitives/card';
+import { Button } from '@/ui/primitives/button';
 import Link from 'next/link';
 
 // Import from our new architecture
-import { MFASetup } from '@/src/ui/styled/auth/MFASetup';
-import { useMFA } from '@/src/hooks/auth/useMFA';
+import { MFASetup } from '@/ui/styled/auth/MFASetup';
+import { useMFA } from '@/hooks/auth/useMFA';
 
 export default function SecuritySettingsPage() {
   const { t } = useTranslation();

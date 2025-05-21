@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/stores/auth.store';
-import { Dashboard } from '@/components/dashboard/Dashboard';
+import { Dashboard } from '@/ui/styled/dashboard/Dashboard';
 
 export default function DashboardPage() {
   const { user, isAuthenticated } = useAuthStore();

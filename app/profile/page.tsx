@@ -3,15 +3,15 @@ import '@/lib/i18n';
 
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from '@/ui/primitives/skeleton';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
+import { Button } from '@/ui/primitives/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 
 // Import from our new architecture
-import { ProfileEditor } from '@/src/ui/styled/profile/ProfileEditor';
-import { useUserProfile } from '@/src/hooks/profile/useUserProfile';
-import { useAccountSettings } from '@/src/hooks/profile/useAccountSettings';
+import { ProfileEditor } from '@/ui/styled/profile/ProfileEditor';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { useAccountSettings } from '@/hooks/useAccountSettings';
 
 export default function ProfilePage() {
   const { t } = useTranslation();

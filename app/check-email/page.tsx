@@ -1,8 +1,8 @@
 'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/ui/primitives/button';
 import { useAuthStore } from '@/lib/stores/auth.store';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 import { MailCheck, AlertCircle, MailWarning } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';

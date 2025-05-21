@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDeleteAccount } from '@/hooks/useDeleteAccount';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/ui/primitives/button';
+import { Input } from '@/ui/primitives/input';
+import { Label } from '@/ui/primitives/label';
 import {
   Dialog,
   DialogContent,
@@ -11,9 +11,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from '@/ui/primitives/dialog';
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
 
 interface DeleteAccountDialogProps {
   open: boolean;

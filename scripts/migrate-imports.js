@@ -141,18 +141,13 @@ Object.entries(exactPathMappings).forEach(([oldPath, newPath]) => {
 
 // Add kebab-case converter for new architecture paths
 pathMappings.push({
-  pattern: /from ['"](\@\/(?:ui|hooks|services|adapters|core)\/[a-zA-Z0-9-/]+)\/([A-Z][a-zA-Z0-9]*)['"]/, 
+  pattern: /from ['"](\@\/(?:ui|hooks|services|adapters|core)\/[a-zA-Z0-9-/]+)\/([A-Z][a-zA-Z0-9]*)['"]/,
   replacement: (match, p1, p2) => {
     // Convert PascalCase to kebab-case
     const kebabCase = p2.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
     return `from '${p1}/${kebabCase}'`;
   }
 });
-
-// Function to convert component names to kebab-case
-function pascalToKebabCase(str) {
-  return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
-}
 
 // Function to process a file
 function processFile(filePath) {

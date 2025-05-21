@@ -3,14 +3,14 @@
 import { useEffect } from 'react';
 import { useCompanyProfileStore } from '@/lib/stores/companyProfileStore';
 import { CompanyAddress } from '@/types/company';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
+import { Button } from '@/ui/primitives/button';
 import { Plus } from 'lucide-react';
 import { AddressCard } from '@/ui/styled/company/AddressCard';
 import { AddressDialog } from '@/ui/styled/company/AddressDialog';
 import { useState } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/ui/primitives/skeleton';
 
 export default function CompanyAddressesPage() {
   const { addresses, isLoading, error, fetchAddresses, addAddress, updateAddress, deleteAddress } = useCompanyProfileStore();
