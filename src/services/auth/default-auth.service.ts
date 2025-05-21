@@ -18,18 +18,22 @@ import {
   User 
 } from '@/core/auth/models';
 import { AuthEventHandler, AuthEventTypes } from '@/core/auth/events';
+import { translateError } from '@/lib/utils/error';
+import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
 
 /**
  * Default implementation of the AuthService interface
  */
-export class DefaultAuthService implements AuthService {
+export class DefaultAuthService
+  extends TypedEventEmitter<AuthEventTypes>
+  implements AuthService
+{
   private user: User | null = null;
   private token: string | null = null;
   private isLoading = false;
   private error: string | null = null;
   private successMessage: string | null = null;
   private mfaEnabled = false;
-  private eventHandlers: AuthEventHandler[] = [];
   
   // Session management
   private sessionCheckTimer: NodeJS.Timeout | null = null;
@@ -47,6 +51,7 @@ export class DefaultAuthService implements AuthService {
     private apiClient: any, // This would be replaced with a proper API client interface
     private authDataProvider: any // This would be replaced with a proper auth data provider interface
   ) {
+    super();
     // Initialize session check if there's a stored token
     this.initializeFromStorage();
   }
@@ -144,7 +149,7 @@ export class DefaultAuthService implements AuthService {
    * @param event - The event to emit
    */
   private emitEvent(event: AuthEventTypes): void {
-    this.eventHandlers.forEach(handler => handler(event));
+    this.emit(event);
   }
 
   /**
@@ -192,7 +197,7 @@ export class DefaultAuthService implements AuthService {
         token: response.data.token
       };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'An error occurred during login';
+      const errorMessage = translateError(error, { defaultMessage: 'An error occurred during login' });
       const errorCode = error.response?.data?.code;
       
       this.isLoading = false;
@@ -241,7 +246,7 @@ export class DefaultAuthService implements AuthService {
       
       return { success: true };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || error.message || 'Registration failed';
+      const errorMessage = translateError(error, { defaultMessage: 'Registration failed' });
       
       this.isLoading = false;
       this.error = errorMessage;
@@ -331,7 +336,7 @@ export class DefaultAuthService implements AuthService {
       
       return { success: true, message: 'Password reset email sent.' };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to send password reset email.';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to send password reset email.' });
       
       this.isLoading = false;
       this.error = errorMessage;
@@ -725,18 +730,11 @@ export class DefaultAuthService implements AuthService {
    * @returns Unsubscribe function
    */
   onAuthStateChanged(callback: (user: User | null) => void): () => void {
-    const handler = (event: AuthEventTypes) => {
+    return this.on(event => {
       if (event.type === 'LOGIN' || event.type === 'LOGOUT' || event.type === 'SESSION_TIMEOUT') {
         callback(this.user);
       }
-    };
-    
-    this.eventHandlers.push(handler);
-    
-    // Return unsubscribe function
-    return () => {
-      this.eventHandlers = this.eventHandlers.filter(h => h !== handler);
-    };
+    });
   }
 
   /**
@@ -746,11 +744,6 @@ export class DefaultAuthService implements AuthService {
    * @returns Unsubscribe function
    */
   onAuthEvent(handler: AuthEventHandler): () => void {
-    this.eventHandlers.push(handler);
-    
-    // Return unsubscribe function
-    return () => {
-      this.eventHandlers = this.eventHandlers.filter(h => h !== handler);
-    };
+    return this.on(handler);
   }
 }
