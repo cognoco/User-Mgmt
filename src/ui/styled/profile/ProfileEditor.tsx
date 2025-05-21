@@ -1,372 +1,187 @@
-/**
- * Styled Profile Editor Component
- * 
- * This component provides a default styled implementation of the headless ProfileEditor.
- * It uses the headless component for behavior and adds UI rendering with Shadcn UI components.
- */
-
+import { useState, useRef } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import Cropper from 'react-cropper';
+import 'cropperjs/dist/cropper.css';
 import React from 'react';
-import { ProfileEditor as HeadlessProfileEditor, ProfileEditorProps } from '../../headless/profile/ProfileEditor';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ExclamationTriangleIcon, CheckCircledIcon } from '@radix-ui/react-icons';
+import { Alert } from '@/components/ui/alert';
+import { Avatar } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useProfileStore } from '@/lib/stores/profile.store'; // Import the profile store
+import { ConnectedAccounts } from '@/components/shared/ConnectedAccounts';
 
-export interface StyledProfileEditorProps extends Omit<ProfileEditorProps, 'render'> {
-  /**
-   * Optional title for the profile editor
-   */
-  title?: string;
-  
-  /**
-   * Optional description for the profile editor
-   */
-  description?: string;
-  
-  /**
-   * Optional footer content
-   */
-  footer?: React.ReactNode;
-  
-  /**
-   * Optional className for styling
-   */
-  className?: string;
-}
+const profileSchema = z.object({
+  name: z.string().min(2),
+  bio: z.string().max(500).optional(),
+  location: z.string().optional(),
+  website: z.string().url().optional().or(z.literal('')),
+});
 
-export function ProfileEditor({
-  title = 'Edit Profile',
-  description = 'Update your personal information',
-  footer,
-  className,
-  ...headlessProps
-}: StyledProfileEditorProps) {
+type ProfileData = z.infer<typeof profileSchema>;
+
+export function ProfileEditor() {
+  const { profile, updateProfile, uploadAvatar, isLoading, error } = useProfileStore(); // Use the profile store
+  const [avatar, setAvatar] = useState<string | null>(profile?.avatarUrl || null);
+  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
+  const [tempAvatar, setTempAvatar] = useState<string | null>(null);
+  const cropperRef = useRef<any>(null); // Fix the type
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ProfileData>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: (profile && 'name' in profile ? (profile as any).name : '') || '',
+      // email: profile?.email || '', // Remove or comment out if not present
+      bio: profile?.bio || '',
+      location: profile?.location || '',
+      website: profile?.website || '',
+    }
+  });
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setTempAvatar(reader.result as string);
+        setIsAvatarDialogOpen(true);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCropComplete = () => {
+    if (cropperRef.current) {
+      const croppedCanvas = cropperRef.current.getCroppedCanvas();
+      setAvatar(croppedCanvas.toDataURL());
+      setIsAvatarDialogOpen(false);
+    }
+  };
+
+  const onSubmit = async (data: ProfileData) => {
+    try {
+      await updateProfile(data);
+      
+      if (avatar && avatar !== profile?.avatarUrl) {
+        await uploadAvatar(avatar);
+      }
+    } catch (submitError) {
+      if (process.env.NODE_ENV === 'development') { console.error('Error updating profile:', submitError) }
+    }
+  };
+
   return (
-    <HeadlessProfileEditor
-      {...headlessProps}
-      render={({
-        handleSubmit,
-        profile,
-        updateProfile,
-        isSubmitting,
-        isSuccess,
-        errors,
-        touched,
-        handleBlur,
-        handleAvatarChange,
-        avatarPreview,
-        removeAvatar,
-        availableCountries,
-        availableTimezones,
-        availableLanguages
-      }) => (
-        <Card className={className}>
-          <CardHeader>
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isSuccess && (
-              <Alert className="mb-6 bg-green-50 border-green-200">
-                <CheckCircledIcon className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-800">
-                  Profile updated successfully
-                </AlertDescription>
-              </Alert>
-            )}
-            
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Avatar Section */}
-              <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4 mb-6">
-                <div className="relative">
-                  <Avatar className="h-24 w-24">
-                    <AvatarImage src={avatarPreview || profile.avatarUrl} alt={profile.displayName || 'Profile'} />
-                    <AvatarFallback>
-                      {profile.displayName?.split(' ').map(name => name[0]).join('') || profile.firstName?.[0] || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-                
-                <div className="flex flex-col space-y-2">
-                  <Label htmlFor="avatar">Profile Picture</Label>
-                  <Input
-                    id="avatar"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    className="max-w-sm"
-                  />
-                  <p className="text-xs text-gray-500">
-                    Recommended: Square image, at least 200x200 pixels, maximum 5MB
-                  </p>
-                  
-                  {(avatarPreview || profile.avatarUrl) && (
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm"
-                      onClick={removeAvatar}
-                      className="w-fit"
-                    >
-                      Remove Picture
-                    </Button>
-                  )}
-                </div>
-              </div>
-              
-              <Tabs defaultValue="personal" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="personal">Personal</TabsTrigger>
-                  <TabsTrigger value="contact">Contact</TabsTrigger>
-                  <TabsTrigger value="preferences">Preferences</TabsTrigger>
-                </TabsList>
-                
-                {/* Personal Information Tab */}
-                <TabsContent value="personal" className="space-y-4 pt-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input
-                        id="firstName"
-                        value={profile.firstName || ''}
-                        onChange={(e) => updateProfile('firstName', e.target.value)}
-                        onBlur={() => handleBlur('firstName')}
-                        disabled={isSubmitting}
-                        aria-invalid={touched.firstName && !!errors.firstName}
-                        className={touched.firstName && errors.firstName ? 'border-red-500' : ''}
-                      />
-                      {touched.firstName && errors.firstName && (
-                        <p className="text-sm text-red-500">{errors.firstName}</p>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        value={profile.lastName || ''}
-                        onChange={(e) => updateProfile('lastName', e.target.value)}
-                        onBlur={() => handleBlur('lastName')}
-                        disabled={isSubmitting}
-                        aria-invalid={touched.lastName && !!errors.lastName}
-                        className={touched.lastName && errors.lastName ? 'border-red-500' : ''}
-                      />
-                      {touched.lastName && errors.lastName && (
-                        <p className="text-sm text-red-500">{errors.lastName}</p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="displayName">Display Name</Label>
-                    <Input
-                      id="displayName"
-                      value={profile.displayName || ''}
-                      onChange={(e) => updateProfile('displayName', e.target.value)}
-                      onBlur={() => handleBlur('displayName')}
-                      disabled={isSubmitting}
-                      aria-invalid={touched.displayName && !!errors.displayName}
-                      className={touched.displayName && errors.displayName ? 'border-red-500' : ''}
-                    />
-                    {touched.displayName && errors.displayName && (
-                      <p className="text-sm text-red-500">{errors.displayName}</p>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea
-                      id="bio"
-                      value={profile.bio || ''}
-                      onChange={(e) => updateProfile('bio', e.target.value)}
-                      onBlur={() => handleBlur('bio')}
-                      disabled={isSubmitting}
-                      rows={4}
-                      aria-invalid={touched.bio && !!errors.bio}
-                      className={touched.bio && errors.bio ? 'border-red-500' : ''}
-                    />
-                    {touched.bio && errors.bio && (
-                      <p className="text-sm text-red-500">{errors.bio}</p>
-                    )}
-                  </div>
-                </TabsContent>
-                
-                {/* Contact Information Tab */}
-                <TabsContent value="contact" className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={profile.email || ''}
-                      onChange={(e) => updateProfile('email', e.target.value)}
-                      onBlur={() => handleBlur('email')}
-                      disabled={isSubmitting || headlessProps.disableEmailEdit}
-                      aria-invalid={touched.email && !!errors.email}
-                      className={touched.email && errors.email ? 'border-red-500' : ''}
-                    />
-                    {touched.email && errors.email && (
-                      <p className="text-sm text-red-500">{errors.email}</p>
-                    )}
-                    {headlessProps.disableEmailEdit && (
-                      <p className="text-xs text-gray-500">
-                        Email address cannot be changed. Contact support if you need to update it.
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={profile.phone || ''}
-                      onChange={(e) => updateProfile('phone', e.target.value)}
-                      onBlur={() => handleBlur('phone')}
-                      disabled={isSubmitting}
-                      aria-invalid={touched.phone && !!errors.phone}
-                      className={touched.phone && errors.phone ? 'border-red-500' : ''}
-                    />
-                    {touched.phone && errors.phone && (
-                      <p className="text-sm text-red-500">{errors.phone}</p>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="country">Country</Label>
-                    <Select
-                      value={profile.country || ''}
-                      onValueChange={(value) => updateProfile('country', value)}
-                      disabled={isSubmitting}
-                    >
-                      <SelectTrigger id="country">
-                        <SelectValue placeholder="Select a country" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableCountries.map((country) => (
-                          <SelectItem key={country.code} value={country.code}>
-                            {country.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {touched.country && errors.country && (
-                      <p className="text-sm text-red-500">{errors.country}</p>
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City</Label>
-                      <Input
-                        id="city"
-                        value={profile.city || ''}
-                        onChange={(e) => updateProfile('city', e.target.value)}
-                        onBlur={() => handleBlur('city')}
-                        disabled={isSubmitting}
-                        aria-invalid={touched.city && !!errors.city}
-                        className={touched.city && errors.city ? 'border-red-500' : ''}
-                      />
-                      {touched.city && errors.city && (
-                        <p className="text-sm text-red-500">{errors.city}</p>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="postalCode">Postal Code</Label>
-                      <Input
-                        id="postalCode"
-                        value={profile.postalCode || ''}
-                        onChange={(e) => updateProfile('postalCode', e.target.value)}
-                        onBlur={() => handleBlur('postalCode')}
-                        disabled={isSubmitting}
-                        aria-invalid={touched.postalCode && !!errors.postalCode}
-                        className={touched.postalCode && errors.postalCode ? 'border-red-500' : ''}
-                      />
-                      {touched.postalCode && errors.postalCode && (
-                        <p className="text-sm text-red-500">{errors.postalCode}</p>
-                      )}
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                {/* Preferences Tab */}
-                <TabsContent value="preferences" className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="language">Language</Label>
-                    <Select
-                      value={profile.language || ''}
-                      onValueChange={(value) => updateProfile('language', value)}
-                      disabled={isSubmitting}
-                    >
-                      <SelectTrigger id="language">
-                        <SelectValue placeholder="Select a language" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableLanguages.map((language) => (
-                          <SelectItem key={language.code} value={language.code}>
-                            {language.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {touched.language && errors.language && (
-                      <p className="text-sm text-red-500">{errors.language}</p>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="timezone">Timezone</Label>
-                    <Select
-                      value={profile.timezone || ''}
-                      onValueChange={(value) => updateProfile('timezone', value)}
-                      disabled={isSubmitting}
-                    >
-                      <SelectTrigger id="timezone">
-                        <SelectValue placeholder="Select a timezone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableTimezones.map((timezone) => (
-                          <SelectItem key={timezone.value} value={timezone.value}>
-                            {timezone.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {touched.timezone && errors.timezone && (
-                      <p className="text-sm text-red-500">{errors.timezone}</p>
-                    )}
-                  </div>
-                </TabsContent>
-              </Tabs>
-              
-              {errors.form && (
-                <Alert variant="destructive">
-                  <ExclamationTriangleIcon className="h-4 w-4" />
-                  <AlertDescription>{errors.form}</AlertDescription>
-                </Alert>
-              )}
-              
-              <div className="flex justify-end">
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Saving...' : 'Save Changes'}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-          
-          {footer && <CardFooter>{footer}</CardFooter>}
-        </Card>
-      )}
-    />
+    <div className="space-y-8">
+      <div className="flex items-center space-x-4">
+        <Avatar className="h-20 w-20">
+          <img src={avatar || '/default-avatar.png'} alt="Profile" />
+        </Avatar>
+        
+        <div>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            className="hidden"
+            id="avatar-upload"
+            data-testid="avatar-upload"
+          />
+          <Label htmlFor="avatar-upload">
+            <Button variant="outline" className="cursor-pointer">
+              Change Avatar
+            </Button>
+          </Label>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="name">Name</Label>
+          <Input id="name" {...register('name')} />
+          {errors.name && (
+            <Alert variant="destructive" role="alert">{errors.name.message}</Alert>
+          )}
+        </div>
+
+        {/* Remove email field if not present in profile */}
+        {/*
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" type="email" {...register('email')} />
+          {errors.email && (
+            <Alert variant="destructive">{errors.email.message}</Alert>
+          )}
+        </div>
+        */}
+
+        <div className="space-y-2">
+          <Label htmlFor="bio">Bio</Label>
+          <Input id="bio" {...register('bio')} />
+          {errors.bio && (
+            <Alert variant="destructive" role="alert">{errors.bio.message}</Alert>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="location">Location</Label>
+          <Input id="location" {...register('location')} />
+          {errors.location && (
+            <Alert variant="destructive" role="alert">{errors.location.message}</Alert>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="website">Website</Label>
+          <Input id="website" {...register('website')} />
+          {errors.website && (
+            <Alert variant="destructive" role="alert">{errors.website.message}</Alert>
+          )}
+        </div>
+
+        {error && (
+          <Alert variant="destructive" role="alert">{error}</Alert>
+        )}
+
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? 'Saving...' : 'Save Profile'}
+        </Button>
+      </form>
+
+      {/* Connected Accounts Section */}
+      <div className="pt-8">
+        <h3 className="text-lg font-medium mb-4">Connected Accounts</h3>
+        {/* Expose account linking in profile editor */}
+        <ConnectedAccounts variant="profile" />
+      </div>
+
+      <Dialog open={isAvatarDialogOpen} onOpenChange={setIsAvatarDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Crop Avatar</DialogTitle>
+          </DialogHeader>
+          {tempAvatar && (
+            <>
+              <Cropper
+                ref={cropperRef}
+                src={tempAvatar}
+                style={{ height: 400, width: '100%' }}
+                aspectRatio={1}
+                guides={false}
+              />
+              <Button onClick={handleCropComplete}>
+                Save
+              </Button>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
