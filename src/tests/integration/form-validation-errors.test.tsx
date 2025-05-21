@@ -15,8 +15,8 @@ const mockClearSuccessMessage = vi.fn();
 // --- Place ALL vi.mock calls AFTER variable definitions ---
 
 // Auth Store Mock
-vi.mock('@/lib/stores/auth.store', () => ({
-  useAuthStore: vi.fn(() => ({
+vi.mock('@/hooks/auth/use-auth', () => ({
+  useAuth: vi.fn(() => ({
     register: mockRegisterUserAction,
     isLoading: false,
     error: null,

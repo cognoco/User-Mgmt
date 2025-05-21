@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/ui/primitives/button';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 import { MailCheck, AlertCircle, MailWarning } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -14,21 +14,14 @@ export default function CheckEmailPage() {
     const [isReregisterAttempt, setIsReregisterAttempt] = useState(false);
     const [isValidAccess, setIsValidAccess] = useState(false);
 
-    const { 
-        sendVerificationEmail, 
-        isLoading, 
-        error, 
-        successMessage, 
-        clearError, 
-        clearSuccessMessage 
-    } = useAuthStore((state) => ({
-        sendVerificationEmail: state.sendVerificationEmail,
-        isLoading: state.isLoading,
-        error: state.error,
-        successMessage: state.successMessage,
-        clearError: state.clearError,
-        clearSuccessMessage: state.clearSuccessMessage,
-    }));
+    const {
+        sendVerificationEmail,
+        isLoading,
+        error,
+        successMessage,
+        clearError,
+        clearSuccessMessage
+    } = useAuth();
 
     useEffect(() => {
         const emailFromQuery = searchParams.get('email');

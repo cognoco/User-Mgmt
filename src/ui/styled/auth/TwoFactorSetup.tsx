@@ -12,7 +12,7 @@ import { api } from '@/lib/api/axios';
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Unused
 // import { Loader2, CheckCircle, XCircle, QrCode, Smartphone, KeyRound, Trash2, Edit, Save, Copy } from "lucide-react"; // Unused
 // import { useUserManagement } from "@/lib/auth/UserManagementProvider"; // Unused
-// import { useAuthStore } from "@/lib/stores/auth.store"; // Keep commented if unused
+// import { useAuth } from '@/hooks/auth/useAuth'; // Keep commented if unused
 
 interface TwoFactorSetupProps {
   onComplete?: () => void;

@@ -14,7 +14,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Check, X, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { OAuthButtons } from './OAuthButtons';
 import { PasswordRequirements } from './PasswordRequirements';
 
@@ -78,7 +78,7 @@ export function RegistrationForm() {
   const [isFormValid, setIsFormValid] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [conflictingEmail, setConflictingEmail] = useState<string | null>(null);
-  const authStore = useAuthStore();
+  const authStore = useAuth();
 
   const form = useForm<
     z.input<typeof registrationSchema>,

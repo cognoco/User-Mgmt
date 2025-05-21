@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import type { UserPreferences } from '@/types/database';
 import { getBrowserLanguage, getBrowserTimezone, getDefaultDateFormat } from '@/lib/utils';
 
@@ -22,7 +22,7 @@ export default function UserPreferencesComponent({
   }) => React.ReactNode;
 }) {
   const { preferences, isLoading, error, fetchPreferences, updatePreferences } = usePreferencesStore();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
 
   const DEFAULT_PREFERENCES: UserPreferences = {
     id: '',

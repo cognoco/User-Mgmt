@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { Dashboard } from '@/ui/styled/dashboard/Dashboard';
 
 export default function DashboardPage() {
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 

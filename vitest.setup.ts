@@ -104,7 +104,7 @@ Object.assign(mockStore, {
   subscribe: mockStore.subscribe,
   destroy: mockStore.destroy,
 });
-vi.mock('@/lib/stores/auth.store', () => ({ useAuthStore: mockStore }));
+vi.mock('@/hooks/auth/use-auth', () => ({ useAuth: mockStore }));
 // --- End Auth Store mock --- 
 
 // --- Mock User Store ---

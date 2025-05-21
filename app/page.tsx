@@ -4,7 +4,7 @@ import '@/lib/i18n';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link'; // Use next/link
 import { Button } from '@/ui/primitives/button';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { Hero } from '@/ui/styled/layout/Hero';
 import { Features, FeatureItem } from '@/ui/styled/layout/Features';
 import { Shield, UserCircle, KeyRound } from 'lucide-react';
@@ -14,7 +14,7 @@ export default function HomePage() {
   const { t } = useTranslation(); // Assuming i18n setup works
   
   // React 19 compatibility - Use a primitive selector
-  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  const isAuthenticated = useAuth().isAuthenticated;
 
   // Feature grid for this app
   const features: FeatureItem[] = [

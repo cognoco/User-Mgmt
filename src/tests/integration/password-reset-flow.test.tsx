@@ -5,7 +5,7 @@ import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { act } from 'react'; // Import from React instead of react-dom/test-utils
 
 // Mock the auth store first
-vi.mock('@/lib/stores/auth.store', () => {
+vi.mock('@/hooks/auth/use-auth', () => {
   // Zustand selector-compatible mock
   const store = {
     resetPassword: vi.fn().mockResolvedValue({ success: true, message: 'Reset email sent' }),
@@ -20,7 +20,7 @@ vi.mock('@/lib/stores/auth.store', () => {
   useAuthStoreMock.setState = (newState: any) => {
     Object.assign(store, newState);
   };
-  return { useAuthStore: useAuthStoreMock };
+  return { useAuth: useAuthStoreMock };
 });
 
 // Then mock the Supabase client
@@ -55,7 +55,7 @@ import * as apiModule from '@/lib/api/axios';
 const apiPostSpy = vi.spyOn(apiModule.api, 'post');
 
 // Import after mocks
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
