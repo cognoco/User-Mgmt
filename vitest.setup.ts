@@ -33,7 +33,10 @@ const fetchMock = vi.fn(() =>
   } as Response)
 );
 vi.stubGlobal('fetch', fetchMock);
-// --- End fetch mock --- 
+// --- Global navigator.clipboard mock ---
+const clipboardMock = { writeText: vi.fn() };
+vi.stubGlobal('navigator', { ...navigator, clipboard: clipboardMock });
+// --- End fetch mock ---
 
 // --- Global mock for react-i18next to ensure consistent translation behavior in all tests ---
 

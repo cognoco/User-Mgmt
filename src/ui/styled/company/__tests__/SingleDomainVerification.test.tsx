@@ -2,22 +2,9 @@ import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SingleDomainVerification } from '@/ui/styled/company/SingleDomainVerification';
-import { api } from '@/lib/api';
+import { api } from '@/lib/api/axios';
 import { act } from 'react-dom/test-utils';
 
-// Mock dependencies
-vi.mock('@/lib/api', () => ({
-  api: {
-    post: vi.fn()
-  }
-}));
-
-// Mock clipboard API
-Object.assign(navigator, {
-  clipboard: {
-    writeText: vi.fn().mockImplementation(() => Promise.resolve())
-  }
-});
 
 describe('SingleDomainVerification', () => {
   const mockDomain = {
