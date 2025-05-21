@@ -8,7 +8,7 @@ import { useAuthStore } from '@/lib/stores/auth.store';
 import { User } from '@/types/auth';
 import toast, { Toaster } from 'react-hot-toast';
 import { OAuthProvider } from '@/types/oauth';
-import { SessionPolicyEnforcer } from '@/ui/styled/session/SessionPolicyEnforcer';
+import { SessionPolicyEnforcer } from '@/ui/headless/session/SessionPolicyEnforcer';
 
 // Define the callbacks inside the Client Component
 const clientCallbacks: Required<IntegrationCallbacks> = {
