@@ -42,11 +42,11 @@ vi.mock('@/lib/stores/auth.store', () => ({
 import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { RegistrationForm } from '@/components/auth/RegistrationForm';
+import { RegistrationForm } from '@/ui/styled/auth/RegistrationForm';
 import { describe, test, expect, beforeEach } from 'vitest';
 // Import necessary providers and types
 import { UserManagementProvider, type UserManagementConfig } from '@/lib/auth/UserManagementProvider';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/components/ui/theme-provider';
 import { UserType } from '@/types/user-type';
 // Import SubscriptionTier type
 import { SubscriptionTier } from '@/types/subscription'; // Import enum itself

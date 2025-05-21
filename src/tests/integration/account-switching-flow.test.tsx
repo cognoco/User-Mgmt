@@ -13,7 +13,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 import { Dialog } from '@/components/ui/dialog';
-import { AccountSwitcher } from '@/components/account/AccountSwitcher';
+import { AccountSwitcher } from '@/ui/styled/account/AccountSwitcher';
 import * as accountSwitcherApi from '@/lib/accountSwitcherApi';
 
 // Mock Data

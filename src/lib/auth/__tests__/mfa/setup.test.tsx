@@ -4,7 +4,7 @@ import { vi, Mock, beforeEach, describe, test, expect } from 'vitest';
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TwoFactorSetup } from '@/components/auth/TwoFactorSetup';
+import { TwoFactorSetup } from '@/ui/styled/auth/TwoFactorSetup';
 import { api } from '@/lib/api/axios';
 
 // Import our standardized mock using vi.mock with async dynamic import and alias (no extension)

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render as rtlRender } from '@testing-library/react';
-import { ThemeProvider } from '@/components/theme-provider';
-import { PaletteProvider } from '@/components/PaletteProvider';
+import { ThemeProvider } from '@/components/ui/theme-provider';
+import { PaletteProvider } from '@/components/ui/PaletteProvider';
 import '../i18nTestSetup';
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
 

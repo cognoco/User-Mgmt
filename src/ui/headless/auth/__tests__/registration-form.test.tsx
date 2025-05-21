@@ -73,7 +73,7 @@ import userEvent from '@testing-library/user-event';
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
 import { RegistrationForm } from '../RegistrationForm';
 import { UserType } from '@/types/user-type';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/components/ui/theme-provider';
 import { OAuthProvider } from '@/types/oauth';
 
 describe('RegistrationForm Integration Flow', () => {

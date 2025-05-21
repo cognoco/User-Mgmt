@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { palettes, ColorPalette } from '../lib/constants/themeConstants';
+import { palettes, ColorPalette } from '../../lib/constants/themeConstants';
 
 // Keys for localStorage
 const PALETTE_KEY = 'user-management-palette';

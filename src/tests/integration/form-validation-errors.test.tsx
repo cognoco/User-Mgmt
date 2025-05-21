@@ -59,7 +59,7 @@ vi.mock('next/navigation', () => ({
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { RegistrationForm } from '@/components/auth/RegistrationForm';
+import { RegistrationForm } from '@/ui/styled/auth/RegistrationForm';
 import { UserManagementProvider, UserManagementConfig } from '@/lib/auth/UserManagementProvider';
 import { UserType } from '@/types/user-type';
 import { SubscriptionTier } from '@/types/subscription';

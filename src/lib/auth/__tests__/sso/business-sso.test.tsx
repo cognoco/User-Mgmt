@@ -27,7 +27,7 @@ import '@/tests/i18nTestSetup';
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BusinessSSOAuth } from '@/components/auth/BusinessSSOAuth';
+import { BusinessSSOAuth } from '@/ui/styled/auth/BusinessSSOAuth';
 import { OrganizationProvider } from '@/lib/context/OrganizationContext';
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 

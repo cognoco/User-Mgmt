@@ -1,6 +1,6 @@
 import React from 'react';
-import { usePalette, PaletteKey } from '../PaletteProvider';
-import { useTheme } from '../theme-provider';
+import { usePalette, PaletteKey } from '../ui/PaletteProvider';
+import { useTheme } from '../ui/theme-provider';
 import { palettes } from '../../lib/constants/themeConstants';
 
 export const paletteLabels: Record<PaletteKey, string> = {

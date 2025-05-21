@@ -6,7 +6,7 @@ import { RegisterPage } from '@/pages/auth/RegisterPage';
 import { ProfileCompletionPage } from '@/pages/auth/ProfileCompletionPage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
 import { SettingsPage } from '@/pages/settings/SettingsPage';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { ProtectedRoute } from '@/ui/styled/auth/ProtectedRoute';
 
 export const router = createBrowserRouter([
   {

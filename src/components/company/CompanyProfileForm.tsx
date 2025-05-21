@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
-import { CompanyLogoUpload } from '@/components/profile/CompanyLogoUpload';
+import { CompanyLogoUpload } from '@/ui/styled/profile/CompanyLogoUpload';
 import { CheckCircle, XCircle, Loader2, Search, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { api } from '@/lib/api/axios';
 

@@ -17,7 +17,7 @@ import { useForm } from 'react-hook-form';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { SingleDomainVerification } from '@/components/company/SingleDomainVerification';
+import { SingleDomainVerification } from '@/ui/styled/company/SingleDomainVerification';
 
 interface DomainManagementProps {
   companyId: string;

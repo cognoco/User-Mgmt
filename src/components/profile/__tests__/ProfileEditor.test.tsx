@@ -72,7 +72,7 @@ describe('ProfileEditor', () => {
         clearError: vi.fn()
       })
     }));
-    const { ProfileEditor } = await import('@/components/profile/ProfileEditor');
+    const { ProfileEditor } = await import('@/ui/styled/profile/ProfileEditor');
     await act(async () => {
       render(<ProfileEditor />);
     });
@@ -154,8 +154,8 @@ describe('ProfileEditor', () => {
 
   test('shows loading state during form submission', async () => {
     // Patch: mock ProfileEditor to use a schema that does not require email for this test
-    vi.doMock('@/components/profile/ProfileEditor', async () => {
-      const actual = await vi.importActual<any>('@/components/profile/ProfileEditor');
+    vi.doMock('@/ui/styled/profile/ProfileEditor', async () => {
+      const actual = await vi.importActual<any>('@/ui/styled/profile/ProfileEditor');
       const z = await vi.importActual<any>('zod');
       const profileSchema = z.object({
         name: z.string().min(2),
@@ -182,7 +182,7 @@ describe('ProfileEditor', () => {
         clearError: vi.fn()
       })
     }));
-    const { ProfileEditor } = await import('@/components/profile/ProfileEditor');
+    const { ProfileEditor } = await import('@/ui/styled/profile/ProfileEditor');
     await act(async () => {
       render(<ProfileEditor />);
     });
@@ -194,8 +194,8 @@ describe('ProfileEditor', () => {
 
   test('handles profile update error', async () => {
     // Patch: mock ProfileEditor to use a schema that does not require email for this test
-    vi.doMock('@/components/profile/ProfileEditor', async () => {
-      const actual = await vi.importActual<any>('@/components/profile/ProfileEditor');
+    vi.doMock('@/ui/styled/profile/ProfileEditor', async () => {
+      const actual = await vi.importActual<any>('@/ui/styled/profile/ProfileEditor');
       const z = await vi.importActual<any>('zod');
       const profileSchema = z.object({
         name: z.string().min(2),
@@ -223,7 +223,7 @@ describe('ProfileEditor', () => {
         clearError: vi.fn()
       })
     }));
-    const { ProfileEditor } = await import('@/components/profile/ProfileEditor');
+    const { ProfileEditor } = await import('@/ui/styled/profile/ProfileEditor');
     await act(async () => {
       render(<ProfileEditor />);
     });
@@ -472,7 +472,7 @@ describe('ProfileEditor', () => {
         clearError: vi.fn()
       })
     }));
-    const { ProfileEditor } = await import('@/components/profile/ProfileEditor');
+    const { ProfileEditor } = await import('@/ui/styled/profile/ProfileEditor');
     await act(async () => {
       render(<ProfileEditor />);
     });
@@ -497,7 +497,7 @@ describe('ProfileEditor', () => {
         clearError: vi.fn()
       })
     }));
-    const { ProfileEditor } = await import('@/components/profile/ProfileEditor');
+    const { ProfileEditor } = await import('@/ui/styled/profile/ProfileEditor');
     await act(async () => {
       render(<ProfileEditor />);
     });
@@ -527,7 +527,7 @@ describe('ProfileEditor', () => {
         clearError: vi.fn()
       })
     }));
-    const { ProfileEditor } = await import('@/components/profile/ProfileEditor');
+    const { ProfileEditor } = await import('@/ui/styled/profile/ProfileEditor');
     await act(async () => {
       render(<ProfileEditor />);
     });
@@ -552,7 +552,7 @@ describe('ProfileEditor', () => {
         clearError: vi.fn()
       })
     }));
-    const { ProfileEditor } = await import('@/components/profile/ProfileEditor');
+    const { ProfileEditor } = await import('@/ui/styled/profile/ProfileEditor');
     await act(async () => {
       render(<ProfileEditor />);
     });

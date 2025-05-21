@@ -3,7 +3,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SocialSharingComponent } from '@/components/sharing/SocialSharingComponent'; 
+import { SocialSharingComponent } from '@/ui/styled/sharing/SocialSharingComponent'; 
 
 // Import Vitest functions
 import { vi, Mock } from 'vitest'; 

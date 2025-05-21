@@ -10,7 +10,7 @@ vi.mock('@/hooks/usePermission', () => ({
   usePermission: vi.fn(),
 }));
 
-import { TeamMembersList as TeamMembersListComponent } from '@/components/team/TeamMembersList';
+import { TeamMembersList as TeamMembersListComponent } from '@/ui/styled/team/TeamMembersList';
 import { usePermission } from '@/hooks/usePermission';
 
 // Explicitly type the component

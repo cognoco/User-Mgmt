@@ -3,7 +3,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MFAVerificationForm } from '@/components/auth/MFAVerificationForm';
+import { MFAVerificationForm } from '@/ui/styled/auth/MFAVerificationForm';
 import { vi, describe, beforeEach, test, expect, Mock } from 'vitest';
 import { api } from '@/lib/api/axios';
 import type { UserEvent } from '@testing-library/user-event';

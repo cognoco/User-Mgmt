@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getPlatformClasses } from '@/hooks/usePlatformStyles';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { Platform } from '@/types/platform';
-import { ProviderManagementPanel } from '@/components/auth/ProviderManagementPanel';
+import { ProviderManagementPanel } from '@/ui/styled/auth/ProviderManagementPanel';
 
 export function SettingsPanel() {
   const { t } = useTranslation();

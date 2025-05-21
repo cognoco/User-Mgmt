@@ -1,7 +1,7 @@
 'use client'; // This component uses context and hooks, so it must be a Client Component
 
 import React, { createContext, useContext, ReactNode, useEffect, useMemo } from 'react';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/components/ui/theme-provider';
 // import { Toaster } from '@/components/ui/toaster'; // Comment out unused import
 import { api } from '@/lib/api/axios';
 // import { useAuthStore } from '@/lib/stores/auth.store'; // Commented out
@@ -16,7 +16,7 @@ import { CorporateUserConfig, UserType } from '@/types/user-type';
 import { OAuthModuleConfig } from '@/types/oauth';
 // import { initializeCsrf } from '@/lib/api/axios'; // Removed unused import
 // import { LoginPayload, AuthResult } from '@/types/auth'; // Commented out
-import { PaletteProvider } from '@/components/PaletteProvider';
+import { PaletteProvider } from '@/components/ui/PaletteProvider';
 import { initializeNotifications } from '../services/notification.service';
 import { notificationPreferencesService } from '../services/notification-preferences.service';
 

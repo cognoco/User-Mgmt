@@ -3,7 +3,7 @@
 import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Dashboard } from '@/components/dashboard/Dashboard';
+import { Dashboard } from '@/ui/styled/dashboard/Dashboard';
 import { describe, test, expect, beforeEach, vi } from 'vitest'; 
 
 // Create spy functions that we can control

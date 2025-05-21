@@ -352,10 +352,9 @@ Ask yourself:
 
 ### "How should I name my files?"
 
-1. Use kebab-case for file names: `team-member-list.tsx`
-2. For components, use PascalCase export names: `export function TeamMemberList()`
-3. For hooks, use camelCase with "use" prefix: `export function useTeamMembers()`
-4. For utilities, use camelCase: `export function formatDate()`
+1. For components, use PascalCase export names: `export function TeamMemberList()`
+2. For hooks, use camelCase with "use" prefix: `export function useTeamMembers()`
+3. For utilities, use camelCase: `export function formatDate()`
 
 ## Maintenance and Enforcement
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/stores/auth.store";
-import { LanguageSelector } from "@/components/settings/LanguageSelector";
+import { LanguageSelector } from "@/ui/styled/settings/LanguageSelector";
 import { useTranslation } from "react-i18next";
 import { useUserManagement } from "@/lib/auth/UserManagementProvider";
 import { Menu, X, User, LogOut, Settings, Home } from "lucide-react";

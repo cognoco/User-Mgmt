@@ -284,7 +284,7 @@ export function LoginForm(props) {
 - Tests MUST be organized according to the same layered architecture as the code
 - Each layer MUST be tested in isolation from other layers
 - Tests MUST use mock implementations of dependencies from lower layers
-- Test files MUST use consistent naming conventions (kebab-case with `.test.ts` or `.test.tsx` extension)
+- Test files MUST use consistent naming conventions with `.test.ts` or `.test.tsx` extension
 
 **❌ FORBIDDEN:**
 - Tests MUST NOT have direct dependencies on implementation details of other layers

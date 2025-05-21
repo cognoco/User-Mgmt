@@ -11,7 +11,7 @@ vi.mock('@/lib/database/supabase', async () => {
 import React, { ReactElement } from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BusinessSSOAuth } from '@/components/auth/BusinessSSOAuth';
+import { BusinessSSOAuth } from '@/ui/styled/auth/BusinessSSOAuth';
 import { supabase } from '@/lib/database/supabase';
 import * as useOrganizationModule from '@/lib/hooks/useOrganization';
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '../utils/test-utils';
 import userEvent from '@testing-library/user-event';
-import { RegistrationForm } from '@/components/auth/RegistrationForm';
+import { RegistrationForm } from '@/ui/styled/auth/RegistrationForm';
 import { describe, it, expect } from 'vitest';
 
 describe('Smoke: Registration Form', () => {
