@@ -7,7 +7,6 @@ const domainSchema = z.object({
   isVerified: z.boolean().optional(),
 });
 
-type Domain = z.infer<typeof domainSchema>;
 
 export async function GET(
   request: NextRequest,

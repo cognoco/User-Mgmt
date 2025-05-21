@@ -26,7 +26,7 @@ function generateBackupCodes(count = 10, length = 8): string[] {
   return codes;
 }
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
     // Initialize Supabase client
     const cookieStore = cookies();

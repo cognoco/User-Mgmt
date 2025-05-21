@@ -58,21 +58,23 @@ export async function GET(req: Request) {
           hasResourceAccess = resourceId === teamMember.teamId;
           break;
 
-        case 'project':
+        case 'project': {
           const project = await prisma.project.findUnique({
             where: { id: resourceId },
             select: { teamId: true },
           });
           hasResourceAccess = project?.teamId === teamMember.teamId;
           break;
+        }
 
-        case 'organization':
+        case 'organization': {
           const organization = await prisma.organization.findUnique({
             where: { id: resourceId },
             select: { teams: { select: { id: true } } },
           });
           hasResourceAccess = organization?.teams.some((team: { id: string }) => team.id === teamMember.teamId) ?? false;
           break;
+        }
       }
 
       if (!hasResourceAccess) {
