@@ -6,7 +6,7 @@
  */
 
 import { useState, FormEvent, useEffect, useCallback } from 'react';
-import { useRoles } from '@/hooks/useRoles';
+import { useRoles } from '@/hooks/team/useRoles';
 import { usePermissions } from '@/hooks/permission/usePermissions';
 import { 
   Role, 

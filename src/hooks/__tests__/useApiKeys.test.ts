@@ -4,7 +4,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
-import { useApiKeys } from '../useApiKeys';
+import { useApiKeys } from '../team/useApiKeys';
 
 const server = setupServer();
 

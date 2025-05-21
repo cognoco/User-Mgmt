@@ -1,5 +1,5 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useSubscription } from '@/hooks/useSubscription';
+import { useSubscription } from '@/hooks/user/useSubscription';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock fetch globally

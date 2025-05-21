@@ -6,7 +6,7 @@
  */
 
 import { useState, FormEvent, useEffect } from 'react';
-import { useAuth } from '@/hooks/useMFA';
+import { useAuth } from '@/hooks/auth/useMFA';
 import { MFASetupResponse, MFAVerifyResponse } from '@/core/auth/models';
 import { z } from 'zod';
 

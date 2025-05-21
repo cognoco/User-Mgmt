@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useTeamMembers } from '@/hooks/useTeamMembers';
+import { useTeamMembers } from '@/hooks/team/useTeamMembers';
 import { TeamMember, TeamMemberUpdatePayload } from '@/core/team/models';
 
 export interface TeamMemberManagerProps {
