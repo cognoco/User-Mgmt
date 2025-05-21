@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getPlatformClasses } from '@/hooks/usePlatformStyles';
+import { getPlatformClasses } from '@/hooks/utils/usePlatformStyles';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { Platform } from '@/types/platform';
 import { ProviderManagementPanel } from '@/ui/styled/auth/ProviderManagementPanel';

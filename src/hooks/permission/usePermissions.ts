@@ -6,12 +6,22 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
+import { useQuery } from '@tanstack/react-query';
 import { PermissionService } from '@/core/permission/interfaces';
 import { 
   Permission, 
   PermissionAssignment 
 } from '@/core/permission/models';
 import { UserManagementConfiguration } from '@/core/config';
+
+/**
+ * Interface for permission check options
+ */
+export interface UsePermissionOptions {
+  required: string;
+  resourceId?: string;
+}
 
 /**
  * Hook for permission management functionality
@@ -216,6 +226,41 @@ export function usePermissions() {
     fetchAllPermissions();
   }, [fetchAllPermissions]);
   
+  /**
+   * Simple permission check function that mimics the functionality of the old usePermission hook
+   * This provides backward compatibility while following the new architecture
+   * 
+   * @param options Permission check options
+   * @returns Object containing permission check status and loading state
+   */
+  const checkPermission = useCallback((options: UsePermissionOptions) => {
+    const { data: session, status: sessionStatus } = useSession();
+    
+    const { data: hasPermission, isLoading: permissionLoading } = useQuery({
+      queryKey: ['permission-check', options.required, options.resourceId],
+      queryFn: async () => {
+        if (!session?.user?.id) return false;
+        
+        try {
+          // Use the permission service to check if the user has the permission
+          return await permissionService.hasPermission(
+            session.user.id, 
+            options.required as Permission
+          );
+        } catch (error) {
+          console.error('Permission check error:', error);
+          return false;
+        }
+      },
+      enabled: sessionStatus === 'authenticated' && !!permissionService,
+    });
+    
+    return {
+      hasPermission: !!hasPermission,
+      isLoading: sessionStatus === 'loading' || permissionLoading,
+    };
+  }, [permissionService]);
+
   return {
     // State
     permissions,
@@ -231,7 +276,45 @@ export function usePermissions() {
     addPermissionToRole,
     removePermissionFromRole,
     syncRolePermissions,
-    clearMessages
+    clearMessages,
+    
+    // Backward compatibility with usePermission hook
+    checkPermission
+  };
+}
+
+/**
+ * Legacy hook for checking if a user has a specific permission
+ * This is provided for backward compatibility and redirects to usePermissions
+ * 
+ * @param options Permission check options
+ * @returns Object containing permission check status and loading state
+ */
+export function usePermission(options: UsePermissionOptions) {
+  const { checkPermission } = usePermissions();
+  return checkPermission(options);
+}
+
+/**
+ * Higher-order component that conditionally renders based on permissions
+ * This is provided for backward compatibility
+ */
+export function withPermission<P extends object>(
+  WrappedComponent: React.ComponentType<P>,
+  permission: string
+) {
+  return function WithPermissionComponent(props: P) {
+    const { hasPermission, isLoading } = usePermission({ required: permission });
+
+    if (isLoading) {
+      return <div className="animate-pulse">Loading permissions...</div>;
+    }
+
+    if (!hasPermission) {
+      return null;
+    }
+
+    return <WrappedComponent {...props} />;
   };
 }
 

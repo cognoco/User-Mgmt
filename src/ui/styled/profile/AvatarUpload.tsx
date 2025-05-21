@@ -19,7 +19,7 @@ import {
   canvasPreview
 } from '@/lib/utils/file-upload';
 import { Upload, User, Trash, Camera, Image } from 'lucide-react';
-import { getPlatformClasses } from '@/hooks/usePlatformStyles';
+import { getPlatformClasses } from '@/hooks/utils/usePlatformStyles';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { api } from '@/lib/api/axios';
 

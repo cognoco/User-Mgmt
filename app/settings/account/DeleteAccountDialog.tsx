@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useDeleteAccount } from '@/hooks/useDeleteAccount';
+import { useDeleteAccount } from '@/hooks/user/useDeleteAccount';
 import { Button } from '@/ui/primitives/button';
 import { Input } from '@/ui/primitives/input';
 import { Label } from '@/ui/primitives/label';

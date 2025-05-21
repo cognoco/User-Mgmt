@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest'; // Import vi
 import DeleteAccountDialog from '@/ui/styled/account/DeleteAccountDialog';
-import { useDeleteAccount } from '@/hooks/useDeleteAccount';
+import { useDeleteAccount } from '@/hooks/user/useDeleteAccount';
 import { act } from 'react';
 
 // Mock the custom hook

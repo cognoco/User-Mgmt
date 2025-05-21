@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { useDeleteAccount } from '@/hooks/useDeleteAccount';
+import { useDeleteAccount } from '@/hooks/user/useDeleteAccount';
 
 const CONFIRMATION_TEXT = 'DELETE';
 

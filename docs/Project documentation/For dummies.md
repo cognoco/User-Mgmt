@@ -31,6 +31,16 @@ Critically, this clubhouse is designed to be installed in ANY building. This mea
 - **Some admin tools:** For the club owner to manage members more easily.
 - **More tests:** To make sure everything works perfectly, even in weird situations.
 
+
+The Parts and What They Do
+Core Layer - This is like the blueprint or instruction manual. It defines what each piece should do without actually doing it.
+Adapter Layer - These are special connectors that let the module talk to different databases or services. Right now it uses Supabase, but you can swap it for something else.
+Service Layer - This is the engine that makes everything work. It uses the adapters to do things like register users or update profiles.
+Hook Layer - These are special React tools that make it easy for your app to use all the user management features.
+UI Layer - These are the screens and buttons users see. It comes in two flavors:
+Headless components - Just the behavior without any styling
+Styled components - Ready-to-use pretty components
+
 ---
 
 ## How important are the missing parts?

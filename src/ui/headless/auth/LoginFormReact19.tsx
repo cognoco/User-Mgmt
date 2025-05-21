@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect, FormEvent, useTransition } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { LoginPayload, loginSchema } from '@/core/auth/models';
 import { z } from 'zod';
 

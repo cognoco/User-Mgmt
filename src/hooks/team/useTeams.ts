@@ -16,7 +16,7 @@ import {
   TeamSearchResult
 } from '@/core/team/models';
 import { UserManagementConfiguration } from '@/core/config';
-import { useAuth } from './useAuth';
+import { useAuth } from '../auth/useAuth';
 
 /**
  * Hook for team management functionality

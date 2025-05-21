@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export type TwoFactorMethod = 'app' | 'sms' | 'email' | 'backup';
 

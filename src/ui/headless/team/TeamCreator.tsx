@@ -6,8 +6,8 @@
  */
 
 import { useState, FormEvent, useEffect } from 'react';
-import { useTeams } from '@/hooks/useTeams';
-import { useAuth } from '@/hooks/useAuth';
+import { useTeams } from '@/hooks/team/useTeams';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { TeamCreatePayload } from '@/core/team/models';
 import { z } from 'zod';
 

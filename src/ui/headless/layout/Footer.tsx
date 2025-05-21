@@ -1,4 +1,4 @@
-import { getPlatformClasses } from '@/hooks/usePlatformStyles';
+import { getPlatformClasses } from '@/hooks/utils/usePlatformStyles';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 
 export interface FooterProps {

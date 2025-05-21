@@ -1,5 +1,5 @@
 import { ReactNode, ComponentType, useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 /**
  * Headless withRole higher-order component that handles role-based access control

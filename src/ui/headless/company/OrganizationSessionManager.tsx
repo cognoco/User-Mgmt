@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useOrganizationPolicies, useOrganizationMembers, useTerminateUserSessions } from '@/hooks/useOrganizationSession';
+import { useOrganizationPolicies, useOrganizationMembers, useTerminateUserSessions } from '@/hooks/user/useOrganizationSession';
 import { useOrganization } from '@/lib/context/OrganizationContext';
 import { OrganizationSecurityPolicy } from '@/types/organizations';
 

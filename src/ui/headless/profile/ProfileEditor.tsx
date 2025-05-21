@@ -7,7 +7,7 @@
 
 import { useState, FormEvent, useEffect } from 'react';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { ProfileUpdatePayload, UserProfile } from '@/core/user/models';
 import { z } from 'zod';
 import { UserType } from '@/types/user-type';

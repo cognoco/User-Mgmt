@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PrivacySettings } from '../PrivacySettings';
-import { useProfile } from '@/hooks/useProfile';
+import { useProfile } from '@/hooks/user/useProfile';
 import { Profile as DbProfile } from '@/types/database';
 
 // Mock the Supabase client EARLY, before other imports might trigger it

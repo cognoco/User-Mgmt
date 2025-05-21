@@ -3,11 +3,11 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ProfilePrivacySettings } from '@/ui/styled/profile/ProfilePrivacySettings';
 import { useProfileStore } from '@/lib/stores/profile.store';
-import { usePermission } from '@/hooks/usePermission';
+import { usePermission } from '@/hooks/permission/usePermissions';
 
 // Mock the stores and hooks
 vi.mock('@/lib/stores/profile.store');
-vi.mock('@/hooks/usePermission');
+vi.mock('@/hooks/permission/usePermissions');
 
 describe('ProfilePrivacySettings', () => {
   const user = userEvent.setup();

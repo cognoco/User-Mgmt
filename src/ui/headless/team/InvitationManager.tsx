@@ -7,7 +7,7 @@
 
 import { useState, FormEvent, useEffect, useCallback } from 'react';
 import { useTeamInvitations } from '@/hooks/useTeamInvitations';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { TeamInvitation } from '@/core/team/models';
 import { z } from 'zod';
 

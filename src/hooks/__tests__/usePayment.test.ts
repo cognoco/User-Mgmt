@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { usePayment } from '../usePayment';
+import { usePayment } from '../user/usePayment';
 import { describe, it, expect, vi, beforeEach, MockInstance } from 'vitest';
 import { api } from '@/lib/api/axios';
 

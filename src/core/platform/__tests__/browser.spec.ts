@@ -1,0 +1,68 @@
+/**
+ * @file Browser-specific tests for the platform abstraction layer
+ * @group core/platform
+ * @browser
+ */
+
+import { getStorage } from '..';
+
+// These tests only run in a browser environment
+describe('Browser Platform', () => {
+  describe('getStorage', () => {
+    const originalLocalStorage = global.localStorage;
+    const originalSessionStorage = global.sessionStorage;
+
+    beforeEach(() => {
+      // Mock localStorage and sessionStorage
+      const localStorageMock = {
+        getItem: jest.fn(),
+        setItem: jest.fn(),
+        removeItem: jest.fn(),
+        clear: jest.fn(),
+        key: jest.fn(),
+        length: 0
+      };
+
+      const sessionStorageMock = {
+        getItem: jest.fn(),
+        setItem: jest.fn(),
+        removeItem: jest.fn(),
+        clear: jest.fn(),
+        key: jest.fn(),
+        length: 0
+      };
+
+      // @ts-ignore - Mocking browser globals
+      global.localStorage = localStorageMock;
+      // @ts-ignore - Mocking browser globals
+      global.sessionStorage = sessionStorageMock;
+    });
+
+    afterEach(() => {
+      // Restore originals
+      // @ts-ignore - Restoring browser globals
+      global.localStorage = originalLocalStorage;
+      // @ts-ignore - Restoring browser globals
+      global.sessionStorage = originalSessionStorage;
+      jest.clearAllMocks();
+    });
+
+    it('should use localStorage when type is "local"', () => {
+      const storage = getStorage('local');
+      storage.setItem('test', 'value');
+      expect(global.localStorage.setItem).toHaveBeenCalledWith('test', 'value');
+    });
+
+    it('should use sessionStorage when type is "session"', () => {
+      const storage = getStorage('session');
+      storage.setItem('test', 'value');
+      expect(global.sessionStorage.setItem).toHaveBeenCalledWith('test', 'value');
+    });
+
+    it('should default to localStorage when no type is specified', () => {
+      const storage = getStorage();
+      storage.setItem('test', 'value');
+      expect(global.localStorage.setItem).toHaveBeenCalledWith('test', 'value');
+    });
+  });
+});

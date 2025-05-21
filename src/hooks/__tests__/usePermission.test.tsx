@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useSession } from 'next-auth/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { usePermission, withPermission } from '@/hooks/usePermission';
+import { usePermission, withPermission } from '@/hooks/permission/usePermissions';
 import { checkRolePermission } from '@/lib/rbac/roleService';
 import { render } from '@testing-library/react';
 

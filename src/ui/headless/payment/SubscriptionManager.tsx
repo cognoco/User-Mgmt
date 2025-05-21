@@ -1,5 +1,5 @@
 import { ReactNode, useEffect } from 'react';
-import { usePayment } from '@/hooks/usePayment';
+import { usePayment } from '@/hooks/user/usePayment';
 
 interface Subscription {
   id: string;

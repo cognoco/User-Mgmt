@@ -164,7 +164,7 @@ describe('Organization Security Policy', () => {
   
   test('terminates user sessions', async () => {
     const user = userEvent.setup();
-    const { useTerminateUserSessions } = await import('@/hooks/useOrganizationSession');
+    const { useTerminateUserSessions } = await import('@/hooks/user/useOrganizationSession');
     const mockTerminate = vi.fn().mockResolvedValue({ success: true });
     
     (useTerminateUserSessions as any).mockReturnValue({
@@ -242,7 +242,7 @@ describe('Organization Security Policy', () => {
   
   test('updates security policy settings', async () => {
     const user = userEvent.setup();
-    const { useOrganizationPolicies } = await import('@/hooks/useOrganizationSession');
+    const { useOrganizationPolicies } = await import('@/hooks/user/useOrganizationSession');
     const mockUpdatePolicies = vi.fn().mockResolvedValue(true);
     
     (useOrganizationPolicies as any).mockReturnValue({

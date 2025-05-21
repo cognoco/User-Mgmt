@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { getPlatformClasses } from "@/hooks/usePlatformStyles";
+import { getPlatformClasses } from "@/hooks/utils/usePlatformStyles";
 import { useIsMobile } from "@/lib/utils/responsive";
 
 interface HeaderProps {

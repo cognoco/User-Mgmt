@@ -6,7 +6,7 @@
  */
 
 import { useState, FormEvent, useEffect, useCallback } from 'react';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/hooks/permission/usePermissions';
 import { Permission } from '@/core/permission/models';
 import { z } from 'zod';
 

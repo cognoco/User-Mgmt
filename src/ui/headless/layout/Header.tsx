@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/lib/stores/auth.store';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
-import { getPlatformClasses } from '@/hooks/usePlatformStyles';
+import { getPlatformClasses } from '@/hooks/utils/usePlatformStyles';
 import { useIsMobile } from '@/lib/utils/responsive';
 
 export interface NavItem {

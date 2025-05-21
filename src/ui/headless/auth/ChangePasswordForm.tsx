@@ -1,6 +1,6 @@
 import { ReactNode, useState, FormEvent } from 'react';
 import { z } from 'zod';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 /**
  * Zod schema for changing password

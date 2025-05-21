@@ -6,7 +6,7 @@
  */
 
 import { useState, FormEvent, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { RegistrationPayload, registerSchema } from '@/core/auth/models';
 import { z } from 'zod';
 

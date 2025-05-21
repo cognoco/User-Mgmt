@@ -5,13 +5,13 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 
 // Restore the usePermission mock
-vi.mock('@/hooks/usePermission', () => ({
+vi.mock('@/hooks/permission/usePermissions', () => ({
   __esModule: true,
   usePermission: vi.fn(),
 }));
 
 import { TeamMembersList as TeamMembersListComponent } from '@/ui/styled/team/TeamMembersList';
-import { usePermission } from '@/hooks/usePermission';
+import { usePermission } from '@/hooks/permission/usePermissions';
 
 // Explicitly type the component
 const TeamMembersList: React.FC = TeamMembersListComponent;

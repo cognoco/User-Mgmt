@@ -17,7 +17,7 @@ import {
   canvasPreview // Re-using canvasPreview helper
 } from '@/lib/utils/file-upload';
 import { Upload, Building, Trash, Camera } from 'lucide-react'; // Use Building icon for company
-import { getPlatformClasses } from '@/hooks/usePlatformStyles';
+import { getPlatformClasses } from '@/hooks/utils/usePlatformStyles';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 
 // Helper function (same as AvatarUpload) - can be moved to utils
