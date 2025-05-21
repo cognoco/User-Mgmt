@@ -19,16 +19,20 @@ import {
   RoleUpdatePayload,
   DefaultRoleDefinitions
 } from '@/core/permission/models';
-import { 
-  PermissionEventTypes, 
-  PermissionEventHandler 
+import {
+  PermissionEventTypes,
+  PermissionEventHandler
 } from '@/core/permission/events';
+import { translateError } from '@/lib/utils/error';
+import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
 
 /**
  * Default implementation of the PermissionService interface
  */
-export class DefaultPermissionService implements PermissionService {
-  private eventHandlers: PermissionEventHandler[] = [];
+export class DefaultPermissionService
+  extends TypedEventEmitter<PermissionEventTypes>
+  implements PermissionService
+{
   
   /**
    * Constructor for DefaultPermissionService
@@ -39,7 +43,9 @@ export class DefaultPermissionService implements PermissionService {
   constructor(
     private apiClient: any, // This would be replaced with a proper API client interface
     private permissionDataProvider: any // This would be replaced with a proper permission data provider interface
-  ) {}
+  ) {
+    super();
+  }
   
   /**
    * Emit a permission event
@@ -47,7 +53,7 @@ export class DefaultPermissionService implements PermissionService {
    * @param event - The event to emit
    */
   private emitEvent(event: PermissionEventTypes): void {
-    this.eventHandlers.forEach(handler => handler(event));
+    this.emit(event);
   }
   
   /**
@@ -470,11 +476,6 @@ export class DefaultPermissionService implements PermissionService {
    * @returns Unsubscribe function
    */
   onPermissionEvent(handler: PermissionEventHandler): () => void {
-    this.eventHandlers.push(handler);
-    
-    // Return unsubscribe function
-    return () => {
-      this.eventHandlers = this.eventHandlers.filter(h => h !== handler);
-    };
+    return this.on(handler);
   }
 }
