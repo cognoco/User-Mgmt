@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useDeleteAccount } from '@/hooks/useDeleteAccount';
 import { Button } from '@/ui/primitives/button';
 import { Input } from '@/ui/primitives/input';
@@ -12,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui/primitives/dialog';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 
 interface DeleteAccountDialogProps {
@@ -23,7 +22,6 @@ interface DeleteAccountDialogProps {
 const CONFIRMATION_TEXT = 'DELETE';
 
 const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ open, onClose }) => {
-  const { t } = useTranslation();
   const [confirmText, setConfirmText] = useState('');
   const { deleteAccount, isLoading, error } = useDeleteAccount();
 
@@ -63,7 +61,7 @@ const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ open, onClose
               Confirm deletion
             </Label>
             <p className="text-sm text-muted-foreground">
-              Please type "DELETE" to confirm you want to delete your account
+              Please type &quot;DELETE&quot; to confirm you want to delete your account
             </p>
             <Input
               id="confirm-deletion"

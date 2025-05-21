@@ -32,7 +32,6 @@ export default function TeamInvitationsPage() {
   } = useTeams();
   
   const {
-    invitations,
     pendingInvitations,
     sentInvitations,
     createInvitation,
