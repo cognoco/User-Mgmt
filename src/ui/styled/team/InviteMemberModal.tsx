@@ -1,7 +1,3 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import {
   Dialog,
   DialogContent,
@@ -9,7 +5,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@/ui/primitives/dialog';
 import { Button } from '@/ui/primitives/button';
 import { Input } from '@/ui/primitives/input';
@@ -18,175 +14,100 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/ui/primitives/select';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/ui/primitives/form';
-import { useTeamInvite } from './hooks/useTeamInvite';
 import { Progress } from '@/ui/primitives/progress';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { UserPlus } from 'lucide-react';
-
-const inviteSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  role: z.enum(['admin', 'member', 'viewer'], {
-    required_error: 'Please select a role',
-  }),
-});
-
-type InviteFormData = z.infer<typeof inviteSchema>;
+import {
+  InviteMemberModal as InviteMemberModalHeadless,
+  SeatUsage
+} from '@/ui/headless/team/InviteMemberModal';
 
 interface InviteMemberModalProps {
-  teamLicenseId: string;
-  seatUsage: {
-    used: number;
-    total: number;
-    percentage: number;
-  };
+  teamId: string;
+  seatUsage: SeatUsage;
 }
 
-export function InviteMemberModal({ teamLicenseId, seatUsage }: InviteMemberModalProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const { mutate: inviteMember, isLoading, error } = useTeamInvite();
-
-  const form = useForm<InviteFormData>({
-    resolver: zodResolver(inviteSchema),
-    defaultValues: {
-      email: '',
-      role: 'member',
-    },
-  });
-
-  const onSubmit = (data: InviteFormData) => {
-    inviteMember(
-      {
-        ...data,
-        teamLicenseId,
-      },
-      {
-        onSuccess: () => {
-          setIsOpen(false);
-          form.reset();
-        },
-      }
-    );
-  };
-
-  const hasAvailableSeats = seatUsage.used < seatUsage.total;
-
+export function InviteMemberModal({ teamId, seatUsage }: InviteMemberModalProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button disabled={!hasAvailableSeats}>
-          <UserPlus className="mr-2 h-4 w-4" />
-          Invite Member
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Invite Team Member</DialogTitle>
-          <DialogDescription>
-            Send an invitation to join your team. They'll receive an email with instructions.
-          </DialogDescription>
-        </DialogHeader>
+    <InviteMemberModalHeadless teamId={teamId} seatUsage={seatUsage}>
+      {({ isOpen, open, close, seatUsage: usage, formProps }) => {
+        const hasAvailableSeats = usage.used < usage.total;
+        return (
+          <Dialog open={isOpen} onOpenChange={(v) => (v ? open() : close())}>
+            <DialogTrigger asChild>
+              <Button disabled={!hasAvailableSeats}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Invite Member
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Invite Team Member</DialogTitle>
+                <DialogDescription>
+                  Send an invitation to join your team. They'll receive an email with instructions.
+                </DialogDescription>
+              </DialogHeader>
 
-        {/* Seat Usage Indicator */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span>Seat Usage</span>
-            <span>
-              {seatUsage.used}/{seatUsage.total} seats used
-            </span>
-          </div>
-          <Progress value={seatUsage.percentage} className="h-2" />
-          {!hasAvailableSeats && (
-            <Alert variant="destructive">
-              <AlertDescription>
-                You've reached your seat limit. Upgrade your plan or remove inactive members to invite
-                more.
-              </AlertDescription>
-            </Alert>
-          )}
-        </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Seat Usage</span>
+                  <span>
+                    {usage.used}/{usage.total} seats used
+                  </span>
+                </div>
+                <Progress value={usage.percentage} className="h-2" />
+                {!hasAvailableSeats && (
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      You've reached your seat limit. Upgrade your plan or remove inactive members to invite more.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter email address"
-                      type="email"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Role</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a role" />
-                      </SelectTrigger>
-                    </FormControl>
+              <form onSubmit={formProps.handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Email</label>
+                  <Input
+                    placeholder="Enter email address"
+                    type="email"
+                    value={formProps.email}
+                    onChange={(e) => formProps.setEmail(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Role</label>
+                  <Select value={formProps.role} onValueChange={formProps.setRole}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="admin">Admin</SelectItem>
                       <SelectItem value="member">Member</SelectItem>
                       <SelectItem value="viewer">Viewer</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  {error instanceof Error ? error.message : 'Failed to send invitation'}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isLoading || !hasAvailableSeats}
-              >
-                {isLoading ? 'Sending...' : 'Send Invitation'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+                </div>
+                {formProps.error && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{formProps.error}</AlertDescription>
+                  </Alert>
+                )}
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={close}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={formProps.isSubmitting || !hasAvailableSeats}>
+                    {formProps.isSubmitting ? 'Sending...' : 'Send Invitation'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        );
+      }}
+    </InviteMemberModalHeadless>
   );
 }
