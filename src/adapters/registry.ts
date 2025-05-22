@@ -16,6 +16,7 @@ import { SessionDataProvider } from './session/interfaces';
 import { SsoDataProvider } from './sso/interfaces';
 import { SubscriptionDataProvider } from './subscription/interfaces';
 import { ApiKeyDataProvider } from './api-keys/interfaces';
+import { IWebhookDataProvider } from './webhook/IWebhookDataProvider';
 
 
 /**
@@ -75,6 +76,11 @@ export interface AdapterFactory {
    * Create an API key data provider
    */
   createApiKeyProvider(): ApiKeyDataProvider;
+
+  /**
+   * Create a webhook data provider
+   */
+  createWebhookProvider?(): IWebhookDataProvider;
 }
 
 /**
