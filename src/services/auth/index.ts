@@ -7,6 +7,8 @@
 
 import { AuthService } from '@/core/auth/interfaces';
 import { DefaultAuthService } from './default-auth.service';
+import type { AxiosInstance } from 'axios';
+import type { AuthDataProvider } from '@/adapters/auth/interfaces';
 
 /**
  * Configuration options for creating an AuthService
@@ -15,12 +17,12 @@ export interface AuthServiceConfig {
   /**
    * API client for making HTTP requests
    */
-  apiClient: any; // This would be replaced with a proper API client interface
+  apiClient: AxiosInstance;
   
   /**
    * Auth data provider for database operations
    */
-  authDataProvider: any; // This would be replaced with a proper auth data provider interface
+  authDataProvider: AuthDataProvider;
 }
 
 /**
