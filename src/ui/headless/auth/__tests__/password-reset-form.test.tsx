@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, act } from '@testing-library/react';
-import { LoginForm } from '../LoginForm';
+import { PasswordResetForm } from '../PasswordResetForm';
 import { useAuth } from '@/hooks/auth/useAuth';
 
 vi.mock('@/hooks/auth/useAuth', () => ({
@@ -9,21 +9,22 @@ vi.mock('@/hooks/auth/useAuth', () => ({
 }));
 
 function setupAuth(overrides: Record<string, any> = {}) {
-  const mockLogin = vi.fn().mockResolvedValue({ success: true });
+  const mockResetPassword = vi.fn().mockResolvedValue({ success: true });
   (useAuth as any).mockReturnValue({
-    login: mockLogin,
+    resetPassword: mockResetPassword,
     isLoading: false,
     error: null,
+    successMessage: null,
     ...overrides,
   });
-  return { mockLogin };
+  return { mockResetPassword };
 }
 
-describe('LoginForm (headless)', () => {
+describe('PasswordResetForm', () => {
   let props: any;
   const renderForm = (p = {}) =>
     render(
-      <LoginForm
+      <PasswordResetForm
         {...p}
         render={(rp) => {
           props = rp;
@@ -36,39 +37,37 @@ describe('LoginForm (headless)', () => {
     vi.clearAllMocks();
   });
 
-  it('calls login with form values', async () => {
-    const { mockLogin } = setupAuth();
+  it('submits email and calls resetPassword', async () => {
+    const { mockResetPassword } = setupAuth();
     renderForm();
-
     act(() => {
       props.setEmailValue('user@example.com');
-      props.setPasswordValue('pass');
     });
-
     await act(async () => {
       await props.handleSubmit({ preventDefault() {} } as any);
     });
-
-    expect(mockLogin).toHaveBeenCalledWith({
-      email: 'user@example.com',
-      password: 'pass',
-      rememberMe: false,
-    });
+    expect(mockResetPassword).toHaveBeenCalledWith('user@example.com');
+    expect(props.isSuccess).toBe(true);
   });
 
-  it('validates email format', async () => {
-    setupAuth();
+  it('validates email before submitting', async () => {
+    const { mockResetPassword } = setupAuth();
     renderForm();
-
     act(() => {
       props.setEmailValue('bad');
-      props.setPasswordValue('pass');
     });
-
     await act(async () => {
       await props.handleSubmit({ preventDefault() {} } as any);
     });
-
+    expect(mockResetPassword).not.toHaveBeenCalled();
     expect(props.errors.email).toBeDefined();
+  });
+
+  it('uses external state props', () => {
+    setupAuth();
+    renderForm({ error: 'e', successMessage: 'ok', isLoading: true });
+    expect(props.errors.form).toBe('e');
+    expect(props.successMessage).toBe('ok');
+    expect(props.isSubmitting).toBe(true);
   });
 });
