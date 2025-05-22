@@ -1,15 +1,10 @@
-import { z } from 'zod';
 import { NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/database/supabase';
 import { triggerWebhook } from '@/lib/webhooks/triggerWebhook';
+import { getApiSsoService } from '@/lib/api/sso/factory';
+import { ssoProviderSchema } from '@/core/sso/models';
 
 // Zod schema for SSO provider config
-const SsoProviderSchema = z.object({
-  organizationId: z.string().uuid(),
-  providerType: z.enum(['saml', 'oidc']),
-  providerName: z.string().min(1),
-  config: z.record(z.any()), // Accept any config fields, store as JSONB
-});
+const SsoProviderSchema = ssoProviderSchema;
 
 // GET: List all active SSO providers for an org (orgId via query param)
 export async function GET(request: Request) {
@@ -18,16 +13,16 @@ export async function GET(request: Request) {
   if (!orgId) {
     return NextResponse.json({ error: 'organizationId is required' }, { status: 400 });
   }
-  const supabase = getServiceSupabase();
-  const { data, error } = await supabase
-    .from('sso_providers')
-    .select('*')
-    .eq('organization_id', orgId)
-    .eq('is_active', true);
-  if (error) {
-    return NextResponse.json({ error: 'Failed to fetch SSO providers' }, { status: 500 });
+  const ssoService = getApiSsoService();
+  try {
+    const providers = await ssoService.getProviders(orgId);
+    return NextResponse.json({ providers });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: 'Failed to fetch SSO providers' },
+      { status: 500 }
+    );
   }
-  return NextResponse.json({ providers: data });
 }
 
 // POST: Upsert SSO provider config for an org
@@ -38,21 +33,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid input', details: parse.error.format() }, { status: 400 });
   }
   const { organizationId, providerType, providerName, config } = parse.data;
-  const supabase = getServiceSupabase();
-  // Upsert by org+type+name (one provider of each type/name per org)
-  const { data, error } = await supabase
-    .from('sso_providers')
-    .upsert({
-      organization_id: organizationId,
-      provider_type: providerType,
-      provider_name: providerName,
+  const ssoService = getApiSsoService();
+  let provider;
+  try {
+    provider = await ssoService.upsertProvider({
+      organizationId,
+      providerType,
+      providerName,
       config,
-      is_active: true,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'organization_id,provider_type,provider_name' })
-    .select()
-    .maybeSingle();
-  if (error) {
+    });
+  } catch (error: any) {
     return NextResponse.json({ error: 'Failed to upsert SSO provider' }, { status: 500 });
   }
   // Trigger webhook for SSO provider update
@@ -64,5 +54,5 @@ export async function POST(request: Request) {
     timestamp: new Date().toISOString(),
     action: 'updated',
   });
-  return NextResponse.json({ provider: data });
-} 
+  return NextResponse.json({ provider, success: true });
+}

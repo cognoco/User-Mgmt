@@ -10,8 +10,13 @@ export * from './auth';
 export * from './user';
 export * from './team';
 export * from './permission';
+export * from './sso';
+export * from './api-keys';
 export * from './notification';
 export * from './session';
+export * from './subscription';
+export * from './csrf';
+
 
 // Import and register the Supabase adapter factory by default
 import { AdapterRegistry } from './registry';

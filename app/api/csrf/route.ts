@@ -1,18 +1,15 @@
 import { NextResponse } from 'next/server';
-import { randomBytes } from 'crypto';
+import { getApiCsrfService } from '@/lib/api/csrf/factory';
 
 // Configuration (consider moving to a shared config if used elsewhere)
 const cookieName = 'csrf-token';
 const secure = process.env.NODE_ENV === 'production';
 const sameSite = 'strict';
 
-function generateToken(): string {
-  return randomBytes(32).toString('hex');
-}
-
 export async function GET() {
   try {
-    const token = generateToken();
+    const csrfService = getApiCsrfService();
+    const { token } = await csrfService.generateToken();
     const response = NextResponse.json({ csrfToken: token }, { status: 200 });
 
     // Set the HttpOnly cookie
