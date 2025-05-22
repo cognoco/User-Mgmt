@@ -3,16 +3,12 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, Mock } from 'vitest';
 import { MFAManagementSection } from '../MFAManagementSection';
-import { api } from '@/lib/api/axios';
 
 // Mock useAuth hook globally
-vi.mock('@/hooks/auth/use-auth', () => ({
+vi.mock('@/hooks/auth/useAuth', () => ({
   useAuth: vi.fn()
 }));
-import { useAuth } from '@/hooks/auth/use-auth';
-
-// Mock API globally
-vi.mock('@/lib/api/axios');
+import { useAuth } from '@/hooks/auth/useAuth';
 
 const mockUserBase = {
   id: 'user-123',
@@ -54,18 +50,18 @@ describe('MFAManagementSection', () => {
   });
 
   it('removes a factor and shows success', async () => {
+    const disableMock = vi.fn().mockResolvedValue({ success: true, message: 'ok' });
     (useAuth as unknown as Mock).mockReturnValue({
-      user: {
-        ...mockUserBase,
-        user_metadata: {
-          mfaMethods: ['sms'],
-          mfaSmsVerified: true,
-          mfaPhone: '+1234567890',
-          backupCodes: ['111', '222', '333']
-        }
-      }
+      user: { ...mockUserBase },
+      getUserMFAMethods: vi.fn().mockResolvedValue([
+        { id: 'sms1', type: 'sms', name: 'sms', isEnabled: true, createdAt: new Date() }
+      ]),
+      getAvailableMFAMethods: vi.fn().mockResolvedValue([]),
+      disableMFAMethod: disableMock,
+      regenerateMFABackupCodes: vi.fn(),
+      isLoading: false,
+      error: null
     });
-    (api.post as Mock).mockResolvedValueOnce({});
     render(<MFAManagementSection />);
     // Click remove button
     await act(async () => {
@@ -76,24 +72,24 @@ describe('MFAManagementSection', () => {
       await userEvent.click(screen.getAllByRole('button', { name: /remove/i })[1]);
     });
     await waitFor(() => {
-      expect(api.post).toHaveBeenCalledWith('/api/2fa/disable', { method: 'sms' });
+      expect(disableMock).toHaveBeenCalledWith('sms1');
       expect(screen.getByText(/success/i)).toBeInTheDocument();
     });
   });
 
   it('shows error alert if API fails to remove factor', async () => {
+    const disableMock = vi.fn().mockResolvedValue({ success: false, error: 'Failed to remove' });
     (useAuth as unknown as Mock).mockReturnValue({
-      user: {
-        ...mockUserBase,
-        user_metadata: {
-          mfaMethods: ['sms'],
-          mfaSmsVerified: true,
-          mfaPhone: '+1234567890',
-          backupCodes: ['111', '222', '333']
-        }
-      }
+      user: { ...mockUserBase },
+      getUserMFAMethods: vi.fn().mockResolvedValue([
+        { id: 'sms1', type: 'sms', name: 'sms', isEnabled: true, createdAt: new Date() }
+      ]),
+      getAvailableMFAMethods: vi.fn().mockResolvedValue([]),
+      disableMFAMethod: disableMock,
+      regenerateMFABackupCodes: vi.fn(),
+      isLoading: false,
+      error: null
     });
-    (api.post as Mock).mockRejectedValueOnce({ response: { data: { error: 'Failed to remove' } } });
     render(<MFAManagementSection />);
     // Click remove button
     await act(async () => {
@@ -104,23 +100,24 @@ describe('MFAManagementSection', () => {
       await userEvent.click(screen.getAllByRole('button', { name: /remove/i })[1]);
     });
     await waitFor(() => {
-      expect(api.post).toHaveBeenCalledWith('/api/2fa/disable', { method: 'sms' });
+      expect(disableMock).toHaveBeenCalledWith('sms1');
       expect(screen.getByRole('alert')).toHaveTextContent(/failed to remove/i);
     });
   });
 
   it('shows success alert when factor is removed', async () => {
+    const disableMock = vi.fn().mockResolvedValue({ success: true });
     (useAuth as unknown as Mock).mockReturnValue({
-      user: {
-        ...mockUserBase,
-        user_metadata: {
-          mfaMethods: ['totp'],
-          totpEnabled: true,
-          backupCodes: ['111', '222', '333']
-        }
-      }
+      user: { ...mockUserBase },
+      getUserMFAMethods: vi.fn().mockResolvedValue([
+        { id: 'totp1', type: 'totp', name: 'totp', isEnabled: true, createdAt: new Date() }
+      ]),
+      getAvailableMFAMethods: vi.fn().mockResolvedValue([]),
+      disableMFAMethod: disableMock,
+      regenerateMFABackupCodes: vi.fn(),
+      isLoading: false,
+      error: null
     });
-    (api.post as Mock).mockResolvedValueOnce({});
     render(<MFAManagementSection />);
     // Click remove button
     await act(async () => {
@@ -131,6 +128,7 @@ describe('MFAManagementSection', () => {
       await userEvent.click(screen.getAllByRole('button', { name: /remove/i })[1]);
     });
     await waitFor(() => {
+      expect(disableMock).toHaveBeenCalledWith('totp1');
       expect(screen.getByText(/success/i)).toBeInTheDocument();
     });
   });
