@@ -1,24 +1,13 @@
-/**
- * API Key Service Interface
- *
- * Defines the contract for API key management operations.
- */
-
-import { ApiKey, ApiKeyCreatePayload, ApiKeyCreateResult } from './models';
+import type { ApiKey } from './types';
 
 export interface ApiKeyService {
-  /**
-   * Get all API keys for a user.
-   */
-  listKeys(userId: string): Promise<ApiKey[]>;
-
-  /**
-   * Create a new API key for a user.
-   */
-  createKey(userId: string, data: ApiKeyCreatePayload): Promise<ApiKeyCreateResult>;
-
-  /**
-   * Revoke an existing API key.
-   */
-  revokeKey(userId: string, keyId: string): Promise<{ success: boolean; error?: string }>;
+  listApiKeys(): Promise<ApiKey[]>;
+  createApiKey(
+    name: string,
+    permissions: string[],
+    expiresInDays?: number
+  ): Promise<{ key: string } & ApiKey>;
+  revokeApiKey(id: string): Promise<void>;
+  regenerateApiKey(id: string): Promise<{ key: string } & ApiKey>;
+  validateApiKey(apiKey: string): Promise<boolean>;
 }
