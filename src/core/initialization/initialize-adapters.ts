@@ -10,6 +10,7 @@ import { DefaultAuthService } from '@/services/auth/default-auth-service';
 import { DefaultUserService } from '@/services/user/default-user-service';
 import { DefaultTeamService } from '@/services/team/default-team-service';
 import { DefaultPermissionService } from '@/services/permission/default-permission-service';
+import { DefaultSsoService } from '@/services/sso/default-sso.service';
 import { UserManagementConfiguration } from '@/core/config';
 import { isServer } from '../platform';
 
@@ -72,23 +73,27 @@ export function initializeAdapters(
     const userAdapter = factory.createUserProvider();
     const teamAdapter = factory.createTeamProvider();
     const permissionAdapter = factory.createPermissionProvider();
+    const ssoAdapter = factory.createSsoProvider();
     
     // Create service instances with the adapters
     const authService = new DefaultAuthService(authAdapter);
     const userService = new DefaultUserService(userAdapter);
     const teamService = new DefaultTeamService(teamAdapter);
     const permissionService = new DefaultPermissionService(permissionAdapter);
+    const ssoService = new DefaultSsoService(ssoAdapter);
     
     return {
       authService,
       userService,
       teamService,
       permissionService,
+      ssoService,
       adapters: {
         authAdapter,
         userAdapter,
         teamAdapter,
-        permissionAdapter
+        permissionAdapter,
+        ssoAdapter
       }
     };
   } catch (error) {
@@ -114,6 +119,7 @@ export function initializeUserManagement(config = {}, options = {}) {
       userService: services.userService,
       teamService: services.teamService,
       permissionService: services.permissionService,
+      ssoService: services.ssoService,
       ...options.serviceProviders
     },
     options: {

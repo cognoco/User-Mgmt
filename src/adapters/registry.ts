@@ -11,6 +11,7 @@ import { AuthDataProvider } from './auth/interfaces';
 import { UserDataProvider } from './user/interfaces';
 import { TeamDataProvider } from './team/interfaces';
 import { PermissionDataProvider } from './permission/interfaces';
+import { SsoDataProvider } from './sso/interfaces';
 
 /**
  * Interface for adapter factory options
@@ -43,6 +44,11 @@ export interface AdapterFactory {
    * Create a permission data provider
    */
   createPermissionProvider(): PermissionDataProvider;
+
+  /**
+   * Create an SSO data provider
+   */
+  createSsoProvider(): SsoDataProvider;
 }
 
 /**
