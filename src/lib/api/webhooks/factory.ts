@@ -5,20 +5,20 @@
  * It ensures consistent configuration and dependency injection across all API endpoints.
  */
 
-import { WebhookService } from '@/core/webhook/interfaces';
+import { IWebhookService } from '@/core/webhooks';
 import { UserManagementConfiguration } from '@/core/config';
 import { createWebhookProvider } from '@/adapters/webhook/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
 // Singleton instance for API routes
-let webhookServiceInstance: WebhookService | null = null;
+let webhookServiceInstance: IWebhookService | null = null;
 
 /**
  * Get the configured webhook service instance for API routes
  * 
- * @returns Configured WebhookService instance
+ * @returns Configured IWebhookService instance
  */
-export function getApiWebhookService(): WebhookService {
+export function getApiWebhookService(): IWebhookService {
   if (!webhookServiceInstance) {
     // Get Supabase configuration from the existing service
     const supabase = getServiceSupabase();
@@ -33,7 +33,7 @@ export function getApiWebhookService(): WebhookService {
     });
     
     // Create webhook service with the data provider
-    webhookServiceInstance = UserManagementConfiguration.getServiceProvider('webhookService') as WebhookService;
+    webhookServiceInstance = UserManagementConfiguration.getServiceProvider('webhookService') as IWebhookService;
     
     // If no webhook service is registered, throw an error
     if (!webhookServiceInstance) {
