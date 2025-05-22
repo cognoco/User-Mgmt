@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { getServiceSupabase } from '@/lib/database/supabase';
 import { getSessionTimeout, getMaxSessionsPerUser } from '@/lib/security/security-policy.service';
+import { createSessionProvider } from '@/adapters/session/factory';
 
 /**
  * API route to enforce session policies
@@ -12,8 +12,14 @@ import { getSessionTimeout, getMaxSessionsPerUser } from '@/lib/security/securit
 export async function POST(req: NextRequest) {
   const res = NextResponse.next();
   
-  // Create service client (admin rights)
-  const supabaseService = getServiceSupabase();
+  // Create session provider using service role credentials
+  const sessionProvider = createSessionProvider({
+    type: 'supabase',
+    options: {
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    }
+  });
   
   // Create user client (cookies)
   const supabase = createServerClient(
@@ -50,7 +56,7 @@ export async function POST(req: NextRequest) {
     
     if (timeoutMinutes > 0) {
       // Get all sessions for this user
-      const { data: sessions } = await supabaseService.auth.admin.listUserSessions(user.id);
+      const sessions = await sessionProvider.listUserSessions(user.id);
       
       if (sessions && sessions.length > 0) {
         const currentTime = Date.now();
@@ -63,7 +69,7 @@ export async function POST(req: NextRequest) {
           const lastActivity = new Date(session.user_metadata.last_activity).getTime();
           if (currentTime - lastActivity > timeoutMs) {
             // This session has exceeded the timeout
-            await supabaseService.auth.admin.deleteSession(session.id);
+            await sessionProvider.deleteUserSession(user.id, session.id);
           }
         }
       }
@@ -74,7 +80,7 @@ export async function POST(req: NextRequest) {
     
     if (maxSessions > 0) {
       // Get all sessions for this user
-      const { data: sessions } = await supabaseService.auth.admin.listUserSessions(user.id);
+      const sessions = await sessionProvider.listUserSessions(user.id);
       
       if (sessions && sessions.length > maxSessions) {
         // Sort sessions by last activity (oldest first)
@@ -102,7 +108,7 @@ export async function POST(req: NextRequest) {
           if (removedCount >= sessionsToRemove) break;
           
           if (session.id !== currentSessionId) {
-            await supabaseService.auth.admin.deleteSession(session.id);
+            await sessionProvider.deleteUserSession(user.id, session.id);
             removedCount++;
           }
         }
