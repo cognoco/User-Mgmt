@@ -44,12 +44,20 @@ vi.mock('@/hooks/auth/useAuth', () => ({
 vi.mock('@/ui/primitives/use-toast', () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
+vi.mock('@/components/ui/textarea', () => ({
+  Textarea: (props: any) => <textarea {...props} />,
+}));
 
 describe('ProfileForm component', () => {
   it('renders with auth hook data', () => {
     render(<ProfileForm />);
     
     // Verify the component renders with the email from the auth hook
+    expect(screen.getByText('user@example.com')).toBeInTheDocument();
+  });
+
+  it('displays the current user\'s email from the auth hook', () => {
+    render(<ProfileForm />);
     expect(screen.getByText('user@example.com')).toBeInTheDocument();
   });
 });
