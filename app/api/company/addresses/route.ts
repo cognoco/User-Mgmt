@@ -1,22 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { addressCreateSchema } from '@/core/address/models';
+import { createSupabaseAddressProvider } from '@/adapters/address/factory';
 
-// Address Schema
-const AddressSchema = z.object({
-  type: z.enum(['billing', 'shipping', 'legal']),
-  street_line1: z.string().min(1).max(100),
-  street_line2: z.string().max(100).optional(),
-  city: z.string().min(1).max(100),
-  state: z.string().min(1).max(100),
-  postal_code: z.string().min(1).max(20),
-  country: z.string().min(2).max(2), // ISO 2-letter country code
-  is_primary: z.boolean().optional().default(false),
-  validated: z.boolean().optional().default(false)
-});
-
-type AddressRequest = z.infer<typeof AddressSchema>;
+import { z } from 'zod';
+type AddressRequest = z.infer<typeof addressCreateSchema>;
 
 export async function POST(request: NextRequest) {
   // 1. Rate Limiting
@@ -59,7 +48,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
     }
 
-    const parseResult = AddressSchema.safeParse(body);
+    const parseResult = addressCreateSchema.safeParse(body);
     if (!parseResult.success) {
       return NextResponse.json({ 
         error: 'Validation failed', 
@@ -67,32 +56,22 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // 5. If setting as primary, unset other primary addresses of same type
-    if (parseResult.data.is_primary) {
-      await supabaseService
-        .from('company_addresses')
-        .update({ is_primary: false })
-        .eq('company_id', companyProfile.id)
-        .eq('type', parseResult.data.type);
-    }
+    const addressProvider = createSupabaseAddressProvider(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    );
 
-    // 6. Create Address
-    const { data: address, error: createError } = await supabaseService
-      .from('company_addresses')
-      .insert({
-        ...parseResult.data,
-        company_id: companyProfile.id,
-        validated: parseResult.data.validated ?? false
-      })
-      .select()
-      .single();
+    const result = await addressProvider.createAddress(
+      companyProfile.id,
+      parseResult.data
+    );
 
-    if (createError) {
-      console.error('Error creating address:', createError);
+    if (!result.success) {
+      console.error('Error creating address:', result.error);
       return NextResponse.json({ error: 'Failed to create address' }, { status: 500 });
     }
 
-    return NextResponse.json(address);
+    return NextResponse.json(result.address);
 
   } catch (error) {
     console.error('Unexpected error in POST /api/company/addresses:', error);
@@ -133,17 +112,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Company profile not found' }, { status: 404 });
     }
 
-    // 4. Get Addresses
-    const { data: addresses, error: addressesError } = await supabaseService
-      .from('company_addresses')
-      .select('*')
-      .eq('company_id', companyProfile.id)
-      .order('created_at', { ascending: false });
+    const addressProvider = createSupabaseAddressProvider(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    );
 
-    if (addressesError) {
-      console.error('Error fetching addresses:', addressesError);
-      return NextResponse.json({ error: 'Failed to fetch addresses' }, { status: 500 });
-    }
+    const addresses = await addressProvider.getAddresses(companyProfile.id);
 
     return NextResponse.json(addresses);
 

@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { getCurrentUser } from '@/lib/auth/session';
-import { generateApiKey } from '@/lib/api-keys/api-key-utils';
+import { createSupabaseApiKeyProvider } from '@/adapters/api-keys/factory';
 
 // Zod schema for API key creation
 const CreateApiKeySchema = z.object({
@@ -28,22 +27,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get Supabase instance
-    const supabase = getServiceSupabase();
+    const provider = createSupabaseApiKeyProvider({
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
+    });
 
-    // Fetch API keys for the user (excluding the actual key hash)
-    const { data: apiKeys, error } = await supabase
-      .from('api_keys')
-      .select('id, name, prefix, scopes, expires_at, last_used_at, created_at, is_revoked')
-      .eq('user_id', user.id)
-      .eq('is_revoked', false);
+    const keys = await provider.listKeys(user.id);
 
-    if (error) {
-      console.error('Error fetching API keys:', error);
-      return NextResponse.json({ error: 'Failed to fetch API keys' }, { status: 500 });
-    }
-
-    return NextResponse.json({ keys: apiKeys });
+    return NextResponse.json({ keys });
   } catch (error) {
     console.error('Unexpected error in API keys GET:', error);
     return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
@@ -88,31 +79,19 @@ export async function POST(request: NextRequest) {
 
     const { name, scopes, expiresAt } = parseResult.data;
 
-    // Generate API key
-    const { key, hashedKey, prefix } = generateApiKey();
+    const provider = createSupabaseApiKeyProvider({
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
+    });
 
-    // Insert API key into database
-    const supabase = getServiceSupabase();
-    const { data, error } = await supabase
-      .from('api_keys')
-      .insert({
-        user_id: user.id,
-        name,
-        key_hash: hashedKey,
-        prefix,
-        scopes,
-        expires_at: expiresAt,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        is_revoked: false
-      })
-      .select('id, name, prefix, scopes, expires_at, created_at')
-      .single();
+    const result = await provider.createKey(user.id, { name, scopes, expiresAt });
 
-    if (error) {
-      console.error('Error creating API key:', error);
+    if (!result.success || !result.key) {
+      console.error('Error creating API key:', result.error);
       return NextResponse.json({ error: 'Failed to create API key' }, { status: 500 });
     }
+    const data = result.key;
+    const key = result.plaintext;
 
     // Log the action
     await logUserAction({

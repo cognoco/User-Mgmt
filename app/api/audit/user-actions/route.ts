@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { supabase } from '@/lib/supabase';
+import { createAuditProvider } from '@/adapters/audit/factory';
 import { hasPermission } from '@/lib/auth/hasPermission';
 import { middleware } from '@/middleware';
 
@@ -64,61 +64,38 @@ export const GET = middleware(
         }
       }
 
-      // Build query
-      let query = supabase
-        .from('user_actions_log')
-        .select('*', { count: 'exact' })
-        .eq('user_id', targetUserId);
+      const provider = createAuditProvider({
+        type: 'supabase',
+        options: {
+          supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+          supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+        },
+      });
 
-      if (startDate) {
-        query = query.gte('created_at', startDate);
-      }
-      if (endDate) {
-        query = query.lte('created_at', endDate);
-      }
-      if (action) {
-        query = query.eq('action', action);
-      }
-      if (status) {
-        query = query.eq('status', status);
-      }
-      if (resourceType) {
-        query = query.eq('target_resource_type', resourceType);
-      }
-      if (resourceId) {
-        query = query.eq('target_resource_id', resourceId);
-      }
-      if (ipAddress) {
-        query = query.ilike('ip_address', `%${ipAddress}%`);
-      }
-      if (userAgent) {
-        query = query.ilike('user_agent', `%${userAgent}%`);
-      }
-      if (search) {
-        // Free-text search across action, details, error, target_resource_id/type
-        // Supabase/Postgres: use ilike for partial, case-insensitive match
-        query = query.or(`action.ilike.%${search}%,details::text.ilike.%${search}%,error.ilike.%${search}%,target_resource_id.ilike.%${search}%,target_resource_type.ilike.%${search}%`);
-      }
-
-      // Sorting and pagination
-      query = query
-        .order(sortBy, { ascending: sortOrder === 'asc' })
-        .range((page - 1) * limit, page * limit - 1);
-
-      // Execute query
-      const { data: logs, error, count } = await query;
-      if (error) {
-        console.error('Error fetching user action logs:', error);
-        return NextResponse.json({ error: 'Failed to fetch user action logs' }, { status: 500 });
-      }
+      const { logs, count } = await provider.getUserActionLogs({
+        page,
+        limit,
+        userId: targetUserId,
+        action,
+        status,
+        resourceType,
+        resourceId,
+        startDate,
+        endDate,
+        ipAddress,
+        userAgent,
+        search,
+        sortBy,
+        sortOrder,
+      });
 
       return NextResponse.json({
         logs,
         pagination: {
           page,
           limit,
-          total: count || 0,
-          totalPages: count ? Math.ceil(count / limit) : 0,
+          total: count,
+          totalPages: Math.ceil(count / limit),
         },
       });
     } catch (error) {
