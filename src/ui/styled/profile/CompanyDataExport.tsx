@@ -12,6 +12,9 @@ export default function CompanyDataExport() {
             <CardTitle>Export Company Data</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <p className="text-sm text-gray-600 mb-4">
+              Download a copy of your company profile, team members, roles, and activity logs. This export is provided in JSON format for compliance, backup, or migration needs. Only company admins can access this export.
+            </p>
             {error && (
               <Alert variant="destructive" role="alert">
                 <AlertDescription>{error}</AlertDescription>
