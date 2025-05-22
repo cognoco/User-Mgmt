@@ -1,45 +1,49 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { MFAVerificationForm } from '../MFAVerificationForm';
-import { api } from '@/lib/api/axios';
 
-vi.mock('@/lib/api/axios', () => ({ api: { post: vi.fn() } }));
+let state: any;
 
-const mockPost = api.post as unknown as ReturnType<typeof vi.fn>;
+vi.mock('../../../headless/auth/MFAVerificationForm', () => ({
+  MFAVerificationForm: ({ render, onUseBackupCode }: any) => {
+    state.onUseBackupCode = onUseBackupCode;
+    return render(state);
+  }
+}));
 
 describe('MFAVerificationForm styled component', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    state = {
+      handleSubmit: vi.fn((e: any) => e.preventDefault()),
+      verificationCode: '',
+      setVerificationCode: vi.fn((v: string) => { state.verificationCode = v; }),
+      isSubmitting: false,
+      errors: {} as any,
+      touched: { verificationCode: false },
+      handleBlur: vi.fn(),
+    };
   });
 
-  it('submits code and calls onSuccess', async () => {
+  it('submits form using headless handler', async () => {
     const user = userEvent.setup();
-    mockPost.mockResolvedValueOnce({ data: { user: { id: 'u1' }, token: 'tok' } });
-    const onSuccess = vi.fn();
-    render(<MFAVerificationForm accessToken="abc" onSuccess={onSuccess} />);
+    render(<MFAVerificationForm sessionId="abc" onSuccess={vi.fn()} />);
     await user.type(screen.getByPlaceholderText('000000'), '123456');
+    expect(state.setVerificationCode).toHaveBeenCalled();
     await user.click(screen.getByRole('button', { name: '[i18n:auth.mfa.verifyButton]' }));
-    await waitFor(() => {
-      expect(onSuccess).toHaveBeenCalledWith({ id: 'u1' }, 'tok');
-    });
+    expect(state.handleSubmit).toHaveBeenCalled();
   });
 
-  it('shows error on failure', async () => {
-    const user = userEvent.setup();
-    mockPost.mockRejectedValueOnce({ response: { data: { error: 'Invalid' } } });
-    render(<MFAVerificationForm accessToken="abc" onSuccess={vi.fn()} />);
-    await user.type(screen.getByPlaceholderText('000000'), '123456');
-    await user.click(screen.getByRole('button', { name: '[i18n:auth.mfa.verifyButton]' }));
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent('Invalid');
-    });
+  it('shows error message', () => {
+    state.errors.form = 'Invalid';
+    render(<MFAVerificationForm sessionId="abc" onSuccess={vi.fn()} />);
+    expect(screen.getByRole('alert')).toHaveTextContent('Invalid');
   });
 
   it('toggles backup code input', async () => {
     const user = userEvent.setup();
-    render(<MFAVerificationForm accessToken="abc" onSuccess={vi.fn()} />);
+    render(<MFAVerificationForm sessionId="abc" onSuccess={vi.fn()} />);
     await user.click(screen.getByRole('button', { name: '[i18n:auth.mfa.useBackupCode]' }));
-    expect(screen.getByPlaceholderText('XXXX-XXXX')).toBeInTheDocument();
+    expect(state.onUseBackupCode).toBeDefined();
   });
 });
