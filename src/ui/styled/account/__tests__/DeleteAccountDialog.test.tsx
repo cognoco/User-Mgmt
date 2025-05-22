@@ -6,7 +6,7 @@ import { useDeleteAccount } from '@/hooks/user/useDeleteAccount';
 import { act } from 'react';
 
 // Mock the custom hook
-vi.mock('@/hooks/useDeleteAccount');
+vi.mock('@/hooks/user/useDeleteAccount');
 
 describe('DeleteAccountDialog', () => {
   let handleClose: ReturnType<typeof vi.fn>;
