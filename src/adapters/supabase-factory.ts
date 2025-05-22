@@ -5,11 +5,13 @@
  * It provides methods to create Supabase adapter instances for different data providers.
  */
 
+
 import { AdapterFactory, AdapterFactoryOptions } from './registry';
 import { AuthDataProvider } from './auth/interfaces';
 import { UserDataProvider } from './user/interfaces';
 import { TeamDataProvider } from './team/interfaces';
 import { PermissionDataProvider } from './permission/interfaces';
+import { SubscriptionDataProvider } from './subscription/interfaces';
 import { ApiKeyDataProvider } from './api-keys/interfaces';
 
 // Import domain-specific factories
@@ -17,6 +19,7 @@ import createSupabaseAuthProvider from './auth/supabase/factory';
 import createSupabaseUserProvider from './user/supabase/factory';
 import createSupabaseTeamProvider from './team/supabase/factory';
 import createSupabasePermissionProvider from './permission/supabase/factory';
+import createSupabaseSubscriptionProvider from './subscription/factory';
 import createSupabaseApiKeyProvider from './api-keys/supabase/factory';
 
 /**
@@ -71,6 +74,13 @@ export class SupabaseAdapterFactory implements AdapterFactory {
    */
   createPermissionProvider(): PermissionDataProvider {
     return createSupabasePermissionProvider(this.options);
+  }
+
+  /**
+   * Create a Supabase subscription provider
+   */
+  createSubscriptionProvider(): SubscriptionDataProvider {
+    return createSupabaseSubscriptionProvider(this.options);
   }
 
   /**

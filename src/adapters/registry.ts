@@ -11,6 +11,7 @@ import { AuthDataProvider } from './auth/interfaces';
 import { UserDataProvider } from './user/interfaces';
 import { TeamDataProvider } from './team/interfaces';
 import { PermissionDataProvider } from './permission/interfaces';
+import { SubscriptionDataProvider } from './subscription/interfaces';
 import { ApiKeyDataProvider } from './api-keys/interfaces';
 
 /**
@@ -39,11 +40,16 @@ export interface AdapterFactory {
    * Create a team data provider
    */
   createTeamProvider(): TeamDataProvider;
-  
+
   /**
    * Create a permission data provider
    */
   createPermissionProvider(): PermissionDataProvider;
+
+  /**
+   * Create a subscription data provider
+   */
+  createSubscriptionProvider(): SubscriptionDataProvider;
 
   /**
    * Create an API key data provider
