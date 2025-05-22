@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { Calendar } from '@/ui/primitives/calendar';
-import { Button } from '@/ui/primitives/button';
-import { Input } from '@/ui/primitives/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/primitives/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -14,28 +12,29 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/ui/primitives/table';
+} from '@/components/ui/table';
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
   PaginationNext,
   PaginationPrevious,
-} from '@/ui/primitives/pagination';
-import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
-import { Badge } from '@/ui/primitives/badge';
-import { useToast } from '@/ui/primitives/use-toast';
-import { ChevronDown } from 'lucide-react';
+} from '@/components/ui/pagination';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ChevronDown, Copy } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/ui/primitives/dropdown-menu';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/ui/primitives/dialog';
-import { ScrollArea } from '@/ui/primitives/scroll-area';
-import { Copy } from 'lucide-react';
-import * as XLSX from 'xlsx';
+} from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/components/ui/use-toast';
+
+import { HeadlessAuditLogViewer, METHODS, STATUS_CODES, STATUS_BADGE } from '@/ui/headless/audit/AuditLogViewer';
+
 
 interface AuditLog {
   id: string;
@@ -106,156 +105,86 @@ export function AuditLogViewer({ isAdmin = true }: { isAdmin?: boolean }) {
     );
   }
 
-  const { toast } = useToast();
-  const [filters, setFilters] = useState<AuditLogFilters>({
-    page: 1,
-    limit: 20,
-    sortBy: 'timestamp',
-    sortOrder: 'desc',
-    search: '',
-    resourceType: '',
-    resourceId: '',
-    ipAddress: '',
-    userAgent: '',
-  });
-  const [isExporting, setIsExporting] = useState(false);
-  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['auditLogs', filters],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined) {
-          params.append(key, value.toString());
-        }
-      });
-
-      const response = await fetch(`/api/audit/user-actions?${params.toString()}`);
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch audit logs');
-      }
-      return response.json();
-    },
-  });
-
-  const handleFilterChange = (key: keyof AuditLogFilters, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
-  };
-
-  const handlePageChange = (newPage: number) => {
-    setFilters(prev => ({ ...prev, page: newPage }));
-  };
-
-  const handleExport = async (format: 'csv' | 'json' | 'xlsx') => {
-    try {
-      setIsExporting(true);
-      
-      // Build query parameters from current filters
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && !['page', 'limit'].includes(key)) {
-          params.append(key, value.toString());
-        }
-      });
-      // Check if we're simulating an error for testing
-      if (window.location.search.includes('simulateError=1')) {
-        throw new Error('Failed to fetch audit logs');
-      }
-      
-      if (format === 'xlsx') {
-        // Fetch all filtered logs (not just current page)
-        params.set('page', '1');
-        params.set('limit', '1000'); // Adjust as needed for max export size
-        const response = await fetch(`/api/audit/user-actions?${params.toString()}`);
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Failed to export audit logs');
-        }
-        const { logs } = await response.json();
-        const worksheet = XLSX.utils.json_to_sheet(logs);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Audit Logs');
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'audit-logs.xlsx';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        toast({
-          title: 'Export Successful',
-          description: 'Audit logs have been exported as Excel (.xlsx)',
-        });
-      } else {
-        params.append('format', format);
-        const response = await fetch(`/api/audit/user-actions/export?${params.toString()}`);
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Failed to export audit logs');
-        }
-        // Create blob and download
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `audit-logs-${format === 'csv' ? 'spreadsheet' : 'data'}.${format}`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        toast({
-          title: 'Export Successful',
-          description: `Audit logs have been exported as ${format.toUpperCase()}`,
-        });
-      }
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') { console.error('Export error:', error); }
-      toast({
-        title: 'Export Failed',
-        description: error instanceof Error ? error.message : 'Failed to export audit logs',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  const handleRowClick = (log: AuditLog) => {
-    setSelectedLog(log);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedLog(null);
-  };
-
-  const handleCopyJson = useCallback(() => {
-    if (selectedLog) {
-      navigator.clipboard.writeText(JSON.stringify(selectedLog, null, 2));
-      toast({ title: 'Copied', description: 'Log JSON copied to clipboard.' });
-    }
-  }, [selectedLog, toast]);
-
-  if (error) {
-    if (process.env.NODE_ENV === 'development') { console.error('Error:', error); }
-    toast({
-      title: 'Error',
-      description: error instanceof Error ? error.message : 'Failed to fetch audit logs',
-      variant: 'destructive',
-    });
-  }
-
   return (
-    <>
-      <Card className="w-full">
-        <CardHeader className="flex flex-row items-center justify-between">
+    <HeadlessAuditLogViewer isAdmin={isAdmin}>
+      {({
+        filters,
+        isExporting,
+        selectedLog,
+        isModalOpen,
+        data,
+        isLoading,
+        error,
+        handleFilterChange,
+        handlePageChange,
+        handleExport,
+        handleRowClick,
+        handleCloseModal,
+        handleCopyJson
+      }) => (
+        <>
+          <Card className="w-full">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Audit Logs</CardTitle>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    disabled={isExporting}
+                    aria-label="Export options"
+                    role={isExporting ? "status" : undefined}
+                  >
+                    Export <ChevronDown className="ml-2 h-4 w-4" aria-hidden="true" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    disabled={isExporting}
+                    onClick={() => !isExporting && handleExport('csv')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        !isExporting && handleExport('csv');
+                      }
+                    }}
+                    role="menuitem"
+                    tabIndex={0}
+                  >
+                    Export as CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={isExporting}
+                    onClick={() => !isExporting && handleExport('json')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        !isExporting && handleExport('json');
+                      }
+                    }}
+                    role="menuitem"
+                    tabIndex={0}
+                  >
+                    Export as JSON
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={isExporting}
+                    onClick={() => !isExporting && handleExport('xlsx')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        !isExporting && handleExport('xlsx');
+                      }
+                    }}
+                    role="menuitem"
+                    tabIndex={0}
+                  >
+                    Export as Excel
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </CardHeader>
+            <CardContent>
+              {/* Filters */}
           <CardTitle>Audit Logs</CardTitle>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

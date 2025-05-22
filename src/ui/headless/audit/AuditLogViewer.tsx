@@ -271,12 +271,5 @@ export interface HeadlessAuditLogViewerProps extends UseAuditLogViewerProps {
 
 export function HeadlessAuditLogViewer({ isAdmin = true, children }: HeadlessAuditLogViewerProps) {
   const hookResult = useAuditLogViewer({ isAdmin });
-  
-  if (!isAdmin) {
-    return <div className="w-full">
-      <div className="text-red-600 font-semibold">Access denied: Admins only.</div>
-    </div>;
-  }
-  
   return <>{children(hookResult)}</>;
 }
