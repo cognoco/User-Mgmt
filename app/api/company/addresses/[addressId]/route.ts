@@ -2,23 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { addressUpdateSchema } from '@/core/address/models';
+import { createSupabaseAddressProvider } from '@/adapters/address/factory';
 
-// Address Update Schema - more permissive than creation schema
-const AddressUpdateSchema = z.object({
-  type: z.enum(['billing', 'shipping', 'legal']).optional(),
-  street_line1: z.string().min(1).max(100).optional(),
-  street_line2: z.string().max(100).optional(),
-  city: z.string().min(1).max(100).optional(),
-  state: z.string().min(1).max(100).optional(),
-  postal_code: z.string().min(1).max(20).optional(),
-  country: z.string().min(2).max(2).optional(), // ISO 2-letter country code
-  is_primary: z.boolean().optional(),
-  validated: z.boolean().optional()
-}).refine(data => Object.keys(data).length > 0, {
-  message: "At least one field must be provided for update"
-});
-
-type AddressUpdateRequest = z.infer<typeof AddressUpdateSchema>;
+// Use the shared address update schema from the core layer
+type AddressUpdateRequest = z.infer<typeof addressUpdateSchema>;
 
 export async function PUT(
   request: NextRequest,
@@ -56,19 +44,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Company profile not found' }, { status: 404 });
     }
 
-    // 4. Get Existing Address
-    const { data: existingAddress, error: addressError } = await supabaseService
-      .from('company_addresses')
-      .select('*')
-      .eq('id', params.addressId)
-      .eq('company_id', companyProfile.id)
-      .single();
-
-    if (addressError || !existingAddress) {
-      return NextResponse.json({ error: 'Address not found' }, { status: 404 });
-    }
-
-    // 5. Parse and Validate Request Body
+    // 4. Parse and Validate Request Body
     let body: AddressUpdateRequest;
     try {
       body = await request.json();
@@ -76,7 +52,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
     }
 
-    const parseResult = AddressUpdateSchema.safeParse(body);
+    const parseResult = addressUpdateSchema.safeParse(body);
     if (!parseResult.success) {
       return NextResponse.json({ 
         error: 'Validation failed', 
@@ -84,40 +60,23 @@ export async function PUT(
       }, { status: 400 });
     }
 
-    // 6. If setting as primary, unset other primary addresses of same type
-    if (parseResult.data.is_primary) {
-      await supabaseService
-        .from('company_addresses')
-        .update({ is_primary: false })
-        .eq('company_id', companyProfile.id)
-        .eq('type', parseResult.data.type || existingAddress.type)
-        .neq('id', params.addressId);
-    }
+    const addressProvider = createSupabaseAddressProvider(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    );
 
-    // 7. Update Address
-    const updatePayload = {
-      ...parseResult.data,
-      updated_at: new Date().toISOString()
-    };
-    // Delete validated from payload if it wasn't explicitly passed in the request
-    if (!('validated' in parseResult.data)) {
-      delete updatePayload.validated;
-    }
+    const result = await addressProvider.updateAddress(
+      companyProfile.id,
+      params.addressId,
+      parseResult.data
+    );
 
-    const { data: updatedAddress, error: updateError } = await supabaseService
-      .from('company_addresses')
-      .update(updatePayload)
-      .eq('id', params.addressId)
-      .eq('company_id', companyProfile.id)
-      .select()
-      .single();
-
-    if (updateError) {
-      console.error('Error updating address:', updateError);
+    if (!result.success) {
+      console.error('Error updating address:', result.error);
       return NextResponse.json({ error: 'Failed to update address' }, { status: 500 });
     }
 
-    return NextResponse.json(updatedAddress);
+    return NextResponse.json(result.address);
 
   } catch (error) {
     console.error('Unexpected error in PUT /api/company/addresses/[addressId]:', error);
@@ -161,15 +120,18 @@ export async function DELETE(
       return NextResponse.json({ error: 'Company profile not found' }, { status: 404 });
     }
 
-    // 4. Delete Address
-    const { error: deleteError } = await supabaseService
-      .from('company_addresses')
-      .delete()
-      .eq('id', params.addressId)
-      .eq('company_id', companyProfile.id);
+    const addressProvider = createSupabaseAddressProvider(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    );
 
-    if (deleteError) {
-      console.error('Error deleting address:', deleteError);
+    const result = await addressProvider.deleteAddress(
+      companyProfile.id,
+      params.addressId
+    );
+
+    if (!result.success) {
+      console.error('Error deleting address:', result.error);
       return NextResponse.json({ error: 'Failed to delete address' }, { status: 500 });
     }
 

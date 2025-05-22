@@ -2,31 +2,30 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST, GET } from '../route';
 import { getServiceSupabase } from '@/lib/database/supabase';
+import { createSupabaseAddressProvider } from '@/adapters/address/factory';
 
 // Mock Supabase client
 vi.mock('@/lib/database/supabase', () => ({
   getServiceSupabase: vi.fn(() => ({
-    auth: {
-      getUser: vi.fn()
-    },
+    auth: { getUser: vi.fn() },
     from: vi.fn(() => ({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
           single: vi.fn(),
-          order: vi.fn((column: string, { ascending }: { ascending: boolean }) => ({
-            ascending
-          }))
+          order: vi.fn((column: string, { ascending }: { ascending: boolean }) => ({ ascending }))
         }))
-      })),
-      insert: vi.fn(() => ({
-        select: vi.fn(() => ({
-          single: vi.fn()
-        }))
-      })),
-      update: vi.fn(() => ({
-        eq: vi.fn()
       }))
     }))
+  }))
+}));
+
+// Mock address provider factory
+vi.mock('@/adapters/address/factory', () => ({
+  createSupabaseAddressProvider: vi.fn(() => ({
+    createAddress: vi.fn(),
+    getAddresses: vi.fn(),
+    updateAddress: vi.fn(),
+    deleteAddress: vi.fn()
   }))
 }));
 
@@ -68,11 +67,12 @@ describe('Company Addresses API', () => {
   describe('POST /api/company/addresses', () => {
     it('should create a new company address', async () => {
       const supabase = getServiceSupabase();
+      const provider = { createAddress: vi.fn(), getAddresses: vi.fn(), updateAddress: vi.fn(), deleteAddress: vi.fn() };
+      (createSupabaseAddressProvider as any).mockReturnValue(provider);
       (supabase.auth.getUser as any).mockResolvedValue({ data: { user: mockUser }, error: null });
       (supabase.from('company_profiles').select('id').eq('user_id', mockUser.id).single as any)
         .mockResolvedValue({ data: mockCompanyProfile, error: null });
-      (supabase.from('company_addresses').insert().select().single as any)
-        .mockResolvedValue({ data: mockAddress, error: null });
+      (provider.createAddress as any).mockResolvedValue({ success: true, address: mockAddress });
 
       const request = new NextRequest('http://localhost/api/company/addresses', {
         method: 'POST',
@@ -141,11 +141,12 @@ describe('Company Addresses API', () => {
   describe('GET /api/company/addresses', () => {
     it('should return company addresses', async () => {
       const supabase = getServiceSupabase();
+      const provider = { createAddress: vi.fn(), getAddresses: vi.fn(), updateAddress: vi.fn(), deleteAddress: vi.fn() };
+      (createSupabaseAddressProvider as any).mockReturnValue(provider);
       (supabase.auth.getUser as any).mockResolvedValue({ data: { user: mockUser }, error: null });
       (supabase.from('company_profiles').select('id').eq('user_id', mockUser.id).single as any)
         .mockResolvedValue({ data: mockCompanyProfile, error: null });
-      (supabase.from('company_addresses').select('*').eq('company_id', mockCompanyProfile.id).order('created_at', { ascending: false }) as any)
-        .mockResolvedValue({ data: [mockAddress], error: null });
+      (provider.getAddresses as any).mockResolvedValue([mockAddress]);
 
       const request = new NextRequest('http://localhost/api/company/addresses', {
         method: 'GET',
