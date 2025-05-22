@@ -5,20 +5,20 @@
  * It ensures consistent configuration and dependency injection across all API endpoints.
  */
 
-import { AddressService } from '@/core/address/interfaces';
+import { CompanyAddressService } from '@/core/address/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
 import { createAddressProvider } from '@/adapters/address/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
 // Singleton instance for API routes
-let addressServiceInstance: AddressService | null = null;
+let addressServiceInstance: CompanyAddressService | null = null;
 
 /**
  * Get the configured address service instance for API routes
  * 
  * @returns Configured AddressService instance
  */
-export function getApiAddressService(): AddressService {
+export function getApiAddressService(): CompanyAddressService {
   if (!addressServiceInstance) {
     // Get Supabase configuration from the existing service
     const supabase = getServiceSupabase();
@@ -33,7 +33,7 @@ export function getApiAddressService(): AddressService {
     });
     
     // Create address service with the data provider
-    addressServiceInstance = UserManagementConfiguration.getServiceProvider('addressService') as AddressService;
+    addressServiceInstance = UserManagementConfiguration.getServiceProvider('addressService') as CompanyAddressService;
     
     // If no address service is registered, throw an error
     if (!addressServiceInstance) {
