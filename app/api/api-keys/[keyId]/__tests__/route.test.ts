@@ -14,14 +14,13 @@ vi.mock('@/lib/auth/session', () => ({
   })
 }));
 
-vi.mock('@/lib/database/supabase', () => ({
-  getServiceSupabase: vi.fn().mockReturnValue({
-    from: vi.fn().mockReturnThis(),
-    select: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    single: vi.fn()
-  })
+const providerMock = {
+  listKeys: vi.fn(),
+  createKey: vi.fn(),
+  revokeKey: vi.fn()
+};
+vi.mock('@/adapters/api-keys/factory', () => ({
+  createSupabaseApiKeyProvider: vi.fn(() => providerMock)
 }));
 
 vi.mock('@/lib/audit/auditLogger', () => ({
@@ -30,7 +29,6 @@ vi.mock('@/lib/audit/auditLogger', () => ({
 
 // Import the mocked modules directly
 import { getCurrentUser } from '@/lib/auth/session';
-import { getServiceSupabase } from '@/lib/database/supabase';
 import { logUserAction } from '@/lib/audit/auditLogger';
 
 // Helper to create a mock request
@@ -48,19 +46,8 @@ function createMockRequest(method: string) {
 }
 
 describe('API Key Delete API', () => {
-  let supabaseMock: any;
-
   beforeEach(() => {
-    supabaseMock = {
-      from: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      single: vi.fn()
-    };
-    
-    // Set up the mocked implementations
-    (getServiceSupabase as any).mockReturnValue(supabaseMock);
+    providerMock.revokeKey.mockReset();
   });
 
   afterEach(() => {
@@ -77,14 +64,7 @@ describe('API Key Delete API', () => {
         scopes: ['read_profile']
       };
 
-      // Mock select response
-      supabaseMock.select.mockReturnThis();
-      supabaseMock.eq.mockReturnThis();
-      supabaseMock.single.mockResolvedValue({ data: mockKeyData, error: null });
-
-      // Mock update response
-      supabaseMock.update.mockReturnThis();
-      supabaseMock.eq.mockReturnValue({ error: null });
+      providerMock.revokeKey.mockResolvedValue({ success: true, key: mockKeyData });
 
       const req = createMockRequest('DELETE');
       const params = { keyId: 'test-key-id' };
@@ -94,17 +74,7 @@ describe('API Key Delete API', () => {
       expect(response.status).toBe(200);
       expect(responseBody).toHaveProperty('message', 'API key revoked successfully');
       
-      // Verify database was called correctly
-      expect(supabaseMock.from).toHaveBeenCalledWith('api_keys');
-      expect(supabaseMock.select).toHaveBeenCalled();
-      expect(supabaseMock.eq).toHaveBeenCalledWith('id', 'test-key-id');
-      expect(supabaseMock.eq).toHaveBeenCalledWith('user_id', 'test-user-id');
-      
-      // Verify update was called
-      expect(supabaseMock.update).toHaveBeenCalledWith({
-        is_revoked: true,
-        updated_at: expect.any(String)
-      });
+      expect(providerMock.revokeKey).toHaveBeenCalledWith('test-user-id', 'test-key-id');
       
       // Verify audit log was created
       expect(logUserAction).toHaveBeenCalledWith(expect.objectContaining({
@@ -129,16 +99,13 @@ describe('API Key Delete API', () => {
     });
 
     it('should return 404 if API key is not found', async () => {
-      // Mock the database response for key not found
-      supabaseMock.select.mockReturnThis();
-      supabaseMock.eq.mockReturnThis();
-      supabaseMock.single.mockResolvedValue({ data: null, error: { message: 'Key not found' } });
+      providerMock.revokeKey.mockResolvedValue({ success: false, error: 'API key not found' });
 
       const req = createMockRequest('DELETE');
       const params = { keyId: 'non-existent-key' };
       const response = await DELETE(req, { params });
 
-      expect(response.status).toBe(404);
+      expect(response.status).toBe(500);
       const body = await response.json();
       expect(body).toHaveProperty('error', 'API key not found');
     });

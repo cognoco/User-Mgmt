@@ -14,31 +14,22 @@ vi.mock('@/lib/auth/session', () => ({
   })
 }));
 
-vi.mock('@/lib/database/supabase', () => ({
-  getServiceSupabase: vi.fn().mockReturnValue({
-    from: vi.fn().mockReturnThis(),
-    select: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    single: vi.fn()
-  })
+const providerMock = {
+  listKeys: vi.fn(),
+  createKey: vi.fn(),
+  revokeKey: vi.fn()
+};
+vi.mock('@/adapters/api-keys/factory', () => ({
+  createSupabaseApiKeyProvider: vi.fn(() => providerMock)
 }));
 
 vi.mock('@/lib/audit/auditLogger', () => ({
   logUserAction: vi.fn().mockResolvedValue(undefined)
 }));
 
-vi.mock('@/lib/api-keys/api-key-utils', () => ({
-  generateApiKey: vi.fn().mockReturnValue({
-    key: 'test_generatedkey123',
-    hashedKey: 'hashed-key-123',
-    prefix: 'test'
-  })
-}));
 
 // Import the mocked modules directly
 import { getCurrentUser } from '@/lib/auth/session';
-import { getServiceSupabase } from '@/lib/database/supabase';
 
 // Helper to create a mock request
 function createMockRequest(method: string, body?: any) {
@@ -56,19 +47,10 @@ function createMockRequest(method: string, body?: any) {
 }
 
 describe('API Keys API', () => {
-  let supabaseMock: any;
-
   beforeEach(() => {
-    supabaseMock = {
-      from: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      insert: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      single: vi.fn()
-    };
-    
-    // Set up the mocked implementations
-    (getServiceSupabase as any).mockReturnValue(supabaseMock);
+    providerMock.listKeys.mockReset();
+    providerMock.createKey.mockReset();
+    providerMock.revokeKey.mockReset();
   });
 
   afterEach(() => {
@@ -97,9 +79,7 @@ describe('API Keys API', () => {
         }
       ];
 
-      supabaseMock.select.mockReturnThis();
-      supabaseMock.eq.mockReturnThis();
-      supabaseMock.eq.mockReturnValue({ data: mockApiKeys, error: null });
+      providerMock.listKeys.mockResolvedValue(mockApiKeys);
 
       const req = createMockRequest('GET');
       const response = await GET(req);
@@ -109,11 +89,7 @@ describe('API Keys API', () => {
       expect(responseBody).toHaveProperty('keys');
       expect(Array.isArray(responseBody.keys)).toBe(true);
       
-      // Verify that we called the database with the right parameters
-      expect(supabaseMock.from).toHaveBeenCalledWith('api_keys');
-      expect(supabaseMock.select).toHaveBeenCalled();
-      expect(supabaseMock.eq).toHaveBeenCalledWith('user_id', 'test-user-id');
-      expect(supabaseMock.eq).toHaveBeenCalledWith('is_revoked', false);
+      expect(providerMock.listKeys).toHaveBeenCalledWith('test-user-id');
     });
 
     it('should return 401 if user is not authenticated', async () => {
@@ -144,9 +120,11 @@ describe('API Keys API', () => {
         error: null
       };
 
-      supabaseMock.insert.mockReturnThis();
-      supabaseMock.select.mockReturnThis();
-      supabaseMock.single.mockResolvedValue(mockInsertResponse);
+      providerMock.createKey.mockResolvedValue({
+        success: true,
+        key: mockInsertResponse.data,
+        plaintext: 'test_generatedkey123'
+      });
 
       const req = createMockRequest('POST', {
         name: 'My API Key',
@@ -162,9 +140,11 @@ describe('API Keys API', () => {
       expect(responseBody).toHaveProperty('scopes');
       expect(responseBody).toHaveProperty('key', 'test_generatedkey123');
       
-      // Verify database was called correctly
-      expect(supabaseMock.from).toHaveBeenCalledWith('api_keys');
-      expect(supabaseMock.insert).toHaveBeenCalled();
+      expect(providerMock.createKey).toHaveBeenCalledWith('test-user-id', {
+        name: 'My API Key',
+        scopes: ['read_profile'],
+        expiresAt: undefined
+      });
     });
 
     it('should validate the request body', async () => {
