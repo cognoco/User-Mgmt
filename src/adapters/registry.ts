@@ -11,6 +11,7 @@ import { AuthDataProvider } from './auth/interfaces';
 import { UserDataProvider } from './user/interfaces';
 import { TeamDataProvider } from './team/interfaces';
 import { PermissionDataProvider } from './permission/interfaces';
+import { GdprDataProvider } from './gdpr/interfaces';
 import { SessionDataProvider } from './session/interfaces';
 import { SsoDataProvider } from './sso/interfaces';
 import { SubscriptionDataProvider } from './subscription/interfaces';
@@ -48,6 +49,12 @@ export interface AdapterFactory {
    * Create a permission data provider
    */
   createPermissionProvider(): PermissionDataProvider;
+
+  /**
+  /**
+   * Create a GDPR data provider
+   */
+  createGdprProvider?(): GdprDataProvider;
 
   /**
    * Create a session data provider

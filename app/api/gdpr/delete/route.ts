@@ -1,9 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { logUserAction } from '@/lib/audit/auditLogger';
-
-// Simulate a delay for deletion process
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import { getApiGdprService } from '@/lib/api/gdpr/factory';
 
 export async function POST(request: NextRequest) {
   // 1. Authentication (Essential)
@@ -47,18 +45,13 @@ export async function POST(request: NextRequest) {
   // }
 
   try {
-    // --- Mock Deletion Logic ---
-    await sleep(2000); // Simulate deletion process
+    const gdprService = getApiGdprService();
+    const result = await gdprService.deleteAccount(user.id);
 
-    // In a real scenario, you would:
-    // 1. Delete related data (profiles, settings, documents, logs, etc.) from your tables.
-    // 2. Delete associated files from storage.
-    // 3. Potentially call Supabase admin functions to delete the auth user itself.
-    //    (Requires service_role key - handle with extreme care on the backend)
-    //    Example (DO NOT RUN DIRECTLY FROM CLIENT-SIDE CODE):
-    //    const { data, error } = await supabaseAdmin.auth.admin.deleteUser(user.id)
+    if (!result.success) {
+      throw new Error(result.error || 'Deletion failed');
+    }
 
-    console.log(`Mock deletion completed for user: ${user.id}`);
     await logUserAction({
       userId: user.id,
       action: 'ACCOUNT_DELETION_INITIATED',
@@ -68,10 +61,8 @@ export async function POST(request: NextRequest) {
       targetResourceType: 'user',
       targetResourceId: user.id
     });
-    // --- End Mock Deletion Logic ---
 
-    // Respond with success
-    return NextResponse.json({ message: 'Account deletion process initiated successfully (mock).' });
+    return NextResponse.json({ message: result.message || 'Account deletion process initiated successfully.' });
 
   } catch (error) {
     console.error(`Error during mock account deletion for user ${user.id}:`, error);

@@ -10,6 +10,7 @@ import { DefaultAuthService } from '@/services/auth/default-auth-service';
 import { DefaultUserService } from '@/services/user/default-user-service';
 import { DefaultTeamService } from '@/services/team/default-team-service';
 import { DefaultPermissionService } from '@/services/permission/default-permission-service';
+import { DefaultGdprService } from '@/services/gdpr/default-gdpr.service';
 import { DefaultSsoService } from '@/services/sso/default-sso.service';
 import { UserManagementConfiguration } from '@/core/config';
 import { isServer } from '../platform';
@@ -67,12 +68,13 @@ export function initializeAdapters(
     
     // Create the adapter factory
     const factory = createAdapterFactory(config);
-    
+
     // Create adapter instances
     const authAdapter = factory.createAuthProvider();
     const userAdapter = factory.createUserProvider();
     const teamAdapter = factory.createTeamProvider();
     const permissionAdapter = factory.createPermissionProvider();
+    const gdprAdapter = factory.createGdprProvider?.();
     const ssoAdapter = factory.createSsoProvider();
     
     // Create service instances with the adapters
@@ -80,6 +82,7 @@ export function initializeAdapters(
     const userService = new DefaultUserService(userAdapter);
     const teamService = new DefaultTeamService(teamAdapter);
     const permissionService = new DefaultPermissionService(permissionAdapter);
+    const gdprService = gdprAdapter ? new DefaultGdprService(gdprAdapter) : undefined;
     const ssoService = new DefaultSsoService(ssoAdapter);
     
     return {
@@ -87,13 +90,16 @@ export function initializeAdapters(
       userService,
       teamService,
       permissionService,
+      gdprService,
       ssoService,
       adapters: {
         authAdapter,
         userAdapter,
         teamAdapter,
         permissionAdapter,
+        gdprAdapter,
         ssoAdapter
+      }
       }
     };
   } catch (error) {
@@ -119,6 +125,7 @@ export function initializeUserManagement(config = {}, options = {}) {
       userService: services.userService,
       teamService: services.teamService,
       permissionService: services.permissionService,
+      gdprService: ervices.gdprService,
       ssoService: services.ssoService,
       ...options.serviceProviders
     },
