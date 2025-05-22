@@ -1,12 +1,14 @@
-import { SessionPolicyEnforcer } from '@/ui/styled/session/SessionPolicyEnforcer';
+import { Outlet } from "react-router-dom";
+import { UserLayout as HeadlessUserLayout } from "../../headless/layout/UserLayout";
 
-<UserContext>
-  <ThemeProvider>
-    <Toaster />
-    <AuthGuard>
-      <SessionPolicyEnforcer>
-        {/* Existing layout content */}
-      </SessionPolicyEnforcer>
-    </AuthGuard>
-  </ThemeProvider>
-</UserContext> 
+export function UserLayout() {
+  return (
+    <HeadlessUserLayout>
+      {({ SessionPolicyEnforcer }) => (
+        <SessionPolicyEnforcer>
+          <Outlet />
+        </SessionPolicyEnforcer>
+      )}
+    </HeadlessUserLayout>
+  );
+}

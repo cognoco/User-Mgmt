@@ -1,5 +1,6 @@
-import React from 'react';
-import { Dashboard as HeadlessDashboard } from '../../headless/dashboard/Dashboard';
+import React from "react";
+// Already uses the headless dashboard implementation
+import { Dashboard as HeadlessDashboard } from "../../headless/dashboard/Dashboard";
 
 export const Dashboard: React.FC = () => (
   <HeadlessDashboard>
@@ -24,8 +25,12 @@ export const Dashboard: React.FC = () => (
             onSubmit={(e) => {
               e.preventDefault();
               const form = e.target as HTMLFormElement;
-              const title = (form.elements.namedItem('title') as HTMLInputElement).value;
-              const description = (form.elements.namedItem('description') as HTMLInputElement).value;
+              const title = (
+                form.elements.namedItem("title") as HTMLInputElement
+              ).value;
+              const description = (
+                form.elements.namedItem("description") as HTMLInputElement
+              ).value;
 
               if (currentItem) {
                 handleUpdate(currentItem.id, title, description);
@@ -36,11 +41,19 @@ export const Dashboard: React.FC = () => (
           >
             <div>
               <label htmlFor="title">Title</label>
-              <input id="title" name="title" defaultValue={currentItem?.title || ''} />
+              <input
+                id="title"
+                name="title"
+                defaultValue={currentItem?.title || ""}
+              />
             </div>
             <div>
               <label htmlFor="description">Description</label>
-              <input id="description" name="description" defaultValue={currentItem?.description || ''} />
+              <input
+                id="description"
+                name="description"
+                defaultValue={currentItem?.description || ""}
+              />
             </div>
             <button type="submit">Save</button>
           </form>
@@ -64,7 +77,7 @@ export const Dashboard: React.FC = () => (
                 <button
                   onClick={() => {
                     /* istanbul ignore next */
-                    if (window.confirm('Are you sure?')) {
+                    if (window.confirm("Are you sure?")) {
                       handleDelete(item.id);
                     }
                   }}
