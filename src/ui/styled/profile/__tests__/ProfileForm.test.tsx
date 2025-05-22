@@ -17,6 +17,9 @@ vi.mock('@/hooks/auth/useAuth', () => ({
 vi.mock('@/components/ui/use-toast', () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
+vi.mock('@/components/ui/textarea', () => ({
+  Textarea: (props: any) => <textarea {...props} />,
+}));
 
 describe('ProfileForm component', () => {
   beforeEach(() => {
@@ -56,5 +59,10 @@ describe('ProfileForm component', () => {
     await waitFor(() => {
       expect(updateProfileMock).toHaveBeenCalled();
     });
+  });
+
+  it('displays the current user\'s email from the auth hook', () => {
+    render(<ProfileForm />);
+    expect(screen.getByText('user@example.com')).toBeInTheDocument();
   });
 });
