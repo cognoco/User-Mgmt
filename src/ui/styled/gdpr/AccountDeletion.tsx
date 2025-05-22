@@ -18,7 +18,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Trash2, Loader2, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api/axios';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export function AccountDeletion() {
   const { t } = useTranslation();

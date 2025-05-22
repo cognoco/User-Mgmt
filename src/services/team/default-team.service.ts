@@ -27,12 +27,16 @@ import {
 import { TeamEventType } from '@/core/team/events';
 import type { AxiosInstance } from 'axios';
 import type { TeamDataProvider } from '@/adapters/team/interfaces';
+import { translateError } from '@/lib/utils/error';
+import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
 
 /**
  * Default implementation of the TeamService interface
  */
-export class DefaultTeamService implements TeamService {
-  private eventHandlers: Array<(event: TeamEventType) => void> = [];
+export class DefaultTeamService
+  extends TypedEventEmitter<TeamEventType>
+  implements TeamService
+{
   
   /**
    * Constructor for DefaultTeamService
@@ -43,7 +47,9 @@ export class DefaultTeamService implements TeamService {
   constructor(
     private apiClient: AxiosInstance,
     private teamDataProvider: TeamDataProvider
-  ) {}
+  ) {
+    super();
+  }
 
   /**
    * Emit a team event
@@ -51,7 +57,7 @@ export class DefaultTeamService implements TeamService {
    * @param event - The event to emit
    */
   private emitEvent(event: TeamEventType): void {
-    this.eventHandlers.forEach(handler => handler(event));
+    this.emit(event);
   }
 
   /**
@@ -83,7 +89,7 @@ export class DefaultTeamService implements TeamService {
         team
       };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to create team';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to create team' });
       return {
         success: false,
         error: errorMessage
@@ -150,7 +156,7 @@ export class DefaultTeamService implements TeamService {
         team
       };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to update team';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to update team' });
       return {
         success: false,
         error: errorMessage
@@ -317,7 +323,7 @@ export class DefaultTeamService implements TeamService {
         member
       };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to update team member';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to update team member' });
       return {
         success: false,
         error: errorMessage
@@ -350,7 +356,7 @@ export class DefaultTeamService implements TeamService {
       
       return { success: true };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to remove team member';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to remove team member' });
       return {
         success: false,
         error: errorMessage
@@ -693,21 +699,11 @@ export class DefaultTeamService implements TeamService {
    * @returns Unsubscribe function
    */
   onTeamChanged(callback: (team: Team) => void): () => void {
-    const handler = (event: TeamEventType) => {
-      if (
-        event.type === 'team_created' || 
-        event.type === 'team_updated'
-      ) {
+    return this.on(event => {
+      if (event.type === 'team_created' || event.type === 'team_updated') {
         callback(event.team);
       }
-    };
-    
-    this.eventHandlers.push(handler);
-    
-    // Return unsubscribe function
-    return () => {
-      this.eventHandlers = this.eventHandlers.filter(h => h !== handler);
-    };
+    });
   }
   
   /**
@@ -717,23 +713,15 @@ export class DefaultTeamService implements TeamService {
    * @returns Unsubscribe function
    */
   onTeamMembershipChanged(callback: (teamId: string, members: TeamMember[]) => void): () => void {
-    const handler = async (event: TeamEventType) => {
+    return this.on(async event => {
       if (
-        event.type === 'team_member_added' || 
-        event.type === 'team_member_role_changed' || 
+        event.type === 'team_member_added' ||
+        event.type === 'team_member_role_changed' ||
         event.type === 'team_member_removed'
       ) {
-        // Get the updated list of members
         const members = await this.getTeamMembers(event.teamId);
         callback(event.teamId, members);
       }
-    };
-    
-    this.eventHandlers.push(handler);
-    
-    // Return unsubscribe function
-    return () => {
-      this.eventHandlers = this.eventHandlers.filter(h => h !== handler);
-    };
+    });
   }
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useAuthStore } from "@/lib/stores/auth.store";
+import { useAuth } from '@/hooks/auth/useAuth';
 import { LanguageSelector } from "@/ui/styled/settings/LanguageSelector";
 import { useTranslation } from "react-i18next";
 import { useUserManagement } from "@/lib/auth/UserManagementProvider";
@@ -22,9 +22,9 @@ interface HeaderProps {
 
 export function Header({ type = 'fixed' }: HeaderProps) {
   const { t } = useTranslation();
-  const user = useAuthStore(state => state.user);
-  const logout = useAuthStore(state => state.logout);
-  const isLoading = useAuthStore(state => state.isLoading);
+  const user = useAuth().user;
+  const logout = useAuth().logout;
+  const isLoading = useAuth().isLoading;
   
   const { isNative, platform } = useUserManagement();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

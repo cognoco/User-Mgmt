@@ -25,12 +25,16 @@ import {
 } from '@/core/permission/events';
 import type { AxiosInstance } from 'axios';
 import type { PermissionDataProvider } from '@/adapters/permission/interfaces';
+import { translateError } from '@/lib/utils/error';
+import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
 
 /**
  * Default implementation of the PermissionService interface
  */
-export class DefaultPermissionService implements PermissionService {
-  private eventHandlers: PermissionEventHandler[] = [];
+export class DefaultPermissionService
+  extends TypedEventEmitter<PermissionEventTypes>
+  implements PermissionService
+{
   
   /**
    * Constructor for DefaultPermissionService
@@ -39,9 +43,11 @@ export class DefaultPermissionService implements PermissionService {
    * @param permissionDataProvider - The data provider for permission operations
    */
   constructor(
-    private apiClient: AxiosInstance,
-    private permissionDataProvider: PermissionDataProvider
-  ) {}
+  private apiClient: AxiosInstance,
+  private permissionDataProvider: PermissionDataProvider
+) {
+  super();
+}
   
   /**
    * Emit a permission event
@@ -49,7 +55,7 @@ export class DefaultPermissionService implements PermissionService {
    * @param event - The event to emit
    */
   private emitEvent(event: PermissionEventTypes): void {
-    this.eventHandlers.forEach(handler => handler(event));
+    this.emit(event);
   }
   
   /**
@@ -472,11 +478,6 @@ export class DefaultPermissionService implements PermissionService {
    * @returns Unsubscribe function
    */
   onPermissionEvent(handler: PermissionEventHandler): () => void {
-    this.eventHandlers.push(handler);
-    
-    // Return unsubscribe function
-    return () => {
-      this.eventHandlers = this.eventHandlers.filter(h => h !== handler);
-    };
+    return this.on(handler);
   }
 }

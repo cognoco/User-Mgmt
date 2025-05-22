@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,9 +11,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 export function AccountDeletion() {
   const { t } = useTranslation();
-  const deleteAccount = useAuthStore(state => state.deleteAccount);
-  const isLoading = useAuthStore(state => state.isLoading);
-  const error = useAuthStore(state => state.error);
+  const deleteAccount = useAuth().deleteAccount;
+  const isLoading = useAuth().isLoading;
+  const error = useAuth().error;
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [password, setPassword] = useState('');

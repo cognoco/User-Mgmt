@@ -1,12 +1,14 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useTeamInvite } from '../team/useTeamInvite';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { useTeamInvite } from '../useTeamInvite';
 import { toast } from 'sonner';
+import { UserManagementConfiguration } from '@/core/config';
+import type { TeamService } from '@/core/team/interfaces';
 
-// Mock fetch
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
+const mockTeamService: TeamService = {
+  inviteToTeam: vi.fn(),
+} as unknown as TeamService;
 
 // Mock toast
 vi.mock('sonner', () => ({
@@ -42,74 +44,70 @@ describe('useTeamInvite', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    UserManagementConfiguration.reset();
+    UserManagementConfiguration.configureServiceProviders({ teamService: mockTeamService });
+  });
+
+  afterEach(() => {
+    UserManagementConfiguration.reset();
   });
 
   it('should send an invitation successfully', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({}),
-    });
+    vi.mocked(mockTeamService.inviteToTeam).mockResolvedValue({ success: true });
 
     const { result } = renderHook(() => useTeamInvite(), {
       wrapper: createWrapper(),
     });
 
     await act(async () => {
-      result.current.mutate(inviteData);
+      await result.current.inviteToTeam('license-123', inviteData);
     });
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockFetch).toHaveBeenCalledWith('/api/team/invites/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(inviteData),
-    });
+    expect(mockTeamService.inviteToTeam).toHaveBeenCalledWith('license-123', inviteData);
 
     expect(toast.success).toHaveBeenCalledWith('Invitation sent successfully');
   });
 
   it('should handle invitation failure', async () => {
     const errorMessage = 'Invalid email address';
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      json: () => Promise.resolve({ message: errorMessage }),
-    });
+    vi.mocked(mockTeamService.inviteToTeam).mockResolvedValue({ success: false, error: errorMessage });
 
     const { result } = renderHook(() => useTeamInvite(), {
       wrapper: createWrapper(),
     });
 
     await act(async () => {
-      result.current.mutate(inviteData);
+      await result.current.inviteToTeam('license-123', inviteData);
     });
 
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
     });
 
+    expect(mockTeamService.inviteToTeam).toHaveBeenCalledWith('license-123', inviteData);
     expect(toast.error).toHaveBeenCalledWith(errorMessage);
   });
 
   it('should handle network errors', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Network error'));
+    vi.mocked(mockTeamService.inviteToTeam).mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useTeamInvite(), {
       wrapper: createWrapper(),
     });
 
     await act(async () => {
-      result.current.mutate(inviteData);
+      await result.current.inviteToTeam('license-123', inviteData);
     });
 
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
     });
 
+    expect(mockTeamService.inviteToTeam).toHaveBeenCalledWith('license-123', inviteData);
     expect(toast.error).toHaveBeenCalledWith('Network error');
   });
 });

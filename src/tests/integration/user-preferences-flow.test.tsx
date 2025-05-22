@@ -4,12 +4,12 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserPreferencesComponent } from '@/components/common/UserPreferences';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
 
 // Mock Zustand stores
-vi.mock('@/lib/stores/auth.store', () => ({
-  useAuthStore: vi.fn(),
+vi.mock('@/hooks/auth/use-auth', () => ({
+  useAuth: vi.fn(),
 }));
 vi.mock('@/lib/stores/preferences.store', () => ({
   usePreferencesStore: vi.fn(),

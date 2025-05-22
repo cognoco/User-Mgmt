@@ -4,7 +4,7 @@ import React, { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useAuthStore } from '@/lib/stores/auth-store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -41,8 +41,8 @@ export function LoginFormReact19() {
   const [isPending, startTransition] = useTransition();
   
   // Use selector pattern for better compatibility with React 19
-  const login = useAuthStore(state => state.login);
-  const sendVerificationEmail = useAuthStore(state => state.sendVerificationEmail);
+  const login = useAuth().login;
+  const sendVerificationEmail = useAuth().sendVerificationEmail;
   
   const form = useForm<LoginData>({
     resolver: zodResolver(loginSchema),

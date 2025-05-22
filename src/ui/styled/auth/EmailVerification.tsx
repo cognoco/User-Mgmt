@@ -5,16 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export function EmailVerification() {
-  const verifyEmail = useAuthStore(state => state.verifyEmail);
-  const sendVerificationEmail = useAuthStore(state => state.sendVerificationEmail);
-  const isLoading = useAuthStore(state => state.isLoading);
-  const error = useAuthStore(state => state.error);
-  const successMessage = useAuthStore(state => state.successMessage);
-  const clearError = useAuthStore(state => state.clearError);
-  const clearSuccess = useAuthStore(state => state.clearSuccessMessage);
+  const verifyEmail = useAuth().verifyEmail;
+  const sendVerificationEmail = useAuth().sendVerificationEmail;
+  const isLoading = useAuth().isLoading;
+  const error = useAuth().error;
+  const successMessage = useAuth().successMessage;
+  const clearError = useAuth().clearError;
+  const clearSuccess = useAuth().clearSuccessMessage;
 
   const [token, setToken] = useState('');
   const [email, setEmail] = useState('');

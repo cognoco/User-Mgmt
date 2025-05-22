@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { useRBACStore } from '@/lib/stores/rbac.store';
 
 interface ProtectedRouteProps {
@@ -21,9 +21,9 @@ export function ProtectedRoute({
   const router = useRouter();
   
   // Update to use individual selectors for React 19 compatibility
-  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-  const authLoading = useAuthStore(state => state.isLoading);
-  const user = useAuthStore(state => state.user);
+  const isAuthenticated = useAuth().isAuthenticated;
+  const authLoading = useAuth().isLoading;
+  const user = useAuth().user;
   
   // Update to use individual selectors for RBAC store
   const hasRole = useRBACStore(state => state.hasRole);

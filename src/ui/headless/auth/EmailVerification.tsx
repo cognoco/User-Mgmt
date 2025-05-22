@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export interface EmailVerificationProps {
   render: (props: {
@@ -18,13 +18,13 @@ export interface EmailVerificationProps {
 }
 
 export function EmailVerification({ render }: EmailVerificationProps) {
-  const verifyEmail = useAuthStore(state => state.verifyEmail);
-  const sendVerificationEmail = useAuthStore(state => state.sendVerificationEmail);
-  const isLoading = useAuthStore(state => state.isLoading);
-  const error = useAuthStore(state => state.error);
-  const successMessage = useAuthStore(state => state.successMessage);
-  const clearError = useAuthStore(state => state.clearError);
-  const clearSuccess = useAuthStore(state => state.clearSuccessMessage);
+  const verifyEmail = useAuth().verifyEmail;
+  const sendVerificationEmail = useAuth().sendVerificationEmail;
+  const isLoading = useAuth().isLoading;
+  const error = useAuth().error;
+  const successMessage = useAuth().successMessage;
+  const clearError = useAuth().clearError;
+  const clearSuccess = useAuth().clearSuccessMessage;
 
   const [token, setToken] = useState('');
   const [email, setEmail] = useState('');

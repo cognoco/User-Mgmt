@@ -21,12 +21,16 @@ import {
   ProfileVisibility
 } from '@/core/user/models';
 import { UserEventType } from '@/core/user/events';
+import { translateError } from '@/lib/utils/error';
+import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
 
 /**
  * Default implementation of the UserService interface
  */
-export class DefaultUserService implements UserService {
-  private eventHandlers: Array<(event: UserEventType) => void> = [];
+export class DefaultUserService
+  extends TypedEventEmitter<UserEventType>
+  implements UserService
+{
   
   /**
    * Constructor for DefaultUserService
@@ -35,9 +39,11 @@ export class DefaultUserService implements UserService {
    * @param userDataProvider - The data provider for user operations
    */
   constructor(
-    private apiClient: AxiosInstance,
-    private userDataProvider: UserDataProvider
-  ) {}
+Private apiClient: AxiosInstance,
+  private userDataProvider: UserDataProvider
+) {
+  super();
+}
 
   /**
    * Emit a user event
@@ -45,7 +51,7 @@ export class DefaultUserService implements UserService {
    * @param event - The event to emit
    */
   private emitEvent(event: UserEventType): void {
-    this.eventHandlers.forEach(handler => handler(event));
+    this.emit(event);
   }
 
   /**
@@ -89,7 +95,7 @@ export class DefaultUserService implements UserService {
         profile: response.data.profile
       };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to update user profile';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to update user profile' });
       return {
         success: false,
         error: errorMessage
@@ -308,7 +314,7 @@ export class DefaultUserService implements UserService {
       
       return { success: true };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to deactivate user';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to deactivate user' });
       return {
         success: false,
         error: errorMessage
@@ -391,17 +397,8 @@ export class DefaultUserService implements UserService {
    * @returns Unsubscribe function
    */
   onUserProfileChanged(callback: (profile: UserProfile) => void): () => void {
-    const handler = (event: UserEventType) => {
-      if (event.type === 'user_profile_updated') {
-        callback(event.profile);
-      }
-    };
-    
-    this.eventHandlers.push(handler);
-    
-    // Return unsubscribe function
-    return () => {
-      this.eventHandlers = this.eventHandlers.filter(h => h !== handler);
-    };
+    return this.onType('user_profile_updated', event => {
+      callback(event.profile);
+    });
   }
 }

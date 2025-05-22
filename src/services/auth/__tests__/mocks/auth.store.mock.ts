@@ -2,7 +2,7 @@
 // Robust mock factory for useAuthStore (Zustand)
 // Usage: import { createMockAuthStore } from './auth.store.mock';
 //        const mockStore = createMockAuthStore({ user: { ... } }, { login: vi.fn() });
-//        vi.mock('@/lib/stores/auth.store', () => ({ useAuthStore: vi.fn(() => mockStore) }));
+//        vi.mock('@/lib/stores/auth.store', () => ({ useAuth: vi.fn(() => mockStore) }));
 
 import { vi } from 'vitest';
 import type { AuthState, AuthResult, MFASetupResponse, MFAVerifyResponse } from '../../types/auth';
@@ -187,7 +187,7 @@ export function createMockAuthStore(
   store.__setState = (partial: Partial<AuthState>, replace = false) => store.setState(partial, replace);
 
   // Create a function that returns the store
-  function useAuthStore() {
+  function useAuth() {
     return store;
   }
   // Attach Zustand-like static methods

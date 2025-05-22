@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UpgradeToBusinessFlow } from '@/ui/styled/auth/UpgradeToBusinessFlow';
 import { api } from '@/lib/api';
-import { useAuthStore } from '@/lib/stores/auth-store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { useNotificationStore } from '@/lib/stores/notification-store';
 
 // Mock API calls
@@ -16,8 +16,8 @@ vi.mock('@/lib/api', () => ({
 }));
 
 // Mock auth store
-vi.mock('@/lib/stores/auth-store', () => ({
-  useAuthStore: vi.fn()
+vi.mock('@/hooks/auth/use-auth', () => ({
+  useAuth: vi.fn()
 }));
 
 // Mock notification store

@@ -6,10 +6,10 @@ import { MFAManagementSection } from '../MFAManagementSection';
 import { api } from '@/lib/api/axios';
 
 // Mock useAuthStore globally
-vi.mock('@/lib/stores/auth.store', () => ({
-  useAuthStore: vi.fn()
+vi.mock('@/hooks/auth/use-auth', () => ({
+  useAuth: vi.fn()
 }));
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 // Mock API globally
 vi.mock('@/lib/api/axios');

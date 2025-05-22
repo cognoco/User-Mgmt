@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
 import { vi as viMock } from 'vitest';
 
 // Mock the robust Zustand store for useAuthStore INSIDE the vi.mock factory to avoid hoisting issues
-viMock.mock('@/lib/stores/auth.store', () => {
+viMock.mock('@/hooks/auth/use-auth', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { createMockAuthStore } = require('../../../tests/mocks/auth.store.mock');
-  return { useAuthStore: createMockAuthStore() };
+  return { useAuth: createMockAuthStore() };
 });
 
 // Mock the entire axios module used by the store
@@ -27,8 +27,10 @@ viMock.mock('@/lib/database/supabase', () => ({
   }
 }));
 
-import { useAuthStore } from '@/lib/stores/auth.store';
-import { User, RegistrationPayload, LoginPayload, AuthResult } from '@/types/auth';
+import { useAuth } from '@/hooks/auth/useAuth';
+
+const useAuthStore = useAuth;
+import { User, RegistrationPayload, LoginPayload, AuthResult } from '@/core/auth/models';
 import { api } from '../../api/axios';
 import { act } from '@testing-library/react';
 import { supabase as supabaseMock } from '@/lib/database/supabase';

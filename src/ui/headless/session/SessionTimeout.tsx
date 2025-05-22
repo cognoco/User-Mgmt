@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export interface SessionTimeoutProps {
   isOpen: boolean;
@@ -9,7 +9,7 @@ export interface SessionTimeoutProps {
 }
 
 export function SessionTimeout({ isOpen, onClose, render }: SessionTimeoutProps) {
-  const logout = useAuthStore(state => state.logout);
+  const logout = useAuth().logout;
 
   const handleLogout = () => {
     logout();
