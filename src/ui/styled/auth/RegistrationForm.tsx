@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { UserType } from '@/types/user-type';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { Button } from '@/ui/primitives/button';
@@ -17,6 +14,11 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { OAuthButtons } from './OAuthButtons';
 import { PasswordRequirements } from './PasswordRequirements';
+import { RegistrationForm as HeadlessRegistrationForm } from '@/ui/headless/auth/RegistrationForm';
+import { RegistrationPayload } from '@/core/auth/models';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 // Base registration schema
 const baseRegistrationSchema = z.object({
@@ -71,160 +73,110 @@ export function RegistrationForm() {
   const router = useRouter();
   const [userType, setUserType] = useState<UserType>(userManagement.corporateUsers.defaultUserType);
   
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
   const [shouldRedirect, setShouldRedirect] = useState(false);
-  const [isFormValid, setIsFormValid] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [conflictingEmail, setConflictingEmail] = useState<string | null>(null);
-  const authStore = useAuth();
-
-  const form = useForm<
-    z.input<typeof registrationSchema>,
-    any,
-    z.output<typeof registrationSchema>
-  >({
-    resolver: zodResolver(registrationSchema),
-    defaultValues: {
-      userType: userManagement.corporateUsers.defaultUserType,
-      acceptTerms: false,
-      firstName: '',
-      lastName: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      companyName: '',
-      position: '',
-      department: '',
-      industry: '',
-      companySize: undefined,
-      companyWebsite: '',
-    },
-    mode: 'onChange',
-  });
   
-  // Add this useEffect to help with testing, especially on Safari
-  useEffect(() => {
-    // Trigger validation when component mounts
-    if (!form.formState.isSubmitted) {
-      form.trigger();
-    }
-  }, [form]);
-  
-  useEffect(() => {
-    if (form.formState.isDirty) {
-      setApiError(null);
-      setApiSuccess(null);
-      setShowUpgradePrompt(false);
-      setConflictingEmail(null);
-    }
-  }, [form.formState.isDirty]);
-  
-  // Handle redirection after successful registration
-  useEffect(() => {
-    let redirectTimer: NodeJS.Timeout;
+  // Handle successful registration and redirection
+  const handleRegistrationSuccess = (email: string) => {
+    const successMsg = 'Registration successful! Please check your email to verify your account.';
+    setApiSuccess(successMsg);
+    setShouldRedirect(true);
     
-    if (shouldRedirect && apiSuccess) {
-      redirectTimer = setTimeout(() => {
-        const email = form.getValues('email');
-        router.push(`/check-email?email=${encodeURIComponent(email)}`);
-      }, 2000); // 2 second delay to ensure success message is visible
-    }
-    
-    return () => {
-      if (redirectTimer) clearTimeout(redirectTimer);
-    };
-  }, [shouldRedirect, apiSuccess, router, form]);
+    // Set a timer to redirect after showing success message
+    setTimeout(() => {
+      router.push(`/check-email?email=${encodeURIComponent(email)}`);
+    }, 2000);
+  };
   
-  // Improve the form validation watcher with better triggers and dependencies
-  useEffect(() => {
-    const validateForm = async () => {
-      // Force validation of all fields
-      await form.trigger();
-      
-      // Check form validity based on all required conditions
-      const hasNoErrors = Object.keys(form.formState.errors).length === 0;
-      const allRequiredFields = !!form.getValues('email') &&
-                               !!form.getValues('password') &&
-                               !!form.getValues('confirmPassword') &&
-                               form.getValues('acceptTerms') === true;
-                               
-      // User type specific validation
-      const userTypeValid = userType === UserType.PRIVATE
-        ? !!form.getValues('firstName') && !!form.getValues('lastName')
-        : !!form.getValues('companyName');
-      
-      // Specific validation for password match
-      const passwordsMatch = form.getValues('password') === form.getValues('confirmPassword');
-      
-      setIsFormValid(hasNoErrors && allRequiredFields && userTypeValid && passwordsMatch);
-    };
-    
-    validateForm();
-  }, [
-    form,
-    userType,
-    // Watch all critical form values to trigger validation
-    form.watch('email'),
-    form.watch('password'),
-    form.watch('confirmPassword'),
-    form.watch('acceptTerms'),
-    form.watch('firstName'),
-    form.watch('lastName'),
-    form.watch('companyName')
-  ]);
-  
-  // Initial validation on mount
-  useEffect(() => {
-    // Initial validation trigger to ensure submit button state is correctly set
-    const initialValidation = async () => {
-      await form.trigger();
-    };
-    initialValidation();
-    // Run once on mount
-  }, [form]);
-  
-  const onSubmit = async (data: RegistrationFormValues) => {
-    if (isSubmitting) {
-      return;
-    }
-    
-    if (!authStore || typeof authStore.register !== 'function') {
-        setApiError('An internal error occurred (Auth service unavailable). Please try again later.');
-        setIsSubmitting(false);
-        return;
-    }
-    
-    setIsSubmitting(true);
-    setApiError(null);
-    setApiSuccess(null);
-    setShouldRedirect(false);
-    setShowUpgradePrompt(false);
-    setConflictingEmail(null);
-
+  // Handle registration submission
+  const handleRegistrationSubmit = async (userData: RegistrationPayload) => {
+    // Add any UI-specific handling here
     try {
-      const result = await authStore.register({
-        email: data.email,
-        password: data.password,
-        firstName: data.firstName || '',
-        lastName: data.lastName || '',
-      });
-
-      if (result.success) {
-        const successMsg = 'Registration successful! Please check your email to verify your account.';
-        setApiSuccess(successMsg);
-        setApiError(null);
-        // Set the flag to trigger redirect after showing success message
-        setShouldRedirect(true);
+      // For corporate users, add company information to metadata
+      if (userType === UserType.CORPORATE) {
+        userData.metadata = {
+          ...userData.metadata,
+          userType: UserType.CORPORATE,
+          companyName: userData.metadata?.companyName || '',
+          position: userData.metadata?.position || '',
+          department: userData.metadata?.department || '',
+          industry: userData.metadata?.industry || '',
+          companySize: userData.metadata?.companySize || '',
+          companyWebsite: userData.metadata?.companyWebsite || '',
+        };
       } else {
-        if (
-          data.userType === UserType.CORPORATE &&
-          result.error &&
-          (result.error.includes('EMAIL_EXISTS_PERSONAL_ACCOUNT') || result.error.toLowerCase().includes('email already registered for a personal account'))
-        ) {
-          setConflictingEmail(data.email);
-          setShowUpgradePrompt(true);
+        userData.metadata = {
+          ...userData.metadata,
+          userType: UserType.PRIVATE,
+        };
+      }
+      
+      handleRegistrationSuccess(userData.email);
+    } catch (error) {
+      // Handle any UI-specific error handling
+      if (error instanceof Error) {
+        return { error: error.message };
+      }
+      return { error: 'An unknown error occurred during registration' };
+    }
+  };
+  
+  // Handle user type change
+  const handleUserTypeChange = (type: UserType) => {
+    setUserType(type);
+  };
+  
+  return (
+    <HeadlessRegistrationForm
+      initialEmail=""
+      onSubmit={handleRegistrationSubmit}
+      onValidationChange={(isValid) => {}}
+      render={({ 
+        handleSubmit, 
+        emailValue, 
+        setEmailValue,
+        passwordValue, 
+        setPasswordValue,
+        confirmPasswordValue, 
+        setConfirmPasswordValue,
+        firstNameValue, 
+        setFirstNameValue,
+        lastNameValue, 
+        setLastNameValue,
+        acceptTermsValue, 
+        setAcceptTermsValue,
+        isSubmitting,
+        isValid,
+        errors,
+        touched,
+        handleBlur
+      }) => {
+        return (
+          <div className="space-y-6 max-w-md mx-auto p-6 bg-background rounded-lg shadow-md border border-border">
+            <h1 className="text-2xl font-bold text-center">Create an Account</h1>
+            
+            {/* User Type Selection */}
+            {userManagement.corporateUsers.enabled && (
+              <div className="space-y-3">
+                <Label>Account Type</Label>
+                <RadioGroup 
+                  value={userType} 
+                  onValueChange={(value) => handleUserTypeChange(value as UserType)}
+                  className="flex flex-col space-y-1"
+                  data-testid="user-type-radio-group"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value={UserType.PRIVATE} id="private" data-testid="private-user-radio" />
+                    <Label htmlFor="private" className="cursor-pointer">Personal Account</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value={UserType.CORPORATE} id="corporate" data-testid="corporate-user-radio" />
+                    <Label htmlFor="corporate" className="cursor-pointer">Business Account</Label>
+                  </div>
+                </RadioGroup>
+              </div>
           setApiError(null);
         } else {
           setApiError(result.error || 'Registration failed. Please try again.');

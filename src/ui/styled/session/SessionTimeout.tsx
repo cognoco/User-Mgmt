@@ -2,7 +2,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/primitives/dialog';
 import { Button } from '@/ui/primitives/button';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { SessionTimeout as HeadlessSessionTimeout } from '@/ui/headless/session/SessionTimeout';
 
 interface SessionTimeoutProps {
   isOpen: boolean;
@@ -10,24 +10,23 @@ interface SessionTimeoutProps {
 }
 
 export function SessionTimeout({ isOpen, onClose }: SessionTimeoutProps) {
-  const logout = useAuth().logout;
-
-  const handleLogout = () => {
-    logout();
-    onClose();
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Session Expired</DialogTitle>
-        </DialogHeader>
-        <p className="py-4">Your session has expired due to inactivity. Please log in again.</p>
-        <DialogFooter>
-          <Button onClick={handleLogout}>Log In Again</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <HeadlessSessionTimeout
+      isOpen={isOpen}
+      onClose={onClose}
+      render={({ handleLogout, isOpen, onClose }) => (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Session Expired</DialogTitle>
+            </DialogHeader>
+            <p className="py-4">Your session has expired due to inactivity. Please log in again.</p>
+            <DialogFooter>
+              <Button onClick={handleLogout}>Log In Again</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+    />
   );
 }
