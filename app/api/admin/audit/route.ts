@@ -6,27 +6,26 @@ import {
   withValidation,
 } from '@/lib/api/common';
 import { getApiAdminService } from '@/lib/api/admin/factory';
-import { createUserNotFoundError, mapAdminServiceError } from '@/lib/api/admin/error-handler';
+import { createAuditLogRetrievalError } from '@/lib/api/admin/error-handler';
 import { createProtectedHandler } from '@/middleware/permissions';
 
 const querySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(10),
-  search: z.string().optional(),
-  sortBy: z.enum(['name', 'email', 'createdAt', 'status']).optional().default('createdAt'),
+  userId: z.string().optional(),
+  action: z.string().optional(),
+  resource: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 });
 
-type QueryParams = z.infer<typeof querySchema>;
+type Query = z.infer<typeof querySchema>;
 
-async function handleAdminUsers(req: NextRequest, params: QueryParams) {
+async function handleAuditLogs(req: NextRequest, params: Query) {
   const adminService = getApiAdminService();
-  const result = await adminService.listUsers(params);
-
-  return createSuccessResponse({
-    users: result.users,
-    pagination: result.pagination,
-  });
+  const result = await adminService.getAuditLogs(params);
+  return createSuccessResponse({ logs: result.logs, pagination: result.pagination });
 }
 
 async function handler(req: NextRequest) {
@@ -34,10 +33,10 @@ async function handler(req: NextRequest) {
     async (r) => {
       const url = new URL(r.url);
       const query = Object.fromEntries(url.searchParams.entries());
-      return withValidation(querySchema, handleAdminUsers, r, query as any);
+      return withValidation(querySchema, handleAuditLogs, r, query as any);
     },
     req
   );
 }
 
-export const GET = createProtectedHandler(handler, 'admin.users.list');
+export const GET = createProtectedHandler(handler, 'admin.audit.view');

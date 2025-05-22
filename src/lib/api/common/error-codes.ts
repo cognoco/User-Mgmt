@@ -59,6 +59,8 @@ export const SERVER_ERROR_CODES = {
   INTERNAL_ERROR: 'server/internal_error',
   SERVICE_UNAVAILABLE: 'server/service_unavailable',
   DATABASE_ERROR: 'server/database_error',
+  OPERATION_FAILED: 'server/operation_failed',
+  RETRIEVAL_FAILED: 'server/retrieval_failed',
 } as const;
 
 // Combine all error codes for easy export
