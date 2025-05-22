@@ -4,7 +4,8 @@ import React, { useEffect } from 'react';
 import { UserManagementProvider, UserManagementConfig, IntegrationCallbacks } from './UserManagementProvider';
 import { initializeCsrf } from '@/lib/api/axios';
 import { supabase } from '@/lib/database/supabase';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { UserManagementConfiguration } from '@/core/config';
+import { AuthService } from '@/core/auth/interfaces';
 import { User } from '@/core/auth/models';
 import toast, { Toaster } from 'react-hot-toast';
 import { OAuthProvider } from '@/types/oauth';
@@ -66,7 +67,7 @@ const clientConfig: UserManagementConfig = {
 };
 
 interface UserManagementClientBoundaryProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export function UserManagementClientBoundary({ children }: UserManagementClientBoundaryProps) {
@@ -87,7 +88,14 @@ export function UserManagementClientBoundary({ children }: UserManagementClientB
   // Setup Supabase auth listener
   useEffect(() => {
     console.log('>>>>>>>>>> [UserManagementClientBoundary] useEffect Supabase Listener RUNNING <<<<<<<<<<');
-    const { setUser, setToken } = useAuthStore.getState();
+    
+    // Get the auth service from the service provider registry
+    const authService = UserManagementConfiguration.getServiceProvider<AuthService>('authService');
+    
+    if (!authService) {
+      console.error('[UserManagementClientBoundary] AuthService is not registered in the service provider registry');
+      return;
+    }
 
     // Initial session check
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -102,18 +110,18 @@ export function UserManagementClientBoundary({ children }: UserManagementClientB
           user_metadata: session.user.user_metadata,
           // Add other fields from session.user if needed by local User type
         };
-        setUser(localUser);
-        setToken(session.access_token ?? null);
+        authService.setCurrentUser(localUser);
+        authService.setAuthToken(session.access_token ?? null);
       } else {
-        setUser(null);
-        setToken(null);
+        authService.setCurrentUser(null);
+        authService.setAuthToken(null);
       }
     });
 
     // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('[UserManagementClientBoundary] Auth state change:', event, session);
-      const previousUser = useAuthStore.getState().user;
+      const previousUser = authService.getCurrentUser();
       
       if (session?.user && session.user.email) {
         const localUser: User = {
@@ -122,8 +130,8 @@ export function UserManagementClientBoundary({ children }: UserManagementClientB
           app_metadata: session.user.app_metadata,
           user_metadata: session.user.user_metadata,
         };
-        setUser(localUser);
-        setToken(session.access_token ?? null);
+        authService.setCurrentUser(localUser);
+        authService.setAuthToken(session.access_token ?? null);
 
         if (event === 'SIGNED_IN' && !previousUser) {
             const isConfirmed = session.user.email_confirmed_at || (session.user.user_metadata as any)?.email_verified;
@@ -141,12 +149,12 @@ export function UserManagementClientBoundary({ children }: UserManagementClientB
 
       } else {
         if (previousUser) {
-           setUser(null);
-           setToken(null);
+           authService.setCurrentUser(null);
+           authService.setAuthToken(null);
            clientCallbacks.onUserLogout();
         } else {
-           setUser(null);
-           setToken(null);
+           authService.setCurrentUser(null);
+           authService.setAuthToken(null);
         }
       }
     });

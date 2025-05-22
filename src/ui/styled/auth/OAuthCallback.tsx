@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth/use-auth';
 import { getUserHomePage } from '@/lib/utils/getUserHomePage';
 import { toast } from '@/components/ui/use-toast';
 import { useOAuthStore } from '@/lib/stores/oauth.store';
@@ -12,6 +12,7 @@ import { Spinner } from '@/components/ui/spinner';
 export function OAuthCallback() {
   const { t } = useTranslation();
   const { handleCallback, isLoading, error } = useOAuthStore();
+  const { user } = useAuth();
   const [processingState, setProcessingState] = useState<'initial' | 'processing' | 'error' | 'success'>('initial');
   
   useEffect(() => {
@@ -45,8 +46,6 @@ export function OAuthCallback() {
         // Process the callback
         await handleCallback(provider, code);
         setProcessingState('success');
-        // Get the user from auth store
-        const user = useAuthStore.getState().user;
         // Determine homepage
         const homepage = user ? getUserHomePage(user) : '/dashboard';
         // Show toast on next page load (using sessionStorage as a cross-page flag)

@@ -5,11 +5,11 @@ import { vi, Mock } from 'vitest';
 import { MFAManagementSection } from '../MFAManagementSection';
 import { api } from '@/lib/api/axios';
 
-// Mock useAuthStore globally
+// Mock useAuth hook globally
 vi.mock('@/hooks/auth/use-auth', () => ({
   useAuth: vi.fn()
 }));
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth/use-auth';
 
 // Mock API globally
 vi.mock('@/lib/api/axios');
@@ -26,14 +26,14 @@ describe('MFAManagementSection', () => {
   });
 
   it('renders setup prompt when no factors are enrolled', () => {
-    (useAuthStore as unknown as Mock).mockReturnValue({ user: { ...mockUserBase, user_metadata: {} } });
+    (useAuth as unknown as Mock).mockReturnValue({ user: { ...mockUserBase, user_metadata: {} } });
     render(<MFAManagementSection />);
     expect(screen.getByText(/setup/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /setup/i })).toBeInTheDocument();
   });
 
   it('renders enrolled TOTP and SMS factors', () => {
-    (useAuthStore as unknown as Mock).mockReturnValue({
+    (useAuth as unknown as Mock).mockReturnValue({
       user: {
         ...mockUserBase,
         user_metadata: {
@@ -54,7 +54,7 @@ describe('MFAManagementSection', () => {
   });
 
   it('removes a factor and shows success', async () => {
-    (useAuthStore as unknown as Mock).mockReturnValue({
+    (useAuth as unknown as Mock).mockReturnValue({
       user: {
         ...mockUserBase,
         user_metadata: {
@@ -82,7 +82,7 @@ describe('MFAManagementSection', () => {
   });
 
   it('shows error alert if API fails to remove factor', async () => {
-    (useAuthStore as unknown as Mock).mockReturnValue({
+    (useAuth as unknown as Mock).mockReturnValue({
       user: {
         ...mockUserBase,
         user_metadata: {
@@ -110,7 +110,7 @@ describe('MFAManagementSection', () => {
   });
 
   it('shows success alert when factor is removed', async () => {
-    (useAuthStore as unknown as Mock).mockReturnValue({
+    (useAuth as unknown as Mock).mockReturnValue({
       user: {
         ...mockUserBase,
         user_metadata: {

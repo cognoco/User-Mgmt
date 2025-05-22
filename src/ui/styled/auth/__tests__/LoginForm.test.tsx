@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LoginForm } from '../LoginForm';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth/use-auth';
 import type { LoginData } from '@/types/auth';
 import * as React from 'react';
 
@@ -104,9 +104,9 @@ vi.mock('lucide-react', () => ({
   EyeOff: () => <div data-testid="eye-off-icon" />,
 }));
 
-// Patch for Zustand selector compatibility in React 19+
-function setupAuthStoreMock(authMock: any) {
-  (useAuthStore as any).mockImplementation((selector: any) => selector(authMock));
+// Patch for useAuth mock compatibility
+function setupAuthMock(authMock: any) {
+  (useAuth as any).mockImplementation(() => authMock);
 }
 
 describe('LoginForm', () => {

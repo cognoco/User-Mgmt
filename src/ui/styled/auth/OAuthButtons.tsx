@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useOAuthStore } from '@/lib/stores/oauth.store';
+import { useAuth } from '@/hooks/auth/use-auth';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { OAuthProvider } from '@/types/oauth';
 import { Button } from '@/components/ui/button';
@@ -49,7 +49,7 @@ export function OAuthButtons({
 }: OAuthButtonsProps) {
   const { t } = useTranslation();
   const { oauth } = useUserManagement();
-  const { login, isLoading, error, clearError } = useOAuthStore();
+  const { loginWithProvider, isLoading, error, clearError } = useAuth();
   
   // Clear error on unmount
   useEffect(() => {
@@ -118,7 +118,7 @@ export function OAuthButtons({
   
   // Handle login with provider
   const handleLogin = (provider: OAuthProvider) => {
-    login(provider);
+    loginWithProvider(provider);
     if (typeof onSuccess === 'function') {
       onSuccess(provider);
     }

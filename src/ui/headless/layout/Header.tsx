@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth/use-auth';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { getPlatformClasses } from '@/hooks/utils/usePlatformStyles';
 import { useIsMobile } from '@/lib/utils/responsive';
@@ -29,9 +29,7 @@ export interface HeaderProps {
 }
 
 export function Header({ type = 'fixed', navItems, children }: HeaderProps) {
-  const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
-  const isLoading = useAuthStore((state) => state.isLoading);
+  const { user, logout, loading: isLoading } = useAuth();
   const { isNative, platform } = useUserManagement();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();

@@ -10,27 +10,42 @@ import type {
 import { useAuthService } from '@/lib/context/AuthContext';
 
 export interface UseAuth {
+  // User state
   user: User | null;
   token: string | null;
   loading: boolean;
   error: string | null;
   success: string | null;
+  
+  // MFA state
   mfaEnabled: boolean;
   mfaSecret: string | null;
   mfaQrCode: string | null;
   mfaBackupCodes: string[] | null;
+  
+  // Authentication methods
   login: (email: string, password: string, rememberMe?: boolean) => Promise<AuthResult>;
   register: (data: RegistrationPayload) => Promise<AuthResult>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   updatePassword: (oldPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
+  
+  // MFA methods
   setupMFA: () => Promise<MFASetupResponse>;
   verifyMFA: (code: string, isBackupCode?: boolean) => Promise<MFAVerifyResponse>;
   disableMFA: () => Promise<AuthResult>;
+  
+  // State management
   clearError: () => void;
   clearSuccess: () => void;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
+  
+  // Session management
+  refreshToken: () => Promise<boolean>;
+  updateLastActivity: () => void;
+  onSessionTimeout: (callback: () => void) => (() => void);
+  onAuthEvent: (callback: (event: any) => void) => (() => void);
 }
 
 export function useAuth(): UseAuth {
@@ -235,6 +250,39 @@ export function useAuth(): UseAuth {
   const setUser = useCallback((u: User | null) => setUserState(u), []);
   const setToken = useCallback((t: string | null) => setTokenState(t), []);
 
+  // Session management methods
+  const refreshToken = useCallback(async (): Promise<boolean> => {
+    setLoading(true);
+    try {
+      const result = await authService.refreshToken();
+      setLoading(false);
+      return result;
+    } catch (err) {
+      setLoading(false);
+      const message = err instanceof Error ? err.message : 'Token refresh failed';
+      setError(message);
+      return false;
+    }
+  }, [authService]);
+
+  const updateLastActivity = useCallback((): void => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('last_activity', Date.now().toString());
+    }
+  }, []);
+
+  const onSessionTimeout = useCallback((callback: () => void): (() => void) => {
+    return authService.onAuthEvent(event => {
+      if (event.type === 'SESSION_TIMEOUT') {
+        callback();
+      }
+    });
+  }, [authService]);
+
+  const onAuthEvent = useCallback((callback: (event: any) => void): (() => void) => {
+    return authService.onAuthEvent(callback);
+  }, [authService]);
+
   return {
     user,
     token,
@@ -257,6 +305,11 @@ export function useAuth(): UseAuth {
     clearSuccess,
     setUser,
     setToken,
+    // Session management
+    refreshToken,
+    updateLastActivity,
+    onSessionTimeout,
+    onAuthEvent,
   };
 }
 

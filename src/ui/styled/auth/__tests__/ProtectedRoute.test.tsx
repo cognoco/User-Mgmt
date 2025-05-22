@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '../ProtectedRoute';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth/use-auth';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -14,7 +14,7 @@ vi.mock('next/navigation', () => ({
   }))
 }));
 
-// Use robust mock for useAuthStore
+// Use robust mock for useAuth
 vi.mock('@/hooks/auth/use-auth', () => {
   // Move setupZustandSelectorMock inside the factory
   function setupZustandSelectorMock(store: any) {
@@ -26,12 +26,12 @@ vi.mock('@/hooks/auth/use-auth', () => {
     isLoading: false
   };
   // Create a mock function that supports selectors
-  const useAuthStoreMock: any = vi.fn(setupZustandSelectorMock(mockStore));
+  const useAuthMock: any = vi.fn(setupZustandSelectorMock(mockStore));
   // Add setState method to update the mock store
-  useAuthStoreMock.setState = (newState: any) => {
+  useAuthMock.setState = (newState: any) => {
     Object.assign(mockStore, newState);
   };
-  return { useAuth: useAuthStoreMock };
+  return { useAuth: useAuthMock };
 });
 
 // Setup RBAC store with selector support
@@ -72,8 +72,8 @@ describe('ProtectedRoute', () => {
     vi.clearAllMocks();
     (useRouter as any).mockImplementation(() => mockRouter);
     
-    // Reset auth store state
-    useAuthStore.setState({
+    // Reset auth hook state
+    useAuth.setState({
       isAuthenticated: false,
       user: null,
       isLoading: false
@@ -102,7 +102,7 @@ describe('ProtectedRoute', () => {
   });
 
   it('should show loading state when authentication is being checked', async () => {
-    useAuthStore.setState({ isAuthenticated: false, user: null, isLoading: true });
+    useAuth.setState({ isAuthenticated: false, user: null, isLoading: true });
     const rbacStoreMock = (global as any).__rbacStoreMock;
     rbacStoreMock.isLoading = false;
     
@@ -119,7 +119,7 @@ describe('ProtectedRoute', () => {
   });
 
   it('should redirect to login when user is not authenticated', async () => {
-    useAuthStore.setState({ isAuthenticated: false, user: null, isLoading: false });
+    useAuth.setState({ isAuthenticated: false, user: null, isLoading: false });
     const rbacStoreMock = (global as any).__rbacStoreMock;
     rbacStoreMock.isLoading = false;
     
@@ -138,7 +138,7 @@ describe('ProtectedRoute', () => {
   });
 
   it('should render children when user is authenticated', async () => {
-    useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+    useAuth.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
     const rbacStoreMock = (global as any).__rbacStoreMock;
     rbacStoreMock.isLoading = false;
     
@@ -160,7 +160,7 @@ describe('ProtectedRoute', () => {
   });
 
   it('should handle custom redirect paths', async () => {
-    useAuthStore.setState({ isAuthenticated: false, user: null, isLoading: false });
+    useAuth.setState({ isAuthenticated: false, user: null, isLoading: false });
     const rbacStoreMock = (global as any).__rbacStoreMock;
     rbacStoreMock.isLoading = false;
     
@@ -180,7 +180,7 @@ describe('ProtectedRoute', () => {
 
   describe('Role-based access control', () => {
     it('should allow access when user has required role', async () => {
-      useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+      useAuth.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
       
       // Simulate roles and userRoles
       const rbacStoreMock = (global as any).__rbacStoreMock;
@@ -205,7 +205,7 @@ describe('ProtectedRoute', () => {
     });
 
     it('should deny access when user lacks required role', async () => {
-      useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+      useAuth.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
       
       // Simulate roles and userRoles
       const rbacStoreMock = (global as any).__rbacStoreMock;
@@ -231,7 +231,7 @@ describe('ProtectedRoute', () => {
     });
 
     it('should handle multiple required roles', async () => {
-      useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+      useAuth.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
       
       // Simulate roles and userRoles
       const rbacStoreMock = (global as any).__rbacStoreMock;
@@ -262,7 +262,7 @@ describe('ProtectedRoute', () => {
     });
 
     it('should handle custom access denied component', async () => {
-      useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+      useAuth.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
       
       // Simulate roles and userRoles
       const rbacStoreMock = (global as any).__rbacStoreMock;
@@ -295,7 +295,7 @@ describe('ProtectedRoute', () => {
 
   describe('Permission-based access control', () => {
     it('should allow access when user has required permission', async () => {
-      useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+      useAuth.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
       
       // Simulate roles and userRoles
       const rbacStoreMock = (global as any).__rbacStoreMock;
@@ -320,7 +320,7 @@ describe('ProtectedRoute', () => {
     });
 
     it('should deny access when user lacks required permission', async () => {
-      useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+      useAuth.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
       
       // Simulate roles and userRoles
       const rbacStoreMock = (global as any).__rbacStoreMock;
@@ -346,7 +346,7 @@ describe('ProtectedRoute', () => {
     });
 
     it('should handle multiple required permissions', async () => {
-      useAuthStore.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
+      useAuth.setState({ isAuthenticated: true, user: { id: '1', email: 'test@example.com' }, isLoading: false });
       
       // Simulate roles and userRoles
       const rbacStoreMock = (global as any).__rbacStoreMock;

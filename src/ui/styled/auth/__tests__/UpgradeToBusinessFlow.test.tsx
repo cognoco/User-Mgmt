@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UpgradeToBusinessFlow } from '@/ui/styled/auth/UpgradeToBusinessFlow';
 import { api } from '@/lib/api';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth/use-auth';
 import { useNotificationStore } from '@/lib/stores/notification-store';
 
 // Mock API calls
@@ -46,7 +46,7 @@ describe('UpgradeToBusinessFlow', () => {
     vi.resetAllMocks();
     
     // Setup default mocks
-    useAuthStore.mockReturnValue({
+    useAuth.mockReturnValue({
       user: mockPersonalUser,
       updateUser: vi.fn()
     });
@@ -286,7 +286,7 @@ describe('UpgradeToBusinessFlow', () => {
   
   test('handles case where user already has a business account', async () => {
     // Mock a user who is already a business user
-    useAuthStore.mockReturnValue({
+    useAuth.mockReturnValue({
       user: { ...mockPersonalUser, accountType: 'business' },
       updateUser: vi.fn()
     });

@@ -2,10 +2,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, act } from '@testing-library/react';
 import { EmailVerification } from '../EmailVerification';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/use-auth';
 
-vi.mock('@/lib/stores/auth.store', () => ({
-  useAuthStore: vi.fn()
+vi.mock('@/hooks/auth/use-auth', () => ({
+  useAuth: vi.fn()
 }));
 
 function setupStore(overrides: Record<string, any> = {}) {
@@ -19,7 +19,7 @@ function setupStore(overrides: Record<string, any> = {}) {
     clearSuccessMessage: vi.fn(),
     ...overrides,
   };
-  (useAuthStore as any).mockImplementation((sel: any) => sel(store));
+  (useAuth as any).mockImplementation(() => store);
   return store;
 }
 

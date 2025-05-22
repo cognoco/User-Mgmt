@@ -68,7 +68,7 @@ vi.mock('@/hooks/auth/use-auth', () => ({
   }))
 }));
 
-console.log('[MOCK] useAuthStore mock applied');
+console.log('[MOCK] useAuth hook mock applied');
 
 import React from 'react';
 import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';

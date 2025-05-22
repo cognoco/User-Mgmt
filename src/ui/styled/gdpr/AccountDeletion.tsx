@@ -18,12 +18,12 @@ import { useToast } from "@/components/ui/use-toast";
 import { Trash2, Loader2, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api/axios';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth/use-auth';
 
 export function AccountDeletion() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const logout = useAuthStore((state) => state.logout);
+  const { logout } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
