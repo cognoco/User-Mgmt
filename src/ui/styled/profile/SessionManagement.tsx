@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSessionStore } from '@/lib/stores/session.store';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/ui/primitives/use-toast';
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -11,7 +11,7 @@ import {
   AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
-} from '@/components/ui/alert-dialog';
+} from '@/ui/primitives/alert-dialog';
 
 const SessionManagement: React.FC = () => {
   const {

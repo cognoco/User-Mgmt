@@ -16,7 +16,7 @@ import {
   DropdownMenu, 
   DropdownMenuContent,
   DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
+} from '@/ui/primitives/dropdown-menu';
 
 interface Column<T> {
   key: keyof T;

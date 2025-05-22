@@ -1,17 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { useToast } from "@/components/ui/use-toast";
+import { Button } from '@/ui/primitives/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/ui/primitives/card';
+import { useToast } from "@/ui/primitives/use-toast";
 import { Download, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api/axios';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { RadioGroup, RadioGroupItem } from '@/ui/primitives/radio-group';
+import { Label } from '@/ui/primitives/label';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { useIsMobile } from '@/lib/utils/responsive';
-import { Progress } from '@/components/ui/progress';
+import { Progress } from '@/ui/primitives/progress';
 
 // Define export formats
 enum ExportFormat {

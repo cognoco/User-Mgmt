@@ -64,7 +64,7 @@ vi.mock('react-hook-form', async () => {
 });
 
 // Mock UI components needed by LoginForm
-vi.mock('@/components/ui/alert', () => ({
+vi.mock('@/ui/primitives/alert', () => ({
   Alert: ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div data-testid="alert" className={className}>{children}</div>
   ),

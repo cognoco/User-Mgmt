@@ -2,15 +2,15 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
+import { Label } from '@/ui/primitives/label';
+import { Switch } from '@/ui/primitives/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/primitives/select';
+import { Button } from '@/ui/primitives/button';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { api } from '@/lib/api/axios'; // Assuming api setup
 import { KeyRound, AlertCircle, CheckCircle } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton'; // For loading state
+import { Skeleton } from '@/ui/primitives/skeleton'; // For loading state
 
 interface BusinessSSOSetupProps {
     orgId: string;

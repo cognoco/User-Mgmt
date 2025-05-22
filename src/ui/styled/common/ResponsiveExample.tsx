@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DataTable } from '@/components/common/DataTable';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/primitives/card';
+import { Input } from '@/ui/primitives/input';
+import { Button } from '@/ui/primitives/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/primitives/select';
+import { DataTable } from '@/ui/styled/common/DataTable';
 import { useIsMobile } from '@/lib/utils/responsive';
 import {
   ResponsiveForm,
   ResponsiveFormItems,
   ResponsiveFormRow,
   ResponsiveFormFooter
-} from '@/components/ui/form-responsive';
+} from '@/ui/primitives/form-responsive';
 
 interface User {
   id: number;

@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertTitle, AlertDescription } from '@/ui/primitives/alert';
 
 export function AccountLockout() {
   return (

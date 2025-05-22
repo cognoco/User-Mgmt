@@ -11,7 +11,7 @@ import {
   AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
-} from '@/components/ui/alert-dialog';
+} from '@/ui/primitives/alert-dialog';
 import type { UserPreferences } from '@/types/database';
 import { getBrowserLanguage, getBrowserTimezone, getDefaultDateFormat } from '@/lib/utils';
 

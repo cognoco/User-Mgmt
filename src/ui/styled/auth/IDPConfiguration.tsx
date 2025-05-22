@@ -5,17 +5,17 @@ import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/ui/primitives/form';
+import { Input } from '@/ui/primitives/input';
+import { Textarea } from '@/ui/primitives/textarea';
+import { Button } from '@/ui/primitives/button';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { KeyRound, AlertCircle, CheckCircle, Upload } from 'lucide-react';
 import { api } from '@/lib/api/axios';
-import { Skeleton } from '@/components/ui/skeleton';
-import { CopyButton } from '@/components/ui/copy-button'; // Assuming you have this component
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/ui/primitives/skeleton';
+import { CopyButton } from '@/ui/primitives/copy-button'; // Assuming you have this component
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
 import { isValidUrl } from '@/lib/utils'; // Assuming a utility function to validate URLs
 
 // SAML Schema

@@ -6,7 +6,7 @@ import { supabase } from '@/lib/database/supabase';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { UserPreferencesComponent } from '@/components/common/UserPreferences';
+import { UserPreferencesComponent } from '@/ui/styled/common/UserPreferences';
 import { vi } from 'vitest';
 
 describe('User Preferences Flow', () => {

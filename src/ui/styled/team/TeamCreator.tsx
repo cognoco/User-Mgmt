@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { TeamCreator as HeadlessTeamCreator, TeamCreatorProps } from '../../headless/team/TeamCreator';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/ui/primitives/input';
+import { Button } from '@/ui/primitives/button';
+import { Label } from '@/ui/primitives/label';
+import { Textarea } from '@/ui/primitives/textarea';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/primitives/select';
 import { ExclamationTriangleIcon, CheckCircledIcon } from '@radix-ui/react-icons';
 
 export interface StyledTeamCreatorProps extends Omit<TeamCreatorProps, 'render'> {

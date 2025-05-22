@@ -2,21 +2,21 @@
 
 import React, { useState, useEffect } from 'react';
 import { CompanyDomain } from '@/types/company';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/ui/primitives/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/primitives/card';
+import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
+import { Badge } from '@/ui/primitives/badge';
 import { api } from '@/lib/api/axios';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/ui/primitives/use-toast';
 import { CheckCircle, Clock, AlertCircle, Loader2, Plus, Trash, Globe, Shield, Star } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/ui/primitives/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/primitives/table';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/ui/primitives/form';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/primitives/tooltip';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/primitives/dialog';
 import { SingleDomainVerification } from '@/ui/styled/company/SingleDomainVerification';
 
 interface DomainManagementProps {

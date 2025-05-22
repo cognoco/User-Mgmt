@@ -5,12 +5,12 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+} from "@/ui/primitives/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/primitives/tabs";
+import { Button } from "@/ui/primitives/button";
+import { Badge } from "@/ui/primitives/badge";
+import { ScrollArea } from "@/ui/primitives/scroll-area";
+import { Separator } from "@/ui/primitives/separator";
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/auth/useAuth';
