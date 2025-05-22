@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { useTranslation } from 'react-i18next';
 import {
   AlertDialog,
@@ -55,7 +55,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
 export const UserPreferencesComponent: React.FC<UserPreferencesProps> = ({ onSave, onReset, onError }) => {
   const { t } = useTranslation();
   const { preferences, isLoading, error, fetchPreferences, updatePreferences } = usePreferencesStore();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
 
   // Local state for form
   const [form, setForm] = useState<UserPreferences>(DEFAULT_PREFERENCES);

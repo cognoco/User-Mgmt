@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { OAuthProvider, OAuthState } from '@/types/oauth';
 import { useUserManagement } from '../auth/UserManagementProvider';
 import { api } from '@/lib/api/axios';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export const useOAuthStore = create<OAuthState>((set, get) => ({
   isLoading: false,

@@ -2,7 +2,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 interface SessionTimeoutProps {
   isOpen: boolean;
@@ -10,7 +10,7 @@ interface SessionTimeoutProps {
 }
 
 export function SessionTimeout({ isOpen, onClose }: SessionTimeoutProps) {
-  const logout = useAuthStore(state => state.logout);
+  const logout = useAuth().logout;
 
   const handleLogout = () => {
     logout();

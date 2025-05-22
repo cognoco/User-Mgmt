@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation'; // Import useSearchParams
-import { useAuthStore } from '@/lib/stores/auth.store'; // Adjust path if needed
+import { useAuth } from '@/hooks/auth/useAuth'; // Adjust path if needed
 import { supabase } from '@/lib/database/supabase'; // Corrected import path
 import { Button } from '@/ui/primitives/button';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
@@ -17,7 +17,7 @@ export default function VerifyEmailPage() {
       error: storeError, 
       clearError, 
       clearSuccessMessage 
-  } = useAuthStore();
+  } = useAuth();
   
   const [status, setStatus] = useState<'verifying' | 'success' | 'error' | 'idle'>('verifying');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

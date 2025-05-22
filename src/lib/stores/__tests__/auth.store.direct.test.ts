@@ -24,9 +24,9 @@ const localStorageMock = {
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
 // Patch: Use robust mock for useAuthStore
-viMock.mock('@/lib/stores/auth.store', async () => {
+viMock.mock('@/hooks/auth/use-auth', async () => {
   const { createMockAuthStore } = await import('@/tests/mocks/auth.store.mock');
-  return { useAuthStore: createMockAuthStore() };
+  return { useAuth: createMockAuthStore() };
 });
 
 // Patch: Set up globalThis.api for the mock to work

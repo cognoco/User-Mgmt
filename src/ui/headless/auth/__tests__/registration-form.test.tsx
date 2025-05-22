@@ -8,10 +8,16 @@ vi.mock('@/hooks/auth/useAuth', () => ({
   useAuth: vi.fn()
 }));
 
-function setupAuth(overrides: Record<string, any> = {}) {
-  const mockRegister = vi.fn().mockResolvedValue({ success: true });
-  (useAuth as any).mockReturnValue({
-    register: mockRegister,
+// Mock the entire auth store module
+const mockRegisterUserAction = vi.fn();
+const mockClearError = vi.fn();
+const mockClearSuccessMessage = vi.fn();
+vi.mock('@/hooks/auth/use-auth', () => ({
+  useAuth: vi.fn(() => ({
+    register: mockRegisterUserAction,
+    // ...add other mocked methods/properties as needed for your tests
+  })),
+}));
     isLoading: false,
     error: null,
     successMessage: null,

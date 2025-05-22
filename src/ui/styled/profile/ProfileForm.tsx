@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 import { useProfileStore } from '@/lib/stores/profile.store';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { profileSchema, ProfileFormData } from '@/types/profile';
 import { Edit2, XCircle, Save } from 'lucide-react';
 import { api } from '@/lib/api/axios';
@@ -35,7 +35,7 @@ export function ProfileForm() {
   const fetchProfile = useProfileStore(state => state.fetchProfile);
   const updateProfile = useProfileStore(state => state.updateProfile);
   
-  const userEmail = useAuthStore(state => state.user?.email);
+  const userEmail = useAuth().user?.email;
   
   const [isEditing, setIsEditing] = useState(false);
   const [isPrivacyLoading, setIsPrivacyLoading] = useState(false);

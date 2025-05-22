@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { useUserStore } from '@/lib/stores/user.store';
 import { use2FAStore } from '@/lib/stores/2fa.store';
 import { useCompanyProfileStore } from '@/lib/stores/companyProfileStore';

@@ -4,7 +4,7 @@ import React, { createContext, useContext, ReactNode, useEffect, useMemo } from 
 import { ThemeProvider } from '@/components/ui/theme-provider';
 // import { Toaster } from '@/components/ui/toaster'; // Comment out unused import
 import { api } from '@/lib/api/axios';
-// import { useAuthStore } from '@/lib/stores/auth.store'; // Commented out
+// import { useAuth } from '@/hooks/auth/useAuth'; // Commented out
 import { 
   /* initializeNotifications, */ // Keep type imports, comment out function if problematic
   type NotificationConfig, 
@@ -15,7 +15,7 @@ import { SubscriptionProviderConfig, SubscriptionTier } from '@/types/subscripti
 import { CorporateUserConfig, UserType } from '@/types/user-type';
 import { OAuthModuleConfig } from '@/types/oauth';
 // import { initializeCsrf } from '@/lib/api/axios'; // Removed unused import
-// import { LoginPayload, AuthResult } from '@/types/auth'; // Commented out
+// import { LoginPayload, AuthResult } from '@/core/auth/models'; // Commented out
 import { PaletteProvider } from '@/components/ui/PaletteProvider';
 import { initializeNotifications } from '../services/notification.service';
 import { notificationPreferencesService } from '../services/notification-preferences.service';
@@ -254,10 +254,10 @@ export function UserManagementProvider({
   /*
   let authStore;
   try {
-    authStore = useAuthStore();
-    console.log("[PROVIDER_DEBUG] useAuthStore() successful");
+    authStore = useAuth();
+    console.log("[PROVIDER_DEBUG] useAuth() successful");
   } catch (e) {
-    console.error("[PROVIDER_DEBUG] useAuthStore() FAILED:", e);
+    console.error("[PROVIDER_DEBUG] useAuth() FAILED:", e);
     throw e; // Re-throw to see error in tests if this fails
   }
 

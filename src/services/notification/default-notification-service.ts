@@ -5,7 +5,7 @@
  * It provides the default implementation for notification operations.
  */
 
-import { 
+import {
   NotificationService,
   NotificationHandler
 } from '@/core/notification/interfaces';
@@ -22,6 +22,8 @@ import {
   NotificationCategory,
   NotificationPriority
 } from '@/core/notification/models';
+import type { AxiosInstance } from 'axios';
+import type { NotificationDataProvider } from '@/adapters/notification/interfaces';
 
 /**
  * Default implementation of the NotificationService interface
@@ -37,8 +39,8 @@ export class DefaultNotificationService implements NotificationService {
    * @param notificationHandler - The handler for displaying notifications
    */
   constructor(
-    private apiClient: any, // This would be replaced with a proper API client interface
-    private notificationDataProvider: any, // This would be replaced with a proper notification data provider interface
+    private apiClient: AxiosInstance,
+    private notificationDataProvider: NotificationDataProvider,
     private notificationHandler: NotificationHandler
   ) {}
   

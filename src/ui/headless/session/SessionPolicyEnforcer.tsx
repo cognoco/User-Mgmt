@@ -6,7 +6,7 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api/axios';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export interface SessionPolicyEnforcerProps {
   intervalMs?: number;
@@ -16,7 +16,7 @@ export interface SessionPolicyEnforcerProps {
 export function SessionPolicyEnforcer({ intervalMs = 5 * 60 * 1000, children }: SessionPolicyEnforcerProps) {
   const enforceIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, logout } = useAuth();
 
   const enforceSessionPolicies = async () => {
     if (!isAuthenticated) return;

@@ -8,6 +8,8 @@
 import { NotificationService, NotificationHandler } from '@/core/notification/interfaces';
 import { DefaultNotificationService } from './default-notification-service';
 import { DefaultNotificationHandler } from './default-notification.handler';
+import type { AxiosInstance } from 'axios';
+import type { NotificationDataProvider } from '@/adapters/notification/interfaces';
 
 /**
  * Configuration options for creating a NotificationService
@@ -16,12 +18,12 @@ export interface NotificationServiceConfig {
   /**
    * API client for making HTTP requests
    */
-  apiClient: any; // This would be replaced with a proper API client interface
+  apiClient: AxiosInstance;
   
   /**
    * Notification data provider for database operations
    */
-  notificationDataProvider: any; // This would be replaced with a proper notification data provider interface
+  notificationDataProvider: NotificationDataProvider;
   
   /**
    * Custom notification handler (optional)

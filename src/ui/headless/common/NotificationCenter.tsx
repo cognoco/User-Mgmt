@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 import type { CompanyNotificationLog } from '@/types/company';
 
 /**
@@ -38,7 +38,7 @@ export default function NotificationCenter({
     fetchNotifications: () => Promise<void>;
   }) => React.ReactNode;
 }) {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
