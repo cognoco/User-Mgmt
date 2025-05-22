@@ -14,7 +14,7 @@ vi.mock('@/lib/api/axios', () => ({
   },
 }));
 
-vi.mock('@/components/ui/tooltip', () => ({
+vi.mock('@/ui/primitives/tooltip', () => ({
   Tooltip: (props: any) => <div data-testid="tooltip">{props.children}</div>,
   TooltipTrigger: (props: any) => <div data-testid="tooltip-trigger">{props.children}</div>,
   TooltipContent: (props: any) => <div data-testid="tooltip-content">{props.children}</div>,

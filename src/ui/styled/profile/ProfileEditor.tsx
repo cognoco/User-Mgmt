@@ -5,14 +5,14 @@ import { z } from 'zod';
 import Cropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert } from '@/components/ui/alert';
-import { Avatar } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/ui/primitives/button';
+import { Input } from '@/ui/primitives/input';
+import { Label } from '@/ui/primitives/label';
+import { Alert } from '@/ui/primitives/alert';
+import { Avatar } from '@/ui/primitives/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/primitives/dialog';
 import { useProfileStore } from '@/lib/stores/profile.store'; // Import the profile store
-import { ConnectedAccounts } from '@/components/shared/ConnectedAccounts';
+import { ConnectedAccounts } from '@/ui/styled/shared/ConnectedAccounts';
 
 const profileSchema = z.object({
   name: z.string().min(2),

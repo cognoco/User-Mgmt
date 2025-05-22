@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation'; // Import useSearchParams
 import { useAuth } from '@/hooks/auth/useAuth'; // Adjust path if needed
-import { supabase } from '@/lib/database/supabase'; // Corrected import path
+import { supabase } from '@/adapters/database/supabase-provider'; // Corrected import path
 import { Button } from '@/ui/primitives/button';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 import { Loader2, AlertCircle, MailWarning, CheckCircle } from 'lucide-react'; // Added icons

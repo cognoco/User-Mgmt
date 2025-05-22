@@ -4,7 +4,7 @@
  * Extends the headless SessionPolicyEnforcer with styling.
  * Since this component doesn't render visible UI, it simply re-exports the headless version.
  */
-import { SessionPolicyEnforcer as HeadlessSessionPolicyEnforcer, SessionPolicyEnforcerProps } from '@/ui/headless/session/SessionPolicyEnforcer';
+import { SessionPolicyEnforcer as HeadlessSessionPolicyEnforcer, SessionPolicyEnforcerProps } from '@/ui/headless/session/session-policy-enforcer';
 
 /**
  * Since this component doesn't have any visual styling needs, we simply re-export the headless version.

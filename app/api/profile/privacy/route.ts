@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 // import { z } from 'zod'; // Removed unused import
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { profileSchema } from '@/types/database'; // Corrected import path
 import { logUserAction } from '@/lib/audit/auditLogger'; // Added audit logger import

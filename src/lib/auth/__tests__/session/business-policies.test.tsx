@@ -3,7 +3,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { OrganizationSessionManager } from '@/ui/styled/company/OrganizationSessionManager';
+import { OrganizationSessionManager } from '@/ui/styled/company/organization-session-manager';
 import { OrganizationProvider } from '@/lib/context/OrganizationContext'; // Corrected import path
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
 import { vi, describe, beforeEach, test, expect, afterEach } from 'vitest'; // Import vi and afterEach
@@ -13,7 +13,7 @@ vi.mock('@supabase/supabase-js', async () => (await import('@/tests/mocks/supaba
 
 // IMPORTANT: Mock must be first to ensure all imports use the mock
 vi.mock('../../../../lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 describe('MOCK DIAGNOSTIC', () => {
   test('supabase.from returns a function with .select', () => {

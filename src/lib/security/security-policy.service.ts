@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 import { OrganizationSecurityPolicy, DEFAULT_SECURITY_POLICY } from '@/types/organizations';
 import { validatePasswordWithPolicy } from './password-validation';
 

@@ -33,7 +33,7 @@ const useAuthStore = useAuth;
 import { User, RegistrationPayload, LoginPayload, AuthResult } from '@/core/auth/models';
 import { api } from '../../api/axios';
 import { act } from '@testing-library/react';
-import { supabase as supabaseMock } from '@/lib/database/supabase';
+import { supabase as supabaseMock } from '@/adapters/database/supabase-provider';
 
 // Use imported Mock type for assertion
 const mockApiPost = api.post as Mock;

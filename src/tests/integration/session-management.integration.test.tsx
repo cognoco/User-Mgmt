@@ -1,7 +1,7 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SessionPolicyEnforcer } from '@/ui/styled/session/SessionPolicyEnforcer';
+import { SessionPolicyEnforcer } from '@/ui/styled/session/session-policy-enforcer';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { api } from '@/lib/api/axios';
 

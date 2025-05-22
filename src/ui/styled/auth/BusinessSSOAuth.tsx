@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { OAuthButtons } from './OAuthButtons';
 import { useOrganization } from '@/lib/hooks/useOrganization';
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 import { Provider } from '@supabase/supabase-js';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 

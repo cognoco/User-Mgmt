@@ -1,4 +1,4 @@
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 
 interface NotificationOptions {
   companyId: string;

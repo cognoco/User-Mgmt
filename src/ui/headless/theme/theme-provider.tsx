@@ -1,4 +1,4 @@
 /**
  * Headless Theme Provider re-export.
  */
-export { ThemeProvider, useTheme } from '@/components/ui/theme-provider';
+export { ThemeProvider, useTheme } from '@/ui/primitives/theme-provider';

@@ -1,4 +1,4 @@
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 import { sendCompanyNotification } from '@/lib/notifications/sendCompanyNotification';
 
 /**

@@ -3,14 +3,14 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MFAVerificationForm } from '@/ui/styled/auth/MFAVerificationForm';
+import { MFAVerificationForm } from '@/ui/styled/auth/mfaverification-form';
 import { vi, describe, beforeEach, test, expect, Mock } from 'vitest';
 import { api } from '@/lib/api/axios';
 import type { UserEvent } from '@testing-library/user-event';
 
 // Import our standardized mock using vi.mock with dynamic import
 vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 describe('MFA Verification During Login', () => {
   let user: UserEvent;

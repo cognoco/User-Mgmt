@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST, GET } from '../route';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 
 // Mock Supabase client
 vi.mock('@/lib/database/supabase', () => ({

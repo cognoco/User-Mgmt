@@ -8,7 +8,7 @@ import { Button } from '@/ui/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 
 // Import from our new architecture
-import { ProfileEditor } from '@/ui/styled/profile/ProfileEditor';
+import { ProfileEditor } from '@/ui/styled/profile/profile-editor';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAccountSettings } from '@/hooks/useAccountSettings';
 

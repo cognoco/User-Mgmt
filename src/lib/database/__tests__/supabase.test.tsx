@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 // This test is checking that the supabase module correctly uses environment variables 
 // to create clients when needed. With our global mock in place, we need to verify

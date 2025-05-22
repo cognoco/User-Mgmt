@@ -13,9 +13,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from '@/ui/primitives/dialog';
+import { Button } from '@/ui/primitives/button';
+import { Input } from '@/ui/primitives/input';
 import {
   Form,
   FormControl,
@@ -23,9 +23,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from '@/components/ui/form';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Spinner } from '@/components/ui/spinner';
+} from '@/ui/primitives/form';
+import { Checkbox } from '@/ui/primitives/checkbox';
+import { Spinner } from '@/ui/primitives/spinner';
 
 // Define the address schema
 const addressSchema = z.object({

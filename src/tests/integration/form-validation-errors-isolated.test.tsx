@@ -4,7 +4,7 @@
 import { vi } from 'vitest';
 
 // Mock UI components
-vi.mock('@/components/ui/alert', () => ({
+vi.mock('@/ui/primitives/alert', () => ({
   Alert: ({ children, className }: { children: React.ReactNode, className?: string }) => <div data-testid="alert" role="alert" className={className}>{children}</div>,
   AlertTitle: ({ children }: { children: React.ReactNode }) => <h5 data-testid="alert-title">{children}</h5>,
   AlertDescription: ({ children }: { children: React.ReactNode }) => <p data-testid="alert-description">{children}</p>,
@@ -42,11 +42,11 @@ vi.mock('@/hooks/auth/use-auth', () => ({
 import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { RegistrationForm } from '@/ui/styled/auth/RegistrationForm';
+import { RegistrationForm } from '@/ui/styled/auth/registration-form';
 import { describe, test, expect, beforeEach } from 'vitest';
 // Import necessary providers and types
 import { UserManagementProvider, type UserManagementConfig } from '@/lib/auth/UserManagementProvider';
-import { ThemeProvider } from '@/components/ui/theme-provider';
+import { ThemeProvider } from '@/ui/primitives/theme-provider';
 import { UserType } from '@/types/user-type';
 // Import SubscriptionTier type
 import { SubscriptionTier } from '@/types/subscription'; // Import enum itself

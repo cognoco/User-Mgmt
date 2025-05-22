@@ -14,15 +14,15 @@ vi.mock('@/lib/supabase');
 vi.mock('@/hooks/useProfile');
 
 // Mock UI components used
-vi.mock('@/components/ui/button', () => ({ Button: (props: any) => <button {...props} /> }));
-vi.mock('@/components/ui/card', () => ({
+vi.mock('@/ui/primitives/button', () => ({ Button: (props: any) => <button {...props} /> }));
+vi.mock('@/ui/primitives/card', () => ({
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardTitle: ({ children }: { children: React.ReactNode }) => <h3>{children}</h3>,
   CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
-vi.mock('@/components/ui/label', () => ({ Label: (props: any) => <label {...props} /> }));
-vi.mock('@/components/ui/switch', () => ({
+vi.mock('@/ui/primitives/label', () => ({ Label: (props: any) => <label {...props} /> }));
+vi.mock('@/ui/primitives/switch', () => ({
   Switch: ({ checked, onCheckedChange, ...props }: any) => (
     <input
       type="checkbox"
@@ -33,7 +33,7 @@ vi.mock('@/components/ui/switch', () => ({
     />
   )
 }));
-vi.mock('@/components/ui/select', () => ({
+vi.mock('@/ui/primitives/select', () => ({
   Select: ({ children, value, onValueChange, disabled }: any) => (
     <select
       data-testid="profile-visibility-select"

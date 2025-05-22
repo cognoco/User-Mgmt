@@ -3,12 +3,12 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import FormWithRecovery from '@/components/common/FormWithRecovery';
+import FormWithRecovery from '@/ui/styled/common/FormWithRecovery';
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 
 // Import our standardized mock
 vi.mock('@/lib/database/supabase', () => require('@/tests/mocks/supabase'));
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 describe('Error Recovery Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

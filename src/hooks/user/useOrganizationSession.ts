@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 import { OrganizationSecurityPolicy, DEFAULT_SECURITY_POLICY } from '@/types/organizations';
 // import types from /src/types if available
 

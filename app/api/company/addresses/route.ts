@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 import { checkRateLimit } from '@/middleware/rate-limit';
 
 // Address Schema

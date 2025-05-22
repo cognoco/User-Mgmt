@@ -23,7 +23,7 @@ vi.mock('../Profile.jsx', async () => {
 
 // Mock Supabase separately, after we've mocked the Profile component
 vi.mock('@/lib/database/supabase', async () => await import('@/tests/mocks/supabase'));
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 describe('Profile Component', () => {
   // Setup test environment and router

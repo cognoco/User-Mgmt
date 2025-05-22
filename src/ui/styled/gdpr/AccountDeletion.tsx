@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/ui/primitives/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/primitives/card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,8 +13,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { useToast } from "@/components/ui/use-toast";
+} from "@/ui/primitives/alert-dialog"
+import { useToast } from "@/ui/primitives/use-toast";
 import { Trash2, Loader2, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api/axios';

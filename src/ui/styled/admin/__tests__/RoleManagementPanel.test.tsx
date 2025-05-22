@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { act } from 'react';
 import RoleManagementPanel from '../RoleManagementPanel';
 import { useRBACStore } from '@/lib/stores/rbac.store';
-import { User } from '@/types/user';
+import { User } from '@/core/user/types';
 import { RoleSchema, UserRoleSchema, RoleValues, PermissionValues } from '@/types/rbac';
 import { createRBACStoreMock } from '@/tests/mocks/rbac.store.mock';
 

@@ -4,19 +4,19 @@ import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/ui/primitives/button';
+import { Input } from '@/ui/primitives/input';
+import { Label } from '@/ui/primitives/label';
+import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
+import { Checkbox } from '@/ui/primitives/checkbox';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { loginSchema, type LoginData } from '@/core/auth/models';
 import { useRouter } from 'next/navigation';
 import { MFAVerificationForm } from './MFAVerificationForm';
-import { RateLimitFeedback } from '@/components/common/RateLimitFeedback';
+import { RateLimitFeedback } from '@/ui/styled/common/RateLimitFeedback';
 import { OAuthButtons } from './OAuthButtons';
 import { z } from 'zod';
-import { ErrorBoundary, DefaultErrorFallback } from '@/components/common/ErrorBoundary';
+import { ErrorBoundary, DefaultErrorFallback } from '@/ui/styled/common/ErrorBoundary';
 import Link from 'next/link';
 
 export function LoginForm() {

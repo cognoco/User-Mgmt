@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BackupCodesDisplay } from '@/ui/styled/auth/BackupCodesDisplay';
-import { MFAVerificationForm } from '@/ui/styled/auth/MFAVerificationForm';
+import { BackupCodesDisplay } from '@/ui/styled/auth/backup-codes-display';
+import { MFAVerificationForm } from '@/ui/styled/auth/mfaverification-form';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { vi } from 'vitest';

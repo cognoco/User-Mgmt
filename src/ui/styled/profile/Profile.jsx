@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 import DataExport from './DataExport';
 import CompanyDataExport from './CompanyDataExport';
 import NotificationPreferences from './NotificationPreferences';

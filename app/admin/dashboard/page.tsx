@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { AdminDashboard } from '@/ui/styled/admin/AdminDashboard';
+import { AdminDashboard } from '@/ui/styled/admin/admin-dashboard';
 import { Button } from '@/ui/primitives/button';
 import Link from 'next/link';
 

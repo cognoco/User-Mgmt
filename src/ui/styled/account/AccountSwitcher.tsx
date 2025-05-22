@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { fetchAccounts, switchAccount, createOrganization, fetchOrganizationMembers, leaveOrganization, Account, OrganizationMember } from '@/lib/accountSwitcherApi';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Alert } from '@/components/ui/alert';
-import { supabase } from '@/lib/database/supabase';
+import { Button } from '@/ui/primitives/button';
+import { Input } from '@/ui/primitives/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/primitives/dialog';
+import { Alert } from '@/ui/primitives/alert';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 interface AccountSwitcherProps {
   showDetails?: boolean;

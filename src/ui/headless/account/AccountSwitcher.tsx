@@ -15,7 +15,7 @@ import {
   Account, 
   OrganizationMember 
 } from '@/lib/accountSwitcherApi';
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 export interface AccountSwitcherProps {
   /**

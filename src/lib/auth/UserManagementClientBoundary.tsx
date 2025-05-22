@@ -3,12 +3,12 @@
 import React, { useEffect } from 'react';
 import { UserManagementProvider, UserManagementConfig, IntegrationCallbacks } from './UserManagementProvider';
 import { initializeCsrf } from '@/lib/api/axios';
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { User } from '@/core/auth/models';
 import toast, { Toaster } from 'react-hot-toast';
 import { OAuthProvider } from '@/types/oauth';
-import { SessionPolicyEnforcer } from '@/ui/styled/session/SessionPolicyEnforcer';
+import { SessionPolicyEnforcer } from '@/ui/styled/session/session-policy-enforcer';
 
 // Define the callbacks inside the Client Component
 const clientCallbacks: Required<IntegrationCallbacks> = {

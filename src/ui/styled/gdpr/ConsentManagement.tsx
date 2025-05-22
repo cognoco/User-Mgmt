@@ -1,9 +1,9 @@
 'use client';
 
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/ui/primitives/checkbox';
+import { Button } from '@/ui/primitives/button';
+import { Label } from '@/ui/primitives/label';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { ConsentManagement as HeadlessConsentManagement } from '../../headless/gdpr/ConsentManagement';
 
 export function ConsentManagement() {

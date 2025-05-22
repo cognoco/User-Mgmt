@@ -4,7 +4,7 @@ import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LoginForm } from '../LoginForm';
 import { useAuth } from '@/hooks/auth/useAuth';
-import type { LoginData } from '@/types/auth';
+import type { LoginData } from '@/core/auth/types';
 import * as React from 'react';
 
 // Mock ResizeObserver
@@ -65,7 +65,7 @@ vi.mock('react-hook-form', async () => {
 });
 
 // Mock UI components needed by LoginForm
-vi.mock('@/components/ui/alert', () => ({
+vi.mock('@/ui/primitives/alert', () => ({
   Alert: ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div data-testid="alert" className={className}>{children}</div>
   ),

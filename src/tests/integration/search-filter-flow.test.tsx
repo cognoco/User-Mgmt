@@ -64,10 +64,10 @@ vi.mock('@/lib/database/supabase', () => {
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import SearchPage from '@/components/search/SearchPage'; 
+import SearchPage from '@/ui/styled/search/SearchPage'; 
 
 // Import supabase AFTER the mock definition
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 describe('Search and Filtering Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

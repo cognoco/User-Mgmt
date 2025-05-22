@@ -30,7 +30,7 @@ vi.mock('@/lib/audit/auditLogger', () => ({
 
 // Import the mocked modules directly
 import { getCurrentUser } from '@/lib/auth/session';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 import { logUserAction } from '@/lib/audit/auditLogger';
 
 // Helper to create a mock request

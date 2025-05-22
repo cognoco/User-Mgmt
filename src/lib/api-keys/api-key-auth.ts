@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 import { hashApiKey, getKeyPrefix } from './api-key-utils';
 
 export interface ApiKeyAuthResult {

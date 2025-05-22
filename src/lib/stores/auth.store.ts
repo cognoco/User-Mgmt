@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 import { 
   AuthState, 
   LoginPayload, 

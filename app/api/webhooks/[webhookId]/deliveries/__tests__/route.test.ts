@@ -20,7 +20,7 @@ vi.mock('@/lib/database/supabase', () => ({
 
 // Import the mocked modules directly
 import { getCurrentUser } from '@/lib/auth/session';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 
 // Helper to create a mock request
 function createMockRequest(method: string, queryParams: Record<string, string> = {}) {

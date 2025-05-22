@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST, DELETE, PATCH } from '../route';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 import { z } from 'zod';
 
 // Mock dependencies

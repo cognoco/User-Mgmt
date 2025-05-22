@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 // Import from our new architecture
-import { TeamMemberManager } from '@/ui/styled/team/TeamMemberManager';
+import { TeamMemberManager } from '@/ui/styled/team/team-member-manager';
 import { useTeams } from '@/hooks/team/use-teams';
 import { useTeamMembers } from '@/hooks/team/use-team-members';
 

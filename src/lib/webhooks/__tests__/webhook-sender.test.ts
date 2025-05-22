@@ -19,7 +19,7 @@ vi.mock('@/lib/database/supabase', () => ({
 }));
 
 // Import the mocked supabase directly
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 
 describe('Webhook Sender', () => {
   let supabaseMock: any;

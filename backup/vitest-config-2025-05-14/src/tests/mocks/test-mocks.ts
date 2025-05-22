@@ -1,5 +1,5 @@
 import { vi, Mock } from 'vitest';
-import { AuthState, User } from '@/types/auth';
+import { AuthState, User } from '@/core/auth/types';
 
 // Type for mocked auth store
 export type MockAuthStore = {

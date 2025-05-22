@@ -4,12 +4,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState } from 'react';
-import { ErrorBoundary, DefaultErrorFallback } from '@/components/common/ErrorBoundary';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { PasswordRequirements } from '@/ui/styled/auth/PasswordRequirements';
+import { ErrorBoundary, DefaultErrorFallback } from '@/ui/styled/common/ErrorBoundary';
+import { Button } from '@/ui/primitives/button';
+import { Input } from '@/ui/primitives/input';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/ui/primitives/form';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
+import { PasswordRequirements } from '@/ui/styled/auth/password-requirements';
 import { api } from '@/lib/api/axios';
 
 const resetPasswordSchema = z.object({

@@ -3,14 +3,14 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SocialSharingComponent } from '@/ui/styled/sharing/SocialSharingComponent'; 
+import { SocialSharingComponent } from '@/ui/styled/sharing/social-sharing-component'; 
 
 // Import Vitest functions
 import { vi, Mock } from 'vitest'; 
 
 // --- Remove Supabase client mock --- 
 // vi.mock('@/lib/database/supabase'); 
-// import { supabase } from '@/lib/database/supabase';
+// import { supabase } from '@/adapters/database/supabase-provider';
 
 import type { UserEvent } from '@testing-library/user-event'; 
 

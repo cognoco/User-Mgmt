@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, test, expect, beforeEach, Mock } from 'vitest';
-import { TwoFactorSetup } from '@/ui/styled/auth/TwoFactorSetup';
+import { TwoFactorSetup } from '@/ui/styled/auth/two-factor-setup';
 import { api } from '@/lib/api/axios';
 
 // Mock the api module

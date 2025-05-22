@@ -3,7 +3,7 @@
 import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Dashboard } from '@/ui/styled/dashboard/Dashboard';
+import { Dashboard } from '@/ui/styled/dashboard/dashboard';
 import { describe, test, expect, beforeEach, vi } from 'vitest'; 
 
 // Create spy functions that we can control
@@ -49,7 +49,7 @@ vi.mock('@/lib/database/supabase', () => {
 });
 
 // Import after mock
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 describe('Data Management Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

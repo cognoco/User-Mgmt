@@ -7,9 +7,9 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 // Import specific forms instead of generic Auth
-import { RegistrationForm } from '@/ui/styled/auth/RegistrationForm';
-import { LoginForm } from '@/ui/styled/auth/LoginForm';
-import { ProfileEditor } from '@/ui/styled/profile/ProfileEditor'; // Assuming ProfileEditor handles profile updates
+import { RegistrationForm } from '@/ui/styled/auth/registration-form';
+import { LoginForm } from '@/ui/styled/auth/login-form';
+import { ProfileEditor } from '@/ui/styled/profile/profile-editor'; // Assuming ProfileEditor handles profile updates
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'; // Add SpyInstance
 // Remove the module mock for auth.store
 // vi.mock('@/lib/stores/auth.store', () => ({ ... })); 
@@ -20,11 +20,11 @@ import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'; // A
 // Mock Supabase (using factory with dynamic import)
 vi.mock('@/lib/database/supabase', () => import('@/tests/mocks/supabase'));
 // Import the mocked supabase instance (Vitest redirects this)
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 // Import Profile type
 import type { Profile } from '@/types/profile'; // Assuming type exists here
-import type { User, RateLimitInfo } from '@/types/auth'; // Import types
+import type { User, RateLimitInfo } from '@/core/auth/types'; // Import types
 // If ConnectedAccount is only used as a type, re-import it from the correct alias
 // import type { ConnectedAccount } from '@/types/connected-accounts';
 

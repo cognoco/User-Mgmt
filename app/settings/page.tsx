@@ -9,7 +9,7 @@ import { Skeleton } from '@/ui/primitives/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 
 // Import from our new architecture
-import { AccountSettings } from '@/ui/styled/profile/AccountSettings';
+import { AccountSettings } from '@/ui/styled/profile/account-settings';
 import { useAccountSettings } from '@/src/hooks/profile/useAccountSettings';
 import { useUserProfile } from '@/src/hooks/profile/useUserProfile';
 

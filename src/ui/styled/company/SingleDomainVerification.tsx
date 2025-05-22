@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import { CompanyDomain } from '@/types/company';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/ui/primitives/button';
+import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 import { api } from '@/lib/api/axios';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/ui/primitives/use-toast';
 import { CheckCircle, AlertCircle, Loader2, Copy } from 'lucide-react';
 
 interface SingleDomainVerificationProps {

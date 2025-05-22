@@ -5,12 +5,12 @@ vi.mock('@/lib/database/supabase', () => require('../mocks/supabase'));
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { NotificationPreferences } from '@/components/shared/NotificationPreferences';
+import { NotificationPreferences } from '@/ui/styled/shared/NotificationPreferences';
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 
 // Import our standardized mock
-import { supabase } from '@/lib/database/supabase';
-import { NotificationCenter } from '@/components/common/NotificationCenter';
+import { supabase } from '@/adapters/database/supabase-provider';
+import { NotificationCenter } from '@/ui/styled/common/NotificationCenter';
 
 describe('Notification Management Flow', () => {
   let user: ReturnType<typeof userEvent.setup>;

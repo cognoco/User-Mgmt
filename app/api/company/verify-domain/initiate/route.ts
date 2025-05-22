@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { v4 as uuidv4 } from 'uuid';
 import { URL } from 'url'; // Use Node.js URL parser

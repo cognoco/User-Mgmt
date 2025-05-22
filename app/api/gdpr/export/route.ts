@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 
 // Simulate a delay for gathering data
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

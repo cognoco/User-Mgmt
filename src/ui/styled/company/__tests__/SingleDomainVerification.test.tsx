@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SingleDomainVerification } from '@/ui/styled/company/SingleDomainVerification';
+import { SingleDomainVerification } from '@/ui/styled/company/single-domain-verification';
 import { api } from '@/lib/api/axios';
 import { act } from 'react-dom/test-utils';
 

@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { Button } from '@/ui/primitives/button';
 import { Plus } from 'lucide-react';
-import { AddressCard } from '@/ui/styled/company/AddressCard';
-import { AddressDialog } from '@/ui/styled/company/AddressDialog';
+import { AddressCard } from '@/ui/styled/company/address-card';
+import { AddressDialog } from '@/ui/styled/company/address-dialog';
 import { useState } from 'react';
 import { Skeleton } from '@/ui/primitives/skeleton';
 

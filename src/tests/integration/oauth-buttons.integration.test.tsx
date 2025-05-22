@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { OAuthButtons } from '@/ui/styled/auth/OAuthButtons';
+import { OAuthButtons } from '@/ui/styled/auth/oauth-buttons';
 import { useOAuthStore } from '@/lib/stores/oauth.store';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { OAuthProvider } from '@/types/oauth';

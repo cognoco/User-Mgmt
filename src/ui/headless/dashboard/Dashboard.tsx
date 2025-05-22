@@ -1,5 +1,5 @@
 import { useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 export interface Item {
   id: string;

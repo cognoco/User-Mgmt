@@ -1,5 +1,5 @@
 import { stripe, createCustomer, createSubscription } from '@/lib/payments/stripe';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
 

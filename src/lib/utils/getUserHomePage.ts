@@ -1,4 +1,4 @@
-import type { User } from '@/types/user';
+import type { User } from '@/core/user/types';
 
 /**
  * Determines the homepage/dashboard route for a user based on company and individual preferences.

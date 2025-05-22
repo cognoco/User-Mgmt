@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
-import { Toaster } from '@/components/ui/toaster';
-import { ThemeProvider } from '@/components/theme/theme-provider';
+import { Toaster } from '@/ui/primitives/toaster';
+import { ThemeProvider } from '@/ui/styled/theme/theme-provider';
 
 export function Layout() {
   return (

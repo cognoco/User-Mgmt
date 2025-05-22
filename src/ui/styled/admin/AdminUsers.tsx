@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Input } from '@/components/ui/input';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Alert } from '@/components/ui/alert';
-import type { User as BaseUser } from '@/types/user';
+import { Input } from '@/ui/primitives/input';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/ui/primitives/table';
+import { Button } from '@/ui/primitives/button';
+import { Alert } from '@/ui/primitives/alert';
+import type { User as BaseUser } from '@/core/user/types';
 
 // Extend User type for admin table compatibility
 interface User extends BaseUser {

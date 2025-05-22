@@ -5,7 +5,7 @@ import { Skeleton } from '@/ui/primitives/skeleton';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 
 // Import from our new architecture
-import { PermissionEditor } from '@/ui/styled/permission/PermissionEditor';
+import { PermissionEditor } from '@/ui/styled/permission/permission-editor';
 import { usePermissions } from '@/hooks/permission/use-permissions';
 
 export const metadata: Metadata = {

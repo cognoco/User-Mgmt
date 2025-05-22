@@ -4,7 +4,7 @@ import { vi, Mock, beforeEach, describe, test, expect } from 'vitest';
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TwoFactorSetup } from '@/ui/styled/auth/TwoFactorSetup';
+import { TwoFactorSetup } from '@/ui/styled/auth/two-factor-setup';
 import { api } from '@/lib/api/axios';
 
 // Import our standardized mock using vi.mock with async dynamic import and alias (no extension)
@@ -12,7 +12,7 @@ vi.mock('@/lib/database/supabase', async () => {
   const mod = await import('@/tests/mocks/supabase');
   return mod; 
 });
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 // Mock the API instance specifically for these tests
 vi.mock('@/lib/api/axios');

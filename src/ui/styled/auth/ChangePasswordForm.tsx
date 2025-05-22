@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { FormEvent } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/ui/primitives/button';
+import { Input } from '@/ui/primitives/input';
+import { Label } from '@/ui/primitives/label';
+import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 import { PasswordRequirements } from './PasswordRequirements';
-import { ChangePasswordForm as HeadlessChangePasswordForm, type ChangePasswordFormValues } from '@/ui/headless/auth/ChangePasswordForm';
+import { ChangePasswordForm as HeadlessChangePasswordForm, type ChangePasswordFormValues } from '@/ui/headless/auth/change-password-form';
 
 /**
  * Styled ChangePasswordForm component that uses the headless component for behavior

@@ -59,7 +59,7 @@ vi.mock('@/lib/database/supabase', () => {
 });
 
 // Import module after mocking
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 import { describe, test, expect, beforeEach } from 'vitest';
 
 // Get the exported spies

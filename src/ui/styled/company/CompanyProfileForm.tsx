@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/ui/primitives/button';
+import { Input } from '@/ui/primitives/input';
+import { Textarea } from '@/ui/primitives/textarea';
 import {
   Form,
   FormControl,
@@ -13,16 +13,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from '@/ui/primitives/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { useToast } from '@/components/ui/use-toast';
-import { CompanyLogoUpload } from '@/ui/styled/profile/CompanyLogoUpload';
+} from '@/ui/primitives/select';
+import { useToast } from '@/ui/primitives/use-toast';
+import { CompanyLogoUpload } from '@/ui/styled/profile/company-logo-upload';
 import { CheckCircle, XCircle, Loader2, Search, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { api } from '@/lib/api/axios';
 

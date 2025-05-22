@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 import { triggerWebhook } from '@/lib/webhooks/triggerWebhook';
 
 // Zod schema for SSO provider config

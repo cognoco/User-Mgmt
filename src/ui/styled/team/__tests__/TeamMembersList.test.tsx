@@ -10,7 +10,7 @@ vi.mock('@/hooks/permission/usePermissions', () => ({
   usePermission: vi.fn(),
 }));
 
-import { TeamMembersList as TeamMembersListComponent } from '@/ui/styled/team/TeamMembersList';
+import { TeamMembersList as TeamMembersListComponent } from '@/ui/styled/team/team-members-list';
 import { usePermission } from '@/hooks/permission/usePermissions';
 
 // Explicitly type the component
@@ -73,7 +73,7 @@ const mockTeamMembers = {
 };
 
 // Mock Skeleton component for test selection
-vi.mock('@/components/ui/skeleton', () => ({
+vi.mock('@/ui/primitives/skeleton', () => ({
   Skeleton: ({ className }: { className?: string }) => (
     <div data-testid="skeleton" className={className} />
   ),

@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { UpgradeToBusinessFlow } from '@/ui/styled/auth/UpgradeToBusinessFlow';
+import { UpgradeToBusinessFlow } from '@/ui/styled/auth/upgrade-to-business-flow';
 import { api } from '@/lib/api';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useNotificationStore } from '@/lib/stores/notification-store';

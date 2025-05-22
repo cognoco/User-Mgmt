@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { getUser } from '@/lib/auth/getUser';
 import { hasPermission } from '@/lib/auth/hasPermission';
-import { AdminAuditLogs } from '@/ui/styled/admin/audit-logs/AdminAuditLogs';
+import { AdminAuditLogs } from '@/ui/styled/admin/audit-logs/admin-audit-logs';
 
 export const metadata: Metadata = {
   title: 'Admin Audit Logs',

@@ -8,8 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/primitives/card';
 
 // Import from our new architecture
-import { TeamCreator } from '@/ui/styled/team/TeamCreator';
-import { TeamMemberManager } from '@/ui/styled/team/TeamMemberManager';
+import { TeamCreator } from '@/ui/styled/team/team-creator';
+import { TeamMemberManager } from '@/ui/styled/team/team-member-manager';
 import { useTeams } from '@/hooks/team/use-teams';
 import { useTeamMembers } from '@/hooks/team/use-team-members';
 import { useTeamInvitations } from '@/hooks/team/use-team-invitations';

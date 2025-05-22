@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { useOAuthStore } from '@/lib/stores/oauth.store';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { OAuthProvider } from '@/types/oauth';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/ui/primitives/button';
 import { useTranslation } from 'react-i18next';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
 
 // Provider icons (you can replace these with actual icons)
 const providerIcons: Record<OAuthProvider, React.ReactNode> = {

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { decode } from 'base64-arraybuffer'; // For decoding base64
 import { v4 as uuidv4 } from 'uuid'; // For generating unique filenames

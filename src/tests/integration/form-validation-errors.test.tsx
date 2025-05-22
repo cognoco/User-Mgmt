@@ -33,7 +33,7 @@ vi.mock('@/hooks/auth/use-auth', () => ({
 }));
 
 // UI Component Mocks
-vi.mock('@/components/ui/alert', () => ({
+vi.mock('@/ui/primitives/alert', () => ({
     Alert: ({ children, className }: { children: React.ReactNode, className?: string }) => <div data-testid="alert" role="alert" className={className}>{children}</div>,
     AlertTitle: ({ children }: { children: React.ReactNode }) => <h5 data-testid="alert-title">{children}</h5>,
     AlertDescription: ({ children }: { children: React.ReactNode }) => <p data-testid="alert-description">{children}</p>,
@@ -59,7 +59,7 @@ vi.mock('next/navigation', () => ({
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { RegistrationForm } from '@/ui/styled/auth/RegistrationForm';
+import { RegistrationForm } from '@/ui/styled/auth/registration-form';
 import { UserManagementProvider, UserManagementConfig } from '@/lib/auth/UserManagementProvider';
 import { UserType } from '@/types/user-type';
 import { SubscriptionTier } from '@/types/subscription';

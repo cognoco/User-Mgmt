@@ -1,8 +1,8 @@
 "use client";
 
-import { AuditLogViewer } from '@/ui/styled/audit/AuditLogViewer';
+import { AuditLogViewer } from '@/ui/styled/audit/audit-log-viewer';
 import { useEffect, useState } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/ui/primitives/use-toast';
 
 export function AdminAuditLogs() {
   const { toast } = useToast();

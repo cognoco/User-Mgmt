@@ -8,7 +8,7 @@ vi.mock('@/lib/database/supabase', async () => {
     getServiceSupabase: () => supabase,
   };
 });
-import { supabase, getServiceSupabase } from '@/lib/database/supabase';
+import { supabase, getServiceSupabase } from '@/adapters/database/supabase-provider';
 
 describe('Database Operations', () => {
   beforeEach(() => {

@@ -17,7 +17,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 // Mock UI components
-vi.mock('@/components/ui/alert', () => ({
+vi.mock('@/ui/primitives/alert', () => ({
   Alert: ({ children, className }: { children: React.ReactNode, className?: string }) => <div data-testid="alert" className={className}>{children}</div>,
   AlertTitle: ({ children }: { children: React.ReactNode }) => <div data-testid="alert-title">{children}</div>,
   AlertDescription: ({ children }: { children: React.ReactNode }) => <div data-testid="alert-description">{children}</div>,
@@ -73,7 +73,7 @@ import userEvent from '@testing-library/user-event';
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
 import { RegistrationForm } from '../RegistrationForm';
 import { UserType } from '@/types/user-type';
-import { ThemeProvider } from '@/components/ui/theme-provider';
+import { ThemeProvider } from '@/ui/primitives/theme-provider';
 import { OAuthProvider } from '@/types/oauth';
 
 describe('RegistrationForm Integration Flow', () => {

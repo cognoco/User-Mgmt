@@ -6,7 +6,7 @@ import type {
   RegistrationPayload,
   MFASetupResponse,
   MFAVerifyResponse
-} from '@/types/auth';
+} from '@/core/auth/types';
 
 interface AuthState {
   user: User | null;

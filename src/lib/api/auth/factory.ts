@@ -8,7 +8,7 @@
 import { AuthService } from '@/core/auth/interfaces';
 import { DefaultAuthService } from '@/services/auth/default-auth.service';
 import { createAuthProvider } from '@/adapters/auth/factory';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 
 // Singleton instance for API routes
 let authServiceInstance: AuthService | null = null;

@@ -6,7 +6,7 @@ import { NextRequest } from 'next/server';
 import { GET, PATCH } from '../route';
 
 // TODO: Import global Supabase and rate-limit mocks as per project convention
-// import { getServiceSupabase } from '@/lib/database/supabase';
+// import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 // import { checkRateLimit } from '@/middleware/rate-limit';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { User as BaseUser } from '@/types/user';
+import type { User as BaseUser } from '@/core/user/types';
 
 // Extend User type for admin table compatibility
 export interface User extends BaseUser {

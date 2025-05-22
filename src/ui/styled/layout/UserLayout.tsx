@@ -1,4 +1,4 @@
-import { SessionPolicyEnforcer } from '@/ui/styled/session/SessionPolicyEnforcer';
+import { SessionPolicyEnforcer } from '@/ui/styled/session/session-policy-enforcer';
 
 <UserContext>
   <ThemeProvider>

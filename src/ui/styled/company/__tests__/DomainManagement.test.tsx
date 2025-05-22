@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DomainManagement } from '@/ui/styled/company/DomainManagement';
+import { DomainManagement } from '@/ui/styled/company/domain-management';
 import { api } from '@/lib/api/axios';
 
 const companyId = 'company-123';

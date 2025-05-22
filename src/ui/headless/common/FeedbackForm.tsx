@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 import { feedbackCategoryEnum } from '@/types/feedback';
 
 /**

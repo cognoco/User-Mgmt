@@ -5,7 +5,7 @@ import { Skeleton } from '@/ui/primitives/skeleton';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 
 // Import from our new architecture
-import { RoleManager } from '@/ui/styled/permission/RoleManager';
+import { RoleManager } from '@/ui/styled/permission/role-manager';
 import { useRoles } from '@/hooks/permission/use-roles';
 import { usePermissions } from '@/hooks/permission/use-permissions';
 

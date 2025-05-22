@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/adapters/database/supabase-provider';
 
 interface WebhookPayload {
   event: string;

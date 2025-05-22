@@ -3,12 +3,12 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import FileManager from '@/components/common/FileManager';
+import FileManager from '@/ui/styled/common/FileManager';
 import { vi, Mock } from 'vitest';
 
 // Import our standardized mock
 vi.mock('@/lib/database/supabase', async () => (await import('@/tests/mocks/supabase')));
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 // Cast storage methods to Mock for linter compliance
 const getStorage = () => supabase.storage.from('files');

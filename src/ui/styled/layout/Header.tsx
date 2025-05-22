@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/ui/primitives/button";
 import { useAuth } from '@/hooks/auth/useAuth';
-import { LanguageSelector } from "@/ui/styled/settings/LanguageSelector";
+import { LanguageSelector } from '@/ui/styled/settings/language-selector';
 import { useTranslation } from "react-i18next";
 import { useUserManagement } from "@/lib/auth/UserManagementProvider";
 import { Menu, X, User, LogOut, Settings, Home } from "lucide-react";
@@ -12,7 +12,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+} from "@/ui/primitives/dropdown-menu";
 import { getPlatformClasses } from "@/hooks/utils/usePlatformStyles";
 import { useIsMobile } from "@/lib/utils/responsive";
 

@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton"; // For loading state
+import { Button } from '@/ui/primitives/button';
+import { Input } from '@/ui/primitives/input';
+import { Label } from '@/ui/primitives/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/primitives/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/primitives/card";
+import { Alert, AlertDescription } from "@/ui/primitives/alert";
+import { Skeleton } from "@/ui/primitives/skeleton"; // For loading state
 import { useProfileStore } from '@/lib/stores/profile.store';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/ui/primitives/use-toast';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

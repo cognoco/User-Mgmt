@@ -6,7 +6,7 @@
  */
 
 import { UserManagementConfiguration } from '@/core/config';
-import { createSupabaseClient } from '@/lib/database/supabase';
+import { createSupabaseClient } from '@/adapters/database/supabase-provider';
 
 // Initialize the application
 export function initializeApp() {

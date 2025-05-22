@@ -9,7 +9,7 @@ import { Button } from '@/ui/primitives/button';
 import Link from 'next/link';
 
 // Import from our new architecture
-import { MFASetup } from '@/ui/styled/auth/MFASetup';
+import { MFASetup } from '@/ui/styled/auth/mfasetup';
 import { useMFA } from '@/hooks/auth/useMFA';
 
 export default function SecuritySettingsPage() {

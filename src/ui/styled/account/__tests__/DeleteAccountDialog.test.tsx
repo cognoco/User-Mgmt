@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest'; // Import vi
-import DeleteAccountDialog from '@/ui/styled/account/DeleteAccountDialog';
+import DeleteAccountDialog from '@/ui/styled/account/delete-account-dialog';
 import { useDeleteAccount } from '@/hooks/user/useDeleteAccount';
 import { act } from 'react';
 

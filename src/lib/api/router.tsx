@@ -1,12 +1,12 @@
 import { createBrowserRouter } from 'react-router-dom';
-import { Layout } from '@/components/layout/Layout';
+import { Layout } from '@/ui/styled/layout/Layout';
 import { HomePage } from '@/pages/home/HomePage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
 import { ProfileCompletionPage } from '@/pages/auth/ProfileCompletionPage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
 import { SettingsPage } from '@/pages/settings/SettingsPage';
-import { ProtectedRoute } from '@/ui/styled/auth/ProtectedRoute';
+import { ProtectedRoute } from '@/ui/styled/auth/protected-route';
 
 export const router = createBrowserRouter([
   {

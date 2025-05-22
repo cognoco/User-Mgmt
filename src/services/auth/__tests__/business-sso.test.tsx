@@ -27,12 +27,12 @@ import '@/tests/i18nTestSetup';
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BusinessSSOAuth } from '@/ui/styled/auth/BusinessSSOAuth';
+import { BusinessSSOAuth } from '@/ui/styled/auth/business-ssoauth';
 import { OrganizationProvider } from '@/lib/context/OrganizationContext';
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 
 // Import our standardized mock using vi.mock with async import
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 // Store original window location
 const originalLocation = window.location;

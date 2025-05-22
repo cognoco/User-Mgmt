@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 export default function Auth() {
   const [loading, setLoading] = useState(false);

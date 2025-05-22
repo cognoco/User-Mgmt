@@ -12,7 +12,7 @@ import { auditLog } from '../../middleware/audit-log';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 // Import our mocked supabase client
-import { supabase } from '@/lib/database/supabase';
+import { supabase } from '@/adapters/database/supabase-provider';
 
 // Extend NextApiRequest to include user property
 interface ExtendedRequest extends NextApiRequest {

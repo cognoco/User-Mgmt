@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
-import { useTheme } from '@/components/ui/theme-provider';
-import { usePalette, PaletteKey } from '@/components/ui/PaletteProvider';
+import { useTheme } from '@/ui/primitives/theme-provider';
+import { usePalette, PaletteKey } from '@/ui/primitives/PaletteProvider';
 
 /**
  * Headless Theme Settings

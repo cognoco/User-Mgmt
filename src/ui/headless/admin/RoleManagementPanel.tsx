@@ -1,5 +1,5 @@
 import React from 'react';
-import { User } from '@/types/user';
+import { User } from '@/core/user/types';
 import { useRBACStore } from '@/lib/stores/rbac.store';
 import { UserRoleSchema, RoleSchema } from '@/types/rbac';
 
@@ -17,7 +17,7 @@ import { UserRoleSchema, RoleSchema } from '@/types/rbac';
  *   - children: Render prop function that receives role management state and handlers
  *
  * Usage Example:
- *   import { RoleManagementPanel } from '@/ui/headless/admin/RoleManagementPanel';
+ *   import { RoleManagementPanel } from '@/ui/headless/admin/role-management-panel';
  *   
  *   <RoleManagementPanel users={users}>
  *     {({ roles, userRoles, isLoading, error, getUserRoleAssignments, getAssignableRoles, handleAssignRole, handleRemoveRole }) => (

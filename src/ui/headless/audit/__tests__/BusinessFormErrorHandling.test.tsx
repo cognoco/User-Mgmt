@@ -1,8 +1,8 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BusinessRegistrationForm } from '@/ui/styled/auth/BusinessRegistrationForm';
-import { CompanyEditForm } from '@/ui/styled/company/CompanyEditForm';
+import { BusinessRegistrationForm } from '@/ui/styled/auth/business-registration-form';
+import { CompanyEditForm } from '@/ui/styled/company/company-edit-form';
 
 // Mock form submission handlers
 const mockSubmit = vi.fn();

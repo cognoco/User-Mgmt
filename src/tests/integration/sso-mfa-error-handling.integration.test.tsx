@@ -8,8 +8,8 @@ import { vi } from 'vitest';
 import '@/tests/i18nTestSetup';
 
 // Import components to test
-import { MFAVerificationForm } from '@/ui/styled/auth/MFAVerificationForm';
-import { OAuthCallback } from '@/ui/styled/auth/OAuthCallback';
+import { MFAVerificationForm } from '@/ui/styled/auth/mfaverification-form';
+import { OAuthCallback } from '@/ui/styled/auth/oauth-callback';
 import { TwoFactorMethod } from '@/core/auth/models';
 import { api } from '@/lib/api';
 

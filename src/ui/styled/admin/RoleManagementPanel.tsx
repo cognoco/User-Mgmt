@@ -1,5 +1,5 @@
 import React from 'react';
-import { User } from '@/types/user';
+import { User } from '@/core/user/types';
 import { useRBACStore } from '@/lib/stores/rbac.store';
 import { UserRoleSchema, RoleSchema } from '@/types/rbac';
 
@@ -16,7 +16,7 @@ import { UserRoleSchema, RoleSchema } from '@/types/rbac';
  *   - (Planned) Optional feature toggles and custom actions for further configuration.
  *
  * Usage Example:
- *   import RoleManagementPanel from '@/ui/styled/admin/RoleManagementPanel';
+ *   import RoleManagementPanel from '@/ui/styled/admin/role-management-panel';
  *   <RoleManagementPanel users={users} />
  *
  * Feature Toggling:
