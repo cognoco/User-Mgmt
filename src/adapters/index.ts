@@ -17,6 +17,7 @@ export * from './gdpr';
 export * from './session';
 export * from './subscription';
 export * from './csrf';
+export * from './webhook';
 
 
 // Import and register the Supabase adapter factory by default

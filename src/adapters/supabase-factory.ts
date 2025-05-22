@@ -16,6 +16,7 @@ import { SessionDataProvider } from './session/interfaces';
 import { SsoDataProvider } from './sso/interfaces';
 import { SubscriptionDataProvider } from './subscription/interfaces';
 import { ApiKeyDataProvider } from './api-keys/interfaces';
+import { IWebhookDataProvider } from './webhook/IWebhookDataProvider';
 
 
 // Import domain-specific factories
@@ -28,6 +29,7 @@ import { createSupabaseSessionProvider } from './session/factory';
 import createSupabaseSsoProvider from './sso/supabase/factory';
 import createSupabaseSubscriptionProvider from './subscription/factory';
 import createSupabaseApiKeyProvider from './api-keys/supabase/factory';
+import { createSupabaseWebhookProvider } from './webhook';
 
 
 /**
@@ -118,6 +120,13 @@ export class SupabaseAdapterFactory implements AdapterFactory {
    */
   createApiKeyProvider(): ApiKeyDataProvider {
     return createSupabaseApiKeyProvider(this.options);
+  }
+
+  /**
+   * Create a Supabase webhook provider
+   */
+  createWebhookProvider(): IWebhookDataProvider {
+    return createSupabaseWebhookProvider(this.options);
   }
   }
 }
