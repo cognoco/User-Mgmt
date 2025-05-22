@@ -1,62 +1,45 @@
-import { type NextRequest, NextResponse } from 'next/server';
-import { checkRateLimit } from '@/middleware/rate-limit';
-import { getApiAuthService } from '@/lib/api/auth/factory';
-import { logUserAction } from '@/lib/audit/auditLogger';
+import { type NextRequest } from "next/server";
+import { checkRateLimit } from "@/middleware/rate-limit";
+import { getApiAuthService } from "@/lib/api/auth/factory";
+import { logUserAction } from "@/lib/audit/auditLogger";
+import {
+  createSuccessResponse,
+  withErrorHandling,
+  ApiError,
+  ERROR_CODES,
+} from "@/lib/api/common";
 
-export async function POST(request: NextRequest) {
-  // Get IP and User Agent early for logging
-  const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
-  const userAgent = request.headers.get('user-agent') || 'unknown';
-  
-  // 1. Rate Limiting
-  const isRateLimited = await checkRateLimit(request);
+async function handleLogout(req: NextRequest) {
+  const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
+  const userAgent = req.headers.get("user-agent") || "unknown";
+
+  const isRateLimited = await checkRateLimit(req);
   if (isRateLimited) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    throw new ApiError(ERROR_CODES.INVALID_REQUEST, "Too many requests", 429);
   }
 
-  try {
-    // 2. Get AuthService
-    const authService = getApiAuthService();
-    
-    // Get current user for logging purposes
-    const currentUser = authService.getCurrentUser();
-    const userId = currentUser?.id;
-    
-    // 3. Call logout method on AuthService
-    await authService.logout();
-    
-    // 4. Log the successful logout
-    if (userId) {
-      await logUserAction({
-        userId,
-        action: 'LOGOUT_SUCCESS',
-        status: 'SUCCESS',
-        ipAddress,
-        userAgent,
-        targetResourceType: 'auth',
-        targetResourceId: userId
-      });
-    }
-    
-    // 5. Handle Success
-    console.log('Logout successful');
-    return NextResponse.json({ message: 'Successfully logged out' }); // 200 OK
+  const authService = getApiAuthService();
+  const currentUser = authService.getCurrentUser();
+  const userId = currentUser?.id;
 
-  } catch (error) {
-    // 6. Handle Unexpected Errors
-    console.error('Unexpected Logout API error:', error);
-    const message = error instanceof Error ? error.message : 'An unexpected error occurred';
-    
-    // Log the error
+  await authService.logout();
+
+  if (userId) {
     await logUserAction({
-      action: 'LOGOUT_ERROR',
-      status: 'FAILURE',
+      userId,
+      action: "LOGOUT_SUCCESS",
+      status: "SUCCESS",
       ipAddress,
       userAgent,
-      targetResourceType: 'auth',
-      details: { error: message }
+      targetResourceType: "auth",
+      targetResourceId: userId,
     });
-    
-    return NextResponse.json({ error: 'An internal server error occurred.', details: message }, { status: 500 });
   }
+
+  console.log("Logout successful");
+  return createSuccessResponse({ message: "Successfully logged out" });
+}
+
+export async function POST(request: NextRequest) {
+  return withErrorHandling(handleLogout, request);
 }
