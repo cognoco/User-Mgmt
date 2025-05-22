@@ -5,21 +5,31 @@ import { ProfileForm } from '../ProfileForm';
 import { createMockProfileStore } from '@/tests/mocks/profile.store.mock';
 
 // Mock dependencies
+const fetchProfileMock = vi.fn();
+const updateProfileMock = vi.fn();
+
 vi.mock('@/lib/stores/profile.store', () => ({
-  useProfileStore: () => ({
-    profile: {
-      id: '1',
-      first_name: 'John',
-      last_name: 'Doe',
-      bio: 'Old bio',
-      email: 'john@example.com',
-      is_public: true
-    },
-    isLoading: false,
-    error: null,
-    fetchProfile: vi.fn(),
-    updateProfile: vi.fn()
-  }),
+  useProfileStore: (selector) => {
+    // Create a mock store object
+    const store = {
+      profile: {
+        id: '1',
+        first_name: 'John',
+        last_name: 'Doe',
+        bio: 'Old bio',
+        email: 'john@example.com',
+        is_public: true
+      },
+      isLoading: false,
+      error: null,
+      fetchProfile: fetchProfileMock,
+      updateProfile: updateProfileMock
+    };
+    
+    // If a selector function is provided, call it with the store
+    // Otherwise return the entire store
+    return selector ? selector(store) : store;
+  },
 }));
 
 // Mock the auth hook - this is what we're testing
