@@ -1,0 +1,18 @@
+import React from 'react';
+import { useDataDeletion } from '@/hooks/gdpr/use-data-deletion';
+
+export interface DataDeletionRequestProps {
+  render: (props: {
+    requestDeletion: () => Promise<void>;
+    isLoading: boolean;
+    success: boolean;
+    error: string | null;
+  }) => React.ReactNode;
+}
+
+export function DataDeletionRequest({ render }: DataDeletionRequestProps) {
+  const { requestDeletion, isLoading, success, error } = useDataDeletion();
+  return <>{render({ requestDeletion, isLoading, success, error })}</>;
+}
+
+export default DataDeletionRequest;
