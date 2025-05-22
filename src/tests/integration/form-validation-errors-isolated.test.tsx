@@ -20,8 +20,8 @@ vi.mock('lucide-react', () => ({
 const mockRegisterUserAction = vi.fn();
 const mockClearError = vi.fn();
 const mockClearSuccessMessage = vi.fn();
-vi.mock('@/lib/stores/auth.store', () => ({
-  useAuthStore: vi.fn(() => ({
+vi.mock('@/hooks/auth/use-auth', () => ({
+  useAuth: vi.fn(() => ({
     register: mockRegisterUserAction,
     isLoading: false,
     error: null,

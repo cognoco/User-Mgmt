@@ -10,7 +10,7 @@ import {
   RateLimitInfo,
   MFASetupResponse,
   MFAVerifyResponse
-} from '@/types/auth';
+} from '@/core/auth/models';
 
 // Constants for token management
 const TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000; // 5 minutes in milliseconds

@@ -15,7 +15,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'; // A
 // vi.mock('@/lib/stores/auth.store', () => ({ ... })); 
 
 // Import the actual store
-// import { useAuthStore } from '@/lib/stores/auth.store';
+// import { useAuth } from '@/hooks/auth/useAuth';
 
 // Mock Supabase (using factory with dynamic import)
 vi.mock('@/lib/database/supabase', () => import('@/tests/mocks/supabase'));
@@ -65,7 +65,7 @@ vi.mock('@/lib/stores/connected-accounts.store', () => ({
 // --- End Connected Accounts Store Mock ---
 
 // Zustand selector-compatible mock for useAuthStore, defined at the top for Vitest hoisting
-vi.mock('@/lib/stores/auth.store', () => {
+vi.mock('@/hooks/auth/use-auth', () => {
   const createAuthStoreState = () => ({
     user: null as User | null,
     token: null as string | null,
@@ -115,7 +115,7 @@ vi.mock('@/lib/stores/auth.store', () => {
   };
   (global as any).__useAuthStoreMock = useAuthStoreMock;
   return {
-    useAuthStore: useAuthStoreMock
+    useAuth: useAuthStoreMock
   };
 });
 

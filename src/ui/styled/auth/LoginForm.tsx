@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { loginSchema, type LoginData } from '@/core/auth/models';
 import { useRouter } from 'next/navigation';
 import { MFAVerificationForm } from './MFAVerificationForm';
 import { RateLimitFeedback } from '@/components/common/RateLimitFeedback';
@@ -19,11 +21,17 @@ import { LoginPayload } from '@/core/auth/models';
 
 export function LoginForm() {
   const router = useRouter();
-  const { login, error: authError } = useAuth();
   
-  const [showPassword, setShowPassword] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  // React 19 compatibility - Use individual primitive selectors instead of object destructuring
+  // This is more efficient and avoids infinite loop with getServerSnapshot in React 19
+  const login = useAuth().login;
+  const sendVerificationEmail = useAuth().sendVerificationEmail;
+  const isLoading = useAuth().isLoading;
+  const error = useAuth().error;
+  const clearError = useAuth().clearError;
+  const setUser = useAuth().setUser;
+  const setToken = useAuth().setToken;
+  
   const [resendStatus, setResendStatus] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [showResendLink, setShowResendLink] = useState(false);
   const [mfaRequired, setMfaRequired] = useState(false);

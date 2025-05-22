@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useRBACStore } from '@/lib/stores/rbac.store';
 import { WithRoleProps } from '@/types/rbac';
-import { useAuthStore } from '@/lib/stores/auth.store';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export function withRole<P extends object>(
   WrappedComponent: React.ComponentType<P>,
@@ -14,7 +14,7 @@ export function withRole<P extends object>(
     const fetchUserRoles = useRBACStore(state => state.fetchUserRoles);
     
     // Use a single primitive selector for the user
-    const user = useAuthStore(state => state.user);
+    const user = useAuth().user;
 
     useEffect(() => {
       if (user) {

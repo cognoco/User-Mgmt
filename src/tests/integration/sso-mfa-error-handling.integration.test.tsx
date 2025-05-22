@@ -10,7 +10,7 @@ import '@/tests/i18nTestSetup';
 // Import components to test
 import { MFAVerificationForm } from '@/ui/styled/auth/MFAVerificationForm';
 import { OAuthCallback } from '@/ui/styled/auth/OAuthCallback';
-import { TwoFactorMethod } from '@/types/auth';
+import { TwoFactorMethod } from '@/core/auth/models';
 import { api } from '@/lib/api';
 
 // Create a test server to mock API responses
@@ -91,9 +91,9 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
-// Setup mock for useAuthStore and related Zustand stores if needed
-vi.mock('@/lib/stores/auth-store', () => ({
-  useAuthStore: vi.fn(() => ({
+// Setup mock for useAuth hook and related Zustand stores if needed
+vi.mock('@/hooks/auth/use-auth', () => ({
+  useAuth: vi.fn(() => ({
     user: { id: 'user-123', email: 'test@example.com' },
     setUser: vi.fn(),
     clearUser: vi.fn()
