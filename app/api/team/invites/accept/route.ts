@@ -1,61 +1,43 @@
-import { NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/database/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/index';
+import {
+  createSuccessResponse,
+  withErrorHandling,
+  withValidation,
+  ApiError,
+  ERROR_CODES
+} from '@/lib/api/common';
+import { createTeamMemberNotFoundError } from '@/lib/api/team/error-handler';
 
-const acceptInviteSchema = z.object({
-  token: z.string(),
-});
+const acceptInviteSchema = z.object({ token: z.string() });
 
-export async function POST(req: Request) {
+async function handleAccept(req: NextRequest, data: z.infer<typeof acceptInviteSchema>) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Unauthorized', 401);
+  }
+
+  const invite = await prisma.teamMember.findUnique({
+    where: { inviteToken: data.token },
+    include: { teamLicense: true },
+  });
+  if (!invite) {
+    throw new ApiError(ERROR_CODES.INVALID_REQUEST, 'Invalid or expired invitation', 400);
+  }
+
+  if (invite.inviteExpires && invite.inviteExpires < new Date()) {
+    throw new ApiError(ERROR_CODES.INVALID_REQUEST, 'Invitation has expired', 400);
+  }
+
+  if (invite.invitedEmail !== session.user.email) {
+    throw new ApiError(ERROR_CODES.FORBIDDEN, 'This invitation was sent to a different email address', 403);
+  }
+
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    // Parse and validate request body
-    const body = await req.json();
-    const { token } = acceptInviteSchema.parse(body);
-
-    // Find the invite
-    const invite = await prisma.teamMember.findUnique({
-      where: { inviteToken: token },
-      include: {
-        teamLicense: true,
-      },
-    });
-
-    if (!invite) {
-      return NextResponse.json(
-        { error: 'Invalid or expired invitation' },
-        { status: 400 }
-      );
-    }
-
-    // Check if invite is expired
-    if (invite.inviteExpires && invite.inviteExpires < new Date()) {
-      return NextResponse.json(
-        { error: 'Invitation has expired' },
-        { status: 400 }
-      );
-    }
-
-    // Check if the invite was sent to the current user's email
-    if (invite.invitedEmail !== session.user.email) {
-      return NextResponse.json(
-        { error: 'This invitation was sent to a different email address' },
-        { status: 403 }
-      );
-    }
-
-    // Accept the invite
-    const updatedMember = await prisma.teamMember.update({
+    const updated = await prisma.teamMember.update({
       where: { id: invite.id },
       data: {
         userId: session.user.id,
@@ -64,21 +46,15 @@ export async function POST(req: Request) {
         inviteExpires: null,
       },
     });
-
-    return NextResponse.json(updatedMember);
-  } catch (error) {
-    console.error('Failed to accept team invite:', error);
-    
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: 'Failed to accept team invite' },
-      { status: 500 }
-    );
+    return createSuccessResponse(updated);
+  } catch (e) {
+    throw createTeamMemberNotFoundError();
   }
-} 
+}
+
+async function handler(req: NextRequest) {
+  const body = await req.json();
+  return withValidation(acceptInviteSchema, handleAccept, req, body);
+}
+
+export const POST = (req: NextRequest) => withErrorHandling(handler, req);

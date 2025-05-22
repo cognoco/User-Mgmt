@@ -1,11 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/index';
 import { prisma } from '@/lib/database/prisma';
 import { createProtectedHandler } from '@/middleware/permissions';
 import { z } from 'zod';
+import {
+  createSuccessResponse,
+  withErrorHandling,
+  withValidation,
+  ApiError,
+  ERROR_CODES
+} from '@/lib/api/common';
 
-// Query parameters schema
 const querySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(10),
@@ -15,163 +21,107 @@ const querySchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 });
 
-async function handler(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+async function handleTeamMembers(
+  req: NextRequest,
+  data: z.infer<typeof querySchema>
+) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
+  }
 
-    // Parse and validate query parameters
-    const url = new URL(req.url);
-    const queryParams = Object.fromEntries(url.searchParams.entries());
-    const { page, limit, search, status, sortBy, sortOrder } = querySchema.parse(queryParams);
+  const { page, limit, search, status, sortBy, sortOrder } = data;
+  const skip = (page - 1) * limit;
 
-    // Calculate pagination
-    const skip = (page - 1) * limit;
-
-    // Build base where clause
-    const baseWhere = {
-      teamMember: {
-        team: {
-          members: {
-            some: {
-              userId: session.user.id,
-            },
-          },
-        },
-      },
-    };
-
-    // Add conditional filters
-    let whereConditions: any = { ...baseWhere }; // Start with base, use any for flexibility
-
-    if (search) {
-      whereConditions = {
-        ...whereConditions,
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { email: { contains: search, mode: 'insensitive' } },
-        ],
-      };
-    }
-
-    if (status !== 'all') {
-      whereConditions = {
-        ...whereConditions,
-        teamMember: {
-          ...whereConditions.teamMember, // Ensure teamMember exists
-          status: status,
-        },
-      };
-    }
-
-    // Execute queries in parallel
-    const [users, totalCount] = await Promise.all([
-      prisma.user.findMany({
-        where: whereConditions, // Use the fully constructed conditions
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          image: true,
-          teamMember: {
-            select: {
-              id: true,
-              role: true,
-              status: true,
-              joinedAt: true,
-            },
-          },
-        },
-        orderBy: {
-          ...(sortBy === 'joinedAt' && { teamMember: { joinedAt: sortOrder } }),
-          ...(sortBy === 'name' && { name: sortOrder }),
-          ...(sortBy === 'email' && { email: sortOrder }),
-          ...(sortBy === 'role' && { teamMember: { role: sortOrder } }),
-          ...(sortBy === 'status' && { teamMember: { status: sortOrder } }),
-        },
-        skip,
-        take: limit,
-      }),
-      prisma.user.count({ where: whereConditions }), // Use the same conditions for count
-    ]);
-
-    // Get team subscription info for seat usage
-    const team = await prisma.team.findFirst({
-      where: {
+  const baseWhere = {
+    teamMember: {
+      team: {
         members: {
           some: {
             userId: session.user.id,
           },
         },
       },
+    },
+  } as any;
+
+  let where: any = { ...baseWhere };
+  if (search) {
+    where = {
+      ...where,
+      OR: [
+        { name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ],
+    };
+  }
+  if (status !== 'all') {
+    where = {
+      ...where,
+      teamMember: {
+        ...where.teamMember,
+        status,
+      },
+    };
+  }
+
+  const [users, totalCount] = await Promise.all([
+    prisma.user.findMany({
+      where,
       select: {
-        subscription: {
-          select: {
-            seats: true,
-          },
-        },
-        _count: {
-          select: {
-            members: true,
-          },
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        teamMember: {
+          select: { id: true, role: true, status: true, joinedAt: true },
         },
       },
-    });
+      orderBy: {
+        ...(sortBy === 'joinedAt' && { teamMember: { joinedAt: sortOrder } }),
+        ...(sortBy === 'name' && { name: sortOrder }),
+        ...(sortBy === 'email' && { email: sortOrder }),
+        ...(sortBy === 'role' && { teamMember: { role: sortOrder } }),
+        ...(sortBy === 'status' && { teamMember: { status: sortOrder } }),
+      },
+      skip,
+      take: limit,
+    }),
+    prisma.user.count({ where }),
+  ]);
 
-    // Calculate pagination metadata
-    const totalPages = Math.ceil(totalCount / limit);
-    const hasNextPage = page < totalPages;
-    const hasPreviousPage = page > 1;
+  const team = await prisma.team.findFirst({
+    where: {
+      members: { some: { userId: session.user.id } },
+    },
+    select: {
+      subscription: { select: { seats: true } },
+      _count: { select: { members: true } },
+    },
+  });
 
-    return new NextResponse(
-      JSON.stringify({
-        users,
-        pagination: {
-          page,
-          limit,
-          totalCount,
-          totalPages,
-          hasNextPage,
-          hasPreviousPage,
-        },
-        seatUsage: {
-          used: team?._count.members ?? 0,
-          total: team?.subscription?.seats ?? 0,
-          percentage: team?.subscription?.seats
-            ? (team._count.members / team.subscription.seats) * 100
-            : 0,
-        },
-      }),
-      {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-  } catch (error) {
-    console.error('Error fetching team members:', error);
-    if (error instanceof z.ZodError) {
-      return new NextResponse(
-        JSON.stringify({ error: 'Invalid query parameters', details: error.errors }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-    return new NextResponse(
-      JSON.stringify({ error: 'Internal server error' }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-  }
+  const totalPages = Math.ceil(totalCount / limit);
+  const hasNextPage = page < totalPages;
+  const hasPreviousPage = page > 1;
+
+  return createSuccessResponse({
+    users,
+    pagination: { page, limit, totalCount, totalPages, hasNextPage, hasPreviousPage },
+    seatUsage: {
+      used: team?._count.members ?? 0,
+      total: team?.subscription?.seats ?? 0,
+      percentage: team?.subscription?.seats ? (team._count.members / team.subscription.seats) * 100 : 0,
+    },
+  });
 }
 
-// Protect the endpoint with the required permission
-export const GET = createProtectedHandler(handler, 'team.members.list');
+async function handler(req: NextRequest) {
+  const url = new URL(req.url);
+  const params = Object.fromEntries(url.searchParams.entries());
+  return withValidation(querySchema, handleTeamMembers, req, params);
+}
+
+export const GET = createProtectedHandler(
+  (req) => withErrorHandling(handler, req),
+  'team.members.list'
+);

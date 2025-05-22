@@ -4,6 +4,7 @@ import { prisma } from '@/lib/database/prisma';
 import { getServerSession } from 'next-auth';
 import { sendTeamInviteEmail } from '@/lib/email/teamInvite';
 import { generateInviteToken } from '@/lib/utils/token';
+import { ERROR_CODES } from '@/lib/api/common';
 
 // Mock dependencies
 vi.mock('next-auth', () => ({
@@ -77,7 +78,7 @@ describe('POST /api/team/invites', () => {
     const data = await response.json();
 
     expect(response.status).toBe(201);
-    expect(data).toEqual({
+    expect(data.data).toEqual({
       id: 'member-123',
       teamLicenseId: mockLicense.id,
       invitedEmail: 'new@example.com',
@@ -109,7 +110,7 @@ describe('POST /api/team/invites', () => {
     const data = await response.json();
 
     expect(response.status).toBe(401);
-    expect(data).toEqual({ error: 'Unauthorized' });
+    expect(data.error.code).toBe(ERROR_CODES.UNAUTHORIZED);
   });
 
   it('returns 400 when team license is not found', async () => {
@@ -129,7 +130,7 @@ describe('POST /api/team/invites', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data).toEqual({ error: 'Invalid team license' });
+    expect(data.error.code).toBe(ERROR_CODES.NOT_FOUND);
   });
 
   it('returns 403 when team has reached seat limit', async () => {
@@ -148,8 +149,8 @@ describe('POST /api/team/invites', () => {
     const response = await POST(request);
     const data = await response.json();
 
-    expect(response.status).toBe(403);
-    expect(data).toEqual({ error: 'Team has reached its seat limit' });
+    expect(response.status).toBe(400);
+    expect(data.error.code).toBe(ERROR_CODES.INVALID_REQUEST);
   });
 
   it('returns 400 when email validation fails', async () => {
@@ -167,7 +168,7 @@ describe('POST /api/team/invites', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error).toContain('Invalid email');
+    expect(data.error.code).toBe(ERROR_CODES.INVALID_REQUEST);
   });
 
   it('returns 400 when role validation fails', async () => {
@@ -185,6 +186,6 @@ describe('POST /api/team/invites', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error).toContain('Invalid role');
+    expect(data.error.code).toBe(ERROR_CODES.INVALID_REQUEST);
   });
 }); 
