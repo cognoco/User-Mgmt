@@ -12,6 +12,9 @@ import { UserDataProvider } from './user/interfaces';
 import { TeamDataProvider } from './team/interfaces';
 import { PermissionDataProvider } from './permission/interfaces';
 import { SsoDataProvider } from './sso/interfaces';
+import { SubscriptionDataProvider } from './subscription/interfaces';
+import { ApiKeyDataProvider } from './api-keys/interfaces';
+
 
 /**
  * Interface for adapter factory options
@@ -39,7 +42,7 @@ export interface AdapterFactory {
    * Create a team data provider
    */
   createTeamProvider(): TeamDataProvider;
-  
+
   /**
    * Create a permission data provider
    */
@@ -49,7 +52,16 @@ export interface AdapterFactory {
    * Create an SSO data provider
    */
   createSsoProvider(): SsoDataProvider;
-}
+
+  /**
+   * Create a subscription data provider
+   */
+  createSubscriptionProvider(): SubscriptionDataProvider;
+
+  /**
+   * Create an API key data provider
+   */
+  createApiKeyProvider(): ApiKeyDataProvider;
 
 /**
  * Factory creator function type
