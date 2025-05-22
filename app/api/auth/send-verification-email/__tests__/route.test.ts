@@ -1,166 +1,73 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiAuthService } from '@/lib/api/auth/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { NextRequest } from 'next/server';
+import { ERROR_CODES } from '@/lib/api/common';
 
-// Mock dependencies
-vi.mock('@/lib/database/supabase', () => ({
-  getServiceSupabase: vi.fn(() => ({
-    auth: {
-      getUser: vi.fn(),
-      resend: vi.fn()
-    }
-  }))
+vi.mock('@/lib/api/auth/factory', () => ({
+  getApiAuthService: vi.fn()
 }));
-
 vi.mock('@/middleware/rate-limit', () => ({
   checkRateLimit: vi.fn()
 }));
 
 describe('POST /api/auth/send-verification-email', () => {
-  const mockUser = {
-    id: 'user-123',
-    email: 'test@example.com',
-    email_confirmed_at: null
+  const mockAuthService = {
+    sendVerificationEmail: vi.fn()
   };
 
-  const mockSupabase = {
-    auth: {
-      getUser: vi.fn(),
-      resend: vi.fn()
-    }
-  };
-
-  const createMockRequest = (options: { headers?: Record<string, string> } = {}) => {
-    return new NextRequest('http://localhost:3000/api/auth/send-verification-email', {
+  const createRequest = (email: string) =>
+    new NextRequest('http://localhost/api/auth/send-verification-email', {
       method: 'POST',
-      ...options
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
     });
-  };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (getServiceSupabase as any).mockReturnValue(mockSupabase);
-    (checkRateLimit as any).mockResolvedValue(false);
-    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockUser }, error: null });
-    mockSupabase.auth.resend.mockResolvedValue({ error: null });
+    (getApiAuthService as unknown as vi.Mock).mockReturnValue(mockAuthService);
+    (checkRateLimit as unknown as vi.Mock).mockResolvedValue(false);
+    mockAuthService.sendVerificationEmail.mockResolvedValue({ success: true });
   });
 
-  it('should return 429 when rate limited', async () => {
-    (checkRateLimit as any).mockResolvedValue(true);
-
-    const request = createMockRequest({
-      headers: {
-        'Authorization': 'Bearer valid-token'
-      }
-    });
-
-    const response = await POST(request);
-    const data = await response.json();
-
-    expect(response.status).toBe(429);
-    expect(data.error).toBe('Too many requests');
+  it('returns 429 when rate limited', async () => {
+    (checkRateLimit as unknown as vi.Mock).mockResolvedValue(true);
+    const res = await POST(createRequest('test@example.com'));
+    const data = await res.json();
+    expect(res.status).toBe(429);
+    expect(data.error.code).toBe(ERROR_CODES.INVALID_REQUEST);
   });
 
-  it('should return 401 when no authorization header is present', async () => {
-    const request = createMockRequest();
-
-    const response = await POST(request);
-    const data = await response.json();
-
-    expect(response.status).toBe(401);
-    expect(data.error).toBe('Missing or invalid authorization token');
+  it('validates request body', async () => {
+    const request = new NextRequest('http://localhost/api/auth/send-verification-email', { method: 'POST' });
+    const res = await POST(request);
+    const data = await res.json();
+    expect(res.status).toBe(400);
+    expect(data.error.code).toBe(ERROR_CODES.INVALID_REQUEST);
   });
 
-  it('should return 401 when user is not found', async () => {
-    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null }, error: { message: 'User not found' } });
-
-    const request = createMockRequest({
-      headers: {
-        'Authorization': 'Bearer valid-token'
-      }
-    });
-
-    const response = await POST(request);
-    const data = await response.json();
-
-    expect(response.status).toBe(401);
-    expect(data.error).toBe('User not found');
+  it('returns success when service succeeds', async () => {
+    const res = await POST(createRequest('test@example.com'));
+    const data = await res.json();
+    expect(res.status).toBe(200);
+    expect(data.data.message).toBe('If an account exists with this email, a verification email has been sent.');
+    expect(mockAuthService.sendVerificationEmail).toHaveBeenCalledWith('test@example.com');
   });
 
-  it('should return 400 when user has no email', async () => {
-    mockSupabase.auth.getUser.mockResolvedValue({ 
-      data: { user: { ...mockUser, email: null } }, 
-      error: null 
-    });
-
-    const request = createMockRequest({
-      headers: {
-        'Authorization': 'Bearer valid-token'
-      }
-    });
-
-    const response = await POST(request);
-    const data = await response.json();
-
-    expect(response.status).toBe(400);
-    expect(data.error).toBe('User email not found.');
+  it('still returns success when service fails', async () => {
+    mockAuthService.sendVerificationEmail.mockResolvedValueOnce({ success: false, error: 'fail' });
+    const res = await POST(createRequest('test@example.com'));
+    const data = await res.json();
+    expect(res.status).toBe(200);
+    expect(data.data.message).toBe('If an account exists with this email, a verification email has been sent.');
   });
 
-  it('should successfully send verification email', async () => {
-    const request = createMockRequest({
-      headers: {
-        'Authorization': 'Bearer valid-token'
-      }
-    });
-
-    const response = await POST(request);
-    const data = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(data.message).toBe('Verification email has been sent');
-    expect(mockSupabase.auth.resend).toHaveBeenCalledWith({
-      type: 'signup',
-      email: mockUser.email,
-      options: {
-        emailRedirectTo: expect.any(String)
-      }
-    });
+  it('handles unexpected errors', async () => {
+    mockAuthService.sendVerificationEmail.mockRejectedValueOnce(new Error('oops'));
+    const res = await POST(createRequest('test@example.com'));
+    const data = await res.json();
+    expect(res.status).toBe(500);
+    expect(data.error.code).toBe(ERROR_CODES.INTERNAL_ERROR);
   });
-
-  it('should handle Supabase resend error', async () => {
-    mockSupabase.auth.resend.mockResolvedValue({ 
-      error: { message: 'Failed to send email', status: 400 } 
-    });
-
-    const request = createMockRequest({
-      headers: {
-        'Authorization': 'Bearer valid-token'
-      }
-    });
-
-    const response = await POST(request);
-    const data = await response.json();
-
-    expect(response.status).toBe(400);
-    expect(data.error).toBe('Failed to send email');
-  });
-
-  it('should handle unexpected errors', async () => {
-    mockSupabase.auth.resend.mockRejectedValue(new Error('Unexpected error'));
-
-    const request = createMockRequest({
-      headers: {
-        'Authorization': 'Bearer valid-token'
-      }
-    });
-
-    const response = await POST(request);
-    const data = await response.json();
-
-    expect(response.status).toBe(500);
-    expect(data.error).toBe('An internal server error occurred.');
-    expect(data.details).toBe('Unexpected error');
-  });
-}); 
+});
