@@ -10,6 +10,7 @@ export * from './auth';
 export * from './user';
 export * from './team';
 export * from './permission';
+export * from './api-keys';
 export * from './notification';
 
 // Import and register the Supabase adapter factory by default
