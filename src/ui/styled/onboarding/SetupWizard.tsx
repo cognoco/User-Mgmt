@@ -1,22 +1,12 @@
-import { useState } from 'react';
-import { useOnboarding } from '@/lib/hooks/useOnboarding';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Progress } from '../ui/progress';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
-
-interface SetupStep {
-  id: string;
-  title: string;
-  component: React.ReactNode;
-}
+import SetupWizardHeadless, { SetupStep } from '@/ui/headless/onboarding/SetupWizard';
 
 export function SetupWizard() {
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const { completeStep } = useOnboarding();
-
   const steps: SetupStep[] = [
     {
       id: 'preferences',
@@ -76,39 +66,41 @@ export function SetupWizard() {
     },
   ];
 
-  const handleNext = () => {
-    if (currentStepIndex < steps.length - 1) {
-      setCurrentStepIndex(currentStepIndex + 1);
-    } else {
-      completeStep('settings');
-    }
-  };
-
-  const progress = ((currentStepIndex + 1) / steps.length) * 100;
-
   return (
-    <Card className="max-w-lg mx-auto">
-      <CardHeader>
-        <CardTitle>{steps[currentStepIndex].title}</CardTitle>
-      </CardHeader>
-      
-      <CardContent>
-        <Progress value={progress} className="mb-6" />
-        {steps[currentStepIndex].component}
-      </CardContent>
+    <SetupWizardHeadless
+      steps={steps}
+      render={({
+        currentStep,
+        currentStepIndex,
+        progress,
+        handleNext,
+        handlePrevious,
+        setCurrentStepIndex,
+      }) => (
+        <Card className="max-w-lg mx-auto">
+          <CardHeader>
+            <CardTitle>{currentStep.title}</CardTitle>
+          </CardHeader>
 
-      <CardFooter className="flex justify-between">
-        <Button
-          variant="outline"
-          onClick={() => setCurrentStepIndex(Math.max(0, currentStepIndex - 1))}
-          disabled={currentStepIndex === 0}
-        >
-          Previous
-        </Button>
-        <Button onClick={handleNext}>
-          {currentStepIndex === steps.length - 1 ? 'Finish' : 'Next'}
-        </Button>
-      </CardFooter>
-    </Card>
+          <CardContent>
+            <Progress value={progress} className="mb-6" />
+            {currentStep.component}
+          </CardContent>
+
+          <CardFooter className="flex justify-between">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentStepIndex === 0}
+            >
+              Previous
+            </Button>
+            <Button onClick={handleNext}>
+              {currentStepIndex === steps.length - 1 ? 'Finish' : 'Next'}
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
+    />
   );
 }
