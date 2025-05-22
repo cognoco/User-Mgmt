@@ -5,7 +5,11 @@
  * It provides the default implementation for user management operations.
  */
 
-import { UserService } from '@/core/user/interfaces';
+import {
+  UserService
+} from '@/core/user/interfaces';
+import type { AxiosInstance } from 'axios';
+import type { UserDataProvider } from '@/adapters/user/interfaces';
 import { 
   UserProfile, 
   ProfileUpdatePayload, 
@@ -35,11 +39,11 @@ export class DefaultUserService
    * @param userDataProvider - The data provider for user operations
    */
   constructor(
-    private apiClient: any, // This would be replaced with a proper API client interface
-    private userDataProvider: any // This would be replaced with a proper user data provider interface
-  ) {
-    super();
-  }
+Private apiClient: AxiosInstance,
+  private userDataProvider: UserDataProvider
+) {
+  super();
+}
 
   /**
    * Emit a user event

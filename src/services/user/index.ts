@@ -7,6 +7,8 @@
 
 import { UserService } from '@/core/user/interfaces';
 import { DefaultUserService } from './default-user.service';
+import type { AxiosInstance } from 'axios';
+import type { UserDataProvider } from '@/adapters/user/interfaces';
 
 /**
  * Configuration options for creating a UserService
@@ -15,12 +17,12 @@ export interface UserServiceConfig {
   /**
    * API client for making HTTP requests
    */
-  apiClient: any; // This would be replaced with a proper API client interface
+  apiClient: AxiosInstance;
   
   /**
    * User data provider for database operations
    */
-  userDataProvider: any; // This would be replaced with a proper user data provider interface
+  userDataProvider: UserDataProvider;
 }
 
 /**

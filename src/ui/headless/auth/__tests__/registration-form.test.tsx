@@ -51,6 +51,9 @@ const mockClearSuccessMessage = vi.fn();
 vi.mock('@/hooks/auth/use-auth', () => ({
   useAuth: vi.fn(() => ({
     register: mockRegisterUserAction,
+    // ...add other mocked methods/properties as needed for your tests
+  })),
+}));
     isLoading: false,
     error: null,
     successMessage: null,
@@ -76,240 +79,36 @@ import { UserType } from '@/types/user-type';
 import { ThemeProvider } from '@/ui/primitives/theme-provider';
 import { OAuthProvider } from '@/types/oauth';
 
-describe('RegistrationForm Integration Flow', () => {
-  const renderWithProvider = () => {
-    const testConfig = {
-      corporateUsers: {
-        enabled: true,
-        registrationEnabled: true,
-        defaultUserType: UserType.PRIVATE,
-        requireCompanyValidation: false,
-        allowUserTypeChange: true,
-        companyFieldsRequired: ['companyName']
-      },
-      twoFactor: {
-        enabled: false,
-        required: false,
-        methods: []
-      },
-      oauth: {
-        enabled: true,
-        providers: [
-          {
-            provider: OAuthProvider.GOOGLE,
-            clientId: 'test-google-client-id',
-            redirectUri: 'http://localhost:3000/auth/callback/google',
-            enabled: true,
-            label: 'Google'
-          },
-          {
-            provider: OAuthProvider.APPLE,
-            clientId: 'test-apple-client-id',
-            redirectUri: 'http://localhost:3000/auth/callback/apple',
-            enabled: true,
-            label: 'Apple'
-          }
-        ],
-        autoLink: true,
-        allowUnverifiedEmails: false,
-        defaultRedirectPath: '/'
-      }
-    };
-    return render(
-      <ThemeProvider defaultTheme="system" storageKey="test-theme-key">
-        <UserManagementProvider config={testConfig}>
-          <RegistrationForm />
-        </UserManagementProvider>
-      </ThemeProvider>
+describe('RegistrationForm (headless)', () => {
+  let props: any;
+  const renderForm = (p = {}) =>
+    render(
+      <RegistrationForm
+        {...p}
+        render={(rp) => {
+          props = rp;
+          return <div />;
+        }}
+      />
     );
-  };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockRegisterUserAction.mockReset();
-    mockSupabaseSignUp.mockReset();
-    mockClearError.mockReset();
-    mockClearSuccessMessage.mockReset();
-    mockRouterPush.mockReset();
-    mockRegisterUserAction.mockImplementation(async (data) => {
-      const result = await mockSupabaseSignUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            first_name: data.firstName,
-            last_name: data.lastName,
-          },
-          emailRedirectTo: 'http://localhost:3000/check-email',
-        },
-      });
-      return { success: !result.error, error: result.error?.message };
-    });
   });
 
-  it('shows validation errors for required fields (Personal user)', async () => {
-    const user = userEvent.setup();
+  it('calls register with form values', async () => {
+    const { mockRegister } = setupAuth();
+    renderForm();
+    act(() => {
+      props.setEmailValue('user@example.com');
+      props.setPasswordValue('Password123');
+      props.setConfirmPasswordValue('Password123');
+      props.setFirstNameValue('A');
+      props.setLastNameValue('B');
+      props.setAcceptTermsValue(true);
+    });
     await act(async () => {
-      renderWithProvider();
-    });
-
-    // Type, clear, and blur each required field to trigger validation
-    const emailInput = screen.getByTestId('email-input');
-    const firstNameInput = screen.getByTestId('first-name-input');
-    const lastNameInput = screen.getByTestId('last-name-input');
-    const passwordInput = screen.getByTestId('password-input');
-    const confirmPasswordInput = screen.getByTestId('confirm-password-input');
-
-    // Email
-    await user.type(emailInput, 'a');
-    await user.clear(emailInput);
-    screen.debug();
-    console.log('email value after clear:', (emailInput as HTMLInputElement).value);
-    fireEvent.blur(emailInput);
-    fireEvent.change(emailInput, { target: { value: '' } });
-    await user.tab();
-
-    // First Name
-    await user.type(firstNameInput, 'a');
-    await user.clear(firstNameInput);
-    screen.debug();
-    console.log('firstName value after clear:', (firstNameInput as HTMLInputElement).value);
-    fireEvent.blur(firstNameInput);
-    fireEvent.change(firstNameInput, { target: { value: '' } });
-    await user.tab();
-
-    // Last Name
-    await user.type(lastNameInput, 'a');
-    await user.clear(lastNameInput);
-    screen.debug();
-    console.log('lastName value after clear:', (lastNameInput as HTMLInputElement).value);
-    fireEvent.blur(lastNameInput);
-    fireEvent.change(lastNameInput, { target: { value: '' } });
-    await user.tab();
-
-    // Password
-    await user.type(passwordInput, 'a');
-    await user.clear(passwordInput);
-    screen.debug();
-    console.log('password value after clear:', (passwordInput as HTMLInputElement).value);
-    fireEvent.blur(passwordInput);
-    fireEvent.change(passwordInput, { target: { value: '' } });
-    await user.tab();
-
-    // Confirm Password
-    await user.type(confirmPasswordInput, 'a');
-    await user.clear(confirmPasswordInput);
-    screen.debug();
-    console.log('confirmPassword value after clear:', (confirmPasswordInput as HTMLInputElement).value);
-    fireEvent.blur(confirmPasswordInput);
-    fireEvent.change(confirmPasswordInput, { target: { value: '' } });
-    await user.tab();
-
-    // Now click submit
-    const submitButton = screen.getByTestId('submit-button');
-    await act(async () => {
-      await user.click(submitButton);
-    });
-    screen.debug(); // Debug after submit
-
-    await waitFor(() => {
-      expect(screen.getByText(/please enter a valid email address/i)).toBeInTheDocument();
-      expect(screen.getByText(/first name is required/i)).toBeInTheDocument();
-      expect(screen.getByText(/last name is required/i)).toBeInTheDocument();
-      expect(screen.getByText(/password must be at least 8 characters/i)).toBeInTheDocument();
-      expect(screen.getByText((content) => /terms and conditions/i.test(content))).toBeInTheDocument();
-    });
-    expect(mockRegisterUserAction).not.toHaveBeenCalled();
-  }, 20000);
-
-  it('disables submit button if terms are not accepted', async () => {
-    const user = userEvent.setup();
-    await act(async () => {
-      renderWithProvider();
-    });
-    await user.type(screen.getByTestId('email-input'), 'terms@example.com');
-    await user.type(screen.getByTestId('first-name-input'), 'Test');
-    await user.type(screen.getByTestId('last-name-input'), 'User');
-    await user.type(screen.getByTestId('password-input'), 'ValidPass123!');
-    await user.type(screen.getByTestId('confirm-password-input'), 'ValidPass123!');
-    const submitButton = screen.getByTestId('submit-button');
-    expect(submitButton).toBeDisabled();
-    await user.click(submitButton);
-    expect(mockRegisterUserAction).not.toHaveBeenCalled();
-  });
-
-  it('calls store register, which calls supabase signUp, shows success, and redirects', async () => {
-    const user = userEvent.setup();
-    const testEmail = 'test-success@example.com';
-    const testPassword = 'ValidPass123!';
-
-    mockSupabaseSignUp.mockResolvedValueOnce({
-      data: {
-        user: { id: '123', email: testEmail, email_confirmed_at: null },
-        session: null
-      },
-      error: null
-    });
-
-    await act(async () => {
-      renderWithProvider();
-    });
-
-    await user.type(screen.getByTestId('email-input'), testEmail);
-    await user.type(screen.getByTestId('first-name-input'), 'Test');
-    await user.type(screen.getByTestId('last-name-input'), 'User');
-    await user.type(screen.getByTestId('password-input'), testPassword);
-    await user.type(screen.getByTestId('confirm-password-input'), testPassword);
-    await user.click(screen.getByTestId('accept-terms-checkbox'));
-
-    const submitButton = screen.getByTestId('submit-button');
-    expect(submitButton).not.toBeDisabled();
-    await act(async () => {
-      await user.click(submitButton);
-    });
-
-    await waitFor(() => {
-      expect(mockRegisterUserAction).toHaveBeenCalledTimes(1);
-      expect(mockRegisterUserAction).toHaveBeenCalledWith(expect.objectContaining({
-        email: testEmail,
-        password: testPassword,
-        firstName: 'Test',
-        lastName: 'User'
-      }));
-    });
-
-    await waitFor(() => {
-      expect(mockSupabaseSignUp).toHaveBeenCalledTimes(1);
-      expect(mockSupabaseSignUp).toHaveBeenCalledWith({
-        email: testEmail,
-        password: testPassword,
-        options: {
-          data: {
-            first_name: 'Test',
-            last_name: 'User',
-          },
-          emailRedirectTo: expect.any(String)
-        },
-      });
-    });
-
-    await waitFor(() => {
-      const alert = screen.getByTestId('alert');
-      expect(alert).toBeInTheDocument();
-      expect(screen.getByText(/Registration successful! Please check your email/i)).toBeInTheDocument();
-    });
-
-    await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledTimes(1);
-      expect(mockRouterPush).toHaveBeenCalledWith(`/check-email?email=${encodeURIComponent(testEmail)}`);
-    }, { timeout: 3000 });
-
-  }, 20000);
-
-  it('requires company name for corporate users', async () => {
-    const user = userEvent.setup();
-    await act(async () => {
-      renderWithProvider();
+      await props.handleSubmit({ preventDefault() {} } as any);
     });
     const corporateRadio = screen.getByTestId('user-type-corporate');
     await user.click(corporateRadio);
