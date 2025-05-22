@@ -10,6 +10,7 @@ import { DefaultAuthService } from '@/services/auth/default-auth-service';
 import { DefaultUserService } from '@/services/user/default-user-service';
 import { DefaultTeamService } from '@/services/team/default-team-service';
 import { DefaultPermissionService } from '@/services/permission/default-permission-service';
+import { DefaultGdprService } from '@/services/gdpr/default-gdpr.service';
 import { UserManagementConfiguration } from '@/core/config';
 import { isServer } from '../platform';
 
@@ -66,29 +67,33 @@ export function initializeAdapters(
     
     // Create the adapter factory
     const factory = createAdapterFactory(config);
-    
+
     // Create adapter instances
     const authAdapter = factory.createAuthProvider();
     const userAdapter = factory.createUserProvider();
     const teamAdapter = factory.createTeamProvider();
     const permissionAdapter = factory.createPermissionProvider();
-    
+    const gdprAdapter = factory.createGdprProvider?.();
+
     // Create service instances with the adapters
     const authService = new DefaultAuthService(authAdapter);
     const userService = new DefaultUserService(userAdapter);
     const teamService = new DefaultTeamService(teamAdapter);
     const permissionService = new DefaultPermissionService(permissionAdapter);
+    const gdprService = gdprAdapter ? new DefaultGdprService(gdprAdapter) : undefined;
     
     return {
       authService,
       userService,
       teamService,
       permissionService,
+      gdprService,
       adapters: {
         authAdapter,
         userAdapter,
         teamAdapter,
-        permissionAdapter
+        permissionAdapter,
+        gdprAdapter
       }
     };
   } catch (error) {
@@ -114,6 +119,7 @@ export function initializeUserManagement(config = {}, options = {}) {
       userService: services.userService,
       teamService: services.teamService,
       permissionService: services.permissionService,
+      gdprService: services.gdprService,
       ...options.serviceProviders
     },
     options: {
