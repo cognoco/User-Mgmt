@@ -24,6 +24,10 @@
 - **Tech Stack:**  
   Use only the established stack (Next.js, TypeScript, React, Supabase, Zustand, Tailwind CSS, Shadcn UI, Vitest, React Testing Library, User Event, MSW, JSDOM, Testing Library Jest DOM). Ask before introducing new technologies.
 
+ALWAYS MUST READ: 
+docs\Product documentation\Architecture Guidelines.md
+docs\Product documentation\Architecture Rules References.md
+ 
   ### Testing Rules
 
 FOR E2E tests - THESE TESTS ARE MADE TO DISCOVER BUGS. DO NOT FIX A TEST IF UI/API/HOOK or some other functionality is missing! Keep them as close to reality and avoid mockings where possilble. DO not fix the test so that it passes when it points to missing/wrong implementation. 

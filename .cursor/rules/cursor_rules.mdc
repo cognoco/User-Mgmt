@@ -4,6 +4,8 @@ globs: .cursor/rules/*.mdc
 alwaysApply: true
 ---
 READ .Cursorrules
+ALWAYS READ: docs\Product documentation\Architecture Guidelines.md
+
 
 - **Required Rule Structure:**
   ```markdown
