@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 vi.mock('@/lib/api/axios');
 
 // Mock UI components
-vi.mock('@/components/ui/card', () => ({
+vi.mock('@/ui/primitives/card', () => ({
   Card: ({ children, className }: { children: React.ReactNode; className?: string }) => 
     <div data-testid="card" className={className}>{children}</div>,
   CardHeader: ({ children }: { children: React.ReactNode }) => 
@@ -56,7 +56,7 @@ const mockFormState: FormState = {
 };
 
 // Update form mock to use Zod validation
-vi.mock('@/components/ui/form', () => ({
+vi.mock('@/ui/primitives/form', () => ({
   Form: ({ children, onSubmit }: { children: React.ReactNode; onSubmit?: (data: DomainFormValues) => Promise<void> }) => {
     // Provide a default no-op async onSubmit if not supplied
     const safeOnSubmit = onSubmit || (async () => {});
@@ -136,7 +136,7 @@ vi.mock('@/components/ui/form', () => ({
   ),
 }));
 
-vi.mock('@/components/ui/input', () => {
+vi.mock('@/ui/primitives/input', () => {
   const MockInput = React.forwardRef(({ name, onChange, value, placeholder }: any, ref: any) => (
     <input 
       data-testid="input"
@@ -151,7 +151,7 @@ vi.mock('@/components/ui/input', () => {
   return { Input: MockInput };
 });
 
-vi.mock('@/components/ui/button', () => ({
+vi.mock('@/ui/primitives/button', () => ({
   Button: ({
     children,
     disabled,
@@ -180,7 +180,7 @@ vi.mock('@/components/ui/button', () => ({
   ),
 }));
 
-vi.mock('@/components/ui/alert', () => ({
+vi.mock('@/ui/primitives/alert', () => ({
   Alert: ({ children, variant, className }: { children: React.ReactNode; variant?: string; className?: string }) => (
     <div 
       data-testid="alert" 
@@ -198,7 +198,7 @@ vi.mock('@/components/ui/alert', () => ({
   ),
 }));
 
-vi.mock('@/components/ui/table', () => ({
+vi.mock('@/ui/primitives/table', () => ({
   Table: ({ children }: { children: React.ReactNode }) => 
     <table data-testid="table">{children}</table>,
   TableHeader: ({ children }: { children: React.ReactNode }) => 
@@ -217,7 +217,7 @@ vi.mock('@/components/ui/table', () => ({
     <caption data-testid="table-caption">{children}</caption>,
 }));
 
-vi.mock('@/components/ui/switch', () => ({
+vi.mock('@/ui/primitives/switch', () => ({
   Switch: ({ checked, onCheckedChange, disabled, 'aria-label': ariaLabel }: { 
     checked?: boolean;
     onCheckedChange?: (checked: boolean) => void;
@@ -236,7 +236,7 @@ vi.mock('@/components/ui/switch', () => ({
   ),
 }));
 
-vi.mock('@/components/ui/badge', () => ({
+vi.mock('@/ui/primitives/badge', () => ({
   Badge: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <span data-testid="badge" className={className}>
       {children}
@@ -256,7 +256,7 @@ vi.mocked(api).delete = mockApiDelete;
 vi.mocked(api).put = mockApiPut;
 
 // Mock skeleton component
-vi.mock('@/components/ui/skeleton', () => ({
+vi.mock('@/ui/primitives/skeleton', () => ({
   Skeleton: ({ className }: { className?: string }) => (
     <div data-testid="skeleton" className={className} />
   ),

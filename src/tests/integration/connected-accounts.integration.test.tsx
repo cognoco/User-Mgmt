@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ConnectedAccounts } from '@/components/shared/ConnectedAccounts'; // Corrected import path
+import { ConnectedAccounts } from '@/ui/styled/shared/ConnectedAccounts'; // Corrected import path
 import { useConnectedAccountsStore } from '@/lib/stores/connected-accounts.store'; // CORRECT STORE
 import { createConnectedAccountsStoreMock } from '@/tests/mocks/connected-accounts.store.mock';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';

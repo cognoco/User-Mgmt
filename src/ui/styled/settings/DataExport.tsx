@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Spinner } from '@/components/ui/spinner';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
+import { Button } from '@/ui/primitives/button';
+import { Checkbox } from '@/ui/primitives/checkbox';
+import { Label } from '@/ui/primitives/label';
+import { RadioGroup, RadioGroupItem } from '@/ui/primitives/radio-group';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
+import { Spinner } from '@/ui/primitives/spinner';
 import { ExportFormat, ExportCategory, downloadDataExport } from '@/lib/utils/data-export';
 
 export function DataExport() {

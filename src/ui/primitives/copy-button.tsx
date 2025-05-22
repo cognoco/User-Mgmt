@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
+import { Button } from "@/ui/primitives/button";
 import { Check, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/ui/primitives/tooltip";
 
 interface CopyButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
   value: string;

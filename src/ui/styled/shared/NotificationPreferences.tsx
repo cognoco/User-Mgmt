@@ -5,12 +5,12 @@ import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
 import type { UserPreferences } from '@/types/database';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
+import { Label } from '@/ui/primitives/label';
+import { Switch } from '@/ui/primitives/switch';
 import { Bell, Mail, Smartphone, BadgePercent } from 'lucide-react';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/ui/primitives/skeleton';
 
 interface NotificationPreferencesProps {
   variant?: 'settings' | 'profile';

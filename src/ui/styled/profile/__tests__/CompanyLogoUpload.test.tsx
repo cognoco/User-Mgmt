@@ -15,17 +15,17 @@ vi.mock('@/lib/supabase');
 vi.mock('@/lib/stores/profile.store');
 
 // Mock UI components
-vi.mock('@/components/ui/button', () => ({ Button: (props: any) => <button {...props}>{props.children}</button> }));
-vi.mock('@/components/ui/card', () => ({
+vi.mock('@/ui/primitives/button', () => ({ Button: (props: any) => <button {...props}>{props.children}</button> }));
+vi.mock('@/ui/primitives/card', () => ({
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
-vi.mock('@/components/ui/alert', () => ({
+vi.mock('@/ui/primitives/alert', () => ({
   Alert: ({ children }: { children: React.ReactNode }) => <div role="alert">{children}</div>,
   AlertTitle: ({ children }: { children: React.ReactNode }) => <h4>{children}</h4>,
   AlertDescription: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
 }));
-vi.mock('@/components/ui/dialog', () => ({
+vi.mock('@/ui/primitives/dialog', () => ({
   Dialog: ({ children, open }: { children: React.ReactNode, open: boolean }) => open ? <div data-testid="dialog">{children}</div> : null,
   DialogContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DialogHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

@@ -35,7 +35,7 @@ function createMockResponse<T>(data: T): AxiosResponse<T> {
 
 
 // Mock UI components
-vi.mock('@/components/ui/card', () => ({
+vi.mock('@/ui/primitives/card', () => ({
   Card: (props: any) => <div data-testid="card" {...props} />,
   CardHeader: (props: any) => <div data-testid="card-header" {...props} />,
   CardTitle: (props: any) => <div data-testid="card-title">{props.children}</div>,
@@ -44,7 +44,7 @@ vi.mock('@/components/ui/card', () => ({
   CardFooter: (props: any) => <div data-testid="card-footer" {...props} />,
 }));
 
-vi.mock('@/components/ui/button', () => ({
+vi.mock('@/ui/primitives/button', () => ({
   Button: ({ children, disabled, onClick, 'aria-live': ariaLive }: any) => (
     <button 
       data-testid="button" 
@@ -57,7 +57,7 @@ vi.mock('@/components/ui/button', () => ({
   ),
 }));
 
-vi.mock('@/components/ui/alert', () => ({
+vi.mock('@/ui/primitives/alert', () => ({
   Alert: (props: any) => (
     <div data-testid="alert" role="alert" className={props.className}>
       {props.children}
@@ -68,7 +68,7 @@ vi.mock('@/components/ui/alert', () => ({
   ),
 }));
 
-vi.mock('@/components/ui/switch', () => ({
+vi.mock('@/ui/primitives/switch', () => ({
   Switch: (props: any) => {
     debug(`Rendering Switch with checked=${props.checked}, disabled=${props.disabled}`);
     return (
@@ -89,7 +89,7 @@ vi.mock('@/components/ui/switch', () => ({
   },
 }));
 
-vi.mock('@/components/ui/select', () => {
+vi.mock('@/ui/primitives/select', () => {
   const components = {
     SelectValue: ({ placeholder }: any) => <span data-testid="select-value">{placeholder}</span>,
     SelectContent: ({ children }: any) => <div data-testid="select-content">{children}</div>,

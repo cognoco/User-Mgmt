@@ -13,23 +13,23 @@ expect.extend(matchers);
 (globalThis as any).React = React;
 
 // Mock components
-vi.mock('@/components/ui/button', () => ({
+vi.mock('@/ui/primitives/button', () => ({
   Button: ({ children, ...props }: React.ComponentProps<'button'>) => <button {...props}>{children}</button>,
 }));
 
-vi.mock('@/components/ui/label', () => ({
+vi.mock('@/ui/primitives/label', () => ({
   Label: ({ children, ...props }: React.ComponentProps<'label'>) => <label {...props}>{children}</label>,
 }));
 
-vi.mock('@/components/ui/input', () => ({
+vi.mock('@/ui/primitives/input', () => ({
   Input: (props: React.ComponentProps<'input'>) => <input {...props} />,
 }));
 
-vi.mock('@/components/ui/checkbox', () => ({
+vi.mock('@/ui/primitives/checkbox', () => ({
   Checkbox: (props: React.ComponentProps<'input'>) => <input type="checkbox" {...props} />,
 }));
 
-vi.mock('@/components/ui/alert', () => ({
+vi.mock('@/ui/primitives/alert', () => ({
   Alert: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => <div role="alert" {...props}>{children}</div>,
   AlertTitle: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => <h5 {...props}>{children}</h5>,
   AlertDescription: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => <div {...props}>{children}</div>,

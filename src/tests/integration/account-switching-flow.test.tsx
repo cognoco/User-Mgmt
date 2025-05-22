@@ -12,7 +12,7 @@ vi.mock('@/lib/accountSwitcherApi', async () => await import('../../tests/mocks/
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
-import { Dialog } from '@/components/ui/dialog';
+import { Dialog } from '@/ui/primitives/dialog';
 import { AccountSwitcher } from '@/ui/styled/account/AccountSwitcher';
 import * as accountSwitcherApi from '@/lib/accountSwitcherApi';
 

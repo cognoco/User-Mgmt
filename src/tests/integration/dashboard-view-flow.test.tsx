@@ -4,7 +4,7 @@ import React from 'react';
 // Use act for wrapping state updates like timer advancements
 import { render, screen, act } from '@testing-library/react'; 
 // Removed userEvent as it's no longer used after refactoring
-import { ReportingDashboard } from '@/components/common/ReportingDashboard';
+import { ReportingDashboard } from '@/ui/styled/common/ReportingDashboard';
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 
 // Mocking supabase is unnecessary for this component, but keep the module mock 

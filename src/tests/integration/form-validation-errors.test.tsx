@@ -33,7 +33,7 @@ vi.mock('@/hooks/auth/use-auth', () => ({
 }));
 
 // UI Component Mocks
-vi.mock('@/components/ui/alert', () => ({
+vi.mock('@/ui/primitives/alert', () => ({
     Alert: ({ children, className }: { children: React.ReactNode, className?: string }) => <div data-testid="alert" role="alert" className={className}>{children}</div>,
     AlertTitle: ({ children }: { children: React.ReactNode }) => <h5 data-testid="alert-title">{children}</h5>,
     AlertDescription: ({ children }: { children: React.ReactNode }) => <p data-testid="alert-description">{children}</p>,

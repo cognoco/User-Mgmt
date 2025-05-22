@@ -1,7 +1,7 @@
 'use client';
 
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/ui/primitives/checkbox';
+import { Label } from '@/ui/primitives/label';
 
 interface RememberMeToggleProps {
   checked: boolean;

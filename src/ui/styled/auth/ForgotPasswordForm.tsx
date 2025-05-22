@@ -5,10 +5,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Input } from "@/ui/primitives/input";
+import { Button } from "@/ui/primitives/button";
+import { Label } from "@/ui/primitives/label";
+import { Alert, AlertDescription, AlertTitle } from "@/ui/primitives/alert";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email format'),

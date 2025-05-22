@@ -13,14 +13,14 @@ import { api } from '@/lib/api/axios';
 const mockToastFn = vi.fn();
 
 vi.mock('@/lib/stores/profile.store');
-vi.mock('@/components/ui/use-toast', () => ({
+vi.mock('@/ui/primitives/use-toast', () => ({
   useToast: () => ({ toast: mockToastFn }),
 }));
 
 // Restore Select mock that reads ID from Trigger child
-vi.mock('@/components/ui/select', async (importOriginal) => {
+vi.mock('@/ui/primitives/select', async (importOriginal) => {
   // Explicitly type the original module import
-  const actual = await importOriginal<typeof import('@/components/ui/select')>();
+  const actual = await importOriginal<typeof import('@/ui/primitives/select')>();
   // Import React inside factory for type checking
   const React = await import('react'); 
 

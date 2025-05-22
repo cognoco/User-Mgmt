@@ -1,17 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/primitives/card';
+import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
+import { Switch } from '@/ui/primitives/switch';
+import { Input } from '@/ui/primitives/input';
+import { Button } from '@/ui/primitives/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
+import { Label } from '@/ui/primitives/label';
+import { Badge } from '@/ui/primitives/badge';
 import { Loader2, Bell, Mail, Plus, Trash, AlertCircle, Info } from 'lucide-react';
 import { api } from '@/lib/api/axios';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/ui/primitives/use-toast';
 import {
   CompanyNotificationPreference,
   NotificationType,
@@ -20,7 +20,7 @@ import {
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/ui/primitives/form';
 
 interface NotificationPreferencesProps {
   companyId: string;

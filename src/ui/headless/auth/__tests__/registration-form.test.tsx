@@ -17,7 +17,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 // Mock UI components
-vi.mock('@/components/ui/alert', () => ({
+vi.mock('@/ui/primitives/alert', () => ({
   Alert: ({ children, className }: { children: React.ReactNode, className?: string }) => <div data-testid="alert" className={className}>{children}</div>,
   AlertTitle: ({ children }: { children: React.ReactNode }) => <div data-testid="alert-title">{children}</div>,
   AlertDescription: ({ children }: { children: React.ReactNode }) => <div data-testid="alert-description">{children}</div>,

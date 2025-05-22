@@ -1,6 +1,6 @@
 import { CompanyAddress } from '@/types/company';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/ui/primitives/card';
+import { Button } from '@/ui/primitives/button';
 import { Edit, Trash2 } from 'lucide-react';
 
 interface AddressCardProps {

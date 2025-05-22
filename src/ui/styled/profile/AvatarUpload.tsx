@@ -3,12 +3,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProfileStore } from '@/lib/stores/profile.store';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from '@/ui/primitives/button';
+import { Card, CardContent } from '@/ui/primitives/card';
+import { Alert, AlertTitle, AlertDescription } from '@/ui/primitives/alert';
+import { Avatar, AvatarImage, AvatarFallback } from '@/ui/primitives/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/ui/primitives/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/primitives/tabs";
 import ReactCrop, { type Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { 

@@ -8,12 +8,12 @@ import {
   DialogTitle,
   DialogDescription,
   DialogClose,
-} from '@/components/ui/dialog';
+} from '@/ui/primitives/dialog';
 import { OAUTH_PROVIDERS } from '@/lib/constants/oauthProviders';
 import { useLinkedProviders, useLinkProvider, useUnlinkProvider } from '@/lib/hooks/useProviderManagement';
 import { OAuthProvider } from '@/types/oauth';
-import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/use-toast';
+import { Button } from '@/ui/primitives/button';
+import { toast } from '@/ui/primitives/use-toast';
 
 const ALL_PROVIDERS: OAuthProvider[] = [
   OAuthProvider.GOOGLE,
