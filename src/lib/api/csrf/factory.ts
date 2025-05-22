@@ -6,9 +6,8 @@
  */
 
 import { CsrfService } from '@/core/csrf/interfaces';
-import { UserManagementConfiguration } from '@/core/config';
 import { createCsrfProvider } from '@/adapters/csrf/factory';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { DefaultCsrfService } from '@/services/csrf/default-csrf.service';
 
 // Singleton instance for API routes
 let csrfServiceInstance: CsrfService | null = null;
@@ -20,26 +19,8 @@ let csrfServiceInstance: CsrfService | null = null;
  */
 export function getApiCsrfService(): CsrfService {
   if (!csrfServiceInstance) {
-    // Get Supabase configuration from the existing service
-    const supabase = getServiceSupabase();
-    
-    // Create CSRF data provider
-    const csrfDataProvider = createCsrfProvider({
-      type: 'supabase',
-      options: {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-      }
-    });
-    
-    // Create CSRF service with the data provider
-    csrfServiceInstance = UserManagementConfiguration.getServiceProvider('csrfService') as CsrfService;
-    
-    // If no CSRF service is registered, throw an error
-    if (!csrfServiceInstance) {
-      throw new Error('CSRF service not registered in UserManagementConfiguration');
-    }
+    const csrfDataProvider = createCsrfProvider({ type: 'default' });
+    csrfServiceInstance = new DefaultCsrfService(csrfDataProvider);
   }
-  
   return csrfServiceInstance;
 }

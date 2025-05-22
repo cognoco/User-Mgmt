@@ -11,6 +11,7 @@ import { DefaultUserService } from '@/services/user/default-user-service';
 import { DefaultTeamService } from '@/services/team/default-team-service';
 import { DefaultPermissionService } from '@/services/permission/default-permission-service';
 import { DefaultGdprService } from '@/services/gdpr/default-gdpr.service';
+import { DefaultSsoService } from '@/services/sso/default-sso.service';
 import { UserManagementConfiguration } from '@/core/config';
 import { isServer } from '../platform';
 
@@ -74,13 +75,15 @@ export function initializeAdapters(
     const teamAdapter = factory.createTeamProvider();
     const permissionAdapter = factory.createPermissionProvider();
     const gdprAdapter = factory.createGdprProvider?.();
-
+    const ssoAdapter = factory.createSsoProvider();
+    
     // Create service instances with the adapters
     const authService = new DefaultAuthService(authAdapter);
     const userService = new DefaultUserService(userAdapter);
     const teamService = new DefaultTeamService(teamAdapter);
     const permissionService = new DefaultPermissionService(permissionAdapter);
     const gdprService = gdprAdapter ? new DefaultGdprService(gdprAdapter) : undefined;
+    const ssoService = new DefaultSsoService(ssoAdapter);
     
     return {
       authService,
@@ -88,12 +91,15 @@ export function initializeAdapters(
       teamService,
       permissionService,
       gdprService,
+      ssoService,
       adapters: {
         authAdapter,
         userAdapter,
         teamAdapter,
         permissionAdapter,
-        gdprAdapter
+        gdprAdapter,
+        ssoAdapter
+      }
       }
     };
   } catch (error) {
@@ -119,7 +125,8 @@ export function initializeUserManagement(config = {}, options = {}) {
       userService: services.userService,
       teamService: services.teamService,
       permissionService: services.permissionService,
-      gdprService: services.gdprService,
+      gdprService: ervices.gdprService,
+      ssoService: services.ssoService,
       ...options.serviceProviders
     },
     options: {

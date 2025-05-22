@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { getCurrentUser } from '@/lib/auth/session';
+import { createSupabaseApiKeyProvider } from '@/adapters/api-keys/factory';
 
 // DELETE handler to revoke an API key
 export async function DELETE(
@@ -29,36 +29,19 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get Supabase instance
-    const supabase = getServiceSupabase();
+    const provider = createSupabaseApiKeyProvider({
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
+    });
 
-    // First, verify that the API key belongs to the user
-    const { data: keyData, error: fetchError } = await supabase
-      .from('api_keys')
-      .select('id, name, prefix')
-      .eq('id', keyId)
-      .eq('user_id', user.id)
-      .single();
+    const revokeResult = await provider.revokeKey(user.id, keyId);
 
-    if (fetchError || !keyData) {
-      console.error('Error fetching API key or key not found:', fetchError);
-      return NextResponse.json({ error: 'API key not found' }, { status: 404 });
+    if (!revokeResult.success) {
+      console.error('Error revoking API key:', revokeResult.error);
+      return NextResponse.json({ error: revokeResult.error || 'Failed to revoke API key' }, { status: 500 });
     }
 
-    // Soft delete (revoke) the API key
-    const { error: updateError } = await supabase
-      .from('api_keys')
-      .update({
-        is_revoked: true,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', keyId)
-      .eq('user_id', user.id);
-
-    if (updateError) {
-      console.error('Error revoking API key:', updateError);
-      return NextResponse.json({ error: 'Failed to revoke API key' }, { status: 500 });
-    }
+    const keyData = revokeResult.key;
 
     // Log the action
     await logUserAction({
