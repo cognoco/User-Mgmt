@@ -44,11 +44,12 @@ export async function withErrorHandling(
 export async function withValidation<T>(
   schema: ZodSchema<T>,
   handler: (req: NextRequest, validatedData: T) => Promise<NextResponse>,
-  req: NextRequest
+  req: NextRequest,
+  data?: unknown
 ): Promise<NextResponse> {
   try {
-    const body = await req.json();
-    const validatedData = schema.parse(body);
+    const input = data ?? (await req.json());
+    const validatedData = schema.parse(input);
     return await handler(req, validatedData);
   } catch (error) {
     if (error.name === 'ZodError') {
