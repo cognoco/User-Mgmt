@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromRequest } from '@/lib/auth/utils';
-import { createClient } from '@/lib/supabase';
+import { createSessionProvider } from '@/adapters/session/factory';
 
 // GET /api/session - List all active sessions for the current user
 export async function GET(req: NextRequest) {
   const user = await getUserFromRequest(req);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const supabase = createClient();
+  const provider = createSessionProvider({
+    type: 'supabase',
+    options: {
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    }
+  });
   try {
-    // Get all sessions for the user
-    const { data: sessions, error } = await supabase.auth.admin.listUserSessions(user.id);
-    if (error) throw error;
-    // Optionally, filter/format session info here
+    const sessions = await provider.listUserSessions(user.id);
     return NextResponse.json({ sessions });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 });

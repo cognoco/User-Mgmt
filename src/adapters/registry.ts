@@ -11,6 +11,7 @@ import { AuthDataProvider } from './auth/interfaces';
 import { UserDataProvider } from './user/interfaces';
 import { TeamDataProvider } from './team/interfaces';
 import { PermissionDataProvider } from './permission/interfaces';
+import { SessionDataProvider } from './session/interfaces';
 import { SsoDataProvider } from './sso/interfaces';
 import { SubscriptionDataProvider } from './subscription/interfaces';
 import { ApiKeyDataProvider } from './api-keys/interfaces';
@@ -49,6 +50,11 @@ export interface AdapterFactory {
   createPermissionProvider(): PermissionDataProvider;
 
   /**
+   * Create a session data provider
+   */
+  createSessionProvider(): SessionDataProvider;
+
+  /**
    * Create an SSO data provider
    */
   createSsoProvider(): SsoDataProvider;
@@ -62,6 +68,7 @@ export interface AdapterFactory {
    * Create an API key data provider
    */
   createApiKeyProvider(): ApiKeyDataProvider;
+}
 
 /**
  * Factory creator function type
