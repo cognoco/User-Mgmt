@@ -11,6 +11,7 @@ export * from './user';
 export * from './team';
 export * from './permission';
 export * from './notification';
+export * from './csrf';
 
 // Import and register the Supabase adapter factory by default
 import { AdapterRegistry } from './registry';
