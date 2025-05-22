@@ -3,7 +3,7 @@
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AdminUsers } from '../../components/admin/AdminUsers';
+import { AdminUsers } from '@/ui/styled/admin/AdminUsers';
 import { describe, expect, beforeEach, vi } from 'vitest';
 import { UserType } from '@/types/user-type';
 
@@ -18,7 +18,7 @@ let fetchUsersMock: () => Promise<typeof mockUsersList>;
 let handleRoleChangeMock: (user: any, newRole: string) => Promise<any>;
 
 // Mock the AdminUsers component's dependencies
-vi.mock('../../components/admin/AdminUsers', async (importOriginal: () => Promise<any>) => {
+vi.mock('@/ui/styled/admin/AdminUsers', async (importOriginal: () => Promise<any>) => {
   const actual = await importOriginal();
   return {
     ...actual,
