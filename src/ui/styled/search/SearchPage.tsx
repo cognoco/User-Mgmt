@@ -1,9 +1,9 @@
 import React, { useState, useCallback } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/ui/primitives/input';
+import { Button } from '@/ui/primitives/button';
+import { Checkbox } from '@/ui/primitives/checkbox';
+import { Label } from '@/ui/primitives/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { supabase } from '@/lib/database/supabase';
 import { SearchPage as HeadlessSearchPage } from '../../headless/search/SearchPage';
 

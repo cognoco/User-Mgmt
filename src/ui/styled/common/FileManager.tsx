@@ -1,15 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/database/supabase';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import FileTypeIcon from '@/components/ui/FileTypeIcon';
+import { Button } from '@/ui/primitives/button';
+import { Spinner } from '@/ui/primitives/spinner';
+import { Alert, AlertTitle, AlertDescription } from '@/ui/primitives/alert';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/primitives/dialog';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@/ui/primitives/alert-dialog';
+import { Label } from '@/ui/primitives/label';
+import { Input } from '@/ui/primitives/input';
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/ui/primitives/breadcrumb';
+import FileTypeIcon from '@/ui/primitives/FileTypeIcon';
 import { formatFileSize } from '@/lib/utils/file-upload';
 
 /**

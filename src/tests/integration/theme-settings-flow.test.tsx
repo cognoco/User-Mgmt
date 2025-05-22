@@ -3,7 +3,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from 'src/tests/utils/test-utils';
 import userEvent from '@testing-library/user-event';
-import { ThemeSettings } from '@/components/common/ThemeSettings';
+import { ThemeSettings } from '@/ui/styled/common/ThemeSettings';
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { supabase } from '@/lib/database/supabase';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';

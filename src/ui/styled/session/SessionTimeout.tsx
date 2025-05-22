@@ -1,7 +1,7 @@
 'use client';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/primitives/dialog';
+import { Button } from '@/ui/primitives/button';
 import { useAuth } from '@/hooks/auth/useAuth';
 
 interface SessionTimeoutProps {

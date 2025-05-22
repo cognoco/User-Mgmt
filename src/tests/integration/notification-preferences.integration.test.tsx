@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
-import { NotificationPreferences } from '@/components/shared/NotificationPreferences';
+import { NotificationPreferences } from '@/ui/styled/shared/NotificationPreferences';
 import { usePreferencesStore, type PreferencesState } from '@/lib/stores/preferences.store';
 import { api } from '@/lib/api/axios';
 

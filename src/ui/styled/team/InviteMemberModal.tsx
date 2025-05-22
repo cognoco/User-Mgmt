@@ -10,16 +10,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from '@/ui/primitives/dialog';
+import { Button } from '@/ui/primitives/button';
+import { Input } from '@/ui/primitives/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/ui/primitives/select';
 import {
   Form,
   FormControl,
@@ -27,10 +27,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from '@/ui/primitives/form';
 import { useTeamInvite } from './hooks/useTeamInvite';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/ui/primitives/progress';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { UserPlus } from 'lucide-react';
 
 const inviteSchema = z.object({

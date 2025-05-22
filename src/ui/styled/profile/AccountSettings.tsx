@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { AccountSettings as HeadlessAccountSettings, AccountSettingsProps } from '../../headless/profile/AccountSettings';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/ui/primitives/input';
+import { Button } from '@/ui/primitives/button';
+import { Label } from '@/ui/primitives/label';
+import { Switch } from '@/ui/primitives/switch';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
+import { Separator } from '@/ui/primitives/separator';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/primitives/dialog';
 import { ExclamationTriangleIcon, CheckCircledIcon, TrashIcon, LockClosedIcon } from '@radix-ui/react-icons';
 
 export interface StyledAccountSettingsProps extends Omit<AccountSettingsProps, 'render'> {

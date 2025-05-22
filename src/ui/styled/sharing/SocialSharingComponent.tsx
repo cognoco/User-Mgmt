@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/ui/primitives/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/ui/primitives/popover';
 import { Link, Copy, Twitter, Linkedin, Facebook, Mail, Image as ImageIcon } from 'lucide-react'; // Assuming lucide-react for icons
 
 // Define the expected shape of the item data REQUIRED by this component

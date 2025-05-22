@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/primitives/card';
+import { Progress } from '@/ui/primitives/progress';
 import { CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 

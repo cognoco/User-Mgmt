@@ -81,14 +81,14 @@ const defaultUserManagementContext: UserManagementContextValue = {
   },
 };
 
-vi.mock('@/components/ui/button', () => ({ Button: (props: any) => <button {...props} /> }));
-vi.mock('@/components/ui/input', () => {
+vi.mock('@/ui/primitives/button', () => ({ Button: (props: any) => <button {...props} /> }));
+vi.mock('@/ui/primitives/input', () => {
     const MockInput = React.forwardRef((props: any, ref: any) => <input ref={ref} {...props} />);
     MockInput.displayName = 'MockInput';
     return { Input: MockInput };
 });
-vi.mock('@/components/ui/label', () => ({ Label: (props: any) => <label {...props} /> }));
-vi.mock('@/components/ui/card', () => ({
+vi.mock('@/ui/primitives/label', () => ({ Label: (props: any) => <label {...props} /> }));
+vi.mock('@/ui/primitives/card', () => ({
   Card: ({ children }: { children: React.ReactNode }) => <div data-testid="card">{children}</div>,
   CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardTitle: ({ children }: { children: React.ReactNode }) => <h3>{children}</h3>,
@@ -96,8 +96,8 @@ vi.mock('@/components/ui/card', () => ({
   CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   CardFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
-vi.mock('@/components/ui/separator', () => ({ Separator: () => <hr /> }));
-vi.mock('@/components/ui/alert', () => ({
+vi.mock('@/ui/primitives/separator', () => ({ Separator: () => <hr /> }));
+vi.mock('@/ui/primitives/alert', () => ({
   Alert: ({ children }: { children: React.ReactNode }) => <div role="alert">{children}</div>,
   AlertDescription: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
 }));

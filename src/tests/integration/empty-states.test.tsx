@@ -6,9 +6,9 @@ import { supabase } from '@/lib/database/supabase';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DataTable } from '@/components/common/DataTable';
-import { SearchResults } from '@/components/common/SearchResults';
-import NotificationCenter from '@/components/common/NotificationCenter';
+import { DataTable } from '@/ui/styled/common/DataTable';
+import { SearchResults } from '@/ui/styled/common/SearchResults';
+import NotificationCenter from '@/ui/styled/common/NotificationCenter';
 import { vi } from 'vitest';
 
 describe('Empty States', () => {

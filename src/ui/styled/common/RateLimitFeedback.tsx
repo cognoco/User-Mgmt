@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
+import { Progress } from '@/ui/primitives/progress';
 
 interface RateLimitFeedbackProps {
   windowMs: number;

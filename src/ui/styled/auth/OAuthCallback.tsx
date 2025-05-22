@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/auth/use-auth';
 import { getUserHomePage } from '@/lib/utils/getUserHomePage';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/ui/primitives/use-toast';
 import { useOAuthStore } from '@/lib/stores/oauth.store';
 import { OAuthProvider } from '@/types/oauth';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Spinner } from '@/components/ui/spinner';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/primitives/card';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
+import { Spinner } from '@/ui/primitives/spinner';
 
 export function OAuthCallback() {
   const { t } = useTranslation();

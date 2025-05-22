@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 // import { use2FAStore } from '@/lib/stores/2fa.store'; // Unused
 import { TwoFactorMethod } from '@/types/2fa';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/ui/primitives/button';
+import { Card } from '@/ui/primitives/card';
+import { Input } from '@/ui/primitives/input';
+import { Label } from '@/ui/primitives/label';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api/axios';
-// import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"; // Unused
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Unused
+// import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/ui/primitives/dialog"; // Unused
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/primitives/tabs"; // Unused
 // import { Loader2, CheckCircle, XCircle, QrCode, Smartphone, KeyRound, Trash2, Edit, Save, Copy } from "lucide-react"; // Unused
 // import { useUserManagement } from "@/lib/auth/UserManagementProvider"; // Unused
 // import { useAuth } from '@/hooks/auth/useAuth'; // Keep commented if unused

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from '@/ui/primitives/textarea';
 
 describe('Minimal React Hook Form + Textarea', () => {
   it('should update textarea value when form is reset', async () => {

@@ -5,17 +5,17 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/ui/primitives/button';
+import { Input } from '@/ui/primitives/input';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/ui/primitives/form';
+import { Alert, AlertTitle, AlertDescription } from '@/ui/primitives/alert';
+import { Checkbox } from '@/ui/primitives/checkbox';
 import { OAuthButtons } from './OAuthButtons';
-import { ErrorBoundary, DefaultErrorFallback } from '@/components/common/ErrorBoundary';
+import { ErrorBoundary, DefaultErrorFallback } from '@/ui/styled/common/ErrorBoundary';
 import Link from 'next/link';
-import { FormWithRecovery } from '@/components/ui/form-with-recovery';
-import { Spinner } from '@/components/ui/spinner';
-import { Label } from '@/components/ui/label';
+import { FormWithRecovery } from '@/ui/primitives/form-with-recovery';
+import { Spinner } from '@/ui/primitives/spinner';
+import { Label } from '@/ui/primitives/label';
 
 // Form schema
 const loginSchema = z.object({

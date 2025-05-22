@@ -73,7 +73,7 @@ const mockTeamMembers = {
 };
 
 // Mock Skeleton component for test selection
-vi.mock('@/components/ui/skeleton', () => ({
+vi.mock('@/ui/primitives/skeleton', () => ({
   Skeleton: ({ className }: { className?: string }) => (
     <div data-testid="skeleton" className={className} />
   ),

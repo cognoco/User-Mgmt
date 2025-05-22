@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/ui/primitives/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/primitives/card';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { Shield, ShieldAlert, ShieldCheck, KeyRound } from 'lucide-react';
 import { api } from '@/lib/api/axios';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { TwoFactorSetup } from './TwoFactorSetup';
 import { BackupCodesDisplay } from './BackupCodesDisplay';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent } from '@/ui/primitives/dialog';
+import { Input } from '@/ui/primitives/input';
+import { Label } from '@/ui/primitives/label';
 
 export function MFAManagementSection() {
   const { t } = useTranslation();

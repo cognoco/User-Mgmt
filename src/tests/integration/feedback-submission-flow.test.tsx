@@ -4,7 +4,7 @@ import { vi, beforeEach, afterEach } from 'vitest';
 import { screen, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import FeedbackForm from '@/components/common/FeedbackForm';
+import FeedbackForm from '@/ui/styled/common/FeedbackForm';
 
 // Silence act() warnings as they're expected in integration tests
 // This is acceptable according to TESTING_ISSUES.md

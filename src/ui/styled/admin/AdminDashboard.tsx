@@ -5,10 +5,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+} from '@/ui/primitives/card';
+import { Progress } from '@/ui/primitives/progress';
+import { Badge } from '@/ui/primitives/badge';
+import { Skeleton } from '@/ui/primitives/skeleton';
 import { formatDistanceToNow, format } from 'date-fns';
 import {
   Users,

@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { CompanyProfile } from '@/types/company';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/ui/primitives/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/ui/primitives/card';
+import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
+import { Badge } from '@/ui/primitives/badge';
 import { api } from '@/lib/api/axios';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/ui/primitives/use-toast';
 import { CheckCircle, Clock, AlertCircle, Loader2, Copy } from 'lucide-react';
 
 interface DomainVerificationProps {

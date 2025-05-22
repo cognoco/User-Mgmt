@@ -7,16 +7,16 @@
 
 import React from 'react';
 import { RoleManager as HeadlessRoleManager, RoleManagerProps } from '../../headless/permission/RoleManager';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/ui/primitives/input';
+import { Button } from '@/ui/primitives/button';
+import { Label } from '@/ui/primitives/label';
+import { Textarea } from '@/ui/primitives/textarea';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/primitives/table';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/primitives/dialog';
+import { Checkbox } from '@/ui/primitives/checkbox';
 import { ExclamationTriangleIcon, CheckCircledIcon, PlusIcon, Pencil1Icon, TrashIcon } from '@radix-ui/react-icons';
 
 export interface StyledRoleManagerProps extends Omit<RoleManagerProps, 'render'> {
