@@ -1,3 +1,5 @@
+// NOTE: This component handles sending team invitations and does not have a
+// matching headless implementation yet, so it retains its local logic.
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {

@@ -1,3 +1,5 @@
+// NOTE: Pagination and seat usage logic here is custom and no equivalent
+// headless component currently exists, so this component keeps its own logic.
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {

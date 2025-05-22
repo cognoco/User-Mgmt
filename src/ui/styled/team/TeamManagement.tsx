@@ -1,3 +1,5 @@
+// NOTE: Seat and license management logic here has no equivalent headless
+// component yet, so this styled component remains as is.
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
