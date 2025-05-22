@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/database/prisma';
 import { GET } from '@/app/api/team/members/route';
+import { ERROR_CODES } from '@/lib/api/common';
 
 // Mocks
 vi.mock('next-auth', () => ({
@@ -69,7 +70,8 @@ describe('Team Members API', () => {
     const response = await GET(request);
 
     expect(response.status).toBe(401);
-    expect(await response.json()).toEqual({ error: 'Unauthorized' });
+    const data = await response.json();
+    expect(data.error.code).toBe(ERROR_CODES.UNAUTHORIZED);
   });
 
   it('returns team members with pagination', async () => {
@@ -78,7 +80,7 @@ describe('Team Members API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data).toEqual({
+    expect(data.data).toEqual({
       users: mockUsers,
       pagination: {
         page: 1,
@@ -167,11 +169,8 @@ describe('Team Members API', () => {
     const response = await GET(request);
 
     expect(response.status).toBe(400);
-    expect(await response.json()).toEqual(
-      expect.objectContaining({
-        error: 'Invalid query parameters',
-      })
-    );
+    const data = await response.json();
+    expect(data.error.code).toBe(ERROR_CODES.INVALID_REQUEST);
   });
 
   it('handles database errors gracefully', async () => {
@@ -183,8 +182,7 @@ describe('Team Members API', () => {
     const response = await GET(request);
 
     expect(response.status).toBe(500);
-    expect(await response.json()).toEqual({
-      error: 'Internal server error',
-    });
+    const data = await response.json();
+    expect(data.error.code).toBe(ERROR_CODES.INTERNAL_ERROR);
   });
 });

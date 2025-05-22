@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
+import { ERROR_CODES } from '@/lib/api/common';
 
 // Mock dependencies
 vi.mock('next-auth', () => ({
@@ -94,7 +95,7 @@ describe('POST /api/team/invites/accept', () => {
     const data = await response.json();
 
     expect(response.status).toBe(401);
-    expect(data).toEqual({ error: 'Unauthorized' });
+    expect(data.error.code).toBe(ERROR_CODES.UNAUTHORIZED);
   });
 
   it('returns 400 when invite token is invalid', async () => {
@@ -112,7 +113,7 @@ describe('POST /api/team/invites/accept', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data).toEqual({ error: 'Invalid or expired invitation' });
+    expect(data.error.code).toBe(ERROR_CODES.INVALID_REQUEST);
   });
 
   it('returns 400 when invite is expired', async () => {
@@ -133,7 +134,7 @@ describe('POST /api/team/invites/accept', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data).toEqual({ error: 'Invitation has expired' });
+    expect(data.error.code).toBe(ERROR_CODES.INVALID_REQUEST);
   });
 
   it('returns 403 when invite email does not match user email', async () => {
@@ -154,7 +155,7 @@ describe('POST /api/team/invites/accept', () => {
     const data = await response.json();
 
     expect(response.status).toBe(403);
-    expect(data).toEqual({ error: 'This invitation was sent to a different email address' });
+    expect(data.error.code).toBe(ERROR_CODES.FORBIDDEN);
   });
 
   it('should return 400 when request body is invalid', async () => {
@@ -174,8 +175,8 @@ describe('POST /api/team/invites/accept', () => {
 
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error).toBe('Invalid request data');
-    expect(data.details).toBeDefined();
+    expect(data.error.code).toBe(ERROR_CODES.INVALID_REQUEST);
+    expect(data.error.details).toBeDefined();
   });
 
   it('should return 500 when database operation fails', async () => {
@@ -197,6 +198,6 @@ describe('POST /api/team/invites/accept', () => {
 
     expect(response.status).toBe(500);
     const data = await response.json();
-    expect(data.error).toBe('Failed to accept team invite');
+    expect(data.error.code).toBe(ERROR_CODES.INTERNAL_ERROR);
   });
 }); 

@@ -1,137 +1,88 @@
-import { NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/database/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { Session } from '@/types/next-auth';
 import { logUserAction } from '@/lib/audit/auditLogger';
+import {
+  createSuccessResponse,
+  withErrorHandling,
+  withValidation,
+  ApiError,
+  ERROR_CODES
+} from '@/lib/api/common';
+import { createTeamMemberNotFoundError } from '@/lib/api/team/error-handler';
 
 const updateRoleSchema = z.object({
   role: z.enum(['admin', 'member', 'viewer']),
 });
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: { memberId: string } }
+async function handlePatch(
+  req: NextRequest,
+  data: z.infer<typeof updateRoleSchema>,
+  memberId: string
 ) {
-  try {
-    // Check authentication
-    const session = await getServerSession(authOptions) as Session;
-    if (!session?.user) {
-      await logUserAction({
-        action: 'TEAM_ROLE_UPDATE_ATTEMPT',
-        status: 'FAILURE',
-        ipAddress: undefined,
-        userAgent: undefined,
-        userId: undefined,
-        targetResourceType: 'team_member',
-        targetResourceId: params.memberId,
-        details: { reason: 'Unauthorized' }
-      });
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const { memberId } = params;
-
-    // Check if the current user is an admin of the team
-    const currentUserMember = await prisma.teamMember.findFirst({
-      where: {
-        userId: session.user.id,
-        role: 'admin',
-      },
-    });
-
-    if (!currentUserMember) {
-      await logUserAction({
-        userId: session.user.id,
-        action: 'TEAM_ROLE_UPDATE_ATTEMPT',
-        status: 'FAILURE',
-        ipAddress: undefined,
-        userAgent: undefined,
-        targetResourceType: 'team_member',
-        targetResourceId: params.memberId,
-        details: { reason: 'Only admins can update member roles' }
-      });
-      return NextResponse.json(
-        { error: 'Only admins can update member roles' },
-        { status: 403 }
-      );
-    }
-
-    // Parse and validate request body
-    const body = await request.json();
-    const { role } = updateRoleSchema.parse(body);
-
-    // Update the member's role
-    try {
-      const updatedMember = await prisma.teamMember.update({
-        where: { id: memberId },
-        data: { role },
-      });
-
-      await logUserAction({
-        userId: session.user.id,
-        action: 'TEAM_ROLE_UPDATE_SUCCESS',
-        status: 'SUCCESS',
-        ipAddress: undefined,
-        userAgent: undefined,
-        targetResourceType: 'team_member',
-        targetResourceId: memberId,
-        details: { newRole: role }
-      });
-      return NextResponse.json(updatedMember);
-    } catch (error) {
-      await logUserAction({
-        userId: session.user.id,
-        action: 'TEAM_ROLE_UPDATE_NOT_FOUND',
-        status: 'FAILURE',
-        ipAddress: undefined,
-        userAgent: undefined,
-        targetResourceType: 'team_member',
-        targetResourceId: memberId,
-        details: { error: error instanceof Error ? error.message : String(error) }
-      });
-      return NextResponse.json(
-        { error: 'Team member not found' },
-        { status: 404 }
-      );
-    }
-  } catch (error) {
-    console.error('Failed to update team member role:', error);
-    
-    if (error instanceof z.ZodError) {
-      await logUserAction({
-        userId: session?.user?.id,
-        action: 'TEAM_ROLE_UPDATE_VALIDATION_ERROR',
-        status: 'FAILURE',
-        ipAddress: undefined,
-        userAgent: undefined,
-        targetResourceType: 'team_member',
-        targetResourceId: params.memberId,
-        details: { error: error.errors }
-      });
-      return NextResponse.json(
-        { error: 'Invalid request parameters', details: error.errors },
-        { status: 400 }
-      );
-    }
-
+  const session = (await getServerSession(authOptions)) as Session;
+  if (!session?.user) {
     await logUserAction({
-      userId: session?.user?.id,
-      action: 'TEAM_ROLE_UPDATE_ERROR',
+      action: 'TEAM_ROLE_UPDATE_ATTEMPT',
       status: 'FAILURE',
-      ipAddress: undefined,
-      userAgent: undefined,
       targetResourceType: 'team_member',
-      targetResourceId: params.memberId,
+      targetResourceId: memberId,
+      details: { reason: 'Unauthorized' }
+    });
+    throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Unauthorized', 401);
+  }
+
+  const currentUserMember = await prisma.teamMember.findFirst({
+    where: { userId: session.user.id, role: 'admin' },
+  });
+  if (!currentUserMember) {
+    await logUserAction({
+      userId: session.user.id,
+      action: 'TEAM_ROLE_UPDATE_ATTEMPT',
+      status: 'FAILURE',
+      targetResourceType: 'team_member',
+      targetResourceId: memberId,
+      details: { reason: 'Only admins can update member roles' }
+    });
+    throw new ApiError(ERROR_CODES.FORBIDDEN, 'Only admins can update member roles', 403);
+  }
+
+  try {
+    const updatedMember = await prisma.teamMember.update({
+      where: { id: memberId },
+      data: { role: data.role },
+    });
+    await logUserAction({
+      userId: session.user.id,
+      action: 'TEAM_ROLE_UPDATE_SUCCESS',
+      status: 'SUCCESS',
+      targetResourceType: 'team_member',
+      targetResourceId: memberId,
+      details: { newRole: data.role }
+    });
+    return createSuccessResponse(updatedMember);
+  } catch (error) {
+    await logUserAction({
+      userId: session.user.id,
+      action: 'TEAM_ROLE_UPDATE_NOT_FOUND',
+      status: 'FAILURE',
+      targetResourceType: 'team_member',
+      targetResourceId: memberId,
       details: { error: error instanceof Error ? error.message : String(error) }
     });
-    return NextResponse.json(
-      { error: 'Failed to update team member role' },
-      { status: 500 }
-    );
+    throw createTeamMemberNotFoundError();
   }
-} 
+}
+
+async function handler(
+  req: NextRequest,
+  context: { params: { memberId: string } }
+) {
+  return withValidation(updateRoleSchema, (r, data) => handlePatch(r, data, context.params.memberId), req);
+}
+
+export const PATCH = (req: NextRequest, ctx: { params: { memberId: string } }) =>
+  withErrorHandling((r) => handler(r, ctx), req);
