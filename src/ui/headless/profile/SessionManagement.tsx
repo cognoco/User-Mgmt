@@ -5,14 +5,15 @@
  */
 
 import { useEffect } from 'react';
-import { useSessionStore } from '@/lib/stores/session.store';
+import { useSession } from '@/hooks/session/use-session';
+import type { SessionInfo } from '@/core/session/models';
 
 export interface SessionManagementProps {
   render: (props: SessionManagementRenderProps) => React.ReactNode;
 }
 
 export interface SessionManagementRenderProps {
-  sessions: ReturnType<typeof useSessionStore>['sessions'];
+  sessions: SessionInfo[];
   loading: boolean;
   error?: string | null;
   revoke: (id: string) => Promise<void>;
@@ -22,28 +23,27 @@ export interface SessionManagementRenderProps {
 export function SessionManagement({ render }: SessionManagementProps) {
   const {
     sessions,
-    sessionLoading,
-    sessionError,
+    loading,
+    error,
     fetchSessions,
-    revokeSession,
-  } = useSessionStore();
+    terminateSession,
+    terminateAllOtherSessions,
+  } = useSession();
 
   useEffect(() => {
     fetchSessions();
   }, [fetchSessions]);
 
   const revokeAll = async () => {
-    for (const s of sessions) {
-      if (!s.is_current) await revokeSession(s.id);
-    }
+    await terminateAllOtherSessions();
   };
 
   return (
     <>{render({
       sessions,
-      loading: sessionLoading,
-      error: sessionError,
-      revoke: revokeSession,
+      loading,
+      error,
+      revoke: terminateSession,
       revokeAll,
     })}</>
   );
