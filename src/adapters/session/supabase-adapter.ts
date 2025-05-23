@@ -4,10 +4,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { SessionInfo } from '../../core/session/models';
-
 import type { ISessionDataProvider } from '@/core/session/ISessionDataProvider';
-
-
 export class SupabaseSessionProvider implements ISessionDataProvider {
   private supabase: SupabaseClient;
 

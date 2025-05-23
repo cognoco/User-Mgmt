@@ -7,7 +7,6 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { SsoProvider, SsoProviderPayload } from '../../core/sso/models';
-
 import type { ISsoDataProvider } from '@/core/sso/ISsoDataProvider';
 
 

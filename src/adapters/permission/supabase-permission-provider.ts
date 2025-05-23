@@ -15,7 +15,7 @@ import {
   RoleCreationPayload,
   RoleUpdatePayload
 } from '../../core/permission/models';
-import { IPermissionDataProvider } from '../../core/permission/IPermissionDataProvider';
+import type { IPermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
 import { PermissionEventHandler, PermissionEventTypes } from '../../core/permission/events';
 
 /**

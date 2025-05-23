@@ -16,7 +16,9 @@ import {
   UserSearchResult,
   ProfileVisibility
 } from '../../core/user/models';
-import { IUserDataProvider } from '../../core/user/IUserDataProvider';
+
+import type { IUserDataProvider } from '@/core/user/IUserDataProvider';
+
 
 /**
  * Supabase implementation of the UserDataProvider interface

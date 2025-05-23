@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { IAuditDataProvider } from '../../core/audit/IAuditDataProvider';
+
+import type { IAuditDataProvider } from '@/core/audit/IAuditDataProvider';
 import { AuditLogEntry, AuditLogQuery } from '@/core/audit/models';
 
 export class SupabaseAuditAdapter implements IAuditDataProvider {
