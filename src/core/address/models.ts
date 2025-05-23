@@ -48,6 +48,23 @@ export interface AddressResult {
   error?: string;
 }
 
+export interface AddressQuery {
+  /** Page number starting from 1 */
+  page?: number;
+  /** Number of items per page */
+  limit?: number;
+  /** Filter by address type */
+  type?: AddressType;
+  /** Only return addresses marked as primary */
+  is_primary?: boolean;
+  /** Filter by validation status */
+  validated?: boolean;
+  /** Field to sort by */
+  sortBy?: keyof CompanyAddress | string;
+  /** Sort order */
+  sortOrder?: 'asc' | 'desc';
+}
+
 export const addressCreateSchema = z.object({
   type: z.enum(['billing', 'shipping', 'legal']),
   street_line1: z.string().min(1).max(100),

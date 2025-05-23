@@ -13,6 +13,22 @@ export interface AuditLogEntry {
 
 export type AuditLogStatus = 'SUCCESS' | 'FAILURE' | 'INITIATED' | 'COMPLETED';
 
+export interface AuditLogCreatePayload
+  extends Omit<AuditLogEntry, 'id' | 'createdAt'> {
+  /** Optional creation timestamp */
+  createdAt?: string;
+}
+
+export type AuditLogUpdatePayload = Partial<
+  Omit<AuditLogEntry, 'id' | 'createdAt'>
+>;
+
+export interface AuditLogResult {
+  success: boolean;
+  log?: AuditLogEntry;
+  error?: string;
+}
+
 export interface AuditLogQuery {
   page: number;
   limit: number;
