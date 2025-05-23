@@ -1,0 +1,76 @@
+import { NextApiRequest, NextApiResponse } from 'next';
+import type { User } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
+
+/**
+ * Options for {@link withAuth} middleware.
+ */
+export interface WithAuthOptions {
+  /** Require the authenticated user to have the `admin` role. */
+  requireAdmin?: boolean;
+}
+
+/**
+ * Request object extended with an authenticated user.
+ */
+export interface AuthenticatedRequest extends NextApiRequest {
+  /** Authenticated Supabase user */
+  user: User;
+}
+
+/**
+ * Wrap an API route handler with authentication/authorization checks.
+ *
+ * The middleware verifies the `Authorization` header using Supabase. If
+ * `requireAdmin` is set, the user must have an `admin` role in their
+ * `app_metadata`.
+ *
+ * On failure it responds with `401` or `403` status codes. Unexpected errors
+ * result in a `500` response.
+ *
+ * @param handler API route handler to execute after authentication succeeds.
+ * @param options Optional middleware configuration.
+ * @returns A new handler enforcing authentication.
+ */
+export function withAuth(
+  handler: (req: AuthenticatedRequest, res: NextApiResponse) => Promise<void> | void,
+  options: WithAuthOptions = {}
+) {
+  return async (req: NextApiRequest, res: NextApiResponse) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader) {
+        return res
+          .status(401)
+          .json({ error: 'Unauthorized: Missing authorization header' });
+      }
+
+      // Support both "Bearer <token>" and raw token formats
+      const token = authHeader.startsWith('Bearer ')
+        ? authHeader.split(' ')[1]
+        : authHeader;
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser(token);
+
+      if (error || !user) {
+        return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+      }
+
+      if (
+        options.requireAdmin &&
+        (!user.app_metadata?.role || user.app_metadata.role !== 'admin')
+      ) {
+        return res.status(403).json({ error: 'Forbidden: Admin access required' });
+      }
+
+      const authedReq = req as AuthenticatedRequest;
+      authedReq.user = user;
+      return handler(authedReq, res);
+    } catch (err) {
+      console.error('Auth middleware error:', err);
+      return res.status(500).json({ error: 'Server error during authentication' });
+    }
+  };
+}
