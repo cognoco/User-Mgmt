@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { triggerWebhook } from '@/lib/webhooks/triggerWebhook';
-import { getApiSsoService } from '@/lib/api/sso/factory';
+import { getApiSsoService } from '@/services/sso/factory';
 import { ssoProviderSchema } from '@/core/sso/models';
 
 // Zod schema for SSO provider config

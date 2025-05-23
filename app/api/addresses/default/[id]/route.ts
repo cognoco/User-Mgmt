@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiAddressService } from '@/lib/api/address/factory';
+import { getApiAddressService } from '@/services/address/factory';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const userId = req.headers.get('x-user-id');

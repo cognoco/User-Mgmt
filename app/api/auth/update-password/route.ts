@@ -3,7 +3,7 @@ import { z } from "zod";
 import { withAuthRateLimit } from "@/middleware/with-auth-rate-limit";
 import { withSecurity } from "@/middleware/with-security";
 import { logUserAction } from "@/lib/audit/auditLogger";
-import { getApiAuthService } from "@/lib/api/auth/factory";
+import { getApiAuthService } from "@/services/auth/factory";
 import {
   createSuccessResponse,
   withErrorHandling,

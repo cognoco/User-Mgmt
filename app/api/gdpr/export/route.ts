@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
-import { getApiGdprService } from '@/lib/api/gdpr/factory';
+import { getApiGdprService } from '@/services/gdpr/factory';
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');

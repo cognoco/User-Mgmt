@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { logUserAction } from '@/lib/audit/auditLogger';
-import { getApiGdprService } from '@/lib/api/gdpr/factory';
+import { getApiGdprService } from '@/services/gdpr/factory';
 
 export async function POST(request: NextRequest) {
   // 1. Authentication (Essential)

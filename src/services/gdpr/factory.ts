@@ -7,6 +7,7 @@
 
 import { GdprService } from '@/core/gdpr/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
+import type { IGdprDataProvider } from '@/core/gdpr';
 import { createGdprProvider } from '@/adapters/gdpr/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiGdprService(): GdprService {
     const supabase = getServiceSupabase();
     
     // Create GDPR data provider
-    const gdprDataProvider = createGdprProvider({
+    const gdprDataProvider: IGdprDataProvider = createGdprProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

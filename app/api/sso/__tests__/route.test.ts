@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET, POST } from '../route';
-import { getApiSsoService } from '@/lib/api/sso/factory';
+import { getApiSsoService } from '@/services/sso/factory';
 
-vi.mock('@/lib/api/sso/factory', () => ({
+vi.mock('@/services/sso/factory', () => ({
   getApiSsoService: vi.fn(),
 }));
 

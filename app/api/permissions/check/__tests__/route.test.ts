@@ -4,14 +4,14 @@ import { GET } from '../route';
 const mockAuthService = {
   getSession: vi.fn(),
 };
-vi.mock('@/lib/api/auth/factory', () => ({
+vi.mock('@/services/auth/factory', () => ({
   getApiAuthService: () => mockAuthService,
 }));
 
 const mockPermissionService = {
   hasPermission: vi.fn(),
 };
-vi.mock('@/lib/api/permission/factory', () => ({
+vi.mock('@/services/permission/factory', () => ({
   getApiPermissionService: () => mockPermissionService,
 }));
 

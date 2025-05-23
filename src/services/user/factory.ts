@@ -7,6 +7,7 @@
 
 import { UserService } from '@/core/user/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
+import type { IUserDataProvider } from '@/core/user';
 import { createUserProvider } from '@/adapters/user/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiUserService(): UserService {
     const supabase = getServiceSupabase();
     
     // Create user data provider
-    const userDataProvider = createUserProvider({
+    const userDataProvider: IUserDataProvider = createUserProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

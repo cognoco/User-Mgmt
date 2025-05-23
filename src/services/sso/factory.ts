@@ -7,6 +7,7 @@
 
 import { SsoService } from '@/core/sso/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
+import type { ISsoDataProvider } from '@/core/sso';
 import { createSsoProvider } from '@/adapters/sso/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiSsoService(): SsoService {
     const supabase = getServiceSupabase();
     
     // Create SSO data provider
-    const ssoDataProvider = createSsoProvider({
+    const ssoDataProvider: ISsoDataProvider = createSsoProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

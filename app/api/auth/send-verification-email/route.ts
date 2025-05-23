@@ -1,7 +1,7 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { checkRateLimit } from '@/middleware/rate-limit';
-import { getApiAuthService } from '@/lib/api/auth/factory';
+import { getApiAuthService } from '@/services/auth/factory';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import {
   createSuccessResponse,

@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ZodSchema } from 'zod';
 import { ApiError } from './api-error';
 import { createErrorResponse } from './response-formatter';
-import { getApiAuthService } from '../auth/factory';
+import { getApiAuthService } from '@/services/auth/factory';
 
 /**
  * Middleware to handle API errors

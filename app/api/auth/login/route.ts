@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
-import { getApiAuthService } from '@/lib/api/auth/factory';
+import { getApiAuthService } from '@/services/auth/factory';
 import { LoginPayload } from '@/core/auth/models';
 import {
   createSuccessResponse,

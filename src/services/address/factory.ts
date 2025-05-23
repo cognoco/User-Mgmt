@@ -7,6 +7,7 @@
 
 import { CompanyAddressService } from '@/core/address/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
+import type { IAddressDataProvider } from '@/core/address';
 import { createAddressProvider } from '@/adapters/address/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiAddressService(): CompanyAddressService {
     const supabase = getServiceSupabase();
     
     // Create address data provider
-    const addressDataProvider = createAddressProvider({
+    const addressDataProvider: IAddressDataProvider = createAddressProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

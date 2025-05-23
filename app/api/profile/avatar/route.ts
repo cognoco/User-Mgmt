@@ -18,7 +18,7 @@ import {
   mapUserServiceError,
 } from '@/lib/api/user/error-handler';
 
-import { getApiUserService } from '@/lib/api/user/factory';
+import { getApiUserService } from '@/services/user/factory';
 
 // Schema for avatar upload request body (supports both custom uploads and predefined avatars)
 const AvatarUploadSchema = z.object({
