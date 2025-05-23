@@ -100,7 +100,9 @@ export class AdapterRegistry {
 
   private constructor() {}
 
-  /** Get the singleton registry instance */
+  /**
+   * Get the singleton instance of the registry
+   */
   static getInstance(): AdapterRegistry {
     if (!this.instance) {
       this.instance = new AdapterRegistry();
@@ -108,20 +110,30 @@ export class AdapterRegistry {
     return this.instance;
   }
 
-  /** Register an adapter instance for later retrieval */
+  /**
+   * Register a concrete adapter instance
+   *
+   * @param name Adapter name
+   * @param adapter Adapter instance
+   */
   registerAdapter<T>(name: string, adapter: T): void {
     this.adapters[name] = adapter;
   }
 
-  /** Retrieve a previously registered adapter instance */
+  /**
+   * Retrieve a registered adapter instance
+   *
+   * @param name Adapter name
+   * @returns Adapter instance
+   */
   getAdapter<T>(name: string): T {
     const adapter = this.adapters[name];
     if (!adapter) {
-      throw new Error(`Adapter '${name}' not registered`);
+      throw new Error(`Adapter '${name}' not registered in AdapterRegistry`);
     }
     return adapter as T;
   }
-  
+}
   /**
    * Register an adapter factory
    * 
@@ -131,6 +143,7 @@ export class AdapterRegistry {
   static registerFactory(name: string, factoryCreator: FactoryCreator): void {
     this.factories[name] = factoryCreator;
   }
+}
   
   /**
    * Get an adapter factory by name
