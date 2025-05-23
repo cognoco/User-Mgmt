@@ -1,15 +1,14 @@
-import type { AxiosInstance } from 'axios';
 import type { IWebhookService } from '@/core/webhooks/IWebhookService';
 import type { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import { WebhookService } from './WebhookService';
 
 export interface WebhookServiceConfig {
-  apiClient: AxiosInstance;
   webhookDataProvider: IWebhookDataProvider;
 }
 
 export function createWebhookService(config: WebhookServiceConfig): IWebhookService {
-  return new WebhookService(config.apiClient, config.webhookDataProvider);
+  return new WebhookService(config.webhookDataProvider);
 }
 
 export default { createWebhookService };
+

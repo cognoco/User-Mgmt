@@ -8,7 +8,6 @@
 import { IWebhookService } from '@/core/webhooks';
 import type { IWebhookDataProvider } from '@/core/webhooks';
 import { AdapterRegistry } from '@/adapters/registry';
-import { api } from '@/lib/api/axios';
 import { WebhookService } from './WebhookService';
 
 // Singleton instance for API routes
@@ -22,8 +21,9 @@ let webhookServiceInstance: IWebhookService | null = null;
 export function getApiWebhookService(): IWebhookService {
   if (!webhookServiceInstance) {
     const webhookDataProvider = AdapterRegistry.getInstance().getAdapter<IWebhookDataProvider>('webhook');
-    webhookServiceInstance = new WebhookService(api, webhookDataProvider);
+    webhookServiceInstance = new WebhookService(webhookDataProvider);
   }
   
   return webhookServiceInstance;
 }
+
