@@ -665,3 +665,49 @@ export const notificationTemplateSchema = z.object({
 export type NotificationPayloadData = z.infer<typeof notificationPayloadSchema>;
 export type NotificationPreferencesData = z.infer<typeof notificationPreferencesSchema>;
 export type NotificationTemplateData = z.infer<typeof notificationTemplateSchema>;
+
+/**
+ * Parameters for listing notification templates.
+ */
+export interface NotificationTemplateQuery {
+  /** Free text search */
+  search?: string;
+
+  /** Filter by channel */
+  channel?: NotificationChannel;
+
+  /** Filter by category */
+  category?: NotificationCategory;
+
+  /** Sort field */
+  sortBy?: 'name' | 'createdAt' | 'updatedAt';
+
+  /** Sort direction */
+  sortDirection?: 'asc' | 'desc';
+
+  /** Page number starting from 1 */
+  page?: number;
+
+  /** Items per page */
+  limit?: number;
+}
+
+/**
+ * Result of a template list operation.
+ */
+export interface NotificationTemplateList {
+  /** Array of templates for the current page */
+  templates: NotificationTemplate[];
+
+  /** Total number of templates matching the query */
+  total: number;
+
+  /** Current page number */
+  page: number;
+
+  /** Items per page */
+  limit: number;
+
+  /** Total number of pages */
+  totalPages: number;
+}
