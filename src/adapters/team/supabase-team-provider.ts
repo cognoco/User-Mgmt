@@ -20,12 +20,12 @@ import {
   TeamSearchParams,
   TeamSearchResult
 } from '../../core/team/models';
-import { TeamDataProvider } from './interfaces';
+import { ITeamDataProvider } from '../../core/team/ITeamDataProvider';
 
 /**
  * Supabase implementation of the TeamDataProvider interface
  */
-export class SupabaseTeamProvider implements TeamDataProvider {
+export class SupabaseTeamProvider implements ITeamDataProvider {
   private supabase: SupabaseClient;
   private teamCallbacks: ((team: Team) => void)[] = [];
   private membershipCallbacks: ((teamId: string, members: TeamMember[]) => void)[] = [];

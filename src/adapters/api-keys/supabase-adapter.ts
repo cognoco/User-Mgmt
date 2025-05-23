@@ -4,10 +4,10 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ApiKey, ApiKeyCreatePayload, ApiKeyCreateResult } from '../../core/api-keys/models';
-import { ApiKeyDataProvider } from './interfaces';
+import { IApiKeyDataProvider } from '../../core/api-keys/IApiKeyDataProvider';
 import { generateApiKey } from '../../lib/api-keys/api-key-utils';
 
-export class SupabaseApiKeyProvider implements ApiKeyDataProvider {
+export class SupabaseApiKeyProvider implements IApiKeyDataProvider {
   private supabase: SupabaseClient;
 
   constructor(supabaseUrl: string, supabaseKey: string) {
