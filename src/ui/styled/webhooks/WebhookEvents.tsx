@@ -1,19 +1,43 @@
 import React from 'react';
-import { WebhookEvents as HeadlessWebhookEvents } from '../../headless/webhooks/WebhookEvents';
+import { WebhookEvents as HeadlessWebhookEvents } from '@/ui/headless/webhooks/WebhookEvents';
 import { Checkbox } from '@/ui/primitives/checkbox';
 
-export function WebhookEvents(props: any) {
+interface WebhookEventsProps {
+  events?: string[];
+  available?: string[];
+  onChange?: (events: string[]) => void;
+  children?: (props: { selected: string[]; toggle: (e: string) => void }) => React.ReactNode;
+}
+
+const defaultEvents = ['user.created', 'user.deleted'];
+
+export function WebhookEvents({ 
+  events = defaultEvents,
+  available = defaultEvents,
+  onChange,
+  children
+}: WebhookEventsProps) {
+  const renderDefault = ({ selected, toggle }: { selected: string[]; toggle: (e: string) => void }) => (
+    <div className="space-y-2">
+      {available.map((event) => (
+        <label key={event} className="flex items-center space-x-2">
+          <Checkbox 
+            checked={selected.includes(event)} 
+            onCheckedChange={() => toggle(event)} 
+          />
+          <span>{event}</span>
+        </label>
+      ))}
+    </div>
+  );
+
   return (
-    <HeadlessWebhookEvents {...props}>
-      {({ selected, toggle }) => (
-        <div>
-          {props.available.map((ev: string) => (
-            <label key={ev} className="block">
-              <Checkbox checked={selected.includes(ev)} onCheckedChange={() => toggle(ev)} /> {ev}
-            </label>
-          ))}
-        </div>
-      )}
+    <HeadlessWebhookEvents 
+      events={events} 
+      available={available} 
+      onChange={onChange}
+    >
+      {children || renderDefault}
     </HeadlessWebhookEvents>
   );
 }
