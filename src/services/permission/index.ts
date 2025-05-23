@@ -7,18 +7,12 @@
 
 import { PermissionService } from '@/core/permission/interfaces';
 import { DefaultPermissionService } from './default-permission.service';
-import type { AxiosInstance } from 'axios';
 import type { PermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
 
 /**
  * Configuration options for creating a PermissionService
  */
 export interface PermissionServiceConfig {
-  /**
-   * API client for making HTTP requests
-   */
-  apiClient: AxiosInstance;
-  
   /**
    * Permission data provider for database operations
    */
@@ -32,10 +26,7 @@ export interface PermissionServiceConfig {
  * @returns An instance of the PermissionService
  */
 export function createPermissionService(config: PermissionServiceConfig): PermissionService {
-  return new DefaultPermissionService(
-    config.apiClient, 
-    config.permissionDataProvider
-  );
+  return new DefaultPermissionService(config.permissionDataProvider);
 }
 
 /**

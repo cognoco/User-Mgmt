@@ -23,7 +23,6 @@ import {
   PermissionEventTypes,
   PermissionEventHandler
 } from '@/core/permission/events';
-import type { AxiosInstance } from 'axios';
 import type { PermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
 import { translateError } from '@/lib/utils/error';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
@@ -38,16 +37,12 @@ export class DefaultPermissionService
   
   /**
    * Constructor for DefaultPermissionService
-   * 
-   * @param apiClient - The API client for making HTTP requests
+   *
    * @param permissionDataProvider - The data provider for permission operations
    */
-  constructor(
-  private apiClient: AxiosInstance,
-  private permissionDataProvider: PermissionDataProvider
-) {
-  super();
-}
+  constructor(private permissionDataProvider: PermissionDataProvider) {
+    super();
+  }
   
   /**
    * Emit a permission event
@@ -120,10 +115,10 @@ export class DefaultPermissionService
    */
   async getAllRoles(): Promise<RoleWithPermissions[]> {
     try {
-      const response = await this.apiClient.get('/api/roles');
-      return response.data.roles;
+      return await this.permissionDataProvider.getAllRoles();
     } catch (error) {
-      console.error('Error getting all roles:', error);
+      const errorMessage = translateError(error, { defaultMessage: 'Error getting all roles' });
+      console.error('Error getting all roles:', errorMessage);
       return [];
     }
   }
@@ -136,10 +131,10 @@ export class DefaultPermissionService
    */
   async getRoleById(roleId: string): Promise<RoleWithPermissions | null> {
     try {
-      const response = await this.apiClient.get(`/api/roles/${roleId}`);
-      return response.data.role;
+      return await this.permissionDataProvider.getRoleById(roleId);
     } catch (error) {
-      console.error('Error getting role by ID:', error);
+      const errorMessage = translateError(error, { defaultMessage: 'Error getting role by ID' });
+      console.error('Error getting role by ID:', errorMessage);
       return null;
     }
   }
@@ -152,8 +147,7 @@ export class DefaultPermissionService
    */
   async createRole(roleData: RoleCreationPayload): Promise<RoleWithPermissions> {
     try {
-      const response = await this.apiClient.post('/api/roles', roleData);
-      const role = response.data.role;
+      const role = await this.permissionDataProvider.createRole(roleData);
       
       // Emit role created event
       this.emitEvent({
@@ -164,8 +158,9 @@ export class DefaultPermissionService
       
       return role;
     } catch (error) {
-      console.error('Error creating role:', error);
-      throw new Error('Failed to create role');
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to create role' });
+      console.error('Error creating role:', errorMessage);
+      throw new Error(errorMessage);
     }
   }
   
@@ -185,8 +180,7 @@ export class DefaultPermissionService
         throw new Error('Role not found');
       }
       
-      const response = await this.apiClient.put(`/api/roles/${roleId}`, roleData);
-      const role = response.data.role;
+      const role = await this.permissionDataProvider.updateRole(roleId, roleData);
       
       // Emit role updated event
       this.emitEvent({
@@ -198,8 +192,9 @@ export class DefaultPermissionService
       
       return role;
     } catch (error) {
-      console.error('Error updating role:', error);
-      throw new Error('Failed to update role');
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to update role' });
+      console.error('Error updating role:', errorMessage);
+      throw new Error(errorMessage);
     }
   }
   
@@ -211,7 +206,7 @@ export class DefaultPermissionService
    */
   async deleteRole(roleId: string): Promise<boolean> {
     try {
-      await this.apiClient.delete(`/api/roles/${roleId}`);
+      await this.permissionDataProvider.deleteRole(roleId);
       
       // Emit role deleted event
       this.emitEvent({
@@ -222,7 +217,8 @@ export class DefaultPermissionService
       
       return true;
     } catch (error) {
-      console.error('Error deleting role:', error);
+      const errorMessage = translateError(error, { defaultMessage: 'Error deleting role' });
+      console.error('Error deleting role:', errorMessage);
       return false;
     }
   }
@@ -235,10 +231,10 @@ export class DefaultPermissionService
    */
   async getUserRoles(userId: string): Promise<UserRole[]> {
     try {
-      const response = await this.apiClient.get(`/api/users/${userId}/roles`);
-      return response.data.roles;
+      return await this.permissionDataProvider.getUserRoles(userId);
     } catch (error) {
-      console.error('Error getting user roles:', error);
+      const errorMessage = translateError(error, { defaultMessage: 'Error getting user roles' });
+      console.error('Error getting user roles:', errorMessage);
       return [];
     }
   }
@@ -259,13 +255,12 @@ export class DefaultPermissionService
     expiresAt?: Date
   ): Promise<UserRole> {
     try {
-      const response = await this.apiClient.post(`/api/users/${userId}/roles`, {
+      const userRole = await this.permissionDataProvider.assignRoleToUser(
+        userId,
         roleId,
         assignedBy,
-        expiresAt: expiresAt?.toISOString()
-      });
-      
-      const userRole = response.data.userRole;
+        expiresAt
+      );
       
       // Emit role assigned event
       this.emitEvent({
@@ -276,8 +271,9 @@ export class DefaultPermissionService
       
       return userRole;
     } catch (error) {
-      console.error('Error assigning role to user:', error);
-      throw new Error('Failed to assign role to user');
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to assign role to user' });
+      console.error('Error assigning role to user:', errorMessage);
+      throw new Error(errorMessage);
     }
   }
   
@@ -290,7 +286,7 @@ export class DefaultPermissionService
    */
   async removeRoleFromUser(userId: string, roleId: string): Promise<boolean> {
     try {
-      await this.apiClient.delete(`/api/users/${userId}/roles/${roleId}`);
+      await this.permissionDataProvider.removeRoleFromUser(userId, roleId);
       
       // Emit role removed event
       this.emitEvent({
@@ -302,7 +298,8 @@ export class DefaultPermissionService
       
       return true;
     } catch (error) {
-      console.error('Error removing role from user:', error);
+      const errorMessage = translateError(error, { defaultMessage: 'Error removing role from user' });
+      console.error('Error removing role from user:', errorMessage);
       return false;
     }
   }
@@ -333,11 +330,10 @@ export class DefaultPermissionService
    */
   async addPermissionToRole(roleId: string, permission: Permission): Promise<PermissionAssignment> {
     try {
-      const response = await this.apiClient.post(`/api/roles/${roleId}/permissions`, {
+      const permissionAssignment = await this.permissionDataProvider.addPermissionToRole(
+        roleId,
         permission
-      });
-      
-      const permissionAssignment = response.data.permissionAssignment;
+      );
       
       // Emit permission added event
       this.emitEvent({
@@ -349,8 +345,9 @@ export class DefaultPermissionService
       
       return permissionAssignment;
     } catch (error) {
-      console.error('Error adding permission to role:', error);
-      throw new Error('Failed to add permission to role');
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to add permission to role' });
+      console.error('Error adding permission to role:', errorMessage);
+      throw new Error(errorMessage);
     }
   }
   
@@ -363,7 +360,7 @@ export class DefaultPermissionService
    */
   async removePermissionFromRole(roleId: string, permission: Permission): Promise<boolean> {
     try {
-      await this.apiClient.delete(`/api/roles/${roleId}/permissions/${encodeURIComponent(permission)}`);
+      await this.permissionDataProvider.removePermissionFromRole(roleId, permission);
       
       // Emit permission removed event
       this.emitEvent({
@@ -375,7 +372,8 @@ export class DefaultPermissionService
       
       return true;
     } catch (error) {
-      console.error('Error removing permission from role:', error);
+      const errorMessage = translateError(error, { defaultMessage: 'Error removing permission from role' });
+      console.error('Error removing permission from role:', errorMessage);
       return false;
     }
   }
@@ -387,10 +385,10 @@ export class DefaultPermissionService
    */
   async getAllPermissions(): Promise<Permission[]> {
     try {
-      const response = await this.apiClient.get('/api/permissions');
-      return response.data.permissions;
+      return await this.permissionDataProvider.getAllPermissions();
     } catch (error) {
-      console.error('Error getting all permissions:', error);
+      const errorMessage = translateError(error, { defaultMessage: 'Error getting all permissions' });
+      console.error('Error getting all permissions:', errorMessage);
       return [];
     }
   }
@@ -403,10 +401,10 @@ export class DefaultPermissionService
    */
   async getRolePermissions(roleId: string): Promise<Permission[]> {
     try {
-      const response = await this.apiClient.get(`/api/roles/${roleId}/permissions`);
-      return response.data.permissions;
+      return await this.permissionDataProvider.getRolePermissions(roleId);
     } catch (error) {
-      console.error('Error getting role permissions:', error);
+      const errorMessage = translateError(error, { defaultMessage: 'Error getting role permissions' });
+      console.error('Error getting role permissions:', errorMessage);
       return [];
     }
   }
