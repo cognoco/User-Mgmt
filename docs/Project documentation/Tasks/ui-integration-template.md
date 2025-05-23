@@ -1,4 +1,6 @@
-# UI Integration Task: [DOMAIN_NAME]
+# UI Integration Task Template
+
+> **NOTE**: This is a template file for future domain implementations. The placeholders like `[DOMAIN_NAME]`, `[domain]`, etc. are intentional and should be replaced when using this template for a specific domain. There are no actual placeholders in the source code that need to be fixed.
 
 ## Your Task
 **PRIMARY FOCUS: Update import paths and integrate the new architecture components**
@@ -61,8 +63,14 @@ Create a new page component at `app/[SECTION]/[DOMAIN]/page.tsx` that:
 ### 4. Example Implementation
 
 ```tsx
-// REPLACE THIS WITH YOUR ACTUAL IMPLEMENTATION
+// TEMPLATE: REPLACE PLACEHOLDERS WITH ACTUAL VALUES WHEN IMPLEMENTING
 'use client';
+// Example with placeholders:
+// import { useUser } from '@/hooks/user/use-user';
+// import { UserList } from '@/ui/styled/user/UserList';
+// import { UserForm } from '@/ui/styled/user/UserForm';
+
+// Template with placeholders:
 import { use[DomainName] } from '@/hooks/[domain]/use-[domain-name]';
 import { [Component]List } from '@/ui/styled/[domain]/[Component]List';
 import { [Component]Form } from '@/ui/styled/[domain]/[Component]Form';
@@ -131,6 +139,14 @@ Implementation order for new components:
 
 Example implementation for a new component:
 ```tsx
+// TEMPLATE: REPLACE PLACEHOLDERS WITH ACTUAL VALUES WHEN IMPLEMENTING
+
+// Example with real values:
+// src/ui/headless/user/UserProfile.tsx
+// import React from 'react';
+// import { useUser } from '@/hooks/user/use-user';
+
+// Template with placeholders:
 // src/ui/headless/[domain]/NewComponent.tsx
 import React from 'react';
 import { use[Domain] } from '@/hooks/[domain]/use-[domain]';

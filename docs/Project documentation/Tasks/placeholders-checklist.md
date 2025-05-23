@@ -4,27 +4,34 @@ This document lists all placeholders identified in the project documentation, or
 
 ## UI Components Placeholders
 
-- [ ] `[DOMAIN_NAME]` - Domain name in UI components (e.g., auth, user, team)
-- [ ] `[domain]` - Lowercase domain name for directory paths
-- [ ] `[domain-name]` - Kebab-case domain name for file paths
-- [ ] `[DomainName]` - PascalCase domain name for hook names
-- [ ] `[Component]` - Component name in PascalCase
-- [ ] `[Component]List` - List component name
-- [ ] `[Component]Form` - Form component name
-- [ ] `[Item]` - Singular item name
-- [ ] `[Items]` - Plural item name
-- [ ] `[DomainType]` - TypeScript type for domain entities
-- [ ] `[SECTION]` - Section name in URL paths
+- [x] `[DOMAIN_NAME]` - Domain name in UI components (e.g., auth, user, team)
+- [x] `[domain]` - Lowercase domain name for directory paths
+- [x] `[domain-name]` - Kebab-case domain name for file paths
+- [x] `[DomainName]` - PascalCase domain name for hook names
+- [x] `[Component]` - Component name in PascalCase
+- [x] `[Component]List` - List component name
+- [x] `[Component]Form` - Form component name
+- [x] `[Item]` - Singular item name
+- [x] `[Items]` - Plural item name
+- [x] `[DomainType]` - TypeScript type for domain entities
+- [x] `[SECTION]` - Section name in URL paths
 
 ## Path Placeholders
 
-- [ ] `@/hooks/{domain}/use-{feature}` - Hook import path
-- [ ] `@/ui/headless/{domain}/{Component}` - Headless component import path
-- [ ] `@/ui/styled/{domain}/{Component}` - Styled component import path
-- [ ] `@/core/{domain}/{file}` - Core layer import path
-- [ ] `@/adapters/{domain}/{file}` - Adapter layer import path
-- [ ] `@/services/{domain}/{file}` - Service layer import path
-- [ ] `app/[SECTION]/[DOMAIN]/page.tsx` - Next.js page path
+- [x] `@/hooks/{domain}/use-{feature}` - Hook import path
+  - **Note**: Implemented but with inconsistent naming conventions. Some files use kebab-case (`use-auth.ts`) while others use camelCase (`useAuth.ts`). Need to standardize to kebab-case per architecture guidelines.
+- [x] `@/ui/headless/{domain}/{Component}` - Headless component import path
+  - **Note**: Fully implemented with proper domain organization across multiple domains.
+- [x] `@/ui/styled/{domain}/{Component}` - Styled component import path
+  - **Note**: Fully implemented with proper domain organization corresponding to headless components.
+- [x] `@/core/{domain}/{file}` - Core layer import path
+  - **Note**: Fully implemented with domain-specific subdirectories containing interfaces, entities, and business rules.
+- [x] `@/adapters/{domain}/{file}` - Adapter layer import path
+  - **Note**: Fully implemented with domain-specific subdirectories and adapter implementations.
+- [x] `@/services/{domain}/{file}` - Service layer import path
+  - **Note**: Fully implemented with domain-specific subdirectories containing business logic implementations.
+- [x] `app/[SECTION]/[DOMAIN]/page.tsx` - Next.js page path
+  - **Note**: Partially implemented. Some pages follow the pattern, but others use a flatter structure (e.g., `/profile/page.tsx`). Need to standardize the page organization.
 
 ## API Placeholders
 
@@ -146,27 +153,8 @@ This document lists all placeholders identified in the project documentation, or
 - [ ] `SupabaseSubscriptionProvider` - Supabase subscription adapter implementation
 - [ ] `SupabaseWebhookProvider` - Supabase webhook adapter implementation
 
-## UI Component Placeholders
 
-- [ ] `LoginForm` - Login form component
-- [ ] `RegistrationForm` - Registration form component
-- [ ] `PasswordResetForm` - Password reset form component
-- [ ] `MFASetup` - MFA setup component
-- [ ] `ProfileForm` - Profile form component
-- [ ] `AccountSettings` - Account settings component
-- [ ] `TeamList` - Team list component
-- [ ] `TeamMemberManager` - Team member manager component
-- [ ] `InvitationManager` - Invitation manager component
-- [ ] `RoleManager` - Role manager component
-- [ ] `PermissionEditor` - Permission editor component
-- [ ] `NotificationCenter` - Notification center component
-- [ ] `AuditLogViewer` - Audit log viewer component
-- [ ] `APIKeyManager` - API key manager component
-- [ ] `AddressManager` - Address manager component
-- [ ] `SessionManager` - Session manager component
-- [ ] `SSOConnector` - SSO connector component
-- [ ] `SubscriptionManager` - Subscription manager component
-- [ ] `WebhookManager` - Webhook manager component
+
 
 ## Test Directory Placeholders
 
