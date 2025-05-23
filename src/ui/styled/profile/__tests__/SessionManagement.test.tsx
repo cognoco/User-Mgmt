@@ -3,10 +3,10 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import SessionManagement from '../SessionManagement';
-import { useSessionStore } from '@/lib/stores/session.store';
+import { useSession } from '@/hooks/session/use-session';
 
-// Mock Zustand store
-vi.mock('@/lib/stores/session.store');
+// Mock useSession hook
+vi.mock('@/hooks/session/use-session');
 
 const mockSessions = [
   {
@@ -27,17 +27,20 @@ const mockSessions = [
 
 describe('SessionManagement', () => {
   let fetchSessions: any;
-  let revokeSession: any;
+  let terminateSession: any;
+  let terminateAllOtherSessions: any;
 
   beforeEach(() => {
     fetchSessions = vi.fn();
-    revokeSession = vi.fn();
-    (useSessionStore as any).mockReturnValue({
+    terminateSession = vi.fn();
+    terminateAllOtherSessions = vi.fn();
+    (useSession as any).mockReturnValue({
       sessions: mockSessions,
-      sessionLoading: false,
-      sessionError: '',
+      loading: false,
+      error: '',
       fetchSessions,
-      revokeSession,
+      terminateSession,
+      terminateAllOtherSessions,
     });
   });
 
@@ -72,17 +75,18 @@ describe('SessionManagement', () => {
       await userEvent.click(confirmBtn!);
     });
     await waitFor(() => {
-      expect(revokeSession).toHaveBeenCalledWith('session-2');
+      expect(terminateSession).toHaveBeenCalledWith('session-2');
     });
   });
 
   it('shows loading state', async () => {
-    (useSessionStore as any).mockReturnValue({
+    (useSession as any).mockReturnValue({
       sessions: [],
-      sessionLoading: true,
-      sessionError: '',
+      loading: true,
+      error: '',
       fetchSessions,
-      revokeSession,
+      terminateSession,
+      terminateAllOtherSessions,
     });
     await act(async () => {
       render(<SessionManagement />);
@@ -91,12 +95,13 @@ describe('SessionManagement', () => {
   });
 
   it('shows error state', async () => {
-    (useSessionStore as any).mockReturnValue({
+    (useSession as any).mockReturnValue({
       sessions: [],
-      sessionLoading: false,
-      sessionError: 'Failed to fetch',
+      loading: false,
+      error: 'Failed to fetch',
       fetchSessions,
-      revokeSession,
+      terminateSession,
+      terminateAllOtherSessions,
     });
     await act(async () => {
       render(<SessionManagement />);
@@ -105,12 +110,13 @@ describe('SessionManagement', () => {
   });
 
   it('shows empty state', async () => {
-    (useSessionStore as any).mockReturnValue({
+    (useSession as any).mockReturnValue({
       sessions: [],
-      sessionLoading: false,
-      sessionError: '',
+      loading: false,
+      error: '',
       fetchSessions,
-      revokeSession,
+      terminateSession,
+      terminateAllOtherSessions,
     });
     await act(async () => {
       render(<SessionManagement />);

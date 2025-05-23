@@ -1,7 +1,8 @@
 'use client';
 import '@/lib/i18n';
 import { useTranslation } from 'react-i18next';
-import { ApiKeyForm, ApiKeyList } from '@/ui/styled/api-keys';
+import { ApiKeyForm } from '@/ui/styled/api-keys/ApiKeyForm';
+import { ApiKeyList } from '@/ui/styled/api-keys/ApiKeyList';
 import { useApiKeys } from '@/hooks/api-keys/use-api-keys';
 
 export default function ApiKeysPage() {
