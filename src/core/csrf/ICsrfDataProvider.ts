@@ -31,3 +31,9 @@ export interface ICsrfDataProvider {
    */
   revokeToken(token: string): Promise<{ success: boolean; error?: string }>;
 }
+
+/**
+ * Convenience alias so services can import `CsrfDataProvider` instead of
+ * the longer `ICsrfDataProvider` name.
+ */
+export type CsrfDataProvider = ICsrfDataProvider;
