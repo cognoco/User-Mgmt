@@ -44,3 +44,11 @@ export function getApiTwoFactorService(): TwoFactorService {
   
   return twoFactorServiceInstance;
 }
+
+/**
+ * Temporary alias for backwards compatibility. Will be removed once all
+ * routes are updated to use the new naming convention.
+ */
+export function getApi2FAService(): TwoFactorService {
+  return getApiTwoFactorService();
+}

@@ -25,3 +25,10 @@ export function getApiCsrfService(): CsrfService {
   }
   return csrfServiceInstance;
 }
+
+/**
+ * Temporary alias for backwards compatibility with older route imports.
+ */
+export function getApiCSRFService(): CsrfService {
+  return getApiCsrfService();
+}

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
-import { getApiGdprService } from '@/services/gdpr/factory';
+import { getApiGDPRService } from '@/services/gdpr/factory';
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
   }
 
-  const gdprService = getApiGdprService();
+  const gdprService = getApiGDPRService();
 
   try {
     const exportData = await gdprService.exportUserData(user.id);

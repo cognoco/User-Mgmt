@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { logUserAction } from '@/lib/audit/auditLogger';
-import { getApiGdprService } from '@/services/gdpr/factory';
+import { getApiGDPRService } from '@/services/gdpr/factory';
 
 export async function POST(request: NextRequest) {
   // 1. Authentication (Essential)
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
   // }
 
   try {
-    const gdprService = getApiGdprService();
+    const gdprService = getApiGDPRService();
     const result = await gdprService.deleteAccount(user.id);
 
     if (!result.success) {
