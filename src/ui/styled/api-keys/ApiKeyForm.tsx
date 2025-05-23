@@ -2,16 +2,18 @@ import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Checkbox } from '@/ui/primitives/checkbox';
-import { ApiKeyForm as HeadlessApiKeyForm } from '@/ui/headless/api-keys/ApiKeyForm';
+import {
+  ApiKeyForm as HeadlessApiKeyForm,
+  ApiKeyFormProps as HeadlessApiKeyFormProps,
+} from '@/ui/headless/api-keys/ApiKeyForm';
 
-export interface ApiKeyFormProps {
+export interface ApiKeyFormProps extends HeadlessApiKeyFormProps {
   availablePermissions: string[];
-  onCreated?: (key: string) => void;
 }
 
-export function ApiKeyForm({ availablePermissions, onCreated }: ApiKeyFormProps) {
+export function ApiKeyForm({ availablePermissions, onSubmit, defaultPermissions }: ApiKeyFormProps) {
   return (
-    <HeadlessApiKeyForm>
+    <HeadlessApiKeyForm onSubmit={onSubmit} defaultPermissions={defaultPermissions}>
       {({
         name,
         setName,
