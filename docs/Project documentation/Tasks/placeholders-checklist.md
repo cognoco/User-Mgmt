@@ -34,7 +34,6 @@ This document lists all placeholders identified in the project documentation, or
   - **Note**: Partially implemented. Some pages follow the pattern, but others use a flatter structure (e.g., `/profile/page.tsx`). Need to standardize the page organization.
 
 ## API Placeholders
-
 - [ ] `AuthDataProvider` - Auth adapter interface
 - [ ] `UserDataProvider` - User adapter interface
 - [ ] `TeamDataProvider` - Team adapter interface
@@ -55,6 +54,7 @@ This document lists all placeholders identified in the project documentation, or
 - [ ] `/api/sso/*` - Single Sign-On endpoints
 - [ ] `/api/subscription/*` - Subscription management endpoints
 - [ ] `/api/webhooks/*` - Webhook management endpoints
+
 
 ## Factory Placeholders
 
@@ -78,27 +78,27 @@ This document lists all placeholders identified in the project documentation, or
 ## Hook Placeholders
 
 - [ ] `use[DomainName]` - Domain-specific hook
-- [ ] `useAuth` - Authentication hook
-- [ ] `useRegistration` - Registration hook
-- [ ] `usePasswordReset` - Password reset hook
-- [ ] `useMFA` - Multi-factor authentication hook
-- [ ] `useUserProfile` - User profile hook
-- [ ] `useAccountSettings` - Account settings hook
-- [ ] `useTeams` - Teams hook
-- [ ] `useTeamMembers` - Team members hook
-- [ ] `useTeamInvitations` - Team invitations hook
-- [ ] `useRoles` - Roles hook
-- [ ] `usePermissions` - Permissions hook
-- [ ] `useNotifications` - Notifications hook
-- [ ] `useAuditLogs` - Audit logs hook
-- [ ] `useAPIKeys` - API keys hook
-- [ ] `useAddress` - Address management hook
-- [ ] `useCSRF` - CSRF protection hook
-- [ ] `useGDPR` - GDPR compliance hook
-- [ ] `useSession` - Session management hook
-- [ ] `useSSO` - SSO hook
-- [ ] `useSubscription` - Subscription management hook
-- [ ] `useWebhooks` - Webhooks hook
+- [x] `useAuth` - Authentication hook
+- [x] `useRegistration` - Registration hook
+- [x] `usePasswordReset` - Password reset hook
+- [x] `useMFA` - Multi-factor authentication hook
+- [x] `useUserProfile` - User profile hook
+- [x] `useAccountSettings` - Account settings hook
+- [x] `useTeams` - Teams hook
+- [x] `useTeamMembers` - Team members hook
+- [x] `useTeamInvitations` - Team invitations hook
+- [x] `useRoles` - Roles hook
+- [x] `usePermissions` - Permissions hook
+- [x] `useNotifications` - Notifications hook
+- [x] `useAuditLogs` - Audit logs hook
+- [x] `useAPIKeys` - API keys hook
+- [x] `useAddress` - Address management hook
+- [x] `useCSRF` - CSRF protection hook
+- [x] `useGDPR` - GDPR compliance hook
+- [x] `useSession` - Session management hook
+- [x] `useSSO` - SSO hook
+- [x] `useSubscription` - Subscription management hook
+- [x] `useWebhooks` - Webhooks hook
 
 ## Service Interface Placeholders
 
