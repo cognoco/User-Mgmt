@@ -7,6 +7,7 @@
 
 import { SubscriptionService } from '@/core/subscription/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
+import type { ISubscriptionDataProvider } from '@/core/subscription';
 import { createSubscriptionProvider } from '@/adapters/subscription/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiSubscriptionService(): SubscriptionService {
     const supabase = getServiceSupabase();
     
     // Create subscription data provider
-    const subscriptionDataProvider = createSubscriptionProvider({
+    const subscriptionDataProvider: ISubscriptionDataProvider = createSubscriptionProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

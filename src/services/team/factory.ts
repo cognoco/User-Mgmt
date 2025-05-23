@@ -7,6 +7,7 @@
 
 import { TeamService } from '@/core/team/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
+import type { ITeamDataProvider } from '@/core/team';
 import { createTeamProvider } from '@/adapters/team/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiTeamService(): TeamService {
     const supabase = getServiceSupabase();
     
     // Create team data provider
-    const teamDataProvider = createTeamProvider({
+    const teamDataProvider: ITeamDataProvider = createTeamProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

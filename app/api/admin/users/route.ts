@@ -5,7 +5,7 @@ import {
   withErrorHandling,
   withValidation,
 } from '@/lib/api/common';
-import { getApiAdminService } from '@/lib/api/admin/factory';
+import { getApiAdminService } from '@/services/admin/factory';
 import { createUserNotFoundError, mapAdminServiceError } from '@/lib/api/admin/error-handler';
 import { createProtectedHandler } from '@/middleware/permissions';
 

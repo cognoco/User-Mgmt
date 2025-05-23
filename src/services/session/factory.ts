@@ -7,6 +7,7 @@
 
 import { SessionService } from '@/core/session/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
+import type { ISessionDataProvider } from '@/core/session';
 import { createSessionProvider } from '@/adapters/session/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiSessionService(): SessionService {
     const supabase = getServiceSupabase();
     
     // Create session data provider
-    const sessionDataProvider = createSessionProvider({
+    const sessionDataProvider: ISessionDataProvider = createSessionProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

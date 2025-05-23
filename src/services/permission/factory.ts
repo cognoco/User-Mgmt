@@ -7,6 +7,7 @@
 
 import { PermissionService } from '@/core/permission/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
+import type { IPermissionDataProvider } from '@/core/permission';
 import { createPermissionProvider } from '@/adapters/permission/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiPermissionService(): PermissionService {
     const supabase = getServiceSupabase();
     
     // Create permission data provider
-    const permissionDataProvider = createPermissionProvider({
+    const permissionDataProvider: IPermissionDataProvider = createPermissionProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

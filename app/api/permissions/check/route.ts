@@ -11,7 +11,7 @@ import {
   createPermissionNotFoundError,
   mapPermissionServiceError,
 } from '@/lib/api/permission/error-handler';
-import { getApiPermissionService } from '@/lib/api/permission/factory';
+import { getApiPermissionService } from '@/services/permission/factory';
 import { isPermission, Permission } from '@/lib/rbac/roles';
 
 const querySchema = z.object({

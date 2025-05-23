@@ -7,6 +7,7 @@
 
 import { IWebhookService } from '@/core/webhooks';
 import { UserManagementConfiguration } from '@/core/config';
+import type { IWebhookDataProvider } from '@/core/webhooks';
 import { createWebhookProvider } from '@/adapters/webhook';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiWebhookService(): IWebhookService {
     const supabase = getServiceSupabase();
     
     // Create webhook data provider
-    const webhookDataProvider = createWebhookProvider({
+    const webhookDataProvider: IWebhookDataProvider = createWebhookProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

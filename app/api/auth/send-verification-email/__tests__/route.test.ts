@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
-import { getApiAuthService } from '@/lib/api/auth/factory';
+import { getApiAuthService } from '@/services/auth/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { NextRequest } from 'next/server';
 import { ERROR_CODES } from '@/lib/api/common';
 
-vi.mock('@/lib/api/auth/factory', () => ({
+vi.mock('@/services/auth/factory', () => ({
   getApiAuthService: vi.fn()
 }));
 vi.mock('@/middleware/rate-limit', () => ({

@@ -7,6 +7,7 @@
 
 import { NotificationService } from '@/core/notification/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
+import type { INotificationDataProvider } from '@/core/notification';
 import { createNotificationProvider } from '@/adapters/notification/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiNotificationService(): NotificationService {
     const supabase = getServiceSupabase();
     
     // Create notification data provider
-    const notificationDataProvider = createNotificationProvider({
+    const notificationDataProvider: INotificationDataProvider = createNotificationProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

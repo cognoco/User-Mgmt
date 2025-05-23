@@ -7,6 +7,7 @@
 
 import { AuditService } from '@/core/audit/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
+import type { IAuditDataProvider } from '@/core/audit';
 import { createAuditProvider } from '@/adapters/audit/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiAuditService(): AuditService {
     const supabase = getServiceSupabase();
     
     // Create audit data provider
-    const auditDataProvider = createAuditProvider({
+    const auditDataProvider: IAuditDataProvider = createAuditProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

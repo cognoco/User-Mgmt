@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getApiCsrfService } from '@/lib/api/csrf/factory';
+import { getApiCsrfService } from '@/services/csrf/factory';
 
 // Configuration (consider moving to a shared config if used elsewhere)
 const cookieName = 'csrf-token';

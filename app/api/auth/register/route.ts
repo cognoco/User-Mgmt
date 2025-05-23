@@ -5,7 +5,7 @@ import { withAuthRateLimit } from '@/middleware/with-auth-rate-limit';
 import { withSecurity } from '@/middleware/with-security';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { associateUserWithCompanyByDomain } from '@/lib/auth/domainMatcher';
-import { getApiAuthService } from '@/lib/api/auth/factory';
+import { getApiAuthService } from '@/services/auth/factory';
 import { RegistrationPayload } from '@/core/auth/models';
 import {
   createSuccessResponse,

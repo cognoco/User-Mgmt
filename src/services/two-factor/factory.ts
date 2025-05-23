@@ -7,6 +7,7 @@
 
 import { TwoFactorService } from '@/core/two-factor/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
+import type { ITwoFactorDataProvider } from '@/core/two-factor';
 import { createTwoFactorProvider } from '@/adapters/two-factor/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiTwoFactorService(): TwoFactorService {
     const supabase = getServiceSupabase();
     
     // Create 2FA data provider
-    const twoFactorDataProvider = createTwoFactorProvider({
+    const twoFactorDataProvider: ITwoFactorDataProvider = createTwoFactorProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

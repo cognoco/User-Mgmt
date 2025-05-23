@@ -7,6 +7,7 @@
 
 import { AdminService } from '@/core/admin/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
+import type { IAdminDataProvider } from '@/core/admin';
 import { createAdminProvider } from '@/adapters/admin/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiAdminService(): AdminService {
     const supabase = getServiceSupabase();
 
     // Create admin data provider
-    const adminDataProvider = createAdminProvider({
+    const adminDataProvider: IAdminDataProvider = createAdminProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

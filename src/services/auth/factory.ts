@@ -6,7 +6,8 @@
  */
 
 import { AuthService } from '@/core/auth/interfaces';
-import { DefaultAuthService } from '@/services/auth/default-auth.service';
+import type { IAuthDataProvider } from '@/core/auth';
+import { DefaultAuthService } from './default-auth.service';
 import { createAuthProvider } from '@/adapters/auth/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiAuthService(): AuthService {
     const supabase = getServiceSupabase();
     
     // Create auth data provider
-    const authDataProvider = createAuthProvider({
+    const authDataProvider: IAuthDataProvider = createAuthProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

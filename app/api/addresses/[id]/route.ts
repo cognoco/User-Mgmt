@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiAddressService } from '@/lib/api/address/factory';
+import { getApiAddressService } from '@/services/address/factory';
 import { addressSchema } from '@/core/address/validation';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {

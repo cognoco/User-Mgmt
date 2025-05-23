@@ -4,8 +4,8 @@ import { z } from 'zod';
 import { authenticator } from 'otplib';
 import * as qrcode from 'qrcode';
 import { TwoFactorMethod } from '@/types/2fa';
-import { getApiTwoFactorService } from '@/lib/api/two-factor/factory';
-import { getApiAuthService } from '@/lib/api/auth/factory';
+import { getApiTwoFactorService } from '@/services/two-factor/factory';
+import { getApiAuthService } from '@/services/auth/factory';
 
 // Request schema
 const setupRequestSchema = z.object({

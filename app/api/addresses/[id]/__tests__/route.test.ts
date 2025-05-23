@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, PUT, DELETE } from '../route';
-import { getApiAddressService } from '@/lib/api/address/factory';
+import { getApiAddressService } from '@/services/address/factory';
 
-vi.mock('@/lib/api/address/factory', () => ({
+vi.mock('@/services/address/factory', () => ({
   getApiAddressService: vi.fn(),
 }));
 

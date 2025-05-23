@@ -7,6 +7,7 @@
 
 import { ApiKeyService } from '@/core/api-key/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
+import type { IApiKeyDataProvider } from '@/core/api-keys';
 import { createApiKeyProvider } from '@/adapters/api-key/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -24,7 +25,7 @@ export function getApiKeyService(): ApiKeyService {
     const supabase = getServiceSupabase();
     
     // Create API key data provider
-    const apiKeyDataProvider = createApiKeyProvider({
+    const apiKeyDataProvider: IApiKeyDataProvider = createApiKeyProvider({
       type: 'supabase',
       options: {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
