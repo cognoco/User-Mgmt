@@ -12,7 +12,7 @@ import { Textarea } from '@/ui/primitives/textarea';
 import { Button } from '@/ui/primitives/button';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { KeyRound, AlertCircle, CheckCircle, Upload } from 'lucide-react';
-import { api } from '@/lib/api/axios';
+import { useOrgSsoConfig } from '@/hooks/sso/use-org-sso-config';
 import { Skeleton } from '@/ui/primitives/skeleton';
 import { CopyButton } from '@/ui/primitives/copy-button'; // Assuming you have this component
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
@@ -77,6 +77,12 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
   const [metadataUrl, setMetadataUrl] = useState<string>('');
   const [spEntityId, setSpEntityId] = useState<string>('');
   const [spMetadata, setSpMetadata] = useState<string>('');
+
+  const {
+    getIdpConfig,
+    getMetadata,
+    updateIdpConfig,
+  } = useOrgSsoConfig(orgId);
   
   // Initialize form based on IDP type
   const form = useForm<IdpConfig>({
@@ -153,7 +159,7 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
     setError(null);
     try {
       // Fetch IDP configuration
-      const configResponse = await api.get(`/organizations/${orgId}/sso/${idpType}/config`);
+      const configResponse = await getIdpConfig(idpType);
       
       // Set form values
       if (idpType === 'saml') {
@@ -173,10 +179,10 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
       }
 
       // Fetch service provider metadata
-      const metadataResponse = await api.get(`/organizations/${orgId}/sso/metadata`);
-      setMetadataUrl(metadataResponse.data.url);
-      setSpEntityId(metadataResponse.data.entity_id);
-      setSpMetadata(metadataResponse.data.xml);
+      const metadataResponse = await getMetadata();
+      setMetadataUrl(metadataResponse.url);
+      setSpEntityId(metadataResponse.entity_id);
+      setSpMetadata(metadataResponse.xml);
       
     } catch (err) {
       if (process.env.NODE_ENV === 'development') { console.error(`Failed to fetch ${idpType.toUpperCase()} configuration:`, err); }
@@ -196,7 +202,7 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
       // Strip the type field before sending to API
       const { type, ...configData } = data;
       
-      await api.put(`/organizations/${orgId}/sso/${idpType}/config`, configData);
+      await updateIdpConfig(idpType, configData);
       setSuccess(t('org.sso.saveConfigSuccess'));
       
       if (onConfigurationUpdate) {
