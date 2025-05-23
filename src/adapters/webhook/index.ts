@@ -1,8 +1,8 @@
 export * from '@/core/webhooks/IWebhookDataProvider';
-export * from './SupabaseWebhookProvider';
+export * from './supabase/supabase-webhook.provider';
 
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
-import { SupabaseWebhookProvider } from './SupabaseWebhookProvider';
+import { SupabaseWebhookProvider } from './supabase/supabase-webhook.provider';
 
 export function createSupabaseWebhookProvider(options: {
   supabaseUrl: string;
