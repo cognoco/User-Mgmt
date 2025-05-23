@@ -24,7 +24,7 @@ export function getApiPermissionService(): PermissionService {
     const permissionDataProvider = AdapterRegistry.getInstance().getAdapter<IPermissionDataProvider>('permission');
 
     // Create permission service with the adapter
-    permissionServiceInstance = new DefaultPermissionService(null as any, permissionDataProvider);
+    permissionServiceInstance = new DefaultPermissionService(permissionDataProvider);
   }
   
   return permissionServiceInstance;
