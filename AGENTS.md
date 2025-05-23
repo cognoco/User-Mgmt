@@ -29,6 +29,7 @@ docs\Product documentation\Architecture Guidelines.md
 docs\Product documentation\Architecture Rules References.md
  
   ### Testing Rules
+  DO NOT RUN TESTS UNLESS YOU ARE SPECIFICALLY ASKED TO! IF SO FOLLOW THIS: 
 
 FOR E2E tests - THESE TESTS ARE MADE TO DISCOVER BUGS. DO NOT FIX A TEST IF UI/API/HOOK or some other functionality is missing! Keep them as close to reality and avoid mockings where possilble. DO not fix the test so that it passes when it points to missing/wrong implementation. 
 Before you run the E2E for any feature, first read the expected implementation that is described in one of the relevant files under docs/Product documentation/functionality-features-phase...
