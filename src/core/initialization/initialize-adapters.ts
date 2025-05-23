@@ -13,6 +13,7 @@ import { DefaultPermissionService } from '@/services/permission/default-permissi
 import { DefaultGdprService } from '@/services/gdpr/default-gdpr.service';
 import { DefaultSsoService } from '@/services/sso/default-sso.service';
 import { UserManagementConfiguration } from '@/core/config';
+import { AdapterRegistry } from '@/adapters/registry';
 import { isServer } from '../platform';
 
 /**
@@ -76,6 +77,14 @@ export function initializeAdapters(
     const permissionAdapter = factory.createPermissionProvider();
     const gdprAdapter = factory.createGdprProvider?.();
     const ssoAdapter = factory.createSsoProvider();
+
+    const registry = AdapterRegistry.getInstance();
+    registry.registerAdapter('auth', authAdapter);
+    registry.registerAdapter('user', userAdapter);
+    registry.registerAdapter('team', teamAdapter);
+    registry.registerAdapter('permission', permissionAdapter);
+    if (gdprAdapter) registry.registerAdapter('gdpr', gdprAdapter);
+    registry.registerAdapter('sso', ssoAdapter);
     
     // Create service instances with the adapters
     const authService = new DefaultAuthService(authAdapter);

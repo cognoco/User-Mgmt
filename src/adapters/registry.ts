@@ -94,6 +94,23 @@ export type FactoryCreator = (options: AdapterFactoryOptions) => AdapterFactory;
  */
 export class AdapterRegistry {
   private static factories: Record<string, FactoryCreator> = {};
+  private static adapters: Record<string, any> = {};
+  private static instance: AdapterRegistry;
+
+  static getInstance(): AdapterRegistry {
+    if (!this.instance) {
+      this.instance = new AdapterRegistry();
+    }
+    return this.instance;
+  }
+
+  registerAdapter(name: string, adapter: any): void {
+    AdapterRegistry.adapters[name] = adapter;
+  }
+
+  getAdapter<T>(name: string): T {
+    return AdapterRegistry.adapters[name] as T;
+  }
   
   /**
    * Register an adapter factory

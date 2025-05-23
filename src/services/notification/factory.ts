@@ -6,10 +6,11 @@
  */
 
 import { NotificationService } from '@/core/notification/interfaces';
-import { UserManagementConfiguration } from '@/core/config';
 import type { INotificationDataProvider } from '@/core/notification';
-import { createNotificationProvider } from '@/adapters/notification/factory';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { DefaultNotificationService } from './default-notification-service';
+import { DefaultNotificationHandler } from './default-notification.handler';
+import { AdapterRegistry } from '@/adapters/registry';
+import api from '@/lib/api/axios';
 
 // Singleton instance for API routes
 let notificationServiceInstance: NotificationService | null = null;
@@ -21,26 +22,10 @@ let notificationServiceInstance: NotificationService | null = null;
  */
 export function getApiNotificationService(): NotificationService {
   if (!notificationServiceInstance) {
-    // Get Supabase configuration from the existing service
-    const supabase = getServiceSupabase();
-    
-    // Create notification data provider
-    const notificationDataProvider: INotificationDataProvider = createNotificationProvider({
-      type: 'supabase',
-      options: {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-      }
-    });
-    
-    // Create notification service with the data provider
-    notificationServiceInstance = UserManagementConfiguration.getServiceProvider('notificationService') as NotificationService;
-    
-    // If no notification service is registered, throw an error
-    if (!notificationServiceInstance) {
-      throw new Error('Notification service not registered in UserManagementConfiguration');
-    }
+    const notificationDataProvider = AdapterRegistry.getInstance().getAdapter<INotificationDataProvider>('notification');
+    const handler = new DefaultNotificationHandler();
+    notificationServiceInstance = new DefaultNotificationService(api, notificationDataProvider, handler);
   }
-  
+
   return notificationServiceInstance;
 }

@@ -8,8 +8,7 @@
 import { SubscriptionService } from '@/core/subscription/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
 import type { ISubscriptionDataProvider } from '@/core/subscription';
-import { createSubscriptionProvider } from '@/adapters/subscription/factory';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { AdapterRegistry } from '@/adapters/registry';
 
 // Singleton instance for API routes
 let subscriptionServiceInstance: SubscriptionService | null = null;
@@ -21,21 +20,9 @@ let subscriptionServiceInstance: SubscriptionService | null = null;
  */
 export function getApiSubscriptionService(): SubscriptionService {
   if (!subscriptionServiceInstance) {
-    // Get Supabase configuration from the existing service
-    const supabase = getServiceSupabase();
-    
-    // Create subscription data provider
-    const subscriptionDataProvider: ISubscriptionDataProvider = createSubscriptionProvider({
-      type: 'supabase',
-      options: {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-      }
-    });
-    
-    // Create subscription service with the data provider
+    AdapterRegistry.getInstance().getAdapter<ISubscriptionDataProvider>('subscription');
     subscriptionServiceInstance = UserManagementConfiguration.getServiceProvider('subscriptionService') as SubscriptionService;
-    
+
     // If no subscription service is registered, throw an error
     if (!subscriptionServiceInstance) {
       throw new Error('Subscription service not registered in UserManagementConfiguration');
