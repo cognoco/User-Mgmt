@@ -16,12 +16,12 @@ import {
   UserSearchResult,
   ProfileVisibility
 } from '../../core/user/models';
-import { UserDataProvider } from './interfaces';
+import { IUserDataProvider } from '../../core/user/IUserDataProvider';
 
 /**
  * Supabase implementation of the UserDataProvider interface
  */
-export class SupabaseUserProvider implements UserDataProvider {
+export class SupabaseUserProvider implements IUserDataProvider {
   private supabase: SupabaseClient;
   private profileCallbacks: ((profile: UserProfile) => void)[] = [];
   

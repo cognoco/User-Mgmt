@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { IAddressDataProvider } from '@/core/address/IAddressDataProvider';
+import type { IAddressDataProvider } from '../../core/address/IAddressDataProvider';
 import {
   CompanyAddress,
   AddressCreatePayload,
