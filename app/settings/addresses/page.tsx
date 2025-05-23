@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Address } from '@/core/address/types';
-import { useAddresses } from '@/hooks/address/use-addresses';
+import { useAddresses } from '@/hooks/address/useAddresses';
 import { StyledAddressForm as AddressForm } from '@/ui/styled/address/AddressForm';
 import { StyledAddressList as AddressList } from '@/ui/styled/address/AddressList';
 

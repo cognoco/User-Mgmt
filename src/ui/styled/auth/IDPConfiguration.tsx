@@ -12,7 +12,7 @@ import { Textarea } from '@/ui/primitives/textarea';
 import { Button } from '@/ui/primitives/button';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { KeyRound, AlertCircle, CheckCircle, Upload } from 'lucide-react';
-import { useOrgSsoConfig } from '@/hooks/sso/use-org-sso-config';
+import { useOrgSsoConfig } from '@/hooks/sso/useOrgSsoConfig';
 import { Skeleton } from '@/ui/primitives/skeleton';
 import { CopyButton } from '@/ui/primitives/copy-button'; // Assuming you have this component
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';

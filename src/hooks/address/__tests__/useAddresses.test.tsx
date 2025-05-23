@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useAddresses } from '../use-addresses';
+import { useAddresses } from '../useAddresses';
 import { UserManagementConfiguration } from '@/core/config';
 import type { AddressService } from '@/core/address/interfaces';
 

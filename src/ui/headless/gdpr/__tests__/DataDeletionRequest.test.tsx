@@ -2,9 +2,9 @@
 import { render, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DataDeletionRequest } from '../DataDeletionRequest';
-import { useDataDeletion } from '@/hooks/gdpr/use-data-deletion';
+import { useDataDeletion } from '@/hooks/gdpr/useDataDeletion';
 
-vi.mock('@/hooks/gdpr/use-data-deletion', () => ({ useDataDeletion: vi.fn() }));
+vi.mock('@/hooks/gdpr/useDataDeletion', () => ({ useDataDeletion: vi.fn() }));
 
 const mockHook = useDataDeletion as unknown as ReturnType<typeof vi.fn>;
 

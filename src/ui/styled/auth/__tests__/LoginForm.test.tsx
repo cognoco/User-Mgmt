@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LoginForm } from '../LoginForm';
-import { useAuth } from '@/hooks/auth/use-auth';
+import { useAuth } from '@/hooks/auth/useAuthLegacy';
 import type { LoginData } from '@/types/auth';
 import * as React from 'react';
 
@@ -16,7 +16,7 @@ class ResizeObserver {
 window.ResizeObserver = ResizeObserver;
 
 // Mock the auth store
-vi.mock('@/hooks/auth/use-auth', () => ({
+vi.mock('@/hooks/auth/useAuthLegacy', () => ({
   useAuth: vi.fn()
 }));
 

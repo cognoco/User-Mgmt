@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UserManagementConfiguration } from '@/core/config';
-import { useWebhooks } from '../use-webhooks';
+import { useWebhooks } from '../useWebhooks';
 import type { IWebhookService } from '@/core/webhooks';
 
 const mockService: IWebhookService = {

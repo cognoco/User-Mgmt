@@ -3,7 +3,7 @@ import '@/lib/i18n';
 import { useTranslation } from 'react-i18next';
 import { ApiKeyForm } from '@/ui/styled/api-keys/ApiKeyForm';
 import { ApiKeyList } from '@/ui/styled/api-keys/ApiKeyList';
-import { useApiKeys } from '@/hooks/api-keys/use-api-keys';
+import { useApiKeys } from '@/hooks/api-keys/useApiKeys';
 
 export default function ApiKeysPage() {
   const { t } = useTranslation();

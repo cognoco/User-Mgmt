@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDataDeletion } from '@/hooks/gdpr/use-data-deletion';
+import { useDataDeletion } from '@/hooks/gdpr/useDataDeletion';
 
 export interface DataDeletionRequestProps {
   render: (props: {

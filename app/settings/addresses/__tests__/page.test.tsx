@@ -2,7 +2,7 @@ import '@/tests/i18nTestSetup';
 import { render, screen } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
 
-vi.mock('@/hooks/address/use-addresses', () => ({
+vi.mock('@/hooks/address/useAddresses', () => ({
   useAddresses: () => ({
     addresses: [
       { id: '1', userId: 'u1', type: 'shipping', isDefault: true, fullName: 'John Doe', street1: '123 Main', city: 'City', state: 'ST', postalCode: '12345', country: 'US', createdAt: new Date(), updatedAt: new Date() },

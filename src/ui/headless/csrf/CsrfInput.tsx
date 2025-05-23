@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCsrf } from '@/hooks/csrf/use-csrf';
+import { useCsrf } from '@/hooks/csrf/useCsrf';
 
 export interface CsrfInputProps {
   fieldName?: string;

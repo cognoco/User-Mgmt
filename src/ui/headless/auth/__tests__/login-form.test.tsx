@@ -15,7 +15,7 @@ class ResizeObserver {
 window.ResizeObserver = ResizeObserver;
 
 // Mock the auth store
-vi.mock('@/hooks/auth/use-auth', () => ({
+vi.mock('@/hooks/auth/useAuthLegacy', () => ({
   useAuth: vi.fn()
 }));
 

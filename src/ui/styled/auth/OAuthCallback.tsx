@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/auth/use-auth';
+import { useAuth } from '@/hooks/auth/useAuthLegacy';
 import { getUserHomePage } from '@/lib/utils/getUserHomePage';
 import { toast } from '@/ui/primitives/use-toast';
 import { useOAuthStore } from '@/lib/stores/oauth.store';

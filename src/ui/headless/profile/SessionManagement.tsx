@@ -5,7 +5,7 @@
  */
 
 import { useEffect } from 'react';
-import { useSession } from '@/hooks/session/use-session';
+import { useSession } from '@/hooks/session/useSession';
 import type { SessionInfo } from '@/core/session/models';
 
 export interface SessionManagementProps {

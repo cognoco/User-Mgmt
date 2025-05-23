@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/notification/use-toast';
+import { useToast } from '@/hooks/notification/useToastAdvanced';
 
 /**
  * Hook for handling account deletion functionality

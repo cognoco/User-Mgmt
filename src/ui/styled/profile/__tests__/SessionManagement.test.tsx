@@ -3,10 +3,10 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import SessionManagement from '../SessionManagement';
-import { useSession } from '@/hooks/session/use-session';
+import { useSession } from '@/hooks/session/useSession';
 
 // Mock useSession hook
-vi.mock('@/hooks/session/use-session');
+vi.mock('@/hooks/session/useSession');
 
 const mockSessions = [
   {

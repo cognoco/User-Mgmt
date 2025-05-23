@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/auth/use-auth';
+import { useAuth } from '@/hooks/auth/useAuthLegacy';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { getPlatformClasses } from '@/hooks/utils/usePlatformStyles';
 import { useIsMobile } from '@/lib/utils/responsive';

@@ -2,7 +2,7 @@
 import { WebhookForm } from '@/ui/styled/webhooks/WebhookForm';
 import { WebhookList } from '@/ui/styled/webhooks/WebhookList';
 import { WebhookEvents } from '@/ui/styled/webhooks/WebhookEvents';
-import { useWebhooks } from '@/hooks/webhooks/use-webhooks';
+import { useWebhooks } from '@/hooks/webhooks/useWebhooks';
 import { useAuth } from '@/hooks/auth/useAuth';
 
 export default function TeamWebhooksPage() {

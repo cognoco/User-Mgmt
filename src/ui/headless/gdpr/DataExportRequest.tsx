@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDataExport } from '@/hooks/gdpr/use-data-export';
+import { useDataExport } from '@/hooks/gdpr/useDataExport';
 
 export interface DataExportRequestProps {
   render: (props: {
