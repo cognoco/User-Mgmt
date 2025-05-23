@@ -1,23 +1,35 @@
 import type { ApiKey } from '@/core/api-keys/types';
-import { useApiKeys } from '@/hooks/api-keys/use-api-keys';
-
-export interface ApiKeyListRenderProps {
-  apiKeys: ApiKey[];
-  isLoading: boolean;
-  error: string | null;
-  revoke: (id: string) => Promise<void>;
-  regenerate: (id: string) => Promise<{ key: string } & ApiKey>;
-  refresh: () => Promise<void>;
-}
 
 export interface ApiKeyListProps {
-  children: (props: ApiKeyListRenderProps) => React.ReactNode;
+  apiKeys: ApiKey[];
+  loading: boolean;
+  error: string | null;
+  onRevoke: (id: string) => Promise<void>;
+  onRegenerate: (id: string) => Promise<{ key: string } & ApiKey>;
+  renderItem?: (
+    key: ApiKey,
+    actions: { onRevoke: (id: string) => Promise<void>; onRegenerate: (id: string) => Promise<{ key: string } & ApiKey> }
+  ) => React.ReactNode;
 }
 
-export function ApiKeyList({ children }: ApiKeyListProps) {
-  const { apiKeys, isLoading, error, revokeApiKey, regenerateApiKey, fetchApiKeys } = useApiKeys();
+export function ApiKeyList({ apiKeys, loading, error, onRevoke, onRegenerate, renderItem }: ApiKeyListProps) {
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return (
+      <p className="text-destructive text-sm" role="alert">
+        {error}
+      </p>
+    );
+  }
 
   return (
-    <>{children({ apiKeys, isLoading, error, revoke: revokeApiKey, regenerate: regenerateApiKey, refresh: fetchApiKeys })}</>
+    <div className="space-y-4">
+      {apiKeys.map((key) => (
+        <div key={key.id}>{renderItem ? renderItem(key, { onRevoke, onRegenerate }) : null}</div>
+      ))}
+    </div>
   );
 }

@@ -58,6 +58,12 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
             </Link>
           </Button>
           <Button asChild variant="ghost" className="w-full justify-start">
+            <Link href="/admin/gdpr">
+              <List className="mr-2 h-5 w-5" />
+              GDPR Compliance
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" className="w-full justify-start">
             <Link href="/admin/settings">
               <Settings className="mr-2 h-5 w-5" />
               Settings
