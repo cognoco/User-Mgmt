@@ -5,7 +5,7 @@
  * It allows for dependency injection and makes it easy to swap implementations.
  */
 
-import { UserDataProvider } from './interfaces';
+import type { IUserDataProvider } from '@/core/user/IUserDataProvider';
 import { SupabaseUserProvider } from './supabase-user-provider';
 
 /**
@@ -18,7 +18,7 @@ import { SupabaseUserProvider } from './supabase-user-provider';
 export function createSupabaseUserProvider(
   supabaseUrl: string,
   supabaseKey: string
-): UserDataProvider {
+): IUserDataProvider {
   return new SupabaseUserProvider(supabaseUrl, supabaseKey);
 }
 
@@ -31,7 +31,7 @@ export function createSupabaseUserProvider(
 export function createUserProvider(config: {
   type: 'supabase' | string;
   options: Record<string, any>;
-}): UserDataProvider {
+}): IUserDataProvider {
   switch (config.type) {
     case 'supabase':
       return createSupabaseUserProvider(

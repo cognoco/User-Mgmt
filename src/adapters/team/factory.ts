@@ -5,7 +5,7 @@
  * It allows for dependency injection and makes it easy to swap implementations.
  */
 
-import { TeamDataProvider } from './interfaces';
+import type { ITeamDataProvider } from '@/core/team/ITeamDataProvider';
 import { SupabaseTeamProvider } from './supabase-team-provider';
 
 /**
@@ -18,7 +18,7 @@ import { SupabaseTeamProvider } from './supabase-team-provider';
 export function createSupabaseTeamProvider(
   supabaseUrl: string,
   supabaseKey: string
-): TeamDataProvider {
+): ITeamDataProvider {
   return new SupabaseTeamProvider(supabaseUrl, supabaseKey);
 }
 
@@ -31,7 +31,7 @@ export function createSupabaseTeamProvider(
 export function createTeamProvider(config: {
   type: 'supabase' | string;
   options: Record<string, any>;
-}): TeamDataProvider {
+}): ITeamDataProvider {
   switch (config.type) {
     case 'supabase':
       return createSupabaseTeamProvider(
