@@ -6,10 +6,10 @@
  */
 
 import { SessionService } from '@/core/session/interfaces';
-import { UserManagementConfiguration } from '@/core/config';
 import type { ISessionDataProvider } from '@/core/session';
-import { createSessionProvider } from '@/adapters/session/factory';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { AdapterRegistry } from '@/adapters/registry';
+import { api } from '@/lib/api/axios';
+import { DefaultSessionService } from './default-session.service';
 
 // Singleton instance for API routes
 let sessionServiceInstance: SessionService | null = null;
@@ -21,25 +21,8 @@ let sessionServiceInstance: SessionService | null = null;
  */
 export function getApiSessionService(): SessionService {
   if (!sessionServiceInstance) {
-    // Get Supabase configuration from the existing service
-    const supabase = getServiceSupabase();
-    
-    // Create session data provider
-    const sessionDataProvider: ISessionDataProvider = createSessionProvider({
-      type: 'supabase',
-      options: {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-      }
-    });
-    
-    // Create session service with the data provider
-    sessionServiceInstance = UserManagementConfiguration.getServiceProvider('sessionService') as SessionService;
-    
-    // If no session service is registered, throw an error
-    if (!sessionServiceInstance) {
-      throw new Error('Session service not registered in UserManagementConfiguration');
-    }
+    const sessionDataProvider = AdapterRegistry.getInstance().getAdapter<ISessionDataProvider>('session');
+    sessionServiceInstance = new DefaultSessionService(api, sessionDataProvider);
   }
   
   return sessionServiceInstance;
