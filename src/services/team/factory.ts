@@ -24,7 +24,7 @@ export function getApiTeamService(): TeamService {
     const teamDataProvider = AdapterRegistry.getInstance().getAdapter<ITeamDataProvider>('team');
 
     // Create team service with the adapter
-    teamServiceInstance = new DefaultTeamService(null as any, teamDataProvider);
+    teamServiceInstance = new DefaultTeamService(teamDataProvider);
   }
   
   return teamServiceInstance;
