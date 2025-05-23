@@ -1,7 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useWebhooks } from '../useWebhooks';
+import { useWebhooks } from '../use-webhooks';
 
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
