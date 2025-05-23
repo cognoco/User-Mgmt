@@ -219,13 +219,16 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    */
   async sendVerificationEmail(email: string): Promise<AuthResult> {
     try {
-      // Supabase doesn't have a direct method to resend verification email
-      // We would need to implement our own logic or use a custom function
-      // This is a placeholder implementation
-      return {
-        success: false,
-        error: 'Email verification not implemented for Supabase adapter'
-      };
+      const { error } = await this.supabase.auth.resend({
+        type: 'signup',
+        email
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
     } catch (error: any) {
       return {
         success: false,
@@ -240,8 +243,24 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @param token Verification token from the email link
    */
   async verifyEmail(token: string): Promise<void> {
-    // Supabase handles email verification automatically
-    // This method is a placeholder for compatibility with the interface
+    const {
+      data: { user },
+      error: userError
+    } = await this.supabase.auth.getUser();
+
+    if (userError || !user) {
+      throw new Error(userError?.message || 'Unable to retrieve current user');
+    }
+
+    const { error } = await this.supabase.auth.verifyOtp({
+      type: 'email',
+      token,
+      email: user.email ?? ''
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
   }
   
   /**
@@ -250,10 +269,21 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @param password Current password for verification (optional depending on implementation)
    */
   async deleteAccount(password?: string): Promise<void> {
-    // Supabase doesn't have a direct method to delete a user account
-    // We would need to implement our own logic or use a custom function
-    // This is a placeholder implementation
-    throw new Error('Account deletion not implemented for Supabase adapter');
+    const {
+      data: { user },
+      error: userError
+    } = await this.supabase.auth.getUser();
+
+    if (userError || !user) {
+      throw new Error(userError?.message || 'Unable to retrieve current user');
+    }
+
+    const { error } = await this.supabase.rpc('delete_user_account', { password });
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    await this.logout();
   }
   
   /**
