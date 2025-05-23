@@ -219,7 +219,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       // Always filter by current user
       params.append('userId', user.user.id);
 
-      const response = await fetch(`/api/audit/logs?${params.toString()}`);
+      const response = await fetch(`/api/audit/user-actions?${params.toString()}`);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch audit logs');
@@ -253,7 +253,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       params.append('userId', user.user.id);
       params.append('format', 'csv');
 
-      const response = await fetch(`/api/audit/logs/export?${params.toString()}`);
+      const response = await fetch(`/api/audit/user-actions/export?${params.toString()}`);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to export audit logs');
