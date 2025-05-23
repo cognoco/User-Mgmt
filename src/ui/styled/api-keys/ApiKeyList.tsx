@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Button } from '@/ui/primitives/button';
 import { Badge } from '@/ui/primitives/badge';
+import { ApiKeyList as HeadlessApiKeyList } from '@/ui/headless/api-keys/ApiKeyList';
 
 export function ApiKeyList() {
   return (
