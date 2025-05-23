@@ -8,7 +8,6 @@
 import { SessionService } from '@/core/session/interfaces';
 import type { ISessionDataProvider } from '@/core/session';
 import { AdapterRegistry } from '@/adapters/registry';
-import { api } from '@/lib/api/axios';
 import { DefaultSessionService } from './default-session.service';
 
 // Singleton instance for API routes
@@ -22,7 +21,7 @@ let sessionServiceInstance: SessionService | null = null;
 export function getApiSessionService(): SessionService {
   if (!sessionServiceInstance) {
     const sessionDataProvider = AdapterRegistry.getInstance().getAdapter<ISessionDataProvider>('session');
-    sessionServiceInstance = new DefaultSessionService(api, sessionDataProvider);
+    sessionServiceInstance = new DefaultSessionService(sessionDataProvider);
   }
   
   return sessionServiceInstance;

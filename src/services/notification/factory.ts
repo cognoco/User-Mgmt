@@ -7,10 +7,9 @@
 
 import { NotificationService } from '@/core/notification/interfaces';
 import type { INotificationDataProvider } from '@/core/notification';
-import { DefaultNotificationService } from './default-notification-service';
+import { DefaultNotificationService } from './default-notification.service';
 import { DefaultNotificationHandler } from './default-notification.handler';
 import { AdapterRegistry } from '@/adapters/registry';
-import api from '@/lib/api/axios';
 
 // Singleton instance for API routes
 let notificationServiceInstance: NotificationService | null = null;
@@ -24,7 +23,7 @@ export function getApiNotificationService(): NotificationService {
   if (!notificationServiceInstance) {
     const notificationDataProvider = AdapterRegistry.getInstance().getAdapter<INotificationDataProvider>('notification');
     const handler = new DefaultNotificationHandler();
-    notificationServiceInstance = new DefaultNotificationService(api, notificationDataProvider, handler);
+    notificationServiceInstance = new DefaultNotificationService(notificationDataProvider, handler);
   }
 
   return notificationServiceInstance;

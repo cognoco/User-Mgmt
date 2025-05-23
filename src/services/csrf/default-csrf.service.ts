@@ -1,12 +1,19 @@
 import { CsrfService } from '@/core/csrf/interfaces';
-import { CsrfToken } from '@/core/csrf/models';
+import type { CsrfToken } from '@/core/csrf/models';
 import type { CsrfDataProvider } from '@/core/csrf/ICsrfDataProvider';
 
 export class DefaultCsrfService implements CsrfService {
-  constructor(private csrfProvider: CsrfDataProvider) {}
+  constructor(private provider: CsrfDataProvider) {}
 
-  async generateToken(): Promise<CsrfToken> {
-    const token = await this.csrfProvider.generateToken();
-    return { token };
+  async createToken(): Promise<{ success: boolean; token?: CsrfToken; error?: string }> {
+    return this.provider.createToken();
+  }
+
+  async validateToken(token: string): Promise<{ valid: boolean; error?: string }> {
+    return this.provider.validateToken(token);
+  }
+
+  async revokeToken(token: string): Promise<{ success: boolean; error?: string }> {
+    return this.provider.revokeToken(token);
   }
 }

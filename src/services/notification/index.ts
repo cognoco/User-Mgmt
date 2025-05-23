@@ -6,20 +6,14 @@
  */
 
 import { NotificationService, NotificationHandler } from '@/core/notification/interfaces';
-import { DefaultNotificationService } from './default-notification-service';
+import { DefaultNotificationService } from './default-notification.service';
 import { DefaultNotificationHandler } from './default-notification.handler';
-import type { AxiosInstance } from 'axios';
 import type { NotificationDataProvider } from '@/core/notification/INotificationDataProvider';
 
 /**
  * Configuration options for creating a NotificationService
  */
 export interface NotificationServiceConfig {
-  /**
-   * API client for making HTTP requests
-   */
-  apiClient: AxiosInstance;
-  
   /**
    * Notification data provider for database operations
    */
@@ -39,11 +33,9 @@ export interface NotificationServiceConfig {
  * @returns An instance of the NotificationService
  */
 export function createNotificationService(config: NotificationServiceConfig): NotificationService {
-  // Use the provided notification handler or create a default one
   const notificationHandler = config.notificationHandler || new DefaultNotificationHandler();
-  
+
   return new DefaultNotificationService(
-    config.apiClient, 
     config.notificationDataProvider,
     notificationHandler
   );
