@@ -2,8 +2,8 @@
  * Supabase implementation of the SubscriptionDataProvider
  */
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { ISubscriptionDataProvider } from '../../core/subscription/ISubscriptionDataProvider';
-import type { SubscriptionPlan, UserSubscription } from '../../core/subscription/models';
+import type { ISubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataProvider';
+import type { SubscriptionPlan, UserSubscription } from '@/core/subscription/models';
 
 export class SupabaseSubscriptionAdapter implements ISubscriptionDataProvider {
   private supabase: SupabaseClient;
