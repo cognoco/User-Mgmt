@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import { useWebhooks } from '@/hooks/webhooks/use-webhooks';
+import { useWebhooks } from '@/hooks/webhooks/useWebhooks';
 import type { Webhook } from '@/core/webhooks/models';
 
 export interface WebhookListRenderProps {

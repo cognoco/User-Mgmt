@@ -75,7 +75,7 @@ function useAuthStoreMock(selector?: any) {
 useAuthStoreMock.getState = () => authStoreState;
 useAuthStoreMock.setState = (partial: any) => Object.assign(authStoreState, typeof partial === 'function' ? partial(authStoreState) : partial);
 
-vi.mock('@/hooks/auth/use-auth', () => ({
+vi.mock('@/hooks/auth/useAuthLegacy', () => ({
   useAuth: useAuthStoreMock,
 }));
 

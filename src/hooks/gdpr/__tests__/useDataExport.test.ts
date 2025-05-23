@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useDataExport } from '../use-data-export';
+import { useDataExport } from '../useDataExport';
 import { api } from '@/lib/api/axios';
 
 vi.mock('@/lib/api/axios', () => ({ api: { get: vi.fn() } }));

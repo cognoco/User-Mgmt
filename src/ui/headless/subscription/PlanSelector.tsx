@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { useSubscription } from '@/hooks/subscription/use-subscription';
+import { useSubscription } from '@/hooks/subscription/useSubscription';
 import type { SubscriptionPlan } from '@/types/subscription';
 
 export interface PlanSelectorProps {

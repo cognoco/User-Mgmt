@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/auth/useAuth';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
 
 // Mock Zustand stores
-vi.mock('@/hooks/auth/use-auth', () => ({
+vi.mock('@/hooks/auth/useAuthLegacy', () => ({
   useAuth: vi.fn(),
 }));
 vi.mock('@/lib/stores/preferences.store', () => ({

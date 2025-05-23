@@ -2,11 +2,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import BillingPage from '../../../app/billing/page';
-import { useSubscription } from '@/hooks/subscription/use-subscription';
-import { useBilling } from '@/hooks/subscription/use-billing';
+import { useSubscription } from '@/hooks/subscription/useSubscription';
+import { useBilling } from '@/hooks/subscription/useBilling';
 
-vi.mock('@/hooks/subscription/use-subscription');
-vi.mock('@/hooks/subscription/use-billing');
+vi.mock('@/hooks/subscription/useSubscription');
+vi.mock('@/hooks/subscription/useBilling');
 
 describe('Smoke: Billing Page', () => {
   it('renders subscription and billing sections', () => {

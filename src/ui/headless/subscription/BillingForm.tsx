@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { useBilling } from '@/hooks/subscription/use-billing';
+import { useBilling } from '@/hooks/subscription/useBilling';
 
 export interface BillingFormProps {
   onSubmit?: (paymentMethodId: string) => Promise<void>;

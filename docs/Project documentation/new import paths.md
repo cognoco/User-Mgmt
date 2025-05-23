@@ -66,7 +66,7 @@ import { useSomeHook } from '@/hooks/{domain}/{file}';
 
 Examples:
 ```typescript
-import { useAuth } from '@/hooks/auth/use-auth';
+import { useAuth } from '@/hooks/auth/useAuthLegacy';
 import { useRegistration } from '@/hooks/auth/use-registration';
 import { useUserProfile } from '@/hooks/user/use-user-profile';
 import { useAccountSettings } from '@/hooks/user/use-account-settings';
@@ -133,7 +133,7 @@ import { HeadlessOAuthButtons } from '@/ui/headless/auth/oauth-buttons';
 
 #### Auth Hooks
 ```typescript
-import { useAuth } from '@/hooks/auth/use-auth';
+import { useAuth } from '@/hooks/auth/useAuthLegacy';
 import { useRegistration } from '@/hooks/auth/use-registration';
 import { usePasswordReset } from '@/hooks/auth/use-password-reset';
 import { useMagicLink } from '@/hooks/auth/use-magic-link';
@@ -297,7 +297,7 @@ Below is a list of common incorrect import paths from the old architecture and t
 | `@/components/auth/RegistrationForm` | `@/ui/styled/auth/registration-form` |
 | `@/components/profile/ProfileForm` | `@/ui/styled/user/profile-form` |
 | `@/components/team/TeamList` | `@/ui/styled/team/team-list` |
-| `@/lib/auth/useAuth` | `@/hooks/auth/use-auth` |
+| `@/lib/auth/useAuth` | `@/hooks/auth/useAuthLegacy` |
 | `@/lib/user/useProfile` | `@/hooks/user/use-user-profile` |
 | `@/lib/team/useTeams` | `@/hooks/team/use-teams` |
 | `@/lib/stores/authStore` | `@/services/auth/auth-store` |

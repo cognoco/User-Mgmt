@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNotifications } from '@/hooks/notification/use-notifications';
+import { useNotifications } from '@/hooks/notification/useNotifications';
 import type { Notification } from '@/core/notification/models';
 
 export interface NotificationCenterRenderProps {

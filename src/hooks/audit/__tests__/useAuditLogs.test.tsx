@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { UserManagementConfiguration } from '@/core/config';
 import type { AuditService } from '@/core/audit/interfaces';
-import { useAuditLogs } from '../use-audit-logs';
+import { useAuditLogs } from '../useAuditLogs';
 
 function createWrapper() {
   const queryClient = new QueryClient({

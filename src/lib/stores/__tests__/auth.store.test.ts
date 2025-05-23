@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
 import { vi as viMock } from 'vitest';
 
 // Mock the robust Zustand store for useAuthStore INSIDE the vi.mock factory to avoid hoisting issues
-viMock.mock('@/hooks/auth/use-auth', () => {
+viMock.mock('@/hooks/auth/useAuthLegacy', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { createMockAuthStore } = require('../../../tests/mocks/auth.store.mock');
   return { useAuth: createMockAuthStore() };

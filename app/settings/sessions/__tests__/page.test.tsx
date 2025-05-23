@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
 
 // Mock the useSession hook
-vi.mock('@/hooks/session/use-session', () => ({
+vi.mock('@/hooks/session/useSession', () => ({
   useSession: () => ({
     sessions: [
       { id: '1', ip_address: '127.0.0.1', user_agent: 'Chrome', last_active_at: '2024-01-01T00:00:00Z', is_current: true },

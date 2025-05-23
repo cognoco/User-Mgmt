@@ -61,7 +61,7 @@ const exactPathMappings = {
   '@/components/admin/RoleSelector': '@/ui/styled/permission/role-selector',
   
   // Auth hooks
-  '@/lib/auth/useAuth': '@/hooks/auth/use-auth',
+  '@/lib/auth/useAuth': '@/hooks/auth/useAuthLegacy',
   '@/lib/auth/useRegistration': '@/hooks/auth/use-registration',
   '@/lib/auth/usePasswordReset': '@/hooks/auth/use-password-reset',
   '@/lib/auth/useMagicLink': '@/hooks/auth/use-magic-link',

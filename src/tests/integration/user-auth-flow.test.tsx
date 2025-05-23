@@ -65,7 +65,7 @@ vi.mock('@/lib/stores/connected-accounts.store', () => ({
 // --- End Connected Accounts Store Mock ---
 
 // Zustand selector-compatible mock for useAuthStore, defined at the top for Vitest hoisting
-vi.mock('@/hooks/auth/use-auth', () => {
+vi.mock('@/hooks/auth/useAuthLegacy', () => {
   const createAuthStoreState = () => ({
     user: null as User | null,
     token: null as string | null,

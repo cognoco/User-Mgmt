@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { useSso } from '@/hooks/sso/use-sso';
+import { useSso } from '@/hooks/sso/useSso';
 import type { SsoProvider, SsoConnection } from '@/types/sso';
 
 export interface SSOConnectorRenderProps {

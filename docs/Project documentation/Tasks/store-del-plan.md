@@ -32,7 +32,7 @@ This document outlines the plan to migrate from the current Zustand-based auth s
 - [ ] Create/enhance migration script
   - [ ] Update the existing `migrate-auth-imports.cjs` script
   - [ ] Handle all edge cases (different import patterns, usage patterns)
-  - [ ] Update import statements from `@/lib/stores/auth.store` to `@/hooks/auth/use-auth`
+  - [ ] Update import statements from `@/lib/stores/auth.store` to `@/hooks/auth/useAuthLegacy`
   - [ ] Update usage patterns from `useAuthStore(state => state.X)` to `useAuth().X`
 
 - [ ] Update UI components in phases
@@ -77,7 +77,7 @@ This document outlines the plan to migrate from the current Zustand-based auth s
 
 ## 3. Implementation Details
 
-### Auth Hook Implementation (`src/hooks/auth/use-auth.ts`)
+### Auth Hook Implementation (`src/hooks/auth/useAuthLegacy.ts`)
 
 The hook will:
 - [ ] Use React context to provide the auth service instance
@@ -95,7 +95,7 @@ For each component:
 import { useAuthStore } from '@/lib/stores/auth.store';
 
 // After
-import { useAuth } from '@/hooks/auth/use-auth';
+import { useAuth } from '@/hooks/auth/useAuthLegacy';
 ```
 
 2. Update usage:
@@ -116,7 +116,7 @@ vi.mock('@/lib/stores/auth.store', () => ({
 }));
 
 // After
-vi.mock('@/hooks/auth/use-auth', () => ({
+vi.mock('@/hooks/auth/useAuthLegacy', () => ({
   useAuth: () => mockAuthService
 }));
 ```

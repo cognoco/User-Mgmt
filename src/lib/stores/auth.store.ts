@@ -1,10 +1,10 @@
 /**
  * @deprecated This store is being migrated to the new hooks-based architecture.
- * Please use the useAuth hook from @/hooks/auth/use-auth instead.
+ * Please use the useAuth hook from @/hooks/auth/useAuthLegacy instead.
  * This file exists as a compatibility layer during the migration process.
  */
 
-import { useAuth } from '@/hooks/auth/use-auth';
+import { useAuth } from '@/hooks/auth/useAuthLegacy';
 import type { 
   AuthState, 
   LoginPayload, 
@@ -16,7 +16,7 @@ import type {
   MFAVerifyResponse
 } from '@/core/auth/models';
 
-console.log('[DEPRECATED] auth.store.ts is being used. Please migrate to useAuth hook from @/hooks/auth/use-auth');
+console.log('[DEPRECATED] auth.store.ts is being used. Please migrate to useAuth hook from @/hooks/auth/useAuthLegacy');
 
 // Create a compatibility layer that redirects to the new useAuth hook
 export const useAuthStore = () => {

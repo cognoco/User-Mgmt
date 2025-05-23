@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { useWebhooks } from '@/hooks/webhooks/use-webhooks';
+import { useWebhooks } from '@/hooks/webhooks/useWebhooks';
 import type { Webhook, WebhookCreatePayload, WebhookUpdatePayload } from '@/core/webhooks/models';
 
 export interface WebhookManagerRenderProps {

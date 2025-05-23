@@ -2,9 +2,9 @@
 import { render, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { WebhookManager } from '../WebhookManager';
-import { useWebhooks } from '@/hooks/webhooks/use-webhooks';
+import { useWebhooks } from '@/hooks/webhooks/useWebhooks';
 
-vi.mock('@/hooks/webhooks/use-webhooks', () => ({ useWebhooks: vi.fn() }));
+vi.mock('@/hooks/webhooks/useWebhooks', () => ({ useWebhooks: vi.fn() }));
 const mockUseWebhooks = useWebhooks as unknown as ReturnType<typeof vi.fn>;
 let state: any;
 
