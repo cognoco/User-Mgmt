@@ -7,6 +7,7 @@
 
 // Export all interfaces
 export * from './interfaces';
+export * from './IAuthDataProvider';
 
 // Export all models
 export * from './models';
