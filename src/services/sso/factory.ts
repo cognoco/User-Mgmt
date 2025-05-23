@@ -10,19 +10,13 @@ import type { ISsoDataProvider } from '@/core/sso';
 import { AdapterRegistry } from '@/adapters/registry';
 import { DefaultSsoService } from './default-sso.service';
 
-// Singleton instance for API routes
-let ssoServiceInstance: SsoService | null = null;
-
 /**
  * Get the configured SSO service instance for API routes
  * 
  * @returns Configured SsoService instance
  */
 export function getApiSsoService(): SsoService {
-  if (!ssoServiceInstance) {
-    const ssoDataProvider = AdapterRegistry.getInstance().getAdapter<ISsoDataProvider>('sso');
-    ssoServiceInstance = new DefaultSsoService(ssoDataProvider);
-  }
-  
-  return ssoServiceInstance;
+  const ssoDataProvider =
+    AdapterRegistry.getInstance().getAdapter<ISsoDataProvider>('sso');
+  return new DefaultSsoService(ssoDataProvider);
 }

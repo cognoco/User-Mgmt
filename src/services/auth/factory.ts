@@ -10,22 +10,14 @@ import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
 import { DefaultAuthService } from './default-auth.service';
 import { AdapterRegistry } from '@/adapters/registry';
 
-// Singleton instance for API routes
-let authServiceInstance: AuthService | null = null;
-
 /**
- * Get the configured auth service instance for API routes
- * 
- * @returns Configured AuthService instance
+ * Get a configured auth service instance for API routes
+ *
+ * @returns New AuthService instance
  */
 export function getApiAuthService(): AuthService {
-  if (!authServiceInstance) {
-    // Get the auth adapter from the registry
-    const authDataProvider = AdapterRegistry.getInstance().getAdapter<IAuthDataProvider>('auth');
+  const authDataProvider =
+    AdapterRegistry.getInstance().getAdapter<IAuthDataProvider>('auth');
 
-    // Create auth service with the adapter
-    authServiceInstance = new DefaultAuthService(authDataProvider);
-  }
-  
-  return authServiceInstance;
+  return new DefaultAuthService(authDataProvider);
 }
