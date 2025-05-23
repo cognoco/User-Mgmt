@@ -6,6 +6,7 @@
 
 // Export interfaces
 export * from './interfaces';
+export * from './IUserDataProvider';
 
 // Export models
 export * from './models';
