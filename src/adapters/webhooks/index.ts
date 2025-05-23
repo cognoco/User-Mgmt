@@ -1,4 +1,4 @@
-import { SupabaseWebhookProvider } from './SupabaseWebhookProvider';
+import { SupabaseWebhookProvider } from './supabase/supabase-webhook.provider';
 import type { IWebhookDataProvider } from './IWebhookDataProvider';
 
 export function createSupabaseWebhookProvider(options: {

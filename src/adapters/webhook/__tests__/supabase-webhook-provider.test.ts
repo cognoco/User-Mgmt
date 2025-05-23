@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { SupabaseWebhookProvider } from '../SupabaseWebhookProvider';
+import { SupabaseWebhookProvider } from '../supabase/supabase-webhook.provider';
 import { setTableMockData, resetSupabaseMock } from '@/tests/mocks/supabase';
 
 const SUPABASE_URL = 'http://localhost';
