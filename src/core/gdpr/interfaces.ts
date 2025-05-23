@@ -4,16 +4,19 @@
  * Defines the operations related to data privacy such as exporting
  * a user's personal data and deleting a user's account.
  */
-import { UserDataExport, AccountDeletionResult } from './models';
+import { UserDataExport, AccountDeletionResult } from "./models";
 
+/**
+ * Service responsible for GDPR related user data operations.
+ */
 export interface GdprService {
   /**
-   * Export all data related to a user.
+   * Generate an export of all data associated with the user.
    *
    * @param userId ID of the user
-   * @returns The exported data or null if not found
+   * @returns Exported data or null if the user does not exist
    */
-  exportUserData(userId: string): Promise<UserDataExport | null>;
+  generateUserExport(userId: string): Promise<UserDataExport | null>;
 
   /**
    * Delete all data related to a user and schedule account removal.
@@ -21,5 +24,5 @@ export interface GdprService {
    * @param userId ID of the user
    * @returns Result of the deletion request
    */
-  deleteAccount(userId: string): Promise<AccountDeletionResult>;
+  deleteUserData(userId: string): Promise<AccountDeletionResult>;
 }

@@ -23,9 +23,14 @@ import {
 
 /**
  * Core team management service interface
- * 
+ *
  * This interface defines all team management operations that can be performed.
  * Any implementation of this interface must provide all these methods.
+ *
+ * **Error handling:**
+ * Operations resolving to objects will include an `error` property when the
+ * action cannot be completed because of business rules. Unexpected failures
+ * should cause the returned promise to be rejected.
  */
 export interface TeamService {
   /**

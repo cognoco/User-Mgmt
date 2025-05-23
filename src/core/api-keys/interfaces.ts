@@ -1,13 +1,60 @@
-import type { ApiKey } from './types';
+import type { ApiKey, ApiKeyCreatePayload, ApiKeyCreateResult } from "./models";
 
+/**
+ * Service for high level API key management.
+ *
+ * Methods return structured result objects. Implementations should only
+ * reject the promise for unexpected failures. Business errors are reported
+ * via the returned objects.
+ */
 export interface ApiKeyService {
-  listApiKeys(): Promise<ApiKey[]>;
+  /** Retrieve all API keys for a user. */
+  listApiKeys(userId: string): Promise<ApiKey[]>;
+
+  /**
+   * Create a new API key for the given user.
+   *
+   * @param userId Owner of the key
+   * @param data   Creation payload
+   */
   createApiKey(
-    name: string,
-    permissions: string[],
-    expiresInDays?: number
-  ): Promise<{ key: string } & ApiKey>;
-  revokeApiKey(id: string): Promise<void>;
-  regenerateApiKey(id: string): Promise<{ key: string } & ApiKey>;
-  validateApiKey(apiKey: string): Promise<boolean>;
+    userId: string,
+    data: ApiKeyCreatePayload,
+  ): Promise<ApiKeyCreateResult>;
+
+  /**
+   * Revoke an existing API key so it can no longer be used.
+   *
+   * @param userId Owner of the key
+   * @param keyId  Identifier of the key to revoke
+   */
+  revokeApiKey(
+    userId: string,
+    keyId: string,
+  ): Promise<{ success: boolean; key?: ApiKey; error?: string }>;
+
+  /**
+   * Regenerate the secret for an API key.
+   *
+   * @param userId Owner of the key
+   * @param keyId  Identifier of the key
+   */
+  regenerateApiKey(
+    userId: string,
+    keyId: string,
+  ): Promise<{
+    success: boolean;
+    key?: ApiKey;
+    plaintext?: string;
+    error?: string;
+  }>;
+
+  /**
+   * Validate an API key. Should resolve with `{ valid: boolean }` rather than
+   * throwing for invalid keys.
+   */
+  validateApiKey(
+    apiKey: string,
+    userId?: string,
+  ): Promise<{ valid: boolean; error?: string }>;
 }
