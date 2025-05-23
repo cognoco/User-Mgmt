@@ -6,10 +6,9 @@
  */
 
 import { AuthService } from '@/core/auth/interfaces';
-import type { IAuthDataProvider } from '@/core/auth';
+import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
 import { DefaultAuthService } from './default-auth.service';
-import { createAuthProvider } from '@/adapters/auth/factory';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { AdapterRegistry } from '@/adapters/registry';
 
 // Singleton instance for API routes
 let authServiceInstance: AuthService | null = null;
@@ -21,20 +20,11 @@ let authServiceInstance: AuthService | null = null;
  */
 export function getApiAuthService(): AuthService {
   if (!authServiceInstance) {
-    // Get Supabase configuration from the existing service
-    const supabase = getServiceSupabase();
-    
-    // Create auth data provider
-    const authDataProvider: IAuthDataProvider = createAuthProvider({
-      type: 'supabase',
-      options: {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-      }
-    });
-    
-    // Create auth service with the data provider
-    authServiceInstance = new DefaultAuthService(null, authDataProvider);
+    // Get the auth adapter from the registry
+    const authDataProvider = AdapterRegistry.getInstance().getAdapter<IAuthDataProvider>('auth');
+
+    // Create auth service with the adapter
+    authServiceInstance = new DefaultAuthService(null as any, authDataProvider);
   }
   
   return authServiceInstance;

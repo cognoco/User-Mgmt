@@ -6,10 +6,9 @@
  */
 
 import { TeamService } from '@/core/team/interfaces';
-import { UserManagementConfiguration } from '@/core/config';
-import type { ITeamDataProvider } from '@/core/team';
-import { createTeamProvider } from '@/adapters/team/factory';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import type { ITeamDataProvider } from '@/core/team/ITeamDataProvider';
+import { DefaultTeamService } from './default-team.service';
+import { AdapterRegistry } from '@/adapters/registry';
 
 // Singleton instance for API routes
 let teamServiceInstance: TeamService | null = null;
@@ -21,25 +20,11 @@ let teamServiceInstance: TeamService | null = null;
  */
 export function getApiTeamService(): TeamService {
   if (!teamServiceInstance) {
-    // Get Supabase configuration from the existing service
-    const supabase = getServiceSupabase();
-    
-    // Create team data provider
-    const teamDataProvider: ITeamDataProvider = createTeamProvider({
-      type: 'supabase',
-      options: {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-      }
-    });
-    
-    // Create team service with the data provider
-    teamServiceInstance = UserManagementConfiguration.getServiceProvider('teamService') as TeamService;
-    
-    // If no team service is registered, throw an error
-    if (!teamServiceInstance) {
-      throw new Error('Team service not registered in UserManagementConfiguration');
-    }
+    // Get the team adapter from the registry
+    const teamDataProvider = AdapterRegistry.getInstance().getAdapter<ITeamDataProvider>('team');
+
+    // Create team service with the adapter
+    teamServiceInstance = new DefaultTeamService(null as any, teamDataProvider);
   }
   
   return teamServiceInstance;

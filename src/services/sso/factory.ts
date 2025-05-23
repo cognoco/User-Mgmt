@@ -6,10 +6,9 @@
  */
 
 import { SsoService } from '@/core/sso/interfaces';
-import { UserManagementConfiguration } from '@/core/config';
 import type { ISsoDataProvider } from '@/core/sso';
-import { createSsoProvider } from '@/adapters/sso/factory';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { AdapterRegistry } from '@/adapters/registry';
+import { DefaultSsoService } from './default-sso.service';
 
 // Singleton instance for API routes
 let ssoServiceInstance: SsoService | null = null;
@@ -21,25 +20,8 @@ let ssoServiceInstance: SsoService | null = null;
  */
 export function getApiSsoService(): SsoService {
   if (!ssoServiceInstance) {
-    // Get Supabase configuration from the existing service
-    const supabase = getServiceSupabase();
-    
-    // Create SSO data provider
-    const ssoDataProvider: ISsoDataProvider = createSsoProvider({
-      type: 'supabase',
-      options: {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-      }
-    });
-    
-    // Create SSO service with the data provider
-    ssoServiceInstance = UserManagementConfiguration.getServiceProvider('ssoService') as SsoService;
-    
-    // If no SSO service is registered, throw an error
-    if (!ssoServiceInstance) {
-      throw new Error('SSO service not registered in UserManagementConfiguration');
-    }
+    const ssoDataProvider = AdapterRegistry.getInstance().getAdapter<ISsoDataProvider>('sso');
+    ssoServiceInstance = new DefaultSsoService(ssoDataProvider);
   }
   
   return ssoServiceInstance;

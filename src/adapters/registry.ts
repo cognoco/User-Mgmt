@@ -94,9 +94,15 @@ export type FactoryCreator = (options: AdapterFactoryOptions) => AdapterFactory;
  */
 export class AdapterRegistry {
   private static factories: Record<string, FactoryCreator> = {};
-  private static adapters: Record<string, any> = {};
-  private static instance: AdapterRegistry;
+  private static instance: AdapterRegistry | null = null;
 
+  private adapters: Record<string, unknown> = {};
+
+  private constructor() {}
+
+  /**
+   * Get the singleton instance of the registry
+   */
   static getInstance(): AdapterRegistry {
     if (!this.instance) {
       this.instance = new AdapterRegistry();
@@ -104,12 +110,28 @@ export class AdapterRegistry {
     return this.instance;
   }
 
-  registerAdapter(name: string, adapter: any): void {
-    AdapterRegistry.adapters[name] = adapter;
+  /**
+   * Register a concrete adapter instance
+   *
+   * @param name Adapter name
+   * @param adapter Adapter instance
+   */
+  registerAdapter<T>(name: string, adapter: T): void {
+    this.adapters[name] = adapter;
   }
 
+  /**
+   * Retrieve a registered adapter instance
+   *
+   * @param name Adapter name
+   * @returns Adapter instance
+   */
   getAdapter<T>(name: string): T {
-    return AdapterRegistry.adapters[name] as T;
+    const adapter = this.adapters[name];
+    if (!adapter) {
+      throw new Error(`Adapter '${name}' not registered in AdapterRegistry`);
+    }
+    return adapter as T;
   }
   
   /**
@@ -121,6 +143,17 @@ export class AdapterRegistry {
   static registerFactory(name: string, factoryCreator: FactoryCreator): void {
     this.factories[name] = factoryCreator;
   }
+}
+  /**
+   * Register an adapter factory
+   * 
+   * @param name Name to register the factory under
+   * @param factoryCreator Function that creates the factory
+   */
+  static registerFactory(name: string, factoryCreator: FactoryCreator): void {
+    this.factories[name] = factoryCreator;
+  }
+}
   
   /**
    * Get an adapter factory by name

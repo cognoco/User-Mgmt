@@ -8,8 +8,7 @@
 import { CompanyAddressService } from '@/core/address/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
 import type { IAddressDataProvider } from '@/core/address';
-import { createAddressProvider } from '@/adapters/address/factory';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { AdapterRegistry } from '@/adapters/registry';
 
 // Singleton instance for API routes
 let addressServiceInstance: CompanyAddressService | null = null;
@@ -21,21 +20,12 @@ let addressServiceInstance: CompanyAddressService | null = null;
  */
 export function getApiAddressService(): CompanyAddressService {
   if (!addressServiceInstance) {
-    // Get Supabase configuration from the existing service
-    const supabase = getServiceSupabase();
-    
-    // Create address data provider
-    const addressDataProvider: IAddressDataProvider = createAddressProvider({
-      type: 'supabase',
-      options: {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-      }
-    });
-    
-    // Create address service with the data provider
+    // Get the address adapter from the registry
+    AdapterRegistry.getInstance().getAdapter<IAddressDataProvider>('address');
+
+    // Retrieve the service implementation
     addressServiceInstance = UserManagementConfiguration.getServiceProvider('addressService') as CompanyAddressService;
-    
+
     // If no address service is registered, throw an error
     if (!addressServiceInstance) {
       throw new Error('Address service not registered in UserManagementConfiguration');
