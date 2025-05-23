@@ -1,9 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { randomBytes } from 'crypto';
+import { ApiError, ERROR_CODES, createErrorResponse } from '@/lib/api/common';
 
+/**
+ * Configuration options for the {@link csrf} middleware.
+ */
 export interface CSRFOptions {
+  /** Name of the cookie used to store the token */
   cookieName?: string;
+  /** Name of the request header containing the token */
   headerName?: string;
+  /** Cookie settings for the CSRF token */
   cookieOptions?: {
     httpOnly?: boolean;
     secure?: boolean;
@@ -11,14 +18,16 @@ export interface CSRFOptions {
     maxAge?: number;
     path?: string;
   };
+  /** HTTP methods excluded from validation */
   excludeMethods?: string[];
 }
 
 /**
- * Get CSRF token from cookies
- * @param req Request object
- * @param options CSRF options
- * @returns CSRF token or null if not found
+ * Retrieve the CSRF token from the incoming request cookies.
+ *
+ * @param req     The {@link NextApiRequest} object.
+ * @param options Optional {@link CSRFOptions}.
+ * @returns The token value or `null` when not present.
  */
 export function getCSRFToken(
   req: NextApiRequest,
@@ -69,9 +78,13 @@ function generateToken(): string {
 }
 
 /**
- * CSRF protection middleware
- * @param options CSRF options
- * @returns Middleware function
+ * Create a CSRF protection middleware for Next.js API routes.
+ *
+ * The middleware verifies that the request contains a matching token in both
+ * a cookie and a header. A new token is issued for safe methods when missing.
+ *
+ * @param options Optional {@link CSRFOptions} to customize behaviour.
+ * @returns Middleware function compatible with Next.js API handlers.
  */
 export function csrf(options: CSRFOptions = {}) {
   const excludeMethods = options.excludeMethods || ['GET', 'HEAD', 'OPTIONS'];
@@ -99,10 +112,16 @@ export function csrf(options: CSRFOptions = {}) {
     const headerToken = req.headers[headerName] as string;
     
     if (!cookieToken || !headerToken || cookieToken !== headerToken) {
-      res.status(403).json({ error: 'Invalid CSRF token' });
+      const error = new ApiError(
+        ERROR_CODES.FORBIDDEN,
+        'Invalid CSRF token',
+        403
+      );
+      res.status(403).json(error.toResponse());
       return;
     }
     
     await next();
   };
 } 
+

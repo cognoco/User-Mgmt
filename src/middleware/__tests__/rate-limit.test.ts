@@ -265,7 +265,10 @@ describe('Rate Limiting', () => {
 
       expect(res.status).toHaveBeenCalledWith(429);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Too many requests, please try again later.',
+        error: {
+          code: 'server/operation_failed',
+          message: 'Too many requests, please try again later.'
+        }
       });
       expect(next).not.toHaveBeenCalled();
     });
