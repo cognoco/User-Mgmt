@@ -115,4 +115,14 @@ export interface IAuthDataProvider {
    * @returns Unsubscribe function
    */
   onAuthStateChanged(callback: (user: User | null) => void): () => void;
+
+  /**
+   * Handle session expiration by cleaning up authentication state.
+   *
+   * Implementations should remove any cached tokens or user data and
+   * notify listeners if applicable. The default implementation may simply
+   * call {@link logout} but more advanced providers can perform additional
+   * cleanup.
+   */
+  handleSessionTimeout(): void;
 }
