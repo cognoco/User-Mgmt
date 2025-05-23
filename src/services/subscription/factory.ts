@@ -9,6 +9,7 @@ import { SubscriptionService } from '@/core/subscription/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
 import type { ISubscriptionDataProvider } from '@/core/subscription';
 import { AdapterRegistry } from '@/adapters/registry';
+import { DefaultSubscriptionService } from './default-subscription.service';
 
 // Singleton instance for API routes
 let subscriptionServiceInstance: SubscriptionService | null = null;
@@ -20,14 +21,14 @@ let subscriptionServiceInstance: SubscriptionService | null = null;
  */
 export function getApiSubscriptionService(): SubscriptionService {
   if (!subscriptionServiceInstance) {
-    AdapterRegistry.getInstance().getAdapter<ISubscriptionDataProvider>('subscription');
-    subscriptionServiceInstance = UserManagementConfiguration.getServiceProvider('subscriptionService') as SubscriptionService;
+    subscriptionServiceInstance =
+      UserManagementConfiguration.getServiceProvider('subscriptionService') as SubscriptionService | undefined;
 
-    // If no subscription service is registered, throw an error
     if (!subscriptionServiceInstance) {
-      throw new Error('Subscription service not registered in UserManagementConfiguration');
+      const provider = AdapterRegistry.getInstance().getAdapter<ISubscriptionDataProvider>('subscription');
+      subscriptionServiceInstance = new DefaultSubscriptionService(provider);
     }
   }
-  
+
   return subscriptionServiceInstance;
 }

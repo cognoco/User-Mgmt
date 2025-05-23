@@ -9,6 +9,7 @@ import { CsrfService } from '@/core/csrf/interfaces';
 import type { ICsrfDataProvider } from '@/core/csrf';
 import { DefaultCsrfService } from './default-csrf.service';
 import { AdapterRegistry } from '@/adapters/registry';
+import { UserManagementConfiguration } from '@/core/config';
 
 // Singleton instance for API routes
 let csrfServiceInstance: CsrfService | null = null;
@@ -20,8 +21,13 @@ let csrfServiceInstance: CsrfService | null = null;
  */
 export function getApiCsrfService(): CsrfService {
   if (!csrfServiceInstance) {
-    const csrfDataProvider = AdapterRegistry.getInstance().getAdapter<ICsrfDataProvider>('csrf');
-    csrfServiceInstance = new DefaultCsrfService(csrfDataProvider);
+    csrfServiceInstance =
+      UserManagementConfiguration.getServiceProvider('csrfService') as CsrfService | undefined;
+
+    if (!csrfServiceInstance) {
+      const csrfDataProvider = AdapterRegistry.getInstance().getAdapter<ICsrfDataProvider>('csrf');
+      csrfServiceInstance = new DefaultCsrfService(csrfDataProvider);
+    }
   }
   return csrfServiceInstance;
 }

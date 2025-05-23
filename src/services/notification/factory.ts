@@ -10,6 +10,7 @@ import type { INotificationDataProvider } from '@/core/notification';
 import { DefaultNotificationService } from './default-notification.service';
 import { DefaultNotificationHandler } from './default-notification.handler';
 import { AdapterRegistry } from '@/adapters/registry';
+import { UserManagementConfiguration } from '@/core/config';
 
 // Singleton instance for API routes
 let notificationServiceInstance: NotificationService | null = null;
@@ -21,9 +22,15 @@ let notificationServiceInstance: NotificationService | null = null;
  */
 export function getApiNotificationService(): NotificationService {
   if (!notificationServiceInstance) {
-    const notificationDataProvider = AdapterRegistry.getInstance().getAdapter<INotificationDataProvider>('notification');
-    const handler = new DefaultNotificationHandler();
-    notificationServiceInstance = new DefaultNotificationService(notificationDataProvider, handler);
+    notificationServiceInstance =
+      UserManagementConfiguration.getServiceProvider('notificationService') as NotificationService | undefined;
+
+    if (!notificationServiceInstance) {
+      const notificationDataProvider =
+        AdapterRegistry.getInstance().getAdapter<INotificationDataProvider>('notification');
+      const handler = new DefaultNotificationHandler();
+      notificationServiceInstance = new DefaultNotificationService(notificationDataProvider, handler);
+    }
   }
 
   return notificationServiceInstance;
