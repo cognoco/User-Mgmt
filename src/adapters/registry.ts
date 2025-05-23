@@ -94,6 +94,33 @@ export type FactoryCreator = (options: AdapterFactoryOptions) => AdapterFactory;
  */
 export class AdapterRegistry {
   private static factories: Record<string, FactoryCreator> = {};
+  private static instance: AdapterRegistry | null = null;
+
+  private adapters: Record<string, unknown> = {};
+
+  private constructor() {}
+
+  /** Get the singleton registry instance */
+  static getInstance(): AdapterRegistry {
+    if (!this.instance) {
+      this.instance = new AdapterRegistry();
+    }
+    return this.instance;
+  }
+
+  /** Register an adapter instance for later retrieval */
+  registerAdapter<T>(name: string, adapter: T): void {
+    this.adapters[name] = adapter;
+  }
+
+  /** Retrieve a previously registered adapter instance */
+  getAdapter<T>(name: string): T {
+    const adapter = this.adapters[name];
+    if (!adapter) {
+      throw new Error(`Adapter '${name}' not registered`);
+    }
+    return adapter as T;
+  }
   
   /**
    * Register an adapter factory
