@@ -4,7 +4,8 @@ import {
   CompanyAddress,
   AddressCreatePayload,
   AddressUpdatePayload,
-  AddressResult
+  AddressResult,
+  AddressQuery
 } from '../../core/address/models';
 
 export class SupabaseAddressAdapter implements IAddressDataProvider {
@@ -45,13 +46,49 @@ export class SupabaseAddressAdapter implements IAddressDataProvider {
     }
   }
 
-  async getAddresses(companyId: string): Promise<CompanyAddress[]> {
-    const { data } = await this.supabase
+  async getAddress(
+    companyId: string,
+    addressId: string
+  ): Promise<CompanyAddress | null> {
+    const { data, error } = await this.supabase
       .from('company_addresses')
       .select('*')
+      .eq('id', addressId)
       .eq('company_id', companyId)
-      .order('created_at', { ascending: false });
-    return (data ?? []) as CompanyAddress[];
+      .maybeSingle();
+    if (error || !data) {
+      return null;
+    }
+    return this.map(data);
+  }
+
+  async getAddresses(
+    companyId: string,
+    query: AddressQuery = {}
+  ): Promise<{ addresses: CompanyAddress[]; count: number }> {
+    let req = this.supabase
+      .from('company_addresses')
+      .select('*', { count: 'exact' })
+      .eq('company_id', companyId);
+
+    if (query.type) req = req.eq('type', query.type);
+    if (typeof query.is_primary === 'boolean') req = req.eq('is_primary', query.is_primary);
+    if (typeof query.validated === 'boolean') req = req.eq('validated', query.validated);
+    if (query.sortBy) req = req.order(query.sortBy as string, { ascending: query.sortOrder !== 'desc' });
+    if (query.limit && query.page) {
+      const from = (query.page - 1) * query.limit;
+      const to = from + query.limit - 1;
+      req = req.range(from, to);
+    } else if (query.limit) {
+      req = req.limit(query.limit);
+    }
+
+    const { data, error, count } = await req;
+    const addresses = data ? data.map(r => this.map(r)) : [];
+    if (error) {
+      return { addresses: [], count: 0 };
+    }
+    return { addresses, count: count ?? addresses.length };
   }
 
   async updateAddress(companyId: string, addressId: string, update: AddressUpdatePayload): Promise<AddressResult> {

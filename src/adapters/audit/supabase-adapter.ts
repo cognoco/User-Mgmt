@@ -1,7 +1,13 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 import type { IAuditDataProvider } from '@/core/audit/IAuditDataProvider';
-import { AuditLogEntry, AuditLogQuery } from '@/core/audit/models';
+import {
+  AuditLogEntry,
+  AuditLogQuery,
+  AuditLogCreatePayload,
+  AuditLogUpdatePayload,
+  AuditLogResult
+} from '@/core/audit/models';
 
 export class SupabaseAuditAdapter implements IAuditDataProvider {
   private supabase: SupabaseClient;
@@ -25,7 +31,45 @@ export class SupabaseAuditAdapter implements IAuditDataProvider {
     };
   }
 
-  async getUserActionLogs(
+  async createLog(entry: AuditLogCreatePayload): Promise<AuditLogResult> {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_actions_log')
+        .insert({
+          user_id: entry.userId,
+          action: entry.action,
+          status: entry.status,
+          ip_address: entry.ipAddress,
+          user_agent: entry.userAgent,
+          target_resource_type: entry.targetResourceType,
+          target_resource_id: entry.targetResourceId,
+          details: entry.details ?? {},
+          created_at: entry.createdAt ?? new Date().toISOString()
+        })
+        .select('*')
+        .single();
+
+      if (error || !data) {
+        return { success: false, error: error?.message || 'Failed to create log' };
+      }
+
+      return { success: true, log: this.mapDbLog(data) };
+    } catch (e: any) {
+      return { success: false, error: e.message };
+    }
+  }
+
+  async getLog(id: string): Promise<AuditLogEntry | null> {
+    const { data, error } = await this.supabase
+      .from('user_actions_log')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+    if (error || !data) return null;
+    return this.mapDbLog(data);
+  }
+
+  async getLogs(
     query: AuditLogQuery
   ): Promise<{ logs: AuditLogEntry[]; count: number }> {
     let q = this.supabase
@@ -57,10 +101,55 @@ export class SupabaseAuditAdapter implements IAuditDataProvider {
 
     const { data, error, count } = await q;
     if (error) {
-      throw new Error(error.message);
+      return { logs: [], count: 0 };
     }
 
     const logs = (data || []).map((r: any) => this.mapDbLog(r));
     return { logs, count: count ?? logs.length };
+  }
+
+  async updateLog(id: string, updates: AuditLogUpdatePayload): Promise<AuditLogResult> {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_actions_log')
+        .update({
+          user_id: updates.userId,
+          action: updates.action,
+          status: updates.status,
+          ip_address: updates.ipAddress,
+          user_agent: updates.userAgent,
+          target_resource_type: updates.targetResourceType,
+          target_resource_id: updates.targetResourceId,
+          details: updates.details
+        })
+        .eq('id', id)
+        .select('*')
+        .maybeSingle();
+
+      if (error || !data) {
+        return { success: false, error: error?.message || 'Failed to update log' };
+      }
+      return { success: true, log: this.mapDbLog(data) };
+    } catch (e: any) {
+      return { success: false, error: e.message };
+    }
+  }
+
+  async deleteLog(id: string): Promise<{ success: boolean; error?: string }> {
+    const { error } = await this.supabase.from('user_actions_log').delete().eq('id', id);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  }
+
+  async exportLogs(query: AuditLogQuery): Promise<Blob> {
+    const { logs } = await this.getLogs(query);
+    return new Blob([JSON.stringify(logs)], { type: 'application/json' });
+  }
+
+  // keep old method name for backward compatibility
+  async getUserActionLogs(
+    query: AuditLogQuery
+  ): Promise<{ logs: AuditLogEntry[]; count: number }> {
+    return this.getLogs(query);
   }
 }
