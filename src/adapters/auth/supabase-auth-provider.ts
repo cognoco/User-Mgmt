@@ -14,12 +14,12 @@ import {
   MFASetupResponse,
   MFAVerifyResponse
 } from '../../core/auth/models';
-import { AuthDataProvider } from './interfaces';
+import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
 
 /**
  * Supabase implementation of the AuthDataProvider interface
  */
-export class SupabaseAuthProvider implements AuthDataProvider {
+export class SupabaseAuthProvider implements IAuthDataProvider {
   private supabase: SupabaseClient;
   private authStateCallbacks: ((user: User | null) => void)[] = [];
   

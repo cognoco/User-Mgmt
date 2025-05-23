@@ -7,10 +7,10 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { GdprDataProvider } from './interfaces';
+import type { IGdprDataProvider } from '@/core/gdpr/IGdprDataProvider';
 import { UserDataExport, AccountDeletionResult } from '../../core/gdpr/models';
 
-export class SupabaseGdprAdapter implements GdprDataProvider {
+export class SupabaseGdprAdapter implements IGdprDataProvider {
   private supabase: SupabaseClient;
 
   constructor(private supabaseUrl: string, private supabaseKey: string) {
