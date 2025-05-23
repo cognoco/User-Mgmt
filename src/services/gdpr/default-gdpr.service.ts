@@ -3,7 +3,7 @@
  */
 import { GdprService } from '@/core/gdpr/interfaces';
 import { UserDataExport, AccountDeletionResult } from '@/core/gdpr/models';
-import type { GdprDataProvider } from '@/adapters/gdpr/interfaces';
+import type { GdprDataProvider } from '@/core/gdpr/IGdprDataProvider';
 
 export class DefaultGdprService implements GdprService {
   constructor(private provider: GdprDataProvider) {}

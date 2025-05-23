@@ -9,7 +9,7 @@ import {
   UserService
 } from '@/core/user/interfaces';
 import type { AxiosInstance } from 'axios';
-import type { UserDataProvider } from '@/adapters/user/interfaces';
+import type { UserDataProvider } from '@/core/user/IUserDataProvider';
 import { 
   UserProfile, 
   ProfileUpdatePayload, 

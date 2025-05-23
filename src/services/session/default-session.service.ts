@@ -1,7 +1,7 @@
 import { SessionService } from '@/core/session/interfaces';
 import type { SessionInfo } from '@/core/session/models';
 import type { AxiosInstance } from 'axios';
-import type { SessionDataProvider } from '@/adapters/session/interfaces';
+import type { SessionDataProvider } from '@/core/session/ISessionDataProvider';
 
 export class DefaultSessionService implements SessionService {
   constructor(

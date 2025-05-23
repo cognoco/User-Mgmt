@@ -5,7 +5,7 @@
 import { AxiosInstance } from 'axios';
 import { SsoService } from '@/core/sso/interfaces';
 import { DefaultSsoService } from './default-sso.service';
-import { SsoDataProvider } from '@/adapters/sso/interfaces';
+import { SsoDataProvider } from '@/core/sso/ISsoDataProvider';
 
 export interface SsoServiceConfig {
   apiClient: AxiosInstance;
