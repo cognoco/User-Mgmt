@@ -4,7 +4,7 @@ import {
   Webhook,
   WebhookCreatePayload,
   WebhookUpdatePayload
-} from './IWebhookDataProvider';
+} from '../../core/webhooks/IWebhookDataProvider';
 import type { WebhookDelivery } from '@/core/webhooks/models';
 
 export class SupabaseWebhookProvider implements IWebhookDataProvider {
