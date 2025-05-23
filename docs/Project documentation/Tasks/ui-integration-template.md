@@ -1,54 +1,73 @@
-# UI Integration Template for New Architecture Components
+# UI Integration Task: [DOMAIN_NAME]
 
-## Overview
-This template provides standardized instructions for integrating domain-specific components into the existing UI pages following the new architecture. Each developer should adapt this template to their assigned domain (2FA, Address Management, GDPR, etc.).
+## Your Task
+Integrate the [DOMAIN_NAME] components into the User Management Module following the new architecture patterns. This task focuses on replacing direct database calls with the new hooks layer and implementing UI pages using the existing headless/styled components.
 
-## Integration Strategy
-1. **Analyze Current Implementation**
-   - Identify direct database calls in existing pages
-   - Note current UI patterns and user experience elements
+## What You Need to Do
 
-2. **Import Domain-Specific Hooks**
-   - Add the relevant hooks from `src/hooks/{domain}/use-{feature}.ts`
-   - Replace direct database access with hook methods
+### 1. Verify Component Existence
+**IMPORTANT: All components should already exist in the codebase**
+- First check if the required hooks exist in `src/hooks/[domain]/`
+- Verify headless components exist in `src/ui/headless/[domain]/`
+- Verify styled components exist in `src/ui/styled/[domain]/`
+- If any component is missing, create a minimal placeholder that follows the architecture pattern, but do NOT implement full functionality
 
-3. **Integrate UI Components**
-   - Add headless components for behavior (`src/ui/headless/{domain}/`)
-   - Apply styled components for consistent UI (`src/ui/styled/{domain}/`)
+### 2. Create or Update the Page Component
 
-4. **Update Navigation** (if needed)
-   - Add new page links to appropriate navigation components
+**For new pages:**
+Create a new page component at `app/[SECTION]/[DOMAIN]/page.tsx` that:
+- Uses the appropriate hooks from `src/hooks/[domain]/`
+- Implements the UI using styled components from `src/ui/styled/[domain]/`
+- Follows the architecture guidelines for separation of concerns
 
-## Page Implementation Template
+**For existing pages:**
+- Identify direct database/API calls and replace them with hook methods
+- Replace any custom UI logic with the appropriate headless components
+- Update the UI to use the styled components while maintaining the current layout
+- Preserve any existing functionality not covered by the new components
+- **IMPORTANT**: Do not delete any existing functionality
+
+### 3. Implementation Requirements
+- Replace ALL direct database/API calls with hook methods
+- Use ONLY the existing hooks and UI components - don't create new ones
+- Follow the established UI patterns for consistency
+- Ensure proper error handling and loading states
+- Maintain responsive design for all screen sizes
+- **IMPORTANT**: Implement and verify all import paths correctly
+  - Hooks should be imported from `@/hooks/{domain}/use-{feature}`
+  - Headless components from `@/ui/headless/{domain}/{Component}`
+  - Styled components from `@/ui/styled/{domain}/{Component}`
+  - Follow kebab-case for file imports, PascalCase for components
+- If a component is missing, create only a minimal placeholder that follows the architecture pattern
+
+### 4. Example Implementation
 
 ```tsx
-// app/{section}/{domain}/page.tsx
-
+// REPLACE THIS WITH YOUR ACTUAL IMPLEMENTATION
 'use client';
-import { use{Domain} } from '@/hooks/{domain}/use-{domain}';
-import { {Component}List } from '@/ui/styled/{domain}/{Component}List';
-import { {Component}Form } from '@/ui/styled/{domain}/{Component}Form';
+import { use[DomainName] } from '@/hooks/[domain]/use-[domain-name]';
+import { [Component]List } from '@/ui/styled/[domain]/[Component]List';
+import { [Component]Form } from '@/ui/styled/[domain]/[Component]Form';
 
-export default function {Domain}Page() {
-  // Use the appropriate hook
+export default function [Domain]Page() {
   const {
+    // Replace with actual properties from your hook
     items,
     loading,
     error,
     createItem,
     updateItem,
-    deleteItem,
-    // Other domain-specific methods...
-  } = use{Domain}();
+    deleteItem
+  } = use[DomainName]();
   
   return (
     <div className="container mx-auto py-8 space-y-8 max-w-3xl">
-      <h1 className="text-2xl font-bold">{Domain} Management</h1>
+      <h1 className="text-2xl font-bold">[Domain] Management</h1>
       
       {/* Form Section */}
       <div className="bg-card rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Add New {Domain}</h2>
-        <{Component}Form 
+        <h2 className="text-xl font-semibold mb-4">Create New [Item]</h2>
+        <[Component]Form 
           onSubmit={createItem}
           loading={loading}
           error={error}
@@ -57,14 +76,13 @@ export default function {Domain}Page() {
       
       {/* List Section */}
       <div className="bg-card rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">{Domain} List</h2>
-        <{Component}List 
+        <h2 className="text-xl font-semibold mb-4">[Items] List</h2>
+        <[Component]List 
           items={items}
           loading={loading}
           error={error}
           onUpdate={updateItem}
           onDelete={deleteItem}
-          // Other domain-specific props...
         />
       </div>
     </div>
@@ -72,70 +90,74 @@ export default function {Domain}Page() {
 }
 ```
 
-## Example: Address Management Integration
+### 5. Update Navigation (if needed)
+If your component requires a new navigation item:
+- Add it to the appropriate navigation component
+- Ensure it's only shown when the user has the correct permissions
 
+### 6. Creating Placeholders (Only if needed)
+If a required component is missing, create a minimal placeholder that:
+- Follows the architecture pattern (interface-based, headless pattern, etc.)
+- Has the correct file structure and naming conventions
+- Includes basic props and types but minimal implementation
+- Has clear TODO comments indicating it's a placeholder
+- Does NOT implement full business logic or complex UI
+
+Example placeholder for a missing component:
 ```tsx
-// app/team/addresses/page.tsx
+// src/ui/headless/[domain]/MissingComponent.tsx
+import React from 'react';
 
-'use client';
-import { useAddresses } from '@/hooks/address/use-addresses';
-import { AddressList } from '@/ui/styled/address/AddressList';
-import { AddressForm } from '@/ui/styled/address/AddressForm';
+export interface MissingComponentProps {
+  // Basic props only
+  loading?: boolean;
+  error?: Error | null;
+  onAction?: () => void;
+}
 
-export default function TeamAddressesPage() {
-  const {
-    addresses,
-    loading,
-    error,
-    addAddress,
-    updateAddress,
-    deleteAddress,
-    setDefaultAddress
-  } = useAddresses();
-  
+export const MissingComponent: React.FC<MissingComponentProps> = ({
+  loading = false,
+  error = null,
+  onAction,
+}) => {
+  // TODO: This is a placeholder component that needs proper implementation
   return (
-    <div className="container mx-auto py-8 space-y-8 max-w-3xl">
-      <h1 className="text-2xl font-bold">Team Addresses</h1>
-      
-      <div className="bg-card rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Add New Address</h2>
-        <AddressForm 
-          onSubmit={addAddress}
-          loading={loading}
-          error={error}
-        />
-      </div>
-      
-      <div className="bg-card rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Saved Addresses</h2>
-        <AddressList 
-          addresses={addresses}
-          loading={loading}
-          error={error}
-          onUpdate={updateAddress}
-          onDelete={deleteAddress}
-          onSetDefault={setDefaultAddress}
-        />
-      </div>
+    <div>
+      {loading && <p>Loading...</p>}
+      {error && <p>Error: {error.message}</p>}
+      <button onClick={onAction} disabled={loading}>Action</button>
     </div>
   );
-}
+};
 ```
 
-## Implementation Notes
-- Ensure all components follow the architecture guidelines
-- Maintain separation between UI and business logic
-- Use only the established tech stack
-- Follow file structure conventions in `docs/File structure guidelines.md`
-- Reference appropriate documentation for each domain
+## Architecture Reminders
+- UI components must NOT contain business logic
+- Use hooks for ALL data fetching and mutations
+- Headless components handle behavior, styled components handle appearance
+- Follow the file structure guidelines exactly
 
-## Deliverables
-1. New page component using the hooks and UI components
-2. Navigation updates (if applicable)
-3. Any necessary adjustments to existing components
+## Required Documentation Review
+Before starting implementation, review these documents:
+1. [Architecture Guidelines](../Product%20documentation/Architecture%20Guidelines.md) - Comprehensive architecture principles
+2. [Architecture Rules](../Product%20documentation/Architecture%20Rules.md) - Core architecture requirements
+3. [File structure guidelines.md](../File%20structure%20guidelines.md) - File naming and organization rules
+4. The domain-specific documentation in one of the functionality-features-phase documents
 
-## Completion Criteria
+## Architecture Compliance Checks
+Before completing your task, verify that your implementation:
+- Maintains strict separation between UI and business logic
+- Uses only interface-based dependencies
+- Follows the headless pattern with render props
+- Keeps all database code isolated in adapter implementations
+- Makes all features toggleable through configuration
+
+## Deliverable
+A fully functional page component that integrates with the new architecture, using the existing hooks and UI components for [DOMAIN_NAME].
+
+## Definition of Done
 - Page renders correctly with all components
-- All functionality works as expected
-- Code follows architecture guidelines
+- All functionality works as expected with proper error handling
+- Code follows architecture guidelines with proper separation of concerns
+- Navigation is updated if needed
 - No direct database access in UI components
