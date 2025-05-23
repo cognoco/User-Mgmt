@@ -3,9 +3,12 @@ import {
   IWebhookDataProvider,
   Webhook,
   WebhookCreatePayload,
-  WebhookUpdatePayload
+  WebhookUpdatePayload,
+  WebhookListQuery,
+  WebhookDeliveryQuery
 } from '../../core/webhooks/IWebhookDataProvider';
 import type { WebhookDelivery } from '@/core/webhooks/models';
+import type { PaginationMeta } from '@/lib/api/common/response-formatter';
 
 export class SupabaseWebhookProvider implements IWebhookDataProvider {
   private supabase: SupabaseClient;
@@ -22,6 +25,36 @@ export class SupabaseWebhookProvider implements IWebhookDataProvider {
 
     if (error || !data) return [];
     return data.map(r => this.mapRecord(r));
+  }
+
+  async searchWebhooks(
+    userId: string,
+    query: WebhookListQuery
+  ): Promise<{ webhooks: Webhook[]; pagination: PaginationMeta }> {
+    let req = this.supabase.from('webhooks').select('*', { count: 'exact' }).eq('user_id', userId);
+    if (typeof query.isActive === 'boolean') req = req.eq('is_active', query.isActive);
+    if (query.event) req = req.contains('events', [query.event]);
+    if (query.sortBy) req = req.order(query.sortBy as string, { ascending: query.sortOrder !== 'desc' });
+    if (query.limit && query.page) {
+      const from = (query.page - 1) * query.limit;
+      const to = from + query.limit - 1;
+      req = req.range(from, to);
+    } else if (query.limit) {
+      req = req.limit(query.limit);
+    }
+    const { data, error, count } = await req;
+    const items = data ? data.map(r => this.mapRecord(r)) : [];
+    return {
+      webhooks: items,
+      pagination: {
+        page: query.page ?? 1,
+        pageSize: query.limit ?? items.length,
+        totalItems: count ?? items.length,
+        totalPages: query.limit ? Math.ceil((count ?? items.length) / query.limit) : 1,
+        hasNextPage: query.limit ? ((query.page ?? 1) * query.limit) < (count ?? items.length) : false,
+        hasPreviousPage: query.limit ? (query.page ?? 1) > 1 : false
+      }
+    };
   }
 
   async getWebhook(userId: string, id: string): Promise<Webhook | null> {
@@ -101,17 +134,34 @@ export class SupabaseWebhookProvider implements IWebhookDataProvider {
   async listDeliveries(
     userId: string,
     webhookId: string,
-    limit = 10
-  ): Promise<WebhookDelivery[]> {
+    query: number | WebhookDeliveryQuery = 10
+  ): Promise<{ deliveries: WebhookDelivery[]; pagination?: PaginationMeta }> {
+    const limit = typeof query === 'number' ? query : query.limit ?? 10;
     const { data, error } = await this.supabase
       .from('webhook_deliveries')
       .select('*')
       .eq('webhook_id', webhookId)
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .order('created_at', {
+        ascending:
+          typeof query === 'object' ? query.sortOrder === 'asc' : false
+      })
       .limit(limit);
-    if (error || !data) return [];
-    return data as WebhookDelivery[];
+    const deliveries = (data || []) as WebhookDelivery[];
+    return {
+      deliveries,
+      pagination:
+        typeof query === 'object'
+          ? {
+              page: query.page ?? 1,
+              pageSize: limit,
+              totalItems: deliveries.length,
+              totalPages: 1,
+              hasNextPage: false,
+              hasPreviousPage: false
+            }
+          : undefined
+    };
   }
 
   async recordDelivery(delivery: WebhookDelivery): Promise<void> {

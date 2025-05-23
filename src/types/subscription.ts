@@ -105,4 +105,48 @@ export interface SubscriptionProviderConfig {
   };
   enableBilling: boolean;
   paymentProviders?: string[];
-} 
+}
+
+/**
+ * Query parameters for retrieving subscriptions
+ */
+export interface SubscriptionQuery {
+  /** Page number (1-based) */
+  page?: number;
+  /** Items per page */
+  limit?: number;
+  /** Filter by user identifier */
+  userId?: string;
+  /** Filter by plan identifier */
+  planId?: string;
+  /** Filter by subscription status */
+  status?: SubscriptionStatus;
+  /** Field to sort by */
+  sortBy?: keyof UserSubscription | string;
+  /** Sort order */
+  sortOrder?: 'asc' | 'desc';
+}
+
+/**
+ * Payload for creating or updating a subscription record
+ */
+export type SubscriptionUpsertPayload = Partial<UserSubscription> & {
+  /** Owner of the subscription */
+  userId: string;
+  /** Plan identifier */
+  planId: string;
+};
+
+/**
+ * Runtime type guard for SubscriptionUpsertPayload
+ */
+export function isSubscriptionUpsertPayload(
+  value: unknown
+): value is SubscriptionUpsertPayload {
+  return (
+    !!value &&
+    typeof value === 'object' &&
+    'userId' in value &&
+    'planId' in value
+  );
+}

@@ -7,8 +7,11 @@ import type {
   Webhook,
   WebhookCreatePayload,
   WebhookUpdatePayload,
-  WebhookDelivery
+  WebhookDelivery,
+  WebhookListQuery,
+  WebhookDeliveryQuery
 } from './models';
+import type { PaginationMeta } from '@/lib/api/common/response-formatter';
 
 export interface IWebhookDataProvider {
   /** List all webhooks for a user */
@@ -35,7 +38,19 @@ export interface IWebhookDataProvider {
   deleteWebhook(userId: string, webhookId: string): Promise<{ success: boolean; error?: string }>;
 
   /** List delivery history for a webhook */
-  listDeliveries(userId: string, webhookId: string, limit?: number): Promise<WebhookDelivery[]>;
+  listDeliveries(
+    userId: string,
+    webhookId: string,
+    query?: number | WebhookDeliveryQuery
+  ): Promise<{ deliveries: WebhookDelivery[]; pagination?: PaginationMeta }>;
+
+  /**
+   * Search webhooks using filtering and pagination options
+   */
+  searchWebhooks(
+    userId: string,
+    query: WebhookListQuery
+  ): Promise<{ webhooks: Webhook[]; pagination: PaginationMeta }>;
 
   /** Record a webhook delivery attempt */
   recordDelivery(delivery: WebhookDelivery): Promise<void>;

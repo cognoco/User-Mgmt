@@ -43,3 +43,33 @@ export const webhookUpdateSchema = z.object({
   regenerateSecret: z.boolean().optional()
 });
 export type WebhookUpdatePayload = z.infer<typeof webhookUpdateSchema>;
+
+/**
+ * Query parameters for listing webhooks
+ */
+export interface WebhookListQuery {
+  /** Page number (1-based) */
+  page?: number;
+  /** Items per page */
+  limit?: number;
+  /** Filter by active state */
+  isActive?: boolean;
+  /** Only webhooks containing this event */
+  event?: string;
+  /** Sort field */
+  sortBy?: keyof Webhook | string;
+  /** Sort order */
+  sortOrder?: 'asc' | 'desc';
+}
+
+/**
+ * Query parameters for webhook deliveries
+ */
+export interface WebhookDeliveryQuery {
+  /** Page number (1-based) */
+  page?: number;
+  /** Items per page */
+  limit?: number;
+  /** Sort order by creation time */
+  sortOrder?: 'asc' | 'desc';
+}
