@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle, XCircle, AlertTriangle, Clock } from 'lucide-react';
-import { api } from '@/lib/api/axios';
+import { useOrgSsoConfig } from '@/hooks/sso/use-org-sso-config';
 import BusinessSSOSetup from './BusinessSSOSetup';
 import IDPConfiguration from './IDPConfiguration';
 
@@ -35,28 +35,32 @@ const OrganizationSSO: React.FC<OrganizationSSOProps> = ({ orgId }) => {
     totalSuccessfulLogins24h: 0
   });
 
+  const {
+    getSettings,
+    getStatus,
+  } = useOrgSsoConfig(orgId);
+
   // Fetch initial SSO settings on mount
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await api.get(`/organizations/${orgId}/sso/settings`);
-        setSsoSettings(response.data);
+        const data = await getSettings();
+        setSsoSettings(data);
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
           console.error('Failed to fetch SSO settings:', error);
         }
-        // Optionally: setSsoSettings({ sso_enabled: false, idp_type: null });
       }
     };
     fetchSettings();
-  }, [orgId]);
+  }, [orgId, getSettings]);
 
   // Fetch SSO status periodically
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const response = await api.get(`/organizations/${orgId}/sso/status`);
-        setSsoStatus(response.data);
+        const data = await getStatus();
+        setSsoStatus(data);
       } catch (error) {
         if (process.env.NODE_ENV === 'development') { console.error('Failed to fetch SSO status:', error) }
       }
