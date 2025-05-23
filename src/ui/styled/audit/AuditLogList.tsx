@@ -1,6 +1,6 @@
 import { AuditLogList as HeadlessList } from '@/ui/headless/audit/AuditLogList';
 import { AuditLogFilter as HeadlessFilter } from '@/ui/headless/audit/AuditLogFilter';
-import { useAuditLogs } from '@/hooks/audit/use-audit-logs';
+import { useAuditLogs } from '@/hooks/audit/useAuditLogs';
 
 export function AuditLogList() {
   const { logs, isLoading, error, filters, setFilter, page, total, setPage, exportLogs } = useAuditLogs();

@@ -1,4 +1,4 @@
-import { useBilling } from '@/hooks/subscription/use-billing';
+import { useBilling } from '@/hooks/subscription/useBilling';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Alert } from '@/ui/primitives/alert';
 

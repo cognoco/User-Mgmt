@@ -2,9 +2,9 @@
 import { render, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DataExportRequest } from '../DataExportRequest';
-import { useDataExport } from '@/hooks/gdpr/use-data-export';
+import { useDataExport } from '@/hooks/gdpr/useDataExport';
 
-vi.mock('@/hooks/gdpr/use-data-export', () => ({ useDataExport: vi.fn() }));
+vi.mock('@/hooks/gdpr/useDataExport', () => ({ useDataExport: vi.fn() }));
 
 const mockHook = useDataExport as unknown as ReturnType<typeof vi.fn>;
 

@@ -1,5 +1,5 @@
 import React, { useState, FormEvent } from 'react';
-import { useWebhooks } from '@/hooks/webhooks/use-webhooks';
+import { useWebhooks } from '@/hooks/webhooks/useWebhooks';
 import type { WebhookCreatePayload } from '@/core/webhooks/models';
 
 export interface WebhookFormRenderProps {

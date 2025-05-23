@@ -13,7 +13,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 beforeEach(async () => {
-  vi.unmock('@/hooks/auth/use-auth');
+  vi.unmock('@/hooks/auth/useAuthLegacy');
   const mod = await import('../use-auth');
   useAuth = mod.default;
   mockAuthService = {

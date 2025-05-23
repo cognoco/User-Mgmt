@@ -173,6 +173,7 @@ function configureUserManagement(config: Partial<UserManagementConfig>) {
 │   │   └── default-auth.service.ts  # DefaultAuthService
 │   └── ...
 ├── hooks/             # React hooks
+│   # Hook filenames must use camelCase (e.g., useAuth.ts)
 │   ├── auth/
 │   │   └── useAuth.ts  # Auth hooks
 │   └── ...

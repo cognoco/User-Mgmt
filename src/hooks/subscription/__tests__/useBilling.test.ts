@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useBilling } from '../use-billing';
+import { useBilling } from '../useBilling';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 import { usePayment } from '@/hooks/user/usePayment';

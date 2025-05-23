@@ -2,9 +2,9 @@
 import { render, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SSOConnector } from '../SSOConnector';
-import { useSso } from '@/hooks/sso/use-sso';
+import { useSso } from '@/hooks/sso/useSso';
 
-vi.mock('@/hooks/sso/use-sso', () => ({ useSso: vi.fn() }));
+vi.mock('@/hooks/sso/useSso', () => ({ useSso: vi.fn() }));
 const mockUseSso = useSso as unknown as ReturnType<typeof vi.fn>;
 let state: any;
 

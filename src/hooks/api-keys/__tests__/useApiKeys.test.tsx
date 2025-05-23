@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useApiKeys } from '../use-api-keys';
+import { useApiKeys } from '../useApiKeys';
 import { UserManagementConfiguration } from '@/core/config';
 import type { ApiKeyService } from '@/core/api-keys/interfaces';
 import type { ApiKey } from '@/core/api-keys/types';
