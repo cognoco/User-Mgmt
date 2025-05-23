@@ -10,22 +10,13 @@ import type { IPermissionDataProvider } from '@/core/permission/IPermissionDataP
 import { DefaultPermissionService } from './default-permission.service';
 import { AdapterRegistry } from '@/adapters/registry';
 
-// Singleton instance for API routes
-let permissionServiceInstance: PermissionService | null = null;
-
 /**
  * Get the configured permission service instance for API routes
  * 
  * @returns Configured PermissionService instance
  */
 export function getApiPermissionService(): PermissionService {
-  if (!permissionServiceInstance) {
-    // Get the permission adapter from the registry
-    const permissionDataProvider = AdapterRegistry.getInstance().getAdapter<IPermissionDataProvider>('permission');
-
-    // Create permission service with the adapter
-    permissionServiceInstance = new DefaultPermissionService(permissionDataProvider);
-  }
-  
-  return permissionServiceInstance;
+  const permissionDataProvider =
+    AdapterRegistry.getInstance().getAdapter<IPermissionDataProvider>('permission');
+  return new DefaultPermissionService(permissionDataProvider);
 }

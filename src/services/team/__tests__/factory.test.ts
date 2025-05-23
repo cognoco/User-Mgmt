@@ -9,11 +9,13 @@ describe('getApiTeamService', () => {
     (AdapterRegistry as any).instance = null;
   });
 
-  it('returns service using adapter from registry', () => {
+  it('returns new service instance using adapter from registry', () => {
     const adapter = {} as any;
     AdapterRegistry.getInstance().registerAdapter('team', adapter);
-    const service = getApiTeamService();
-    expect(service).toBeInstanceOf(DefaultTeamService);
-    expect(getApiTeamService()).toBe(service);
+    const service1 = getApiTeamService();
+    const service2 = getApiTeamService();
+    expect(service1).toBeInstanceOf(DefaultTeamService);
+    expect(service2).toBeInstanceOf(DefaultTeamService);
+    expect(service1).not.toBe(service2);
   });
 });

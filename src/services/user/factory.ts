@@ -10,22 +10,13 @@ import type { IUserDataProvider } from '@/core/user/IUserDataProvider';
 import { DefaultUserService } from './default-user.service';
 import { AdapterRegistry } from '@/adapters/registry';
 
-// Singleton instance for API routes
-let userServiceInstance: UserService | null = null;
-
 /**
  * Get the configured user service instance for API routes
  * 
  * @returns Configured UserService instance
  */
 export function getApiUserService(): UserService {
-  if (!userServiceInstance) {
-    // Get the user adapter from the registry
-    const userDataProvider = AdapterRegistry.getInstance().getAdapter<IUserDataProvider>('user');
-
-    // Create the user service with the adapter
-    userServiceInstance = new DefaultUserService(userDataProvider);
-  }
-  
-  return userServiceInstance;
+  const userDataProvider =
+    AdapterRegistry.getInstance().getAdapter<IUserDataProvider>('user');
+  return new DefaultUserService(userDataProvider);
 }

@@ -9,11 +9,13 @@ describe('getApiAuthService', () => {
     (AdapterRegistry as any).instance = null;
   });
 
-  it('returns service using adapter from registry', () => {
+  it('returns new service instance using adapter from registry', () => {
     const adapter = {} as any;
     AdapterRegistry.getInstance().registerAdapter('auth', adapter);
-    const service = getApiAuthService();
-    expect(service).toBeInstanceOf(DefaultAuthService);
-    expect(getApiAuthService()).toBe(service);
+    const service1 = getApiAuthService();
+    const service2 = getApiAuthService();
+    expect(service1).toBeInstanceOf(DefaultAuthService);
+    expect(service2).toBeInstanceOf(DefaultAuthService);
+    expect(service1).not.toBe(service2);
   });
 });
