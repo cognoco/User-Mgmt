@@ -4,7 +4,13 @@
  * Defines the contract for persistence operations related to audit logs.
  * This allows the service layer to remain database-agnostic.
  */
-import type { AuditLogEntry, AuditLogQuery } from './models';
+import type {
+  AuditLogEntry,
+  AuditLogQuery,
+  AuditLogCreatePayload,
+  AuditLogUpdatePayload,
+  AuditLogResult,
+} from './models';
 
 export interface IAuditDataProvider {
   /**
@@ -13,7 +19,12 @@ export interface IAuditDataProvider {
    * @param entry - Log entry to store
    * @returns Result with success status and new log id or error
    */
-  createLog(entry: AuditLogEntry): Promise<{ success: boolean; id?: string; error?: string }>;
+  createLog(entry: AuditLogCreatePayload): Promise<AuditLogResult>;
+
+  /**
+   * Retrieve a single audit log entry by id.
+   */
+  getLog(id: string): Promise<AuditLogEntry | null>;
 
   /**
    * Retrieve audit log entries using the provided query parameters.
@@ -22,6 +33,16 @@ export interface IAuditDataProvider {
    * @returns List of logs and total count matching the query
    */
   getLogs(query: AuditLogQuery): Promise<{ logs: AuditLogEntry[]; count: number }>;
+
+  /**
+   * Update an existing audit log entry.
+   */
+  updateLog(id: string, updates: AuditLogUpdatePayload): Promise<AuditLogResult>;
+
+  /**
+   * Delete an audit log entry.
+   */
+  deleteLog(id: string): Promise<{ success: boolean; error?: string }>;
 
   /**
    * Export audit log entries that match the given query as a downloadable blob.
