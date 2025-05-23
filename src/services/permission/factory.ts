@@ -6,10 +6,9 @@
  */
 
 import { PermissionService } from '@/core/permission/interfaces';
-import { UserManagementConfiguration } from '@/core/config';
-import type { IPermissionDataProvider } from '@/core/permission';
-import { createPermissionProvider } from '@/adapters/permission/factory';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import type { IPermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
+import { DefaultPermissionService } from './default-permission.service';
+import { AdapterRegistry } from '@/adapters/registry';
 
 // Singleton instance for API routes
 let permissionServiceInstance: PermissionService | null = null;
@@ -21,25 +20,11 @@ let permissionServiceInstance: PermissionService | null = null;
  */
 export function getApiPermissionService(): PermissionService {
   if (!permissionServiceInstance) {
-    // Get Supabase configuration from the existing service
-    const supabase = getServiceSupabase();
-    
-    // Create permission data provider
-    const permissionDataProvider: IPermissionDataProvider = createPermissionProvider({
-      type: 'supabase',
-      options: {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-      }
-    });
-    
-    // Create permission service with the data provider
-    permissionServiceInstance = UserManagementConfiguration.getServiceProvider('permissionService') as PermissionService;
-    
-    // If no permission service is registered, throw an error
-    if (!permissionServiceInstance) {
-      throw new Error('Permission service not registered in UserManagementConfiguration');
-    }
+    // Get the permission adapter from the registry
+    const permissionDataProvider = AdapterRegistry.getInstance().getAdapter<IPermissionDataProvider>('permission');
+
+    // Create permission service with the adapter
+    permissionServiceInstance = new DefaultPermissionService(null as any, permissionDataProvider);
   }
   
   return permissionServiceInstance;

@@ -154,3 +154,22 @@ describe('createSupabaseAdapterFactory', () => {
     expect(factory).toBeInstanceOf(SupabaseAdapterFactory);
   });
 });
+
+describe('instance adapter registry', () => {
+  beforeEach(() => {
+    // reset singleton and adapters
+    (AdapterRegistry as any).instance = null;
+  });
+
+  it('registers and retrieves adapters', () => {
+    const registry = AdapterRegistry.getInstance();
+    const adapter = { test: true };
+    registry.registerAdapter('sample', adapter);
+    expect(registry.getAdapter('sample')).toBe(adapter);
+  });
+
+  it('throws when adapter missing', () => {
+    const registry = AdapterRegistry.getInstance();
+    expect(() => registry.getAdapter('missing')).toThrow();
+  });
+});

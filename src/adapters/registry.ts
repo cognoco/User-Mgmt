@@ -94,7 +94,8 @@ export type FactoryCreator = (options: AdapterFactoryOptions) => AdapterFactory;
  */
 export class AdapterRegistry {
   private static factories: Record<string, FactoryCreator> = {};
-  private static instance: AdapterRegistry;
+  private static instance: AdapterRegistry | null = null;
+
   private adapters: Record<string, unknown> = {};
 
   private constructor() {}
@@ -132,7 +133,7 @@ export class AdapterRegistry {
     }
     return adapter as T;
   }
-  
+}
   /**
    * Register an adapter factory
    * 
