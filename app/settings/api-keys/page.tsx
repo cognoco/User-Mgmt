@@ -24,7 +24,11 @@ export default function ApiKeysPage() {
         <h2 className="text-xl font-semibold mb-4">
           {t('apiKeys.create', 'Create New API Key')}
         </h2>
-        <ApiKeyForm availablePermissions={[]} onCreated={() => {}} />
+        <ApiKeyForm
+          availablePermissions={[]}
+          onSubmit={createApiKey}
+          defaultPermissions={[]}
+        />
       </div>
       <div className="bg-card rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">

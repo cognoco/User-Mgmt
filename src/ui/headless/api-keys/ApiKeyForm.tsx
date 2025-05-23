@@ -1,5 +1,4 @@
 import { FormEvent, useState } from 'react';
-import { useApiKeys } from '@/hooks/api-keys/use-api-keys';
 import type { ApiKey } from '@/core/api-keys/types';
 
 export interface ApiKeyFormRenderProps {
@@ -16,12 +15,16 @@ export interface ApiKeyFormRenderProps {
 }
 
 export interface ApiKeyFormProps {
+  onSubmit: (
+    name: string,
+    permissions: string[],
+    expiresInDays?: number
+  ) => Promise<{ key: string } & ApiKey>;
   defaultPermissions?: string[];
   children: (props: ApiKeyFormRenderProps) => React.ReactNode;
 }
 
-export function ApiKeyForm({ children, defaultPermissions = [] }: ApiKeyFormProps) {
-  const { createApiKey } = useApiKeys();
+export function ApiKeyForm({ onSubmit, children, defaultPermissions = [] }: ApiKeyFormProps) {
   const [name, setName] = useState('');
   const [permissions, setPermissions] = useState<string[]>(defaultPermissions);
   const [expiresInDays, setExpiresInDays] = useState<number | undefined>(undefined);
@@ -40,7 +43,7 @@ export function ApiKeyForm({ children, defaultPermissions = [] }: ApiKeyFormProp
     setIsSubmitting(true);
     setError(null);
     try {
-      const key = await createApiKey(name, permissions, expiresInDays);
+      const key = await onSubmit(name, permissions, expiresInDays);
       setCreatedKey(key);
       setName('');
       setPermissions(defaultPermissions);
