@@ -9,8 +9,7 @@ import {
   AuthService,
   AuthState
 } from '@/core/auth/interfaces';
-import type { AxiosInstance } from 'axios';
-import type { AuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
 import { 
   AuthResult, 
   LoginPayload, 
@@ -46,13 +45,10 @@ export class DefaultAuthService
 
   /**
    * Constructor for DefaultAuthService
-   * 
-   * @param apiClient - The API client for making HTTP requests
+   *
+   * @param authDataProvider - Adapter providing auth persistence methods
    */
-  constructor(
-    private apiClient: AxiosInstance,
-    private authDataProvider: AuthDataProvider
-  ) {
+  constructor(private authDataProvider: IAuthDataProvider) {
     super();
     // Initialize session check if there's a stored token
     this.initializeFromStorage();
@@ -163,44 +159,49 @@ export class DefaultAuthService
   async login(credentials: LoginPayload): Promise<AuthResult> {
     this.isLoading = true;
     this.error = null;
-    
+
     try {
-      const response = await this.apiClient.post('/api/auth/login', credentials);
-      
-      this.user = response.data.user;
-      this.token = response.data.token;
+      const result = await this.authDataProvider.login(credentials);
+
       this.isLoading = false;
-      this.error = null;
-      
-      // Store token in localStorage if available
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('auth_token', response.data.token);
+      if (result.success) {
+        this.user = result.user || null;
+        this.token = result.token || null;
+        this.error = null;
+
+        // Store token in localStorage if available
+        if (result.token && typeof window !== 'undefined') {
+          localStorage.setItem('auth_token', result.token);
+        }
+
+        // Initialize session management
+        this.updateLastActivity();
+        this.initializeSessionCheck();
+
+        // Emit login event
+        this.emitEvent({
+          type: 'LOGIN',
+          timestamp: new Date(),
+          user: this.user
+        });
+
+        return result;
       }
-      
-      // Initialize session management
-      this.updateLastActivity();
-      this.initializeSessionCheck();
-      
-      // Initialize token refresh if expiration is provided
-      if (response.data.expiresAt) {
-        this.initializeTokenRefresh(response.data.expiresAt);
-      }
-      
-      // Emit login event
+
+      this.user = null;
+      this.token = null;
+      this.error = result.error || 'An error occurred during login';
+
+      // Emit login failed event
       this.emitEvent({
-        type: 'LOGIN',
+        type: 'LOGIN_FAILED',
         timestamp: new Date(),
-        user: this.user
+        error: this.error
       });
-      
-      return {
-        success: true,
-        requiresMfa: response.data.requiresMfa,
-        token: response.data.token
-      };
+
+      return { success: false, error: this.error, code: result.code };
     } catch (error: any) {
       const errorMessage = translateError(error, { defaultMessage: 'An error occurred during login' });
-      const errorCode = error.response?.data?.code;
       
       this.isLoading = false;
       this.error = errorMessage;
@@ -216,8 +217,7 @@ export class DefaultAuthService
       
       return {
         success: false,
-        error: errorMessage,
-        code: errorCode as AuthResult['code']
+        error: errorMessage
       };
     }
   }
@@ -233,20 +233,32 @@ export class DefaultAuthService
     this.error = null;
     
     try {
-      const response = await this.apiClient.post('/api/auth/register', userData);
-      
+      const result = await this.authDataProvider.register(userData);
+
       this.isLoading = false;
-      this.error = null;
-      this.successMessage = response.data.message;
-      
-      // Emit registration event
+      if (result.success) {
+        this.error = null;
+        this.successMessage = 'Registration successful!';
+
+        // Emit registration event
+        this.emitEvent({
+          type: 'REGISTRATION',
+          timestamp: new Date(),
+          email: userData.email
+        });
+
+        return { success: true };
+      }
+      this.error = result.error || 'Registration failed';
+
+      // Emit registration failed event
       this.emitEvent({
-        type: 'REGISTRATION',
+        type: 'REGISTRATION_FAILED',
         timestamp: new Date(),
-        email: userData.email
+        error: this.error
       });
-      
-      return { success: true };
+
+      return { success: false, error: this.error };
     } catch (error: any) {
       const errorMessage = translateError(error, { defaultMessage: 'Registration failed' });
       
@@ -269,7 +281,7 @@ export class DefaultAuthService
    */
   async logout(): Promise<void> {
     try {
-      await this.apiClient.post('/api/auth/logout');
+      await this.authDataProvider.logout();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
@@ -324,19 +336,32 @@ export class DefaultAuthService
     this.successMessage = null;
     
     try {
-      await this.apiClient.post('/api/auth/reset-password', { email });
-      
+      const result = await this.authDataProvider.resetPassword(email);
+
       this.isLoading = false;
-      this.successMessage = 'Password reset email sent. Check your inbox.';
-      
-      // Emit password reset event
+      if (result.success) {
+        this.successMessage = result.message || 'Password reset email sent. Check your inbox.';
+
+        // Emit password reset event
+        this.emitEvent({
+          type: 'PASSWORD_RESET_REQUESTED',
+          timestamp: new Date(),
+          email
+        });
+
+        return { success: true, message: this.successMessage };
+      }
+
+      this.error = result.error || 'Failed to send password reset email.';
+
+      // Emit password reset failed event
       this.emitEvent({
-        type: 'PASSWORD_RESET_REQUESTED',
+        type: 'PASSWORD_RESET_FAILED',
         timestamp: new Date(),
-        email
+        error: this.error
       });
-      
-      return { success: true, message: 'Password reset email sent.' };
+
+      return { success: false, error: this.error };
     } catch (error: any) {
       const errorMessage = translateError(error, { defaultMessage: 'Failed to send password reset email.' });
       
@@ -366,7 +391,7 @@ export class DefaultAuthService
     this.successMessage = null;
     
     try {
-      await this.apiClient.put('/api/auth/update-password', { oldPassword, newPassword });
+      await this.authDataProvider.updatePassword(oldPassword, newPassword);
       
       this.isLoading = false;
       this.successMessage = 'Password updated successfully.';
@@ -377,7 +402,7 @@ export class DefaultAuthService
         timestamp: new Date()
       });
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to update password.';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to update password.' });
       
       this.isLoading = false;
       this.error = errorMessage;
@@ -404,33 +429,45 @@ export class DefaultAuthService
     this.error = null;
     
     try {
-      await this.apiClient.post('/api/auth/send-verification-email', { email });
-      
+      const result = await this.authDataProvider.sendVerificationEmail(email);
+
       this.isLoading = false;
-      this.error = null;
-      this.successMessage = 'Verification email sent successfully.';
-      
-      // Emit email verification sent event
+      if (result.success) {
+        this.error = null;
+        this.successMessage = 'Verification email sent successfully.';
+
+        // Emit email verification sent event
+        this.emitEvent({
+          type: 'EMAIL_VERIFICATION_SENT',
+          timestamp: new Date(),
+          email
+        });
+
+        return { success: true };
+      }
+
+      this.error = result.error || 'Failed to send verification email';
+
+      // Emit email verification failed event
       this.emitEvent({
-        type: 'EMAIL_VERIFICATION_SENT',
+        type: 'EMAIL_VERIFICATION_FAILED',
         timestamp: new Date(),
-        email
+        error: this.error
       });
-      
-      return { success: true };
+
+      return { success: false, error: this.error };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to send verification email';
-      
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to send verification email' });
+
       this.isLoading = false;
       this.error = errorMessage;
-      
-      // Emit email verification failed event
+
       this.emitEvent({
         type: 'EMAIL_VERIFICATION_FAILED',
         timestamp: new Date(),
         error: errorMessage
       });
-      
+
       return { success: false, error: errorMessage };
     }
   }
@@ -446,7 +483,7 @@ export class DefaultAuthService
     this.successMessage = null;
     
     try {
-      await this.apiClient.post('/api/auth/verify-email', { token });
+      await this.authDataProvider.verifyEmail(token);
       
       this.isLoading = false;
       this.successMessage = 'Email verified successfully!';
@@ -457,7 +494,7 @@ export class DefaultAuthService
         timestamp: new Date()
       });
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Email verification failed.';
+      const errorMessage = translateError(error, { defaultMessage: 'Email verification failed.' });
       
       this.isLoading = false;
       this.error = errorMessage;
@@ -484,7 +521,7 @@ export class DefaultAuthService
     this.successMessage = null;
     
     try {
-      await this.apiClient.delete('/api/auth/delete-account', { data: { password } });
+      await this.authDataProvider.deleteAccount(password);
       
       this.cleanupTimers();
       
@@ -505,7 +542,7 @@ export class DefaultAuthService
         timestamp: new Date()
       });
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to delete account.';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to delete account.' });
       
       this.isLoading = false;
       this.error = errorMessage;
@@ -531,36 +568,48 @@ export class DefaultAuthService
     this.error = null;
     
     try {
-      const response = await this.apiClient.post('/api/auth/2fa/setup');
-      const { secret, qrCode } = response.data;
-      
+      const result = await this.authDataProvider.setupMFA();
+
       this.isLoading = false;
-      this.error = null;
-      
-      // Emit MFA setup event
+      if (result.success) {
+        this.error = null;
+
+        this.emitEvent({
+          type: 'MFA_SETUP',
+          timestamp: new Date()
+        });
+
+        return {
+          success: true,
+          secret: result.secret,
+          qrCode: result.qrCode
+        };
+      }
+
+      this.error = result.error || 'Failed to setup MFA';
+
       this.emitEvent({
-        type: 'MFA_SETUP',
-        timestamp: new Date()
+        type: 'MFA_SETUP_FAILED',
+        timestamp: new Date(),
+        error: this.error
       });
-      
+
       return {
-        success: true,
-        secret,
-        qrCode
+        success: false,
+        error: this.error
       };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to setup MFA';
-      
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to setup MFA' });
+
       this.isLoading = false;
       this.error = errorMessage;
-      
-      // Emit MFA setup failed event
+
       this.emitEvent({
         type: 'MFA_SETUP_FAILED',
         timestamp: new Date(),
         error: errorMessage
       });
-      
+
       return {
         success: false,
         error: errorMessage
@@ -577,48 +626,49 @@ export class DefaultAuthService
   async verifyMFA(code: string): Promise<MFAVerifyResponse> {
     this.isLoading = true;
     this.error = null;
-    
+
     try {
-      const response = await this.apiClient.post('/api/auth/2fa/verify', { code });
-      const { backupCodes, token } = response.data;
-      
+      const result = await this.authDataProvider.verifyMFA(code);
+
       this.isLoading = false;
-      this.error = null;
-      this.mfaEnabled = true;
-      this.successMessage = 'MFA setup successful!';
-      
-      if (response.data.user) {
-        this.user = response.data.user;
+      if (result.success) {
+        this.mfaEnabled = true;
+        this.successMessage = 'MFA setup successful!';
+        if (result.user) {
+          this.user = result.user;
+        }
+
+        this.emitEvent({ type: 'MFA_VERIFIED', timestamp: new Date() });
+
+        return {
+          success: true,
+          backupCodes: result.backupCodes,
+          token: result.token
+        };
       }
-      
-      // Emit MFA verified event
+
+      this.error = result.error || 'Failed to verify MFA code';
+
       this.emitEvent({
-        type: 'MFA_VERIFIED',
-        timestamp: new Date()
+        type: 'MFA_VERIFICATION_FAILED',
+        timestamp: new Date(),
+        error: this.error
       });
-      
-      return {
-        success: true,
-        backupCodes,
-        token
-      };
+
+      return { success: false, error: this.error };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to verify MFA code';
-      
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to verify MFA code' });
+
       this.isLoading = false;
       this.error = errorMessage;
-      
-      // Emit MFA verification failed event
+
       this.emitEvent({
         type: 'MFA_VERIFICATION_FAILED',
         timestamp: new Date(),
         error: errorMessage
       });
-      
-      return {
-        success: false,
-        error: errorMessage
-      };
+
+      return { success: false, error: errorMessage };
     }
   }
 
@@ -633,7 +683,7 @@ export class DefaultAuthService
     this.error = null;
     
     try {
-      await this.apiClient.post('/api/auth/2fa/disable', { code });
+      const result = await this.authDataProvider.disableMFA(code);
       
       this.isLoading = false;
       this.error = null;
@@ -646,24 +696,42 @@ export class DefaultAuthService
         timestamp: new Date()
       });
       
-      return { success: true };
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to disable MFA';
-      
+      if (result.success) {
+        this.isLoading = false;
+        this.error = null;
+        this.mfaEnabled = false;
+        this.successMessage = 'MFA disabled successfully';
+
+        this.emitEvent({ type: 'MFA_DISABLED', timestamp: new Date() });
+
+        return { success: true };
+      }
+
+      const errorMessage = result.error || 'Failed to disable MFA';
+    
       this.isLoading = false;
       this.error = errorMessage;
-      
-      // Emit MFA disable failed event
+
       this.emitEvent({
         type: 'MFA_DISABLE_FAILED',
         timestamp: new Date(),
         error: errorMessage
       });
-      
-      return {
-        success: false,
+
+      return { success: false, error: errorMessage };
+    } catch (error: any) {
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to disable MFA' });
+
+      this.isLoading = false;
+      this.error = errorMessage;
+
+      this.emitEvent({
+        type: 'MFA_DISABLE_FAILED',
+        timestamp: new Date(),
         error: errorMessage
-      };
+      });
+
+      return { success: false, error: errorMessage };
     }
   }
 
@@ -674,26 +742,15 @@ export class DefaultAuthService
    */
   async refreshToken(): Promise<boolean> {
     try {
-      const response = await this.apiClient.post('/api/auth/refresh');
-      const { token, expiresAt } = response.data;
-      
-      this.token = token;
-      
-      // Store token in localStorage if available
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('auth_token', token);
+      const success = await this.authDataProvider.refreshToken();
+
+      if (success) {
+        this.emitEvent({ type: 'TOKEN_REFRESHED', timestamp: new Date() });
+      } else {
+        this.handleSessionTimeout();
       }
-      
-      // Initialize next token refresh
-      this.initializeTokenRefresh(expiresAt);
-      
-      // Emit token refreshed event
-      this.emitEvent({
-        type: 'TOKEN_REFRESHED',
-        timestamp: new Date()
-      });
-      
-      return true;
+
+      return success;
     } catch (error) {
       // If refresh fails, log out the user
       this.handleSessionTimeout();
