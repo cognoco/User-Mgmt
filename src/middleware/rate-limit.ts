@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { Redis } from '@upstash/redis';
 import { rateLimitConfig, redisConfig } from '@/lib/config'; // Adjust path as needed
 import { LRUCache } from 'lru-cache';
+import { ApiError, ERROR_CODES } from '@/lib/api/common';
 
 // Initialize Redis client if configured
 let redis: Redis | null = null;
@@ -17,11 +18,13 @@ if (redisConfig.enabled && redisConfig.url && redisConfig.token) {
   );
 }
 
+/** Basic configuration for rate limiting logic */
 interface RateLimitConfig {
   windowMs: number;
   max: number;
 }
 
+/** Options passed to {@link rateLimit} */
 interface RateLimitOptions {
   windowMs?: number;
   max?: number;
@@ -114,6 +117,12 @@ export function getRateLimitHeaders(key: string, options: RateLimitOptions = {})
     };
 }
 
+/**
+ * Create an API rate limiting middleware.
+ *
+ * @param options Optional {@link RateLimitOptions} to override defaults.
+ * @param injectedCheckRateLimit Dependency injection for testing.
+ */
 export function rateLimit(options: RateLimitOptions = {}, injectedCheckRateLimit = checkRateLimit) {
   return async function rateLimitMiddleware(
     req: NextApiRequest,
@@ -124,7 +133,12 @@ export function rateLimit(options: RateLimitOptions = {}, injectedCheckRateLimit
       const isRateLimited = await injectedCheckRateLimit(req as unknown as NextRequest, options);
       
       if (isRateLimited) {
-        res.status(429).json({ error: 'Too many requests, please try again later.' });
+        const error = new ApiError(
+          ERROR_CODES.OPERATION_FAILED,
+          'Too many requests, please try again later.',
+          429
+        );
+        res.status(429).json(error.toResponse());
         return;
       }
 
@@ -167,19 +181,19 @@ export async function withRateLimit(
 
     // Check if rate limit is exceeded
     if (tokenCount >= mergedConfig.max) { // Use merged config
-      return new NextResponse(
-        JSON.stringify({
-          error: 'Too many requests, please try again later.',
-          retryAfter: Math.ceil(mergedConfig.windowMs / 1000) // Use merged config
-        }),
-        {
-          status: 429,
-          headers: {
-            'Content-Type': 'application/json',
-            'Retry-After': String(Math.ceil(mergedConfig.windowMs / 1000)) // Use merged config
-          }
-        }
+      const error = new ApiError(
+        ERROR_CODES.OPERATION_FAILED,
+        'Too many requests, please try again later.',
+        429,
+        { retryAfter: Math.ceil(mergedConfig.windowMs / 1000) }
       );
+      return new NextResponse(JSON.stringify(error.toResponse()), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(Math.ceil(mergedConfig.windowMs / 1000))
+        }
+      });
     }
 
     // Increment the count

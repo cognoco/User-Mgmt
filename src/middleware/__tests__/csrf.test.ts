@@ -92,7 +92,9 @@ describe('CSRF Middleware', () => {
       await middleware(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid CSRF token' });
+      expect(res.json).toHaveBeenCalledWith({
+        error: { code: 'auth/forbidden', message: 'Invalid CSRF token' }
+      });
       expect(next).not.toHaveBeenCalled();
     });
 
@@ -107,7 +109,9 @@ describe('CSRF Middleware', () => {
       await middleware(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid CSRF token' });
+      expect(res.json).toHaveBeenCalledWith({
+        error: { code: 'auth/forbidden', message: 'Invalid CSRF token' }
+      });
       expect(next).not.toHaveBeenCalled();
     });
   });
