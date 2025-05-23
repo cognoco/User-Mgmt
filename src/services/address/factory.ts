@@ -9,6 +9,7 @@ import { CompanyAddressService } from '@/core/address/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
 import type { IAddressDataProvider } from '@/core/address';
 import { AdapterRegistry } from '@/adapters/registry';
+import { DefaultAddressService } from './default-address.service';
 
 // Singleton instance for API routes
 let addressServiceInstance: CompanyAddressService | null = null;
@@ -20,17 +21,14 @@ let addressServiceInstance: CompanyAddressService | null = null;
  */
 export function getApiAddressService(): CompanyAddressService {
   if (!addressServiceInstance) {
-    // Get the address adapter from the registry
-    AdapterRegistry.getInstance().getAdapter<IAddressDataProvider>('address');
+    addressServiceInstance =
+      UserManagementConfiguration.getServiceProvider('addressService') as CompanyAddressService | undefined;
 
-    // Retrieve the service implementation
-    addressServiceInstance = UserManagementConfiguration.getServiceProvider('addressService') as CompanyAddressService;
-
-    // If no address service is registered, throw an error
     if (!addressServiceInstance) {
-      throw new Error('Address service not registered in UserManagementConfiguration');
+      const provider = AdapterRegistry.getInstance().getAdapter<IAddressDataProvider>('address');
+      addressServiceInstance = new DefaultAddressService(provider);
     }
   }
-  
+
   return addressServiceInstance;
 }

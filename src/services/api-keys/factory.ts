@@ -9,6 +9,7 @@ import { ApiKeyService } from '@/core/api-key/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
 import type { IApiKeyDataProvider } from '@/core/api-keys';
 import { AdapterRegistry } from '@/adapters/registry';
+import { DefaultApiKeysService } from './default-api-keys.service';
 
 // Singleton instance for API routes
 let apiKeyServiceInstance: ApiKeyService | null = null;
@@ -20,15 +21,15 @@ let apiKeyServiceInstance: ApiKeyService | null = null;
  */
 export function getApiKeyService(): ApiKeyService {
   if (!apiKeyServiceInstance) {
-    AdapterRegistry.getInstance().getAdapter<IApiKeyDataProvider>('apiKey');
-    apiKeyServiceInstance = UserManagementConfiguration.getServiceProvider('apiKeyService') as ApiKeyService;
+    apiKeyServiceInstance =
+      UserManagementConfiguration.getServiceProvider('apiKeyService') as ApiKeyService | undefined;
 
-    // If no API key service is registered, throw an error
     if (!apiKeyServiceInstance) {
-      throw new Error('API Key service not registered in UserManagementConfiguration');
+      const provider = AdapterRegistry.getInstance().getAdapter<IApiKeyDataProvider>('apiKey');
+      apiKeyServiceInstance = new DefaultApiKeysService(provider);
     }
   }
-  
+
   return apiKeyServiceInstance;
 }
 

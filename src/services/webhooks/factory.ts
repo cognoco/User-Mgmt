@@ -9,6 +9,7 @@ import { IWebhookService } from '@/core/webhooks';
 import type { IWebhookDataProvider } from '@/core/webhooks';
 import { AdapterRegistry } from '@/adapters/registry';
 import { WebhookService } from './WebhookService';
+import { UserManagementConfiguration } from '@/core/config';
 
 // Singleton instance for API routes
 let webhookServiceInstance: IWebhookService | null = null;
@@ -20,10 +21,15 @@ let webhookServiceInstance: IWebhookService | null = null;
  */
 export function getApiWebhookService(): IWebhookService {
   if (!webhookServiceInstance) {
-    const webhookDataProvider = AdapterRegistry.getInstance().getAdapter<IWebhookDataProvider>('webhook');
-    webhookServiceInstance = new WebhookService(webhookDataProvider);
+    webhookServiceInstance =
+      UserManagementConfiguration.getServiceProvider('webhookService') as IWebhookService | undefined;
+
+    if (!webhookServiceInstance) {
+      const webhookDataProvider = AdapterRegistry.getInstance().getAdapter<IWebhookDataProvider>('webhook');
+      webhookServiceInstance = new WebhookService(webhookDataProvider);
+    }
   }
-  
+
   return webhookServiceInstance;
 }
 
