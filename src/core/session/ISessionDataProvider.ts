@@ -6,7 +6,16 @@
  * services remain database agnostic.
  */
 
-import type { SessionInfo } from './models';
+import type {
+  SessionInfo,
+  SessionCreatePayload,
+  SessionUpdatePayload,
+  SessionQueryParams,
+  SessionListResult,
+  SessionOperationResult,
+  SessionDeletionResult,
+  SessionBatchResult,
+} from './models';
 
 /**
  * Interface for session persistence operations.
@@ -15,23 +24,75 @@ import type { SessionInfo } from './models';
  */
 export interface ISessionDataProvider {
   /**
-   * Retrieve all sessions that belong to the specified user.
+   * Create a new session for the given user.
    *
-   * @param userId The user identifier
-   * @returns List of session information objects
+   * @param userId - Owner of the session
+   * @param payload - Session details to persist
+   */
+  createSession(
+    userId: string,
+    payload: SessionCreatePayload
+  ): Promise<SessionOperationResult>;
+
+  /**
+   * Retrieve a specific session by its identifier.
+   */
+  getSession(userId: string, sessionId: string): Promise<SessionInfo | null>;
+
+  /**
+   * Update an existing session.
+   */
+  updateSession(
+    userId: string,
+    sessionId: string,
+    update: SessionUpdatePayload
+  ): Promise<SessionOperationResult>;
+
+  /**
+   * Retrieve all sessions that belong to the specified user.
    */
   listUserSessions(userId: string): Promise<SessionInfo[]>;
 
   /**
-   * Remove a specific user session.
+   * Retrieve sessions for a user with pagination and filtering.
    *
-   * @param userId The user that owns the session
-   * @param sessionId The session identifier to remove
-   * @returns Result object indicating success or error
+   * @example
+   * ```ts
+   * const result = await provider.queryUserSessions(userId, {
+   *   page: 1,
+   *   limit: 20,
+   *   sortBy: 'createdAt',
+   *   sortDirection: 'desc',
+   * });
+   * ```
+   */
+  queryUserSessions(
+    userId: string,
+    query?: SessionQueryParams
+  ): Promise<SessionListResult>;
+
+  /**
+   * Remove a specific user session.
    */
   deleteUserSession(
     userId: string,
     sessionId: string
-  ): Promise<{ success: boolean; error?: string }>;
+  ): Promise<SessionDeletionResult>;
+
+  /**
+   * Remove multiple sessions in one operation.
+   */
+  deleteUserSessions(
+    userId: string,
+    sessionIds: string[]
+  ): Promise<SessionBatchResult>;
+
+  /**
+   * Remove all sessions for a user.
+   */
+  deleteAllUserSessions(userId: string): Promise<SessionDeletionResult>;
 }
+
+/** Convenience alias. */
+export type SessionDataProvider = ISessionDataProvider;
 
