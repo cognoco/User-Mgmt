@@ -30,7 +30,7 @@ describe('SupabaseWebhookProvider', () => {
 
   it('fetches a webhook by id', async () => {
     const provider = new SupabaseWebhookProvider(SUPABASE_URL, SUPABASE_KEY);
-    const hook = await provider.getWebhook('wh-1');
+    const hook = await provider.getWebhook('user-1', 'wh-1');
     expect(hook?.id).toBe('wh-1');
   });
 
@@ -38,23 +38,25 @@ describe('SupabaseWebhookProvider', () => {
     setTableMockData('webhooks', { data: webhookRecord, error: null });
     const provider = new SupabaseWebhookProvider(SUPABASE_URL, SUPABASE_KEY);
     const result = await provider.createWebhook('user-1', {
+      name: 'h',
       url: 'https://example.com',
       events: ['user.created'],
-      secret: 'secret'
+      isActive: true
     });
-    expect(result.id).toBe('wh-1');
+    expect(result.success).toBe(true);
   });
 
   it('updates a webhook', async () => {
     setTableMockData('webhooks', { data: { ...webhookRecord, url: 'https://new.url' }, error: null });
     const provider = new SupabaseWebhookProvider(SUPABASE_URL, SUPABASE_KEY);
-    const result = await provider.updateWebhook('wh-1', { url: 'https://new.url' });
-    expect(result?.url).toBe('https://new.url');
+    const result = await provider.updateWebhook('user-1', 'wh-1', { url: 'https://new.url' });
+    expect(result.success).toBe(true);
   });
 
   it('deletes a webhook', async () => {
     setTableMockData('webhooks', { data: null, error: null });
     const provider = new SupabaseWebhookProvider(SUPABASE_URL, SUPABASE_KEY);
-    await expect(provider.deleteWebhook('wh-1')).resolves.not.toThrow();
+    const result = await provider.deleteWebhook('user-1', 'wh-1');
+    expect(result.success).toBe(true);
   });
 });

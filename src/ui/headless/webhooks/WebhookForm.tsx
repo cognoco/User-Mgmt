@@ -1,4 +1,5 @@
-import { useState, FormEvent } from 'react';
+import React, { useState, FormEvent } from 'react';
+import { useWebhooks } from '@/hooks/webhooks/use-webhooks';
 import type { WebhookCreatePayload } from '@/core/webhooks/models';
 
 export interface WebhookFormRenderProps {
@@ -11,42 +12,86 @@ export interface WebhookFormRenderProps {
   handleSubmit: (e: FormEvent) => Promise<void>;
   isSubmitting: boolean;
   error: string | null;
+  data: WebhookCreatePayload;
+  setData: (data: WebhookCreatePayload) => void;
+  submit: () => Promise<void>;
 }
 
 export interface WebhookFormProps {
-  onSubmit: (payload: WebhookCreatePayload) => Promise<void>;
-  availableEvents: string[];
+  userId: string;
+  onSubmit?: (payload: WebhookCreatePayload) => Promise<void>;
+  availableEvents?: string[];
   loading?: boolean;
   error?: string | null;
   children: (props: WebhookFormRenderProps) => React.ReactNode;
 }
 
-export function WebhookForm({ onSubmit, availableEvents, children, loading = false, error = null }: WebhookFormProps) {
-  const [name, setName] = useState('');
-  const [url, setUrl] = useState('');
-  const [events, setEvents] = useState<string[]>([]);
+export function WebhookForm({ 
+  userId, 
+  onSubmit, 
+  availableEvents = [], 
+  children, 
+  loading: externalLoading = false, 
+  error: externalError = null 
+}: WebhookFormProps) {
+  const { createWebhook } = useWebhooks(userId);
+  const [data, setData] = useState<WebhookCreatePayload>({ 
+    name: '', 
+    url: '', 
+    events: [] 
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [internalError, setInternalError] = useState<string | null>(null);
 
-  const toggleEvent = (e: string) => {
-    setEvents(prev => (prev.includes(e) ? prev.filter(ev => ev !== e) : [...prev, e]));
+  const toggleEvent = (event: string) => {
+    setData(prev => ({
+      ...prev,
+      events: prev.events.includes(event)
+        ? prev.events.filter(e => e !== event)
+        : [...prev.events, event]
+    }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    await submit();
+  };
+
+  const submit = async () => {
     setIsSubmitting(true);
-    setFormError(null);
+    setInternalError(null);
+    
     try {
-      await onSubmit({ name, url, events });
-      setName('');
-      setUrl('');
-      setEvents([]);
+      if (onSubmit) {
+        await onSubmit(data);
+      } else {
+        await createWebhook(data);
+      }
+      // Reset form only on successful submission
+      setData({ name: '', url: '', events: [] });
     } catch (err) {
-      setFormError((err as Error).message);
+      const message = err instanceof Error ? err.message : 'Failed to submit webhook';
+      setInternalError(message);
+      throw err; // Re-throw to allow error handling in parent
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return <>{children({ name, setName, url, setUrl, events, toggleEvent, handleSubmit, isSubmitting: loading || isSubmitting, error: formError || error || null })}</>;
+  const error = internalError || externalError;
+
+  return children({
+    name: data.name,
+    setName: (name) => setData(prev => ({ ...prev, name })),
+    url: data.url,
+    setUrl: (url) => setData(prev => ({ ...prev, url })),
+    events: data.events,
+    toggleEvent,
+    handleSubmit,
+    isSubmitting: externalLoading || isSubmitting,
+    error,
+    data,
+    setData,
+    submit
+  });
 }

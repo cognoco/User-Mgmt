@@ -23,10 +23,28 @@ export interface WebhookUpdatePayload {
   isActive?: boolean;
 }
 
+import type { WebhookDelivery } from '@/core/webhooks/models';
+
 export interface IWebhookDataProvider {
   listWebhooks(userId: string): Promise<Webhook[]>;
-  getWebhook(id: string): Promise<Webhook | null>;
-  createWebhook(userId: string, data: WebhookCreatePayload): Promise<Webhook>;
-  updateWebhook(id: string, data: WebhookUpdatePayload): Promise<Webhook | null>;
-  deleteWebhook(id: string): Promise<void>;
+  getWebhook(userId: string, webhookId: string): Promise<Webhook | null>;
+  createWebhook(
+    userId: string,
+    data: WebhookCreatePayload
+  ): Promise<{ success: boolean; webhook?: Webhook; error?: string }>;
+  updateWebhook(
+    userId: string,
+    webhookId: string,
+    data: WebhookUpdatePayload
+  ): Promise<{ success: boolean; webhook?: Webhook; error?: string }>;
+  deleteWebhook(
+    userId: string,
+    webhookId: string
+  ): Promise<{ success: boolean; error?: string }>;
+  listDeliveries(
+    userId: string,
+    webhookId: string,
+    limit?: number
+  ): Promise<WebhookDelivery[]>;
+  recordDelivery(delivery: WebhookDelivery): Promise<void>;
 }

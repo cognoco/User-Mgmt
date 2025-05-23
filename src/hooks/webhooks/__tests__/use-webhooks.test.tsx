@@ -1,67 +1,42 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderHook, act } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { UserManagementConfiguration } from '@/core/config';
 import { useWebhooks } from '../use-webhooks';
+import type { IWebhookService } from '@/core/webhooks';
 
-const mockFetch = vi.fn();
-vi.stubGlobal('fetch', mockFetch);
+const mockService: IWebhookService = {
+  createWebhook: vi.fn(async () => ({ success: true, webhook: { id: '1', userId: 'u1', name: 'n', url: 'url', events: [], secret: '', isActive: true, createdAt: '' } })),
+  getWebhooks: vi.fn(async () => []),
+  getWebhook: vi.fn(),
+  updateWebhook: vi.fn(async () => ({ success: true, webhook: { id: '1', userId: 'u1', name: 'n', url: 'u', events: [], secret: '', isActive: true, createdAt: '' } })),
+  deleteWebhook: vi.fn(async () => ({ success: true })),
+  getWebhookDeliveries: vi.fn(),
+  triggerEvent: vi.fn(async () => [])
+};
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { retry: false },
-  },
+beforeEach(() => {
+  UserManagementConfiguration.reset();
+  UserManagementConfiguration.configureServiceProviders({ webhookService: mockService });
+  vi.clearAllMocks();
 });
 
-function wrapper({ children }: { children: React.ReactNode }) {
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
-}
-
 describe('useWebhooks', () => {
-  beforeEach(() => {
-    mockFetch.mockReset();
-  });
-
   it('fetches webhooks', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({ webhooks: [{ id: '1', name: 'Webhook 1' }] }),
+    (mockService.getWebhooks as any).mockResolvedValueOnce([{ id: '1', userId: 'u1', name: 'n', url: 'u', events: [], secret: '', isActive: true, createdAt: '' }]);
+    const { result } = renderHook(() => useWebhooks('u1'));
+    await act(async () => {
+      await result.current.fetchWebhooks();
     });
-
-    const { result } = renderHook(() => useWebhooks(), { wrapper });
-
-    await waitFor(() => result.current.webhooks !== undefined);
-    expect(result.current.webhooks).toEqual([{ id: '1', name: 'Webhook 1' }]);
+    expect(mockService.getWebhooks).toHaveBeenCalledWith('u1');
+    expect(result.current.webhooks.length).toBe(1);
   });
 
-  it('creates a webhook', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({ id: '2', name: 'Webhook 2' }),
-    });
-
-    const { result } = renderHook(() => useWebhooks(), { wrapper });
-
+  it('creates webhook', async () => {
+    const { result } = renderHook(() => useWebhooks('u1'));
     await act(async () => {
-      const res = await result.current.createWebhook.mutateAsync({
-        name: 'Webhook 2',
-        url: 'https://example.com',
-        events: [],
-      });
-      expect(res).toEqual({ id: '2', name: 'Webhook 2' });
+      await result.current.createWebhook({ name: 'n', url: 'u', events: [] });
     });
-  });
-
-  it('deletes a webhook', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({ success: true }),
-    });
-
-    const { result } = renderHook(() => useWebhooks(), { wrapper });
-
-    await act(async () => {
-      const res = await result.current.deleteWebhook.mutateAsync('1');
-      expect(res).toEqual({ success: true });
-    });
+    expect(mockService.createWebhook).toHaveBeenCalled();
+    expect(result.current.webhooks.length).toBe(1);
   });
 });

@@ -1,6 +1,6 @@
 import type { AxiosInstance } from 'axios';
 import type { IWebhookService } from '@/core/webhooks/IWebhookService';
-import type { IWebhookDataProvider } from '@/adapters/webhooks/IWebhookDataProvider';
+import type { IWebhookDataProvider } from '@/adapters/webhook/IWebhookDataProvider';
 import { WebhookService } from './WebhookService';
 
 export interface WebhookServiceConfig {
