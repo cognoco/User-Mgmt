@@ -1,13 +1,9 @@
-import type { AxiosInstance } from 'axios';
 import type { IWebhookService } from '@/core/webhooks/IWebhookService';
 import type { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import type { Webhook, WebhookCreatePayload, WebhookUpdatePayload, WebhookDelivery } from '@/core/webhooks/models';
 
 export class WebhookService implements IWebhookService {
-  constructor(
-    private apiClient: AxiosInstance,
-    private dataProvider: IWebhookDataProvider
-  ) {}
+  constructor(private dataProvider: IWebhookDataProvider) {}
 
   async getWebhooks(userId: string): Promise<Webhook[]> {
     return this.dataProvider.listWebhooks(userId);
