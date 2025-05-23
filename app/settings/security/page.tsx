@@ -107,7 +107,7 @@ export default function SecuritySettingsPage() {
             </p>
             <Button 
               variant="outline"
-              onClick={() => window.location.href = '/settings'}
+              onClick={() => window.location.href = '/settings/activity'}
             >
               {t('security.password.change', 'Change Password')}
             </Button>
@@ -139,3 +139,4 @@ export default function SecuritySettingsPage() {
     </div>
   );
 }
+
