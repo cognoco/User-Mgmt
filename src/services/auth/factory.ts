@@ -24,7 +24,7 @@ export function getApiAuthService(): AuthService {
     const authDataProvider = AdapterRegistry.getInstance().getAdapter<IAuthDataProvider>('auth');
 
     // Create auth service with the adapter
-    authServiceInstance = new DefaultAuthService(null as any, authDataProvider);
+    authServiceInstance = new DefaultAuthService(authDataProvider);
   }
   
   return authServiceInstance;
