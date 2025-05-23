@@ -4,7 +4,12 @@
  * Defines the contract for persistence operations related to subscription management.
  * This abstraction allows the service layer to work with any data source.
  */
-import type { SubscriptionPlan, UserSubscription } from './models';
+import type {
+  SubscriptionPlan,
+  UserSubscription,
+  SubscriptionUpsertPayload,
+  SubscriptionQuery
+} from './models';
 
 export interface ISubscriptionDataProvider {
   /**
@@ -57,4 +62,26 @@ export interface ISubscriptionDataProvider {
     subscriptionId: string,
     immediate?: boolean
   ): Promise<{ success: boolean; error?: string }>;
+
+  /**
+   * Insert or update a subscription record.
+   *
+   * This is primarily used when syncing with external billing systems
+   * where the subscription state may already exist.
+   *
+   * @param data Subscription fields to persist
+   * @returns The upserted subscription
+   */
+  upsertSubscription(data: SubscriptionUpsertPayload): Promise<UserSubscription>;
+
+  /**
+   * Retrieve subscriptions using optional filtering and pagination.
+   *
+   * @param query Query parameters for filtering and pagination
+   * @returns Matching subscriptions with total count
+   */
+  listSubscriptions(query: SubscriptionQuery): Promise<{
+    subscriptions: UserSubscription[];
+    count: number;
+  }>;
 }

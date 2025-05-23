@@ -9,6 +9,9 @@ import {
   SubscriptionPeriod,
   subscriptionPlanSchema,
   userSubscriptionSchema,
+  SubscriptionQuery,
+  SubscriptionUpsertPayload,
+  isSubscriptionUpsertPayload
 } from '@/types/subscription';
 
 export {
@@ -19,4 +22,7 @@ export {
   SubscriptionPeriod,
   subscriptionPlanSchema,
   userSubscriptionSchema,
+  SubscriptionQuery,
+  SubscriptionUpsertPayload,
+  isSubscriptionUpsertPayload,
 };
