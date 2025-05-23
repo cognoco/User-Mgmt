@@ -8,8 +8,7 @@
 import { AdminService } from '@/core/admin/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
 import type { IAdminDataProvider } from '@/core/admin';
-import { createAdminProvider } from '@/adapters/admin/factory';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { AdapterRegistry } from '@/adapters/registry';
 
 // Singleton instance for API routes
 let adminServiceInstance: AdminService | null = null;
@@ -21,19 +20,10 @@ let adminServiceInstance: AdminService | null = null;
  */
 export function getApiAdminService(): AdminService {
   if (!adminServiceInstance) {
-    // Get Supabase configuration from the existing service
-    const supabase = getServiceSupabase();
+    // Get the admin adapter from the registry
+    AdapterRegistry.getInstance().getAdapter<IAdminDataProvider>('admin');
 
-    // Create admin data provider
-    const adminDataProvider: IAdminDataProvider = createAdminProvider({
-      type: 'supabase',
-      options: {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-      }
-    });
-
-    // Create admin service with the data provider
+    // Retrieve the service implementation
     adminServiceInstance = UserManagementConfiguration.getServiceProvider('adminService') as AdminService;
 
     // If no admin service is registered, throw an error

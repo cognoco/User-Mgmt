@@ -111,6 +111,9 @@ export class AdapterRegistry {
 
   /**
    * Register a concrete adapter instance
+   *
+   * @param name Adapter name
+   * @param adapter Adapter instance
    */
   registerAdapter<T>(name: string, adapter: T): void {
     this.adapters[name] = adapter;
@@ -118,6 +121,9 @@ export class AdapterRegistry {
 
   /**
    * Retrieve a registered adapter instance
+   *
+   * @param name Adapter name
+   * @returns Adapter instance
    */
   getAdapter<T>(name: string): T {
     const adapter = this.adapters[name];
@@ -136,6 +142,7 @@ export class AdapterRegistry {
   static registerFactory(name: string, factoryCreator: FactoryCreator): void {
     this.factories[name] = factoryCreator;
   }
+}
   
   /**
    * Get an adapter factory by name
