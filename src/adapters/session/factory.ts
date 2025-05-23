@@ -2,21 +2,21 @@
  * Session Data Provider Factory
  */
 
-import { SessionDataProvider } from './interfaces';
+import type { ISessionDataProvider } from '@/core/session/ISessionDataProvider';
 import { SupabaseSessionProvider } from './supabase-adapter';
 
 export function createSupabaseSessionProvider(options: {
   supabaseUrl: string;
   supabaseKey: string;
   [key: string]: any;
-}): SessionDataProvider {
+}): ISessionDataProvider {
   return new SupabaseSessionProvider(options.supabaseUrl, options.supabaseKey);
 }
 
 export function createSessionProvider(config: {
   type: 'supabase' | string;
   options: Record<string, any>;
-}): SessionDataProvider {
+}): ISessionDataProvider {
   switch (config.type) {
     case 'supabase':
       return createSupabaseSessionProvider(config.options);

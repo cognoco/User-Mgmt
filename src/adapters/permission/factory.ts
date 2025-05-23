@@ -5,7 +5,7 @@
  * It allows for dependency injection and makes it easy to swap implementations.
  */
 
-import { PermissionDataProvider } from './interfaces';
+import type { IPermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
 import { SupabasePermissionProvider } from './supabase-permission-provider';
 
 /**
@@ -18,7 +18,7 @@ import { SupabasePermissionProvider } from './supabase-permission-provider';
 export function createSupabasePermissionProvider(
   supabaseUrl: string,
   supabaseKey: string
-): PermissionDataProvider {
+): IPermissionDataProvider {
   return new SupabasePermissionProvider(supabaseUrl, supabaseKey);
 }
 
@@ -31,7 +31,7 @@ export function createSupabasePermissionProvider(
 export function createPermissionProvider(config: {
   type: 'supabase' | string;
   options: Record<string, any>;
-}): PermissionDataProvider {
+}): IPermissionDataProvider {
   switch (config.type) {
     case 'supabase':
       return createSupabasePermissionProvider(

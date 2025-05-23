@@ -1,17 +1,17 @@
-import { AuditDataProvider } from './interfaces';
+import type { IAuditDataProvider } from '@/core/audit/IAuditDataProvider';
 import { SupabaseAuditAdapter } from './supabase-adapter';
 
 export function createSupabaseAuditProvider(
   supabaseUrl: string,
   supabaseKey: string
-): AuditDataProvider {
+): IAuditDataProvider {
   return new SupabaseAuditAdapter(supabaseUrl, supabaseKey);
 }
 
 export function createAuditProvider(config: {
   type: 'supabase' | string;
   options: Record<string, any>;
-}): AuditDataProvider {
+}): IAuditDataProvider {
   switch (config.type) {
     case 'supabase':
       return createSupabaseAuditProvider(

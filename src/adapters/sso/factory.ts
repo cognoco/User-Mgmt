@@ -4,20 +4,20 @@
  * Provides factory functions for creating SSO data providers.
  */
 
-import { SsoDataProvider } from './interfaces';
+import type { ISsoDataProvider } from '@/core/sso/ISsoDataProvider';
 import { SupabaseSsoProvider } from './supabase-adapter';
 
 export function createSupabaseSsoProvider(
   supabaseUrl: string,
   supabaseKey: string
-): SsoDataProvider {
+): ISsoDataProvider {
   return new SupabaseSsoProvider(supabaseUrl, supabaseKey);
 }
 
 export function createSsoProvider(config: {
   type: 'supabase' | string;
   options: Record<string, any>;
-}): SsoDataProvider {
+}): ISsoDataProvider {
   switch (config.type) {
     case 'supabase':
       return createSupabaseSsoProvider(
