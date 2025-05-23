@@ -8,7 +8,6 @@
 import {
   UserService
 } from '@/core/user/interfaces';
-import type { AxiosInstance } from 'axios';
 import type { UserDataProvider } from '@/core/user/IUserDataProvider';
 import { 
   UserProfile, 
@@ -34,16 +33,12 @@ export class DefaultUserService
   
   /**
    * Constructor for DefaultUserService
-   * 
-   * @param apiClient - The API client for making HTTP requests
+   *
    * @param userDataProvider - The data provider for user operations
    */
-  constructor(
-Private apiClient: AxiosInstance,
-  private userDataProvider: UserDataProvider
-) {
-  super();
-}
+  constructor(private userDataProvider: UserDataProvider) {
+    super();
+  }
 
   /**
    * Emit a user event
@@ -62,8 +57,7 @@ Private apiClient: AxiosInstance,
    */
   async getUserProfile(userId: string): Promise<UserProfile | null> {
     try {
-      const response = await this.apiClient.get(`/api/users/${userId}/profile`);
-      return response.data.profile;
+      return await this.userDataProvider.getUserProfile(userId);
     } catch (error) {
       console.error('Error fetching user profile:', error);
       return null;
@@ -78,29 +72,17 @@ Private apiClient: AxiosInstance,
    * @returns Result object with success status and updated profile or error
    */
   async updateUserProfile(userId: string, profileData: ProfileUpdatePayload): Promise<UserProfileResult> {
-    try {
-      const response = await this.apiClient.put(`/api/users/${userId}/profile`, profileData);
-      
-      // Emit profile updated event
+    const result = await this.userDataProvider.updateUserProfile(userId, profileData);
+    if (result.success && result.profile) {
       this.emitEvent({
         type: 'user_profile_updated',
         timestamp: Date.now(),
         userId,
-        profile: response.data.profile,
+        profile: result.profile,
         updatedFields: Object.keys(profileData)
       });
-      
-      return {
-        success: true,
-        profile: response.data.profile
-      };
-    } catch (error: any) {
-      const errorMessage = translateError(error, { defaultMessage: 'Failed to update user profile' });
-      return {
-        success: false,
-        error: errorMessage
-      };
     }
+    return result;
   }
 
   /**
@@ -110,26 +92,7 @@ Private apiClient: AxiosInstance,
    * @returns User preferences or default preferences if not set
    */
   async getUserPreferences(userId: string): Promise<UserPreferences> {
-    try {
-      const response = await this.apiClient.get(`/api/users/${userId}/preferences`);
-      return response.data.preferences;
-    } catch (error) {
-      // Return default preferences if not found
-      return {
-        language: 'en',
-        theme: 'system',
-        emailNotifications: {
-          marketing: false,
-          securityAlerts: true,
-          accountUpdates: true,
-          teamInvitations: true
-        },
-        pushNotifications: {
-          enabled: false,
-          events: []
-        }
-      };
-    }
+    return this.userDataProvider.getUserPreferences(userId);
   }
 
   /**
@@ -139,30 +102,21 @@ Private apiClient: AxiosInstance,
    * @param preferences - Updated preferences data
    * @returns Result object with success status and updated preferences or error
    */
-  async updateUserPreferences(userId: string, preferences: PreferencesUpdatePayload): Promise<{ success: boolean; preferences?: UserPreferences; error?: string }> {
-    try {
-      const response = await this.apiClient.put(`/api/users/${userId}/preferences`, preferences);
-      
-      // Emit preferences updated event
+  async updateUserPreferences(
+    userId: string,
+    preferences: PreferencesUpdatePayload
+  ): Promise<{ success: boolean; preferences?: UserPreferences; error?: string }> {
+    const result = await this.userDataProvider.updateUserPreferences(userId, preferences);
+    if (result.success && result.preferences) {
       this.emitEvent({
         type: 'user_preferences_updated',
         timestamp: Date.now(),
         userId,
-        preferences: response.data.preferences,
+        preferences: result.preferences,
         updatedFields: Object.keys(preferences)
       });
-      
-      return {
-        success: true,
-        preferences: response.data.preferences
-      };
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to update user preferences';
-      return {
-        success: false,
-        error: errorMessage
-      };
     }
+    return result;
   }
 
   /**
@@ -172,36 +126,20 @@ Private apiClient: AxiosInstance,
    * @param imageData - Image data as a File or Blob
    * @returns Result object with success status and image URL or error
    */
-  async uploadProfilePicture(userId: string, imageData: Blob): Promise<{ success: boolean; imageUrl?: string; error?: string }> {
-    try {
-      const formData = new FormData();
-      formData.append('image', imageData);
-      
-      const response = await this.apiClient.post(`/api/users/${userId}/profile-picture`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      
-      // Emit profile picture uploaded event
+  async uploadProfilePicture(
+    userId: string,
+    imageData: Blob
+  ): Promise<{ success: boolean; imageUrl?: string; error?: string }> {
+    const result = await this.userDataProvider.uploadProfilePicture(userId, imageData);
+    if (result.success && result.imageUrl) {
       this.emitEvent({
         type: 'profile_picture_uploaded',
         timestamp: Date.now(),
         userId,
-        imageUrl: response.data.imageUrl
+        imageUrl: result.imageUrl
       });
-      
-      return {
-        success: true,
-        imageUrl: response.data.imageUrl
-      };
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to upload profile picture';
-      return {
-        success: false,
-        error: errorMessage
-      };
     }
+    return result;
   }
 
   /**
@@ -211,24 +149,15 @@ Private apiClient: AxiosInstance,
    * @returns Result object with success status or error
    */
   async deleteProfilePicture(userId: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      await this.apiClient.delete(`/api/users/${userId}/profile-picture`);
-      
-      // Emit profile picture deleted event
+    const result = await this.userDataProvider.deleteProfilePicture(userId);
+    if (result.success) {
       this.emitEvent({
         type: 'profile_picture_deleted',
         timestamp: Date.now(),
         userId
       });
-      
-      return { success: true };
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to delete profile picture';
-      return {
-        success: false,
-        error: errorMessage
-      };
     }
+    return result;
   }
 
   /**
@@ -238,29 +167,20 @@ Private apiClient: AxiosInstance,
    * @param visibility - Profile visibility settings
    * @returns Result object with success status and updated visibility settings or error
    */
-  async updateProfileVisibility(userId: string, visibility: ProfileVisibility): Promise<{ success: boolean; visibility?: ProfileVisibility; error?: string }> {
-    try {
-      const response = await this.apiClient.put(`/api/users/${userId}/visibility`, { visibility });
-      
-      // Emit profile visibility updated event
+  async updateProfileVisibility(
+    userId: string,
+    visibility: ProfileVisibility
+  ): Promise<{ success: boolean; visibility?: ProfileVisibility; error?: string }> {
+    const result = await this.userDataProvider.updateProfileVisibility(userId, visibility);
+    if (result.success && result.visibility) {
       this.emitEvent({
         type: 'profile_visibility_updated',
         timestamp: Date.now(),
         userId,
-        visibility: response.data.visibility
+        visibility: result.visibility
       });
-      
-      return {
-        success: true,
-        visibility: response.data.visibility
-      };
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to update profile visibility';
-      return {
-        success: false,
-        error: errorMessage
-      };
     }
+    return result;
   }
 
   /**
@@ -270,27 +190,7 @@ Private apiClient: AxiosInstance,
    * @returns Search results with pagination
    */
   async searchUsers(params: UserSearchParams): Promise<UserSearchResult> {
-    try {
-      // Build query parameters
-      const queryParams = new URLSearchParams();
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          queryParams.append(key, String(value));
-        }
-      });
-      
-      const response = await this.apiClient.get(`/api/users/search?${queryParams.toString()}`);
-      return response.data;
-    } catch (error: any) {
-      // Return empty result on error
-      return {
-        users: [],
-        total: 0,
-        page: params.page || 1,
-        limit: params.limit || 10,
-        totalPages: 0
-      };
-    }
+    return this.userDataProvider.searchUsers(params);
   }
 
   /**
@@ -301,25 +201,16 @@ Private apiClient: AxiosInstance,
    * @returns Result object with success status or error
    */
   async deactivateUser(userId: string, reason?: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      await this.apiClient.post(`/api/users/${userId}/deactivate`, { reason });
-      
-      // Emit user deactivated event
+    const result = await this.userDataProvider.deactivateUser(userId, reason);
+    if (result.success) {
       this.emitEvent({
         type: 'user_deactivated',
         timestamp: Date.now(),
         userId,
         reason
       });
-      
-      return { success: true };
-    } catch (error: any) {
-      const errorMessage = translateError(error, { defaultMessage: 'Failed to deactivate user' });
-      return {
-        success: false,
-        error: errorMessage
-      };
     }
+    return result;
   }
 
   /**
@@ -329,24 +220,15 @@ Private apiClient: AxiosInstance,
    * @returns Result object with success status or error
    */
   async reactivateUser(userId: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      await this.apiClient.post(`/api/users/${userId}/reactivate`);
-      
-      // Emit user reactivated event
+    const result = await this.userDataProvider.reactivateUser(userId);
+    if (result.success) {
       this.emitEvent({
         type: 'user_reactivated',
         timestamp: Date.now(),
         userId
       });
-      
-      return { success: true };
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to reactivate user';
-      return {
-        success: false,
-        error: errorMessage
-      };
     }
+    return result;
   }
 
   /**
@@ -357,18 +239,16 @@ Private apiClient: AxiosInstance,
    * @param additionalData - Additional data required for the new account type
    * @returns Result object with success status and updated profile or error
    */
-  async convertUserType(userId: string, newType: string, additionalData?: Record<string, any>): Promise<UserProfileResult> {
-    try {
-      const response = await this.apiClient.post(`/api/users/${userId}/convert-type`, {
-        newType,
-        additionalData
-      });
-      
-      // Get the previous type before conversion
+  async convertUserType(
+    userId: string,
+    newType: string,
+    additionalData?: Record<string, any>
+  ): Promise<UserProfileResult> {
+    const result = await this.userDataProvider.convertUserType(userId, newType, additionalData);
+    if (result.success && result.profile) {
       const previousProfile = await this.getUserProfile(userId);
       const previousType = previousProfile?.userType || 'unknown';
-      
-      // Emit user type converted event
+
       this.emitEvent({
         type: 'user_type_converted',
         timestamp: Date.now(),
@@ -376,18 +256,8 @@ Private apiClient: AxiosInstance,
         previousType,
         newType
       });
-      
-      return {
-        success: true,
-        profile: response.data.profile
-      };
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to convert user type';
-      return {
-        success: false,
-        error: errorMessage
-      };
     }
+    return result;
   }
 
   /**
@@ -397,8 +267,15 @@ Private apiClient: AxiosInstance,
    * @returns Unsubscribe function
    */
   onUserProfileChanged(callback: (profile: UserProfile) => void): () => void {
-    return this.onType('user_profile_updated', event => {
-      callback(event.profile);
+    return this.userDataProvider.onUserProfileChanged(profile => {
+      this.emitEvent({
+        type: 'user_profile_updated',
+        timestamp: Date.now(),
+        userId: profile.id,
+        profile,
+        updatedFields: []
+      });
+      callback(profile);
     });
   }
 }

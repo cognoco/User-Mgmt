@@ -24,7 +24,7 @@ export function getApiUserService(): UserService {
     const userDataProvider = AdapterRegistry.getInstance().getAdapter<IUserDataProvider>('user');
 
     // Create the user service with the adapter
-    userServiceInstance = new DefaultUserService(null as any, userDataProvider);
+    userServiceInstance = new DefaultUserService(userDataProvider);
   }
   
   return userServiceInstance;

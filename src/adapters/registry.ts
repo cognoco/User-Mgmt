@@ -143,17 +143,6 @@ export class AdapterRegistry {
   static registerFactory(name: string, factoryCreator: FactoryCreator): void {
     this.factories[name] = factoryCreator;
   }
-}
-  /**
-   * Register an adapter factory
-   * 
-   * @param name Name to register the factory under
-   * @param factoryCreator Function that creates the factory
-   */
-  static registerFactory(name: string, factoryCreator: FactoryCreator): void {
-    this.factories[name] = factoryCreator;
-  }
-}
   
   /**
    * Get an adapter factory by name
