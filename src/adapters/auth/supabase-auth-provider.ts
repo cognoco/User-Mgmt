@@ -14,7 +14,9 @@ import {
   MFASetupResponse,
   MFAVerifyResponse
 } from '../../core/auth/models';
+
 import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
+
 
 /**
  * Supabase implementation of the AuthDataProvider interface

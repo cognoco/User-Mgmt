@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { IWebhookDataProvider } from './IWebhookDataProvider';
+import type { IWebhookDataProvider } from '../../core/webhooks/IWebhookDataProvider';
 import type { Webhook, WebhookCreatePayload } from '@/core/webhooks/models';
 
 export class SupabaseWebhookProvider implements IWebhookDataProvider {

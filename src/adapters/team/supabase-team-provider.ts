@@ -20,7 +20,9 @@ import {
   TeamSearchParams,
   TeamSearchResult
 } from '../../core/team/models';
+
 import type { ITeamDataProvider } from '@/core/team/ITeamDataProvider';
+
 
 /**
  * Supabase implementation of the TeamDataProvider interface
