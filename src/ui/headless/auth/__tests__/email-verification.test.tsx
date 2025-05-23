@@ -2,9 +2,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, act } from '@testing-library/react';
 import { EmailVerification } from '../EmailVerification';
-import { useAuth } from '@/hooks/auth/useAuthLegacy';
+import { useAuth } from '@/hooks/auth/useAuth';
 
-vi.mock('@/hooks/auth/useAuthLegacy', () => ({
+vi.mock('@/hooks/auth/useAuth', () => ({
   useAuth: vi.fn()
 }));
 

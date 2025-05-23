@@ -4,7 +4,7 @@ import { describe, it, beforeEach, expect, vi } from 'vitest';
 import AuthProvider from '@/lib/context/AuthContext';
 import type { AuthService } from '@/core/auth/interfaces';
 import type { User } from '@/core/auth/models';
-let useAuth: typeof import('../use-auth').default;
+import { useAuth } from '../useAuth';
 
 let mockAuthService: AuthService & { onAuthEvent?: any };
 
@@ -13,9 +13,6 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 beforeEach(async () => {
-  vi.unmock('@/hooks/auth/useAuthLegacy');
-  const mod = await import('../use-auth');
-  useAuth = mod.default;
   mockAuthService = {
     login: vi.fn(),
     register: vi.fn(),

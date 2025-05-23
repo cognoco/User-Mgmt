@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '../ProtectedRoute';
-import { useAuth } from '@/hooks/auth/useAuthLegacy';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -15,7 +15,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 // Use robust mock for useAuth
-vi.mock('@/hooks/auth/useAuthLegacy', () => {
+vi.mock('@/hooks/auth/useAuth', () => {
   // Move setupZustandSelectorMock inside the factory
   function setupZustandSelectorMock(store: any) {
     return (selector: any) => (typeof selector === 'function' ? selector(store) : store);

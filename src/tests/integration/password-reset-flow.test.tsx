@@ -5,7 +5,7 @@ import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { act } from 'react'; // Import from React instead of react-dom/test-utils
 
 // Mock the auth store first
-vi.mock('@/hooks/auth/useAuthLegacy', () => {
+vi.mock('@/hooks/auth/useAuth', () => {
   // Zustand selector-compatible mock
   const store = {
     resetPassword: vi.fn().mockResolvedValue({ success: true, message: 'Reset email sent' }),

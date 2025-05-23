@@ -92,7 +92,7 @@ afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
 // Setup mock for useAuth hook and related Zustand stores if needed
-vi.mock('@/hooks/auth/useAuthLegacy', () => ({
+vi.mock('@/hooks/auth/useAuth', () => ({
   useAuth: vi.fn(() => ({
     user: { id: 'user-123', email: 'test@example.com' },
     setUser: vi.fn(),

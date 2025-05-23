@@ -13,7 +13,7 @@ vi.mock('@/lib/api/axios', () => ({
 }));
 
 // Mock the auth store
-vi.mock('@/hooks/auth/useAuthLegacy', () => ({
+vi.mock('@/hooks/auth/useAuth', () => ({
   useAuth: vi.fn(() => ({
     isAuthenticated: true,
     logout: vi.fn(),

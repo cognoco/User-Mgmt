@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useAuth } from '@/hooks/auth/useAuthLegacy';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { OAuthProvider } from '@/types/oauth';
 import { Button } from '@/ui/primitives/button';
