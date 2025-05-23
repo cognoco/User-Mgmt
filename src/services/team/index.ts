@@ -7,18 +7,12 @@
 
 import { TeamService } from '@/core/team/interfaces';
 import { DefaultTeamService } from './default-team.service';
-import type { AxiosInstance } from 'axios';
 import type { TeamDataProvider } from '@/core/team/ITeamDataProvider';
 
 /**
  * Configuration options for creating a TeamService
  */
 export interface TeamServiceConfig {
-  /**
-   * API client for making HTTP requests
-   */
-  apiClient: AxiosInstance;
-  
   /**
    * Team data provider for database operations
    */
@@ -32,7 +26,7 @@ export interface TeamServiceConfig {
  * @returns An instance of the TeamService
  */
 export function createTeamService(config: TeamServiceConfig): TeamService {
-  return new DefaultTeamService(config.apiClient, config.teamDataProvider);
+  return new DefaultTeamService(config.teamDataProvider);
 }
 
 /**

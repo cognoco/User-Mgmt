@@ -25,7 +25,6 @@ import {
   TeamVisibility
 } from '@/core/team/models';
 import { TeamEventType } from '@/core/team/events';
-import type { AxiosInstance } from 'axios';
 import type { TeamDataProvider } from '@/core/team/ITeamDataProvider';
 import { translateError } from '@/lib/utils/error';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
@@ -40,14 +39,10 @@ export class DefaultTeamService
   
   /**
    * Constructor for DefaultTeamService
-   * 
-   * @param apiClient - The API client for making HTTP requests
+   *
    * @param teamDataProvider - The data provider for team operations
    */
-  constructor(
-    private apiClient: AxiosInstance,
-    private teamDataProvider: TeamDataProvider
-  ) {
+  constructor(private teamDataProvider: TeamDataProvider) {
     super();
   }
 
@@ -69,12 +64,13 @@ export class DefaultTeamService
    */
   async createTeam(ownerId: string, teamData: TeamCreatePayload): Promise<TeamResult> {
     try {
-      const response = await this.apiClient.post('/api/teams', {
-        ...teamData,
-        ownerId
-      });
-      
-      const team = response.data.team;
+      const result = await this.teamDataProvider.createTeam(ownerId, teamData);
+
+      if (!result.success || !result.team) {
+        return result;
+      }
+
+      const team = result.team;
       
       // Emit team created event
       this.emitEvent({
@@ -105,8 +101,7 @@ export class DefaultTeamService
    */
   async getTeam(teamId: string): Promise<Team | null> {
     try {
-      const response = await this.apiClient.get(`/api/teams/${teamId}`);
-      return response.data.team;
+      return await this.teamDataProvider.getTeam(teamId);
     } catch (error) {
       console.error('Error fetching team:', error);
       return null;
@@ -122,9 +117,13 @@ export class DefaultTeamService
    */
   async updateTeam(teamId: string, teamData: TeamUpdatePayload): Promise<TeamResult> {
     try {
-      const response = await this.apiClient.put(`/api/teams/${teamId}`, teamData);
-      
-      const team = response.data.team;
+      const result = await this.teamDataProvider.updateTeam(teamId, teamData);
+
+      if (!result.success || !result.team) {
+        return result;
+      }
+
+      const team = result.team;
       
       // Emit team updated event
       this.emitEvent({
@@ -181,7 +180,11 @@ export class DefaultTeamService
         };
       }
       
-      await this.apiClient.delete(`/api/teams/${teamId}`);
+      const deleteResult = await this.teamDataProvider.deleteTeam(teamId);
+
+      if (!deleteResult.success) {
+        return deleteResult;
+      }
       
       // Emit team deleted event
       this.emitEvent({
@@ -193,7 +196,7 @@ export class DefaultTeamService
       
       return { success: true };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to delete team';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to delete team' });
       return {
         success: false,
         error: errorMessage
@@ -209,8 +212,7 @@ export class DefaultTeamService
    */
   async getUserTeams(userId: string): Promise<Team[]> {
     try {
-      const response = await this.apiClient.get(`/api/users/${userId}/teams`);
-      return response.data.teams;
+      return await this.teamDataProvider.getUserTeams(userId);
     } catch (error) {
       console.error('Error fetching user teams:', error);
       return [];
@@ -225,8 +227,7 @@ export class DefaultTeamService
    */
   async getTeamMembers(teamId: string): Promise<TeamMember[]> {
     try {
-      const response = await this.apiClient.get(`/api/teams/${teamId}/members`);
-      return response.data.members;
+      return await this.teamDataProvider.getTeamMembers(teamId);
     } catch (error) {
       console.error('Error fetching team members:', error);
       return [];
@@ -243,12 +244,13 @@ export class DefaultTeamService
    */
   async addTeamMember(teamId: string, userId: string, role: string): Promise<TeamMemberResult> {
     try {
-      const response = await this.apiClient.post(`/api/teams/${teamId}/members`, {
-        userId,
-        role
-      });
-      
-      const member = response.data.member;
+      const result = await this.teamDataProvider.addTeamMember(teamId, userId, role);
+
+      if (!result.success || !result.member) {
+        return result;
+      }
+
+      const member = result.member;
       
       // Get the team to know who the owner is
       const team = await this.getTeam(teamId);
@@ -267,7 +269,7 @@ export class DefaultTeamService
         member
       };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to add team member';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to add team member' });
       return {
         success: false,
         error: errorMessage
@@ -298,9 +300,13 @@ export class DefaultTeamService
       
       const previousRole = currentMember.role;
       
-      const response = await this.apiClient.put(`/api/teams/${teamId}/members/${userId}`, updateData);
-      
-      const member = response.data.member;
+      const result = await this.teamDataProvider.updateTeamMember(teamId, userId, updateData);
+
+      if (!result.success || !result.member) {
+        return result;
+      }
+
+      const member = result.member;
       
       // Get the team to know who the owner is
       const team = await this.getTeam(teamId);
@@ -343,7 +349,11 @@ export class DefaultTeamService
       // Get the team to know who the owner is
       const team = await this.getTeam(teamId);
       
-      await this.apiClient.delete(`/api/teams/${teamId}/members/${userId}`);
+      const result = await this.teamDataProvider.removeTeamMember(teamId, userId);
+
+      if (!result.success) {
+        return result;
+      }
       
       // Emit team member removed event
       this.emitEvent({
@@ -385,11 +395,13 @@ export class DefaultTeamService
       
       const previousOwnerId = team.ownerId;
       
-      const response = await this.apiClient.post(`/api/teams/${teamId}/transfer-ownership`, {
-        newOwnerId
-      });
-      
-      const updatedTeam = response.data.team;
+      const result = await this.teamDataProvider.transferOwnership(teamId, newOwnerId);
+
+      if (!result.success || !result.team) {
+        return result;
+      }
+
+      const updatedTeam = result.team;
       
       // Emit team ownership transferred event
       this.emitEvent({
@@ -406,7 +418,7 @@ export class DefaultTeamService
         team: updatedTeam
       };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to transfer team ownership';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to transfer team ownership' });
       return {
         success: false,
         error: errorMessage
@@ -433,9 +445,13 @@ export class DefaultTeamService
         };
       }
       
-      const response = await this.apiClient.post(`/api/teams/${teamId}/invitations`, invitationData);
-      
-      const invitation = response.data.invitation;
+      const result = await this.teamDataProvider.inviteToTeam(teamId, invitationData);
+
+      if (!result.success || !result.invitation) {
+        return result;
+      }
+
+      const invitation = result.invitation;
       
       // Emit team invitation created event
       this.emitEvent({
@@ -450,7 +466,7 @@ export class DefaultTeamService
         invitation
       };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to invite user to team';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to invite user to team' });
       return {
         success: false,
         error: errorMessage
@@ -466,8 +482,7 @@ export class DefaultTeamService
    */
   async getTeamInvitations(teamId: string): Promise<TeamInvitation[]> {
     try {
-      const response = await this.apiClient.get(`/api/teams/${teamId}/invitations`);
-      return response.data.invitations;
+      return await this.teamDataProvider.getTeamInvitations(teamId);
     } catch (error) {
       console.error('Error fetching team invitations:', error);
       return [];
@@ -482,8 +497,7 @@ export class DefaultTeamService
    */
   async getUserInvitations(email: string): Promise<TeamInvitation[]> {
     try {
-      const response = await this.apiClient.get(`/api/users/invitations?email=${encodeURIComponent(email)}`);
-      return response.data.invitations;
+      return await this.teamDataProvider.getUserInvitations(email);
     } catch (error) {
       console.error('Error fetching user invitations:', error);
       return [];
@@ -499,31 +513,22 @@ export class DefaultTeamService
    */
   async acceptInvitation(invitationId: string, userId: string): Promise<TeamMemberResult> {
     try {
-      // Get the invitation to know the team and role
-      const response = await this.apiClient.get(`/api/invitations/${invitationId}`);
-      const invitation = response.data.invitation;
-      
-      if (!invitation) {
-        return {
-          success: false,
-          error: 'Invitation not found'
-        };
+      const result = await this.teamDataProvider.acceptInvitation(invitationId, userId);
+
+      if (!result.success || !result.member) {
+        return result;
       }
-      
-      const acceptResponse = await this.apiClient.post(`/api/invitations/${invitationId}/accept`, {
-        userId
-      });
-      
-      const member = acceptResponse.data.member;
+
+      const member = result.member;
       
       // Emit team invitation accepted event
       this.emitEvent({
         type: 'team_invitation_accepted',
         timestamp: Date.now(),
         invitationId,
-        teamId: invitation.teamId,
+        teamId: member.teamId,
         userId,
-        role: invitation.role
+        role: member.role
       });
       
       return {
@@ -531,7 +536,7 @@ export class DefaultTeamService
         member
       };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to accept invitation';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to accept invitation' });
       return {
         success: false,
         error: errorMessage
@@ -547,31 +552,23 @@ export class DefaultTeamService
    */
   async declineInvitation(invitationId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      // Get the invitation to know the team and email
-      const response = await this.apiClient.get(`/api/invitations/${invitationId}`);
-      const invitation = response.data.invitation;
-      
-      if (!invitation) {
-        return {
-          success: false,
-          error: 'Invitation not found'
-        };
+      const result = await this.teamDataProvider.declineInvitation(invitationId);
+
+      if (!result.success) {
+        return result;
       }
-      
-      await this.apiClient.post(`/api/invitations/${invitationId}/decline`);
-      
-      // Emit team invitation declined event
+
       this.emitEvent({
         type: 'team_invitation_declined',
         timestamp: Date.now(),
         invitationId,
-        teamId: invitation.teamId,
-        email: invitation.email
+        teamId: '',
+        email: ''
       });
-      
+
       return { success: true };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to decline invitation';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to decline invitation' });
       return {
         success: false,
         error: errorMessage
@@ -587,35 +584,24 @@ export class DefaultTeamService
    */
   async cancelInvitation(invitationId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      // Get the invitation to know the team and email
-      const response = await this.apiClient.get(`/api/invitations/${invitationId}`);
-      const invitation = response.data.invitation;
-      
-      if (!invitation) {
-        return {
-          success: false,
-          error: 'Invitation not found'
-        };
+      const result = await this.teamDataProvider.cancelInvitation(invitationId);
+
+      if (!result.success) {
+        return result;
       }
-      
-      // Get the team to know who the owner is
-      const team = await this.getTeam(invitation.teamId);
-      
-      await this.apiClient.delete(`/api/invitations/${invitationId}`);
-      
-      // Emit team invitation cancelled event
+
       this.emitEvent({
         type: 'team_invitation_cancelled',
         timestamp: Date.now(),
         invitationId,
-        teamId: invitation.teamId,
-        email: invitation.email,
-        cancelledBy: team?.ownerId || invitation.invitedBy // If we can't get the team, use the invitedBy field
+        teamId: '',
+        email: '',
+        cancelledBy: ''
       });
-      
+
       return { success: true };
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to cancel invitation';
+      const errorMessage = translateError(error, { defaultMessage: 'Failed to cancel invitation' });
       return {
         success: false,
         error: errorMessage
@@ -639,8 +625,7 @@ export class DefaultTeamService
         }
       });
       
-      const response = await this.apiClient.get(`/api/teams/search?${queryParams.toString()}`);
-      return response.data;
+      return await this.teamDataProvider.searchTeams(params);
     } catch (error: any) {
       // Return empty result on error
       return {
