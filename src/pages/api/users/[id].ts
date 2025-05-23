@@ -1,6 +1,6 @@
 import { createApiHandler } from '@/lib/api-utils/api-handler';
 import { getApiUserService } from '@/services/user/factory';
-import { ApiError } from '@/lib/errors';
+import { ApiError } from '@/lib/api/common';
 import { z } from 'zod';
 
 // Define validation schemas
