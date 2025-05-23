@@ -19,9 +19,14 @@ import {
 
 /**
  * Core user management service interface
- * 
+ *
  * This interface defines all user management operations that can be performed.
  * Any implementation of this interface must provide all these methods.
+ *
+ * **Error handling:**
+ * Methods returning result objects resolve with an `error` property for
+ * expected business errors. Other methods should reject their promises when
+ * the underlying data provider fails.
  */
 export interface UserService {
   /**

@@ -19,9 +19,13 @@ import { PermissionEventTypes, PermissionEventHandler } from './events';
 
 /**
  * Core permission service interface
- * 
+ *
  * This interface defines all permission and role-related operations that can be performed.
  * Any implementation of this interface must provide all these methods.
+ *
+ * **Error handling:**
+ * Methods return booleans or result objects for known validation errors.
+ * Unexpected provider failures should cause the promise to reject.
  */
 export interface PermissionService {
   /**

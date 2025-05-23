@@ -22,6 +22,12 @@ import {
  * 
  * This interface defines all notification operations that can be performed.
  * Any implementation of this interface must provide all these methods.
+ *
+ * **Error handling:**
+ * Unless otherwise specified, methods should reject their promises when
+ * unexpected errors occur. Operations that return an object containing an
+ * `error` field should resolve with that object for business level failures
+ * rather than rejecting.
  */
 export interface NotificationService {
   /**
@@ -77,6 +83,26 @@ export interface NotificationService {
    * @returns Result object with success status and template ID or error
    */
   createTemplate(template: NotificationTemplate): Promise<{ success: boolean; templateId?: string; error?: string }>;
+
+  /**
+   * Update an existing notification template.
+   *
+   * @param templateId ID of the template to update
+   * @param update Partial template data to store
+   * @returns Result object describing success or containing error details
+   */
+  updateTemplate(
+    templateId: string,
+    update: Partial<NotificationTemplate>
+  ): Promise<{ success: boolean; template?: NotificationTemplate; error?: string }>;
+
+  /**
+   * Delete a notification template.
+   *
+   * @param templateId ID of the template to remove
+   * @returns Result object with success flag or error information
+   */
+  deleteTemplate(templateId: string): Promise<{ success: boolean; error?: string }>;
   
   /**
    * Send a notification using a template
@@ -98,16 +124,15 @@ export interface NotificationService {
   
   /**
    * Update a user's notification preferences
-   * 
+   *
    * @param userId ID of the user
    * @param preferences Updated notification preferences
-   * @returns Result object with success status and updated preferences or error
+   * @returns Updated preferences. The promise should reject if persistence fails.
    */
-  updateUserPreferences(userId: string, preferences: Partial<NotificationPreferences>): Promise<{ 
-    success: boolean; 
-    preferences?: NotificationPreferences; 
-    error?: string 
-  }>;
+  updateUserPreferences(
+    userId: string,
+    preferences: Partial<NotificationPreferences>
+  ): Promise<NotificationPreferences>;
   
   /**
    * Get notifications for a user
