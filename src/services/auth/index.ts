@@ -8,7 +8,7 @@
 import { AuthService } from '@/core/auth/interfaces';
 import { DefaultAuthService } from './default-auth.service';
 import type { AxiosInstance } from 'axios';
-import type { AuthDataProvider } from '@/adapters/auth/interfaces';
+import type { AuthDataProvider } from '@/core/auth/IAuthDataProvider';
 
 /**
  * Configuration options for creating an AuthService

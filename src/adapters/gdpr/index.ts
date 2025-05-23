@@ -1,6 +1,6 @@
 /**
  * GDPR Adapter Exports
  */
-export * from './interfaces';
+export * from '@/core/gdpr/IGdprDataProvider';
 export * from './factory';
 export * from './supabase-adapter';

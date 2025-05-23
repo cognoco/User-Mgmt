@@ -26,7 +26,7 @@ import {
 } from '@/core/team/models';
 import { TeamEventType } from '@/core/team/events';
 import type { AxiosInstance } from 'axios';
-import type { TeamDataProvider } from '@/adapters/team/interfaces';
+import type { TeamDataProvider } from '@/core/team/ITeamDataProvider';
 import { translateError } from '@/lib/utils/error';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
 

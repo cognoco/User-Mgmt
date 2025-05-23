@@ -24,7 +24,7 @@ import {
   PermissionEventHandler
 } from '@/core/permission/events';
 import type { AxiosInstance } from 'axios';
-import type { PermissionDataProvider } from '@/adapters/permission/interfaces';
+import type { PermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
 import { translateError } from '@/lib/utils/error';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
 

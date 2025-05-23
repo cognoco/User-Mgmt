@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { DefaultCsrfService } from '../default-csrf.service';
-import type { CsrfDataProvider } from '@/adapters/csrf/interfaces';
+import type { CsrfDataProvider } from '@/core/csrf/ICsrfDataProvider';
 
 describe('DefaultCsrfService', () => {
   it('returns token from provider', async () => {

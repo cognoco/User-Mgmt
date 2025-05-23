@@ -8,7 +8,7 @@
 import { UserService } from '@/core/user/interfaces';
 import { DefaultUserService } from './default-user.service';
 import type { AxiosInstance } from 'axios';
-import type { UserDataProvider } from '@/adapters/user/interfaces';
+import type { UserDataProvider } from '@/core/user/IUserDataProvider';
 
 /**
  * Configuration options for creating a UserService

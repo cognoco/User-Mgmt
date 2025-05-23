@@ -8,7 +8,7 @@
 import { TeamService } from '@/core/team/interfaces';
 import { DefaultTeamService } from './default-team.service';
 import type { AxiosInstance } from 'axios';
-import type { TeamDataProvider } from '@/adapters/team/interfaces';
+import type { TeamDataProvider } from '@/core/team/ITeamDataProvider';
 
 /**
  * Configuration options for creating a TeamService

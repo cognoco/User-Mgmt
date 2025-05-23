@@ -1,6 +1,6 @@
 import { GdprService } from '@/core/gdpr/interfaces';
 import { DefaultGdprService } from './default-gdpr.service';
-import type { GdprDataProvider } from '@/adapters/gdpr/interfaces';
+import type { GdprDataProvider } from '@/core/gdpr/IGdprDataProvider';
 
 export interface GdprServiceConfig {
   gdprDataProvider: GdprDataProvider;

@@ -8,7 +8,7 @@
 import { PermissionService } from '@/core/permission/interfaces';
 import { DefaultPermissionService } from './default-permission.service';
 import type { AxiosInstance } from 'axios';
-import type { PermissionDataProvider } from '@/adapters/permission/interfaces';
+import type { PermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
 
 /**
  * Configuration options for creating a PermissionService

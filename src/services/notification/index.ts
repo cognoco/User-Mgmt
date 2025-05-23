@@ -9,7 +9,7 @@ import { NotificationService, NotificationHandler } from '@/core/notification/in
 import { DefaultNotificationService } from './default-notification-service';
 import { DefaultNotificationHandler } from './default-notification.handler';
 import type { AxiosInstance } from 'axios';
-import type { NotificationDataProvider } from '@/adapters/notification/interfaces';
+import type { NotificationDataProvider } from '@/core/notification/INotificationDataProvider';
 
 /**
  * Configuration options for creating a NotificationService

@@ -1,6 +1,6 @@
 import { CsrfService } from '@/core/csrf/interfaces';
 import { DefaultCsrfService } from './default-csrf.service';
-import type { CsrfDataProvider } from '@/adapters/csrf/interfaces';
+import type { CsrfDataProvider } from '@/core/csrf/ICsrfDataProvider';
 export { BrowserCsrfService } from './browser-csrf.service';
 
 export interface CsrfServiceConfig {

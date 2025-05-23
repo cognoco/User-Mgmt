@@ -1,7 +1,7 @@
 import { DefaultSessionService } from './default-session.service';
 import type { SessionService } from '@/core/session/interfaces';
 import type { AxiosInstance } from 'axios';
-import type { SessionDataProvider } from '@/adapters/session/interfaces';
+import type { SessionDataProvider } from '@/core/session/ISessionDataProvider';
 
 export interface SessionServiceConfig {
   apiClient: AxiosInstance;

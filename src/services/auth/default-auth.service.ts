@@ -10,7 +10,7 @@ import {
   AuthState
 } from '@/core/auth/interfaces';
 import type { AxiosInstance } from 'axios';
-import type { AuthDataProvider } from '@/adapters/auth/interfaces';
+import type { AuthDataProvider } from '@/core/auth/IAuthDataProvider';
 import { 
   AuthResult, 
   LoginPayload, 

@@ -3,7 +3,7 @@
  */
 
 import { SsoService } from '@/core/sso/interfaces';
-import { SsoDataProvider } from '@/adapters/sso/interfaces';
+import { SsoDataProvider } from '@/core/sso/ISsoDataProvider';
 import { SsoProvider, SsoProviderPayload } from '@/core/sso/models';
 
 export class DefaultSsoService implements SsoService {

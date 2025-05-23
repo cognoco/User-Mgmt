@@ -23,7 +23,7 @@ import {
   NotificationPriority
 } from '@/core/notification/models';
 import type { AxiosInstance } from 'axios';
-import type { NotificationDataProvider } from '@/adapters/notification/interfaces';
+import type { NotificationDataProvider } from '@/core/notification/INotificationDataProvider';
 
 /**
  * Default implementation of the NotificationService interface

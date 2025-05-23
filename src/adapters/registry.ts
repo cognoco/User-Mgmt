@@ -7,16 +7,16 @@
  * database-agnostic as per the architecture guidelines.
  */
 
-import { AuthDataProvider } from './auth/interfaces';
-import { UserDataProvider } from './user/interfaces';
-import { TeamDataProvider } from './team/interfaces';
-import { PermissionDataProvider } from './permission/interfaces';
-import { GdprDataProvider } from './gdpr/interfaces';
-import { SessionDataProvider } from './session/interfaces';
-import { SsoDataProvider } from './sso/interfaces';
-import { SubscriptionDataProvider } from './subscription/interfaces';
-import { ApiKeyDataProvider } from './api-keys/interfaces';
-import { IWebhookDataProvider } from './webhook/IWebhookDataProvider';
+import { AuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import { UserDataProvider } from '@/core/user/IUserDataProvider';
+import { TeamDataProvider } from '@/core/team/ITeamDataProvider';
+import { PermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
+import { GdprDataProvider } from '@/core/gdpr/IGdprDataProvider';
+import { SessionDataProvider } from '@/core/session/ISessionDataProvider';
+import { SsoDataProvider } from '@/core/sso/ISsoDataProvider';
+import { SubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataProvider';
+import { ApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
+import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 
 
 /**
