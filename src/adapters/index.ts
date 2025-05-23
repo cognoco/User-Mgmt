@@ -28,4 +28,4 @@ import { createSupabaseAdapterFactory } from './supabase-factory';
 AdapterRegistry.registerFactory('supabase', createSupabaseAdapterFactory);
 
 // Re-export the registry instance for convenience
-export { AdapterRegistry as default } from './registry';
+export { AdapterRegistry as default } from "./registry";

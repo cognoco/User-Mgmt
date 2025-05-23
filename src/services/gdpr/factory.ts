@@ -8,8 +8,8 @@
 import { GdprService } from '@/core/gdpr/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
 import type { IGdprDataProvider } from '@/core/gdpr';
-import { createGdprProvider } from '@/adapters/gdpr/factory';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { AdapterRegistry } from '@/adapters/registry';
+import { DefaultGdprService } from './default-gdpr.service';
 
 // Singleton instance for API routes
 let gdprServiceInstance: GdprService | null = null;
@@ -21,27 +21,13 @@ let gdprServiceInstance: GdprService | null = null;
  */
 export function getApiGdprService(): GdprService {
   if (!gdprServiceInstance) {
-    // Get Supabase configuration from the existing service
-    const supabase = getServiceSupabase();
-    
-    // Create GDPR data provider
-    const gdprDataProvider: IGdprDataProvider = createGdprProvider({
-      type: 'supabase',
-      options: {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-      }
-    });
-    
-    // Create GDPR service with the data provider
-    gdprServiceInstance = UserManagementConfiguration.getServiceProvider('gdprService') as GdprService;
-    
-    // If no GDPR service is registered, throw an error
+    gdprServiceInstance = UserManagementConfiguration.getServiceProvider('gdprService') as GdprService | undefined;
     if (!gdprServiceInstance) {
-      throw new Error('GDPR service not registered in UserManagementConfiguration');
+      const gdprDataProvider = AdapterRegistry.getInstance().getAdapter<IGdprDataProvider>('gdpr');
+      gdprServiceInstance = new DefaultGdprService(gdprDataProvider);
     }
   }
-  
+
   return gdprServiceInstance;
 }
 
