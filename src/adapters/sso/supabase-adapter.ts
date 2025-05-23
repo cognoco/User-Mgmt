@@ -6,7 +6,14 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { SsoProvider, SsoProviderPayload } from '../../core/sso/models';
+import {
+  SsoProvider,
+  SsoProviderPayload,
+  SsoProviderQueryParams,
+  SsoProviderListResult,
+  SsoProviderResult,
+  SsoProviderBatchResult,
+} from '../../core/sso/models';
 import type { ISsoDataProvider } from '@/core/sso/ISsoDataProvider';
 
 
@@ -31,7 +38,9 @@ export class SupabaseSsoProvider implements ISsoDataProvider {
     return (data || []).map(this.mapRecordToProvider);
   }
 
-  async upsertProvider(payload: SsoProviderPayload): Promise<SsoProvider> {
+  async upsertProvider(
+    payload: SsoProviderPayload
+  ): Promise<{ success: boolean; provider?: SsoProvider; error?: string }> {
     const { data, error } = await this.supabase
       .from('sso_providers')
       .upsert(
@@ -48,15 +57,167 @@ export class SupabaseSsoProvider implements ISsoDataProvider {
       .select()
       .maybeSingle();
 
+    if (error || !data) {
+      return { success: false, error: error?.message || 'Failed to upsert SSO provider' };
+    }
+
+    return { success: true, provider: this.mapRecordToProvider(data) };
+  }
+
+  async createProvider(payload: SsoProviderPayload): Promise<SsoProviderResult> {
+    const { data, error } = await this.supabase
+      .from('sso_providers')
+      .insert({
+        organization_id: payload.organizationId,
+        provider_type: payload.providerType,
+        provider_name: payload.providerName,
+        config: payload.config,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error || !data) {
+      return { success: false, error: error?.message || 'Failed to create SSO provider' };
+    }
+
+    return { success: true, provider: this.mapRecordToProvider(data) };
+  }
+
+  async updateProvider(
+    providerId: string,
+    payload: Partial<SsoProviderPayload>
+  ): Promise<SsoProviderResult> {
+    const update: Record<string, any> = { updated_at: new Date().toISOString() };
+    if (payload.providerType) update.provider_type = payload.providerType;
+    if (payload.providerName) update.provider_name = payload.providerName;
+    if (payload.config) update.config = payload.config;
+
+    const { data, error } = await this.supabase
+      .from('sso_providers')
+      .update(update)
+      .eq('id', providerId)
+      .select()
+      .maybeSingle();
+
+    if (error || !data) {
+      return { success: false, error: error?.message || 'Failed to update SSO provider' };
+    }
+
+    return { success: true, provider: this.mapRecordToProvider(data) };
+  }
+
+  async queryProviders(
+    organizationId: string,
+    query: SsoProviderQueryParams = {}
+  ): Promise<SsoProviderListResult> {
+    const page = query.page ?? 0;
+    const limit = query.limit ?? 20;
+
+    let req = this.supabase
+      .from('sso_providers')
+      .select('*', { count: 'exact' })
+      .eq('organization_id', organizationId);
+
+    if (query.providerType) req = req.eq('provider_type', query.providerType);
+    if (typeof query.isActive === 'boolean') req = req.eq('is_active', query.isActive);
+
+    if (query.sortBy) {
+      const column = query.sortBy === 'providerName' ? 'provider_name' : 'created_at';
+      req = req.order(column, { ascending: query.sortDirection !== 'desc' });
+    } else {
+      req = req.order('created_at', { ascending: false });
+    }
+
+    req = req.range(page * limit, page * limit + limit - 1);
+
+    const { data, error, count } = await req;
+
     if (error) {
       throw new Error(error.message);
     }
 
-    if (!data) {
-      throw new Error('Failed to upsert SSO provider');
+    const providers = (data || []).map(this.mapRecordToProvider);
+    const total = count ?? providers.length;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      providers,
+      pagination: {
+        page,
+        pageSize: limit,
+        totalItems: total,
+        totalPages,
+        hasNextPage: page * limit + providers.length < total,
+        hasPreviousPage: page > 0,
+      },
+    };
+  }
+
+  async getProvider(
+    organizationId: string,
+    providerId: string
+  ): Promise<SsoProvider | null> {
+    const { data, error } = await this.supabase
+      .from('sso_providers')
+      .select('*')
+      .eq('organization_id', organizationId)
+      .eq('id', providerId)
+      .maybeSingle();
+
+    if (error || !data) {
+      return null;
     }
 
     return this.mapRecordToProvider(data);
+  }
+
+  async setProviderActive(
+    providerId: string,
+    active: boolean
+  ): Promise<SsoProviderResult> {
+    const { data, error } = await this.supabase
+      .from('sso_providers')
+      .update({ is_active: active, updated_at: new Date().toISOString() })
+      .eq('id', providerId)
+      .select()
+      .maybeSingle();
+
+    if (error || !data) {
+      return { success: false, error: error?.message || 'Failed to update provider status' };
+    }
+
+    return { success: true, provider: this.mapRecordToProvider(data) };
+  }
+
+  async deleteProvider(providerId: string): Promise<{ success: boolean; error?: string }> {
+    const { error } = await this.supabase
+      .from('sso_providers')
+      .delete()
+      .eq('id', providerId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  }
+
+  async deleteProviders(providerIds: string[]): Promise<SsoProviderBatchResult> {
+    const results: SsoProviderBatchResult['results'] = [];
+
+    for (const id of providerIds) {
+      const { error } = await this.supabase
+        .from('sso_providers')
+        .delete()
+        .eq('id', id);
+
+      results.push({ id, success: !error, error: error?.message });
+    }
+
+    return { success: results.every(r => r.success), results };
   }
 
   private mapRecordToProvider(record: any): SsoProvider {
