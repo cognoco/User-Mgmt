@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getApiCsrfService } from '@/services/csrf/factory';
+import { getApiCSRFService } from '@/services/csrf/factory';
 
 // Configuration (consider moving to a shared config if used elsewhere)
 const cookieName = 'csrf-token';
@@ -8,7 +8,7 @@ const sameSite = 'strict';
 
 export async function GET() {
   try {
-    const csrfService = getApiCsrfService();
+    const csrfService = getApiCSRFService();
     const { token } = await csrfService.generateToken();
     const response = NextResponse.json({ csrfToken: token }, { status: 200 });
 

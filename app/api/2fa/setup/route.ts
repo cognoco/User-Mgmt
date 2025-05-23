@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { authenticator } from 'otplib';
 import * as qrcode from 'qrcode';
 import { TwoFactorMethod } from '@/types/2fa';
-import { getApiTwoFactorService } from '@/services/two-factor/factory';
+import { getApi2FAService } from '@/services/two-factor/factory';
 import { getApiAuthService } from '@/services/auth/factory';
 
 // Request schema
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
     // Get service instances from factories
     const authService = getApiAuthService();
-    const twoFactorService = getApiTwoFactorService();
+    const twoFactorService = getApi2FAService();
     
     // Verify user authentication
     const cookieStore = cookies();

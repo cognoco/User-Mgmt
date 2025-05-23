@@ -44,3 +44,10 @@ export function getApiKeyService(): ApiKeyService {
   
   return apiKeyServiceInstance;
 }
+
+/**
+ * Temporary alias for backwards compatibility with older route imports.
+ */
+export function getApiKeysService(): ApiKeyService {
+  return getApiKeyService();
+}

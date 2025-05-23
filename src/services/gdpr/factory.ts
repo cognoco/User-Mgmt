@@ -44,3 +44,10 @@ export function getApiGdprService(): GdprService {
   
   return gdprServiceInstance;
 }
+
+/**
+ * Temporary alias for backwards compatibility with older route imports.
+ */
+export function getApiGDPRService(): GdprService {
+  return getApiGdprService();
+}
