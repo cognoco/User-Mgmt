@@ -1,16 +1,24 @@
 # UI Integration Task: [DOMAIN_NAME]
 
 ## Your Task
-Integrate the [DOMAIN_NAME] components into the User Management Module following the new architecture patterns. This task focuses on replacing direct database calls with the new hooks layer and implementing UI pages using the existing headless/styled components.
+**PRIMARY FOCUS: Update import paths and integrate the new architecture components**
+
+Your main responsibility is to update the existing pages to use the new architecture components for [DOMAIN_NAME]. This means:
+1. Replacing direct database/API calls with the new hooks
+2. Updating import paths to use the new component locations
+3. Integrating the existing headless/styled components into the UI
+
+This task is primarily about integration, not creating new components from scratch.
 
 ## What You Need to Do
 
-### 1. Verify Component Existence
-**IMPORTANT: All components should already exist in the codebase**
-- First check if the required hooks exist in `src/hooks/[domain]/`
-- Verify headless components exist in `src/ui/headless/[domain]/`
-- Verify styled components exist in `src/ui/styled/[domain]/`
-- If any component is missing, create a minimal placeholder that follows the architecture pattern, but do NOT implement full functionality
+### 1. Search Thoroughly for Existing Components
+**IMPORTANT: Search the entire codebase before creating anything new**
+- First search for hooks in `src/hooks/[domain]/` and related directories
+- Search for headless components in `src/ui/headless/[domain]/` and related directories
+- Search for styled components in `src/ui/styled/[domain]/` and related directories
+- Check for alternative naming patterns or locations if not found initially
+- Use grep or other search tools to find any references to the component
 
 ### 2. Create or Update the Page Component
 
@@ -28,17 +36,27 @@ Create a new page component at `app/[SECTION]/[DOMAIN]/page.tsx` that:
 - **IMPORTANT**: Do not delete any existing functionality
 
 ### 3. Implementation Requirements
-- Replace ALL direct database/API calls with hook methods
-- Use ONLY the existing hooks and UI components - don't create new ones
-- Follow the established UI patterns for consistency
-- Ensure proper error handling and loading states
-- Maintain responsive design for all screen sizes
-- **IMPORTANT**: Implement and verify all import paths correctly
-  - Hooks should be imported from `@/hooks/{domain}/use-{feature}`
-  - Headless components from `@/ui/headless/{domain}/{Component}`
-  - Styled components from `@/ui/styled/{domain}/{Component}`
+
+**MAIN FOCUS: UPDATE IMPORT PATHS AND INTEGRATE COMPONENTS**
+
+- **Update all import paths to use the new architecture structure:**
+  - Hooks: `@/hooks/{domain}/use-{feature}`
+  - Headless components: `@/ui/headless/{domain}/{Component}`
+  - Styled components: `@/ui/styled/{domain}/{Component}`
   - Follow kebab-case for file imports, PascalCase for components
-- If a component is missing, create only a minimal placeholder that follows the architecture pattern
+
+- **Replace direct database/API calls with hook methods:**
+  - Remove any direct Supabase or API calls
+  - Use the appropriate hook methods instead
+  - Ensure proper error handling and loading states
+
+- **Integrate the existing UI components:**
+  - Use the headless components for behavior
+  - Use the styled components for appearance
+  - Maintain the current layout and user experience
+  - Preserve all existing functionality
+
+- Only if a component is truly missing after thorough searching, create a proper implementation following architecture guidelines
 
 ### 4. Example Implementation
 
@@ -95,37 +113,56 @@ If your component requires a new navigation item:
 - Add it to the appropriate navigation component
 - Ensure it's only shown when the user has the correct permissions
 
-### 6. Creating Placeholders (Only if needed)
-If a required component is missing, create a minimal placeholder that:
-- Follows the architecture pattern (interface-based, headless pattern, etc.)
-- Has the correct file structure and naming conventions
-- Includes basic props and types but minimal implementation
-- Has clear TODO comments indicating it's a placeholder
-- Does NOT implement full business logic or complex UI
+### 6. Creating New Components (When Needed)
+If a required component is truly missing after thorough searching, create a proper implementation that:
+- Strictly follows the architecture pattern (interface-based, headless pattern, etc.)
+- Adheres to the correct file structure and naming conventions
+- Implements full functionality according to domain requirements
+- Includes comprehensive props, types, and error handling
+- Follows the separation of concerns principle
 
-Example placeholder for a missing component:
+Implementation order for new components:
+1. First create the core interfaces (if needed)
+2. Implement adapter interfaces (if needed)
+3. Create service implementations
+4. Develop hooks that use the services
+5. Build headless components that use the hooks
+6. Create styled components that use the headless components
+
+Example implementation for a new component:
 ```tsx
-// src/ui/headless/[domain]/MissingComponent.tsx
+// src/ui/headless/[domain]/NewComponent.tsx
 import React from 'react';
+import { use[Domain] } from '@/hooks/[domain]/use-[domain]';
 
-export interface MissingComponentProps {
-  // Basic props only
+export interface NewComponentProps {
+  // Comprehensive props
+  initialData?: [DomainType];
   loading?: boolean;
   error?: Error | null;
-  onAction?: () => void;
+  onSubmit: (data: [DomainType]) => Promise<void>;
+  onUpdate: (id: string, data: Partial<[DomainType]>) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
 }
 
-export const MissingComponent: React.FC<MissingComponentProps> = ({
+export const NewComponent: React.FC<NewComponentProps> = ({
+  initialData = [],
   loading = false,
   error = null,
-  onAction,
+  onSubmit,
+  onUpdate,
+  onDelete,
 }) => {
-  // TODO: This is a placeholder component that needs proper implementation
+  // Full implementation with proper state management and error handling
+  const [data, setData] = React.useState(initialData);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  
+  // Implement full component logic here
+  // ...
+  
   return (
     <div>
-      {loading && <p>Loading...</p>}
-      {error && <p>Error: {error.message}</p>}
-      <button onClick={onAction} disabled={loading}>Action</button>
+      {/* Implement full UI here */}
     </div>
   );
 };
