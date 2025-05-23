@@ -1,0 +1,33 @@
+/**
+ * Audit Data Provider Interface
+ *
+ * Defines the contract for persistence operations related to audit logs.
+ * This allows the service layer to remain database-agnostic.
+ */
+import type { AuditLogEntry, AuditLogQuery } from './models';
+
+export interface IAuditDataProvider {
+  /**
+   * Persist a new audit log entry.
+   *
+   * @param entry - Log entry to store
+   * @returns Result with success status and new log id or error
+   */
+  createLog(entry: AuditLogEntry): Promise<{ success: boolean; id?: string; error?: string }>;
+
+  /**
+   * Retrieve audit log entries using the provided query parameters.
+   *
+   * @param query - Query filters and pagination options
+   * @returns List of logs and total count matching the query
+   */
+  getLogs(query: AuditLogQuery): Promise<{ logs: AuditLogEntry[]; count: number }>;
+
+  /**
+   * Export audit log entries that match the given query as a downloadable blob.
+   *
+   * @param query - Query filters for selecting logs to export
+   * @returns Blob containing the exported logs
+   */
+  exportLogs(query: AuditLogQuery): Promise<Blob>;
+}
