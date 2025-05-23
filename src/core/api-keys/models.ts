@@ -32,3 +32,49 @@ export interface ApiKeyCreateResult {
   plaintext?: string;
   error?: string;
 }
+
+/**
+ * Parameters for querying API keys.
+ */
+export interface ApiKeyQuery {
+  /** Search by key name */
+  search?: string;
+
+  /** Filter by revoked state */
+  isRevoked?: boolean;
+
+  /** Filter by expiration date (ISO string) */
+  expiresBefore?: string;
+
+  /** Sort field */
+  sortBy?: 'name' | 'createdAt' | 'expiresAt';
+
+  /** Sort direction */
+  sortDirection?: 'asc' | 'desc';
+
+  /** Page number starting from 1 */
+  page?: number;
+
+  /** Items per page */
+  limit?: number;
+}
+
+/**
+ * Result of an API key list query.
+ */
+export interface ApiKeyListResult {
+  /** Array of API keys for the current page */
+  apiKeys: ApiKey[];
+
+  /** Total number of keys matching the query */
+  total: number;
+
+  /** Current page number */
+  page: number;
+
+  /** Items per page */
+  limit: number;
+
+  /** Total number of pages */
+  totalPages: number;
+}

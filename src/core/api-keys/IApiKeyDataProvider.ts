@@ -8,12 +8,19 @@
 import type {
   ApiKey,
   ApiKeyCreatePayload,
-  ApiKeyCreateResult
+  ApiKeyCreateResult,
+  ApiKeyQuery,
+  ApiKeyListResult
 } from './models';
 
 export interface IApiKeyDataProvider {
-  /** List all API keys belonging to a user */
-  listApiKeys(userId: string): Promise<ApiKey[]>;
+  /**
+   * List API keys belonging to a user.
+   *
+   * @param userId Identifier of the owner
+   * @param query  Optional query and pagination options
+   */
+  listApiKeys(userId: string, query?: ApiKeyQuery): Promise<ApiKeyListResult>;
 
   /** Retrieve a single API key by id */
   getApiKey(userId: string, keyId: string): Promise<ApiKey | null>;
@@ -53,4 +60,17 @@ export interface IApiKeyDataProvider {
     userId: string,
     keyId: string
   ): Promise<{ success: boolean; key?: ApiKey; plaintext?: string; error?: string }>;
+
+  /**
+   * Update an existing API key.
+   *
+   * @param userId Owner of the key
+   * @param keyId  Identifier of the key to update
+   * @param update Partial data to update
+   */
+  updateApiKey(
+    userId: string,
+    keyId: string,
+    update: Partial<ApiKeyCreatePayload>
+  ): Promise<{ success: boolean; key?: ApiKey; error?: string }>;
 }

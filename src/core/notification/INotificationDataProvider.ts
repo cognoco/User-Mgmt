@@ -6,6 +6,7 @@
  * remains database agnostic.
  */
 import type {
+  Notification,
   NotificationPayload,
   NotificationPreferences,
   NotificationTemplate,
@@ -13,6 +14,8 @@ import type {
   NotificationBatch,
   NotificationFilter,
   NotificationDeliveryStatus,
+  NotificationTemplateQuery,
+  NotificationTemplateList,
   NotificationChannel
 } from './models';
 
@@ -58,6 +61,14 @@ export interface INotificationDataProvider {
   ): Promise<NotificationResult>;
 
   /**
+   * Retrieve a notification by its identifier.
+   *
+   * @param notificationId - Unique identifier of the notification
+   * @returns The notification or null if not found
+   */
+  getNotification(notificationId: string): Promise<Notification | null>;
+
+  /**
    * Cancel a previously scheduled notification.
    *
    * @param notificationId - ID of the scheduled notification
@@ -85,6 +96,26 @@ export interface INotificationDataProvider {
    * Delete a notification template.
    */
   deleteTemplate(templateId: string): Promise<{ success: boolean; error?: string }>;
+
+  /**
+   * List notification templates with optional filtering and pagination.
+   *
+   * @param query - Filtering and pagination options
+   * @returns Templates with paging information
+   */
+  listTemplates(
+    query?: NotificationTemplateQuery
+  ): Promise<NotificationTemplateList>;
+
+  /**
+   * Retrieve a notification template by id.
+   *
+   * @param templateId - Unique identifier of the template
+   * @returns The template or null if not found
+   */
+  getTemplate(
+    templateId: string
+  ): Promise<NotificationTemplate | null>;
 
   /**
    * Send a notification using a template and data replacements.
