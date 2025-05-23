@@ -58,7 +58,17 @@ export interface IUserDataProvider {
     visibility: ProfileVisibility
   ): Promise<{ success: boolean; visibility?: ProfileVisibility; error?: string }>;
 
-  /** Search for users based on parameters */
+  /**
+   * Search for users based on various filters.
+   *
+   * Implementations should support pagination and sorting to allow efficient
+   * user directories. The {@link UserSearchParams} object contains optional
+   * filters such as `query`, `userType` and `isActive` as well as `page`,
+   * `limit`, `sortBy` and `sortDirection` for paging and ordering results.
+   *
+   * @param params Search and paging parameters
+   * @returns A paginated list of users with metadata
+   */
   searchUsers(params: UserSearchParams): Promise<UserSearchResult>;
 
   /** Deactivate a user account */
