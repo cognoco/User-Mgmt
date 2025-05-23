@@ -26,7 +26,7 @@ describe('SupabaseAuditAdapter', () => {
 
   it('fetches user action logs', async () => {
     const adapter = new SupabaseAuditAdapter(SUPABASE_URL, SUPABASE_KEY);
-    const { logs, count } = await adapter.getUserActionLogs({ page: 1, limit: 10 });
+    const { logs, count } = await adapter.getLogs({ page: 1, limit: 10 });
 
     expect(count).toBe(1);
     expect(logs[0]).toEqual({
@@ -41,5 +41,16 @@ describe('SupabaseAuditAdapter', () => {
       targetResourceId: 'user-1',
       details: { foo: 'bar' },
     });
+  });
+
+  it('creates a log entry', async () => {
+    setTableMockData('user_actions_log', { data: logRecord, error: null });
+    const adapter = new SupabaseAuditAdapter(SUPABASE_URL, SUPABASE_KEY);
+    const result = await adapter.createLog({
+      userId: 'user-1',
+      action: 'LOGIN',
+      status: 'SUCCESS'
+    });
+    expect(result.success).toBe(true);
   });
 });
