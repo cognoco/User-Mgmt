@@ -7,7 +7,7 @@
 
 import { IWebhookService } from '@/core/webhooks';
 import { UserManagementConfiguration } from '@/core/config';
-import { createWebhookProvider } from '@/adapters/webhook/factory';
+import { createWebhookProvider } from '@/adapters/webhook';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
 // Singleton instance for API routes

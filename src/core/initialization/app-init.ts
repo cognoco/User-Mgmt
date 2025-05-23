@@ -7,6 +7,9 @@
 
 import { UserManagementConfiguration } from '@/core/config';
 import { createSupabaseClient } from '@/lib/database/supabase';
+import { api } from '@/lib/api/axios';
+import { createSupabaseWebhookProvider } from '@/adapters/webhook';
+import { createWebhookService } from '@/services/webhooks';
 
 // Initialize the application
 export function initializeApp() {
@@ -179,7 +182,15 @@ export function initializeApp() {
         getPermissions: async () => ({ success: true, permissions: [] }),
         assignRole: async () => ({ success: true }),
         revokeRole: async () => ({ success: true }),
-      }
+      },
+
+      webhookService: createWebhookService({
+        apiClient: api,
+        webhookDataProvider: createSupabaseWebhookProvider({
+          supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+          supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+        })
+      })
     });
     
     console.log('Application initialized successfully');
