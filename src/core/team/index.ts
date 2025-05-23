@@ -6,6 +6,7 @@
 
 // Export interfaces
 export * from './interfaces';
+export * from './ITeamDataProvider';
 
 // Export models
 export * from './models';
