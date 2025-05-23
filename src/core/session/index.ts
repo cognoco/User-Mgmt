@@ -3,4 +3,5 @@
  */
 
 export * from './interfaces';
+export * from './ISessionDataProvider';
 export * from './models';
