@@ -1,7 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import {
-  AddressDataProvider
-} from './interfaces';
+import type { IAddressDataProvider } from '@/core/address/IAddressDataProvider';
 import {
   CompanyAddress,
   AddressCreatePayload,
@@ -9,7 +7,7 @@ import {
   AddressResult
 } from '../../core/address/models';
 
-export class SupabaseAddressAdapter implements AddressDataProvider {
+export class SupabaseAddressAdapter implements IAddressDataProvider {
   private supabase: SupabaseClient;
 
   constructor(supabaseUrl: string, supabaseKey: string) {
