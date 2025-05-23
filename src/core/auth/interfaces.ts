@@ -17,10 +17,17 @@ import {
 
 /**
  * Core authentication service interface
- * 
+ *
  * This interface defines all authentication-related operations that can be performed.
  * Any implementation of this interface must provide all these methods.
- */
+ *
+ * **Error handling:**
+ * Methods should reject their returned promises when an operation fails due to
+ * underlying provider errors or validation issues. Methods that return an
+ * object with an `error` property should not reject the promise for expected
+ * business errors (e.g. invalid credentials) but instead resolve with that
+ * information.
+*/
 export interface AuthService {
   /**
    * Authenticate a user with email and password
@@ -45,10 +52,12 @@ export interface AuthService {
   
   /**
    * Get the currently authenticated user
-   * 
-   * @returns The current user or null if not authenticated
+   *
+   * @returns Promise that resolves with the current user or `null` if the
+   *          session is not authenticated. The promise should reject if the
+   *          underlying data provider fails to retrieve the user.
    */
-  getCurrentUser(): User | null;
+  getCurrentUser(): Promise<User | null>;
   
   /**
    * Check if a user is currently authenticated
