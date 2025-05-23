@@ -1,22 +1,31 @@
-import type { AuditLog, AuditLogFilters } from './types';
+import type { AuditLogEntry, AuditLogQuery } from "./models";
 
+/**
+ * High level audit logging service.
+ *
+ * Implementations should surface validation problems via the returned objects
+ * and reserve promise rejection for unexpected failures.
+ */
 export interface AuditService {
-  /** Log an event to the audit log */
+  /**
+   * Persist a new audit log entry.
+   *
+   * @param entry Log information to store
+   * @returns Result object indicating success or failure
+   */
   logEvent(
-    action: string,
-    entityType: string,
-    entityId: string,
-    metadata?: Record<string, unknown>
-  ): Promise<void>;
+    entry: AuditLogEntry,
+  ): Promise<{ success: boolean; id?: string; error?: string }>;
 
-  /** Retrieve audit logs with optional filtering and pagination */
+  /**
+   * Retrieve audit logs using the provided query parameters.
+   */
   getLogs(
-    filters: AuditLogFilters,
-    page: number,
-    pageSize: number
-  ): Promise<{ logs: AuditLog[]; total: number }>;
+    query: AuditLogQuery,
+  ): Promise<{ logs: AuditLogEntry[]; count: number }>;
 
-  /** Export audit logs as a blob (e.g. CSV or Excel) */
-  exportLogs(filters: AuditLogFilters): Promise<Blob>;
+  /**
+   * Export audit logs that match the query as a downloadable blob.
+   */
+  exportLogs(query: AuditLogQuery): Promise<Blob>;
 }
-
