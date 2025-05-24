@@ -144,7 +144,7 @@ test.describe('Team Invite Flow', () => {
   test('Admin can send invitation and invitee can accept it', async ({ page, browserName }) => {
     console.log('=== Starting admin login ===');
     // Step 1: Admin logs in
-    await navigateWithFallback(page, '/login');
+    await navigateWithFallback(page, '/auth/login');
     
     // Wait for login form to be visible with proper error handling
     const formVisible = await Promise.race([
@@ -464,7 +464,7 @@ test.describe('Team Invite Flow', () => {
   test('Admin can see invites in team management', async ({ page, browserName }) => {
     console.log('=== Testing admin view of pending invites ===');
     // Log in as admin
-    await navigateWithFallback(page, '/login');
+    await navigateWithFallback(page, '/auth/login');
     await fillLoginForm(page, ADMIN_EMAIL, ADMIN_PASSWORD, browserName);
     
     // Navigate to team management

@@ -289,10 +289,10 @@ test.describe('Team/Seat Licensing Management', () => {
   test('Admin can view team seat usage details', async ({ page }) => {
     // Navigate to the login page
     try {
-      await page.goto('/login', { timeout: 10000 });
+      await page.goto('/auth/login', { timeout: 10000 });
     } catch (e) {
       console.log('First navigation attempt failed, retrying...');
-      await page.goto('/login', { timeout: 5000 });
+      await page.goto('/auth/login', { timeout: 5000 });
     }
 
     // Wait for login form to be visible
@@ -342,10 +342,10 @@ test.describe('Team/Seat Licensing Management', () => {
 
     // Navigate to the login page
     try {
-      await page.goto('/login', { timeout: 10000 });
+      await page.goto('/auth/login', { timeout: 10000 });
     } catch (e) {
       console.log('First navigation attempt failed, retrying...');
-      await page.goto('/login', { timeout: 5000 });
+      await page.goto('/auth/login', { timeout: 5000 });
     }
 
     // Wait for login form to be visible
@@ -435,10 +435,10 @@ test.describe('Team/Seat Licensing Management', () => {
   test('Admin can remove team members to free up seats', async ({ page }) => {
     // Navigate to the login page
     try {
-      await page.goto('/login', { timeout: 10000 });
+      await page.goto('/auth/login', { timeout: 10000 });
     } catch (e) {
       console.log('First navigation attempt failed, retrying...');
-      await page.goto('/login', { timeout: 5000 });
+      await page.goto('/auth/login', { timeout: 5000 });
     }
 
     // Wait for login form to be visible
@@ -505,10 +505,10 @@ test.describe('Team/Seat Licensing Management', () => {
   test('Admin can navigate to subscription management to add more seats', async ({ page }) => {
     // Navigate to the login page
     try {
-      await page.goto('/login', { timeout: 10000 });
+      await page.goto('/auth/login', { timeout: 10000 });
     } catch (e) {
       console.log('First navigation attempt failed, retrying...');
-      await page.goto('/login', { timeout: 5000 });
+      await page.goto('/auth/login', { timeout: 5000 });
     }
 
     // Wait for login form to be visible

@@ -3,9 +3,9 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { getSessionTimeout } from '@/lib/security/security-policy.service';
 
 // Define paths that require authentication
-const protectedPaths = ['/profile', '/settings', '/complete-profile']; 
+const protectedPaths = ['/account/profile', '/settings', '/account/complete-profile'];
 // Define public paths that authenticated users maybe shouldn't see (optional)
-const publicOnlyPaths = ['/login', '/register'];
+const publicOnlyPaths = ['/auth/login', '/auth/register'];
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
@@ -43,9 +43,9 @@ export async function middleware(req: NextRequest) {
 
   if (isProtected && !session) {
     // Redirect unauthenticated users trying to access protected paths to login
-    console.log(`Redirecting unauthenticated user from ${pathname} to /login`);
+    console.log(`Redirecting unauthenticated user from ${pathname} to /auth/login`);
     const redirectUrl = req.nextUrl.clone();
-    redirectUrl.pathname = '/login';
+    redirectUrl.pathname = '/auth/login';
     redirectUrl.searchParams.set('redirectedFrom', pathname); // Optional: add redirect origin
     return NextResponse.redirect(redirectUrl);
   }
@@ -74,7 +74,7 @@ export async function middleware(req: NextRequest) {
               
               // Redirect to login
               const redirectUrl = req.nextUrl.clone();
-              redirectUrl.pathname = '/login';
+              redirectUrl.pathname = '/auth/login';
               redirectUrl.searchParams.set('reason', 'session_timeout');
               return NextResponse.redirect(redirectUrl);
             }
@@ -116,15 +116,15 @@ export const config = {
      */
     '/((?!api|_next/static|_next/image|favicon.ico).*)', // Run on most paths, including '/', handle public/auth redirects inside
     // Explicitly include paths needing protection (redundant if first line is broad enough, but safe to keep)
-    '/profile/:path*',
+    '/account/profile/:path*',
     '/settings/:path*',
-    '/complete-profile/:path*',
+    '/account/complete-profile/:path*',
     // Add back explicit matches for auth pages if you want middleware to run there for redirects
-    '/login',
-    '/register',
-    '/reset-password',
-    '/update-password',
-    '/verify-email',
-    '/check-email',
+    '/auth/login',
+    '/auth/register',
+    '/auth/reset-password',
+    '/auth/update-password',
+    '/auth/verify-email',
+    '/auth/check-email',
   ],
 }; 

@@ -22,13 +22,13 @@ export default function HomePage() {
       name: t('home.feature.auth.title', 'Authentication'),
       description: t('home.feature.auth.description', 'Secure user authentication with email/password, social login, and two-factor authentication.'),
       icon: KeyRound,
-      href: '/login',
+      href: '/auth/login',
     },
     {
       name: t('home.feature.profile.title', 'Profile Management'),
       description: t('home.feature.profile.description', 'Customizable user profiles with avatar support and privacy settings.'),
       icon: UserCircle,
-      href: '/profile',
+      href: '/account/profile',
     },
     {
       name: t('home.feature.rbac.title', 'Role-Based Access'),
@@ -46,7 +46,7 @@ export default function HomePage() {
       >
         {isAuthenticated ? (
           <>
-            <Link href="/profile">
+            <Link href="/account/profile">
               <Button>{t('home.viewProfile', 'View Profile')}</Button>
             </Link>
             <Link href="/settings">
@@ -55,10 +55,10 @@ export default function HomePage() {
           </>
         ) : (
           <>
-            <Link href="/register">
+            <Link href="/auth/register">
               <Button>{t('home.getStarted', 'Get Started')}</Button>
             </Link>
-            <Link href="/login">
+            <Link href="/auth/login">
               <Button variant="outline">{t('home.signIn', 'Sign In')}</Button>
             </Link>
           </>

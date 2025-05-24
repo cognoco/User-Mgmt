@@ -27,7 +27,7 @@ test.describe('Admin Role/Permission Management', () => {
   // Setup: Login as admin before each test
   test.beforeEach(async ({ page }) => {
     // Go to login page
-    await page.goto('/login');
+    await page.goto('/auth/login');
     
     // Fill in admin credentials
     await page.fill('input[name="email"]', adminEmail);

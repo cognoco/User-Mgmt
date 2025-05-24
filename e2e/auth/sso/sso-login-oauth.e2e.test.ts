@@ -9,8 +9,8 @@ import { ensureUserExists, linkProviderIdentity, unlinkProviderIdentity } from '
 
 test.describe('E2E: OAuth SSO Login Flow', () => {
   // TODO: VERIFY URL/PATTERN: Adjust base URLs if needed
-  const LOGIN_URL = '/login';
-  const DASHBOARD_URL = '/dashboard'; // Verified: Default redirect target
+  const LOGIN_URL = '/auth/login';
+  const DASHBOARD_URL = '/dashboard/overview'; // Verified: Default redirect target
   const FRONTEND_CALLBACK_URL = '/auth/callback'; // The URL providers redirect back to
   const BACKEND_CALLBACK_API = '/api/auth/oauth/callback'; // The API endpoint the frontend calls
 
@@ -43,7 +43,7 @@ test.describe('E2E: OAuth SSO Login Flow', () => {
     // await page.evaluate(() => localStorage.clear()); // Uncomment if using localStorage for tokens
 
     // Navigate to the login page
-    // TODO: VERIFY URL/PATTERN: Ensure LOGIN_URL is correct -> Verified: '/login' assumes standard Next.js structure.
+    // TODO: VERIFY URL/PATTERN: Ensure LOGIN_URL is correct -> Verified: '/auth/login' assumes standard Next.js structure.
     await page.goto(LOGIN_URL);
     await expect(page).toHaveURL(LOGIN_URL);
   });
@@ -115,7 +115,7 @@ test.describe('E2E: OAuth SSO Login Flow', () => {
 
     // 3. Wait for the final redirection to the dashboard
     // The frontend callback page/logic should make the API call (intercepted above) and redirect
-    // TODO: VERIFY URL/PATTERN: Ensure DASHBOARD_URL is the correct final destination -> Verified: '/dashboard' assumes standard Next.js structure.
+    // TODO: VERIFY URL/PATTERN: Ensure DASHBOARD_URL is the correct final destination -> Verified: '/dashboard/overview' assumes standard Next.js structure.
     console.log(`Waiting for final redirection to ${DASHBOARD_URL}...`);
     await page.waitForURL(DASHBOARD_URL);
     await expect(page).toHaveURL(DASHBOARD_URL);

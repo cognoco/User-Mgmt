@@ -3,8 +3,8 @@ import { test, expect, Page } from '@playwright/test';
 // --- Constants and Test Data --- //
 const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';
 const INVALID_EMAIL = 'notarealuser@example.com';
-const FORGOT_PASSWORD_URL = '/reset-password';
-const UPDATE_PASSWORD_URL = '/update-password';
+const FORGOT_PASSWORD_URL = '/auth/reset-password';
+const UPDATE_PASSWORD_URL = '/auth/update-password';
 const INVALID_EMAIL_FORMAT = 'invalid-email-format';
 const NEW_PASSWORD = 'NewPassword123!';
 
@@ -424,14 +424,14 @@ test.describe('Update Password (Logged In)', () => {
   const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';
   const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
   const NEW_PASSWORD = 'NewSecurePassword123!';
-  const PROFILE_URL = '/profile';
+  const PROFILE_URL = '/account/profile';
 
   test.beforeEach(async ({ browser }) => {
     // Create a new page for each test
     page = await browser.newPage();
     
     // Login before each test
-    await page.goto('/login');
+    await page.goto('/auth/login');
     await page.fill('#email', USER_EMAIL);
     await page.fill('#password', USER_PASSWORD);
     await page.getByRole('button', { name: /login/i }).click();
@@ -444,7 +444,7 @@ test.describe('Update Password (Logged In)', () => {
       ]);
       
       // Navigate to profile page if needed
-      if (!page.url().includes('/profile')) {
+      if (!page.url().includes('/account/profile')) {
         await page.goto(PROFILE_URL);
       }
       

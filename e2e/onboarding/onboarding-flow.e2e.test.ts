@@ -21,7 +21,7 @@ const TEST_PASSWORD = 'SecurePassword123!';
  * This ensures we get a fresh user who will see the onboarding flow
  */
 async function registerNewUser(page: Page): Promise<void> {
-  await page.goto('/register');
+  await page.goto('/auth/register');
   
   // Fill registration form with unique email
   const uniqueEmail = `onboarding-test-${Date.now()}@example.com`;
@@ -53,8 +53,8 @@ async function registerNewUser(page: Page): Promise<void> {
   
   // Wait for registration to complete (allow for redirect or success message)
   await Promise.race([
-    page.waitForURL('/verify-email', { timeout: 10000 }),
-    page.waitForURL('/check-email', { timeout: 10000 }),
+    page.waitForURL('/auth/verify-email', { timeout: 10000 }),
+    page.waitForURL('/auth/check-email', { timeout: 10000 }),
     page.waitForSelector('[data-testid="success-message"]', { timeout: 10000 })
   ]).catch(() => {
     console.log('Navigation after registration may have failed, but continuing test');
@@ -82,7 +82,7 @@ async function registerNewUser(page: Page): Promise<void> {
 // If needed, it can be uncommented and utilized in tests
 /*
 async function loginAsUser(page: Page): Promise<void> {
-  await page.goto('/login');
+  await page.goto('/auth/login');
   
   await page.locator('#email').fill('test-user@example.com');
   await page.locator('#password').fill(TEST_PASSWORD);
@@ -107,7 +107,7 @@ test.describe('Onboarding Flow', () => {
     await registerNewUser(page);
     
     // Navigate to dashboard or home page - this should trigger onboarding for new users
-    await page.goto('/dashboard');
+    await page.goto('/dashboard/overview');
     
     // Verify welcome screen appears
     await expect(page.locator('h1:has-text("Welcome to Generic App")')).toBeVisible({ timeout: 10000 });
@@ -122,7 +122,7 @@ test.describe('Onboarding Flow', () => {
   test('should display profile completion step correctly', async () => {
     // Register and navigate to trigger onboarding
     await registerNewUser(page);
-    await page.goto('/dashboard');
+    await page.goto('/dashboard/overview');
     
     // Advance to profile step (if needed)
     const welcomeVisible = await page.locator('h1:has-text("Welcome to Generic App")').isVisible().catch(() => false);
@@ -148,7 +148,7 @@ test.describe('Onboarding Flow', () => {
   test('should navigate through feature tour steps', async () => {
     // Register and navigate to trigger onboarding
     await registerNewUser(page);
-    await page.goto('/dashboard');
+    await page.goto('/dashboard/overview');
     
     // Advance to feature tour step
     // First through welcome screen
@@ -194,7 +194,7 @@ test.describe('Onboarding Flow', () => {
   test('should allow setting preferences', async () => {
     // Register and navigate to trigger onboarding
     await registerNewUser(page);
-    await page.goto('/dashboard');
+    await page.goto('/dashboard/overview');
     
     // Advance to settings/preferences step
     // This requires clicking through previous steps
@@ -245,7 +245,7 @@ test.describe('Onboarding Flow', () => {
   test('should complete onboarding and redirect to app', async () => {
     // Register and navigate to trigger onboarding
     await registerNewUser(page);
-    await page.goto('/dashboard');
+    await page.goto('/dashboard/overview');
     
     // Quickly complete all onboarding steps by clicking next on each screen
     // We're testing the completion flow here, not the individual steps
@@ -309,7 +309,7 @@ test.describe('Onboarding Flow', () => {
   test('should allow skipping onboarding', async () => {
     // Register and navigate to trigger onboarding
     await registerNewUser(page);
-    await page.goto('/dashboard');
+    await page.goto('/dashboard/overview');
     
     // Look for skip button - it might be labeled as "skip", "skip for now", etc.
     const skipButtons = [
@@ -377,7 +377,7 @@ test.describe('Onboarding Flow', () => {
   test('should be able to reset onboarding state from settings', async () => {
     // Register user, then skip onboarding
     await registerNewUser(page);
-    await page.goto('/dashboard');
+    await page.goto('/dashboard/overview');
     
     // Skip onboarding if visible
     try {
@@ -415,7 +415,7 @@ test.describe('Onboarding Flow', () => {
         } catch (e3) {
           console.log('Could not navigate to settings via standard paths');
           // Last resort: try some common settings paths
-          for (const path of ['/settings', '/profile', '/account', '/preferences']) {
+          for (const path of ['/settings', '/account/profile', '/account', '/preferences']) {
             try {
               await page.goto(path);
               break;
@@ -460,7 +460,7 @@ test.describe('Onboarding Flow', () => {
     }
     
     // Navigate to dashboard to verify onboarding reappears
-    await page.goto('/dashboard');
+    await page.goto('/dashboard/overview');
     await page.waitForTimeout(1000);
     
     // Check that onboarding welcome appears again

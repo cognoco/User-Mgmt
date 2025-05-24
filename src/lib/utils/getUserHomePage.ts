@@ -18,7 +18,7 @@ export function getUserHomePage(user: User): string {
   }
 
   // 3. Fallback: default dashboard
-  return '/dashboard';
+  return '/dashboard/overview';
 }
 
 /**

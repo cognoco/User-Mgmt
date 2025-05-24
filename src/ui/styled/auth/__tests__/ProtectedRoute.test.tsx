@@ -132,7 +132,7 @@ describe('ProtectedRoute', () => {
     });
 
     await waitFor(() => {
-      expect(mockRouter.push).toHaveBeenCalledWith('/login');
+      expect(mockRouter.push).toHaveBeenCalledWith('/auth/login');
     });
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });

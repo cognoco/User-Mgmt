@@ -10,7 +10,7 @@ const users = {
 
 test.describe('Team Management E2E', () => {
   test('Admin can view, invite, update seats, and remove members', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/auth/login');
     await page.fill('input[name="email"]', users.admin.email);
     await page.fill('input[name="password"]', users.admin.password);
     await page.click('button[type="submit"]');
@@ -38,7 +38,7 @@ test.describe('Team Management E2E', () => {
   });
 
   test('Member cannot update seats or remove/invite members', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/auth/login');
     await page.fill('input[name="email"]', users.member.email);
     await page.fill('input[name="password"]', users.member.password);
     await page.click('button[type="submit"]');
@@ -53,7 +53,7 @@ test.describe('Team Management E2E', () => {
   });
 
   test('Viewer can only view team info', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/auth/login');
     await page.fill('input[name="email"]', users.viewer.email);
     await page.fill('input[name="password"]', users.viewer.password);
     await page.click('button[type="submit"]');
@@ -66,7 +66,7 @@ test.describe('Team Management E2E', () => {
   });
 
   test('Superadmin can manage any team', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/auth/login');
     await page.fill('input[name="email"]', users.superadmin.email);
     await page.fill('input[name="password"]', users.superadmin.password);
     await page.click('button[type="submit"]');

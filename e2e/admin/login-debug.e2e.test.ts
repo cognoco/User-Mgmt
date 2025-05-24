@@ -21,7 +21,7 @@ const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'adminpassword';
 test('Debug admin login process', async ({ page }) => {
   // Go to login page
   console.log('Navigating to login page...');
-  await page.goto('/login');
+  await page.goto('/auth/login');
   
   // Log URL to verify we're on the right page
   console.log(`Current URL: ${page.url()}`);

@@ -15,7 +15,7 @@ import { test, expect } from '@playwright/test';
 test.describe('E2E: OAuth SSO Signup Flow', () => {
   // TODO: VERIFY CONFIG: Adjust base URLs to match your application
   const SIGNUP_URL = '/signup';
-  const POST_SIGNUP_URL = '/dashboard'; // TODO: VERIFY CONFIG: Or /welcome, /profile/setup etc.
+  const POST_SIGNUP_URL = '/dashboard/overview'; // TODO: VERIFY CONFIG: Or /welcome, /profile/setup etc.
 
   // TODO: VERIFY CONFIG: Adjust API callback paths & providers to match your backend routes
   const GITHUB_CALLBACK_PATTERN = '**/api/auth/callback/github?**';

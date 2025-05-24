@@ -44,7 +44,7 @@ async function navigateToSecuritySettings(page: Page): Promise<boolean> {
  * Helper function to login following best practice #23
  */
 async function login(page: Page, email: string, password: string, browserName: string): Promise<boolean> {
-  await page.goto('/login');
+  await page.goto('/auth/login');
   
   // Apply browser-specific approach following best practice #16
   if (browserName === 'webkit') {

@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Admin Dashboard', () => {
   test('should display admin dashboard for users with admin role', async ({ page }) => {
     // Login as admin
-    await page.goto('/login');
+    await page.goto('/auth/login');
     await page.fill('input[name="email"]', 'admin@example.com');
     await page.fill('input[name="password"]', 'Password123!');
     await page.click('button[type="submit"]');
@@ -33,7 +33,7 @@ test.describe('Admin Dashboard', () => {
 
   test('should redirect non-admin users attempting to access admin dashboard', async ({ page }) => {
     // Login as regular user
-    await page.goto('/login');
+    await page.goto('/auth/login');
     await page.fill('input[name="email"]', 'user@example.com');
     await page.fill('input[name="password"]', 'Password123!');
     await page.click('button[type="submit"]');
@@ -50,7 +50,7 @@ test.describe('Admin Dashboard', () => {
 
   test('should load dashboard data correctly', async ({ page }) => {
     // Login as admin
-    await page.goto('/login');
+    await page.goto('/auth/login');
     await page.fill('input[name="email"]', 'admin@example.com');
     await page.fill('input[name="password"]', 'Password123!');
     await page.click('button[type="submit"]');

@@ -36,7 +36,7 @@ test.describe('Payment Checkout Flow', () => {
       console.log(`Login failed during setup: ${error instanceof Error ? error.message : String(error)}`);
       // Try one more time with a different approach
       try {
-        await page.goto('/login');
+        await page.goto('/auth/login');
         await page.fill('[name="email"]', TEST_USER);
         await page.fill('[name="password"]', TEST_PASSWORD);
         await page.click('button[type="submit"]');

@@ -38,7 +38,7 @@ test.describe('Admin Audit Log E2E', () => {
       await loginAs(page, ADMIN_EMAIL, ADMIN_PASSWORD);
       // Check if we got redirected to dashboard (success)
       const url = page.url();
-      if (url.includes('/dashboard') || url.includes('/admin')) {
+      if (url.includes('/dashboard/overview') || url.includes('/admin')) {
         console.log('Login successful, redirected to:', url);
       } else {
         console.log('No redirect to dashboard detected');
@@ -365,7 +365,7 @@ test.describe('Admin Audit Log E2E', () => {
     
     // Login as regular user
     try {
-      await page.goto('/login');
+      await page.goto('/auth/login');
       
       // Fill in non-admin credentials
       await page.fill('#email, input[name="email"]', USER_EMAIL);
@@ -418,8 +418,8 @@ test.describe('Admin Audit Log E2E', () => {
     const bodyText = await page.textContent('body') || '';
     
     expect(
-      currentUrl.includes('/dashboard') || 
-      currentUrl.includes('/login') || 
+      currentUrl.includes('/dashboard/overview') || 
+      currentUrl.includes('/auth/login') || 
       bodyText.includes('denied') || 
       bodyText.includes('permission')
     ).toBeTruthy();

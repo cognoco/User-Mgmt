@@ -5,7 +5,7 @@ import * as path from 'path';
 // --- Constants and Test Data --- //
 const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';
 const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
-const PROFILE_URL = '/profile';
+const PROFILE_URL = '/account/profile';
 const SETTINGS_URL = '/settings';
 const NEW_FIRST_NAME = 'E2ETestFirstName';
 const NEW_BIO = 'This is a test bio created during E2E testing.';

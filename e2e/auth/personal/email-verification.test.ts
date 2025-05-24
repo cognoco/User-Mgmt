@@ -2,8 +2,8 @@ import { test, expect, Page } from '@playwright/test';
 
 // --- Constants and Test Data --- //
 const TEST_EMAIL = 'testuser+' + Date.now() + '@example.com';
-const CHECK_EMAIL_URL = '/check-email';
-const VERIFY_EMAIL_URL = '/verify-email';
+const CHECK_EMAIL_URL = '/auth/check-email';
+const VERIFY_EMAIL_URL = '/auth/verify-email';
 
 // --- Helper Functions --- //
 /**
@@ -119,7 +119,7 @@ test.describe('Email Verification Flow', () => {
     // Check we're on an expected page
     expect(
       page.url().includes(VERIFY_EMAIL_URL) || 
-      page.url().includes('/login') ||
+      page.url().includes('/auth/login') ||
       page.url().includes('/')
     ).toBeTruthy();
     
@@ -152,7 +152,7 @@ test.describe('Email Verification Flow', () => {
     // Ensure we're on an expected page
     expect(
       page.url().includes(VERIFY_EMAIL_URL) || 
-      page.url().includes('/login')
+      page.url().includes('/auth/login')
     ).toBeTruthy();
     
     console.log('Invalid token handled without crashing');

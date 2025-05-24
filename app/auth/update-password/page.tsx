@@ -48,7 +48,7 @@ export default function UpdatePasswordPage() {
     if (result.success) {
       setSuccess('Password updated successfully! Redirecting to login...');
       setTimeout(() => {
-        router.push('/login');
+        router.push('/auth/login');
       }, 2000);
     }
   };
@@ -88,7 +88,7 @@ export default function UpdatePasswordPage() {
               {(error.includes('expired') || error.includes('Invalid')) && (
                 <Button 
                   variant="link" 
-                  onClick={() => router.push('/reset-password')} 
+                  onClick={() => router.push('/auth/reset-password')}
                   className="p-0 h-auto mt-2 text-destructive hover:text-destructive/80 font-medium underline underline-offset-4"
                 >
                   {t('auth.updatePassword.requestNewLink', 'Request a new reset link')}
@@ -154,7 +154,7 @@ export default function UpdatePasswordPage() {
             <div className="text-center text-sm mt-6">
               <Button 
                 variant="link" 
-                onClick={() => router.push('/login')} 
+                onClick={() => router.push('/auth/login')}
                 className="p-0 h-auto font-medium text-primary hover:underline"
               >
                 {t('auth.updatePassword.returnToLogin', 'Return to Login')}

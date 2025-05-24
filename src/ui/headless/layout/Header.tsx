@@ -54,9 +54,9 @@ export function Header({ type = 'fixed', navItems, children }: HeaderProps) {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login');
+      navigate('/auth/login');
     } catch (error) {
-      navigate('/login');
+      navigate('/auth/login');
     }
   };
 
@@ -78,7 +78,7 @@ export function Header({ type = 'fixed', navItems, children }: HeaderProps) {
     navItems ?? [
       { to: '/', label: 'Home' },
       { to: '/settings', label: 'Settings' },
-      { to: '/profile', label: 'Profile' },
+      { to: '/account/profile', label: 'Profile' },
     ];
 
   return (

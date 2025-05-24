@@ -55,10 +55,10 @@ test.describe('Subscription Management Flow', () => {
   test.beforeEach(async ({ page, browserName }) => {
     // Navigate to the login page with fallback strategy (Issue #30)
     try {
-      await page.goto('/login', { timeout: 10000 });
+      await page.goto('/auth/login', { timeout: 10000 });
     } catch (e) {
       console.log('First navigation attempt failed, retrying...');
-      await page.goto('/login', { timeout: 5000 });
+      await page.goto('/auth/login', { timeout: 5000 });
     }
 
     // Wait for login form to be visible

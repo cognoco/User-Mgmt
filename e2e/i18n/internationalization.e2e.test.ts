@@ -18,7 +18,7 @@ import { loginAs } from '../utils/auth-helpers';
 // Constants for URLs and test data
 const HOME_URL = '/';
 const PROFILE_URL = '/account/profile';
-const LOGIN_URL = '/login';
+const LOGIN_URL = '/auth/login';
 
 // Test user for logged-in tests
 const TEST_USER = process.env.E2E_USER_EMAIL || 'user@example.com';

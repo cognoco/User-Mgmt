@@ -21,7 +21,7 @@ import { test, expect, Page } from '@playwright/test';
 
 // Helper function for more resilient login
 async function loginUser(page: Page, email = 'testuser@example.com', password = 'password123'): Promise<void> {
-  await page.goto('/login');
+  await page.goto('/auth/login');
   
   // Try multiple methods for form interaction (addressing issue #33)
   try {
@@ -366,7 +366,7 @@ test.describe('Push Notification Service Worker', () => {
     await loginUser(page);
     
     try {
-      await page.goto('/dashboard', { timeout: 5000 });
+      await page.goto('/dashboard/overview', { timeout: 5000 });
     } catch (e) {
       console.log('Dashboard navigation failed, trying alternative path');
       await page.goto('/');

@@ -22,7 +22,7 @@ export default function RegisterPage() { // Use default export for Next.js pages
           <div className="text-center text-sm w-full">
             <div className="mt-2">
               {t('auth.register.alreadyHaveAccount', 'Already have an account?')}{' '}
-              <Link href="/login" className="text-primary font-medium hover:underline">
+              <Link href="/auth/login" className="text-primary font-medium hover:underline">
                 {t('auth.register.signIn', 'Sign in')}
               </Link>
             </div>

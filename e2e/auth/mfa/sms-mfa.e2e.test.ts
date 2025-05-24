@@ -66,7 +66,7 @@ test.describe('SMS MFA Setup and Management', () => {
     
     try {
       // Attempt login with credentials
-      await loginPage.goto('/login');
+      await loginPage.goto('/auth/login');
       await loginPage.fill('input[name="email"]', 'user@example.com');  // Use test credentials
       await loginPage.fill('input[name="password"]', 'password123');    // Use test credentials
       await loginPage.click('button[type="submit"]');
@@ -131,7 +131,7 @@ test.describe('SMS MFA Setup and Management', () => {
     
     try {
       // Attempt login with credentials
-      await loginPage.goto('/login');
+      await loginPage.goto('/auth/login');
       await loginPage.fill('input[name="email"]', 'user@example.com');  // Use test credentials
       await loginPage.fill('input[name="password"]', 'password123');    // Use test credentials
       await loginPage.click('button[type="submit"]');

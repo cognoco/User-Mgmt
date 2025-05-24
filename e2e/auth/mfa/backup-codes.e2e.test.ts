@@ -245,7 +245,7 @@ test.describe('4.5: Backup Codes / MFA Fallback', () => {
     
     try {
       // Attempt login
-      await loginPage.goto('/login');
+      await loginPage.goto('/auth/login');
       await loginPage.fill('input[name="email"]', USER_EMAIL);
       await loginPage.fill('input[name="password"]', USER_PASSWORD);
       await loginPage.click('button[type="submit"]');
@@ -328,7 +328,7 @@ test.describe('4.5: Backup Codes / MFA Fallback', () => {
     
     try {
       // First login with "Remember Me" checked
-      await loginPage.goto('/login');
+      await loginPage.goto('/auth/login');
       await loginPage.fill('input[name="email"]', USER_EMAIL);
       await loginPage.fill('input[name="password"]', USER_PASSWORD);
       
@@ -377,7 +377,7 @@ test.describe('4.5: Backup Codes / MFA Fallback', () => {
       await newPage.goto('/');
       
       // Check if we're automatically logged in (no login page)
-      const isOnLoginPage = newPage.url().includes('/login');
+      const isOnLoginPage = newPage.url().includes('/auth/login');
       expect(isOnLoginPage).toBe(false);
       
       // Optional: Check for elements that indicate being logged in

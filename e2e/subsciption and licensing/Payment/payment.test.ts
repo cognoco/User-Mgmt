@@ -11,7 +11,7 @@ test.describe('Payment Management Flows', () => {
   // Login before each test
   test.beforeEach(async ({ page }) => {
     // Navigate to the login page
-    await page.goto('/login');
+    await page.goto('/auth/login');
     
     // Login with test credentials
     await page.locator('#email').fill(USER_EMAIL);

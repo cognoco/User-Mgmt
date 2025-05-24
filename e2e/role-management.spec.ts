@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Role/Permission Management UI', () => {
   test('Admin can log in and see the Role Management Panel', async ({ page }) => {
     // Go to login page
-    await page.goto('/login');
+    await page.goto('/auth/login');
 
     // Fill in admin credentials (replace with test admin user)
     await page.fill('input[name="email"]', 'admin@example.com');
@@ -27,7 +27,7 @@ test.describe('Role/Permission Management UI', () => {
 
   test('Admin can assign a new role to a user', async ({ page }) => {
     // Log in as admin (reuse previous steps)
-    await page.goto('/login');
+    await page.goto('/auth/login');
     await page.fill('input[name="email"]', 'admin@example.com');
     await page.fill('input[name="password"]', 'adminpassword');
     await page.click('button[type="submit"]');

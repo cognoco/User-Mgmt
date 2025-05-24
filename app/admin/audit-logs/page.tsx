@@ -14,7 +14,7 @@ export default async function AdminAuditLogsPage() {
   const user = await getUser();
   
   if (!user) {
-    redirect('/login');
+    redirect('/auth/login');
   }
   
   // Check if user has admin permissions to view audit logs

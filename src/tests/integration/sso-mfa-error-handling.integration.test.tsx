@@ -155,7 +155,7 @@ describe('SSO Error Handling', () => {
     
     // Should redirect to login page after error
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('/login'));
+      expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('/auth/login'));
     });
   });
   

@@ -6,8 +6,8 @@ const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';
 const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
 const INVALID_EMAIL = 'nonexistent@example.com';
 const INVALID_PASSWORD = 'wrongpassword';
-const LOGIN_URL = '/login';
-const REGISTER_URL = '/register';
+const LOGIN_URL = '/auth/login';
+const REGISTER_URL = '/auth/register';
 
 // --- Test Suite --- //
 test.describe('Login Flow', () => {
@@ -196,11 +196,11 @@ test.describe('Login Flow', () => {
     }
     
     // Navigate to a protected page that should require authentication
-    await newPage.goto('/dashboard');
+    await newPage.goto('/dashboard/overview');
     
     // Check if we're still logged in (not redirected to login)
     const currentUrl = newPage.url();
-    const redirectedToLogin = currentUrl.includes('/login');
+    const redirectedToLogin = currentUrl.includes('/auth/login');
     
     // If we got redirected to login, the test fails
     expect(redirectedToLogin).toBe(false);

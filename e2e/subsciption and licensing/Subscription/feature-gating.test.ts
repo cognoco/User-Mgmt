@@ -176,10 +176,10 @@ test.describe('Feature Gating for Subscription Tiers', () => {
   test('Free user should see upgrade prompts for premium features', async ({ page, browserName }) => {
     // Navigate to the login page with fallback strategy (Issue #30)
     try {
-      await page.goto('/login', { timeout: 10000 });
+      await page.goto('/auth/login', { timeout: 10000 });
     } catch (e) {
       console.log('First navigation attempt failed, retrying...');
-      await page.goto('/login', { timeout: 5000 });
+      await page.goto('/auth/login', { timeout: 5000 });
     }
 
     // Wait for login form to be visible
@@ -190,7 +190,7 @@ test.describe('Feature Gating for Subscription Tiers', () => {
     
     // Navigate to dashboard or home page where premium features might be available
     try {
-      await page.goto('/dashboard', { timeout: 10000 });
+      await page.goto('/dashboard/overview', { timeout: 10000 });
     } catch (e) {
       console.log('Dashboard navigation failed, trying home...');
       await page.goto('/home', { timeout: 5000 });
@@ -267,10 +267,10 @@ test.describe('Feature Gating for Subscription Tiers', () => {
 
     // Navigate to the login page with fallback strategy
     try {
-      await page.goto('/login', { timeout: 10000 });
+      await page.goto('/auth/login', { timeout: 10000 });
     } catch (e) {
       console.log('First navigation attempt failed, retrying...');
-      await page.goto('/login', { timeout: 5000 });
+      await page.goto('/auth/login', { timeout: 5000 });
     }
 
     // Wait for login form to be visible
@@ -281,7 +281,7 @@ test.describe('Feature Gating for Subscription Tiers', () => {
     
     // Navigate to dashboard or home page where premium features are available
     try {
-      await page.goto('/dashboard', { timeout: 10000 });
+      await page.goto('/dashboard/overview', { timeout: 10000 });
     } catch (e) {
       console.log('Dashboard navigation failed, trying home...');
       await page.goto('/home', { timeout: 5000 });
@@ -332,10 +332,10 @@ test.describe('Feature Gating for Subscription Tiers', () => {
     
     // Navigate to the login page with fallback strategy
     try {
-      await page.goto('/login', { timeout: 10000 });
+      await page.goto('/auth/login', { timeout: 10000 });
     } catch (e) {
       console.log('First navigation attempt failed, retrying...');
-      await page.goto('/login', { timeout: 5000 });
+      await page.goto('/auth/login', { timeout: 5000 });
     }
 
     // Wait for login form to be visible
@@ -420,10 +420,10 @@ test.describe('Feature Gating for Subscription Tiers', () => {
   test('Free user should be redirected to upgrade page when hitting usage limits', async ({ page, browserName }) => {
     // Navigate to the login page with fallback strategy
     try {
-      await page.goto('/login', { timeout: 10000 });
+      await page.goto('/auth/login', { timeout: 10000 });
     } catch (e) {
       console.log('First navigation attempt failed, retrying...');
-      await page.goto('/login', { timeout: 5000 });
+      await page.goto('/auth/login', { timeout: 5000 });
     }
 
     // Wait for login form to be visible

@@ -2,7 +2,7 @@ import { test, expect, Page } from '@playwright/test';
 
 // Helper function for more resilient login
 async function loginUser(page: Page, email = 'testuser@example.com', password = 'password123'): Promise<void> {
-  await page.goto('/login');
+  await page.goto('/auth/login');
   
   // Try multiple methods for form interaction (addressing issue #33)
   try {
