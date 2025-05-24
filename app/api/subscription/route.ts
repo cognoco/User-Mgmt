@@ -1,6 +1,6 @@
 import { stripe, createCustomer, createSubscription } from '@/lib/payments/stripe';
 import { getServiceSupabase } from '@/lib/database/supabase';
-import { SupabaseSubscriptionProvider } from '@/adapters/subscription/supabase/supabase-subscription.provider';
+import { createSupabaseSubscriptionProvider } from '@/adapters/subscription/factory';
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
 
@@ -9,10 +9,10 @@ const SubscriptionSchema = z.object({ plan: z.string() });
 export async function GET(request: Request) {
   // Assume auth header is present and valid
   const supabase = getServiceSupabase();
-  const provider = new SupabaseSubscriptionProvider(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const provider = createSupabaseSubscriptionProvider({
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
+  });
   const authHeader = request.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
@@ -41,10 +41,10 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const supabase = getServiceSupabase();
-  const provider = new SupabaseSubscriptionProvider(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const provider = createSupabaseSubscriptionProvider({
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
+  });
   const authHeader = request.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });

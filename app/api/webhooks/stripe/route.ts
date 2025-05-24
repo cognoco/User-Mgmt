@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/payments/stripe';
-import { SupabaseSubscriptionProvider } from '@/adapters/subscription/supabase/supabase-subscription.provider';
+import { createSupabaseSubscriptionProvider } from '@/adapters/subscription/factory';
 import type Stripe from 'stripe';
 
 /**
@@ -33,10 +33,10 @@ export async function POST(request: NextRequest) {
         const subscription = event.data.object as Stripe.Subscription;
         const userId = subscription.metadata?.user_id;
         if (userId) {
-          const provider = new SupabaseSubscriptionProvider(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-          );
+          const provider = createSupabaseSubscriptionProvider({
+            supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
+          });
           await provider.upsertSubscription({
             id: subscription.id,
             userId,
