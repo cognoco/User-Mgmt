@@ -2,6 +2,8 @@ import { ApiKeyService } from '@/core/api-keys/interfaces';
 import type { IApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
 import type { ApiKey, ApiKeyCreatePayload, ApiKeyCreateResult } from '@/core/api-keys/models';
 import { getKeyPrefix } from '@/lib/api-keys/api-key-utils';
+import { SubscriptionTier } from '@/core/subscription/models';
+import { ensureSubscriptionTier } from '@/services/subscription/subscription-access';
 
 /**
  * Default implementation of the {@link ApiKeyService} interface.
@@ -14,11 +16,13 @@ export class DefaultApiKeysService implements ApiKeyService {
 
   /** @inheritdoc */
   async listApiKeys(userId: string): Promise<ApiKey[]> {
+    await ensureSubscriptionTier(userId, SubscriptionTier.PREMIUM);
     return this.provider.listApiKeys(userId);
   }
 
   /** @inheritdoc */
   async createApiKey(userId: string, data: ApiKeyCreatePayload): Promise<ApiKeyCreateResult> {
+    await ensureSubscriptionTier(userId, SubscriptionTier.PREMIUM);
     return this.provider.createApiKey(userId, data);
   }
 
@@ -27,6 +31,7 @@ export class DefaultApiKeysService implements ApiKeyService {
     userId: string,
     keyId: string
   ): Promise<{ success: boolean; key?: ApiKey; error?: string }> {
+    await ensureSubscriptionTier(userId, SubscriptionTier.PREMIUM);
     return this.provider.revokeApiKey(userId, keyId);
   }
 
@@ -35,6 +40,7 @@ export class DefaultApiKeysService implements ApiKeyService {
     userId: string,
     keyId: string
   ): Promise<{ success: boolean; key?: ApiKey; plaintext?: string; error?: string }> {
+    await ensureSubscriptionTier(userId, SubscriptionTier.PREMIUM);
     return this.provider.regenerateApiKey(userId, keyId);
   }
 
@@ -44,6 +50,7 @@ export class DefaultApiKeysService implements ApiKeyService {
       return { valid: false, error: 'User id is required' };
     }
     try {
+      await ensureSubscriptionTier(userId, SubscriptionTier.PREMIUM);
       const prefix = getKeyPrefix(apiKey);
       const keys = await this.provider.listApiKeys(userId);
       const match = keys.find(k => k.prefix === prefix && !k.isRevoked);
