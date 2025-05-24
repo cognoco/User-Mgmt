@@ -195,14 +195,14 @@ This checklist tracks the existence of API endpoints for the User Management Mod
 ## 12. Compliance & Legal
 
 **API Endpoints:**
-- [ ] `/api/gdpr/export` (POST)
-- [ ] `/api/gdpr/delete` (POST)
-- [ ] `/api/consent` (GET, POST)
+- [x] `/api/gdpr/export` (POST)
+- [x] `/api/gdpr/delete` (POST)
+- [x] `/api/consent` (GET, POST)
 
 **Core Implementation:**
-- [ ] `GdprService`, `ConsentService`
-- [ ] `gdprServiceFactory`, `consentServiceFactory`
-- [ ] `GdprDataProvider`, `ConsentDataProvider`
+- [x] `GdprService`, `ConsentService`
+- [x] `gdprServiceFactory`, `consentServiceFactory`
+- [x] `GdprDataProvider`, `ConsentDataProvider`
 
 ---
 

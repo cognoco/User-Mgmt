@@ -14,6 +14,7 @@ export * from './sso';
 export * from './api-keys';
 export * from './notification';
 export * from './gdpr';
+export * from './consent';
 export * from './session';
 export * from './subscription';
 export * from './csrf';
