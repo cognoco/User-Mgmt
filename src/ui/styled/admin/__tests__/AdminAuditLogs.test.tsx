@@ -1,0 +1,25 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { AdminAuditLogs } from '../audit-logs/AdminAuditLogs';
+
+import { __setIsError } from '@/tests/mocks/headless-admin-audit-logs.mock';
+vi.mock('@/ui/headless/admin/audit-logs/AdminAuditLogs', async () => await import('@/tests/mocks/headless-admin-audit-logs.mock'));
+vi.mock('@/ui/styled/audit/AuditLogViewer', async () => await import('@/tests/mocks/audit-log-viewer.mock'));
+
+describe('AdminAuditLogs', () => {
+  beforeEach(() => {
+    __setIsError(false);
+    vi.clearAllMocks();
+  });
+
+  it('renders the audit log viewer when no error occurs', () => {
+    render(<AdminAuditLogs />);
+    expect(screen.getByTestId('audit-log-viewer')).toBeInTheDocument();
+  });
+
+  it('shows an error message when fetching logs fails', () => {
+    __setIsError(true);
+    render(<AdminAuditLogs />);
+    expect(screen.getByText(/failed to fetch audit logs/i)).toBeInTheDocument();
+  });
+});
