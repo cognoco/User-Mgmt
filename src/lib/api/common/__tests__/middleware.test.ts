@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { withValidation } from '../middleware';
+import { withValidation } from '../../../middleware/validation';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 

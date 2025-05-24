@@ -1,12 +1,10 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 
-import {
-  createSuccessResponse,
-  withErrorHandling,
-  withValidation,
-  withAuth,
-} from '@/lib/api/common';
+import { createSuccessResponse } from '@/lib/api/common';
+import { withErrorHandling } from '@/middleware/error-handling';
+import { withValidation } from '@/middleware/validation';
+import { withRouteAuth } from '@/middleware/auth';
 import {
   createPermissionNotFoundError,
   mapPermissionServiceError,
@@ -48,7 +46,7 @@ async function handlePermissionCheck(
 export async function GET(request: NextRequest) {
   return withErrorHandling(
     (req) =>
-      withAuth((r, userId) => {
+      withRouteAuth((r, userId) => {
         const url = new URL(r.url);
         const params = Object.fromEntries(url.searchParams.entries());
         return withValidation(querySchema, (r2, data) => handlePermissionCheck(r2, userId, data), r, params);

@@ -5,13 +5,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { Session } from '@/types/next-auth';
 import { logUserAction } from '@/lib/audit/auditLogger';
-import {
-  createSuccessResponse,
-  withErrorHandling,
-  withValidation,
-  ApiError,
-  ERROR_CODES
-} from '@/lib/api/common';
+import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
+import { withErrorHandling } from '@/middleware/error-handling';
+import { withValidation } from '@/middleware/validation';
 import { createTeamMemberNotFoundError } from '@/lib/api/team/error-handler';
 
 const updateRoleSchema = z.object({

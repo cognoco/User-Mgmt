@@ -7,13 +7,9 @@ import { createProtectedHandler } from '@/middleware/permissions';
 import { Permission } from '@/lib/rbac/roles';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/index';
-import {
-  createSuccessResponse,
-  withErrorHandling,
-  withValidation,
-  ApiError,
-  ERROR_CODES
-} from '@/lib/api/common';
+import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
+import { withErrorHandling } from '@/middleware/error-handling';
+import { withValidation } from '@/middleware/validation';
 import {
   createTeamNotFoundError,
   createTeamMemberAlreadyExistsError

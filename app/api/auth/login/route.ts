@@ -7,11 +7,11 @@ import { LoginPayload } from '@/core/auth/models';
 import {
   createSuccessResponse,
   createErrorResponse,
-  withErrorHandling,
-  withValidation,
   ApiError,
   ERROR_CODES
 } from '@/lib/api/common';
+import { withErrorHandling } from '@/middleware/error-handling';
+import { withValidation } from '@/middleware/validation';
 import { createInvalidCredentialsError, createEmailNotVerifiedError } from '@/lib/api/auth/error-handler';
 
 // Zod schema for login data (matches original)
