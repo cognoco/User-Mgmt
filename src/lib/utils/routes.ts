@@ -280,7 +280,7 @@ export const API_ROUTES = {
   // Subscription management domain
   SUBSCRIPTION: {
     BASE: '/api/subscription',
-    PLANS: '/api/subscription/plans',
+    PLANS: '/api/subscriptions/plans',
   },
 
   // Tax ID domain
