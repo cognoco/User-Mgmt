@@ -192,6 +192,16 @@
 
 ## 13. CSRF & Security Middleware
 
+**API Endpoints:**
+- [ ] `/api/csrf` (GET)
+- [ ] `/api/csrf/validate` (POST)
+- [ ] `/api/csrf/revoke` (DELETE)
+
+**Core Implementation:**
+- [ ] `CsrfService`
+- [ ] `csrfServiceFactory`
+- [ ] `CsrfDataProvider`
+
 **Middleware:**
 - [ ] CSRF protection
 - [ ] Rate limiting
