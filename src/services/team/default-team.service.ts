@@ -28,6 +28,7 @@ import { TeamEventType } from '@/core/team/events';
 import type { TeamDataProvider } from '@/core/team/ITeamDataProvider';
 import { translateError } from '@/lib/utils/error';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
+import { prisma } from '@/lib/database/prisma';
 
 /**
  * Default implementation of the TeamService interface
@@ -244,6 +245,18 @@ export class DefaultTeamService
    */
   async addTeamMember(teamId: string, userId: string, role: string): Promise<TeamMemberResult> {
     try {
+      const license = await prisma.teamLicense.findUnique({
+        where: { id: teamId },
+        select: { usedSeats: true, totalSeats: true },
+      });
+
+      if (license && license.usedSeats >= license.totalSeats) {
+        return {
+          success: false,
+          error: "You have reached your plan's seat limit. Please upgrade your plan or remove an existing member.",
+        };
+      }
+
       const result = await this.teamDataProvider.addTeamMember(teamId, userId, role);
 
       if (!result.success || !result.member) {
@@ -263,7 +276,12 @@ export class DefaultTeamService
         member,
         addedBy: team?.ownerId || userId // If we can't get the team, assume the user added themselves
       });
-      
+
+      await prisma.teamLicense.update({
+        where: { id: teamId },
+        data: { usedSeats: { increment: 1 } },
+      });
+
       return {
         success: true,
         member
@@ -435,6 +453,18 @@ export class DefaultTeamService
    */
   async inviteToTeam(teamId: string, invitationData: TeamInvitationPayload): Promise<TeamInvitationResult> {
     try {
+      const license = await prisma.teamLicense.findUnique({
+        where: { id: teamId },
+        select: { usedSeats: true, totalSeats: true },
+      });
+
+      if (license && license.usedSeats >= license.totalSeats) {
+        return {
+          success: false,
+          error: "You have reached your plan's seat limit. Please upgrade your plan or remove an existing member.",
+        };
+      }
+
       // Get the team to know who the owner is
       const team = await this.getTeam(teamId);
       
@@ -460,7 +490,12 @@ export class DefaultTeamService
         invitation,
         invitedBy: team.ownerId // Assuming the owner is sending the invitation
       });
-      
+
+      await prisma.teamLicense.update({
+        where: { id: teamId },
+        data: { usedSeats: { increment: 1 } },
+      });
+
       return {
         success: true,
         invitation
