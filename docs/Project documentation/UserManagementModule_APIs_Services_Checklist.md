@@ -26,26 +26,20 @@ This checklist tracks the existence of API endpoints for the User Management Mod
 ## 1. Authentication
 
 **API Endpoints:**
-- [ ] `/api/auth/login`
-- [ ] `/api/auth/register`
-- [ ] `/api/auth/logout`
-- [ ] `/api/auth/refresh-token`
-- [ ] `/api/auth/send-verification-email`
-- [ ] `/api/auth/verify-email`
-- [ ] `/api/auth/reset-password`
-- [ ] `/api/auth/update-password`
-- [ ] `/api/auth/delete-account`
-- [ ] `/api/auth/setup-mfa`
-- [ ] `/api/auth/verify-mfa`
-- [ ] `/api/auth/disable-mfa`
-- [ ] | `/api/auth/refresh-token` | _(missing)_ | ❌ |
-| `/api/auth/verify-email` | _(missing)_ | ❌ |
-| `/api/auth/delete-account` | _(missing)_ | ❌ |
-| `/api/auth/setup-mfa` | _(missing)_ | ❌ |
-| `/api/auth/verify-mfa` | _(missing)_ | ❌ |
-| `/api/auth/disable-mfa` | _(missing)_ | ❌ |
-| `/api/auth/mfa/enable` | _(missing)_ | ❌ |
-| `/api/auth/mfa/disable` | _(missing)_ | ❌ |
+- [x] `/api/auth/login`
+- [x] `/api/auth/register`
+- [x] `/api/auth/logout`
+- [x] `/api/auth/refresh-token`
+- [x] `/api/auth/send-verification-email`
+- [x] `/api/auth/verify-email`
+- [x] `/api/auth/reset-password`
+- [x] `/api/auth/update-password`
+- [x] `/api/auth/delete-account`
+- [x] `/api/auth/setup-mfa`
+- [x] `/api/auth/verify-mfa`
+- [x] `/api/auth/disable-mfa`
+- [x] `/api/auth/mfa/enable`
+- [x] `/api/auth/mfa/disable`
 
 **Core Implementation:**
 - [ ] `AuthService` (interface & implementation)
