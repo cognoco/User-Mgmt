@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
 import { withValidation } from '@/middleware/validation';
+import { getApiTeamService } from '@/services/team/factory';
 
 const querySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
@@ -15,6 +16,12 @@ const querySchema = z.object({
   status: z.enum(['active', 'pending', 'all']).optional().default('all'),
   sortBy: z.enum(['name', 'email', 'role', 'status', 'joinedAt']).optional().default('joinedAt'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
+});
+
+const addMemberSchema = z.object({
+  teamId: z.string(),
+  userId: z.string(),
+  role: z.string()
 });
 
 async function handleTeamMembers(
@@ -111,6 +118,19 @@ async function handleTeamMembers(
   });
 }
 
+async function handleAddMember(req: NextRequest, data: z.infer<typeof addMemberSchema>) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
+  }
+  const service = getApiTeamService();
+  const result = await service.addTeamMember(data.teamId, data.userId, data.role);
+  if (!result.success || !result.member) {
+    throw new ApiError(ERROR_CODES.INVALID_REQUEST, result.error || 'Failed');
+  }
+  return createSuccessResponse(result.member, 201);
+}
+
 async function handler(req: NextRequest) {
   const url = new URL(req.url);
   const params = Object.fromEntries(url.searchParams.entries());
@@ -120,4 +140,14 @@ async function handler(req: NextRequest) {
 export const GET = createProtectedHandler(
   (req) => withErrorHandling(handler, req),
   'team.members.list'
+);
+
+async function postHandler(req: NextRequest) {
+  const body = await req.json();
+  return withValidation(addMemberSchema, handleAddMember, req, body);
+}
+
+export const POST = createProtectedHandler(
+  (req) => withErrorHandling(postHandler, req),
+  'team.members.add'
 );
