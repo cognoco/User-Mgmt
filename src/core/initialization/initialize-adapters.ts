@@ -9,6 +9,7 @@ import { createAdapterFactory, validateAdapterConfig } from '@/core/config/adapt
 import { DefaultAuthService } from '@/services/auth/default-auth-service';
 import { DefaultUserService } from '@/services/user/default-user-service';
 import { DefaultTeamService } from '@/services/team/default-team-service';
+import { DefaultOrganizationService } from '@/services/organization/default-organization.service';
 import { DefaultPermissionService } from '@/services/permission/default-permission-service';
 import { DefaultGdprService } from '@/services/gdpr/default-gdpr.service';
 import { DefaultSsoService } from '@/services/sso/default-sso.service';
@@ -74,6 +75,7 @@ export function initializeAdapters(
     const authAdapter = factory.createAuthProvider();
     const userAdapter = factory.createUserProvider();
     const teamAdapter = factory.createTeamProvider();
+    const organizationAdapter = factory.createOrganizationProvider?.();
     const permissionAdapter = factory.createPermissionProvider();
     const gdprAdapter = factory.createGdprProvider?.();
     const ssoAdapter = factory.createSsoProvider();
@@ -82,6 +84,7 @@ export function initializeAdapters(
     registry.registerAdapter('auth', authAdapter);
     registry.registerAdapter('user', userAdapter);
     registry.registerAdapter('team', teamAdapter);
+    if (organizationAdapter) registry.registerAdapter('organization', organizationAdapter);
     registry.registerAdapter('permission', permissionAdapter);
     if (gdprAdapter) registry.registerAdapter('gdpr', gdprAdapter);
     registry.registerAdapter('sso', ssoAdapter);
@@ -90,6 +93,7 @@ export function initializeAdapters(
     const authService = new DefaultAuthService(authAdapter);
     const userService = new DefaultUserService(userAdapter);
     const teamService = new DefaultTeamService(teamAdapter);
+    const organizationService = organizationAdapter ? new DefaultOrganizationService(organizationAdapter) : undefined;
     const permissionService = new DefaultPermissionService(permissionAdapter);
     const gdprService = gdprAdapter ? new DefaultGdprService(gdprAdapter) : undefined;
     const ssoService = new DefaultSsoService(ssoAdapter);
@@ -98,6 +102,7 @@ export function initializeAdapters(
       authService,
       userService,
       teamService,
+      organizationService,
       permissionService,
       gdprService,
       ssoService,
@@ -105,6 +110,7 @@ export function initializeAdapters(
         authAdapter,
         userAdapter,
         teamAdapter,
+        organizationAdapter,
         permissionAdapter,
         gdprAdapter,
         ssoAdapter

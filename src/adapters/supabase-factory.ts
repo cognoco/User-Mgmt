@@ -18,12 +18,14 @@ import { SsoDataProvider } from './sso/interfaces';
 import { SubscriptionDataProvider } from './subscription/interfaces';
 import { ApiKeyDataProvider } from './api-keys/interfaces';
 import { IWebhookDataProvider } from './webhook/IWebhookDataProvider';
+import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
 
 
 // Import domain-specific factories
 import createSupabaseAuthProvider from './auth/supabase/factory';
 import createSupabaseUserProvider from './user/supabase/factory';
 import createSupabaseTeamProvider from './team/supabase/factory';
+import { createSupabaseOrganizationProvider } from './organization/factory';
 import createSupabasePermissionProvider from './permission/supabase/factory';
 import createSupabaseGdprProvider from './gdpr/factory';
 import createSupabaseConsentProvider from './consent/factory';
@@ -79,6 +81,13 @@ export class SupabaseAdapterFactory implements AdapterFactory {
    */
   createTeamProvider(): TeamDataProvider {
     return createSupabaseTeamProvider(this.options);
+  }
+
+  /**
+   * Create a Supabase organization provider
+   */
+  createOrganizationProvider(): IOrganizationDataProvider {
+    return createSupabaseOrganizationProvider(this.options);
   }
 
   /**
