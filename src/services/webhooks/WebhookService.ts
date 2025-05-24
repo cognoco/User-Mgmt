@@ -7,6 +7,8 @@ import type {
   WebhookDelivery,
 } from '@/core/webhooks/models';
 import { createWebhookSender } from '@/lib/webhooks/webhook-sender';
+import { SubscriptionTier } from '@/core/subscription/models';
+import { ensureSubscriptionTier } from '@/services/subscription/subscription-access';
 
 export class WebhookService implements IWebhookService {
   private sender;
@@ -16,10 +18,12 @@ export class WebhookService implements IWebhookService {
   }
 
   async getWebhooks(userId: string): Promise<Webhook[]> {
+    await ensureSubscriptionTier(userId, SubscriptionTier.PREMIUM);
     return this.dataProvider.listWebhooks(userId);
   }
 
   async getWebhook(userId: string, webhookId: string): Promise<Webhook | null> {
+    await ensureSubscriptionTier(userId, SubscriptionTier.PREMIUM);
     return this.dataProvider.getWebhook(userId, webhookId);
   }
 
@@ -27,6 +31,7 @@ export class WebhookService implements IWebhookService {
     userId: string,
     payload: WebhookCreatePayload
   ): Promise<{ success: boolean; webhook?: Webhook; error?: string }> {
+    await ensureSubscriptionTier(userId, SubscriptionTier.PREMIUM);
     return this.dataProvider.createWebhook(userId, payload);
   }
 
@@ -35,6 +40,7 @@ export class WebhookService implements IWebhookService {
     webhookId: string,
     payload: WebhookUpdatePayload
   ): Promise<{ success: boolean; webhook?: Webhook; error?: string }> {
+    await ensureSubscriptionTier(userId, SubscriptionTier.PREMIUM);
     return this.dataProvider.updateWebhook(userId, webhookId, payload);
   }
 
@@ -42,6 +48,7 @@ export class WebhookService implements IWebhookService {
     userId: string,
     webhookId: string
   ): Promise<{ success: boolean; error?: string }> {
+    await ensureSubscriptionTier(userId, SubscriptionTier.PREMIUM);
     return this.dataProvider.deleteWebhook(userId, webhookId);
   }
 
@@ -50,6 +57,7 @@ export class WebhookService implements IWebhookService {
     webhookId: string,
     limit?: number
   ): Promise<WebhookDelivery[]> {
+    await ensureSubscriptionTier(userId, SubscriptionTier.PREMIUM);
     return this.dataProvider.listDeliveries(userId, webhookId, limit);
   }
 
@@ -61,6 +69,8 @@ export class WebhookService implements IWebhookService {
     if (!userId) {
       return [];
     }
+
+    await ensureSubscriptionTier(userId, SubscriptionTier.PREMIUM);
 
     const results = await this.sender.sendWebhookEvent(eventType, payload, userId);
     // Strip success field before returning
