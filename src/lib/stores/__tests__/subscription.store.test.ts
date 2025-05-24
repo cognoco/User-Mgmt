@@ -198,4 +198,62 @@ describe('useSubscriptionStore', () => {
       expect(store.hasFeature('unconfigured_feature')).toBe(true);
     });
   });
+
+  describe('cancelSubscription', () => {
+    beforeEach(() => {
+      (api.post as any).mockResolvedValue({});
+      const store = useSubscriptionStore.getState();
+      store.userSubscription = { ...mockSubscription } as any;
+    });
+
+    it('immediately cancels and clears subscription', async () => {
+      await act(async () => {
+        await useSubscriptionStore.getState().cancelSubscription('sub-123', true);
+      });
+
+      const store = useSubscriptionStore.getState();
+      expect(api.post).toHaveBeenCalledWith('/subscriptions/sub-123/cancel', { immediate: true });
+      expect(store.userSubscription).toBeNull();
+      expect(store.error).toBeNull();
+    });
+
+    it('schedules cancellation at period end', async () => {
+      const before = Date.now();
+      await act(async () => {
+        await useSubscriptionStore.getState().cancelSubscription('sub-123');
+      });
+
+      const store = useSubscriptionStore.getState();
+      expect(api.post).toHaveBeenCalledWith('/subscriptions/sub-123/cancel', { immediate: false });
+      expect(store.userSubscription?.status).toBe('canceled');
+      expect(new Date(store.userSubscription!.canceledAt!).getTime()).toBeGreaterThanOrEqual(before);
+    });
+  });
+
+  describe('updateSubscription', () => {
+    it('updates subscription plan', async () => {
+      const updated = { ...mockSubscription, planId: 'free-plan' };
+      (api.put as any).mockResolvedValue({ data: updated });
+
+      await act(async () => {
+        const result = await useSubscriptionStore.getState().updateSubscription('sub-123', 'free-plan');
+        expect(result).toEqual(updated);
+      });
+
+      const store = useSubscriptionStore.getState();
+      expect(api.put).toHaveBeenCalledWith('/subscriptions/sub-123', { planId: 'free-plan' });
+      expect(store.userSubscription).toEqual(updated);
+    });
+
+    it('handles update errors', async () => {
+      (api.put as any).mockRejectedValue(new Error('fail'));
+      await expect(
+        act(async () => {
+          await useSubscriptionStore.getState().updateSubscription('sub-123', 'free-plan');
+        })
+      ).rejects.toThrow('fail');
+
+      expect(useSubscriptionStore.getState().error).toBe('fail');
+    });
+  });
 }); 
