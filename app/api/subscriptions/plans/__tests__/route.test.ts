@@ -1,0 +1,26 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { GET } from '../route';
+import { getApiSubscriptionService } from '@/services/subscription/factory';
+
+vi.mock('@/services/subscription/factory', () => ({
+  getApiSubscriptionService: vi.fn(),
+}));
+
+describe('subscriptions plans API', () => {
+  const service = { getPlans: vi.fn() } as any;
+
+  beforeEach(() => {
+    vi.mocked(getApiSubscriptionService).mockReturnValue(service);
+    vi.clearAllMocks();
+  });
+
+  it('returns plans list', async () => {
+    service.getPlans.mockResolvedValue([{ id: 'plan1' }]);
+    const req = new Request('http://test');
+    const res = await GET(req as any);
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json[0].id).toBe('plan1');
+    expect(service.getPlans).toHaveBeenCalled();
+  });
+});
