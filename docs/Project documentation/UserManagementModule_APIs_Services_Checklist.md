@@ -75,8 +75,8 @@
 ## 4. Permissions & Roles
 
 **API Endpoints:**
-- [ ] `/api/permissions` (GET, POST, PATCH, DELETE)
-- [ ] `/api/roles` (GET, POST, PATCH, DELETE)
+- [x] `/api/permissions` (GET, POST, PATCH, DELETE)
+- [x] `/api/roles` (GET, POST, PATCH, DELETE)
 
 **Core Implementation:**
 - [ ] `PermissionService`
