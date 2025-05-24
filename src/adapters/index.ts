@@ -17,6 +17,7 @@ export * from './gdpr';
 export * from './consent';
 export * from './session';
 export * from './subscription';
+export * from './organization';
 export * from './csrf';
 export * from './webhooks';
 

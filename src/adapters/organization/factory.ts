@@ -1,15 +1,30 @@
 import type { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
-import { SupabaseOrganizationProvider } from './supabase-organization-provider';
+import { DefaultOrganizationAdapter } from './default-organization-adapter';
+import { SupabaseOrganizationProvider } from './supabase/supabase-organization.provider';
 
-export function createSupabaseOrganizationProvider(url: string, key: string): IOrganizationDataProvider {
-  return new SupabaseOrganizationProvider(url, key);
+export function createDefaultOrganizationProvider(): IOrganizationDataProvider {
+  return new DefaultOrganizationAdapter();
 }
 
-export function createOrganizationProvider(config: { type: 'supabase' | string; options: Record<string, any> }): IOrganizationDataProvider {
-  switch (config.type) {
-    case 'supabase':
-      return createSupabaseOrganizationProvider(config.options.supabaseUrl, config.options.supabaseKey);
-    default:
-      throw new Error(`Unsupported organization provider type: ${config.type}`);
+export function createSupabaseOrganizationProvider(options: {
+  supabaseUrl: string;
+  supabaseKey: string;
+  [key: string]: any;
+}): IOrganizationDataProvider {
+  return new SupabaseOrganizationProvider(options.supabaseUrl, options.supabaseKey);
+}
+
+export function createOrganizationProvider(config?: {
+  type?: 'default' | 'supabase' | string;
+  options?: Record<string, any>;
+}): IOrganizationDataProvider {
+  if (!config || config.type === 'default') {
+    return createDefaultOrganizationProvider();
   }
+  if (config.type === 'supabase') {
+    return createSupabaseOrganizationProvider(config.options || {});
+  }
+  throw new Error(`Unsupported organization provider type: ${config.type}`);
 }
+
+export default createSupabaseOrganizationProvider;
