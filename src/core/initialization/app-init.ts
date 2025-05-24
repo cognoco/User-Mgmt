@@ -8,7 +8,7 @@
 import { UserManagementConfiguration } from '@/core/config';
 import { createSupabaseClient } from '@/lib/database/supabase';
 import { api } from '@/lib/api/axios';
-import { createSupabaseWebhookProvider } from '@/adapters/webhook';
+import { createSupabaseWebhookProvider } from '@/adapters/webhooks';
 import { createWebhookService } from '@/services/webhooks';
 
 // Initialize the application
