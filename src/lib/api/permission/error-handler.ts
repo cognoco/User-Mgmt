@@ -70,6 +70,33 @@ export function createPermissionDeleteFailedError(message = 'Failed to delete pe
 }
 
 /**
+ * Create a role not found error
+ */
+export function createRoleNotFoundError(roleId?: string) {
+  const message = roleId ? `Role with ID ${roleId} not found` : 'Role not found';
+  return new ApiError(ERROR_CODES.NOT_FOUND, message, 404);
+}
+
+/**
+ * Create a role already exists error
+ */
+export function createRoleAlreadyExistsError(name: string) {
+  return new ApiError(
+    ERROR_CODES.ALREADY_EXISTS,
+    `Role with name "${name}" already exists`,
+    409
+  );
+}
+
+export function createRoleUpdateFailedError(message = 'Failed to update role', details?: Record<string, any>) {
+  return new ApiError(ERROR_CODES.UPDATE_FAILED, message, 500, details);
+}
+
+export function createRoleDeleteFailedError(message = 'Failed to delete role', details?: Record<string, any>) {
+  return new ApiError(ERROR_CODES.DELETE_FAILED, message, 500, details);
+}
+
+/**
  * Map permission service errors to API errors
  * 
  * This function maps errors from the permission service to standardized API errors.
@@ -95,13 +122,29 @@ export function mapPermissionServiceError(error: Error): ApiError {
   if (message.includes('assignment failed') || message.includes('could not assign')) {
     return createPermissionAssignmentFailedError();
   }
-  
+
   if (message.includes('update failed') || message.includes('could not update')) {
+    if (message.includes('role')) {
+      return createRoleUpdateFailedError();
+    }
     return createPermissionUpdateFailedError();
   }
-  
+
   if (message.includes('delete failed') || message.includes('could not delete')) {
+    if (message.includes('role')) {
+      return createRoleDeleteFailedError();
+    }
     return createPermissionDeleteFailedError();
+  }
+
+  if (message.includes('role not found') || message.includes('role does not exist')) {
+    return createRoleNotFoundError();
+  }
+
+  if (message.includes('role already exists') || message.includes('duplicate role')) {
+    const nameMatch = message.match(/"([^"]+)"/);
+    const name = nameMatch ? nameMatch[1] : 'provided name';
+    return createRoleAlreadyExistsError(name);
   }
   
   // Default to a server error if no specific mapping is found
