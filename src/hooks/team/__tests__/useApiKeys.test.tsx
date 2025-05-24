@@ -28,16 +28,18 @@ describe('useApiKeys', () => {
       json: () => Promise.resolve({ keys: [{ id: '1', name: 'Key 1' }] }),
     });
     const { result } = renderHook(() => useApiKeys(), { wrapper });
-    await waitFor(() => result.current.apiKeys !== undefined);
-    expect(result.current.apiKeys).toEqual([{ id: '1', name: 'Key 1' }]);
+    await waitFor(() => {
+      expect(result.current.apiKeys).toEqual([{ id: '1', name: 'Key 1' }]);
+    });
   });
 
   it('creates an API key', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({ id: '2', name: 'Key 2' }),
-    });
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ keys: [] }) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ id: '2', name: 'Key 2' }) });
+
     const { result } = renderHook(() => useApiKeys(), { wrapper });
+
     await act(async () => {
       const res = await result.current.createApiKey.mutateAsync({ name: 'Key 2' });
       expect(res).toEqual({ id: '2', name: 'Key 2' });
@@ -45,11 +47,12 @@ describe('useApiKeys', () => {
   });
 
   it('revokes an API key', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({ message: 'API key revoked successfully' }),
-    });
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ keys: [] }) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ message: 'API key revoked successfully' }) });
+
     const { result } = renderHook(() => useApiKeys(), { wrapper });
+
     await act(async () => {
       const res = await result.current.revokeApiKey.mutateAsync('1');
       expect(res).toEqual({ message: 'API key revoked successfully' });
