@@ -57,15 +57,15 @@ This checklist tracks the existence of API endpoints for the User Management Mod
 ## 2. User Profile & Account Management
 
 **API Endpoints:**
-- [ ] `/api/user/profile` (GET, PATCH)
-- [ ] `/api/user/settings` (GET, PATCH)
-- [ ] `/api/user/avatar` (GET, POST, DELETE)
-- [ ] `/api/user/connected-accounts` (GET, POST, DELETE)
+ - [x] `/api/user/profile` (GET, PATCH)
+ - [x] `/api/user/settings` (GET, PATCH)
+ - [x] `/api/user/avatar` (GET, POST, DELETE)
+ - [x] `/api/user/connected-accounts` (GET, POST, DELETE)
 
 **Core Implementation:**
-- [ ] `UserService`
-- [ ] `userServiceFactory`
-- [ ] `UserDataProvider`
+ - [x] `UserService`
+ - [x] `userServiceFactory`
+ - [x] `UserDataProvider`
 
 ---
 
