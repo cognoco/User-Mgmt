@@ -6,12 +6,12 @@ import {
   createSuccessResponse,
   createCreatedResponse,
   createNoContentResponse,
-  withErrorHandling,
-  withValidation,
-  withAuth,
   ApiError,
   ERROR_CODES,
 } from '@/lib/api/common';
+import { withErrorHandling } from '@/middleware/error-handling';
+import { withValidation } from '@/middleware/validation';
+import { withRouteAuth } from '@/middleware/auth';
 
 import {
   createUserUpdateFailedError,
@@ -128,14 +128,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   return withErrorHandling(
     (req) =>
-      withAuth((r, userId) => withValidation(AvatarUploadSchema, (r2, data) => handleUploadAvatar(r2, userId, data), r), req),
+      withRouteAuth((r, userId) => withValidation(AvatarUploadSchema, (r2, data) => handleUploadAvatar(r2, userId, data), r), req),
     request
   );
 }
 
 export async function DELETE(request: NextRequest) {
   return withErrorHandling(
-    (req) => withAuth((r, userId) => handleDeleteAvatar(userId), r),
+    (req) => withRouteAuth((r, userId) => handleDeleteAvatar(userId), r),
     request
   );
 }

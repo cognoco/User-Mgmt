@@ -1,11 +1,8 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-import {
-  createSuccessResponse,
-  createNoContentResponse,
-  withErrorHandling,
-  withValidation,
-} from '@/lib/api/common';
+import { createSuccessResponse, createNoContentResponse } from '@/lib/api/common';
+import { withErrorHandling } from '@/middleware/error-handling';
+import { withValidation } from '@/middleware/validation';
 import { getApiAdminService } from '@/services/admin/factory';
 import { createUserNotFoundError } from '@/lib/api/admin/error-handler';
 import { createProtectedHandler } from '@/middleware/permissions';

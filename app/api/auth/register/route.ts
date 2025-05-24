@@ -10,11 +10,11 @@ import { RegistrationPayload } from '@/core/auth/models';
 import {
   createSuccessResponse,
   createCreatedResponse,
-  withErrorHandling,
-  withValidation,
   ApiError,
   ERROR_CODES
 } from '@/lib/api/common';
+import { withErrorHandling } from '@/middleware/error-handling';
+import { withValidation } from '@/middleware/validation';
 import { createUserAlreadyExistsError } from '@/lib/api/user/error-handler';
 
 // Zod schema for registration data (matches original)

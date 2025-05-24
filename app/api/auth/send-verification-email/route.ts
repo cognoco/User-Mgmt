@@ -3,13 +3,9 @@ import { z } from 'zod';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { getApiAuthService } from '@/services/auth/factory';
 import { logUserAction } from '@/lib/audit/auditLogger';
-import {
-  createSuccessResponse,
-  withErrorHandling,
-  withValidation,
-  ApiError,
-  ERROR_CODES
-} from '@/lib/api/common';
+import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
+import { withErrorHandling } from '@/middleware/error-handling';
+import { withValidation } from '@/middleware/validation';
 
 // Zod schema for the request body
 const ResendEmailSchema = z.object({

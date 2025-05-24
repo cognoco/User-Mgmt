@@ -4,13 +4,9 @@ import { authOptions } from '@/lib/auth/index';
 import { prisma } from '@/lib/database/prisma';
 import { createProtectedHandler } from '@/middleware/permissions';
 import { z } from 'zod';
-import {
-  createSuccessResponse,
-  withErrorHandling,
-  withValidation,
-  ApiError,
-  ERROR_CODES
-} from '@/lib/api/common';
+import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
+import { withErrorHandling } from '@/middleware/error-handling';
+import { withValidation } from '@/middleware/validation';
 
 const querySchema = z.object({
   page: z.coerce.number().int().positive().default(1),

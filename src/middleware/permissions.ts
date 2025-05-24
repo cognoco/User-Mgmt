@@ -123,3 +123,32 @@ export function createProtectedHandler(
     })(req);
   };
 }
+import { ApiError } from '@/lib/api/common/api-error';
+import { createErrorResponse } from '@/lib/api/common/response-formatter';
+import { withRouteAuth } from './auth';
+
+/**
+ * Simple permission middleware used by some API routes.
+ * TODO: Replace with real permission checks using the permission service.
+ */
+export async function withPermission(
+  permission: string,
+  handler: (req: NextRequest, userId: string) => Promise<NextResponse>,
+  req: NextRequest
+): Promise<NextResponse> {
+  return withRouteAuth(async (r, userId) => {
+    // Placeholder permission check
+    const hasPermission = true;
+
+    if (!hasPermission) {
+      const forbiddenError = new ApiError(
+        'auth/forbidden',
+        `You don't have permission to perform this action`,
+        403
+      );
+      return createErrorResponse(forbiddenError);
+    }
+
+    return handler(r, userId);
+  }, req);
+}

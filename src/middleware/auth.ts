@@ -74,3 +74,47 @@ export function withAuth(
     }
   };
 }
+
+import { NextRequest, NextResponse } from 'next/server';
+import { ApiError } from '@/lib/api/common/api-error';
+import { createErrorResponse } from '@/lib/api/common/response-formatter';
+import { getApiAuthService } from '@/services/auth/factory';
+
+/**
+ * Authentication middleware for Next.js route handlers.
+ */
+export async function withRouteAuth(
+  handler: (req: NextRequest, userId: string) => Promise<NextResponse>,
+  req: NextRequest
+): Promise<NextResponse> {
+  try {
+    const authService = getApiAuthService();
+    const session = await authService.getSession(
+      req.headers.get('authorization') || ''
+    );
+
+    if (!session || !session.user?.id) {
+      const unauthorizedError = new ApiError(
+        'auth/unauthorized',
+        'Authentication required',
+        401
+      );
+      return createErrorResponse(unauthorizedError);
+    }
+
+    return await handler(req, session.user.id);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return createErrorResponse(error);
+    }
+
+    const serverError = new ApiError(
+      'server/internal_error',
+      error instanceof Error ? error.message : 'An unexpected error occurred',
+      500
+    );
+
+    return createErrorResponse(serverError);
+  }
+}
+
