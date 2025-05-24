@@ -12,6 +12,7 @@ import { UserDataProvider } from './user/interfaces';
 import { TeamDataProvider } from './team/interfaces';
 import { PermissionDataProvider } from './permission/interfaces';
 import { GdprDataProvider } from './gdpr/interfaces';
+import { IConsentDataProvider } from './consent/IConsentDataProvider';
 import { SessionDataProvider } from './session/interfaces';
 import { SsoDataProvider } from './sso/interfaces';
 import { SubscriptionDataProvider } from './subscription/interfaces';
@@ -25,6 +26,7 @@ import createSupabaseUserProvider from './user/supabase/factory';
 import createSupabaseTeamProvider from './team/supabase/factory';
 import createSupabasePermissionProvider from './permission/supabase/factory';
 import createSupabaseGdprProvider from './gdpr/factory';
+import createSupabaseConsentProvider from './consent/factory';
 import { createSupabaseSessionProvider } from './session/factory';
 import createSupabaseSsoProvider from './sso/supabase/factory';
 import createSupabaseSubscriptionProvider from './subscription/factory';
@@ -92,6 +94,13 @@ export class SupabaseAdapterFactory implements AdapterFactory {
    */
   createGdprProvider(): GdprDataProvider {
     return createSupabaseGdprProvider(this.options);
+  }
+
+  /**
+   * Create a Supabase consent provider
+   */
+  createConsentProvider(): IConsentDataProvider {
+    return createSupabaseConsentProvider(this.options);
   }
 
   /**

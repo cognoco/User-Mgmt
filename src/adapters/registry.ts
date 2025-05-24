@@ -12,6 +12,7 @@ import { UserDataProvider } from '@/core/user/IUserDataProvider';
 import { TeamDataProvider } from '@/core/team/ITeamDataProvider';
 import { PermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
 import { GdprDataProvider } from '@/core/gdpr/IGdprDataProvider';
+import { IConsentDataProvider } from '@/core/consent/IConsentDataProvider';
 import { SessionDataProvider } from '@/core/session/ISessionDataProvider';
 import { SsoDataProvider } from '@/core/sso/ISsoDataProvider';
 import { SubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataProvider';
@@ -56,6 +57,11 @@ export interface AdapterFactory {
    * Create a GDPR data provider
    */
   createGdprProvider?(): GdprDataProvider;
+
+  /**
+   * Create a consent data provider
+   */
+  createConsentProvider?(): IConsentDataProvider;
 
   /**
    * Create a session data provider
