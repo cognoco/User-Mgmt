@@ -209,3 +209,22 @@ describe('Webhooks API', () => {
     });
   });
 }); 
+  describe('DELETE /api/webhooks', () => {
+    it('should delete a webhook', async () => {
+      supabaseMock.delete = vi.fn().mockReturnThis();
+      supabaseMock.single.mockResolvedValue({});
+      supabaseMock.eq.mockReturnThis();
+      supabaseMock.from.mockReturnThis();
+      supabaseMock.delete.mockReturnThis();
+      supabaseMock.eq.mockReturnThis();
+      supabaseMock.select = vi.fn();
+      supabaseMock.insert = vi.fn();
+
+      const req = createMockRequest('DELETE', { id: 'webhook1' });
+      const response = await (await import('../route')).DELETE(req);
+      const body = await response.json();
+      expect(response.status).toBe(200);
+      expect(body).toHaveProperty('success', true);
+    });
+  });
+});

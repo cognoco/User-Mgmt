@@ -135,3 +135,52 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
   }
 } 
+// DELETE handler to remove a webhook
+export async function DELETE(request: NextRequest) {
+  const isRateLimited = await checkRateLimit(request);
+  if (isRateLimited) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  let body: any;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+  }
+
+  const id = body?.id;
+  if (!id) {
+    return NextResponse.json({ error: 'Webhook id required' }, { status: 400 });
+  }
+
+  const supabase = getServiceSupabase();
+  const { error } = await supabase
+    .from('webhooks')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id);
+
+  if (error) {
+    console.error('Error deleting webhook:', error);
+    return NextResponse.json({ error: 'Failed to delete webhook' }, { status: 500 });
+  }
+
+  await logUserAction({
+    userId: user.id,
+    action: 'WEBHOOK_DELETED',
+    status: 'SUCCESS',
+    ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+    userAgent: request.headers.get('user-agent') || 'unknown',
+    targetResourceType: 'webhook',
+    targetResourceId: id,
+    details: { id }
+  });
+
+  return NextResponse.json({ success: true });
+}
