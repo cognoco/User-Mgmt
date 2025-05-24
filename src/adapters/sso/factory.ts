@@ -5,7 +5,7 @@
  */
 
 import type { ISsoDataProvider } from '@/core/sso/ISsoDataProvider';
-import { SupabaseSsoProvider } from './supabase-adapter';
+import { SupabaseSsoProvider } from './supabase/supabase-adapter';
 
 export function createSupabaseSsoProvider(
   supabaseUrl: string,

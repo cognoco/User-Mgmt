@@ -3,7 +3,7 @@
  */
 
 import { SsoDataProvider } from '../interfaces';
-import { SupabaseSsoProvider } from '../supabase-adapter';
+import { SupabaseSsoProvider } from './supabase-adapter';
 
 export function createSupabaseSsoProvider(options: {
   supabaseUrl: string;
