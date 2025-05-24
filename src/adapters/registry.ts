@@ -18,6 +18,7 @@ import { SsoDataProvider } from '@/core/sso/ISsoDataProvider';
 import { SubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataProvider';
 import { ApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
+import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
 
 
 /**
@@ -46,6 +47,11 @@ export interface AdapterFactory {
    * Create a team data provider
    */
   createTeamProvider(): TeamDataProvider;
+
+  /**
+   * Create an organization data provider
+   */
+  createOrganizationProvider?(): IOrganizationDataProvider;
 
   /**
    * Create a permission data provider
