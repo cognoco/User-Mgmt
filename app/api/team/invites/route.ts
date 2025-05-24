@@ -21,6 +21,18 @@ const inviteSchema = z.object({
   teamLicenseId: z.string(),
 });
 
+async function listInvites(req: NextRequest) {
+  const url = new URL(req.url);
+  const licenseId = url.searchParams.get('teamLicenseId');
+  if (!licenseId) {
+    return createSuccessResponse([], 200);
+  }
+  const invites = await prisma.teamMember.findMany({
+    where: { teamLicenseId: licenseId, status: 'pending' }
+  });
+  return createSuccessResponse(invites);
+}
+
 async function handleInvite(req: NextRequest, data: z.infer<typeof inviteSchema>) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email || !session?.user?.id) {
@@ -108,3 +120,5 @@ export const POST = createProtectedHandler(
   (req) => withErrorHandling(handler, req),
   Permission.INVITE_TEAM_MEMBER
 );
+
+export const GET = (req: NextRequest) => withErrorHandling(listInvites, req);
