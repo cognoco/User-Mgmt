@@ -44,6 +44,7 @@ describe('SupabaseWebhookProvider', () => {
       isActive: true
     });
     expect(result.success).toBe(true);
+    expect(result.webhook?.secret).toBeDefined();
   });
 
   it('updates a webhook', async () => {

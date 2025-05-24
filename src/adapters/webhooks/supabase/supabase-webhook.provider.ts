@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import * as crypto from 'crypto';
 import type { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import type {
   Webhook,
@@ -96,6 +97,8 @@ export class SupabaseWebhookProvider implements IWebhookDataProvider {
     userId: string,
     payload: WebhookCreatePayload
   ): Promise<{ success: boolean; webhook?: Webhook; error?: string }> {
+    const secret = crypto.randomBytes(32).toString('hex');
+
     const { data, error } = await this.supabase
       .from('webhooks')
       .insert({
@@ -103,7 +106,7 @@ export class SupabaseWebhookProvider implements IWebhookDataProvider {
         name: payload.name,
         url: payload.url,
         events: payload.events,
-        secret: '',
+        secret,
         is_active: payload.isActive ?? true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()

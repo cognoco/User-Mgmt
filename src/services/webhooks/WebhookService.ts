@@ -1,9 +1,19 @@
 import type { IWebhookService } from '@/core/webhooks/IWebhookService';
 import type { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
-import type { Webhook, WebhookCreatePayload, WebhookUpdatePayload, WebhookDelivery } from '@/core/webhooks/models';
+import type {
+  Webhook,
+  WebhookCreatePayload,
+  WebhookUpdatePayload,
+  WebhookDelivery,
+} from '@/core/webhooks/models';
+import { createWebhookSender } from '@/lib/webhooks/webhook-sender';
 
 export class WebhookService implements IWebhookService {
-  constructor(private dataProvider: IWebhookDataProvider) {}
+  private sender;
+
+  constructor(private dataProvider: IWebhookDataProvider) {
+    this.sender = createWebhookSender(this.dataProvider);
+  }
 
   async getWebhooks(userId: string): Promise<Webhook[]> {
     return this.dataProvider.listWebhooks(userId);
@@ -48,12 +58,12 @@ export class WebhookService implements IWebhookService {
     payload: unknown,
     userId?: string
   ): Promise<WebhookDelivery[]> {
-    return this.dataProvider.recordDelivery({
-      id: '',
-      webhookId: '',
-      eventType,
-      payload,
-      createdAt: new Date().toISOString()
-    }).then(() => []);
+    if (!userId) {
+      return [];
+    }
+
+    const results = await this.sender.sendWebhookEvent(eventType, payload, userId);
+    // Strip success field before returning
+    return results.map(({ success, ...delivery }) => delivery);
   }
 }
