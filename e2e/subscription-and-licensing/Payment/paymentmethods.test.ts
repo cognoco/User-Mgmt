@@ -1,4 +1,4 @@
-// e2e/subsciption and licensing/Payment/payment-methods.e2e.test.ts
+// e2e/subscription-and-licensing/Payment/payment-methods.e2e.test.ts
 
 import { test, expect } from '@playwright/test';
 
