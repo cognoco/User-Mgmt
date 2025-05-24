@@ -1,3 +1,11 @@
+
+# User Management Module - APIs & Services Checklist
+
+This checklist tracks the existence of API endpoints for the User Management Module. Authentication endpoints are verified below. Each entry lists the expected route path and whether a corresponding `route.ts` file currently exists in the repository.
+
+## Authentication API Endpoints
+
+
 # User Management Module: APIs, Services, Factories & Adapters Checklist
 
 ---
@@ -30,6 +38,14 @@
 - [ ] `/api/auth/setup-mfa`
 - [ ] `/api/auth/verify-mfa`
 - [ ] `/api/auth/disable-mfa`
+- [ ] | `/api/auth/refresh-token` | _(missing)_ | ❌ |
+| `/api/auth/verify-email` | _(missing)_ | ❌ |
+| `/api/auth/delete-account` | _(missing)_ | ❌ |
+| `/api/auth/setup-mfa` | _(missing)_ | ❌ |
+| `/api/auth/verify-mfa` | _(missing)_ | ❌ |
+| `/api/auth/disable-mfa` | _(missing)_ | ❌ |
+| `/api/auth/mfa/enable` | _(missing)_ | ❌ |
+| `/api/auth/mfa/disable` | _(missing)_ | ❌ |
 
 **Core Implementation:**
 - [ ] `AuthService` (interface & implementation)
@@ -208,3 +224,4 @@
 > - Mark each item as complete `[x]` as you implement and verify it.
 > - Add links to code/docs as needed for traceability.
 > - Update this checklist as requirements evolve. 
+
