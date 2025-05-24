@@ -1,12 +1,31 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, PUT } from '../route';
+import { getApiSsoService } from '@/services/sso/factory';
+
+vi.mock('@/services/sso/factory', () => ({ getApiSsoService: vi.fn() }));
 
 describe('IDP Configuration API Routes', () => {
   const mockOrgId = 'test-org-123';
-  
+  const store: any[] = [];
+  const mockService = {
+    getProviders: vi.fn(async (orgId: string) => store.filter(p => p.organizationId === orgId)),
+    upsertProvider: vi.fn(async (payload: any) => {
+      let provider = store.find(p => p.organizationId === payload.organizationId && p.providerType === payload.providerType);
+      if (!provider) {
+        provider = { id: `${store.length + 1}`, ...payload, isActive: true };
+        store.push(provider);
+      } else {
+        provider.config = payload.config;
+      }
+      return { success: true, provider };
+    }),
+  };
+
   beforeEach(() => {
     vi.resetModules();
+    store.length = 0;
+    (getApiSsoService as unknown as vi.Mock).mockReturnValue(mockService);
   });
 
   describe('SAML Configuration', () => {
@@ -49,6 +68,7 @@ describe('IDP Configuration API Routes', () => {
 
       expect(response.status).toBe(200);
       expect(data).toEqual(validSamlConfig);
+      expect(mockService.upsertProvider).toHaveBeenCalled();
 
       // Verify config was stored
       const getRequest = new NextRequest(
@@ -131,6 +151,7 @@ describe('IDP Configuration API Routes', () => {
 
       expect(response.status).toBe(200);
       expect(data).toEqual(validOidcConfig);
+      expect(mockService.upsertProvider).toHaveBeenCalled();
 
       // Verify config was stored
       const getRequest = new NextRequest(
