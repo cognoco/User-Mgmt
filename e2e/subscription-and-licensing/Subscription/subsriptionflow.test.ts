@@ -1,4 +1,4 @@
-// e2e/subsciption and licensing/Subscription/subscription-flow.e2e.test.ts
+// e2e/subscription-and-licensing/Subscription/subscription-flow.e2e.test.ts
 
 import { test, expect } from '@playwright/test';
 

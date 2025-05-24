@@ -663,7 +663,7 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     ├── profile
     │   ├── business-profile.e2e.test.ts
     │   ├── company-validation.e2e.test.ts
-    │   ├── notification settings
+    │   ├── notification-settings
     │   │   ├── notification-delivery.e2e.test.ts
     │   │   ├── notification-preferences.e2e.test.ts
     │   │   └── push-notification.e2e.test.ts
@@ -672,7 +672,7 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   └── verification.e2e.test.ts
     ├── role-management.spec.ts
     ├── smoke.spec.ts
-    ├── subsciption and licensing
+    ├── subscription-and-licensing
     │   ├── License
     │   │   ├── license-management.test.ts
     │   │   ├── license.test.ts
