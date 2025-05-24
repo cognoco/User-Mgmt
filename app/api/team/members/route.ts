@@ -123,6 +123,18 @@ async function handleAddMember(req: NextRequest, data: z.infer<typeof addMemberS
   if (!session?.user) {
     throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
   }
+  const license = await prisma.teamLicense.findUnique({
+    where: { id: data.teamId },
+    select: { usedSeats: true, totalSeats: true },
+  });
+
+  if (license && license.usedSeats >= license.totalSeats) {
+    throw new ApiError(
+      ERROR_CODES.INVALID_REQUEST,
+      "You have reached your plan's seat limit. Please upgrade your plan or remove an existing member.",
+      400,
+    );
+  }
   const service = getApiTeamService();
   const result = await service.addTeamMember(data.teamId, data.userId, data.role);
   if (!result.success || !result.member) {

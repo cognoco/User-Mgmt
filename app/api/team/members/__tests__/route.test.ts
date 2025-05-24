@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/database/prisma';
-import { GET } from '@/app/api/team/members/route';
+import { GET, POST } from '@/app/api/team/members/route';
 import { ERROR_CODES } from '@/lib/api/common';
 
 // Mocks
@@ -18,6 +18,9 @@ vi.mock('@/lib/prisma', () => ({
     },
     team: {
       findFirst: vi.fn(),
+    },
+    teamLicense: {
+      findUnique: vi.fn(),
     },
   },
 }));
@@ -61,6 +64,7 @@ describe('Team Members API', () => {
     vi.mocked(prisma.user.findMany).mockResolvedValue(mockUsers as any);
     vi.mocked(prisma.user.count).mockResolvedValue(1);
     vi.mocked(prisma.team.findFirst).mockResolvedValue(mockTeam as any);
+    vi.mocked(prisma.teamLicense.findUnique).mockResolvedValue({ usedSeats: 0, totalSeats: 10 });
   });
 
   it('returns 401 when no session exists', async () => {
@@ -184,5 +188,18 @@ describe('Team Members API', () => {
     expect(response.status).toBe(500);
     const data = await response.json();
     expect(data.error.code).toBe(ERROR_CODES.INTERNAL_ERROR);
+  });
+
+  it('returns 400 when seat limit reached', async () => {
+    (prisma.teamLicense.findUnique as any).mockResolvedValue({ usedSeats: 5, totalSeats: 5 });
+    const request = new Request('http://localhost:3000/api/team/members', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ teamId: 'license-123', userId: 'user2', role: 'member' }),
+    });
+    const response = await POST(request);
+    const data = await response.json();
+    expect(response.status).toBe(400);
+    expect(data.error.code).toBe(ERROR_CODES.INVALID_REQUEST);
   });
 });
