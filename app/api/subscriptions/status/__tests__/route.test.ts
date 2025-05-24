@@ -1,0 +1,34 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { GET } from '../route';
+import { getApiSubscriptionService } from '@/services/subscription/factory';
+
+vi.mock('@/services/subscription/factory', () => ({
+  getApiSubscriptionService: vi.fn(),
+}));
+
+describe('subscriptions status API', () => {
+  const service = {
+    getUserSubscription: vi.fn(),
+  } as any;
+
+  beforeEach(() => {
+    vi.mocked(getApiSubscriptionService).mockReturnValue(service);
+    vi.clearAllMocks();
+  });
+
+  it('returns subscription', async () => {
+    service.getUserSubscription.mockResolvedValue({ id: 'sub1' });
+    const req = new Request('http://test');
+    req.headers.set('x-user-id', 'u1');
+    const res = await GET(req as any);
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.id).toBe('sub1');
+  });
+
+  it('unauthorized without header', async () => {
+    const req = new Request('http://test');
+    const res = await GET(req as any);
+    expect(res.status).toBe(401);
+  });
+});
