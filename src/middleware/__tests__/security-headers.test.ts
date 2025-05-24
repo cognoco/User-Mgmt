@@ -64,4 +64,49 @@ describe('Security Headers Middleware', () => {
 
     consoleSpy.mockRestore();
   });
-}); 
+
+  it('should apply additional headers', async () => {
+    const middleware = securityHeaders({ additionalHeaders: { 'X-Test': '1' } });
+    const next = vi.fn();
+
+    await middleware(req, res, next);
+
+    expect(setHeaderFn).toHaveBeenCalledWith('X-Test', '1');
+    expect(next).toHaveBeenCalled();
+  });
+
+  it('should call custom error handler', async () => {
+    const onError = vi.fn();
+    const middleware = securityHeaders({ onError });
+    const next = vi.fn().mockImplementation(() => {
+      throw new Error('failure');
+    });
+
+    await expect(middleware(req, res, next)).rejects.toThrow('failure');
+    expect(onError).toHaveBeenCalledWith(req, res, expect.any(Error));
+  });
+
+  it('should respect custom security options', async () => {
+    const middleware = securityHeaders({
+      xDNSPrefetchControl: false,
+      strictTransportSecurity: { enabled: true, maxAge: 1000, includeSubDomains: false, preload: false },
+      xFrameOptions: 'DENY',
+      contentSecurityPolicy: { directives: { 'script-src': ["'self'", 'cdn'] } },
+      expectCT: { enabled: true, maxAge: 500, enforce: true, reportUri: 'https://example.com' },
+      xPermittedCrossDomainPolicies: 'master-only',
+    });
+    const next = vi.fn();
+
+    await middleware(req, res, next);
+
+    const calls = setHeaderFn.mock.calls.map(([h]) => h);
+    expect(calls).not.toContain('X-DNS-Prefetch-Control');
+    expect(setHeaderFn).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=1000');
+    expect(setHeaderFn).toHaveBeenCalledWith('X-Frame-Options', 'DENY');
+    const cspCall = setHeaderFn.mock.calls.find((c) => c[0] === 'Content-Security-Policy');
+    expect(cspCall?.[1]).toContain('cdn');
+    expect(setHeaderFn).toHaveBeenCalledWith('X-Permitted-Cross-Domain-Policies', 'master-only');
+    expect(setHeaderFn).toHaveBeenCalledWith('Expect-CT', 'max-age=500, enforce, report-uri="https://example.com"');
+    expect(next).toHaveBeenCalled();
+  });
+});
