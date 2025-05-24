@@ -1,31 +1,29 @@
 /**
  * Default Permission Service Implementation
- * 
+ *
  * This file implements the PermissionService interface defined in the core layer.
  * It provides the default implementation for permission and role management operations.
  */
 
+import { PermissionService } from "@/core/permission/interfaces";
 import {
-  PermissionService
-} from '@/core/permission/interfaces';
-import { 
-  Permission, 
-  Role, 
+  Permission,
+  Role,
   RoleEntity,
-  RoleWithPermissions, 
+  RoleWithPermissions,
   UserRole,
   PermissionAssignment,
   RoleCreationPayload,
   RoleUpdatePayload,
-  DefaultRoleDefinitions
-} from '@/core/permission/models';
+  DefaultRoleDefinitions,
+} from "@/core/permission/models";
 import {
   PermissionEventTypes,
-  PermissionEventHandler
-} from '@/core/permission/events';
-import type { PermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
-import { translateError } from '@/lib/utils/error';
-import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
+  PermissionEventHandler,
+} from "@/core/permission/events";
+import type { PermissionDataProvider } from "@/core/permission/IPermissionDataProvider";
+import { translateError } from "@/lib/utils/error";
+import { TypedEventEmitter } from "@/lib/utils/typed-event-emitter";
 
 /**
  * Default implementation of the PermissionService interface
@@ -34,7 +32,6 @@ export class DefaultPermissionService
   extends TypedEventEmitter<PermissionEventTypes>
   implements PermissionService
 {
-  
   /**
    * Constructor for DefaultPermissionService
    *
@@ -43,46 +40,52 @@ export class DefaultPermissionService
   constructor(private permissionDataProvider: PermissionDataProvider) {
     super();
   }
-  
+
   /**
    * Emit a permission event
-   * 
+   *
    * @param event - The event to emit
    */
   private emitEvent(event: PermissionEventTypes): void {
     this.emit(event);
   }
-  
+
   /**
    * Check if a user has a specific permission
-   * 
+   *
    * @param userId - The user ID to check permissions for
    * @param permission - The permission to check
    * @returns A boolean indicating if the user has the permission
    */
-  async hasPermission(userId: string, permission: Permission): Promise<boolean> {
+  async hasPermission(
+    userId: string,
+    permission: Permission,
+  ): Promise<boolean> {
     try {
       // Get all roles assigned to the user
       const userRoles = await this.getUserRoles(userId);
-      
+
       // For each role, check if it has the permission
       for (const userRole of userRoles) {
-        const hasPermission = await this.roleHasPermission(userRole.roleId, permission);
+        const hasPermission = await this.roleHasPermission(
+          userRole.roleId,
+          permission,
+        );
         if (hasPermission) {
           return true;
         }
       }
-      
+
       return false;
     } catch (error) {
-      console.error('Error checking user permission:', error);
+      console.error("Error checking user permission:", error);
       return false;
     }
   }
-  
+
   /**
    * Check if a user has a specific role
-   * 
+   *
    * @param userId - The user ID to check roles for
    * @param role - The role to check
    * @returns A boolean indicating if the user has the role
@@ -91,41 +94,43 @@ export class DefaultPermissionService
     try {
       // Get all roles assigned to the user
       const userRoles = await this.getUserRoles(userId);
-      
+
       // Get the role entity for the specified role
       const roles = await this.getAllRoles();
-      const roleEntity = roles.find(r => r.name === role);
-      
+      const roleEntity = roles.find((r) => r.name === role);
+
       if (!roleEntity) {
         return false;
       }
-      
+
       // Check if the user has the role
-      return userRoles.some(userRole => userRole.roleId === roleEntity.id);
+      return userRoles.some((userRole) => userRole.roleId === roleEntity.id);
     } catch (error) {
-      console.error('Error checking user role:', error);
+      console.error("Error checking user role:", error);
       return false;
     }
   }
-  
+
   /**
    * Get all roles with their permissions
-   * 
+   *
    * @returns An array of all roles with their permissions
    */
   async getAllRoles(): Promise<RoleWithPermissions[]> {
     try {
       return await this.permissionDataProvider.getAllRoles();
     } catch (error) {
-      const errorMessage = translateError(error, { defaultMessage: 'Error getting all roles' });
-      console.error('Error getting all roles:', errorMessage);
+      const errorMessage = translateError(error, {
+        defaultMessage: "Error getting all roles",
+      });
+      console.error("Error getting all roles:", errorMessage);
       return [];
     }
   }
-  
+
   /**
    * Get a specific role by ID
-   * 
+   *
    * @param roleId - The ID of the role to get
    * @returns The role with its permissions, or null if not found
    */
@@ -133,99 +138,115 @@ export class DefaultPermissionService
     try {
       return await this.permissionDataProvider.getRoleById(roleId);
     } catch (error) {
-      const errorMessage = translateError(error, { defaultMessage: 'Error getting role by ID' });
-      console.error('Error getting role by ID:', errorMessage);
+      const errorMessage = translateError(error, {
+        defaultMessage: "Error getting role by ID",
+      });
+      console.error("Error getting role by ID:", errorMessage);
       return null;
     }
   }
-  
+
   /**
    * Create a new role
-   * 
+   *
    * @param roleData - The data for the new role
    * @returns The created role with its permissions
    */
-  async createRole(roleData: RoleCreationPayload): Promise<RoleWithPermissions> {
+  async createRole(
+    roleData: RoleCreationPayload,
+  ): Promise<RoleWithPermissions> {
     try {
       const role = await this.permissionDataProvider.createRole(roleData);
-      
+
       // Emit role created event
       this.emitEvent({
-        type: 'ROLE_CREATED',
+        type: "ROLE_CREATED",
         timestamp: new Date(),
-        role
+        role,
       });
-      
+
       return role;
     } catch (error) {
-      const errorMessage = translateError(error, { defaultMessage: 'Failed to create role' });
-      console.error('Error creating role:', errorMessage);
+      const errorMessage = translateError(error, {
+        defaultMessage: "Failed to create role",
+      });
+      console.error("Error creating role:", errorMessage);
       throw new Error(errorMessage);
     }
   }
-  
+
   /**
    * Update an existing role
-   * 
+   *
    * @param roleId - The ID of the role to update
    * @param roleData - The updated data for the role
    * @returns The updated role with its permissions
    */
-  async updateRole(roleId: string, roleData: RoleUpdatePayload): Promise<RoleWithPermissions> {
+  async updateRole(
+    roleId: string,
+    roleData: RoleUpdatePayload,
+  ): Promise<RoleWithPermissions> {
     try {
       // Get the previous role for the event
       const previousRole = await this.getRoleById(roleId);
-      
+
       if (!previousRole) {
-        throw new Error('Role not found');
+        throw new Error("Role not found");
       }
-      
-      const role = await this.permissionDataProvider.updateRole(roleId, roleData);
-      
+
+      const role = await this.permissionDataProvider.updateRole(
+        roleId,
+        roleData,
+      );
+
       // Emit role updated event
       this.emitEvent({
-        type: 'ROLE_UPDATED',
+        type: "ROLE_UPDATED",
         timestamp: new Date(),
         role,
-        previousRole
+        previousRole,
       });
-      
+
       return role;
     } catch (error) {
-      const errorMessage = translateError(error, { defaultMessage: 'Failed to update role' });
-      console.error('Error updating role:', errorMessage);
+      const errorMessage = translateError(error, {
+        defaultMessage: "Failed to update role",
+      });
+      console.error("Error updating role:", errorMessage);
       throw new Error(errorMessage);
     }
   }
-  
+
   /**
    * Delete a role
-   * 
+   *
    * @param roleId - The ID of the role to delete
    * @returns A boolean indicating if the deletion was successful
    */
   async deleteRole(roleId: string): Promise<boolean> {
     try {
       await this.permissionDataProvider.deleteRole(roleId);
-      
+
       // Emit role deleted event
       this.emitEvent({
-        type: 'ROLE_DELETED',
+        type: "ROLE_DELETED",
         timestamp: new Date(),
-        roleId
+        roleId,
       });
-      
+
       return true;
     } catch (error) {
-      const errorMessage = translateError(error, { defaultMessage: 'Error deleting role' });
-      console.error('Error deleting role:', errorMessage);
+      const errorMessage = translateError(error, {
+        defaultMessage: "Error deleting role",
+      });
+      console.error("Error deleting role:", errorMessage);
       return false;
     }
   }
-  
+
   /**
    * Get all roles assigned to a user
-   * 
+   *
    * @param userId - The ID of the user to get roles for
    * @returns An array of user role assignments
    */
@@ -233,15 +254,17 @@ export class DefaultPermissionService
     try {
       return await this.permissionDataProvider.getUserRoles(userId);
     } catch (error) {
-      const errorMessage = translateError(error, { defaultMessage: 'Error getting user roles' });
-      console.error('Error getting user roles:', errorMessage);
+      const errorMessage = translateError(error, {
+        defaultMessage: "Error getting user roles",
+      });
+      console.error("Error getting user roles:", errorMessage);
       return [];
     }
   }
-  
+
   /**
    * Assign a role to a user
-   * 
+   *
    * @param userId - The ID of the user to assign the role to
    * @param roleId - The ID of the role to assign
    * @param assignedBy - The ID of the user assigning the role
@@ -249,153 +272,195 @@ export class DefaultPermissionService
    * @returns The created user role assignment
    */
   async assignRoleToUser(
-    userId: string, 
-    roleId: string, 
-    assignedBy: string, 
-    expiresAt?: Date
+    userId: string,
+    roleId: string,
+    assignedBy: string,
+    expiresAt?: Date,
   ): Promise<UserRole> {
     try {
+      const existingRoles = await this.getUserRoles(userId);
+      const existing = existingRoles.find((r) => r.roleId === roleId);
+
+      if (existing) {
+        return existing;
+      }
+
       const userRole = await this.permissionDataProvider.assignRoleToUser(
         userId,
         roleId,
         assignedBy,
-        expiresAt
+        expiresAt,
       );
-      
+
       // Emit role assigned event
       this.emitEvent({
-        type: 'ROLE_ASSIGNED',
+        type: "ROLE_ASSIGNED",
         timestamp: new Date(),
-        userRole
+        userRole,
       });
-      
+
       return userRole;
     } catch (error) {
-      const errorMessage = translateError(error, { defaultMessage: 'Failed to assign role to user' });
-      console.error('Error assigning role to user:', errorMessage);
+      const errorMessage = translateError(error, {
+        defaultMessage: "Failed to assign role to user",
+      });
+      console.error("Error assigning role to user:", errorMessage);
       throw new Error(errorMessage);
     }
   }
-  
+
   /**
    * Remove a role from a user
-   * 
+   *
    * @param userId - The ID of the user to remove the role from
    * @param roleId - The ID of the role to remove
    * @returns A boolean indicating if the removal was successful
    */
   async removeRoleFromUser(userId: string, roleId: string): Promise<boolean> {
     try {
+      const currentRoles = await this.getUserRoles(userId);
+      const hasRole = currentRoles.some((r) => r.roleId === roleId);
+
+      if (!hasRole) {
+        return false;
+      }
+
       await this.permissionDataProvider.removeRoleFromUser(userId, roleId);
-      
+
       // Emit role removed event
       this.emitEvent({
-        type: 'ROLE_REMOVED',
+        type: "ROLE_REMOVED",
         timestamp: new Date(),
         userId,
-        roleId
+        roleId,
       });
-      
+
       return true;
     } catch (error) {
-      const errorMessage = translateError(error, { defaultMessage: 'Error removing role from user' });
-      console.error('Error removing role from user:', errorMessage);
+      const errorMessage = translateError(error, {
+        defaultMessage: "Error removing role from user",
+      });
+      console.error("Error removing role from user:", errorMessage);
       return false;
     }
   }
-  
+
   /**
    * Check if a role has a specific permission
-   * 
+   *
    * @param roleId - The ID of the role to check
    * @param permission - The permission to check for
    * @returns A boolean indicating if the role has the permission
    */
-  async roleHasPermission(roleId: string, permission: Permission): Promise<boolean> {
+  async roleHasPermission(
+    roleId: string,
+    permission: Permission,
+  ): Promise<boolean> {
     try {
-      const permissions = await this.getRolePermissions(roleId);
-      return permissions.includes(permission);
+      const role = await this.getRoleById(roleId);
+
+      if (!role) {
+        return false;
+      }
+
+      return role.permissions.includes(permission);
     } catch (error) {
-      console.error('Error checking role permission:', error);
+      console.error("Error checking role permission:", error);
       return false;
     }
   }
-  
+
   /**
    * Add a permission to a role
-   * 
+   *
    * @param roleId - The ID of the role to add the permission to
    * @param permission - The permission to add
    * @returns The updated permission assignment
    */
-  async addPermissionToRole(roleId: string, permission: Permission): Promise<PermissionAssignment> {
+  async addPermissionToRole(
+    roleId: string,
+    permission: Permission,
+  ): Promise<PermissionAssignment> {
     try {
-      const permissionAssignment = await this.permissionDataProvider.addPermissionToRole(
-        roleId,
-        permission
-      );
-      
+      const permissionAssignment =
+        await this.permissionDataProvider.addPermissionToRole(
+          roleId,
+          permission,
+        );
+
       // Emit permission added event
       this.emitEvent({
-        type: 'PERMISSION_ADDED',
+        type: "PERMISSION_ADDED",
         timestamp: new Date(),
         roleId,
-        permission
+        permission,
       });
-      
+
       return permissionAssignment;
     } catch (error) {
-      const errorMessage = translateError(error, { defaultMessage: 'Failed to add permission to role' });
-      console.error('Error adding permission to role:', errorMessage);
+      const errorMessage = translateError(error, {
+        defaultMessage: "Failed to add permission to role",
+      });
+      console.error("Error adding permission to role:", errorMessage);
       throw new Error(errorMessage);
     }
   }
-  
+
   /**
    * Remove a permission from a role
-   * 
+   *
    * @param roleId - The ID of the role to remove the permission from
    * @param permission - The permission to remove
    * @returns A boolean indicating if the removal was successful
    */
-  async removePermissionFromRole(roleId: string, permission: Permission): Promise<boolean> {
+  async removePermissionFromRole(
+    roleId: string,
+    permission: Permission,
+  ): Promise<boolean> {
     try {
-      await this.permissionDataProvider.removePermissionFromRole(roleId, permission);
-      
+      await this.permissionDataProvider.removePermissionFromRole(
+        roleId,
+        permission,
+      );
+
       // Emit permission removed event
       this.emitEvent({
-        type: 'PERMISSION_REMOVED',
+        type: "PERMISSION_REMOVED",
         timestamp: new Date(),
         roleId,
-        permission
+        permission,
       });
-      
+
       return true;
     } catch (error) {
-      const errorMessage = translateError(error, { defaultMessage: 'Error removing permission from role' });
-      console.error('Error removing permission from role:', errorMessage);
+      const errorMessage = translateError(error, {
+        defaultMessage: "Error removing permission from role",
+      });
+      console.error("Error removing permission from role:", errorMessage);
       return false;
     }
   }
-  
+
   /**
    * Get all permissions in the system
-   * 
+   *
    * @returns An array of all available permissions
    */
   async getAllPermissions(): Promise<Permission[]> {
     try {
       return await this.permissionDataProvider.getAllPermissions();
     } catch (error) {
-      const errorMessage = translateError(error, { defaultMessage: 'Error getting all permissions' });
-      console.error('Error getting all permissions:', errorMessage);
+      const errorMessage = translateError(error, {
+        defaultMessage: "Error getting all permissions",
+      });
+      console.error("Error getting all permissions:", errorMessage);
       return [];
     }
   }
-  
+
   /**
    * Get all permissions assigned to a role
-   * 
+   *
    * @param roleId - The ID of the role to get permissions for
    * @returns An array of permissions assigned to the role
    */
@@ -403,39 +468,47 @@ export class DefaultPermissionService
     try {
       return await this.permissionDataProvider.getRolePermissions(roleId);
     } catch (error) {
-      const errorMessage = translateError(error, { defaultMessage: 'Error getting role permissions' });
-      console.error('Error getting role permissions:', errorMessage);
+      const errorMessage = translateError(error, {
+        defaultMessage: "Error getting role permissions",
+      });
+      console.error("Error getting role permissions:", errorMessage);
       return [];
     }
   }
-  
+
   /**
    * Sync role permissions with the database
    * This ensures the database matches the defined permissions
-   * 
+   *
    * @returns A boolean indicating if the sync was successful
    */
   async syncRolePermissions(): Promise<boolean> {
     try {
       // Get all existing roles
       const existingRoles = await this.getAllRoles();
-      
+
       // For each default role definition
-      for (const [roleName, permissions] of Object.entries(DefaultRoleDefinitions)) {
+      for (const [roleName, permissions] of Object.entries(
+        DefaultRoleDefinitions,
+      )) {
         // Check if the role exists
-        const existingRole = existingRoles.find(role => role.name === roleName);
-        
+        const existingRole = existingRoles.find(
+          (role) => role.name === roleName,
+        );
+
         if (existingRole) {
           // Update existing role permissions
-          const currentPermissions = await this.getRolePermissions(existingRole.id);
-          
+          const currentPermissions = await this.getRolePermissions(
+            existingRole.id,
+          );
+
           // Add missing permissions
           for (const permission of permissions) {
             if (!currentPermissions.includes(permission)) {
               await this.addPermissionToRole(existingRole.id, permission);
             }
           }
-          
+
           // Remove extra permissions
           for (const permission of currentPermissions) {
             if (!permissions.includes(permission)) {
@@ -447,31 +520,31 @@ export class DefaultPermissionService
           await this.createRole({
             name: roleName,
             description: `Default ${roleName} role`,
-            permissions
+            permissions,
           });
         }
       }
-      
+
       // Get updated roles
       const updatedRoles = await this.getAllRoles();
-      
+
       // Emit role permissions synced event
       this.emitEvent({
-        type: 'ROLE_PERMISSIONS_SYNCED',
+        type: "ROLE_PERMISSIONS_SYNCED",
         timestamp: new Date(),
-        roles: updatedRoles
+        roles: updatedRoles,
       });
-      
+
       return true;
     } catch (error) {
-      console.error('Error syncing role permissions:', error);
+      console.error("Error syncing role permissions:", error);
       return false;
     }
   }
-  
+
   /**
    * Subscribe to permission events
-   * 
+   *
    * @param handler - Function to call when a permission event occurs
    * @returns Unsubscribe function
    */
