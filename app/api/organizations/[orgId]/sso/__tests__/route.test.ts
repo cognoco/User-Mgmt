@@ -1,14 +1,40 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, PUT } from '../route';
+import { getApiSsoService } from '@/services/sso/factory';
+
+vi.mock('@/services/sso/factory', () => ({ getApiSsoService: vi.fn() }));
 
 describe('SSO API Routes', () => {
   const mockOrgId = 'test-org-123';
   const mockParams = { params: { orgId: mockOrgId } };
+  const store: any[] = [];
+  const mockService = {
+    getProviders: vi.fn(async (orgId: string) => store.filter(p => p.organizationId === orgId)),
+    upsertProvider: vi.fn(async (payload: any) => {
+      let provider = store.find(p => p.organizationId === payload.organizationId && p.providerType === payload.providerType);
+      if (!provider) {
+        provider = { id: `${store.length + 1}`, ...payload, isActive: true };
+        store.push(provider);
+      } else {
+        provider.config = payload.config;
+      }
+      return { success: true, provider };
+    }),
+    deleteProvider: vi.fn(async (id: string) => {
+      const idx = store.findIndex(p => p.id === id);
+      if (idx !== -1) store.splice(idx, 1);
+      return { success: true };
+    }),
+    getProvider: vi.fn(),
+    setProviderActive: vi.fn(async () => ({ success: true })),
+  };
 
   beforeEach(() => {
     // Reset any module state between tests
     vi.resetModules();
+    store.length = 0;
+    (getApiSsoService as unknown as vi.Mock).mockReturnValue(mockService);
   });
 
   describe('GET /api/organizations/[orgId]/sso/settings', () => {
@@ -86,6 +112,7 @@ describe('SSO API Routes', () => {
 
       expect(response.status).toBe(200);
       expect(data).toEqual(newSettings);
+      expect(mockService.upsertProvider).toHaveBeenCalled();
 
       // Verify settings were stored by making a GET request
       const getRequest = new NextRequest(

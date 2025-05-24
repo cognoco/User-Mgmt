@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { getApiSsoService } from '@/services/sso/factory';
 
 // Schema for SSO settings
 const ssoSettingsSchema = z.object({
@@ -7,14 +8,6 @@ const ssoSettingsSchema = z.object({
   idp_type: z.enum(['saml', 'oidc']).nullable(),
 });
 
-// Mock data store - in production, this would be a database
-const mockSSOSettings: Record<string, z.infer<typeof ssoSettingsSchema>> = {};
-const mockSSOStatus: Record<string, {
-  status: 'healthy' | 'warning' | 'error' | 'unknown';
-  lastSuccessfulLogin: string | null;
-  lastError: string | null;
-  totalSuccessfulLogins24h: number;
-}> = {};
 
 // GET /api/organizations/[orgId]/sso/settings
 export async function GET(
@@ -24,30 +17,38 @@ export async function GET(
   const { orgId } = params;
   const path = request.nextUrl.pathname;
 
+  const ssoService = getApiSsoService();
+
   // Handle status endpoint
   if (path.endsWith('/status')) {
-    // Return mock status or initialize if not exists
-    if (!mockSSOStatus[orgId]) {
-      mockSSOStatus[orgId] = {
+    const providers = await ssoService.getProviders(orgId);
+    if (!providers.length) {
+      return NextResponse.json({
         status: 'unknown',
         lastSuccessfulLogin: null,
         lastError: null,
         totalSuccessfulLogins24h: 0,
-      };
+      });
     }
-    return NextResponse.json(mockSSOStatus[orgId]);
+
+    return NextResponse.json({
+      status: 'healthy',
+      lastSuccessfulLogin: null,
+      lastError: null,
+      totalSuccessfulLogins24h: 0,
+    });
   }
 
   // Handle settings endpoint
   if (path.endsWith('/settings')) {
-    // Return mock settings or initialize if not exists
-    if (!mockSSOSettings[orgId]) {
-      mockSSOSettings[orgId] = {
-        sso_enabled: false,
-        idp_type: null,
-      };
+    const providers = await ssoService.getProviders(orgId);
+    if (!providers.length) {
+      return NextResponse.json({ sso_enabled: false, idp_type: null });
     }
-    return NextResponse.json(mockSSOSettings[orgId]);
+    return NextResponse.json({
+      sso_enabled: true,
+      idp_type: providers[0].providerType,
+    });
   }
 
   // Handle metadata endpoint
@@ -93,21 +94,22 @@ export async function PUT(
     try {
       const body = await request.json();
       const settings = ssoSettingsSchema.parse(body);
-      
-      // Store settings
-      mockSSOSettings[orgId] = settings;
+      const service = getApiSsoService();
 
-      // Initialize or update status if SSO is enabled
-      if (settings.sso_enabled) {
-        mockSSOStatus[orgId] = {
-          status: 'healthy',
-          lastSuccessfulLogin: null,
-          lastError: null,
-          totalSuccessfulLogins24h: 0,
-        };
+      if (settings.sso_enabled && settings.idp_type) {
+        await service.upsertProvider({
+          organizationId: orgId,
+          providerType: settings.idp_type,
+          providerName: `default-${settings.idp_type}`,
+          config: {},
+        });
+        return NextResponse.json(settings);
       }
 
-      return NextResponse.json(settings);
+      const existing = await service.getProviders(orgId);
+      await Promise.all(existing.map(p => service.deleteProvider(p.id)));
+
+      return NextResponse.json({ sso_enabled: false, idp_type: null });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });

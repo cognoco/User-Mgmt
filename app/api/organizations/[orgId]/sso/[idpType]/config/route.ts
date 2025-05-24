@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { getApiSsoService } from '@/services/sso/factory';
 
 // SAML Configuration Schema
 const samlConfigSchema = z.object({
@@ -20,11 +21,6 @@ const oidcConfigSchema = z.object({
   scope: z.string().min(1).default('openid email profile'),
 });
 
-// Mock data store - in production, this would be a database
-const mockConfigs: Record<string, any> = {};
-
-// Helper to get config key
-const getConfigKey = (orgId: string, idpType: string) => `${orgId}:${idpType}`;
 
 // GET /api/organizations/[orgId]/sso/[idpType]/config
 export async function GET(
@@ -37,8 +33,10 @@ export async function GET(
     return NextResponse.json({ error: 'Invalid IDP type' }, { status: 404 });
   }
 
-  const configKey = getConfigKey(orgId, idpType);
-  const config = mockConfigs[configKey];
+  const service = getApiSsoService();
+  const providers = await service.getProviders(orgId);
+  const provider = providers.find(p => p.providerType === idpType);
+  const config = provider?.config;
 
   if (!config) {
     // Return default configuration
@@ -78,9 +76,13 @@ export async function PUT(
     const schema = idpType === 'saml' ? samlConfigSchema : oidcConfigSchema;
     const config = schema.parse(body);
     
-    // Store configuration
-    const configKey = getConfigKey(orgId, idpType);
-    mockConfigs[configKey] = config;
+    const service = getApiSsoService();
+    await service.upsertProvider({
+      organizationId: orgId,
+      providerType: idpType as 'saml' | 'oidc',
+      providerName: idpType,
+      config,
+    });
 
     return NextResponse.json(config);
   } catch (error) {
