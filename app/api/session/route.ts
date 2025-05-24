@@ -21,5 +21,21 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// DELETE /api/session - Revoke all sessions except current (optional, not implemented yet)
-// export async function DELETE(req: NextRequest) { ... }
+// DELETE /api/session - Revoke all user sessions
+export async function DELETE(req: NextRequest) {
+  const user = await getUserFromRequest(req);
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const provider = createSessionProvider({
+    type: 'supabase',
+    options: {
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    }
+  });
+  try {
+    const result = await provider.deleteAllUserSessions(user.id);
+    return NextResponse.json({ success: result.success, count: result.count });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to revoke sessions' }, { status: 500 });
+  }
+}

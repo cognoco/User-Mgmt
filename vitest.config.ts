@@ -15,7 +15,11 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
-    include: ['src/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}', 'src/tests/**/*.{test,spec,integration}.{js,jsx,ts,tsx}'],
+    include: [
+      'src/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}',
+      'src/tests/**/*.{test,spec,integration}.{js,jsx,ts,tsx}',
+      'app/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}'
+    ],
     // Add coverage config if needed
     // coverage: {
     //   reporter: ['text', 'json', 'html'],
