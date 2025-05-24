@@ -139,10 +139,10 @@
 ## 9. Subscription & Billing
 
 **API Endpoints:**
-- [ ] `/api/subscriptions/checkout`
-- [ ] `/api/subscriptions/portal`
-- [ ] `/api/subscriptions/status`
-- [ ] `/api/subscriptions/cancel`
+- [x] `/api/subscriptions/checkout`
+- [x] `/api/subscriptions/portal`
+- [x] `/api/subscriptions/status`
+- [x] `/api/subscriptions/cancel`
 
 **Core Implementation:**
 - [ ] `SubscriptionService`

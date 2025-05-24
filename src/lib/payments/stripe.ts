@@ -31,4 +31,11 @@ export async function createCheckoutSession(params: Stripe.Checkout.SessionCreat
   return stripe.checkout.sessions.create(params);
 }
 
+// Example: Create a billing portal session
+export async function createBillingPortalSession(
+  params: Stripe.BillingPortal.SessionCreateParams
+) {
+  return stripe.billingPortal.sessions.create(params);
+}
+
 // Add more helpers as needed for your flows 
