@@ -77,7 +77,7 @@ test.describe('User Logout Flow', () => {
   test('1.3: User can successfully log out', async ({ page }) => {
     try {
       // Login directly in the test instead of beforeEach to avoid timeout issues
-      await page.goto('/login');
+      await page.goto('/auth/login');
       await page.waitForLoadState('domcontentloaded');
       
       // Try to login with form inputs
@@ -137,7 +137,7 @@ test.describe('User Logout Flow', () => {
       if (!isLoggedIn) {
         console.log('Login may have failed - UI does not indicate authenticated state');
         // Try direct navigation to profile/dashboard
-        await page.goto('/profile');
+        await page.goto('/account/profile');
         await page.waitForTimeout(2000);
       }
       
@@ -154,7 +154,7 @@ test.describe('User Logout Flow', () => {
       await page.waitForTimeout(2000);
       
       // Verify user is logged out by checking URL or login button
-      const isLoginPage = page.url().includes('/login');
+      const isLoginPage = page.url().includes('/auth/login');
       const hasLoginButton = await page.getByRole('button', { name: /login|sign in/i }).count() > 0;
       
       // Assertion with console log
@@ -162,11 +162,11 @@ test.describe('User Logout Flow', () => {
       expect(isLoginPage || hasLoginButton).toBe(true);
       
       // Try to access a protected route to verify logout was successful
-      await page.goto('/profile');
+      await page.goto('/account/profile');
       await page.waitForTimeout(2000);
       
       // Verify we can't access protected routes after logout
-      const isRedirectedToLogin = page.url().includes('/login');
+      const isRedirectedToLogin = page.url().includes('/auth/login');
       console.log('Verifying user is redirected to login when accessing protected route after logout');
       expect(isRedirectedToLogin).toBe(true);
     } catch (e) {
@@ -178,7 +178,7 @@ test.describe('User Logout Flow', () => {
   test('1.4: Session is terminated after logout', async ({ page }) => {
     try {
       // Login directly in the test instead of beforeEach to avoid timeout issues
-      await page.goto('/login');
+      await page.goto('/auth/login');
       await page.waitForLoadState('domcontentloaded');
       
       // Try to login with form inputs
@@ -238,7 +238,7 @@ test.describe('User Logout Flow', () => {
       if (!isLoggedIn) {
         console.log('Login may have failed - UI does not indicate authenticated state');
         // Try direct navigation to profile/dashboard
-        await page.goto('/profile');
+        await page.goto('/account/profile');
         await page.waitForTimeout(2000);
       }
       
@@ -253,11 +253,11 @@ test.describe('User Logout Flow', () => {
       await page.waitForTimeout(2000);
       
       // Access a protected route that requires authentication
-      await page.goto('/profile');
+      await page.goto('/account/profile');
       await page.waitForTimeout(2000);
       
       // Verify authentication state via URL - should redirect to login
-      expect(page.url()).toContain('/login');
+      expect(page.url()).toContain('/auth/login');
       
       // Optionally check for authentication required message
       const hasAuthMessage = await page.getByText(/sign in|login|not authenticated/i).count() > 0;

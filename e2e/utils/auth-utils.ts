@@ -13,7 +13,7 @@ const TEST_USER = {
  */
 export async function loginUser(page: Page, email = TEST_USER.email, password = TEST_USER.password): Promise<void> {
   // Navigate to login page
-  await page.goto('/login');
+  await page.goto('/auth/login');
   
   // Fill in login form
   await page.getByLabel(/email/i).fill(email);

@@ -126,7 +126,7 @@ function getStarterLogic(flow, type) {
   if (/login/.test(lower)) {
     if (type === 'e2e') {
       return [
-        "await page.goto('/login');",
+        "await page.goto('/auth/login');",
         "await page.fill('input[name=\"email\"]', 'user@example.com');",
         "await page.fill('input[name=\"password\"]', 'password123');",
         "await page.click('button[type=\"submit\"]'); // or use getByRole('button', { name: /login|sign in/i })",
@@ -286,10 +286,10 @@ function getStarterLogic(flow, type) {
     if (type === 'e2e') {
       // Try to extract a path or use a common one
       let url = "'/' // TODO: Set correct path";
-      if (lower.includes('profile')) url = "'/profile'";
+      if (lower.includes('profile')) url = "'/account/profile'";
       else if (lower.includes('settings')) url = "'/settings'";
       else if (lower.includes('payment')) url = "'/payment'";
-      else if (lower.includes('dashboard')) url = "'/dashboard'";
+      else if (lower.includes('dashboard')) url = "'/dashboard/overview'";
       return [
         `await page.goto(${url});`,
         "// TODO: Replace with actual selector for heading or key element",

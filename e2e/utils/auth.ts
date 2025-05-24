@@ -11,8 +11,8 @@ import { Page } from '@playwright/test';
  */
 export async function loginAs(page: Page, username: string, password: string): Promise<void> {
   // 1. Navigate to login page if not already there
-  if (!page.url().includes('/login')) {
-    await page.goto('/login');
+  if (!page.url().includes('/auth/login')) {
+    await page.goto('/auth/login');
   }
 
   // 2. Fill in credentials using multiple strategies for better reliability

@@ -54,7 +54,7 @@ export interface ProtectedRouteProps {
 export function ProtectedRoute({
   requiredRole,
   requiredPermission,
-  redirectUrl = '/login',
+  redirectUrl = '/auth/login',
   isAuthenticated: externalIsAuthenticated,
   isLoading: externalIsLoading,
   onAuthFail,

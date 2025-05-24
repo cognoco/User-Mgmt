@@ -15,7 +15,7 @@ export function ProtectedRoute({
   children,
   requiredRoles = [],
   requiredPermissions = [],
-  redirectPath = '/login',
+  redirectPath = '/auth/login',
   accessDeniedComponent,
 }: ProtectedRouteProps) {
   const router = useRouter();

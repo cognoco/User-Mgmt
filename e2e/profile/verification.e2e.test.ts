@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Profile Verification UI', () => {
   test('User can request verification without document upload', async ({ page }) => {
     // Go to profile page
-    await page.goto('/profile');
+    await page.goto('/account/profile');
     // Wait for the ProfileVerification UI
     await expect(page.getByText('Profile Verification')).toBeVisible();
     // Should show unverified status and request button

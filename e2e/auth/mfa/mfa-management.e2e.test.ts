@@ -43,7 +43,7 @@ async function navigateToSecuritySettings(page) {
  * Helper function to login
  */
 async function login(page, email, password) {
-  await page.goto('/login');
+  await page.goto('/auth/login');
   await page.fill('input[name="email"]', email);
   await page.fill('input[name="password"]', password);
   await page.click('button[type="submit"]');

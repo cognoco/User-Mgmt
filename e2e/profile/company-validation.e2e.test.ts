@@ -4,7 +4,7 @@ import { loginAs } from '../utils/auth';
 // --- Constants and Test Data --- //
 const ADMIN_EMAIL = process.env.E2E_BUSINESS_ADMIN_EMAIL || 'bizadmin@example.com';
 const ADMIN_PASSWORD = process.env.E2E_BUSINESS_ADMIN_PASSWORD || 'adminpassword';
-const PROFILE_URL = '/profile';
+const PROFILE_URL = '/account/profile';
 const COMPANY_SETTINGS_URL = '/company/settings';
 const VALIDATION_URL = '/company/validate';
 

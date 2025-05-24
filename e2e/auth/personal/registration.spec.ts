@@ -33,12 +33,12 @@ test.describe('Registration Form UI Validation', () => {
   test.beforeEach(async ({ page }) => {
     // Increase navigation timeout to avoid beforeEach hook timeout failures
     try {
-      await page.goto('/register', { timeout: 20000 });
+      await page.goto('/auth/register', { timeout: 20000 });
     } catch (error) {
       console.log(`Navigation failed: ${error instanceof Error ? error.message : String(error)}`);
       // Try one more time with reduced timeout
       try {
-        await page.goto('/register', { timeout: 10000 });
+        await page.goto('/auth/register', { timeout: 10000 });
       } catch (error2) {
         console.log(`Second navigation attempt failed: ${error2 instanceof Error ? error2.message : String(error2)}`);
         // Continue anyway - test may recover or skip based on browser type
@@ -75,7 +75,7 @@ test.describe('Registration Form UI Validation', () => {
     try {
       // Check if already on the register page
       if (!page.url().includes('register')) {
-        await page.goto('/register', { timeout: 10000 });
+        await page.goto('/auth/register', { timeout: 10000 });
       }
       
       // Verify form is visible
@@ -86,7 +86,7 @@ test.describe('Registration Form UI Validation', () => {
       console.log(`Navigation or form wait failed: ${error instanceof Error ? error.message : String(error)}`);
       // Try one more time with simpler approach
       try {
-        await page.goto('/register', { timeout: 5000 });
+        await page.goto('/auth/register', { timeout: 5000 });
       } catch (e) {
         console.log(`Second navigation attempt failed: ${e instanceof Error ? e.message : String(e)}`);
       }
@@ -143,7 +143,7 @@ test.describe('Registration Form UI Validation', () => {
     try {
       if (!(await page.locator('[data-testid="registration-form"]').isVisible({ timeout: 1000 }))) {
         console.log('Form not visible from beforeEach, trying direct navigation');
-        await page.goto('/register', { timeout: 5000 });
+        await page.goto('/auth/register', { timeout: 5000 });
       }
     } catch (error) {
       console.log(`Navigation retry failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -499,7 +499,7 @@ test.describe('Registration Form UI Validation', () => {
     try {
       // Check if already on the register page
       if (!page.url().includes('register')) {
-        await page.goto('/register', { timeout: 10000 });
+        await page.goto('/auth/register', { timeout: 10000 });
       }
       
       // Verify form is visible
@@ -695,7 +695,7 @@ test.describe('Registration End-to-End Flow', () => {
       console.log('Safari detected - using simplified personal registration test');
 
       // Navigate to registration
-      await page.goto('/register', { timeout: 10000 });
+      await page.goto('/auth/register', { timeout: 10000 });
       await page.waitForSelector('[data-testid="registration-form"]', { 
         state: 'visible', 
         timeout: 5000 
@@ -765,7 +765,7 @@ test.describe('Registration End-to-End Flow', () => {
     const uniqueEmail = `test.user.${Date.now()}@example.com`;
     
     // Navigate to the registration page
-    await page.goto('/register');
+    await page.goto('/auth/register');
     await page.waitForSelector('[data-testid="registration-form"]', { state: 'visible', timeout: 10000 });
     
     // Fill in the registration form
@@ -915,7 +915,7 @@ test.describe('Registration End-to-End Flow', () => {
     const existingEmail = process.env.E2E_USER_EMAIL || 'existing@example.com';
     
     // Navigate to registration page
-    await page.goto('/register');
+    await page.goto('/auth/register');
     await page.waitForSelector('[data-testid="registration-form"]', { state: 'visible', timeout: 10000 });
     
     // Fill out the form with an existing email
@@ -1072,7 +1072,7 @@ test.describe('Registration End-to-End Flow', () => {
       
       // Navigate to registration page 
       try {
-        await page.goto('/register', { timeout: 5000 });
+        await page.goto('/auth/register', { timeout: 5000 });
       } catch (error) {
         console.log(`Page navigation failed: ${error instanceof Error ? error.message : String(error)}, but continuing test`);
       }
@@ -1091,7 +1091,7 @@ test.describe('Registration End-to-End Flow', () => {
     try {
       // Navigate to registration
       try {
-        await page.goto('/register', { timeout: 10000 });
+        await page.goto('/auth/register', { timeout: 10000 });
       } catch (err) {
         console.log(`Navigation failed: ${err instanceof Error ? err.message : String(err)}, but continuing`);
       }
@@ -1146,7 +1146,7 @@ test.describe('Registration End-to-End Flow', () => {
     try {
       console.log('Refreshing page for next attempt');
       try {
-        await page.goto('/register', { timeout: 5000 });
+        await page.goto('/auth/register', { timeout: 5000 });
       } catch (err) {
         console.log(`Navigation failed: ${err instanceof Error ? err.message : String(err)}, but continuing`);
       }
@@ -1179,7 +1179,7 @@ test.describe('Registration End-to-End Flow', () => {
     const uniqueEmail = `business.user.${Date.now()}@example.com`;
 
     // Navigate to the registration page
-    await page.goto('/register');
+    await page.goto('/auth/register');
     await page.waitForSelector('[data-testid="registration-form"]', { state: 'visible', timeout: 10000 });
 
     // Select business/corporate user option
@@ -1378,7 +1378,7 @@ test.describe('Registration End-to-End Flow', () => {
     }
 
     // Navigate to registration page
-    await page.goto('/register', { timeout: 10000 });
+    await page.goto('/auth/register', { timeout: 10000 });
     await page.waitForSelector('[data-testid="registration-form"]', { state: 'visible', timeout: 10000 });
 
     // Setup: First ensure we're in business registration mode
@@ -1480,7 +1480,7 @@ test.describe('Registration End-to-End Flow', () => {
     }
 
     // Navigate to registration page
-    await page.goto('/register', { timeout: 10000 });
+    await page.goto('/auth/register', { timeout: 10000 });
     await page.waitForSelector('[data-testid="registration-form"]', { state: 'visible', timeout: 10000 });
 
     // Setup: First ensure we're in business registration mode
@@ -1588,7 +1588,7 @@ test.describe('Registration End-to-End Flow', () => {
     }
 
     // Navigate to registration page
-    await page.goto('/register', { timeout: 10000 });
+    await page.goto('/auth/register', { timeout: 10000 });
     await page.waitForSelector('[data-testid="registration-form"]', { state: 'visible', timeout: 10000 });
 
     // Setup: First ensure we're in business registration mode

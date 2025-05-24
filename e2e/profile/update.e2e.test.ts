@@ -6,7 +6,7 @@ import fs from 'fs';
 // --- Constants and Test Data --- //
 const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';
 const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
-const PROFILE_URL = '/profile'; // Adjust if the URL is different
+const PROFILE_URL = '/account/profile'; // Adjust if the URL is different
 const NEW_FIRST_NAME = 'E2ETestFirstName';
 
 // Ensure test image exists before using it

@@ -84,7 +84,7 @@ export default function CheckEmailPage() {
             <Alert variant="default" className="text-left bg-yellow-50 border-yellow-300 text-yellow-800">
                 <AlertTitle>Cannot Proceed</AlertTitle>
                 <AlertDescription>
-                    It seems you&apos;ve landed here directly. Please <a href="/register" className="underline">register</a> or <a href="/login" className="underline">login</a> first.
+                    It seems you&apos;ve landed here directly. Please <a href="/auth/register" className="underline">register</a> or <a href="/auth/login" className="underline">login</a> first.
                     If you were expecting to resend a verification email, please ensure you followed the correct link.
                 </AlertDescription>
             </Alert>
@@ -128,8 +128,8 @@ export default function CheckEmailPage() {
                         </Button>
                     )}
                     
-                    <Button 
-                        onClick={() => router.push('/login')}
+                    <Button
+                        onClick={() => router.push('/auth/login')}
                         className="w-full"
                         variant="outline"
                     >

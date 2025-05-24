@@ -3,14 +3,14 @@ import { test, expect } from '@playwright/test';
 test.describe('Personal Data Export E2E', () => {
   test('User can request and download their data export', async ({ page }) => {
     // Login as a test user (replace with your login helper or flow)
-    await page.goto('/login');
+    await page.goto('/auth/login');
     await page.fill('input[name="email"]', 'testuser@example.com');
     await page.fill('input[name="password"]', 'password123');
     await page.click('button[type="submit"]');
-    await page.waitForURL('/profile');
+    await page.waitForURL('/account/profile');
 
     // Navigate to profile page (if not redirected)
-    await page.goto('/profile');
+    await page.goto('/account/profile');
     await expect(page.getByText('Export Your Data')).toBeVisible();
 
     // Click the export button

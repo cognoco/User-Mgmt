@@ -11,7 +11,7 @@ const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
 async function navigateToLogin(page: Page): Promise<boolean> {
   try {
     // First attempt with standard timeout
-    await page.goto('/login', { timeout: 10000 });
+    await page.goto('/auth/login', { timeout: 10000 });
     console.log('Navigation to login succeeded on first attempt');
     return true;
   } catch (error) {
@@ -19,14 +19,14 @@ async function navigateToLogin(page: Page): Promise<boolean> {
     
     try {
       // Second attempt with shorter timeout
-      await page.goto('/login', { timeout: 5000 });
+      await page.goto('/auth/login', { timeout: 5000 });
       console.log('Navigation to login succeeded on second attempt');
       return true;
     } catch (error2) {
       console.log(`Second navigation attempt also failed: ${error2}`);
       
       // Check if we ended up at the correct URL anyway
-      if (page.url().includes('/login')) {
+      if (page.url().includes('/auth/login')) {
         console.log('Despite navigation errors, reached login page');
         return true;
       }
@@ -120,8 +120,8 @@ test.describe('4.4 MFA Verify (TOTP) During Login', () => {
       
       // Check if we got redirected to dashboard/profile (successful login)
       const currentUrl = page.url();
-      if (currentUrl.includes('/dashboard') || 
-          currentUrl.includes('/profile') || 
+      if (currentUrl.includes('/dashboard/overview') || 
+          currentUrl.includes('/account/profile') || 
           currentUrl.includes('/home')) {
         console.log('User appears to be logged in without MFA prompt (no MFA or remembered session)');
         test.skip();
@@ -305,8 +305,8 @@ test.describe('4.4 MFA Verify (TOTP) During Login', () => {
     await expect(mfaVerificationScreen).toBeVisible();
     
     // Check that we didn't get redirected to dashboard (login failed)
-    expect(page.url()).not.toContain('/dashboard');
-    expect(page.url()).not.toContain('/profile');
+    expect(page.url()).not.toContain('/dashboard/overview');
+    expect(page.url()).not.toContain('/account/profile');
   });
   
   test('User can use "Remember Me" with TOTP MFA', async ({ browser, browserName }) => {
@@ -320,7 +320,7 @@ test.describe('4.4 MFA Verify (TOTP) During Login', () => {
     const initialLoginPage = await browser.newPage();
     
     // Navigate to login page
-    await initialLoginPage.goto('/login');
+    await initialLoginPage.goto('/auth/login');
     
     // Enter credentials
     await initialLoginPage.fill('#email, input[name="email"]', USER_EMAIL);
@@ -391,8 +391,8 @@ test.describe('4.4 MFA Verify (TOTP) During Login', () => {
       
       // Check if we're logged in without MFA
       const currentUrl = initialLoginPage.url();
-      if (currentUrl.includes('/dashboard') || 
-          currentUrl.includes('/profile') || 
+      if (currentUrl.includes('/dashboard/overview') || 
+          currentUrl.includes('/account/profile') || 
           currentUrl.includes('/home')) {
         console.log('User logged in directly without MFA');
       }
@@ -461,10 +461,10 @@ test.describe('4.4 MFA Verify (TOTP) During Login', () => {
     }, localStorage);
     
     // Navigate to a protected page
-    await newPage.goto('/dashboard');
+    await newPage.goto('/dashboard/overview');
     
     // Check if we're auto-logged in without MFA (Remember Me should bypass it)
-    const isOnLoginPage = newPage.url().includes('/login');
+    const isOnLoginPage = newPage.url().includes('/auth/login');
     
     // We should not be redirected to login
     expect(isOnLoginPage).toBe(false);

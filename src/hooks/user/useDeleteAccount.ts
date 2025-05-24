@@ -32,7 +32,7 @@ export function useDeleteAccount() {
       });
       
       // Redirect to homepage or login page
-      router.push('/login');
+      router.push('/auth/login');
       
     } catch (err) {
       // Error handling

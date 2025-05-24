@@ -19,7 +19,7 @@ export default function ResetPasswordPage() {
         footer={
           <div className="text-center text-sm w-full">
             <div className="mt-2">
-              <Link href="/login" className="text-primary hover:underline">
+              <Link href="/auth/login" className="text-primary hover:underline">
                 {t('auth.resetPassword.backToLogin', 'Back to login')}
               </Link>
             </div>

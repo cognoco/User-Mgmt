@@ -60,7 +60,7 @@ export function LoginForm() {
           setMfaRequired(true);
           setTempAccessToken(result.token ?? null);
         } else {
-          router.push('/dashboard');
+          router.push('/dashboard/overview');
         }
       } else {
         setFormError(result.error || 'Login failed');
@@ -120,7 +120,7 @@ export function LoginForm() {
     authService.setSession?.(user, token);
     
     // Redirect to dashboard
-    router.push('/dashboard');
+    router.push('/dashboard/overview');
   };
 
   // Cancel MFA verification and go back to password login

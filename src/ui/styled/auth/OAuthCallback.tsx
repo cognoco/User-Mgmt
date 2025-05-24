@@ -47,7 +47,7 @@ export function OAuthCallback() {
         await handleCallback(provider, code);
         setProcessingState('success');
         // Determine homepage
-        const homepage = user ? getUserHomePage(user) : '/dashboard';
+        const homepage = user ? getUserHomePage(user) : '/dashboard/overview';
         // Show toast on next page load (using sessionStorage as a cross-page flag)
         sessionStorage.setItem('show_oauth_linked_toast', '1');
         // Redirect
@@ -89,7 +89,7 @@ export function OAuthCallback() {
             <AlertDescription>{error || t('oauth.callback.genericError')}</AlertDescription>
           </Alert>
           <div className="mt-4 text-center">
-            <a href="/login" className="text-primary hover:underline">
+            <a href="/auth/login" className="text-primary hover:underline">
               {t('oauth.callback.backToLogin')}
             </a>
           </div>

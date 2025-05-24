@@ -16,7 +16,7 @@ test.describe('1.4: Token Handling & Session Management', () => {
 
   test('User can view active sessions', async () => {
     // Navigate to profile page
-    await page.goto('/profile');
+    await page.goto('/account/profile');
     
     // Look for session management section
     const sessionSection = page.getByRole('heading', { name: /active sessions|session management/i });
@@ -42,7 +42,7 @@ test.describe('1.4: Token Handling & Session Management', () => {
     }
     
     // Navigate to profile page
-    await page.goto('/profile');
+    await page.goto('/account/profile');
     
     // Wait for session table to load
     await page.waitForSelector('table:has-text("Active Sessions")');
@@ -82,7 +82,7 @@ test.describe('1.4: Token Handling & Session Management', () => {
     // For this implementation, we'll test the session activity API endpoint
     
     // First, verify we're logged in
-    await page.goto('/profile');
+    await page.goto('/account/profile');
     await expect(page.getByRole('heading', { name: /profile|account/i })).toBeVisible();
     
     // Call the session enforcement API directly

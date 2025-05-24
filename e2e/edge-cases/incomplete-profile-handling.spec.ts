@@ -28,7 +28,7 @@ test.describe('Incomplete Profile Handling', () => {
 
   test('displays appropriate placeholders for missing personal profile data', async () => {
     // Navigate to profile page
-    await page.goto('/profile');
+    await page.goto('/account/profile');
     await page.waitForSelector('h1:has-text("Profile")');
     
     // Check that name and email are displayed
@@ -141,7 +141,7 @@ test.describe('Incomplete Profile Handling', () => {
     });
     
     // Navigate to registration page
-    await page.goto('/register');
+    await page.goto('/auth/register');
     await page.waitForSelector('button:has-text("Business Account")');
     
     // Select business account tab

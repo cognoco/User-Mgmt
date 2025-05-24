@@ -8,7 +8,7 @@ const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'adminpassword';
  * Helper function to login as admin
  */
 async function loginAsAdmin(page: Page): Promise<boolean> {
-  await page.goto('/login');
+  await page.goto('/auth/login');
   
   // Fill in login form
   await page.fill('#email, input[name="email"]', ADMIN_EMAIL);

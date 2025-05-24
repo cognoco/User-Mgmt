@@ -16,8 +16,8 @@ import { loginAs } from '../utils/auth-helpers';
 
 // Constants for URLs and test data
 const HOME_URL = '/';
-const LOGIN_URL = '/login';
-const REGISTRATION_URL = '/register';
+const LOGIN_URL = '/auth/login';
+const REGISTRATION_URL = '/auth/register';
 
 test.describe('Accessibility Features', () => {
   test.beforeEach(async ({ page }) => {

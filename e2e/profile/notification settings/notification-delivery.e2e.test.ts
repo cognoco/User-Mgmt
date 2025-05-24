@@ -23,7 +23,7 @@ import { test, expect, Page } from '@playwright/test';
 
 // Helper function for more resilient login
 async function loginUser(page: Page, email = 'testuser@example.com', password = 'password123'): Promise<void> {
-  await page.goto('/login');
+  await page.goto('/auth/login');
   
   // Try multiple methods for form interaction (addressing issue #33)
   try {
@@ -99,7 +99,7 @@ test.describe('Notification Delivery', () => {
   test('should display notification center', async ({ page }) => {
     // Navigate to dashboard where notification center should be accessible
     try {
-      await page.goto('/dashboard', { timeout: 5000 });
+      await page.goto('/dashboard/overview', { timeout: 5000 });
     } catch (e) {
       console.log('Dashboard navigation failed, trying alternative path');
       await page.goto('/');
@@ -140,7 +140,7 @@ test.describe('Notification Delivery', () => {
     
     // Navigate to dashboard where notification center should be accessible
     try {
-      await page.goto('/dashboard', { timeout: 5000 });
+      await page.goto('/dashboard/overview', { timeout: 5000 });
     } catch (e) {
       console.log('Dashboard navigation failed, trying alternative path');
       await page.goto('/');
@@ -208,7 +208,7 @@ test.describe('Notification Delivery', () => {
     
     // Navigate to dashboard where notification center should be accessible
     try {
-      await page.goto('/dashboard', { timeout: 5000 });
+      await page.goto('/dashboard/overview', { timeout: 5000 });
     } catch (e) {
       console.log('Dashboard navigation failed, trying alternative path');
       await page.goto('/');
@@ -355,7 +355,7 @@ test.describe('Notification Delivery', () => {
     
     // Navigate to dashboard where notification center should be accessible
     try {
-      await page.goto('/dashboard', { timeout: 5000 });
+      await page.goto('/dashboard/overview', { timeout: 5000 });
     } catch (e) {
       console.log('Dashboard navigation failed, trying alternative path');
       await page.goto('/');
@@ -400,7 +400,7 @@ test.describe('Notification Delivery', () => {
         page.locator('[data-testid="success-message"]').isVisible({ timeout: 3000 }).catch(() => false),
         // Check if we navigated away from dashboard
         page.evaluate(() => {
-          return !window.location.href.includes('/dashboard');
+          return !window.location.href.includes('/dashboard/overview');
         }).catch(() => false)
       ]);
       
@@ -431,7 +431,7 @@ test.describe('Real-time Notifications', () => {
     
     // Navigate to dashboard where real-time notifications would be active
     try {
-      await page.goto('/dashboard', { timeout: 5000 });
+      await page.goto('/dashboard/overview', { timeout: 5000 });
     } catch (e) {
       console.log('Dashboard navigation failed, trying alternative path');
       await page.goto('/');

@@ -276,7 +276,7 @@ export default function VerifyEmailPage() {
 
             {showLogin && (
                 <Button
-                    onClick={() => router.push('/login')} 
+                    onClick={() => router.push('/auth/login')}
                     variant="outline"
                     className="w-full"
                 >

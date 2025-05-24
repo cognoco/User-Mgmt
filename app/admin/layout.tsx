@@ -15,14 +15,14 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   const user = await getUser();
   
   if (!user) {
-    redirect('/login');
+    redirect('/auth/login');
   }
   
   // Check if user has admin access
   const isAdmin = await hasPermission(user.id, 'ADMIN_ACCESS');
   
   if (!isAdmin) {
-    redirect('/dashboard');
+    redirect('/dashboard/overview');
   }
 
   return (

@@ -6,9 +6,9 @@ import { test, expect } from '@playwright/test';
 
 test.describe('E2E: Business SSO User Login', () => {
   // TODO: VERIFY CONFIG: Adjust URLs/patterns as needed
-  const LOGIN_URL = '/login'; // General login page
+  const LOGIN_URL = '/auth/login'; // General login page
   const ORG_LOGIN_URL_PATTERN = (orgId: string) => `/login/${orgId}`; // Example pattern
-  const DASHBOARD_URL = '/dashboard';
+  const DASHBOARD_URL = '/dashboard/overview';
   const MOCK_SAML_IDP_URL_PATTERN = /^https:\/\/mock-saml-idp\.com\/login.*/;
   const MOCK_OIDC_IDP_URL_PATTERN = /^https:\/\/mock-oidc-idp\.com\/auth.*/;
   const SAML_CALLBACK_PATTERN = '**/api/auth/callback/saml?**'; // TODO: VERIFY CONFIG: Or org-specific path?

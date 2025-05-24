@@ -141,10 +141,10 @@ export function initializeUserManagement(config = {}, options = {}) {
     options: {
       // Default options
       redirects: {
-        afterLogin: '/dashboard',
+        afterLogin: '/dashboard/overview',
         afterLogout: '/',
-        afterRegistration: '/dashboard',
-        afterPasswordReset: '/login',
+        afterRegistration: '/dashboard/overview',
+        afterPasswordReset: '/auth/login',
       },
       // Merge with provided options
       ...options

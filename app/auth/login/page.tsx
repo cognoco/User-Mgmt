@@ -20,13 +20,13 @@ export default function LoginPage() { // Use default export for Next.js pages
         footer={
           <div className="text-center text-sm w-full">
             <div className="mt-2">
-              <Link href="/reset-password" className="text-primary hover:underline">
+              <Link href="/auth/reset-password" className="text-primary hover:underline">
                 {t('auth.login.forgotPassword', 'Forgot your password?')}
               </Link>
             </div>
             <div className="mt-4">
               {t('auth.login.noAccount', "Don't have an account?")}{' '}
-              <Link href="/register" className="text-primary font-medium hover:underline">
+              <Link href="/auth/register" className="text-primary font-medium hover:underline">
                 {t('auth.login.signUp', 'Sign up')}
               </Link>
             </div>

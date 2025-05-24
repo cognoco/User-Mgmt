@@ -122,10 +122,10 @@ export const DEFAULT_CONFIG: UserManagementConfig = {
   options: {
     baseUrl: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000',
     redirects: {
-      afterLogin: '/dashboard',
+      afterLogin: '/dashboard/overview',
       afterLogout: '/',
       afterRegistration: '/onboarding',
-      afterPasswordReset: '/login',
+      afterPasswordReset: '/auth/login',
     },
   },
 };
