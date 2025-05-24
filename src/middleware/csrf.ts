@@ -5,6 +5,12 @@ import { ApiError, ERROR_CODES, createErrorResponse } from '@/lib/api/common';
 /**
  * Configuration options for the {@link csrf} middleware.
  */
+export interface CSRFTokenProvider {
+  generateToken(): string;
+  getToken(req: NextApiRequest, options: CSRFOptions): string | null;
+  saveToken(res: NextApiResponse, token: string, options: CSRFOptions): void;
+}
+
 export interface CSRFOptions {
   /** Name of the cookie used to store the token */
   cookieName?: string;
@@ -20,6 +26,10 @@ export interface CSRFOptions {
   };
   /** HTTP methods excluded from validation */
   excludeMethods?: string[];
+  /** Custom token provider implementation */
+  tokenProvider?: CSRFTokenProvider;
+  /** Custom error handler */
+  onError?: (req: NextApiRequest, res: NextApiResponse) => void | Promise<void>;
 }
 
 /**
@@ -77,6 +87,12 @@ function generateToken(): string {
   return randomBytes(32).toString('hex');
 }
 
+export const defaultTokenProvider: CSRFTokenProvider = {
+  generateToken,
+  getToken: getCSRFToken,
+  saveToken: setCSRFToken,
+};
+
 /**
  * Create a CSRF protection middleware for Next.js API routes.
  *
@@ -89,6 +105,8 @@ function generateToken(): string {
 export function csrf(options: CSRFOptions = {}) {
   const excludeMethods = options.excludeMethods || ['GET', 'HEAD', 'OPTIONS'];
   const headerName = options.headerName || 'x-csrf-token';
+  const tokenProvider = options.tokenProvider || defaultTokenProvider;
+  const onError = options.onError;
   
   return async function csrfMiddleware(
     req: NextApiRequest,
@@ -98,9 +116,9 @@ export function csrf(options: CSRFOptions = {}) {
     // Skip CSRF check for excluded methods
     if (excludeMethods.includes(req.method || '')) {
       // Generate token if not exists for GET requests
-      if (req.method === 'GET' && !getCSRFToken(req, options)) {
-        const token = generateToken();
-        setCSRFToken(res, token, options);
+      if (req.method === 'GET' && !tokenProvider.getToken(req, options)) {
+        const token = tokenProvider.generateToken();
+        tokenProvider.saveToken(res, token, options);
       }
       
       await next();
@@ -108,16 +126,20 @@ export function csrf(options: CSRFOptions = {}) {
     }
     
     // For non-excluded methods, validate CSRF token
-    const cookieToken = getCSRFToken(req, options);
+    const cookieToken = tokenProvider.getToken(req, options);
     const headerToken = req.headers[headerName] as string;
     
     if (!cookieToken || !headerToken || cookieToken !== headerToken) {
-      const error = new ApiError(
-        ERROR_CODES.FORBIDDEN,
-        'Invalid CSRF token',
-        403
-      );
-      res.status(403).json(error.toResponse());
+      if (onError) {
+        await onError(req, res);
+      } else {
+        const error = new ApiError(
+          ERROR_CODES.FORBIDDEN,
+          'Invalid CSRF token',
+          403
+        );
+        res.status(403).json(error.toResponse());
+      }
       return;
     }
     

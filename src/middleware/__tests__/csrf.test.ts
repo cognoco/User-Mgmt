@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { csrf, getCSRFToken } from '../csrf';
+import { csrf, getCSRFToken, defaultTokenProvider, type CSRFTokenProvider } from '../csrf';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 // Mock crypto module properly using importOriginal
@@ -160,6 +160,46 @@ describe('CSRF Middleware', () => {
 
       // Restore the environment
       vi.stubEnv('NODE_ENV', originalNodeEnv || 'test');
+    });
+
+    it('should apply custom cookie options', async () => {
+      const req = mockReq('GET');
+      const res = mockRes();
+      const middleware = csrf({ cookieOptions: { httpOnly: false, sameSite: 'none' } });
+
+      await middleware(req, res, next);
+
+      const cookie = (res.setHeader as any).mock.calls[0][1][0] as string;
+      expect(cookie).not.toContain('HttpOnly');
+      expect(cookie).toContain('SameSite=none');
+    });
+
+    it('should use a custom token provider', async () => {
+      const tokenProvider: CSRFTokenProvider = {
+        generateToken: vi.fn(() => 'prov-token'),
+        getToken: vi.fn(() => null),
+        saveToken: vi.fn(),
+      };
+      const req = mockReq('GET');
+      const res = mockRes();
+      const middleware = csrf({ tokenProvider });
+
+      await middleware(req, res, next);
+
+      expect(tokenProvider.generateToken).toHaveBeenCalled();
+      expect(tokenProvider.saveToken).toHaveBeenCalledWith(res, 'prov-token', expect.any(Object));
+    });
+
+    it('should call custom error handler on validation failure', async () => {
+      const errorHandler = vi.fn();
+      const req = mockReq('POST');
+      const res = mockRes();
+      const middleware = csrf({ onError: errorHandler });
+
+      await middleware(req, res, next);
+
+      expect(errorHandler).toHaveBeenCalledWith(req, res);
+      expect(next).not.toHaveBeenCalled();
     });
   });
 
