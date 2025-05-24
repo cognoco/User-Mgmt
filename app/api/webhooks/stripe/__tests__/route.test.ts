@@ -9,14 +9,14 @@ vi.mock('@/lib/payments/stripe', () => ({
   }
 }));
 
-vi.mock('@/adapters/subscription/supabase/supabase-subscription.provider', () => ({
-  SupabaseSubscriptionProvider: vi.fn().mockImplementation(() => ({
+vi.mock('@/adapters/subscription/factory', () => ({
+  createSupabaseSubscriptionProvider: vi.fn().mockImplementation(() => ({
     upsertSubscription: vi.fn().mockResolvedValue(undefined)
   }))
 }));
 
 const { stripe } = require('@/lib/payments/stripe');
-const { SupabaseSubscriptionProvider } = require('@/adapters/subscription/supabase/supabase-subscription.provider');
+const { createSupabaseSubscriptionProvider } = require('@/adapters/subscription/factory');
 
 function createRequest(body: any, signature = 'sig') {
   return new Request('http://localhost', {
@@ -44,9 +44,9 @@ describe('/api/webhooks/stripe', () => {
     });
     const res = await POST(createRequest({}));
     expect(res.status).toBe(200);
-    const Provider = SupabaseSubscriptionProvider as any;
-    expect(Provider).toHaveBeenCalled();
-    const instance = Provider.mock.results[0].value;
+    const factory = createSupabaseSubscriptionProvider as any;
+    expect(factory).toHaveBeenCalled();
+    const instance = factory.mock.results[0].value;
     expect(instance.upsertSubscription).toHaveBeenCalled();
   });
 });
