@@ -11,12 +11,6 @@ This document serves as the single source of truth for all gaps, missing feature
 ## Implementation Priorities
 
 ### Priority 1: Core Authentication & Security
-1. **Mobile/PWA Implementation**
-   - Missing manifest.json file for installability
-   - Missing service worker file (/push-notification-sw.js)
-   - No PWA configuration in Next.js config
-   - Missing app icons for different device sizes
-   - No offline support
 
 2. **Security Gaps**
    - Account Activity Timeline - No UI showing recent account activity
