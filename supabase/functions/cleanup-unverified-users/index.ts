@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
     // or might be better done via admin API methods if available/safer.
     // Let's use listUsers which is safer.
     
-    let usersToDelete = [];
+    const usersToDelete = [];
     let page = 0;
     const pageSize = 100; // Adjust page size as needed
 
@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
 
     // Delete the identified users
     let deletedCount = 0;
-    let failedDeletions = [];
+    const failedDeletions = [];
     for (const user of usersToDelete) {
       console.log(`Attempting to delete user ID: ${user.id}, Email: ${user.email}`);
       const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);

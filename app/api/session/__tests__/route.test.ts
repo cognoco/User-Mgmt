@@ -11,10 +11,10 @@ vi.mock('@/adapters/session/factory', () => ({
   createSessionProvider: vi.fn(),
 }));
 
-type MockProvider = {
+interface MockProvider {
   listUserSessions?: vi.Mock;
   deleteAllUserSessions?: vi.Mock;
-};
+}
 
 function mockRequest(method: string) {
   return { method, headers: {}, json: vi.fn() } as any;
