@@ -57,7 +57,6 @@ export function InvitationManager({
         newInvitation,
         updateNewInvitation,
         handleSendInvitation,
-        handleCancelInvitation,
         handleResendInvitation,
         isLoading,
         error,

@@ -8,7 +8,6 @@ import { TwoFactorStatus as HeadlessTwoFactorStatus } from '@/ui/headless/two-fa
 interface StyledTwoFactorStatusProps {
   isEnabled: boolean;
   lastUsed?: Date;
-  loading: boolean;
   error: Error | null;
   onDisable: () => Promise<void>;
 }
@@ -19,7 +18,6 @@ export function TwoFactorStatus(props: StyledTwoFactorStatusProps) {
       {({
         isEnabled,
         lastUsed,
-        loading,
         error,
         disableButtonProps,
         viewBackupCodesButtonProps,

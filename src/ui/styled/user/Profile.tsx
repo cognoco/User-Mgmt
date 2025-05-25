@@ -1,6 +1,6 @@
 import React from 'react';
 import HeadlessProfile from '@/ui/headless/user/Profile';
-import { UserProfile, ProfileUpdatePayload } from '@/core/user/models';
+import { ProfileUpdatePayload } from '@/core/user/models';
 import DataExport from '../profile/DataExport';
 import CompanyDataExport from '../profile/CompanyDataExport';
 import NotificationPreferences from '../profile/NotificationPreferences';
@@ -26,8 +26,7 @@ export default function Profile({ userId }: ProfileProps) {
         updateProfile,
         uploadAvatar,
         deleteAvatar,
-        updateProfileField,
-        clearMessages
+        updateProfileField
       }) => {
         if (isLoading) return <div>Loading...</div>;
         if (!profile) return <div>No profile found</div>;

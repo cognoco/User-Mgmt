@@ -15,8 +15,7 @@ import {
   CardTitle
 } from '@/ui/primitives/card';
 import {
-  InviteMemberForm as InviteMemberFormHeadless,
-  InviteMemberFormProps as HeadlessProps
+  InviteMemberForm as InviteMemberFormHeadless
 } from '@/ui/headless/team/InviteMemberForm';
 
 export interface InviteMemberFormProps {

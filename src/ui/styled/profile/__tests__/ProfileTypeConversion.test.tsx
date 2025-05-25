@@ -151,7 +151,7 @@ describe('ProfileTypeConversion', () => {
     mockToast = mockToastFn;
 
     // Mock api.post for domain validation and business creation
-    vi.spyOn(api, 'post').mockImplementation((url, data) => {
+    vi.spyOn(api, 'post').mockImplementation((url, _data) => {
       if (url === '/api/business/validate-domain') {
         return Promise.resolve({ data: { isValid: true } });
       }
@@ -227,7 +227,7 @@ describe('ProfileTypeConversion', () => {
 
   test('shows error and stops if domain validation fails', async () => {
     // Override api.post for this test to simulate domain validation failure
-    vi.spyOn(api, 'post').mockImplementation((url, data) => {
+    vi.spyOn(api, 'post').mockImplementation((url, _data) => {
       if (url === '/api/business/validate-domain') {
         return Promise.resolve({ data: { isValid: false } });
       }
@@ -260,7 +260,7 @@ describe('ProfileTypeConversion', () => {
 
   test('shows error if business creation fails', async () => {
     // Override api.post for this test to simulate business creation failure
-    vi.spyOn(api, 'post').mockImplementation((url, data) => {
+    vi.spyOn(api, 'post').mockImplementation((url, _data) => {
       if (url === '/api/business/validate-domain') {
         return Promise.resolve({ data: { isValid: true } });
       }

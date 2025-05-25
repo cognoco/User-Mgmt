@@ -169,9 +169,11 @@ export function RoleManager({
                                     <DialogContent>
                                       <DialogHeader>
                                         <DialogTitle>Delete Role</DialogTitle>
-                                          <DialogDescription>
-                                            Are you sure you want to delete the &quot;{confirmationState.roleName}&quot; role? This action cannot be undone and may affect users with this role.
-                                          </DialogDescription>
+
+                                        <DialogDescription>
+                                          Are you sure you want to delete the &quot;{confirmationState.roleName}&quot; role? This action cannot be undone and may affect users with this role.
+                                        </DialogDescription>
+
                                       </DialogHeader>
                                       <DialogFooter className="flex space-x-2 justify-end">
                                         <Button

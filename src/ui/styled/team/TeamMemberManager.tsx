@@ -7,9 +7,7 @@
 
 import React from 'react';
 import { TeamMemberManager as HeadlessTeamMemberManager, TeamMemberManagerProps } from '../../headless/team/TeamMemberManager';
-import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
-import { Label } from '@/ui/primitives/label';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/primitives/select';
@@ -54,7 +52,6 @@ export function TeamMemberManager({
         members,
         availableRoles,
         handleRoleChange,
-        handleRemoveMember,
         isLoading,
         error,
         isSuccess,
