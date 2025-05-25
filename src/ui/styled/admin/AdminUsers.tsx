@@ -11,7 +11,7 @@ import {
 
 export const AdminUsers: React.FC<AdminUsersProps> = ({ fetchUsers, handleRoleChange }) => (
   <HeadlessAdminUsers fetchUsers={fetchUsers} handleRoleChange={handleRoleChange}>
-    {({ users, filteredUsers, loading, error, search, setSearch, onRoleChange, handleRetry }) => (
+    {({ filteredUsers, loading, error, search, setSearch, onRoleChange, handleRetry }) => (
       <div className="w-full max-w-4xl mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">Admin Users</h1>
         <div className="mb-4 flex gap-2 items-center">

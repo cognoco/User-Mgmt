@@ -5,10 +5,9 @@
  * It follows the headless UI pattern using render props to allow complete UI customization.
  */
 
-import { useState, FormEvent, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePermissions } from '@/hooks/permission/usePermissions';
 import { Permission } from '@/core/permission/models';
-import { z } from 'zod';
 
 export interface PermissionEditorProps {
   /**

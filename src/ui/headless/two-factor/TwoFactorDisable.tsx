@@ -11,11 +11,10 @@ export interface TwoFactorDisableRenderProps {
 
 export interface TwoFactorDisableProps {
   onSuccess?: () => void;
-  onCancel?: () => void;
   children: (props: TwoFactorDisableRenderProps) => React.ReactNode;
 }
 
-export function TwoFactorDisable({ onSuccess, onCancel, children }: TwoFactorDisableProps) {
+export function TwoFactorDisable({ onSuccess, children }: TwoFactorDisableProps) {
   const { disableMFA, isLoading, error } = useMFA();
   const [code, setCode] = useState('');
 

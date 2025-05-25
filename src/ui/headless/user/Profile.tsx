@@ -30,7 +30,6 @@ export default function Profile({ userId, children }: ProfileProps) {
     isLoading,
     error,
     successMessage,
-    fetchUserProfile,
     updateProfile: updateUserProfile,
     uploadProfilePicture,
     deleteProfilePicture,
@@ -42,7 +41,6 @@ export default function Profile({ userId, children }: ProfileProps) {
   // Update a single profile field
   const updateProfileField = useCallback((field: string, value: string) => {
     if (profile) {
-      const updatedProfile = { ...profile, [field]: value };
       // This only updates the local state, not the database
       // The actual update happens when updateProfile is called
     }
