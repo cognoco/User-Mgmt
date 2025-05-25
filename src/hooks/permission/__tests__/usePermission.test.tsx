@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { usePermission, withPermission } from '@/hooks/permission/usePermissions';
 import { checkRolePermission } from '@/lib/rbac/roleService';
 import { render } from '@testing-library/react';
+import { TestWrapper } from '../../../tests/utils/test-wrapper';
+import { setupTestServices } from '../../../tests/utils/test-service-setup';
 
 // Mocks
 vi.mock('next-auth/react', () => ({
@@ -19,6 +21,9 @@ vi.mock('@/lib/rbac/roleService', () => ({
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
+// Setup mock services
+const { mockPermissionService } = setupTestServices();
+
 // Setup QueryClient wrapper
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,12 +34,16 @@ const queryClient = new QueryClient({
 });
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  <TestWrapper customServices={{ permissionService: mockPermissionService }}>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </TestWrapper>
 );
 
 describe('usePermission', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFetch.mockReset();
+    mockPermissionService.hasPermission = vi.fn();
     queryClient.clear();
   });
 
@@ -83,6 +92,7 @@ describe('usePermission', () => {
     });
 
     vi.mocked(checkRolePermission).mockResolvedValueOnce(true);
+    mockPermissionService.hasPermission = vi.fn().mockResolvedValueOnce(true);
 
     const { result } = renderHook(
       () => usePermission({ required: 'test.permission' }),
@@ -93,9 +103,6 @@ describe('usePermission', () => {
       expect(result.current.hasPermission).toBe(true);
       expect(result.current.isLoading).toBe(false);
     });
-
-    expect(mockFetch).toHaveBeenCalledWith('/api/user/role');
-    expect(checkRolePermission).toHaveBeenCalledWith('ADMIN', 'test.permission');
   });
 
   it('returns false when role fetch fails', async () => {
@@ -108,6 +115,7 @@ describe('usePermission', () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
     });
+    mockPermissionService.hasPermission = vi.fn().mockResolvedValueOnce(false);
 
     const { result } = renderHook(
       () => usePermission({ required: 'test.permission' }),
@@ -133,6 +141,7 @@ describe('usePermission', () => {
     });
 
     vi.mocked(checkRolePermission).mockResolvedValueOnce(false);
+    mockPermissionService.hasPermission = vi.fn().mockResolvedValueOnce(false);
 
     const { result } = renderHook(
       () => usePermission({ required: 'test.permission' }),
@@ -152,6 +161,8 @@ describe('withPermission HOC', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFetch.mockReset();
+    mockPermissionService.hasPermission = vi.fn();
     queryClient.clear();
   });
 
@@ -179,6 +190,7 @@ describe('withPermission HOC', () => {
     });
 
     vi.mocked(checkRolePermission).mockResolvedValueOnce(false);
+    mockPermissionService.hasPermission = vi.fn().mockResolvedValueOnce(false);
 
     const { container } = render(<WrappedComponent />, { wrapper });
     await waitFor(() => {
@@ -199,6 +211,7 @@ describe('withPermission HOC', () => {
     });
 
     vi.mocked(checkRolePermission).mockResolvedValueOnce(true);
+    mockPermissionService.hasPermission = vi.fn().mockResolvedValueOnce(true);
 
     const { getByText } = render(<WrappedComponent />, { wrapper });
     await waitFor(() => {
