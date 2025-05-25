@@ -1,9 +1,7 @@
-/**
- * @jest-environment node
- */
+
 
 import { AdapterRegistry, AdapterFactory, AdapterFactoryOptions } from '../registry';
-import { SupabaseAdapterFactory, createSupabaseAdapterFactory } from '../supabase/factory';
+import { SupabaseAdapterFactory, createSupabaseAdapterFactory } from '../supabase-factory';
 import { AuthDataProvider, UserDataProvider, TeamDataProvider, PermissionDataProvider } from '../interfaces';
 
 // Mock the environment variables
@@ -17,7 +15,7 @@ class TestAuthProvider implements AuthDataProvider {
   async resetPasswordForEmail() { return { error: null }; }
   async updateUser() { return { user: null, error: null }; }
   async getUser() { return { user: null, error: null }; }
-  async onAuthStateChange() { return { data: { subscription: { unsubscribe: jest.fn() } } }; }
+  async onAuthStateChange() { return { data: { subscription: { unsubscribe: vi.fn() } } }; }
 }
 
 class TestUserProvider implements UserDataProvider {
@@ -49,18 +47,10 @@ class TestAdapterFactory implements AdapterFactory {
 
 describe('AdapterRegistry', () => {
   beforeEach(() => {
-    // Reset the registry before each test
-    jest.resetModules();
+    vi.resetModules();
     process.env = { ...originalEnv };
-    
-    // Clear all registered factories
-    Object.keys(AdapterRegistry).forEach(key => {
-      if (typeof AdapterRegistry[key as keyof typeof AdapterRegistry] === 'function') {
-        // Skip non-function properties
-        return;
-      }
-      delete AdapterRegistry[key as keyof typeof AdapterRegistry];
-    });
+    (AdapterRegistry as any).factories = {};
+    (AdapterRegistry as any).instance = null;
   });
 
   afterAll(() => {
@@ -88,7 +78,7 @@ describe('AdapterRegistry', () => {
 
   describe('getFactory', () => {
     it('should get a registered factory', () => {
-      const factoryCreator = jest.fn().mockReturnValue(new TestAdapterFactory());
+      const factoryCreator = vi.fn().mockReturnValue(new TestAdapterFactory());
       AdapterRegistry.registerFactory('test', factoryCreator);
       
       const options = { testOption: 'value' };

@@ -4,6 +4,14 @@ import './src/tests/setup';
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost:54321'; // Dummy URL
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'dummy-anon-key'; // Dummy key
 
+// Mock Prisma client to avoid requiring generated client in tests
+vi.mock('@/lib/database/prisma', () => ({
+  prisma: {
+    $connect: vi.fn(),
+    $disconnect: vi.fn(),
+  },
+}));
+
 import '@testing-library/jest-dom';
 import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
@@ -152,8 +160,8 @@ vi.mock('@/lib/services/limits', () => ({
 }));
 
 // --- Mock window.matchMedia for JSDOM (required for ThemeProvider and media queries in tests) ---
-if (!window.matchMedia) {
-  window.matchMedia = vi.fn().mockImplementation(query => ({
+if (typeof window !== 'undefined' && !window.matchMedia) {
+  window.matchMedia = vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -206,15 +214,17 @@ if (typeof window !== 'undefined' && !window.ResizeObserver) {
 // --- JSDOM/Browser API Polyfills for Testing ---
 // These mocks/polyfills are required for JSDOM compatibility and to prevent test failures unrelated to app logic.
 
-if (!window.scrollTo) window.scrollTo = () => {};
-if (!window.HTMLElement.prototype.scrollIntoView) window.HTMLElement.prototype.scrollIntoView = () => {};
-if (!window.HTMLElement.prototype.releasePointerCapture) window.HTMLElement.prototype.releasePointerCapture = () => {};
-if (!window.HTMLElement.prototype.hasPointerCapture) window.HTMLElement.prototype.hasPointerCapture = () => false;
-if (!window.HTMLElement.prototype.setPointerCapture) window.HTMLElement.prototype.setPointerCapture = () => {};
-if (!window.HTMLElement.prototype.requestFullscreen) window.HTMLElement.prototype.requestFullscreen = () => Promise.resolve();
-if (!window.ClipboardEvent) window.ClipboardEvent = class ClipboardEvent extends Event { constructor(type: string, eventInitDict?: ClipboardEventInit) { super(type, eventInitDict); } } as any;
-if (!window.DataTransfer) window.DataTransfer = class DataTransfer { constructor() { this.items = []; this.files = []; } items: any[]; files: any[]; } as any;
-if (!window.FileReader) {
+if (typeof window !== 'undefined') {
+  if (!window.scrollTo) window.scrollTo = () => {};
+  if (!window.HTMLElement.prototype.scrollIntoView) window.HTMLElement.prototype.scrollIntoView = () => {};
+  if (!window.HTMLElement.prototype.releasePointerCapture) window.HTMLElement.prototype.releasePointerCapture = () => {};
+  if (!window.HTMLElement.prototype.hasPointerCapture) window.HTMLElement.prototype.hasPointerCapture = () => false;
+  if (!window.HTMLElement.prototype.setPointerCapture) window.HTMLElement.prototype.setPointerCapture = () => {};
+  if (!window.HTMLElement.prototype.requestFullscreen) window.HTMLElement.prototype.requestFullscreen = () => Promise.resolve();
+  if (!window.ClipboardEvent) window.ClipboardEvent = class ClipboardEvent extends Event { constructor(type: string, eventInitDict?: ClipboardEventInit) { super(type, eventInitDict); } } as any;
+  if (!window.DataTransfer) window.DataTransfer = class DataTransfer { constructor() { this.items = []; this.files = []; } items: any[]; files: any[]; } as any;
+}
+if (typeof window !== 'undefined' && !window.FileReader) {
   class MockFileReader {
     static readonly EMPTY = 0 as const;
     static readonly LOADING = 1 as const;
@@ -242,11 +252,13 @@ if (!window.FileReader) {
   }
   window.FileReader = MockFileReader as any;
 }
-if (!window.URL.createObjectURL) window.URL.createObjectURL = () => 'blob:http://localhost/fake';
-if (!window.URL.revokeObjectURL) window.URL.revokeObjectURL = () => {};
+if (typeof window !== 'undefined') {
+  if (!window.URL.createObjectURL) window.URL.createObjectURL = () => 'blob:http://localhost/fake';
+  if (!window.URL.revokeObjectURL) window.URL.revokeObjectURL = () => {};
+}
 
 // In Vitest 3.x, IntersectionObserver polyfill might need to be updated
-if (!window.IntersectionObserver) {
+if (typeof window !== 'undefined' && !window.IntersectionObserver) {
   class MockIntersectionObserver {
     root: Element | null = null;
     rootMargin: string = '';
@@ -260,7 +272,7 @@ if (!window.IntersectionObserver) {
 }
 
 // DOMRect is used by many UI libraries, mock it if not available
-if (!window.DOMRect) {
+if (typeof window !== 'undefined' && !window.DOMRect) {
   class MockDOMRect {
     static fromRect() { return new MockDOMRect(); }
     x = 0; y = 0; width = 0; height = 0;
