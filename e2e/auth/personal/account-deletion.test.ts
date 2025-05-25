@@ -190,7 +190,6 @@ test.describe('2.5: Account Deletion', () => {
     await cancelButton.click();
     await expect(dialog).not.toBeVisible();
   }
-  });
 
   test('Account deletion requires confirmation', async () => {
     // Navigate to settings page

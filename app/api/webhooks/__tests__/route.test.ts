@@ -208,7 +208,6 @@ describe('Webhooks API', () => {
       expect(urlError).toBeDefined();
     });
   });
-}); 
   describe('DELETE /api/webhooks', () => {
     it('should delete a webhook', async () => {
       supabaseMock.delete = vi.fn().mockReturnThis();
@@ -227,6 +226,7 @@ describe('Webhooks API', () => {
       expect(body).toHaveProperty('success', true);
     });
   });
+
 });
 
 export {};
