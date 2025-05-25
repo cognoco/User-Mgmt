@@ -1,7 +1,6 @@
 import { Button } from '../ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Progress } from '../ui/progress';
-import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
 import SetupWizardHeadless, { SetupStep } from '@/ui/headless/onboarding/SetupWizard';
@@ -58,10 +57,10 @@ export function SetupWizard() {
       id: 'completion',
       title: 'You\'re All Set!',
       component: (
-        <div className="text-center space-y-4">
-          <div className="text-4xl">🎉</div>
-          <p>Your setup is complete! You're ready to start using the app.</p>
-        </div>
+          <div className="text-center space-y-4">
+            <div className="text-4xl">🎉</div>
+            <p>Your setup is complete! You&apos;re ready to start using the app.</p>
+          </div>
       ),
     },
   ];
@@ -75,7 +74,6 @@ export function SetupWizard() {
         progress,
         handleNext,
         handlePrevious,
-        setCurrentStepIndex,
       }) => (
         <Card className="max-w-lg mx-auto">
           <CardHeader>

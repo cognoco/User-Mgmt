@@ -11,7 +11,7 @@ export const SearchResults: React.FC<{ query: string }> = ({ query }) => {
       query={query}
       render={({ hasResults }) => (
         <div className="search-results-container">
-          <h2 className="search-results-title">Search Results for "{query}"</h2>
+          <h2 className="search-results-title">Search Results for &quot;{query}&quot;</h2>
           {hasResults ? (
             <ul className="search-results-list">
               <li className="search-result-item">Result 1 for {query}</li>
@@ -19,7 +19,7 @@ export const SearchResults: React.FC<{ query: string }> = ({ query }) => {
             </ul>
           ) : (
             <div className="search-results-empty">
-              <p className="search-results-empty-message">No results found for "{query}".</p>
+              <p className="search-results-empty-message">No results found for &quot;{query}&quot;.</p>
               <p className="search-results-empty-suggestion">Try different keywords or check your spelling.</p>
               <div className="search-results-tips">
                 <h4 className="search-results-tips-title">Search Tips</h4>

@@ -14,10 +14,10 @@ import { Textarea } from '@/ui/primitives/textarea';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/primitives/table';
+import { Table, TableBody, TableCell, TableRow } from '@/ui/primitives/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/primitives/dialog';
 import { Checkbox } from '@/ui/primitives/checkbox';
-import { ExclamationTriangleIcon, CheckCircledIcon, PlusIcon, Pencil1Icon, TrashIcon } from '@radix-ui/react-icons';
+import { ExclamationTriangleIcon, CheckCircledIcon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 
 export interface StyledRoleManagerProps extends Omit<RoleManagerProps, 'render'> {
   /**
@@ -61,7 +61,6 @@ export function RoleManager({
         updateRoleForm,
         handleCreateRole,
         handleUpdateRole,
-        handleDeleteRole,
         isLoading,
         error,
         isSuccess,
@@ -170,9 +169,9 @@ export function RoleManager({
                                     <DialogContent>
                                       <DialogHeader>
                                         <DialogTitle>Delete Role</DialogTitle>
-                                        <DialogDescription>
-                                          Are you sure you want to delete the "{confirmationState.roleName}" role? This action cannot be undone and may affect users with this role.
-                                        </DialogDescription>
+                                          <DialogDescription>
+                                            Are you sure you want to delete the &quot;{confirmationState.roleName}&quot; role? This action cannot be undone and may affect users with this role.
+                                          </DialogDescription>
                                       </DialogHeader>
                                       <DialogFooter className="flex space-x-2 justify-end">
                                         <Button

@@ -198,9 +198,8 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
     setError(null);
     setSuccess(null);
     
-    try {
-      // Strip the type field before sending to API
-      const { type, ...configData } = data;
+      try {
+        const { type: _unused, ...configData } = data;
       
       await updateIdpConfig(idpType, configData);
       setSuccess(t('org.sso.saveConfigSuccess'));

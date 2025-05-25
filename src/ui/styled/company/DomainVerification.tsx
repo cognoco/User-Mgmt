@@ -157,7 +157,7 @@ export function DomainVerification({ profile, onVerificationChange }: DomainVeri
 
         {status === 'pending' && token && (
           <div className="space-y-3 p-4 border rounded-md bg-muted/50">
-            <p className="text-sm font-medium">Add the following TXT record to your domain's DNS settings:</p>
+              <p className="text-sm font-medium">Add the following TXT record to your domain&apos;s DNS settings:</p>
             <div className="space-y-1 text-sm">
                 <p><span className="font-semibold">Type:</span> TXT</p>
                 <p><span className="font-semibold">Host/Name:</span> @ (or your domain name)</p>
