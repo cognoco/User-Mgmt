@@ -11,10 +11,10 @@ import { createSupabaseClient } from "@/lib/database/supabase";
 import { api } from "@/lib/api/axios";
 
 // Import factory functions
-import { getAuthService } from "@/services/auth";
-import { getUserService } from "@/services/user";
-import { getTeamService } from "@/services/team";
-import { getPermissionService } from "@/services/permission";
+import { createAuthService } from "@/services/auth";
+import { createUserService } from "@/services/user";
+import { createTeamService } from "@/services/team";
+import { createPermissionService } from "@/services/permission";
 import { createWebhookService } from "@/services/webhooks";
 
 // Import adapter factories
@@ -70,10 +70,12 @@ function registerAllServices() {
     });
 
     // Create services using the providers
-    const authService = getAuthService(authProvider);
-    const userService = getUserService(userProvider);
-    const teamService = getTeamService(teamProvider);
-    const permissionService = getPermissionService(permissionProvider);
+    const authService = createAuthService({ authDataProvider: authProvider });
+    const userService = createUserService({ userDataProvider: userProvider });
+    const teamService = createTeamService({ teamDataProvider: teamProvider });
+    const permissionService = createPermissionService({
+      permissionDataProvider: permissionProvider
+    });
     const webhookService = createWebhookService({
       apiClient: api,
       webhookDataProvider: webhookProvider
