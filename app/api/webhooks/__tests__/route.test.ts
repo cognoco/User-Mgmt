@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { GET, POST } from '../route';
+import { GET, POST, DELETE } from '../route';
 
 // Mock the dependencies
 vi.mock('@/middleware/rate-limit', () => ({
@@ -221,10 +221,12 @@ describe('Webhooks API', () => {
       supabaseMock.insert = vi.fn();
 
       const req = createMockRequest('DELETE', { id: 'webhook1' });
-      const response = await (await import('../route')).DELETE(req);
+      const response = await DELETE(req);
       const body = await response.json();
       expect(response.status).toBe(200);
       expect(body).toHaveProperty('success', true);
     });
   });
 });
+
+export {};
