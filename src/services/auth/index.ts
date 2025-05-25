@@ -35,3 +35,8 @@ export function createAuthService(config: AuthServiceConfig): AuthService {
 export default {
   createAuthService
 };
+
+export type { SessionTracker, SessionTrackerDeps } from './session-tracker';
+export { DefaultSessionTracker } from './session-tracker';
+export type { MFAHandler } from './mfa-handler';
+export { DefaultMFAHandler } from './mfa-handler';

@@ -21,6 +21,10 @@ import {
 import { AuthEventHandler, AuthEventTypes } from '@/core/auth/events';
 import { translateError } from '@/lib/utils/error';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
+import type { SessionTracker } from './session-tracker';
+import { DefaultSessionTracker } from './session-tracker';
+import type { MFAHandler } from './mfa-handler';
+import { DefaultMFAHandler } from './mfa-handler';
 
 /**
  * Default implementation of the AuthService interface
@@ -35,13 +39,10 @@ export class DefaultAuthService
   private error: string | null = null;
   private successMessage: string | null = null;
   private mfaEnabled = false;
-  
-  // Session management
-  private sessionCheckTimer: NodeJS.Timeout | null = null;
-  private tokenRefreshTimer: NodeJS.Timeout | null = null;
-  private readonly TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000; // 5 minutes
-  private readonly SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
-  private readonly SESSION_CHECK_INTERVAL = 1 * 60 * 1000; // 1 minute
+
+  // Session management handled by SessionTracker
+  private sessionTracker: SessionTracker;
+  private mfaHandler: MFAHandler;
 
   /**
    * Constructor for DefaultAuthService
@@ -50,96 +51,14 @@ export class DefaultAuthService
    */
   constructor(private authDataProvider: IAuthDataProvider) {
     super();
-    // Initialize session check if there's a stored token
-    this.initializeFromStorage();
+    this.sessionTracker = new DefaultSessionTracker({
+      refreshToken: () => this.refreshToken(),
+      onSessionTimeout: () => this.handleSessionTimeout()
+    });
+    this.mfaHandler = new DefaultMFAHandler(authDataProvider);
   }
 
-  /**
-   * Initialize the service from storage (e.g., localStorage)
-   */
-  private initializeFromStorage(): void {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        this.token = token;
-        this.refreshToken().then(success => {
-          if (success) {
-            this.initializeSessionCheck();
-          }
-        });
-      }
-    }
-  }
 
-  /**
-   * Initialize session check timer
-   */
-  private initializeSessionCheck(): void {
-    if (this.sessionCheckTimer) {
-      clearInterval(this.sessionCheckTimer);
-    }
-    
-    this.sessionCheckTimer = setInterval(() => {
-      if (typeof window !== 'undefined') {
-        const lastActivity = parseInt(localStorage.getItem('last_activity') || '0', 10);
-        const now = Date.now();
-        
-        if (now - lastActivity > this.SESSION_TIMEOUT) {
-          this.handleSessionTimeout();
-        }
-      }
-    }, this.SESSION_CHECK_INTERVAL);
-    
-    // Update last activity
-    this.updateLastActivity();
-  }
-
-  /**
-   * Update last activity timestamp
-   */
-  private updateLastActivity(): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('last_activity', Date.now().toString());
-    }
-  }
-
-  /**
-   * Initialize token refresh timer
-   * 
-   * @param expiresAt - Timestamp when the token expires
-   */
-  private initializeTokenRefresh(expiresAt: number): void {
-    if (this.tokenRefreshTimer) {
-      clearTimeout(this.tokenRefreshTimer);
-    }
-    
-    const now = Date.now();
-    const timeUntilRefresh = expiresAt - now - this.TOKEN_REFRESH_THRESHOLD;
-    
-    if (timeUntilRefresh > 0) {
-      this.tokenRefreshTimer = setTimeout(() => {
-        this.refreshToken();
-      }, timeUntilRefresh);
-    } else {
-      // Token is close to expiration or expired, refresh immediately
-      this.refreshToken();
-    }
-  }
-
-  /**
-   * Clean up timers
-   */
-  private cleanupTimers(): void {
-    if (this.sessionCheckTimer) {
-      clearInterval(this.sessionCheckTimer);
-      this.sessionCheckTimer = null;
-    }
-    
-    if (this.tokenRefreshTimer) {
-      clearTimeout(this.tokenRefreshTimer);
-      this.tokenRefreshTimer = null;
-    }
-  }
 
   /**
    * Emit an authentication event
@@ -175,8 +94,8 @@ export class DefaultAuthService
         }
 
         // Initialize session management
-        this.updateLastActivity();
-        this.initializeSessionCheck();
+        this.sessionTracker.updateLastActivity();
+        this.sessionTracker.initializeSessionCheck();
 
         // Emit login event
         this.emitEvent({
@@ -285,7 +204,7 @@ export class DefaultAuthService
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      this.cleanupTimers();
+      this.sessionTracker.cleanup();
       
       this.user = null;
       this.token = null;
@@ -523,7 +442,7 @@ export class DefaultAuthService
     try {
       await this.authDataProvider.deleteAccount(password);
       
-      this.cleanupTimers();
+      this.sessionTracker.cleanup();
       
       this.isLoading = false;
       this.successMessage = 'Account deleted successfully.';
@@ -568,7 +487,7 @@ export class DefaultAuthService
     this.error = null;
     
     try {
-      const result = await this.authDataProvider.setupMFA();
+      const result = await this.mfaHandler.setupMFA();
 
       this.isLoading = false;
       if (result.success) {
@@ -628,7 +547,7 @@ export class DefaultAuthService
     this.error = null;
 
     try {
-      const result = await this.authDataProvider.verifyMFA(code);
+      const result = await this.mfaHandler.verifyMFA(code);
 
       this.isLoading = false;
       if (result.success) {
@@ -683,7 +602,7 @@ export class DefaultAuthService
     this.error = null;
     
     try {
-      const result = await this.authDataProvider.disableMFA(code);
+      const result = await this.mfaHandler.disableMFA(code);
       
       this.isLoading = false;
       this.error = null;
@@ -762,7 +681,7 @@ export class DefaultAuthService
    * Handle session timeout by logging out the user
    */
   handleSessionTimeout(): void {
-    this.cleanupTimers();
+    this.sessionTracker.cleanup();
     
     this.user = null;
     this.token = null;
