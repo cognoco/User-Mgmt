@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { FormEvent } from 'react';
 import { Button } from '@/ui/primitives/button';
 import { Input } from '@/ui/primitives/input';
 import { Label } from '@/ui/primitives/label';
@@ -14,17 +13,7 @@ import { ChangePasswordForm as HeadlessChangePasswordForm, type ChangePasswordFo
  * This follows the architecture guidelines by separating behavior and appearance
  */
 export function ChangePasswordForm() {
-  // Track if password is visible
-  const [showPassword, setShowPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
-  // Custom onSubmit handler for API calls
-  const handleCustomSubmit = async (data: ChangePasswordFormValues) => {
-    // This could be implemented if we need custom API handling
-    // For now, we'll use the default behavior from the headless component
-    return;
-  };
+  // Track if password is visible (feature not implemented yet)
   
   return (
     <div className="space-y-4">
@@ -69,7 +58,7 @@ export function ChangePasswordForm() {
                 <Label htmlFor="currentPassword">Current Password</Label>
                 <Input
                   id="currentPassword"
-                  type={showPassword ? 'text' : 'password'}
+                  type="password"
                   value={currentPasswordValue}
                   onChange={(e) => setCurrentPasswordValue(e.target.value)}
                   onBlur={() => handleBlur('currentPassword')}
@@ -86,7 +75,7 @@ export function ChangePasswordForm() {
                 <Label htmlFor="newPassword">New Password</Label>
                 <Input
                   id="newPassword"
-                  type={showNewPassword ? 'text' : 'password'}
+                  type="password"
                   value={newPasswordValue}
                   onChange={(e) => setNewPasswordValue(e.target.value)}
                   onBlur={() => handleBlur('newPassword')}
@@ -104,7 +93,7 @@ export function ChangePasswordForm() {
                 <Label htmlFor="confirmPassword">Confirm New Password</Label>
                 <Input
                   id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type="password"
                   value={confirmPasswordValue}
                   onChange={(e) => setConfirmPasswordValue(e.target.value)}
                   onBlur={() => handleBlur('confirmPassword')}

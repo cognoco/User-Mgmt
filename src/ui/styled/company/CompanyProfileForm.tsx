@@ -23,7 +23,7 @@ import {
 } from '@/ui/primitives/select';
 import { useToast } from '@/lib/hooks/use-toast';
 import { CompanyLogoUpload } from '@/ui/styled/profile/CompanyLogoUpload';
-import { CheckCircle, XCircle, Loader2, Search, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, Search, ShieldCheck } from 'lucide-react';
 import { api } from '@/lib/api/axios';
 
 // Company Profile Schema
@@ -329,7 +329,7 @@ export function CompanyProfileForm({
 
     try {
         const response = await api.post('/api/address/validate', payload);
-        const { isValid, message, suggestions } = response.data;
+        const { isValid } = response.data;
 
         if (isValid) {
             setAddressValidationStatus('valid');

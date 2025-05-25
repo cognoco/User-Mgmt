@@ -12,7 +12,6 @@ import { Button } from '@/ui/primitives/button';
 import { Label } from '@/ui/primitives/label';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
 import { RadioGroup, RadioGroupItem } from '@/ui/primitives/radio-group';
 import { ExclamationTriangleIcon, CheckCircledIcon } from '@radix-ui/react-icons';
 
@@ -77,9 +76,9 @@ export function MFASetup({
                 </div>
                 <div className="text-center">
                   <h3 className="text-lg font-medium">Two-Factor Authentication Enabled</h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Your account is now more secure. You'll need to enter a verification code when you sign in.
-                  </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Your account is now more secure. You&apos;ll need to enter a verification code when you sign in.
+                    </p>
                 </div>
                 
                 {backupCodes && backupCodes.length > 0 && (

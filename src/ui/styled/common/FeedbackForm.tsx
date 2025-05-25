@@ -1,8 +1,6 @@
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui/primitives/button';
-import { Alert, AlertDescription } from '@/ui/primitives/alert';
-import { Input } from '@/ui/primitives/input';
 import FeedbackFormHeadless from '@/ui/headless/common/FeedbackForm';
 import { feedbackCategoryEnum } from '@/types/feedback';
 
@@ -26,7 +24,6 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess, onError }
         setCategory,
         message,
         setMessage,
-        screenshot,
         setScreenshot,
         screenshotPreview,
         handleSubmit,

@@ -16,7 +16,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
 import { Separator } from '@/ui/primitives/separator';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/primitives/dialog';
-import { ExclamationTriangleIcon, CheckCircledIcon, TrashIcon, LockClosedIcon } from '@radix-ui/react-icons';
+import { ExclamationTriangleIcon, CheckCircledIcon, TrashIcon } from '@radix-ui/react-icons';
 
 export interface StyledAccountSettingsProps extends Omit<AccountSettingsProps, 'render'> {
   /**
@@ -262,9 +262,9 @@ export function AccountSettings({
                       </DialogHeader>
                       
                       <div className="space-y-4 py-4">
-                        <p className="text-sm font-medium">
-                          To confirm, please type "DELETE" in the field below:
-                        </p>
+                          <p className="text-sm font-medium">
+                            To confirm, please type &quot;DELETE&quot; in the field below:
+                          </p>
                         <Input
                           value={deleteAccountConfirmation}
                           onChange={(e) => updateDeleteConfirmation(e.target.value)}
