@@ -7,11 +7,13 @@ import { useDataExport } from '@/hooks/gdpr/useDataExport';
 vi.mock('@/hooks/gdpr/useDataExport', () => ({ useDataExport: vi.fn() }));
 
 const mockHook = useDataExport as unknown as ReturnType<typeof vi.fn>;
+let requestExportFn: ReturnType<typeof vi.fn>;
 
 describe('DataExportRequest', () => {
   beforeEach(() => {
+    requestExportFn = vi.fn();
     mockHook.mockReturnValue({
-      requestExport: vi.fn(),
+      requestExport: requestExportFn,
       isLoading: false,
       error: null,
       downloadUrl: null,
@@ -19,7 +21,6 @@ describe('DataExportRequest', () => {
   });
 
   it('calls requestExport', () => {
-    const { requestExport } = mockHook.mock.results[0].value;
     const { getByRole } = render(
       <DataExportRequest
         render={({ requestExport: req }) => (
@@ -28,6 +29,6 @@ describe('DataExportRequest', () => {
       />
     );
     fireEvent.click(getByRole('button'));
-    expect(requestExport).toHaveBeenCalled();
+    expect(requestExportFn).toHaveBeenCalled();
   });
 });

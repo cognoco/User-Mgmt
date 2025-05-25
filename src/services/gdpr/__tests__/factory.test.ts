@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AdapterRegistry } from '@/adapters/registry';
-import { UserManagementConfiguration } from '@/core/config';
+let AdapterRegistry: typeof import('@/adapters/registry').AdapterRegistry;
+let UserManagementConfiguration: typeof import('@/core/config').UserManagementConfiguration;
 
 let getApiGdprService: typeof import('../factory').getApiGdprService;
 let DefaultGdprService: typeof import('../default-gdpr.service').DefaultGdprService;
@@ -8,6 +8,8 @@ let DefaultGdprService: typeof import('../default-gdpr.service').DefaultGdprServ
 describe('getApiGdprService', () => {
   beforeEach(async () => {
     vi.resetModules();
+    ({ AdapterRegistry } = await import('@/adapters/registry'));
+    ({ UserManagementConfiguration } = await import('@/core/config'));
     (AdapterRegistry as any).instance = null;
     UserManagementConfiguration.reset();
     ({ getApiGdprService } = await import('../factory'));
