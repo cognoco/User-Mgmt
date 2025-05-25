@@ -18,7 +18,8 @@ This document lists all placeholders identified in the project documentation, or
 
 ## Path Placeholders
 
-- [x] `@/hooks/{domain}/use-{feature}` - Hook import path
+- [x] `@/`app/[SECTION]/[DOMAIN]/page.tsx` - Next.js page path
+  - **Note**: Partially implemented. Some pages follow the pattern, but others use a flatter structure (e.g., `/profile/page.tsx`). Need to standardize the page organization.hooks/{domain}/use-{feature}` - Hook import path
   - **Note**: Implemented but with inconsistent naming conventions. Some files use kebab-case (`use-auth.ts`) while others use camelCase (`useAuth.ts`). Need to standardize to kebab-case per architecture guidelines.
 - [x] `@/ui/headless/{domain}/{Component}` - Headless component import path
   - **Note**: Fully implemented with proper domain organization across multiple domains.
@@ -30,8 +31,7 @@ This document lists all placeholders identified in the project documentation, or
   - **Note**: Fully implemented with domain-specific subdirectories and adapter implementations.
 - [x] `@/services/{domain}/{file}` - Service layer import path
   - **Note**: Fully implemented with domain-specific subdirectories containing business logic implementations.
-- [x] `app/[SECTION]/[DOMAIN]/page.tsx` - Next.js page path
-  - **Note**: Partially implemented. Some pages follow the pattern, but others use a flatter structure (e.g., `/profile/page.tsx`). Need to standardize the page organization.
+- [x] 
 
 ## API Placeholders
 - [ ] `AuthDataProvider` - Auth adapter interface
