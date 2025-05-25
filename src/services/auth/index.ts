@@ -43,5 +43,7 @@ export default {
   createAuthService
 };
 
-export { BrowserAuthStorage };
-export type { AuthStorage };
+export type { SessionTracker, SessionTrackerDeps } from './session-tracker';
+export { DefaultSessionTracker } from './session-tracker';
+export type { MFAHandler } from './mfa-handler';
+export { DefaultMFAHandler } from './mfa-handler';
