@@ -56,8 +56,8 @@ describe('Admin Users Management Flow', () => {
     await waitFor(() => {
       expect(screen.queryByText('user1@example.com')).not.toBeInTheDocument();
       expect(screen.queryByText('user2@example.com')).not.toBeInTheDocument();
-      await screen.findByText('admin@example.com');
     });
+    await screen.findByText('admin@example.com');
     
     // Clear the filter
     await user.clear(searchInput);
@@ -85,11 +85,11 @@ describe('Admin Users Management Flow', () => {
   });
 
   test('Admin can handle user management errors', async () => {
-    // Mock error when fetching users
-    fetchUsersMock = vi.fn().mockImplementation(() => {
-      // Simulate error by returning a rejected promise
-      return Promise.reject(new Error('Failed to fetch users'));
-    });
+    // Mock fetchUsers to fail on first call and succeed on retry
+    fetchUsersMock = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('Failed to fetch users'))
+      .mockResolvedValueOnce(mockUsersList);
 
     // Render the admin component
     render(<AdminUsers fetchUsers={fetchUsersMock} handleRoleChange={handleRoleChangeMock} />);
@@ -100,9 +100,6 @@ describe('Admin Users Management Flow', () => {
     // Retry button should be present
     const retryButton = screen.getByRole('button', { name: /retry/i });
     expect(retryButton).toBeInTheDocument();
-
-    // Mock successful fetch for retry
-    fetchUsersMock = vi.fn().mockResolvedValue(mockUsersList);
 
     // Click retry
     await user.click(retryButton);
