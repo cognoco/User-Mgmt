@@ -10,6 +10,7 @@
 
 import { useEffect, useState } from 'react';
 import initializeApp from '@/core/initialization/app-init';
+import { UserManagementConfiguration } from '@/core/config';
 
 export function AppInitializer({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -18,7 +19,18 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       console.log('[AppInitializer] Initializing application...');
-      initializeApp();
+      // Initialize the application and get the service instances
+      const services = initializeApp();
+      
+      // Ensure services are properly registered with UserManagementConfiguration
+      UserManagementConfiguration.configureServiceProviders({
+        authService: services.authService,
+        userService: services.userService,
+        teamService: services.teamService,
+        permissionService: services.permissionService,
+        webhookService: services.webhookService
+      });
+      
       console.log('[AppInitializer] Application initialized successfully');
       setIsInitialized(true);
     } catch (err) {

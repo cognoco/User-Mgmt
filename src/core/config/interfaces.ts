@@ -66,15 +66,18 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
  * This allows host applications to override default service implementations
  */
 export interface ServiceProviderRegistry {
-  // Will be populated with service interfaces in Phase 2
-  // Example structure:
-  // authService?: AuthService;
-  // userService?: UserService;
-  // teamService?: TeamService;
-  // permissionService?: PermissionService;
-  // notificationService?: NotificationService;
+  // Core services
+  authService?: any; // Will be typed as AuthService
+  userService?: any; // Will be typed as UserService
+  teamService?: any; // Will be typed as TeamService
+  permissionService?: any; // Will be typed as PermissionService
+  webhookService?: any; // Will be typed as WebhookService
   
-  // This is a placeholder until we define the actual service interfaces
+  // Additional services
+  notificationService?: any; // Will be typed as NotificationService
+  csrfService?: any; // Will be typed as CsrfService
+  
+  // Allow for additional services to be registered
   [key: string]: any;
 }
 

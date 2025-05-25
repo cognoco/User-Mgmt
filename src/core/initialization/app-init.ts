@@ -8,208 +8,114 @@
 import { UserManagementConfiguration } from "@/core/config";
 import { createSupabaseClient } from "@/lib/database/supabase";
 import { api } from "@/lib/api/axios";
-import { createSupabaseWebhookProvider } from "@/adapters/webhooks";
+
+// Import factory functions
+import { getAuthService } from "@/services/auth";
+import { getUserService } from "@/services/user";
+import { getTeamService } from "@/services/team";
+import { getPermissionService } from "@/services/permission";
 import { createWebhookService } from "@/services/webhooks";
+
+// Import adapter factories
+import { createSupabaseAuthProvider } from "@/adapters/auth";
+import { createSupabaseUserProvider } from "@/adapters/user";
+import { createSupabaseTeamProvider } from "@/adapters/team";
+import { createSupabasePermissionProvider } from "@/adapters/permission";
+import { createSupabaseWebhookProvider } from "@/adapters/webhooks";
 
 // Initialize the application
 export function initializeApp() {
   try {
     console.log("Initializing application...");
 
-    // Create Supabase client
-    const supabaseClient = createSupabaseClient();
+    // Get environment variables
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error("Missing Supabase environment variables");
+    }
 
-    // Register service providers
+    // Create data providers (adapters)
+    const authProvider = createSupabaseAuthProvider({
+      supabaseUrl,
+      supabaseKey
+    });
+    
+    const userProvider = createSupabaseUserProvider({
+      supabaseUrl,
+      supabaseKey
+    });
+    
+    const teamProvider = createSupabaseTeamProvider({
+      supabaseUrl,
+      supabaseKey
+    });
+    
+    const permissionProvider = createSupabasePermissionProvider({
+      supabaseUrl,
+      supabaseKey
+    });
+    
+    const webhookProvider = createSupabaseWebhookProvider({
+      supabaseUrl,
+      supabaseKey
+    });
+
+    // Create services using the providers
+    const authService = getAuthService(authProvider);
+    const userService = getUserService(userProvider);
+    const teamService = getTeamService(teamProvider);
+    const permissionService = getPermissionService(permissionProvider);
+    const webhookService = createWebhookService({
+      apiClient: api,
+      webhookDataProvider: webhookProvider
+    });
+
+    // Register all services
     UserManagementConfiguration.configureServiceProviders({
-      // Auth service
-      authService: {
-        login: async (credentials) => {
-          console.log("Login attempt:", credentials.email);
-          try {
-            const { data, error } =
-              await supabaseClient.auth.signInWithPassword({
-                email: credentials.email,
-                password: credentials.password,
-              });
+      authService,
+      userService,
+      teamService,
+      permissionService,
+      webhookService
+    });
 
-            if (error) {
-              console.error("Login error:", error.message);
-              return { success: false, error: error.message };
-            }
+    // Configure feature flags
+    UserManagementConfiguration.configureFeatures({
+      registration: true,
+      emailVerification: true,
+      passwordReset: true,
+      profileManagement: true,
+      teamManagement: true,
+      roleBasedAccess: true,
+      multiFactorAuth: false, // Disabled as noted in GAP_ANALYSIS.md
+      accountLinking: false   // Disabled as noted in GAP_ANALYSIS.md
+    });
 
-            return {
-              success: true,
-              user: {
-                id: data.user?.id,
-                email: data.user?.email,
-                firstName: data.user?.user_metadata?.firstName,
-                lastName: data.user?.user_metadata?.lastName,
-                metadata: data.user?.user_metadata,
-              },
-            };
-          } catch (error) {
-            console.error("Login exception:", error);
-            return { success: false, error: "Authentication failed" };
-          }
-        },
-
-        register: async (userData) => {
-          console.log("Registration attempt:", userData.email);
-          try {
-            const { data, error } = await supabaseClient.auth.signUp({
-              email: userData.email,
-              password: userData.password,
-              options: {
-                data: {
-                  firstName: userData.firstName,
-                  lastName: userData.lastName,
-                  ...userData.metadata,
-                },
-              },
-            });
-
-            if (error) {
-              console.error("Registration error:", error.message);
-              return { success: false, error: error.message };
-            }
-
-            return {
-              success: true,
-              user: {
-                id: data.user?.id,
-                email: data.user?.email,
-                firstName: userData.firstName,
-                lastName: userData.lastName,
-                metadata: userData.metadata,
-              },
-            };
-          } catch (error) {
-            console.error("Registration exception:", error);
-            return { success: false, error: "Registration failed" };
-          }
-        },
-
-        logout: async () => {
-          console.log("Logout attempt");
-          try {
-            const { error } = await supabaseClient.auth.signOut();
-
-            if (error) {
-              console.error("Logout error:", error.message);
-              return { success: false, error: error.message };
-            }
-
-            return { success: true };
-          } catch (error) {
-            console.error("Logout exception:", error);
-            return { success: false, error: "Logout failed" };
-          }
-        },
-
-        resetPassword: async (email) => {
-          console.log("Password reset attempt:", email);
-          try {
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(
-              email,
-              {
-                redirectTo: `${window.location.origin}/reset-password`,
-              },
-            );
-
-            if (error) {
-              console.error("Password reset error:", error.message);
-              return { success: false, error: error.message };
-            }
-
-            return {
-              success: true,
-              message: "Password reset instructions sent to your email",
-            };
-          } catch (error) {
-            console.error("Password reset exception:", error);
-            return { success: false, error: "Password reset failed" };
-          }
-        },
-
-        getCurrentUser: async () => {
-          const { data } = await supabaseClient.auth.getUser();
-          if (data.user) {
-            return {
-              id: data.user.id,
-              email: data.user.email,
-              firstName: data.user.user_metadata?.firstName,
-              lastName: data.user.user_metadata?.lastName,
-              metadata: data.user.user_metadata,
-            };
-          }
-          return null;
-        },
-
-        isAuthenticated: () => {
-          // This is a synchronous method, so we can't use async/await
-          // We'll return false and let the auth state listener handle auth state
-          return false;
-        },
-
-        onAuthStateChanged: (callback) => {
-          // Set up auth state listener
-          const { data } = supabaseClient.auth.onAuthStateChange(
-            (event, session) => {
-              if (session?.user) {
-                const user = {
-                  id: session.user.id,
-                  email: session.user.email,
-                  firstName: session.user.user_metadata?.firstName,
-                  lastName: session.user.user_metadata?.lastName,
-                  metadata: session.user.user_metadata,
-                };
-                callback(user);
-              } else {
-                callback(null);
-              }
-            },
-          );
-
-          // Return unsubscribe function
-          return () => {
-            data.subscription.unsubscribe();
-          };
-        },
-      },
-
-      // Add minimal implementations for other required services
-      userService: {
-        getUserProfile: async () => ({ success: true, profile: {} }),
-        updateUserProfile: async () => ({ success: true }),
-        deleteUserAccount: async () => ({ success: true }),
-      },
-
-      teamService: {
-        getTeams: async () => ({ success: true, teams: [] }),
-        createTeam: async () => ({ success: true, team: {} }),
-        updateTeam: async () => ({ success: true }),
-        deleteTeam: async () => ({ success: true }),
-      },
-
-      permissionService: {
-        getRoles: async () => ({ success: true, roles: [] }),
-        getPermissions: async () => ({ success: true, permissions: [] }),
-        assignRole: async () => ({ success: true }),
-        revokeRole: async () => ({ success: true }),
-      },
-
-      webhookService: createWebhookService({
-        apiClient: api,
-        webhookDataProvider: createSupabaseWebhookProvider({
-          supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-          supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
-        }),
-      }),
+    // Configure options
+    UserManagementConfiguration.configure({
+      options: {
+        redirects: {
+          afterLogin: '/dashboard',
+          afterLogout: '/',
+          afterRegistration: '/auth/verify-email',
+          afterPasswordReset: '/auth/login'
+        }
+      }
     });
 
     console.log("Application initialized successfully");
+    return {
+      authService,
+      userService,
+      teamService,
+      permissionService,
+      webhookService
+    };
   } catch (error) {
     console.error("Failed to initialize application:", error);
+    throw error;
   }
 }
 
