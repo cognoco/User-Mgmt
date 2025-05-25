@@ -14,6 +14,22 @@ import { DefaultOrganizationService } from '@/services/organization/default-orga
 import { DefaultPermissionService } from '@/services/permission/default-permission-service';
 import { DefaultGdprService } from '@/services/gdpr/default-gdpr.service';
 import { DefaultSsoService } from '@/services/sso/default-sso.service';
+import { DefaultConsentService } from '@/services/consent/default-consent.service';
+import { DefaultSessionService } from '@/services/session/default-session.service';
+import { DefaultSubscriptionService } from '@/services/subscription/default-subscription.service';
+import { DefaultApiKeysService } from '@/services/api-keys/default-api-keys.service';
+import { WebhookService } from '@/services/webhooks/WebhookService';
+import { DefaultAddressService } from '@/services/address/default-address.service';
+import { DefaultNotificationService } from '@/services/notification/default-notification.service';
+import { DefaultAuditService } from '@/services/audit/default-audit.service';
+import { DefaultCsrfService } from '@/services/csrf/default-csrf.service';
+import { DefaultNotificationHandler } from '@/services/notification/default-notification.handler';
+import {
+  createAddressProvider
+} from '@/adapters/address/factory';
+import { createAuditProvider } from '@/adapters/audit/factory';
+import { createNotificationProvider } from '@/adapters/notification/factory';
+import { createCsrfProvider } from '@/adapters/csrf/factory';
 import { UserManagementConfiguration } from '@/core/config';
 import { AdapterRegistry } from '@/adapters/registry';
 import { isServer } from '../platform';
@@ -79,7 +95,17 @@ export function initializeAdapters(
     const organizationAdapter = factory.createOrganizationProvider?.();
     const permissionAdapter = factory.createPermissionProvider();
     const gdprAdapter = factory.createGdprProvider?.();
+    const consentAdapter = factory.createConsentProvider?.();
+    const sessionAdapter = factory.createSessionProvider();
     const ssoAdapter = factory.createSsoProvider();
+    const subscriptionAdapter = factory.createSubscriptionProvider();
+    const apiKeyAdapter = factory.createApiKeyProvider();
+    const webhookAdapter = factory.createWebhookProvider?.();
+
+    const addressAdapter = createAddressProvider(config);
+    const auditAdapter = createAuditProvider(config);
+    const csrfAdapter = createCsrfProvider(config);
+    const notificationAdapter = createNotificationProvider(config);
 
     const registry = AdapterRegistry.getInstance();
     registry.registerAdapter('auth', authAdapter);
@@ -88,6 +114,15 @@ export function initializeAdapters(
     if (organizationAdapter) registry.registerAdapter('organization', organizationAdapter);
     registry.registerAdapter('permission', permissionAdapter);
     if (gdprAdapter) registry.registerAdapter('gdpr', gdprAdapter);
+    if (consentAdapter) registry.registerAdapter('consent', consentAdapter);
+    registry.registerAdapter('session', sessionAdapter);
+    registry.registerAdapter('subscription', subscriptionAdapter);
+    registry.registerAdapter('apiKey', apiKeyAdapter);
+    if (webhookAdapter) registry.registerAdapter('webhook', webhookAdapter);
+    registry.registerAdapter('address', addressAdapter);
+    registry.registerAdapter('audit', auditAdapter);
+    registry.registerAdapter('csrf', csrfAdapter);
+    registry.registerAdapter('notification', notificationAdapter);
     registry.registerAdapter('sso', ssoAdapter);
     
     // Create service instances with the adapters
@@ -98,6 +133,15 @@ export function initializeAdapters(
     const organizationService = organizationAdapter ? new DefaultOrganizationService(organizationAdapter) : undefined;
     const permissionService = new DefaultPermissionService(permissionAdapter);
     const gdprService = gdprAdapter ? new DefaultGdprService(gdprAdapter) : undefined;
+    const consentService = consentAdapter ? new DefaultConsentService(consentAdapter) : undefined;
+    const sessionService = new DefaultSessionService(sessionAdapter);
+    const subscriptionService = new DefaultSubscriptionService(subscriptionAdapter);
+    const apiKeyService = new DefaultApiKeysService(apiKeyAdapter);
+    const webhookService = webhookAdapter ? new WebhookService(webhookAdapter) : undefined;
+    const addressService = new DefaultAddressService(addressAdapter);
+    const auditService = new DefaultAuditService(auditAdapter);
+    const csrfService = new DefaultCsrfService(csrfAdapter);
+    const notificationService = new DefaultNotificationService(notificationAdapter, new DefaultNotificationHandler());
     const ssoService = new DefaultSsoService(ssoAdapter);
     
     return {
@@ -107,6 +151,15 @@ export function initializeAdapters(
       organizationService,
       permissionService,
       gdprService,
+      consentService,
+      sessionService,
+      subscriptionService,
+      apiKeyService,
+      webhookService,
+      addressService,
+      auditService,
+      csrfService,
+      notificationService,
       ssoService,
       adapters: {
         authAdapter,
@@ -115,10 +168,18 @@ export function initializeAdapters(
         organizationAdapter,
         permissionAdapter,
         gdprAdapter,
+        consentAdapter,
+        sessionAdapter,
+        subscriptionAdapter,
+        apiKeyAdapter,
+        webhookAdapter,
+        addressAdapter,
+        auditAdapter,
+        csrfAdapter,
+        notificationAdapter,
         ssoAdapter
       }
-      }
-    };
+      };
   } catch (error) {
     console.error('Failed to initialize adapters:', error);
     throw error;
@@ -142,7 +203,16 @@ export function initializeUserManagement(config = {}, options = {}) {
       userService: services.userService,
       teamService: services.teamService,
       permissionService: services.permissionService,
-      gdprService: ervices.gdprService,
+      gdprService: services.gdprService,
+      consentService: services.consentService,
+      sessionService: services.sessionService,
+      subscriptionService: services.subscriptionService,
+      apiKeyService: services.apiKeyService,
+      webhookService: services.webhookService,
+      addressService: services.addressService,
+      auditService: services.auditService,
+      csrfService: services.csrfService,
+      notificationService: services.notificationService,
       ssoService: services.ssoService,
       ...options.serviceProviders
     },
