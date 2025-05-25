@@ -1,15 +1,25 @@
 // __tests__/integration/notification-flow.test.tsx
 
-vi.mock('@/lib/database/supabase', () => require('../mocks/supabase'));
+vi.mock('@/lib/api/axios');
+vi.mock('@/lib/stores/preferences.store');
+vi.mock('@/hooks/auth/useAuth', () => ({
+  useAuth: () => ({ user: { id: 'user-123', email: 'user@example.com' } })
+}));
+vi.mock('@/lib/auth/UserManagementProvider', () => ({
+  useUserManagement: () => ({ platform: 'web' })
+}));
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NotificationPreferences } from '@/ui/styled/shared/NotificationPreferences';
 import { describe, test, expect, beforeEach, vi } from 'vitest';
+import { usePreferencesStore, type PreferencesState } from '@/lib/stores/preferences.store';
+import { api } from '@/lib/api/axios';
+import { UserManagementConfiguration } from '@/core/config';
+import { createMockNotificationService } from '../mocks/notification.service.mock';
 
 // Import our standardized mock
-import { supabase } from '@/lib/database/supabase';
 import { NotificationCenter } from '@/ui/styled/common/NotificationCenter';
 
 describe('Notification Management Flow', () => {
@@ -18,27 +28,27 @@ describe('Notification Management Flow', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     user = userEvent.setup();
-    
-    // Mock authentication
-    (supabase.auth.getUser as any).mockResolvedValue({
-      data: { user: { id: 'user-123', email: 'user@example.com' } },
-      error: null
-    });
-    
-    // Mock current notification settings
-    (supabase.from as any)('notification_settings').select.mockResolvedValueOnce({
-      data: {
-        id: 'notif-1',
-        user_id: 'user-123',
-        email_notifications: true,
-        push_notifications: false,
-        notification_types: {
-          system_updates: true,
-          new_messages: true,
-          activity_summaries: false
-        }
+    const store = {
+      preferences: {
+        notifications: { email: true, push: false, marketing: false }
       },
-      error: null
+      isLoading: false,
+      error: null,
+      fetchPreferences: vi.fn(),
+      updatePreferences: vi.fn().mockResolvedValue(true)
+    } as PreferencesState;
+    (usePreferencesStore as any).mockImplementation(
+      (selector?: (state: PreferencesState) => any) =>
+        selector ? selector(store) : store
+    );
+
+    (api.get as any).mockResolvedValue({ data: store.preferences });
+    (api.patch as any).mockResolvedValue({ data: store.preferences });
+
+    const notificationService = createMockNotificationService();
+    UserManagementConfiguration.reset();
+    UserManagementConfiguration.configureServiceProviders({
+      notificationService
     });
   });
 
@@ -62,19 +72,14 @@ describe('Notification Management Flow', () => {
     await user.click(screen.getByLabelText(/activity summaries/i));
     
     // Mock successful update
-    (supabase.from as any)('notification_settings').update.mockResolvedValueOnce({
+    (api.patch as any).mockResolvedValueOnce({
       data: {
-        id: 'notif-1',
-        user_id: 'user-123',
-        email_notifications: true,
-        push_notifications: true,
-        notification_types: {
-          system_updates: true,
-          new_messages: true,
-          activity_summaries: true
-        }
+        notifications: {
+          email: true,
+          push: true,
+          marketing: false,
+        },
       },
-      error: null
     });
     
     // Save changes
@@ -86,23 +91,18 @@ describe('Notification Management Flow', () => {
     });
     
     // Verify update was called with correct data
-    expect((supabase.from as any)('notification_settings').update).toHaveBeenCalledWith({
-      push_notifications: true,
-      notification_types: {
-        system_updates: true,
-        new_messages: true,
-        activity_summaries: true
-      }
+    expect(api.patch).toHaveBeenCalledWith('/api/preferences', {
+      notifications: {
+        email: true,
+        push: true,
+        marketing: false,
+      },
     });
   });
   
   test('displays error when settings cannot be loaded', async () => {
     // Mock error loading settings
-    (supabase.from as any)('notification_settings').select.mockReset();
-    (supabase.from as any)('notification_settings').select.mockResolvedValueOnce({
-      data: null,
-      error: { message: 'Error loading notification settings' }
-    });
+    (api.get as any).mockRejectedValueOnce(new Error('Error loading notification settings'));
     
     // Render notification settings
     render(<NotificationPreferences />);
@@ -129,10 +129,7 @@ describe('Notification Management Flow', () => {
     await user.click(screen.getByLabelText(/push notifications/i));
     
     // Mock error during update
-    (supabase.from as any)('notification_settings').update.mockResolvedValueOnce({
-      data: null,
-      error: { message: 'Error saving notification settings' }
-    });
+    (api.patch as any).mockRejectedValueOnce(new Error('Error saving notification settings'));
     
     // Try to save changes
     await user.click(screen.getByRole('button', { name: /save changes/i }));
@@ -153,20 +150,14 @@ describe('Notification Management Flow', () => {
     });
     
     // Mock successful reset
-    (supabase.from as any)('notification_settings').update.mockResolvedValueOnce({
+    (api.patch as any).mockResolvedValueOnce({
       data: {
-        id: 'notif-1',
-        user_id: 'user-123',
-        email_notifications: true,
-        push_notifications: true,
-        notification_types: {
-          system_updates: true,
-          new_messages: true,
-          activity_summaries: true,
-          mentions: true
-        }
+        notifications: {
+          email: true,
+          push: true,
+          marketing: false,
+        },
       },
-      error: null
     });
     
     // Click reset to defaults button
@@ -206,28 +197,27 @@ describe('Notification Management Flow', () => {
     await user.click(screen.getByLabelText(/mobile/i));
     
     // Mock successful update
-    (supabase.from as any)('notification_settings').update.mockResolvedValueOnce({
+    (api.patch as any).mockResolvedValueOnce({
       data: {
         channels: {
           email: true,
           in_app: true,
-          mobile: true
-        }
+          mobile: true,
+        },
       },
-      error: null
     });
     
     // Save changes
     await user.click(screen.getByRole('button', { name: /save changes/i }));
     
     // Verify update was called with correct data
-    expect((supabase.from as any)('notification_settings').update).toHaveBeenCalledWith(expect.objectContaining({
+    expect(api.patch).toHaveBeenCalledWith('/api/preferences', {
       channels: {
         email: true,
         in_app: true,
-        mobile: true
-      }
-    }));
+        mobile: true,
+      },
+    });
   });
   
   test('supports frequency settings for different notification types', async () => {
@@ -253,26 +243,25 @@ describe('Notification Management Flow', () => {
     );
     
     // Mock successful update
-    (supabase.from as any)('notification_settings').update.mockResolvedValueOnce({
+    (api.patch as any).mockResolvedValueOnce({
       data: {
         frequency: {
           system_updates: 'immediate',
-          activity_summaries: 'weekly'
-        }
+          activity_summaries: 'weekly',
+        },
       },
-      error: null
     });
     
     // Save changes
     await user.click(screen.getByRole('button', { name: /save changes/i }));
     
     // Verify update was called with correct data
-    expect((supabase.from as any)('notification_settings').update).toHaveBeenCalledWith(expect.objectContaining({
+    expect(api.patch).toHaveBeenCalledWith('/api/preferences', {
       frequency: {
         system_updates: 'immediate',
-        activity_summaries: 'weekly'
-      }
-    }));
+        activity_summaries: 'weekly',
+      },
+    });
   });
   
   test('supports quiet hours configuration', async () => {
@@ -299,52 +288,59 @@ describe('Notification Management Flow', () => {
     await user.type(screen.getByLabelText(/end time/i), '07:00');
     
     // Mock successful update
-    (supabase.from as any)('notification_settings').update.mockResolvedValueOnce({
+    (api.patch as any).mockResolvedValueOnce({
       data: {
         quiet_hours: {
           enabled: true,
           start_time: '22:00',
-          end_time: '07:00'
-        }
+          end_time: '07:00',
+        },
       },
-      error: null
     });
     
     // Save changes
     await user.click(screen.getByRole('button', { name: /save changes/i }));
     
     // Verify update was called with correct data
-    expect((supabase.from as any)('notification_settings').update).toHaveBeenCalledWith(expect.objectContaining({
+    expect(api.patch).toHaveBeenCalledWith('/api/preferences', {
       quiet_hours: {
         enabled: true,
         start_time: '22:00',
-        end_time: '07:00'
-      }
-    }));
+        end_time: '07:00',
+      },
+    });
   });
 
   test('Admin receives and views SSO event notification end-to-end', async () => {
-    // Mock SSO event notification in company_notification_logs
-    (supabase.from as any)('company_notification_logs').select.mockResolvedValueOnce({
-      data: [
-        {
-          id: 'notif-sso-1',
-          recipient_id: 'user-123',
-          notification_type: 'sso_event',
-          channel: 'in_app',
-          content: { subject: 'SSO Configuration Updated', content: 'The SSO configuration for your organization has been updated.' },
-          is_read: false,
-          created_at: new Date().toISOString(),
-        }
-      ],
-      error: null
+    const notifications = [
+      {
+        id: 'notif-sso-1',
+        userId: 'user-123',
+        channel: 'inApp',
+        title: 'SSO Configuration Updated',
+        message: 'The SSO configuration for your organization has been updated.',
+        category: 'sso',
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      },
+    ];
+    const notificationService = createMockNotificationService({
+      getUserNotifications: vi.fn(async () => ({
+        notifications,
+        total: 1,
+        page: 1,
+        limit: 10,
+        totalPages: 1,
+        unreadCount: 1,
+      })),
+      markAsRead: vi.fn(async (id: string) => {
+        const n = notifications.find(n => n.id === id);
+        if (n) n.isRead = true;
+        return { success: true };
+      }),
     });
-    // Mock user context
-    (supabase.auth.getUser as any).mockResolvedValue({
-      data: { user: { id: 'user-123', email: 'admin@example.com' } },
-      error: null
-    });
-    // Render NotificationCenter
+    UserManagementConfiguration.configureServiceProviders({ notificationService });
+
     render(<NotificationCenter />);
     // Wait for SSO notification to appear
     await waitFor(() => {
