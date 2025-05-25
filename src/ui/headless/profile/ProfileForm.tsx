@@ -7,7 +7,7 @@
 
 import { useState, useEffect, FormEvent } from 'react';
 import { z } from 'zod';
-import { useUserProfile } from '@/hooks/useUserProfile';
+import { useUserProfile } from '@/hooks/user/useUserProfile';
 import type { UserProfile, ProfileUpdatePayload } from '@/core/user/models';
 
 /** Props for the ProfileForm component */
