@@ -20,6 +20,7 @@ import {
 import {
   PermissionEventTypes,
   PermissionEventHandler,
+  PermissionEvent,
 } from "@/core/permission/events";
 import type { PermissionDataProvider } from "@/core/permission/IPermissionDataProvider";
 import { translateError } from "@/lib/utils/error";
@@ -29,7 +30,7 @@ import { TypedEventEmitter } from "@/lib/utils/typed-event-emitter";
  * Default implementation of the PermissionService interface
  */
 export class DefaultPermissionService
-  extends TypedEventEmitter<PermissionEventTypes>
+  extends TypedEventEmitter<PermissionEvent>
   implements PermissionService
 {
   /**
@@ -46,7 +47,7 @@ export class DefaultPermissionService
    *
    * @param event - The event to emit
    */
-  private emitEvent(event: PermissionEventTypes): void {
+  private emitEvent(event: PermissionEvent): void {
     this.emit(event);
   }
 
@@ -160,7 +161,7 @@ export class DefaultPermissionService
 
       // Emit role created event
       this.emitEvent({
-        type: "ROLE_CREATED",
+        type: PermissionEventTypes.ROLE_CREATED,
         timestamp: new Date(),
         role,
       });
@@ -201,7 +202,7 @@ export class DefaultPermissionService
 
       // Emit role updated event
       this.emitEvent({
-        type: "ROLE_UPDATED",
+        type: PermissionEventTypes.ROLE_UPDATED,
         timestamp: new Date(),
         role,
         previousRole,
@@ -229,7 +230,7 @@ export class DefaultPermissionService
 
       // Emit role deleted event
       this.emitEvent({
-        type: "ROLE_DELETED",
+        type: PermissionEventTypes.ROLE_DELETED,
         timestamp: new Date(),
         roleId,
       });
@@ -294,7 +295,7 @@ export class DefaultPermissionService
 
       // Emit role assigned event
       this.emitEvent({
-        type: "ROLE_ASSIGNED",
+        type: PermissionEventTypes.ROLE_ASSIGNED,
         timestamp: new Date(),
         userRole,
       });
@@ -329,7 +330,7 @@ export class DefaultPermissionService
 
       // Emit role removed event
       this.emitEvent({
-        type: "ROLE_REMOVED",
+        type: PermissionEventTypes.ROLE_REMOVED,
         timestamp: new Date(),
         userId,
         roleId,
@@ -390,7 +391,7 @@ export class DefaultPermissionService
 
       // Emit permission added event
       this.emitEvent({
-        type: "PERMISSION_ADDED",
+        type: PermissionEventTypes.PERMISSION_ADDED,
         timestamp: new Date(),
         roleId,
         permission,
@@ -425,7 +426,7 @@ export class DefaultPermissionService
 
       // Emit permission removed event
       this.emitEvent({
-        type: "PERMISSION_REMOVED",
+        type: PermissionEventTypes.PERMISSION_REMOVED,
         timestamp: new Date(),
         roleId,
         permission,
@@ -530,7 +531,7 @@ export class DefaultPermissionService
 
       // Emit role permissions synced event
       this.emitEvent({
-        type: "ROLE_PERMISSIONS_SYNCED",
+        type: PermissionEventTypes.ROLE_PERMISSIONS_SYNCED,
         timestamp: new Date(),
         roles: updatedRoles,
       });

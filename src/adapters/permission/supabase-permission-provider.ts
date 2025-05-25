@@ -16,7 +16,11 @@ import {
   RoleUpdatePayload
 } from '../../core/permission/models';
 import type { IPermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
-import { PermissionEventHandler, PermissionEventTypes } from '../../core/permission/events';
+import {
+  PermissionEvent,
+  PermissionEventHandler,
+  PermissionEventTypes,
+} from '../../core/permission/events';
 
 /**
  * Supabase implementation of the PermissionDataProvider interface
@@ -630,7 +634,7 @@ export class SupabasePermissionProvider implements IPermissionDataProvider {
    * 
    * @param event Permission event
    */
-  private notifyEvent(event: any): void {
+  private notifyEvent(event: PermissionEvent): void {
     for (const handler of this.eventHandlers) {
       handler(event);
     }

@@ -35,3 +35,6 @@ export function createPermissionService(config: PermissionServiceConfig): Permis
 export default {
   createPermissionService
 };
+
+export type { PermissionEvent } from '@/core/permission/events';
+export { PermissionEventTypes } from '@/core/permission/events';
