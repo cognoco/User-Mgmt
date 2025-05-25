@@ -1,9 +1,9 @@
-import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useAuth } from '../useAuth';
-import { UserManagementConfiguration } from '@/core/config';
-import type { AuthService } from '@/core/auth/interfaces';
-import type { User } from '@/core/auth/models';
+import { renderHook, act } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { useAuth } from "../useAuth";
+import { UserManagementConfiguration } from "@/core/config";
+import type { AuthService } from "@/core/auth/interfaces";
+import type { User } from "@/core/auth/models";
 
 const mockAuthService: AuthService = {
   login: vi.fn(),
@@ -24,12 +24,14 @@ const mockAuthService: AuthService = {
   onAuthStateChanged: vi.fn(),
 };
 
-describe('useAuth', () => {
+describe("useAuth", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     UserManagementConfiguration.reset();
-    UserManagementConfiguration.configureServiceProviders({ authService: mockAuthService });
-    mockAuthService.getCurrentUser.mockReturnValue(null);
+    UserManagementConfiguration.configureServiceProviders({
+      authService: mockAuthService,
+    });
+    mockAuthService.getCurrentUser.mockResolvedValue(null);
     mockAuthService.isAuthenticated.mockReturnValue(false);
     mockAuthService.onAuthStateChanged.mockImplementation(() => () => {});
   });
@@ -38,33 +40,44 @@ describe('useAuth', () => {
     UserManagementConfiguration.reset();
   });
 
-  it('logs in successfully', async () => {
-    const user: User = { id: '1', email: 'test@example.com' };
+  it("logs in successfully", async () => {
+    const user: User = { id: "1", email: "test@example.com" };
     vi.mocked(mockAuthService.login).mockResolvedValue({ success: true, user });
 
     const { result } = renderHook(() => useAuth());
 
     await act(async () => {
-      await result.current.login({ email: 'test@example.com', password: 'pass' });
+      await result.current.login({
+        email: "test@example.com",
+        password: "pass",
+      });
     });
 
-    expect(mockAuthService.login).toHaveBeenCalledWith({ email: 'test@example.com', password: 'pass' });
+    expect(mockAuthService.login).toHaveBeenCalledWith({
+      email: "test@example.com",
+      password: "pass",
+    });
     expect(result.current.user).toEqual(user);
     expect(result.current.isAuthenticated).toBe(true);
     expect(result.current.error).toBeNull();
   });
 
-  it('handles login error', async () => {
-    vi.mocked(mockAuthService.login).mockRejectedValue(new Error('Invalid credentials'));
+  it("handles login error", async () => {
+    vi.mocked(mockAuthService.login).mockRejectedValue(
+      new Error("Invalid credentials"),
+    );
 
     const { result } = renderHook(() => useAuth());
 
     await act(async () => {
-      await result.current.login({ email: 'test@example.com', password: 'wrong' });
+      await result.current.login({
+        email: "test@example.com",
+        password: "wrong",
+      });
     });
 
     expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
-    expect(result.current.error).toBe('Invalid credentials');
+    expect(result.current.error).toBe("Invalid credentials");
   });
 });

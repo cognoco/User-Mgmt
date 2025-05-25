@@ -32,7 +32,7 @@ async function handleUpdatePassword(
   let userIdForLogging: string | null = null;
 
   const authService = getApiAuthService();
-  const currentUser = authService.getCurrentUser();
+  const currentUser = await authService.getCurrentUser();
 
   if (!currentUser) {
     await logUserAction({
