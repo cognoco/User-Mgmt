@@ -14,7 +14,7 @@ const setupRequestSchema = z.object({
   email: z.string().optional(),
 });
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<NextResponse> {
   try {
     // Parse and validate request body
     const body = await request.json();
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
 
         try {
           // Use the two-factor service to set up SMS
-          const result = await twoFactorService.setupSMS(user.id, phone);
+          await twoFactorService.setupSMS(user.id, phone);
           return NextResponse.json({ success: true });
         } catch (error) {
           console.error('Failed to set up SMS MFA:', error);
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
 
         try {
           // Use the two-factor service to set up Email MFA
-          const result = await twoFactorService.setupEmail(user.id, email);
+          await twoFactorService.setupEmail(user.id, email);
           return NextResponse.json({ success: true, testid: 'email-mfa-setup-success' });
         } catch (error) {
           console.error('Failed to set up Email MFA:', error);

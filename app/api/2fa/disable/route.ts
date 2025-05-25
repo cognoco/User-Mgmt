@@ -8,7 +8,7 @@ const disableRequestSchema = z.object({
   password: z.string().optional(),
 });
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<NextResponse> {
   try {
     // Parse and validate request body
     const body = await request.json();
@@ -24,10 +24,10 @@ export async function POST(request: Request) {
           get(name: string) {
             return cookieStore.get(name)?.value;
           },
-          set(name: string, value: string, options: any) {
+          set(name: string, value: string, options: Record<string, unknown>) {
             cookieStore.set({ name, value, ...options });
           },
-          remove(name: string, options: any) {
+          remove(name: string, options: Record<string, unknown>) {
             cookieStore.set({ name, value: '', ...options });
           },
         },
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       
       // For this implementation, we'll skip password verification
       // but note that it would be important for a production app
-      console.log('Password verification would happen here in a production app');
+      console.warn('Password verification would happen here in a production app');
     }
 
     // Disable 2FA by updating user metadata

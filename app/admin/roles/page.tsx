@@ -6,6 +6,6 @@ export const metadata: Metadata = {
   description: 'Manage user roles and permissions',
 };
 
-export default function RolesManagementPage() {
+export default function RolesManagementPage(): JSX.Element {
   return <RolesManagementPageClient />;
 }

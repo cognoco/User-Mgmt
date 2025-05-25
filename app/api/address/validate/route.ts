@@ -38,17 +38,17 @@ interface GoogleValidationResponse {
     };
     address?: {
       formattedAddress?: string;
-      postalAddress?: any;
-      addressComponents?: any[];
+      postalAddress?: unknown;
+      addressComponents?: unknown[];
     };
-    geocode?: any;
-    metadata?: any;
-    uspsData?: any;
+      geocode?: unknown;
+      metadata?: unknown;
+      uspsData?: unknown;
   };
   responseId?: string;
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   // 1. Rate Limiting (Consider stricter limits for external API calls)
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     let fetchError: string | null = null;
 
     try {
-        console.log('Calling Google Address Validation API...');
+        console.warn('Calling Google Address Validation API...');
         const response = await fetch(googleApiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -111,11 +111,11 @@ export async function POST(request: NextRequest) {
             throw new Error(`Google API error: ${response.status} ${response.statusText} - ${errorBody}`);
         }
         googleResponseData = await response.json();
-        console.log('Google API response received.');
+        console.warn('Google API response received.');
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error calling Google Address Validation API:', error);
-        fetchError = error.message || 'Failed to call validation service.';
+        fetchError = error instanceof Error ? error.message : 'Failed to call validation service.';
     }
 
     // 7. Process Response and Determine Status
@@ -154,8 +154,8 @@ export async function POST(request: NextRequest) {
         suggestions: suggestions 
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Unexpected error in POST /api/address/validate:', error);
     return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
   }
-} 
+}

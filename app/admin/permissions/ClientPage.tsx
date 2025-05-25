@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { PermissionEditor } from '@/ui/styled/permission/PermissionEditor';
 import { usePermissions } from '@/hooks/permission/usePermissions';
 
-export default function PermissionsManagementPageClient() {
+export default function PermissionsManagementPageClient(): JSX.Element {
   const {
     permissions,
     permissionCategories,

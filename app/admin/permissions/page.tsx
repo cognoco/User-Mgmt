@@ -6,6 +6,6 @@ export const metadata: Metadata = {
   description: 'Create and manage permissions for your application',
 };
 
-export default function PermissionsManagementPage() {
+export default function PermissionsManagementPage(): JSX.Element {
   return <PermissionsManagementPageClient />;
 }

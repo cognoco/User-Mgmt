@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Process export and deletion requests and manage user consent',
 };
 
-export default function AdminGdprCompliancePage() {
+export default function AdminGdprCompliancePage(): JSX.Element {
   return (
     <div className="container mx-auto py-8 space-y-8 max-w-3xl">
       <h1 className="text-2xl font-bold">GDPR Compliance</h1>
