@@ -62,6 +62,16 @@ export interface UseAuth {
   ) => Promise<MFAVerifyResponse>;
   disableMFA: () => Promise<AuthResult>;
 
+  // Email verification
+  sendVerificationEmail: (email: string) => Promise<AuthResult>;
+  verifyEmail: (
+    token: string,
+  ) => Promise<{ success: boolean; error?: string }>;
+
+  // Account management
+  deleteAccount: (password?: string) => Promise<{ success: boolean; error?: string }>;
+  getCurrentUser: () => Promise<User | null>;
+
   // State management
   clearError: () => void;
   clearSuccess: () => void;
@@ -430,6 +440,115 @@ export function useAuth(): UseAuth {
     }
   }, [authService]);
 
+  // Send verification email
+  const sendVerificationEmail = useCallback(
+    async (email: string): Promise<AuthResult> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const res = await authService.sendVerificationEmail(email);
+
+        setIsLoading(false);
+
+        if (res.success) {
+          setSuccessMessage(
+            res.message || "Verification email sent successfully",
+          );
+        } else if (res.error) {
+          setError(res.error);
+        }
+
+        return res;
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to send verification email";
+
+        setIsLoading(false);
+        setError(errorMessage);
+
+        return { success: false, error: errorMessage };
+      }
+    },
+    [authService],
+  );
+
+  // Verify email
+  const verifyEmail = useCallback(
+    async (token: string): Promise<{ success: boolean; error?: string }> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        await authService.verifyEmail(token);
+
+        setIsLoading(false);
+        setSuccessMessage("Email verified successfully");
+
+        return { success: true };
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Email verification failed";
+
+        setIsLoading(false);
+        setError(errorMessage);
+
+        return { success: false, error: errorMessage };
+      }
+    },
+    [authService],
+  );
+
+  // Delete account
+  const deleteAccount = useCallback(
+    async (password?: string): Promise<{ success: boolean; error?: string }> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        await authService.deleteAccount(password);
+
+        setIsLoading(false);
+        setUserState(null);
+        setIsAuthenticated(false);
+        setTokenState(null);
+        setSuccessMessage("Account deleted successfully");
+
+        return { success: true };
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Account deletion failed";
+
+        setIsLoading(false);
+        setError(errorMessage);
+
+        return { success: false, error: errorMessage };
+      }
+    },
+    [authService],
+  );
+
+  const getCurrentUser = useCallback(async (): Promise<User | null> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const current = await authService.getCurrentUser();
+      setIsLoading(false);
+      setUserState(current);
+      setIsAuthenticated(!!current);
+      return current;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch user";
+      setIsLoading(false);
+      setError(errorMessage);
+      return null;
+    }
+  }, [authService]);
+
   // Session management methods
   const refreshToken = useCallback(async (): Promise<boolean> => {
     setIsLoading(true);
@@ -511,6 +630,10 @@ export function useAuth(): UseAuth {
     setupMFA,
     verifyMFA,
     disableMFA,
+    sendVerificationEmail,
+    verifyEmail,
+    deleteAccount,
+    getCurrentUser,
     clearError,
     clearSuccess,
     clearMessages,

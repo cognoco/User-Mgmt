@@ -195,6 +195,29 @@ describe("useAuth hook", () => {
     expect(localStorage.getItem("last_activity")).not.toBeNull();
   });
 
+  it("verifies email and deletes account", async () => {
+    (mockAuthService.sendVerificationEmail as any).mockResolvedValue({ success: true });
+    (mockAuthService.verifyEmail as any).mockResolvedValue(undefined);
+    (mockAuthService.deleteAccount as any).mockResolvedValue(undefined);
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await act(async () => {
+      await result.current.sendVerificationEmail("a@test.com");
+    });
+    expect(mockAuthService.sendVerificationEmail).toHaveBeenCalledWith("a@test.com");
+
+    await act(async () => {
+      const res = await result.current.verifyEmail("token");
+      expect(res.success).toBe(true);
+    });
+    expect(mockAuthService.verifyEmail).toHaveBeenCalledWith("token");
+
+    await act(async () => {
+      const res = await result.current.deleteAccount();
+      expect(res.success).toBe(true);
+    });
+    expect(mockAuthService.deleteAccount).toHaveBeenCalled();
+  });
+
   it("handles auth events", () => {
     let eventHandler: any;
     (mockAuthService.onAuthEvent as any).mockImplementation((cb: any) => {
@@ -208,6 +231,16 @@ describe("useAuth hook", () => {
     expect(cb).toHaveBeenCalled();
     expect(typeof unsub).toBe("function");
     expect(unsub()).toBe("unsub");
+  });
+
+  it("fetches current user", async () => {
+    (mockAuthService.getCurrentUser as any).mockResolvedValue({ id: "1", email: "t@test.com" });
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await act(async () => {
+      const user = await result.current.getCurrentUser();
+      expect(user?.email).toBe("t@test.com");
+    });
+    expect(mockAuthService.getCurrentUser).toHaveBeenCalled();
   });
 
   it("clears messages", async () => {

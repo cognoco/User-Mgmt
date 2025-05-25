@@ -127,4 +127,26 @@ describe('useAuth integration', () => {
     expect(result.current.error).toBe('Invalid credentials');
     expect(result.current.isAuthenticated).toBe(false);
   });
+
+  it('exposes verification actions', async () => {
+    const service = createMockAuthService();
+    (service.sendVerificationEmail as any).mockResolvedValue({ success: true });
+    (service.verifyEmail as any).mockResolvedValue(undefined);
+
+    UserManagementConfiguration.configureServiceProviders({ authService: service });
+
+    const { result } = renderHook(() => useAuth());
+
+    await act(async () => {
+      await result.current.sendVerificationEmail('me@test.com');
+    });
+
+    expect(service.sendVerificationEmail).toHaveBeenCalledWith('me@test.com');
+
+    await act(async () => {
+      const res = await result.current.verifyEmail('tok');
+      expect(res.success).toBe(true);
+    });
+    expect(service.verifyEmail).toHaveBeenCalledWith('tok');
+  });
 });
