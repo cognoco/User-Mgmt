@@ -486,7 +486,6 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   └── page.tsx
     ├── globals.css
     ├── layout.tsx
-    ├── layout.tsx.bak
     ├── login
     │   └── page.tsx
     ├── page.tsx
@@ -514,44 +513,6 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   └── page.tsx
     └── verify-email
     │   └── page.tsx
-├── backup
-    ├── _TODO
-    └── vitest-config-2025-05-14
-    │   ├── README.md
-    │   ├── manifest.json
-    │   ├── package-lock.json
-    │   ├── package.json
-    │   ├── plugins-and-configs.md
-    │   ├── src
-    │       └── tests
-    │       │   ├── i18nTestSetup.ts
-    │       │   ├── mocks
-    │       │       ├── 2fa.store.mock.ts
-    │       │       ├── accountSwitcherApi.mock.ts
-    │       │       ├── auth.store.mock.ts
-    │       │       ├── browser.ts
-    │       │       ├── companyProfileStore.mock.ts
-    │       │       ├── connected-accounts.store.mock.ts
-    │       │       ├── debug-auth.tsx
-    │       │       ├── oauth.store.mock.ts
-    │       │       ├── preferences.store.mock.ts
-    │       │       ├── profile.store.mock.ts
-    │       │       ├── rbac.store.mock.ts
-    │       │       ├── redis.tsx
-    │       │       ├── session.store.mock.ts
-    │       │       ├── subscription.store.mock.ts
-    │       │       ├── supabase spies.ts
-    │       │       ├── supabase.ts
-    │       │       ├── supabase.ts.bak
-    │       │       ├── test-mocks.ts
-    │       │       └── user.store.mock.ts
-    │       │   ├── setup.ts
-    │       │   ├── testing-library.d.ts
-    │       │   ├── vitest.d.ts
-    │       │   └── zustand-test-helpers.ts
-    │   ├── test-commands.md
-    │   ├── vitest.config.ts
-    │   └── vitest.setup.ts
 ├── components.json
 ├── count-latest-errors.js
 ├── cspell.json
@@ -1798,7 +1759,6 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   └── 20240610_add_notification_preferences_and_recipients.sql
 ├── tailwind.config.js
 ├── temp
-    └── csrf.test.ts.bak
 ├── test-results.json
 ├── test-results
     ├── .last-run.json
