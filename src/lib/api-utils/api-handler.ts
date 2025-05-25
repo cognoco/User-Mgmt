@@ -43,7 +43,7 @@ export function createApiHandler<T = any>(config: ApiHandlerConfig<T>) {
       // Validate HTTP method
       if (!methods.includes(req.method as HttpMethod)) {
         res.setHeader('Allow', methods);
-        throw new ApiError(405, `Method ${req.method} Not Allowed`);
+        throw new ApiError('server/operation_failed', `Method ${req.method} Not Allowed`, 405);
       }
 
       // Authentication check
@@ -66,11 +66,12 @@ export function createApiHandler<T = any>(config: ApiHandlerConfig<T>) {
       // Validate request body/query if schema is provided
       if (config.schema) {
         try {
-          // Example with Zod:
-          // config.schema.parse(req.method === 'GET' ? req.query : req.body);
-        } catch (validationError) {
-          throw new ApiError(400, 'Validation Error', {
-            details: validationError.errors,
+          config.schema.parse(
+            req.method === 'GET' ? (req.query as any) : (req.body as any)
+          );
+        } catch (validationError: any) {
+          throw new ApiError('validation/error', 'Validation Error', 400, {
+            errors: validationError.errors ?? validationError,
           });
         }
       }
@@ -91,7 +92,8 @@ export function createApiHandler<T = any>(config: ApiHandlerConfig<T>) {
     } catch (error) {
       // Handle known ApiError
       if (error instanceof ApiError) {
-        return res.status(error.statusCode).json({
+        const status = typeof error.status === 'number' ? error.status : 500;
+        return res.status(status).json({
           success: false,
           error: {
             code: error.code || 'API_ERROR',
