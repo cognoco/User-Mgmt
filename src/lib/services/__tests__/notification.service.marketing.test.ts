@@ -1,16 +1,20 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { notificationService } from '../notification.service';
-import { notificationQueue } from '../notification-queue.service';
+let notificationService: typeof import('../notification.service').notificationService;
+let notificationQueue: { enqueue: any; registerProcessor: any };
 
 vi.mock('../notification-queue.service', () => ({
   notificationQueue: {
     enqueue: vi.fn(),
+    registerProcessor: vi.fn(),
   },
 }));
 
 describe('NotificationService marketing & SMS', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    vi.resetModules();
+    ({ notificationService } = await import('../notification.service'));
+    ({ notificationQueue } = await import('../notification-queue.service'));
     notificationService.setConfig({
       enabled: true,
       providers: { marketing: true, sms: true },
