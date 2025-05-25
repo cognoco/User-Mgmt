@@ -12,12 +12,10 @@ This file tests the accessibility features:
 */
 
 import { test, expect } from '@playwright/test';
-import { loginAs } from '../utils/auth-helpers';
 
 // Constants for URLs and test data
 const HOME_URL = '/';
 const LOGIN_URL = '/auth/login';
-const REGISTRATION_URL = '/auth/register';
 
 test.describe('Accessibility Features', () => {
   test.beforeEach(async ({ page }) => {
@@ -222,10 +220,7 @@ test.describe('Accessibility Features', () => {
         return active ? active.textContent?.trim().toLowerCase() : '';
       });
       
-      const elementRole = await page.evaluate(() => {
-        const active = document.activeElement;
-        return active ? active.getAttribute('role') : null;
-      });
+
       
       // Check if we've reached a login or register link/button
       if (
