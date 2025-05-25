@@ -92,8 +92,10 @@ export function createApiHandler<T = any>(config: ApiHandlerConfig<T>) {
     } catch (error) {
       // Handle known ApiError
       if (error instanceof ApiError) {
+
         const status = typeof error.status === 'number' ? error.status : 500;
         return res.status(status).json({
+
           success: false,
           error: {
             code: error.code || 'API_ERROR',

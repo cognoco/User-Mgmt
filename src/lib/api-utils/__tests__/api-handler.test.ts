@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 const methods = ['GET'];
 
-function run(handler, reqOpts = {}) {
+function run(handler: any, reqOpts = {}) {
   const { req, res } = createApiMocks({ method: 'GET', ...reqOpts });
   return handler(req as any, res as any).then(() => res);
 }
