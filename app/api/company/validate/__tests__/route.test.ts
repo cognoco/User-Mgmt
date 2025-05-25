@@ -12,7 +12,7 @@ describe('POST /api/company/validate', () => {
   });
 
   it('returns valid: false for an invalid company name', async () => {
-    const req = mockRequest({ companyName: 'A' });
+    const req = mockRequest({ companyName: 'Acme' });
     const res = await POST(req);
     const json = await res.json();
     expect(json.valid).toBe(false);
