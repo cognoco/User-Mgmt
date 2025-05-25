@@ -9,9 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/
 // Import from our new architecture
 import { TeamCreator } from '@/ui/styled/team/TeamCreator';
 import { TeamMemberManager } from '@/ui/styled/team/TeamMemberManager';
-import { useTeams } from '@/hooks/team/use-teams';
-import { useTeamMembers } from '@/hooks/team/use-team-members';
-import { useTeamInvitations } from '@/hooks/team/use-team-invitations';
+import { useTeams } from '@/hooks/team/useTeams';
+import { useTeamMembers } from '@/hooks/team/useTeamMembers';
+import { useTeamInvitations } from '@/hooks/team/useTeamInvitations';
 
 export default function TeamDashboardPageClient() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -192,3 +192,13 @@ export default function TeamDashboardPageClient() {
             <Card>
               <CardContent className="pt-6">
                 <p className="text-center text-muted-foreground">
+                  No teams found. Create a team to get started.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

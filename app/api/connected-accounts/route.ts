@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserFromRequest } from '@/lib/auth/server-auth';
+import { getUserFromRequest } from '@/lib/auth/utils';
 import { prisma } from '@/lib/database/prisma';
 import { connectedAccountSchema } from '@/types/connected-accounts';
 
