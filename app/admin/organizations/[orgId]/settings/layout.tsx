@@ -10,7 +10,7 @@ interface SettingsLayoutProps {
   };
 }
 
-export default function SettingsLayout({ children, params }: SettingsLayoutProps) {
+export default function SettingsLayout({ children, params }: SettingsLayoutProps): JSX.Element {
   const { orgId } = params;
 
   return (

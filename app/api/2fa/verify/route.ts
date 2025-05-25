@@ -11,7 +11,7 @@ const verifyRequestSchema = z.object({
   code: z.string().min(6).max(8),
 });
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<NextResponse> {
   try {
     // Parse and validate request body
     const body = await request.json();
@@ -27,10 +27,10 @@ export async function POST(request: Request) {
           get(name: string) {
             return cookieStore.get(name)?.value;
           },
-          set(name: string, value: string, options: any) {
+          set(name: string, value: string, options: Record<string, unknown>) {
             cookieStore.set({ name, value, ...options });
           },
-          remove(name: string, options: any) {
+          remove(name: string, options: Record<string, unknown>) {
             cookieStore.set({ name, value: '', ...options });
           },
         },

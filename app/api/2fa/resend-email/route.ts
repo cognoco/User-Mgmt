@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-export async function POST() {
+export async function POST(): Promise<NextResponse> {
   try {
     // Initialize Supabase client
     const cookieStore = cookies();
@@ -14,10 +14,10 @@ export async function POST() {
           get(name: string) {
             return cookieStore.get(name)?.value;
           },
-          set(name: string, value: string, options: any) {
+          set(name: string, value: string, options: Record<string, unknown>) {
             cookieStore.set({ name, value, ...options });
           },
-          remove(name: string, options: any) {
+          remove(name: string, options: Record<string, unknown>) {
             cookieStore.set({ name, value: '', ...options });
           },
         },
@@ -88,10 +88,10 @@ export async function POST() {
       message: 'Verification code sent successfully',
       testid: 'email-mfa-resend-success'
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in resend-email route:', error);
     return NextResponse.json(
-      { error: error.message || 'An unexpected error occurred' },
+      { error: error instanceof Error ? error.message : 'An unexpected error occurred' },
       { status: 500 }
     );
   }

@@ -10,7 +10,7 @@ interface SettingsPageProps {
   };
 }
 
-export default function SettingsPage({ params }: SettingsPageProps) {
+export default function SettingsPage({ params }: SettingsPageProps): JSX.Element {
   const { orgId } = params;
 
   return (

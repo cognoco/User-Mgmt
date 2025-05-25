@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: 'View and manage system audit logs',
 };
 
-export default async function AdminAuditLogsPage() {
+export default async function AdminAuditLogsPage(): Promise<JSX.Element> {
   // Get current user and check permissions
   const user = await getUser();
   

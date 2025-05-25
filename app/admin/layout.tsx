@@ -10,7 +10,7 @@ interface AdminLayoutProps {
   children: ReactNode;
 }
 
-export default async function AdminLayout({ children }: AdminLayoutProps) {
+export default async function AdminLayout({ children }: AdminLayoutProps): Promise<JSX.Element> {
   // Get current user and check permissions
   const user = await getUser();
   

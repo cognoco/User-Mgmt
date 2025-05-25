@@ -26,7 +26,7 @@ function generateBackupCodes(count = 10, length = 8): string[] {
   return codes;
 }
 
-export async function POST() {
+export async function POST(): Promise<NextResponse> {
   try {
     // Initialize Supabase client
     const cookieStore = cookies();
@@ -38,10 +38,10 @@ export async function POST() {
           get(name: string) {
             return cookieStore.get(name)?.value;
           },
-          set(name: string, value: string, options: any) {
+          set(name: string, value: string, options: Record<string, unknown>) {
             cookieStore.set({ name, value, ...options });
           },
-          remove(name: string, options: any) {
+          remove(name: string, options: Record<string, unknown>) {
             cookieStore.set({ name, value: '', ...options });
           },
         },

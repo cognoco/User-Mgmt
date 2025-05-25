@@ -9,7 +9,7 @@ interface SSOSettingsPageProps {
   };
 }
 
-export default function SSOSettingsPage({ params }: SSOSettingsPageProps) {
+export default function SSOSettingsPage({ params }: SSOSettingsPageProps): JSX.Element {
   const { orgId } = params;
 
   if (!orgId) {

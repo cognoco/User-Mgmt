@@ -7,7 +7,7 @@ import { RoleManager } from '@/ui/styled/permission/RoleManager';
 import { useRoles } from '@/hooks/team/useRoles';
 import { usePermissions } from '@/hooks/permission/usePermissions';
 
-export default function RolesManagementPageClient() {
+export default function RolesManagementPageClient(): JSX.Element {
   const {
     roles,
     isLoading: rolesLoading,

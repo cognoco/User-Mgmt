@@ -4,7 +4,7 @@ import { PlanSelector } from '@/ui/styled/subscription/PlanSelector';
 import { BillingForm } from '@/ui/styled/subscription/BillingForm';
 import { InvoiceList } from '@/ui/styled/subscription/InvoiceList';
 
-export default function BillingPage() {
+export default function BillingPage(): JSX.Element {
   return (
     <div className="container mx-auto py-8 space-y-8 max-w-3xl">
       <h1 className="text-2xl font-bold">Subscription Management</h1>
