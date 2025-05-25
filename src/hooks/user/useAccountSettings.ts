@@ -12,7 +12,7 @@ import {
   PreferencesUpdatePayload 
 } from '@/core/user/models';
 import { UserManagementConfiguration } from '@/core/config';
-import { useAuth } from './useAuth';
+import { useAuth } from '../auth/useAuth';
 
 /**
  * Hook for account settings and preferences management

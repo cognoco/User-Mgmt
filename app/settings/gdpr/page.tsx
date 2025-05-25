@@ -1,5 +1,3 @@
-'use client';
-
 import { Metadata } from 'next';
 import { DataExportRequest } from '@/ui/styled/gdpr/DataExportRequest';
 import { DataDeletionRequest } from '@/ui/styled/gdpr/DataDeletionRequest';
