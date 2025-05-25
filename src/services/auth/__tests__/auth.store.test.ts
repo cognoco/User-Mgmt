@@ -11,7 +11,12 @@ function createAdapter(
     login: vi.fn(),
     register: vi.fn(),
     logout: vi.fn(),
-    getCurrentUser: vi.fn(),
+    // getCurrentUser should resolve to null by default to mimic
+    // the typical behavior of real providers when no user is
+    // authenticated. This prevents tests from receiving
+    // `undefined` which would cause assertions expecting `null`
+    // to fail.
+    getCurrentUser: vi.fn().mockResolvedValue(null),
     resetPassword: vi.fn(),
     updatePassword: vi.fn(),
     sendVerificationEmail: vi.fn(),
