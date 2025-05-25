@@ -1,6 +1,6 @@
 
 
-import { AdapterRegistry, AdapterFactory, AdapterFactoryOptions } from '../registry';
+import { AdapterRegistry, AdapterFactory } from '../registry';
 import { SupabaseAdapterFactory, createSupabaseAdapterFactory } from '../supabase-factory';
 import { AuthDataProvider, UserDataProvider, TeamDataProvider, PermissionDataProvider } from '../interfaces';
 

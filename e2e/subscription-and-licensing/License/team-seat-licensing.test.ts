@@ -255,7 +255,6 @@ async function injectTeamManagementUIIfNeeded(page: any) {
           });
           
           document.getElementById('confirm-remove')?.addEventListener('click', (e) => {
-            const userId = (e.currentTarget as HTMLElement).getAttribute('data-user-id');
             document.getElementById('remove-confirm-modal')?.remove();
             
             // Remove the team member from the UI

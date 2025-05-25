@@ -6,6 +6,7 @@
  */
 
 import { AdapterFactory, AdapterFactoryOptions } from '@/adapters/registry';
+import { AdapterRegistry } from '@/adapters';
 
 /**
  * Adapter configuration interface
@@ -44,8 +45,7 @@ export const DEFAULT_ADAPTER_CONFIG: AdapterConfig = {
 export function createAdapterFactory(config: AdapterConfig): AdapterFactory {
   const { type, options } = config;
   
-  // Import dynamically to avoid circular dependencies
-  const { AdapterRegistry } = require('@/adapters');
+
   
   if (!AdapterRegistry.isAdapterAvailable(type)) {
     const availableAdapters = AdapterRegistry.listAvailableAdapters().join(', ');

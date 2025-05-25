@@ -5,9 +5,11 @@ import { CsrfProvider } from '@/ui/headless/csrf/CsrfProvider';
 import type { CsrfService } from '@/core/csrf/interfaces';
 
 function createWrapper(service: CsrfService) {
-  return ({ children }: { children: React.ReactNode }) => (
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <CsrfProvider csrfService={service}>{children}</CsrfProvider>
   );
+  Wrapper.displayName = 'CsrfTestWrapper';
+  return Wrapper;
 }
 
 describe('useCsrf', () => {

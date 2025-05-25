@@ -9,7 +9,6 @@ import { useState, useEffect, useCallback } from "react";
 import { AuthService } from "@/core/auth/interfaces";
 import {
   User,
-  LoginPayload,
   RegistrationPayload,
   AuthResult,
   MFASetupResponse,

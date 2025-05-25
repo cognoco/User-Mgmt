@@ -1,6 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { SsoProvider } from '@/types/sso';
 import { SsoProvider as SsoServiceProvider, SsoService } from '@/lib/context/SsoContext';
 import { useSso } from '../useSso';
 

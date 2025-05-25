@@ -5,11 +5,9 @@
  * These events allow other parts of the application to react to notification changes.
  */
 
-import { 
-  Notification, 
-  NotificationChannel, 
-  NotificationCategory,
-  NotificationStatus,
+import {
+  Notification,
+  NotificationChannel,
   NotificationPreferences
 } from './models';
 

@@ -4,10 +4,9 @@
  */
 
 import { 
-  isServer, 
-  isClient, 
-  getStorage, 
-  getRequestContext, 
+  isServer,
+  isClient,
+  getRequestContext,
   setRequestContext,
   clientOnly,
   serverOnly,
