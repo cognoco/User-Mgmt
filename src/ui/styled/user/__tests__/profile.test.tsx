@@ -3,39 +3,31 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import Profile from '../Profile';
-import HeadlessProfile from '@/ui/headless/user/Profile';
-import { UserProfile } from '@/core/user/models';
+import { TestWrapper } from '../../../../tests/utils/test-wrapper';
+import { setupTestServices } from '../../../../tests/utils/test-service-setup';
+import '@/tests/i18nTestSetup';
 
-// Mock the headless component
-vi.mock('@/ui/headless/user/Profile', () => {
-  return {
-    default: ({ children }: { children: Function }) => {
-      const mockProfile: UserProfile = {
-        id: 'test-user-id',
-        fullName: 'Test User',
-        email: 'test@example.com',
-        website: 'https://example.com',
-        avatarUrl: 'https://example.com/avatar.jpg',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+let mockUserService: any;
 
-      const mockProps = {
-        profile: mockProfile,
-        isLoading: false,
-        error: null,
-        successMessage: null,
-        uploadingAvatar: false,
-        updateProfile: vi.fn().mockResolvedValue(undefined),
-        uploadAvatar: vi.fn().mockResolvedValue(undefined),
-        deleteAvatar: vi.fn().mockResolvedValue(undefined),
-        updateProfileField: vi.fn(),
-        clearMessages: vi.fn()
-      };
+function renderWithWrapper(ui: React.ReactElement) {
+  return render(<TestWrapper authenticated>{ui}</TestWrapper>);
+}
 
-      return children(mockProps);
-    }
-  };
+beforeEach(() => {
+  const services = setupTestServices();
+  mockUserService = services.mockUserService;
+  mockUserService.setMockProfile('user-123', {
+    id: 'user-123',
+    email: 'test@example.com',
+    firstName: 'Test',
+    lastName: 'User',
+    fullName: 'Test User',
+    website: 'https://example.com',
+    avatarUrl: 'https://example.com/avatar.jpg',
+    isActive: true,
+    isVerified: true,
+    userType: 'private'
+  });
 });
 
 // Mock the imported components
@@ -56,144 +48,103 @@ vi.mock('../profile/ActivityLog', () => ({
 }));
 
 describe('Styled Profile Component', () => {
-  it('renders the profile information correctly', () => {
-    render(<Profile />);
-    
-    expect(screen.getByRole('heading', { name: /profile/i })).toBeInTheDocument();
+  it('renders the profile information correctly', async () => {
+    renderWithWrapper(<Profile />);
+
+    expect(await screen.findByRole('heading', { name: /profile/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/full name/i)).toHaveValue('Test User');
     expect(screen.getByLabelText(/website/i)).toHaveValue('https://example.com');
     expect(screen.getByAltText(/avatar/i)).toHaveAttribute('src', 'https://example.com/avatar.jpg');
   });
 
-  it('renders the form with correct input fields', () => {
-    render(<Profile />);
-    
-    expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
+  it('renders the form with correct input fields', async () => {
+    renderWithWrapper(<Profile />);
+
+    expect(await screen.findByLabelText(/full name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/website/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /update profile/i })).toBeInTheDocument();
   });
 
-  it('renders the avatar upload section', () => {
-    render(<Profile />);
-    
-    expect(screen.getByLabelText(/upload avatar/i)).toBeInTheDocument();
+  it('renders the avatar upload section', async () => {
+    renderWithWrapper(<Profile />);
+
+    expect(await screen.findByLabelText(/upload avatar/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /remove avatar/i })).toBeInTheDocument();
   });
 
-  it('renders the additional sections', () => {
-    render(<Profile />);
-    
-    expect(screen.getByTestId('data-export')).toBeInTheDocument();
+  it('renders the additional sections', async () => {
+    renderWithWrapper(<Profile />);
+
+    expect(await screen.findByTestId('data-export')).toBeInTheDocument();
     expect(screen.getByTestId('company-data-export')).toBeInTheDocument();
     expect(screen.getByTestId('notification-preferences')).toBeInTheDocument();
     expect(screen.getByTestId('activity-log')).toBeInTheDocument();
   });
 
   it('calls updateProfileField when input values change', async () => {
-    render(<Profile />);
-    
-    const fullNameInput = screen.getByLabelText(/full name/i);
+    renderWithWrapper(<Profile />);
+
+    const fullNameInput = await screen.findByLabelText(/full name/i);
     await userEvent.clear(fullNameInput);
     await userEvent.type(fullNameInput, 'New Name');
     
-    // We can't directly test if the mock function was called with specific arguments
-    // since we're mocking the entire HeadlessProfile component
-    // But we can verify the input value was updated in the UI
+    // Verify the input value was updated in the UI
     expect(fullNameInput).toHaveValue('New Name');
   });
 
   it('calls updateProfile when the form is submitted', async () => {
-    render(<Profile />);
-    
-    const form = screen.getByRole('form');
-    fireEvent.submit(form);
-    
-    // Again, we can't directly verify the mock function was called
-    // But we can ensure the form submission doesn't cause errors
+    const updateSpy = vi
+      .spyOn(mockUserService, 'updateUserProfile')
+      .mockResolvedValue({
+        success: true,
+        profile: mockUserService.getMockProfile('user-123')!
+      });
+
+    renderWithWrapper(<Profile />);
+
+    await screen.findByRole('form');
+    fireEvent.submit(screen.getByRole('form'));
+
     await waitFor(() => {
-      expect(screen.queryByText(/error/i)).not.toBeInTheDocument();
+      expect(updateSpy).toHaveBeenCalled();
     });
   });
 
-  it('shows loading state when isLoading is true', () => {
-    // Override the mock to return isLoading as true
-    vi.mocked(HeadlessProfile).mockImplementationOnce(({ children }) => {
-      return children({
-        profile: null,
-        isLoading: true,
-        error: null,
-        successMessage: null,
-        uploadingAvatar: false,
-        updateProfile: vi.fn(),
-        uploadAvatar: vi.fn(),
-        deleteAvatar: vi.fn(),
-        updateProfileField: vi.fn(),
-        clearMessages: vi.fn()
-      });
-    });
-    
-    render(<Profile />);
-    
+  it('shows loading state when profile is loading', () => {
+    vi.spyOn(mockUserService, 'getUserProfile').mockImplementation(
+      () => new Promise(() => {})
+    );
+
+    renderWithWrapper(<Profile />);
+
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
   });
 
-  it('shows error message when there is an error', () => {
-    // Override the mock to return an error
-    vi.mocked(HeadlessProfile).mockImplementationOnce(({ children }) => {
-      return children({
-        profile: {
-          id: 'test-user-id',
-          fullName: 'Test User',
-          email: 'test@example.com',
-          website: 'https://example.com',
-          avatarUrl: 'https://example.com/avatar.jpg',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        },
-        isLoading: false,
-        error: 'Failed to load profile',
-        successMessage: null,
-        uploadingAvatar: false,
-        updateProfile: vi.fn(),
-        uploadAvatar: vi.fn(),
-        deleteAvatar: vi.fn(),
-        updateProfileField: vi.fn(),
-        clearMessages: vi.fn()
-      });
-    });
-    
-    render(<Profile />);
-    
-    expect(screen.getByText(/failed to load profile/i)).toBeInTheDocument();
+  it('shows error message when profile fetch fails', async () => {
+    vi.spyOn(mockUserService, 'getUserProfile').mockRejectedValue(new Error('Failed to load profile'));
+
+    renderWithWrapper(<Profile />);
+
+    expect(await screen.findByText(/failed to load profile/i)).toBeInTheDocument();
   });
 
-  it('shows success message when there is a success message', () => {
-    // Override the mock to return a success message
-    vi.mocked(HeadlessProfile).mockImplementationOnce(({ children }) => {
-      return children({
-        profile: {
-          id: 'test-user-id',
-          fullName: 'Test User',
-          email: 'test@example.com',
-          website: 'https://example.com',
-          avatarUrl: 'https://example.com/avatar.jpg',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        },
-        isLoading: false,
-        error: null,
-        successMessage: 'Profile updated successfully',
-        uploadingAvatar: false,
-        updateProfile: vi.fn(),
-        uploadAvatar: vi.fn(),
-        deleteAvatar: vi.fn(),
-        updateProfileField: vi.fn(),
-        clearMessages: vi.fn()
-      });
+  it('shows success message after profile update', async () => {
+    vi.spyOn(mockUserService, 'updateUserProfile').mockResolvedValue({
+      success: true,
+      profile: {
+        ...mockUserService.getMockProfile('user-123'),
+        fullName: 'New Name'
+      }
     });
-    
-    render(<Profile />);
-    
-    expect(screen.getByText(/profile updated successfully/i)).toBeInTheDocument();
+
+    renderWithWrapper(<Profile />);
+
+    const fullNameInput = await screen.findByLabelText(/full name/i);
+    await userEvent.clear(fullNameInput);
+    await userEvent.type(fullNameInput, 'New Name');
+
+    fireEvent.submit(screen.getByRole('form'));
+
+    expect(await screen.findByText(/profile updated successfully/i)).toBeInTheDocument();
   });
 });

@@ -10,7 +10,7 @@ export type StyledWebhookManagerProps = Omit<WebhookManagerProps, 'children'> & 
 export function WebhookManager({ availableEvents = [], ...props }: StyledWebhookManagerProps) {
   return (
     <HeadlessWebhookManager {...props}>
-      {({ webhooks, create, update, remove, refresh, loading, error }) => (
+      {({ create, remove, error }) => (
         <div className="space-y-4">
           {error && <Alert variant="destructive">{error}</Alert>}
           <WebhookForm userId={props.userId} onSubmit={create} availableEvents={availableEvents} />

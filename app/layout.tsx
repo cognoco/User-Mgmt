@@ -1,11 +1,9 @@
 // import '@/lib/i18n';
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { AppInitializer } from '@/core/config/AppInitializer';
 import { UserManagementClientBoundary } from '@/lib/auth/UserManagementClientBoundary';
 
-const inter = Inter({ subsets: ['latin'] });
 
 // Define viewport configuration
 export const viewport: Viewport = {
@@ -43,7 +41,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="antialiased">
       <head />
-      <body className={inter.className}>
+      <body className="font-sans">
         <AppInitializer>
           <UserManagementClientBoundary>
             {children}

@@ -1,10 +1,12 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useAddresses } from '../useAddresses';
-import { UserManagementConfiguration } from '@/core/config';
 import type { AddressService } from '@/core/address/interfaces';
 import { TestWrapper } from '../../../tests/utils/test-wrapper';
 import { useAuth } from '@/hooks/auth/useAuth';
+
+vi.mock('@/hooks/auth/useAuth');
+
 
 const mockService: AddressService = {
   getAddresses: vi.fn(async () => []),
@@ -23,15 +25,13 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('useAddresses', () => {
   beforeEach(() => {
-    UserManagementConfiguration.reset();
-    UserManagementConfiguration.configureServiceProviders({ addressService: mockService });
     vi.clearAllMocks();
-    (useAuth as any).getState().user = { id: 'u1' };
-    (useAuth as any).getState().isAuthenticated = true;
+    (useAuth as unknown as vi.Mock).mockReturnValue({ user: { id: 'u1' } });
   });
 
   it('fetches addresses on mount', async () => {
     const { result } = renderHook(() => useAddresses(), { wrapper });
+    await act(async () => {}); // allow wrapper effects to run
     await act(async () => {
       await result.current.refresh();
     });
@@ -40,6 +40,7 @@ describe('useAddresses', () => {
 
   it('adds address', async () => {
     const { result } = renderHook(() => useAddresses(), { wrapper });
+    await act(async () => {});
     await act(async () => {
       await result.current.addAddress({ userId: 'u1', type: 'shipping', isDefault: false, fullName: 'John', street1: '123', city: 'A', state: 'B', postalCode: '1', country: 'US' });
     });

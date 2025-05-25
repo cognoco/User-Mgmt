@@ -1,13 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AdapterRegistry } from '@/adapters/registry';
-import { UserManagementConfiguration } from '@/core/config';
+import type { UserManagementConfiguration as UMCType } from '@/core/config';
 
 let getApiAddressService: typeof import('../factory').getApiAddressService;
 let DefaultAddressService: typeof import('../default-address.service').DefaultAddressService;
+let AdapterRegistry: typeof import('@/adapters/registry').AdapterRegistry;
+let UserManagementConfiguration: typeof import('@/core/config').UserManagementConfiguration;
 
 describe('getApiAddressService', () => {
   beforeEach(async () => {
     vi.resetModules();
+    ({ AdapterRegistry } = await import('@/adapters/registry'));
+    ({ UserManagementConfiguration } = await import('@/core/config'));
     (AdapterRegistry as any).instance = null;
     UserManagementConfiguration.reset();
     ({ getApiAddressService } = await import('../factory'));
