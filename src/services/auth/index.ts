@@ -7,7 +7,7 @@
 
 import { AuthService } from '@/core/auth/interfaces';
 import { DefaultAuthService } from './default-auth.service';
-import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import type { IAuthDataProvider } from '@/adapters/auth/interfaces';
 
 /**
  * Configuration options for creating an AuthService

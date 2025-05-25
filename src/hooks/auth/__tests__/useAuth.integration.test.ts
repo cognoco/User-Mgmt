@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useAuth } from '../useAuth';
 import { UserManagementConfiguration } from '@/core/config';
 import type { AuthService } from '@/core/auth/interfaces';
-import type { AuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import type { AuthDataProvider } from '@/adapters/auth/interfaces';
 import { DefaultAuthService } from '@/services/auth/default-auth.service';
 
 // helper to build minimal auth service mocks

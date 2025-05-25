@@ -126,3 +126,6 @@ export interface IAuthDataProvider {
    */
   handleSessionTimeout(): void;
 }
+
+export type AuthDataProvider = IAuthDataProvider;
+

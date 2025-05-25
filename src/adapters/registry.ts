@@ -7,7 +7,7 @@
  * database-agnostic as per the architecture guidelines.
  */
 
-import { AuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import { AuthDataProvider } from '@/adapters/auth/interfaces';
 import { UserDataProvider } from '@/core/user/IUserDataProvider';
 import { TeamDataProvider } from '@/core/team/ITeamDataProvider';
 import { PermissionDataProvider } from '@/core/permission/IPermissionDataProvider';

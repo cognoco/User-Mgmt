@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DefaultAuthService } from '../default-auth.service';
-import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import type { IAuthDataProvider } from '@/adapters/auth/interfaces';
 import type { AuthResult, LoginPayload } from '@/core/auth/models';
 
 function createAdapter(overrides: Partial<IAuthDataProvider> = {}): IAuthDataProvider {

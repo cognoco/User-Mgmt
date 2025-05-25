@@ -15,7 +15,7 @@ import {
   MFAVerifyResponse
 } from '../../core/auth/models';
 
-import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import type { IAuthDataProvider } from './interfaces';
 
 
 /**
