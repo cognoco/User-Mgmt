@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { PrivacySettings as ProfilePrivacySettings } from '@/ui/styled/profile/PrivacySettings';
+import { vi } from 'vitest';
+import { ProfilePrivacySettings } from '@/ui/styled/profile/ProfilePrivacySettings';
 import { useProfileStore } from '@/lib/stores/profile.store';
 import { usePermission } from '@/hooks/permission/usePermissions';
 

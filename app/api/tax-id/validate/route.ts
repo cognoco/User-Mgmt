@@ -9,8 +9,16 @@ export async function POST(req: Request) {
   if (!parse.success) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
   }
-  // TODO: Implement real tax ID validation logic
+  // Simple real-world tax/VAT ID validation
   const { taxId } = parse.data;
-  const isValid = taxId.length > 5; // mock logic
+
+  const patterns = [
+    /^DE[0-9]{9}$/, // German VAT
+    /^FR[0-9A-Z]{2}[0-9]{9}$/, // French VAT
+    /^[0-9]{2}-[0-9]{7}$/, // US EIN
+    /^[A-Z]{2}[0-9]{8,12}$/ // Generic prefix + digits
+  ];
+
+  const isValid = patterns.some((p) => p.test(taxId));
   return NextResponse.json({ valid: isValid });
 } 

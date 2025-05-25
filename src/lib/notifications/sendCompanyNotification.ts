@@ -1,4 +1,5 @@
 import { getServiceSupabase } from '@/lib/database/supabase';
+import { sendEmail } from '@/lib/email/sendEmail';
 
 interface NotificationOptions {
   companyId: string;
@@ -105,20 +106,58 @@ export async function sendCompanyNotification(options: NotificationOptions) {
     // Process email notifications
     const emailNotifications = notifications.filter(n => n.channel === 'email');
     if (emailNotifications.length > 0) {
-      // TODO: In a real implementation, this would call a service like SendGrid or AWS SES
-      console.log(`Would send ${emailNotifications.length} emails for notification type "${notificationType}"`);
-      
-      // Update status to "sent" for all email notifications (simulating sending)
-      const now = new Date().toISOString();
-      const emailIds = emailNotifications.map(n => n.id);
-      
-      await supabase
-        .from('company_notification_logs')
-        .update({
-          status: 'sent',
-          sent_at: now,
-        })
-        .in('id', emailIds);
+      const recipientsMap = new Map(recipients.map(r => [r.id, r]));
+      for (const notif of emailNotifications) {
+        const recipient = recipientsMap.get(notif.recipient_id);
+        if (!recipient) {
+          continue;
+        }
+
+        let emailAddress = recipient.email as string | undefined;
+
+        if (!emailAddress && recipient.user_id) {
+          const { data: { user }, error } = await supabase.auth.admin.getUserById(recipient.user_id);
+          if (error) {
+            console.error('Failed to fetch user email for notification', error);
+          }
+          emailAddress = user?.email || undefined;
+        }
+
+        if (!emailAddress) {
+          await supabase
+            .from('company_notification_logs')
+            .update({
+              status: 'failed',
+              error_message: 'No recipient email available',
+            })
+            .eq('id', notif.id);
+          continue;
+        }
+
+        try {
+          await sendEmail({
+            to: emailAddress,
+            subject,
+            html: content,
+          });
+
+          await supabase
+            .from('company_notification_logs')
+            .update({
+              status: 'sent',
+              sent_at: new Date().toISOString(),
+            })
+            .eq('id', notif.id);
+        } catch (err) {
+          await supabase
+            .from('company_notification_logs')
+            .update({
+              status: 'failed',
+              error_message: err instanceof Error ? err.message : 'Email send failed',
+            })
+            .eq('id', notif.id);
+        }
+      }
     }
     
     // Process in-app notifications
