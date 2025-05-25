@@ -88,6 +88,10 @@ function setupAuth(overrides: Record<string, any> = {}) {
   return { mockLogin };
 }
 
+function setupAuthStoreMock(authMock: any) {
+  (useAuth as any).mockImplementation(() => authMock);
+}
+
 describe('LoginForm', () => {
   const mockLogin = vi.fn();
 
