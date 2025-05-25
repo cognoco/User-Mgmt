@@ -12,13 +12,13 @@ describe('Node.js Platform', () => {
 
   beforeAll(() => {
     // Simulate Node.js environment
-    // @ts-ignore - Mocking browser globals
+    // @ts-expect-error - Mocking browser globals
     delete global.window;
   });
 
   afterAll(() => {
     // Restore original window object
-    // @ts-ignore - Restoring browser globals
+    // @ts-expect-error - Restoring browser globals
     global.window = originalWindow;
   });
 

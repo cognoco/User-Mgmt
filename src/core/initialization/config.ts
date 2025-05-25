@@ -12,7 +12,7 @@ import { initializeUserManagement } from './initialize-adapters';
 
 // Initialize the User Management Module with default configuration
 // This maintains backward compatibility with existing code
-const services = initializeUserManagement({
+initializeUserManagement({
   type: 'supabase',
   options: {
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',

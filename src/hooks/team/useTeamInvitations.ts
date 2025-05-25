@@ -7,9 +7,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { TeamService } from '@/core/team/interfaces';
-import { 
-  TeamInvitation, 
-  TeamInvitationResult,
+import {
+  TeamInvitation,
   TeamMemberResult
 } from '@/core/team/models';
 import { UserManagementConfiguration } from '@/core/config';
@@ -154,7 +153,7 @@ export function useTeamInvitations(teamId?: string) {
   }, []);
   
   // Resend invitation
-  const resendInvitation = useCallback(async (invitationId: string): Promise<{ success: boolean; error?: string }> => {
+  const resendInvitation = useCallback(async (_invitationId: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     setError(null);
     

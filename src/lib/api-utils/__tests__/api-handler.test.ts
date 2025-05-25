@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { createApiHandler, createApiResponse, createErrorResponse } from '../api-handler';
 import { ApiError } from '@/lib/api/common';
 import { createApiMocks } from '@/tests/utils/api-testing-utils';
