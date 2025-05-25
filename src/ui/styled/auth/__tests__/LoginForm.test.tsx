@@ -133,17 +133,17 @@ describe('LoginForm', () => {
     });
     
     // Always provide clearError as a function
-    const authMock = {
-      login: mockLogin,
-      isLoading: false,
-      error: null,
-      clearError: vi.fn(),
-      sendVerificationEmail: vi.fn(),
-      setUser: vi.fn(),
-      setToken: vi.fn(),
-      ...authState
-    };
-    setupAuthStoreMock(authMock);
+      const authMock = {
+        login: mockLogin,
+        isLoading: false,
+        error: null,
+        clearError: vi.fn(),
+        sendVerificationEmail: vi.fn(),
+        setUser: vi.fn(),
+        setToken: vi.fn(),
+        ...authState
+      };
+      setupAuthMock(authMock);
   };
 
   beforeEach(() => {
