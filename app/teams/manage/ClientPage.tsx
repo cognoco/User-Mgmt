@@ -10,8 +10,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 // Import from our new architecture
 import { TeamMemberManager } from '@/ui/styled/team/TeamMemberManager';
-import { useTeams } from '@/hooks/team/use-teams';
-import { useTeamMembers } from '@/hooks/team/use-team-members';
+import { useTeams } from '@/hooks/team/useTeams';
+import { useTeamMembers } from '@/hooks/team/useTeamMembers';
 
 export default function TeamManagementPageClient() {
   const router = useRouter();

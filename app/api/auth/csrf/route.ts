@@ -1,5 +1,5 @@
 import { type NextRequest } from "next/server";
-import { withSecurity } from "@/middleware/security";
+import { withSecurity } from '@/middleware/with-security';
 import { getCSRFToken } from "@/middleware/csrf";
 import { logUserAction } from "@/lib/audit/auditLogger";
 import {

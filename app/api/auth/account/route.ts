@@ -1,6 +1,6 @@
 import { type NextRequest } from "next/server";
 import { z } from "zod";
-import { withSecurity } from "@/middleware/security";
+import { withSecurity } from '@/middleware/with-security';
 import { withAuthRateLimit } from "@/middleware/rate-limit";
 import { getApiAuthService } from "@/services/auth/factory";
 import { logUserAction } from "@/lib/audit/auditLogger";

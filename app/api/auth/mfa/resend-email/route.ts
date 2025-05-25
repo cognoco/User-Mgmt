@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { getApiAuthService } from '@/services/auth/factory';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { withAuthRateLimit } from '@/middleware/rate-limit';
-import { withSecurity } from '@/middleware/security';
+import { withSecurity } from '@/middleware/with-security';
 
 // Request schema for resending email during login
 const resendEmailSchema = z.object({

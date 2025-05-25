@@ -8,8 +8,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 // Import from our new architecture
 import { InvitationManager } from '@/ui/styled/team/InvitationManager';
-import { useTeams } from '@/hooks/team/use-teams';
-import { useTeamInvitations } from '@/hooks/team/use-team-invitations';
+import { useTeams } from '@/hooks/team/useTeams';
+import { useTeamInvitations } from '@/hooks/team/useTeamInvitations';
 
 export default function TeamInvitationsPageClient() {
   const router = useRouter();
