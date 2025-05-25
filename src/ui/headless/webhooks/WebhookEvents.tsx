@@ -2,16 +2,14 @@ import React from 'react';
 
 export interface WebhookEventsProps {
   events: string[];
-  available?: string[];
   onChange?: (events: string[]) => void;
   children?: (props: { selected: string[]; toggle: (e: string) => void }) => React.ReactNode;
 }
 
-export function WebhookEvents({ 
-  events = [], 
-  available = [], 
+export function WebhookEvents({
+  events = [],
   onChange,
-  children 
+  children
 }: WebhookEventsProps) {
   const toggle = (e: string) => {
     if (!onChange) return;

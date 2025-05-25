@@ -186,10 +186,6 @@ export function createMockAuthStore(
   // Allow direct state mutation for tests
   store.__setState = (partial: Partial<AuthState>, replace = false) => store.setState(partial, replace);
 
-  // Create a function that returns the store
-  function useAuth() {
-    return store;
-  }
   // Attach Zustand-like static methods
   useAuthStore.getState = store.getState;
   useAuthStore.setState = store.setState;

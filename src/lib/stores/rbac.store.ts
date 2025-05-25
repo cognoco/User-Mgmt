@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
-import { RBACState, Role, Permission, RoleSchema, UserRoleSchema } from '../../types/rbac';
+import { RBACState, Role, Permission } from '../../types/rbac';
 import { useAuth } from '@/lib/hooks/useAuth';
 
 type RBACInternalState = Omit<RBACState, 'hasPermission' | 'hasRole'> & {

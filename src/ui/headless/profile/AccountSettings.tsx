@@ -9,7 +9,6 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useUserProfile } from '@/hooks/user/useUserProfile';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { UserPreferences, PreferencesUpdatePayload, ProfileVisibility, VisibilityLevel } from '@/core/user/models';
-import { z } from 'zod';
 
 export interface AccountSettingsProps {
   /**
@@ -351,7 +350,7 @@ export function AccountSettings({
 }
 
 // Helper function to update profile (not exported)
-async function updateProfile(userId: string, data: any) {
+async function updateProfile(_userId: string, _data: any) {
   // This is a placeholder function to avoid circular dependencies
   // In a real implementation, we would use the UserService directly
   return { success: true };

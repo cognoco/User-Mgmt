@@ -16,7 +16,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/primitives/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/primitives/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/primitives/dialog';
-import { ExclamationTriangleIcon, CheckCircledIcon, PlusIcon, Pencil1Icon, TrashIcon } from '@radix-ui/react-icons';
+import { ExclamationTriangleIcon, CheckCircledIcon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 
 export interface StyledPermissionEditorProps extends Omit<PermissionEditorProps, 'render'> {
   /**
@@ -59,7 +59,6 @@ export function PermissionEditor({
         updatePermissionForm,
         handleCreatePermission,
         handleUpdatePermission,
-        handleDeletePermission,
         isLoading,
         error,
         isSuccess,
@@ -193,9 +192,11 @@ export function PermissionEditor({
                                     <DialogContent>
                                       <DialogHeader>
                                         <DialogTitle>Delete Permission</DialogTitle>
-                                        <DialogDescription>
-                                          Are you sure you want to delete the "{confirmationState.permissionName}" permission? This action cannot be undone and may affect roles using this permission.
-                                        </DialogDescription>
+
+                                          <DialogDescription>
+                                            Are you sure you want to delete the &quot;{confirmationState.permissionName}&quot; permission? This action cannot be undone and may affect roles using this permission.
+                                          </DialogDescription>
+
                                       </DialogHeader>
                                       <DialogFooter className="flex space-x-2 justify-end">
                                         <Button

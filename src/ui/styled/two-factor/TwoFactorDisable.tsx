@@ -1,12 +1,10 @@
 'use client';
-import { useState } from 'react';
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Card } from '@/ui/primitives/card';
 import { TwoFactorDisable as HeadlessTwoFactorDisable } from '@/ui/headless/two-factor/TwoFactorDisable';
 
 export function TwoFactorDisable({ onSuccess, onCancel }: { onSuccess?: () => void; onCancel?: () => void }) {
-  const [code, setCode] = useState('');
   return (
     <HeadlessTwoFactorDisable onSuccess={onSuccess} onCancel={onCancel}>
       {({ code: value, setCode: setValue, submit, loading, error }) => (

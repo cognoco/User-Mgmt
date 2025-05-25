@@ -57,11 +57,23 @@ async function sendViaTwilio(to: string, message: string, options?: SMSProviderO
   return { success: true, provider: 'twilio' };
 }
 
-async function sendViaAWS(to: string, message: string, options?: SMSProviderOptions) {
-    // Implementation for AWS SNS provider  const accessKey = process.env.AWS_ACCESS_KEY_ID;  const secretKey = process.env.AWS_SECRET_ACCESS_KEY;  const region = options?.region || process.env.AWS_REGION || 'us-east-1';    if (!accessKey || !secretKey) {    throw new Error('AWS credentials not configured');  }    // In a real implementation, you would use the AWS SDK:  // const AWS = require('aws-sdk');  // const sns = new AWS.SNS({ region });  console.log(`Using AWS region: ${region}`);
-  
+async function sendViaAWS(
+  to: string,
+  message: string,
+  options?: SMSProviderOptions,
+) {
+  const accessKey = process.env.AWS_ACCESS_KEY_ID;
+  const secretKey = process.env.AWS_SECRET_ACCESS_KEY;
+  const region = options?.region || process.env.AWS_REGION || 'us-east-1';
+
+  if (!accessKey || !secretKey) {
+    throw new Error('AWS credentials not configured');
+  }
+
+  // In a real implementation, you would use the AWS SDK to send the SMS
+  console.log(`Using AWS region: ${region}`);
   console.log(`[AWS SNS] To: ${to} | Message: ${message}`);
-  
+
   // Mock successful response for now
   return { success: true, provider: 'aws-sns' };
 }

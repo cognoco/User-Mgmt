@@ -5,7 +5,6 @@ import {
   initializeRolePermissions,
   getRolePermissions,
   checkRolePermission,
-  getAllRolesWithPermissions,
   syncRolePermissions,
 } from '../roleService';
 import { TeamRole } from '@prisma/client';

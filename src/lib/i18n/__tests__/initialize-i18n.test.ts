@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import i18n, { initializeI18n, languages } from '../index';
+import { initializeI18n, languages } from '../index';
 
 describe('initializeI18n', () => {
   it('registers custom resources and returns translations', () => {

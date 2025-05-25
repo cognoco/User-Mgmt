@@ -1,7 +1,6 @@
 import { prisma } from '@/lib/database/prisma';
-import { Permission, RoleType, RoleDefinition, isPermission } from './roles';
+import { Permission, RoleType, RoleDefinition } from './roles';
 import { TeamRole } from '@prisma/client';
-import { Permission as RBACPermission, Role } from "@/types/rbac";
 
 /**
  * Initialize role permissions in the database

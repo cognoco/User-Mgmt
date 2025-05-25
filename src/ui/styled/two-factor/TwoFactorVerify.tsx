@@ -1,12 +1,10 @@
 'use client';
-import { useState } from 'react';
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Card } from '@/ui/primitives/card';
 import { TwoFactorVerify as HeadlessTwoFactorVerify } from '@/ui/headless/two-factor/TwoFactorVerify';
 
 export function TwoFactorVerify({ onSuccess }: { onSuccess?: () => void }) {
-  const [code, setCode] = useState('');
   return (
     <HeadlessTwoFactorVerify onSuccess={onSuccess}>
       {({ code: value, setCode: setValue, submit, loading, error }) => (

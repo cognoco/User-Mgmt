@@ -1,4 +1,3 @@
-import { CompanyProfile, CompanyAddress, AddressType } from '@/types/company';
 
 interface CompanyProfileStoreMockState {
   profile: any;

@@ -13,18 +13,6 @@ const updateSpy = vi.fn();
 const deleteSpy = vi.fn();
 const eqSpy = vi.fn();
 
-// Create chain-returning mock objects for method chaining
-const updateWithEq = {
-  update: vi.fn().mockReturnValue({
-    eq: eqSpy
-  })
-};
-
-const deleteWithEq = {
-  delete: vi.fn().mockReturnValue({
-    eq: eqSpy
-  })
-};
 
 // Fix the mocking approach: make update and delete use their spies and return chainable eq
 vi.mock('@/lib/database/supabase', () => {

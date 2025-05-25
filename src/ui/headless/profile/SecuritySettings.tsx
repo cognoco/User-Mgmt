@@ -4,7 +4,7 @@
  * Manages MFA and security policy preferences using render props.
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useOrganizationPolicies } from '@/hooks/user/useOrganizationSession';
 

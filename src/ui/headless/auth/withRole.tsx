@@ -110,7 +110,6 @@ export function withRole<P extends object>(
 export const WithRoleComponent = ({
   requiredRoles = [],
   requiredPermissions = [],
-  fallback = null,
   onAccessDenied,
   bypass = false,
   children

@@ -20,7 +20,6 @@ let twoFactorServiceInstance: TwoFactorService | null = null;
  */
 export function getApiTwoFactorService(): TwoFactorService {
   if (!twoFactorServiceInstance) {
-    const twoFactorDataProvider = AdapterRegistry.getInstance().getAdapter<ITwoFactorDataProvider>('twoFactor');
     twoFactorServiceInstance = UserManagementConfiguration.getServiceProvider('twoFactorService') as TwoFactorService;
     if (!twoFactorServiceInstance) {
       throw new Error('Two-factor service not registered in UserManagementConfiguration');

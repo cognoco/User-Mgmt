@@ -223,7 +223,6 @@ describe('Headless AvatarUpload Component', () => {
     let imgSrc = 'test-image.jpg';
     
     const mockFileInput = { value: 'test.jpg' };
-    const mockRef = { current: mockFileInput };
     
     act(() => {
       render(

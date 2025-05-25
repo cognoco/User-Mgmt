@@ -6,7 +6,7 @@ import { supabase } from '@/lib/database/supabase';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { LoginForm } from '\.\.\/\.\.\/src\/components/auth/LoginForm';
+import { LoginForm } from '../../src/components/auth/LoginForm';
 
 describe('API Error Messages', () => {
   let user;

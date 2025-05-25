@@ -9,7 +9,6 @@ import { PermissionService } from "@/core/permission/interfaces";
 import {
   Permission,
   Role,
-  RoleEntity,
   RoleWithPermissions,
   UserRole,
   PermissionAssignment,

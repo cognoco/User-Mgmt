@@ -4,19 +4,13 @@ import { decode } from 'base64-arraybuffer';
 
 import {
   createSuccessResponse,
-  createCreatedResponse,
   createNoContentResponse,
-  ApiError,
-  ERROR_CODES,
 } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
 import { withValidation } from '@/middleware/validation';
 import { withRouteAuth } from '@/middleware/auth';
 
-import {
-  createUserUpdateFailedError,
-  mapUserServiceError,
-} from '@/lib/api/user/error-handler';
+import { createUserUpdateFailedError } from '@/lib/api/user/error-handler';
 
 import { getApiUserService } from '@/services/user/factory';
 
@@ -31,11 +25,9 @@ const AvatarUploadSchema = z.object({
   message: "Either 'avatar' or 'avatarId' is required"
 });
 
-type AvatarUploadRequest = z.infer<typeof AvatarUploadSchema>;
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB limit
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-const STORAGE_BUCKET = 'avatars';
 
 // Predefined avatars - These would typically be stored in a database or config file
 // For now, we're hardcoding them here
@@ -135,7 +127,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   return withErrorHandling(
-    (req) => withRouteAuth((r, userId) => handleDeleteAvatar(userId), r),
+    (req) => withRouteAuth((r, userId) => handleDeleteAvatar(userId), req),
     request
   );
 }

@@ -5,8 +5,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TestWrapper } from '../../../../tests/utils/test-wrapper';
 
 // Mock data
-const dashboardUrl = '/api/admin/dashboard';
-
 const mockDashboardData = {
   team: {
     activeMembers: 8,

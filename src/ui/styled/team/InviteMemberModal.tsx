@@ -29,7 +29,7 @@ interface InviteMemberModalProps {
   seatUsage: SeatUsage;
 }
 
-export function InviteMemberModal({ teamId, seatUsage }: InviteMemberModalProps) {
+export function InviteMemberModal({ teamId, seatUsage }: InviteMemberModalProps): JSX.Element {
   return (
     <InviteMemberModalHeadless teamId={teamId} seatUsage={seatUsage}>
       {({ isOpen, open, close, seatUsage: usage, formProps }) => {
@@ -45,9 +45,11 @@ export function InviteMemberModal({ teamId, seatUsage }: InviteMemberModalProps)
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>Invite Team Member</DialogTitle>
-                <DialogDescription>
-                  Send an invitation to join your team. They'll receive an email with instructions.
-                </DialogDescription>
+
+                  <DialogDescription>
+                    Send an invitation to join your team. They&apos;ll receive an email with instructions.
+                  </DialogDescription>
+
               </DialogHeader>
 
               <div className="space-y-2">
@@ -60,9 +62,11 @@ export function InviteMemberModal({ teamId, seatUsage }: InviteMemberModalProps)
                 <Progress value={usage.percentage} className="h-2" />
                 {!hasAvailableSeats && (
                   <Alert variant="destructive">
-                    <AlertDescription>
-                      You've reached your seat limit. Upgrade your plan or remove inactive members to invite more.
-                    </AlertDescription>
+
+                      <AlertDescription>
+                        You&apos;ve reached your seat limit. Upgrade your plan or remove inactive members to invite more.
+                      </AlertDescription>
+
                   </Alert>
                 )}
               </div>

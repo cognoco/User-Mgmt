@@ -1,8 +1,5 @@
 // __tests__/integration/account-settings-flow.test.js
 
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 // import { AccountSettings } from '../../components/account/AccountSettings'; // TODO: Update path if file exists
 import { vi } from 'vitest';
 // import { supabase } from '../../lib/supabase'; // TODO: Update path if file exists
@@ -11,19 +8,9 @@ import { vi } from 'vitest';
 vi.mock('@/lib/supabase');
 
 describe('Account Settings Flow', () => {
-  let user;
-
-  // Create mock authenticated user
-  const mockUser = {
-    id: 'user-123',
-    email: 'user@example.com',
-    role: 'authenticated',
-    app_metadata: { role: 'user' }
-  };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    user = userEvent.setup();
     
     // Mock user authentication
     // supabase.auth.getUser.mockResolvedValue({

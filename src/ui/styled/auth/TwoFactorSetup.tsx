@@ -39,7 +39,6 @@ export function TwoFactorSetup({ onComplete, onCancel }: TwoFactorSetupProps) {
       onSetupComplete={onComplete}
       onCancel={onCancel}
       render={({
-        currentMethod,
         setupStage,
         handleMethodChange,
         handleStartSetup,

@@ -31,7 +31,6 @@ import {
 } from '@/ui/primitives/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/ui/primitives/dialog';
 import { ScrollArea } from '@/ui/primitives/scroll-area';
-import { useToast } from '@/lib/hooks/use-toast';
 import { HeadlessAuditLogViewer } from '@/ui/headless/audit/AuditLogViewer';
 
 interface AuditLog {
@@ -47,41 +46,12 @@ interface AuditLog {
   status: string;
 }
 
-interface AuditLogFilters {
-  startDate?: string;
-  endDate?: string;
-  userId?: string;
-  method?: string;
-  path?: string;
-  statusCode?: number;
-  hasError?: boolean;
-  resourceType?: string;
-  resourceId?: string;
-  ipAddress?: string;
-  userAgent?: string;
-  search?: string;
-  page: number;
-  limit: number;
-  sortBy: 'timestamp' | 'status_code' | 'response_time';
-  sortOrder: 'asc' | 'desc';
-}
 
 const METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
 const STATUS_CODES = [200, 201, 400, 401, 403, 404, 500];
 
 type CalendarDate = Date | undefined;
 
-const ACTION_LABELS: Record<string, string> = {
-  LOGIN_SUCCESS: 'Login Success',
-  LOGIN_FAILURE: 'Login Failure',
-  PASSWORD_UPDATE_SUCCESS: 'Password Update Success',
-  PASSWORD_UPDATE_FAILURE: 'Password Update Failure',
-  ACCOUNT_DELETION_INITIATED: 'Account Deletion Initiated',
-  ACCOUNT_DELETION_ERROR: 'Account Deletion Error',
-  COMPANY_DATA_EXPORT: 'Company Data Export',
-  TEAM_ROLE_UPDATE_SUCCESS: 'Team Role Update Success',
-  TEAM_ROLE_UPDATE_FAILURE: 'Team Role Update Failure',
-};
 
 const STATUS_BADGE: Record<string, { label: string; color: 'success' | 'destructive' | 'warning' | 'default' }> = {
   SUCCESS: { label: 'Success', color: 'success' },
@@ -108,7 +78,6 @@ export function AuditLogViewer({ isAdmin = true }: { isAdmin?: boolean }) {
         isModalOpen,
         data,
         isLoading,
-        error,
         handleFilterChange,
         handlePageChange,
         handleExport,

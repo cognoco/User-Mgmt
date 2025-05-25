@@ -27,11 +27,10 @@ const ALL_PROVIDERS: OAuthProvider[] = [
 
 export function ProviderManagementPanel() {
   const { linkedProviders, loading: loadingLinked, error: errorLinked, fetchLinkedProviders } = useLinkedProviders();
-  const { linkProvider, loading: linking, error: errorLink } = useLinkProvider();
+  const { loading: linking, error: errorLink } = useLinkProvider();
   const { unlinkProvider, loading: unlinking, error: errorUnlink } = useUnlinkProvider();
   const [selectedProvider, setSelectedProvider] = useState<OAuthProvider | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLinkedProviders();
@@ -39,7 +38,6 @@ export function ProviderManagementPanel() {
 
   const handleLink = async (provider: OAuthProvider) => {
     setSelectedProvider(provider);
-    setMessage(null);
     try {
       // Request the OAuth authorization URL from the backend
       const res = await fetch('/api/auth/oauth', {
@@ -71,7 +69,6 @@ export function ProviderManagementPanel() {
 
   const confirmUnlink = async () => {
     if (!selectedProvider) return;
-    setMessage(null);
     try {
       await unlinkProvider(selectedProvider);
       toast({
@@ -111,10 +108,7 @@ export function ProviderManagementPanel() {
             <li key={provider} className="flex items-center gap-2 mb-2">
               {/* Show icon and label from OAUTH_PROVIDERS mapping */}
               {(() => {
-                // Import mapping at the top: import { OAUTH_PROVIDERS } from '@/lib/constants/oauthProviders';
-                // Fallback to provider name if not found
-                const mapping = require('@/lib/constants/oauthProviders').OAUTH_PROVIDERS;
-                const info = mapping[provider.toLowerCase()] || { label: provider.toLowerCase() };
+                const info = OAUTH_PROVIDERS[provider.toLowerCase()] || { label: provider.toLowerCase() };
                 return (
                   <span className="flex items-center gap-2">
                     {info.icon && (
