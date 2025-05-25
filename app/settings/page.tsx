@@ -10,8 +10,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 
 // Import from our new architecture
 import { AccountSettings } from '@/ui/styled/profile/AccountSettings';
-import { useAccountSettings } from '@/src/hooks/profile/useAccountSettings';
-import { useUserProfile } from '@/src/hooks/profile/useUserProfile';
+import { useAccountSettings } from '@/hooks/user/useAccountSettings';
+import { useUserProfile } from '@/hooks/user/useUserProfile';
 
 export default function SettingsPage() {
   const { t } = useTranslation();

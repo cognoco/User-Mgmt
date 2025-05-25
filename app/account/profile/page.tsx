@@ -9,8 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 
 // Import from our new architecture
 import { ProfileEditor } from '@/ui/styled/profile/ProfileEditor';
-import { useUserProfile } from '@/hooks/useUserProfile';
-import { useAccountSettings } from '@/hooks/useAccountSettings';
+import { useUserProfile } from '@/hooks/user/useUserProfile';
+import { useAccountSettings } from '@/hooks/user/useAccountSettings';
 
 export default function ProfilePage() {
   const { t } = useTranslation();

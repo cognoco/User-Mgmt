@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+
 interface UserStoreMockState {
   profile: any;
   settings: any;
