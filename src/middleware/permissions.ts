@@ -126,6 +126,8 @@ export function createProtectedHandler(
 import { ApiError } from '@/lib/api/common/api-error';
 import { createErrorResponse } from '@/lib/api/common/response-formatter';
 import { withRouteAuth } from './auth';
+import { getApiPermissionService } from '@/services/permission/factory';
+import { isPermission, Permission } from '@/lib/rbac/roles';
 
 /**
  * Simple permission middleware used by some API routes.
@@ -137,8 +139,14 @@ export async function withPermission(
   req: NextRequest
 ): Promise<NextResponse> {
   return withRouteAuth(async (r, userId) => {
-    // Placeholder permission check
-    const hasPermission = true;
+    const service = getApiPermissionService();
+    let hasPermission = false;
+
+    if (isPermission(permission)) {
+      hasPermission = await service.hasPermission(userId, permission as Permission);
+    } else {
+      console.warn(`Invalid permission '${permission}' passed to withPermission`);
+    }
 
     if (!hasPermission) {
       const forbiddenError = new ApiError(
