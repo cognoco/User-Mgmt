@@ -146,7 +146,6 @@ export class SupabaseAdapterFactory implements AdapterFactory {
   createWebhookProvider(): IWebhookDataProvider {
     return createSupabaseWebhookProvider(this.options);
   }
-  }
 }
 
 /**

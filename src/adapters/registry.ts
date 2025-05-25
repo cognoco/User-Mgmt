@@ -153,6 +153,9 @@ export class AdapterRegistry {
    * @param factoryCreator Function that creates the factory
    */
   static registerFactory(name: string, factoryCreator: FactoryCreator): void {
+    if (this.factories[name]) {
+      throw new Error(`Adapter factory '${name}' is already registered`);
+    }
     this.factories[name] = factoryCreator;
   }
   
