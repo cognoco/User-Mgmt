@@ -123,9 +123,28 @@ export function UserManagementClientBoundary({
 
     if (!authService) {
       console.error(
-        "[UserManagementClientBoundary] AuthService is not registered in the service provider registry",
+        "[UserManagementClientBoundary] AuthService is not registered in the service provider registry. Attempting to initialize...",
       );
-      return;
+      
+      // Try to initialize the application if the service is not found
+      try {
+        const { initializeApp } = require('@/core/initialization/app-init');
+        const services = initializeApp();
+        
+        // Register services with UserManagementConfiguration
+        UserManagementConfiguration.configureServiceProviders({
+          authService: services.authService,
+          userService: services.userService,
+          teamService: services.teamService,
+          permissionService: services.permissionService,
+          webhookService: services.webhookService
+        });
+        
+        console.log("[UserManagementClientBoundary] Successfully initialized application and registered services");
+      } catch (initError) {
+        console.error("[UserManagementClientBoundary] Failed to initialize application:", initError);
+        return;
+      }
     }
 
     // Initial session check
@@ -216,6 +235,23 @@ export function UserManagementClientBoundary({
     };
   }, []); // Empty dependency array ensures this runs only once on mount
 
+  // Check if all required services are registered before rendering
+  const authService = UserManagementConfiguration.getServiceProvider<AuthService>("authService");
+  
+  if (!authService) {
+    // Still no auth service after initialization attempt
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-red-50">
+        <div className="p-6 max-w-md bg-white rounded-lg shadow-lg">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Service Initialization Error</h1>
+          <p className="text-gray-700 mb-4">
+            The application failed to initialize required services. Please check the console for more details.
+          </p>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <UserManagementProvider config={clientConfig}>
       <Toaster position="top-center" reverseOrder={false} />
