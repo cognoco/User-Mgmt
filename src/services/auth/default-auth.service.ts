@@ -21,6 +21,8 @@ import {
 import { AuthEventHandler, AuthEventTypes } from '@/core/auth/events';
 import { translateError } from '@/lib/utils/error';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
+import type { AuthStorage } from './auth-storage';
+import { BrowserAuthStorage } from './auth-storage';
 
 /**
  * Default implementation of the AuthService interface
@@ -47,8 +49,12 @@ export class DefaultAuthService
    * Constructor for DefaultAuthService
    *
    * @param authDataProvider - Adapter providing auth persistence methods
+   * @param storage - Storage mechanism for persisting tokens
    */
-  constructor(private authDataProvider: IAuthDataProvider) {
+  constructor(
+    private authDataProvider: IAuthDataProvider,
+    private storage: AuthStorage = new BrowserAuthStorage()
+  ) {
     super();
     // Initialize session check if there's a stored token
     this.initializeFromStorage();
@@ -59,7 +65,7 @@ export class DefaultAuthService
    */
   private initializeFromStorage(): void {
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('auth_token');
+      const token = this.storage.getItem('auth_token');
       if (token) {
         this.token = token;
         this.refreshToken().then(success => {
@@ -81,7 +87,7 @@ export class DefaultAuthService
     
     this.sessionCheckTimer = setInterval(() => {
       if (typeof window !== 'undefined') {
-        const lastActivity = parseInt(localStorage.getItem('last_activity') || '0', 10);
+        const lastActivity = parseInt(this.storage.getItem('last_activity') || '0', 10);
         const now = Date.now();
         
         if (now - lastActivity > this.SESSION_TIMEOUT) {
@@ -99,7 +105,7 @@ export class DefaultAuthService
    */
   private updateLastActivity(): void {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('last_activity', Date.now().toString());
+      this.storage.setItem('last_activity', Date.now().toString());
     }
   }
 
@@ -169,9 +175,9 @@ export class DefaultAuthService
         this.token = result.token || null;
         this.error = null;
 
-        // Store token in localStorage if available
+        // Store token using provided storage if available
         if (result.token && typeof window !== 'undefined') {
-          localStorage.setItem('auth_token', result.token);
+          this.storage.setItem('auth_token', result.token);
         }
 
         // Initialize session management
@@ -292,10 +298,10 @@ export class DefaultAuthService
       this.error = null;
       this.successMessage = null;
       
-      // Clear localStorage if available
+      // Clear stored auth data if available
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('last_activity');
+        this.storage.removeItem('auth_token');
+        this.storage.removeItem('last_activity');
       }
       
       // Emit logout event
@@ -530,10 +536,10 @@ export class DefaultAuthService
       this.user = null;
       this.token = null;
       
-      // Clear localStorage if available
+      // Clear stored auth data if available
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('last_activity');
+        this.storage.removeItem('auth_token');
+        this.storage.removeItem('last_activity');
       }
       
       // Emit account deleted event
@@ -769,10 +775,10 @@ export class DefaultAuthService
     this.error = 'Session expired. Please log in again.';
     this.successMessage = null;
     
-    // Clear localStorage if available
+    // Clear stored auth data if available
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('last_activity');
+      this.storage.removeItem('auth_token');
+      this.storage.removeItem('last_activity');
     }
     
     // Emit session timeout event
