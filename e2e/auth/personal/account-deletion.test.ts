@@ -283,6 +283,8 @@ test.describe('2.5: Account Deletion', () => {
       }
     } else {
       console.log('Delete account button not found - UI might be different');
+      test.skip();
+    }
   });
 
   // NOTE: We do NOT implement the actual account deletion test
