@@ -6,16 +6,16 @@ This document serves as the main reference for the User Management System. It pr
 ## Core Documentation
 
 ### Essential References
-- [Gap Analysis](./GAP_ANALYSIS.md) - Current state and missing features
-- [API Documentation](./API.md) - Complete API reference
+- [Gap Analysis](./docs/Project%20documentation/GAP_ANALYSIS.md) - Current state and missing features
+- [API Documentation](./docs/Product%20documentation/API.md) - Complete API reference
 - [Technical Setup](./SETUP.md) - Setup and configuration guide
 - [Deployment Guide](./DEPLOYMENT.md) - Production deployment instructions
 - [File Structure Guidelines](./File%20structure%20guidelines.md) - Project organization
 - [Architecture Guidelines](../Product%20documentation/Architecture%20Guidelines.md) - Comprehensive architecture principles
 - [Architecture Rules](../Product%20documentation/Architecture%20Rules.md) - Core architecture requirements
 - [Authentication Roles](./auth-roles.md) - Role definitions and permissions
-- [Testing Guide](./TESTING.md) - Testing setup and guidelines
-- [Testing Issues](./TESTING_ISSUES.md) - Known testing issues and workarounds
+- [Testing Guide](./docs/Testing%20documentation/TESTING.md) - Testing setup and guidelines
+- [Testing Issues](./docs/Testing%20documentation/TESTING_ISSUES-UnitTests.md) - Known testing issues and workarounds
 - [Implementation Checklist](./Product%20documentation/Implementation-Checklist.md) - Code-verified implementation and test status
 
 ### Feature Documentation
