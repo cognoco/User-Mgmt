@@ -28,8 +28,7 @@ export const usePreferencesStore = create<PreferencesState>((set) => ({
     
     set({ isLoading: true, error: null });
     try {
-      // TODO: Implement API route /api/preferences (GET)
-      const response = await api.get('/api/preferences'); 
+      const response = await api.get('/api/preferences');
       set({ preferences: response.data as UserPreferences, isLoading: false });
     } catch (error: any) {
       console.error("Fetch preferences error:", error);
@@ -56,8 +55,7 @@ export const usePreferencesStore = create<PreferencesState>((set) => ({
     
     set({ isLoading: true, error: null });
     try {
-       // TODO: Implement API route /api/preferences (PATCH or PUT)
-      const response = await api.patch('/api/preferences', updateData); 
+      const response = await api.patch('/api/preferences', updateData);
       
       set((state) => ({
         preferences: state.preferences 
@@ -75,4 +73,4 @@ export const usePreferencesStore = create<PreferencesState>((set) => ({
       return false;
     }
   },
-})); 
+}));
