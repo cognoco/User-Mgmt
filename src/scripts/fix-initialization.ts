@@ -1,8 +1,9 @@
 /**
- * Application Initialization
- *
- * This file initializes the application by configuring all necessary services
- * and adapters according to the architecture guidelines.
+ * Fix Initialization Script
+ * 
+ * This script is designed to diagnose and fix issues with the application initialization.
+ * It checks for missing or improperly registered services and ensures they are properly
+ * registered with the UserManagementConfiguration.
  */
 
 import { UserManagementConfiguration } from "@/core/config";
@@ -12,9 +13,7 @@ import { api } from "@/lib/api/axios";
 // Import factory functions
 import { getAuthService } from "@/services/auth";
 import { getUserService } from "@/services/user";
-// Import API-based team service for client use
-import { getApiTeamService } from "@/services/team/api-team.service"; // client-safe
-// Do NOT import Prisma-based getTeamService at the top level!
+import { getTeamService } from "@/services/team";
 import { getPermissionService } from "@/services/permission";
 import { createWebhookService } from "@/services/webhooks";
 
@@ -25,15 +24,16 @@ import { createSupabaseTeamProvider } from "@/adapters/team";
 import { createSupabasePermissionProvider } from "@/adapters/permission";
 import { createSupabaseWebhookProvider } from "@/adapters/webhooks";
 
-// Initialize the application
-export function initializeApp() {
-  // DEBUG: Log environment variable values for troubleshooting
-  console.log("ENV CHECK", {
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  });
+// Function to check if a service is registered
+function checkServiceRegistration(serviceName: string): boolean {
+  const service = UserManagementConfiguration.getServiceProvider(serviceName);
+  return !!service;
+}
+
+// Function to register all services
+function registerAllServices() {
   try {
-    console.log("Initializing application...");
+    console.log("Registering all services...");
 
     // Get environment variables
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -72,16 +72,7 @@ export function initializeApp() {
     // Create services using the providers
     const authService = getAuthService(authProvider);
     const userService = getUserService(userProvider);
-    // Use API-based team service on client, Prisma-based on server
-    let teamService;
-    if (typeof window !== "undefined") {
-      teamService = getApiTeamService();
-    } else {
-      // Import here so Prisma code is never bundled to client
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getTeamService } = require("@/services/team");
-      teamService = getTeamService(teamProvider);
-    }
+    const teamService = getTeamService(teamProvider);
     const permissionService = getPermissionService(permissionProvider);
     const webhookService = createWebhookService({
       apiClient: api,
@@ -99,14 +90,20 @@ export function initializeApp() {
 
     // Configure feature flags
     UserManagementConfiguration.configureFeatures({
-      registration: true,
-      emailVerification: true,
-      passwordReset: true,
-      profileManagement: true,
-      teamManagement: true,
-      roleBasedAccess: true,
-      multiFactorAuth: false, // Disabled as noted in GAP_ANALYSIS.md
-      accountLinking: false   // Disabled as noted in GAP_ANALYSIS.md
+      enableRegistration: true,
+      enablePasswordReset: true,
+      enableMFA: true,
+      enableSocialAuth: true,
+      enableSSOAuth: true,
+      enableProfileManagement: true,
+      enableAccountSettings: true,
+      enableTeams: true,
+      enableTeamInvitations: true,
+      enableTeamRoles: true,
+      enableRoleManagement: true,
+      enablePermissionManagement: true,
+      enableEmailNotifications: true,
+      enableInAppNotifications: true
     });
 
     // Configure options
@@ -121,7 +118,7 @@ export function initializeApp() {
       }
     });
 
-    console.log("Application initialized successfully");
+    console.log("All services registered successfully");
     return {
       authService,
       userService,
@@ -130,10 +127,55 @@ export function initializeApp() {
       webhookService
     };
   } catch (error) {
-    console.error("Failed to initialize application:", error);
+    console.error("Failed to register services:", error);
     throw error;
   }
 }
 
-// Export a default function for easier imports
-export default initializeApp;
+// Function to diagnose initialization issues
+function diagnoseInitializationIssues() {
+  console.log("Diagnosing initialization issues...");
+  
+  const services = [
+    "authService",
+    "userService",
+    "teamService",
+    "permissionService",
+    "webhookService"
+  ];
+  
+  const missingServices = services.filter(service => !checkServiceRegistration(service));
+  
+  if (missingServices.length > 0) {
+    console.log(`Missing services: ${missingServices.join(", ")}`);
+    console.log("Attempting to register missing services...");
+    registerAllServices();
+    
+    // Check again after registration
+    const stillMissingServices = services.filter(service => !checkServiceRegistration(service));
+    
+    if (stillMissingServices.length > 0) {
+      console.error(`Failed to register services: ${stillMissingServices.join(", ")}`);
+      return false;
+    } else {
+      console.log("All services successfully registered");
+      return true;
+    }
+  } else {
+    console.log("All services are properly registered");
+    return true;
+  }
+}
+
+// Export the functions for use in other files
+export {
+  checkServiceRegistration,
+  registerAllServices,
+  diagnoseInitializationIssues
+};
+
+// If this script is run directly, diagnose and fix issues
+if (typeof window !== 'undefined') {
+  console.log("Running initialization diagnostics...");
+  diagnoseInitializationIssues();
+}

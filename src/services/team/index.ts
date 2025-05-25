@@ -5,9 +5,9 @@
  * It follows the factory pattern to allow dependency injection and configuration.
  */
 
-import { TeamService } from '@/core/team/interfaces';
-import { DefaultTeamService } from './default-team.service';
-import type { TeamDataProvider } from '@/core/team/ITeamDataProvider';
+// Client-safe exports only
+export * from './api-team.service';
+export type { TeamService } from '@/core/team/interfaces';
 
 /**
  * Configuration options for creating a TeamService

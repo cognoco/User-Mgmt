@@ -26,5 +26,10 @@ This document summarises the remaining feature gaps in the User Management modul
 - A generic `use[DomainName]` hook template is still pending.
 - Documentation guides such as the architecture overview and integration guide remain to be written.
 
+## Client/Server Separation Gaps
+- API-based service implementations for user, permission, and other domains are missing. Currently, only the team domain has an API-based service (`ApiTeamService`).
+- Prisma-based services/adapters must never be imported or executed on the client. All client-side code must use API-based services to comply with the layered, pluggable architecture.
+- API endpoints for these domains must be implemented and tested to support the client services.
+
 ## References
 For a detailed list of implemented features see [Implementation-Checklist](../Product%20documentation/Implementation-Checklist.md).
