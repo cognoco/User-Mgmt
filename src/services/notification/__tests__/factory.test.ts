@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AdapterRegistry } from '@/adapters/registry';
-import { UserManagementConfiguration } from '@/core/config';
+let AdapterRegistry: typeof import('@/adapters/registry').AdapterRegistry;
+let UserManagementConfiguration: typeof import('@/core/config').UserManagementConfiguration;
 
 let getApiNotificationService: typeof import('../factory').getApiNotificationService;
 let DefaultNotificationService: typeof import('../default-notification.service').DefaultNotificationService;
@@ -8,6 +8,8 @@ let DefaultNotificationService: typeof import('../default-notification.service')
 describe('getApiNotificationService', () => {
   beforeEach(async () => {
     vi.resetModules();
+    ({ AdapterRegistry } = await import('@/adapters/registry'));
+    ({ UserManagementConfiguration } = await import('@/core/config'));
     (AdapterRegistry as any).instance = null;
     UserManagementConfiguration.reset();
     ({ getApiNotificationService } = await import('../factory'));
