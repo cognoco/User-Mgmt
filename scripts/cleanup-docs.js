@@ -69,4 +69,4 @@ filesToRemove.forEach(file => {
 console.log('\nDocumentation cleanup completed!');
 console.log('Archived files are stored in docs/archived_docs/');
 console.log('\nEssential files preserved:');
-essentialFiles.forEach(file => console.log(`- ${file}`
+essentialFiles.forEach(file => console.log(`- ${file}`));

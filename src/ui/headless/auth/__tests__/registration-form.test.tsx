@@ -51,9 +51,6 @@ const mockClearSuccessMessage = vi.fn();
 vi.mock('@/hooks/auth/useAuth', () => ({
   useAuth: vi.fn(() => ({
     register: mockRegisterUserAction,
-    // ...add other mocked methods/properties as needed for your tests
-  })),
-}));
     isLoading: false,
     error: null,
     successMessage: null,
@@ -65,7 +62,7 @@ vi.mock('@/hooks/auth/useAuth', () => ({
     logout: vi.fn(),
     sendVerificationEmail: vi.fn(),
     deleteAccount: vi.fn(),
-  }))
+  })),
 }));
 
 console.log('[MOCK] useAuth hook mock applied');

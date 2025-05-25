@@ -96,10 +96,11 @@ export interface UseAuth {
  */
 export function useAuth(): UseAuth {
   // Get the auth service from the service provider registry
+  const fallbackAuthService = useAuthService();
   const authService =
     UserManagementConfiguration.getServiceProvider<AuthService>(
       "authService",
-    ) || useAuthService();
+    ) || fallbackAuthService;
 
   if (!authService) {
     throw new Error(

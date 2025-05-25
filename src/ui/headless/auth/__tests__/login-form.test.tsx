@@ -75,7 +75,6 @@ vi.mock('@/ui/primitives/alert', () => ({
     <div data-testid="alert-description">{children}</div>
   ),
 }));
-}));
 
 function setupAuth(overrides: Record<string, any> = {}) {
   const mockLogin = vi.fn().mockResolvedValue({ success: true });
