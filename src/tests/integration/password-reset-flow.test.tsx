@@ -16,11 +16,11 @@ vi.mock('@/hooks/auth/useAuth', () => {
     clearError: vi.fn(),
     clearSuccessMessage: vi.fn()
   };
-  const useAuthStoreMock: any = vi.fn((selector: any) => (typeof selector === 'function' ? selector(store) : store));
-  useAuthStoreMock.setState = (newState: any) => {
+  const useAuthMock: any = vi.fn((selector: any) => (typeof selector === 'function' ? selector(store) : store));
+  useAuthMock.setState = (newState: any) => {
     Object.assign(store, newState);
   };
-  return { useAuth: useAuthStoreMock };
+  return { useAuth: useAuthMock };
 });
 
 // Then mock the Supabase client
@@ -56,7 +56,6 @@ const apiPostSpy = vi.spyOn(apiModule.api, 'post');
 
 // Import after mocks
 import { useAuth } from '@/hooks/auth/useAuth';
-import { useAuthStore } from '@/lib/stores/auth.store';
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -86,9 +85,9 @@ describe('Password Reset Flow', () => {
       configurable: true
     });
 
-    // Always reset useAuthStore mock to have successMessage: null before each test
-    if ((useAuthStore as any).setState) {
-      (useAuthStore as any).setState({
+    // Always reset mocked auth state before each test
+    if ((useAuth as any).setState) {
+      (useAuth as any).setState({
         resetPassword: vi.fn().mockResolvedValue({ success: true, message: 'Reset email sent' }),
         isLoading: false,
         error: null,
@@ -113,8 +112,8 @@ describe('Password Reset Flow', () => {
     const mockResetPassword = vi.fn().mockResolvedValue({ success: true, message: 'Reset email sent' });
     
     // Update the mock to return our specific function
-    if ((useAuthStore as any).setState) {
-      (useAuthStore as any).setState({
+    if ((useAuth as any).setState) {
+      (useAuth as any).setState({
         resetPassword: mockResetPassword,
         isLoading: false,
         error: null,
@@ -151,8 +150,8 @@ describe('Password Reset Flow', () => {
     expect(mockResetPassword).toHaveBeenCalledWith('user@example.com');
 
     // After form submission, update the mock to show success message
-    if ((useAuthStore as any).setState) {
-      (useAuthStore as any).setState({
+    if ((useAuth as any).setState) {
+      (useAuth as any).setState({
         resetPassword: mockResetPassword,
         isLoading: false,
         error: null,
@@ -186,8 +185,8 @@ describe('Password Reset Flow', () => {
       error: 'Email not found' 
     });
     
-    if ((useAuthStore as any).setState) {
-      (useAuthStore as any).setState({
+    if ((useAuth as any).setState) {
+      (useAuth as any).setState({
         resetPassword: mockResetPassword,
         isLoading: false,
         error: 'Email not found',
@@ -281,9 +280,9 @@ describe('Password Reset Flow', () => {
     // Mock updatePassword function that we can check if it was called
     const mockUpdatePassword = vi.fn().mockResolvedValue(undefined);
     
-    // Set up auth store mock
-    if ((useAuthStore as any).setState) {
-      (useAuthStore as any).setState({
+    // Set up auth hook mock
+    if ((useAuth as any).setState) {
+      (useAuth as any).setState({
         updatePassword: mockUpdatePassword,
         isLoading: false,
         error: null
