@@ -13,7 +13,6 @@ import { useRouter } from 'next/navigation';
 import { OAuthButtons } from './OAuthButtons';
 import { PasswordRequirements } from './PasswordRequirements';
 import { RegistrationForm as HeadlessRegistrationForm } from '@/ui/headless/auth/RegistrationForm';
-import { RegistrationPayload } from '@/core/auth/models';
 
 export function RegistrationForm() {
   const userManagement = useUserManagement();

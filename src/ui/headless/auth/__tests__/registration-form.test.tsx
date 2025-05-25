@@ -68,13 +68,9 @@ vi.mock('@/hooks/auth/useAuth', () => ({
 console.log('[MOCK] useAuth hook mock applied');
 
 import React from 'react';
-import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
 import { RegistrationForm } from '../RegistrationForm';
-import { UserType } from '@/types/user-type';
-import { ThemeProvider } from '@/ui/primitives/theme-provider';
-import { OAuthProvider } from '@/types/oauth';
 
 describe('RegistrationForm (headless)', () => {
   let props: any;
@@ -94,7 +90,6 @@ describe('RegistrationForm (headless)', () => {
   });
 
   it('calls register with form values', async () => {
-    const { mockRegister } = setupAuth();
     renderForm();
     act(() => {
       props.setEmailValue('user@example.com');

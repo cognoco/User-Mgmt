@@ -48,7 +48,6 @@ export function Header({ type = "fixed" }: HeaderProps) {
         handleLogout,
         isLoading,
         user,
-        isMobile,
         headerClasses,
         navItems,
       }) => (

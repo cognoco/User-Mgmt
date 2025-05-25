@@ -27,7 +27,6 @@ export function MFAManagementSection() {
       onError={(err) => setError(err)}
     >
       {({
-        isMFAEnabled,
         configuredMethods,
         disableMethod,
         backupCodes,

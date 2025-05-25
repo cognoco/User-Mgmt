@@ -82,26 +82,26 @@ export class MockAuthService implements AuthService {
     return this.mockAuthState.isAuthenticated;
   });
 
-  resetPassword = vi.fn().mockImplementation(async (email: string): Promise<{ success: boolean; message?: string; error?: string }> => {
+  resetPassword = vi.fn().mockImplementation(async (_email: string): Promise<{ success: boolean; message?: string; error?: string }> => {
     return { success: true, message: 'Password reset email sent' };
   });
 
-  updatePassword = vi.fn().mockImplementation(async (oldPassword: string, newPassword: string): Promise<void> => {
+  updatePassword = vi.fn().mockImplementation(async (_oldPassword: string, _newPassword: string): Promise<void> => {
     // Implementation not needed for most tests
   });
 
-  sendVerificationEmail = vi.fn().mockImplementation(async (email: string): Promise<AuthResult> => {
+  sendVerificationEmail = vi.fn().mockImplementation(async (_email: string): Promise<AuthResult> => {
     return { success: true };
   });
 
-  verifyEmail = vi.fn().mockImplementation(async (token: string): Promise<void> => {
+  verifyEmail = vi.fn().mockImplementation(async (_token: string): Promise<void> => {
     if (this.mockUser) {
       this.mockUser.emailVerified = true;
       this.notifyListeners(this.mockUser);
     }
   });
 
-  deleteAccount = vi.fn().mockImplementation(async (password?: string): Promise<void> => {
+  deleteAccount = vi.fn().mockImplementation(async (_password?: string): Promise<void> => {
     this.mockUser = null;
     this.mockAuthState = {
       ...this.mockAuthState,
@@ -119,7 +119,7 @@ export class MockAuthService implements AuthService {
     };
   });
 
-  verifyMFA = vi.fn().mockImplementation(async (code: string): Promise<MFAVerifyResponse> => {
+  verifyMFA = vi.fn().mockImplementation(async (_code: string): Promise<MFAVerifyResponse> => {
     this.mockAuthState = {
       ...this.mockAuthState,
       mfaEnabled: true
@@ -127,7 +127,7 @@ export class MockAuthService implements AuthService {
     return { success: true, token: 'mock-mfa-token' };
   });
 
-  disableMFA = vi.fn().mockImplementation(async (code: string): Promise<AuthResult> => {
+  disableMFA = vi.fn().mockImplementation(async (_code: string): Promise<AuthResult> => {
     this.mockAuthState = {
       ...this.mockAuthState,
       mfaEnabled: false

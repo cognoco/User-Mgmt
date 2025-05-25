@@ -59,7 +59,7 @@ const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ open, onClose
                   Confirm deletion
                 </Label>
                 <p className="text-sm text-muted-foreground">
-                  Please type "{confirmationText}" to confirm you want to delete your account
+                  Please type &quot;{confirmationText}&quot; to confirm you want to delete your account
                 </p>
                 <Input
                   id="confirm-deletion"

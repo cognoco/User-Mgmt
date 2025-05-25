@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { UserManagementConfiguration as UMCType } from '@/core/config';
 
 let getApiAddressService: typeof import('../factory').getApiAddressService;
 let DefaultAddressService: typeof import('../default-address.service').DefaultAddressService;

@@ -1,8 +1,6 @@
-/// <reference types="vitest" />
 // __tests__/auth/sso/business-sso.test.tsx
 
 import { vi } from 'vitest';
-import * as useOrganizationModule from '@/lib/hooks/useOrganization';
 
 declare global {
   // eslint-disable-next-line no-var

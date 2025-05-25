@@ -10,7 +10,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/ui/primitives/input';
 import { Switch } from '@/ui/primitives/switch';
 import { Separator } from '@/ui/primitives/separator';
-import { Building, Globe, Plus, Trash, Check, X } from 'lucide-react';
+import { Building, Globe, Plus, Trash, Check } from 'lucide-react';
 import { api } from '@/lib/api/axios';
 import { Badge } from '@/ui/primitives/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/primitives/table';
@@ -39,10 +39,9 @@ interface Domain {
 
 interface DomainBasedOrgMatchingProps {
   organizationId: string;
-  organizationName: string;
 }
 
-export function DomainBasedOrgMatching({ organizationId, organizationName }: DomainBasedOrgMatchingProps) {
+export function DomainBasedOrgMatching({ organizationId }: DomainBasedOrgMatchingProps) {
   const { t } = useTranslation();
   const [domains, setDomains] = useState<Domain[]>([]);
   const [isLoading, setIsLoading] = useState(false);

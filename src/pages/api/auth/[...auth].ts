@@ -18,7 +18,7 @@ const LoginSchema = z.object({
  */
 const loginHandler = createApiHandler({
   methods: ['POST'],
-  async handler(req, res) {
+  async handler(req) {
     const parse = LoginSchema.safeParse(req.body);
     if (!parse.success) {
       throw new ApiError(400, 'Invalid credentials input', { details: parse.error.flatten() });

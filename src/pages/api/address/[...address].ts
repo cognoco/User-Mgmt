@@ -5,7 +5,6 @@ import { addressSchema } from '@/core/address/validation';
 import { z } from 'zod';
 
 const userSchema = z.object({ userId: z.string().uuid() });
-const idSchema = z.string();
 const createSchema = addressSchema.extend({ userId: z.string().uuid() });
 const updateSchema = addressSchema.partial().extend({ userId: z.string().uuid() });
 

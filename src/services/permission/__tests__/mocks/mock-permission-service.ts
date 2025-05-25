@@ -1,6 +1,6 @@
 // src/services/permission/__tests__/mocks/mock-permission-service.ts
 import { vi } from 'vitest';
-import { PermissionService, PermissionState } from '../../../../core/permission/interfaces';
+import { PermissionService } from '../../../../core/permission/interfaces';
 import { 
   Permission, 
   Role, 
@@ -11,7 +11,6 @@ import {
   RoleUpdatePayload
 } from '../../../../core/permission/models';
 import {
-  PermissionEvent,
   PermissionEventHandler,
   PermissionEventTypes,
 } from '../../../../core/permission/events';
@@ -140,7 +139,7 @@ export class MockPermissionService implements PermissionService {
       return false;
     }
     
-    const role = { ...this.mockRoles[roleId] };
+    const _role = { ...this.mockRoles[roleId] };
     delete this.mockRoles[roleId];
     delete this.mockRolePermissions[roleId];
     

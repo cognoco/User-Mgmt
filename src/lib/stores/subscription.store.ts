@@ -1,10 +1,8 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
-import { 
-  SubscriptionState, 
-  SubscriptionTier, 
-  SubscriptionPlan,
-  UserSubscription
+import {
+  SubscriptionState,
+  SubscriptionTier
 } from '@/types/subscription';
 import { useUserManagement } from '../auth/UserManagementProvider';
 
@@ -136,7 +134,6 @@ const subscriptionStoreBase = create<SubscriptionInternalState>((set, get) => ({
 
   // Helper: Check if user has access to a specific feature
   hasFeature: (cfg: any, featureName: string) => {
-    const { userSubscription, plans } = get();
 
     // First check if there's a subscription config for the feature
     const featureConfig = cfg?.subscription?.features?.[featureName];

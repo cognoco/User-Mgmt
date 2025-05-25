@@ -29,7 +29,6 @@ export default function ThemeSettings({
   const [pendingPalette, setPendingPalette] = useState<PaletteKey>(paletteKey as PaletteKey);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
-  const [previewMode, setPreviewMode] = useState(false);
 
   useEffect(() => {
     if (!preferences && !isLoading && !error) fetchPreferences();
@@ -45,7 +44,6 @@ export default function ThemeSettings({
   useEffect(() => {
     setTheme(pendingTheme);
     setPaletteByKey(pendingPalette);
-    setPreviewMode(true);
   }, [pendingTheme, pendingPalette, setTheme, setPaletteByKey]);
 
   const handleSave = async () => {
@@ -55,8 +53,7 @@ export default function ThemeSettings({
     setSaving(false);
     if (ok) {
       setSuccess('saved');
-      setPreviewMode(false);
-    }
+  }
   };
 
   const handleCancel = () => {
@@ -64,7 +61,6 @@ export default function ThemeSettings({
       setPendingTheme(preferences.theme as any);
       if (preferences.color_scheme) setPendingPalette(preferences.color_scheme as PaletteKey);
     }
-    setPreviewMode(false);
   };
 
   return (

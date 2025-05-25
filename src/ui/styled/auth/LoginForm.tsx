@@ -293,8 +293,8 @@ export function LoginForm() {
               </Button>
             </form>
             
-            <div className="text-center text-sm">
-              Don't have an account?{' '}
+              <div className="text-center text-sm">
+                Don&apos;t have an account?{' '}
               <Link 
                 href="/auth/register" 
                 className="text-primary hover:underline"

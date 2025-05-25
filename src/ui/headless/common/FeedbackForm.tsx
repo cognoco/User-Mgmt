@@ -25,7 +25,6 @@ export interface FeedbackFormProps {
   }) => React.ReactNode;
 }
 
-const CATEGORY_OPTIONS = feedbackCategoryEnum.options;
 
 export function FeedbackForm({ onSuccess, onError, render }: FeedbackFormProps) {
   const [category, setCategory] = useState('');

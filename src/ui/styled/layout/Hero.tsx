@@ -5,11 +5,10 @@ import { Hero as HeadlessHero } from "../../headless/layout/Hero";
 interface HeroProps {
   title?: ReactNode;
   description?: ReactNode;
-  children?: ReactNode;
   className?: string;
 }
 
-export function Hero({ title, description, children, className }: HeroProps) {
+export function Hero({ title, description, className }: HeroProps) {
   return (
     <HeadlessHero
       title={title}

@@ -35,7 +35,7 @@ export interface DataExportProps {
  * Headless component handling personal data export flow.
  */
 export function DataExport({ children }: DataExportProps) {
-  const { requestExport, refreshStatus, status, isLoading, error } = useDataExport();
+  const { requestExport, refreshStatus, isLoading, error } = useDataExport();
 
   const [exportStatus, setExportStatus] = useState<PersonalExportStatus>('not_started');
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);

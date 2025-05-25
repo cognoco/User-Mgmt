@@ -32,17 +32,17 @@ describe('Browser Platform', () => {
         length: 0
       };
 
-      // @ts-ignore - Mocking browser globals
+      // @ts-expect-error - Mocking browser globals
       global.localStorage = localStorageMock;
-      // @ts-ignore - Mocking browser globals
+      // @ts-expect-error - Mocking browser globals
       global.sessionStorage = sessionStorageMock;
     });
 
     afterEach(() => {
       // Restore originals
-      // @ts-ignore - Restoring browser globals
+      // @ts-expect-error - Restoring browser globals
       global.localStorage = originalLocalStorage;
-      // @ts-ignore - Restoring browser globals
+      // @ts-expect-error - Restoring browser globals
       global.sessionStorage = originalSessionStorage;
       jest.clearAllMocks();
     });

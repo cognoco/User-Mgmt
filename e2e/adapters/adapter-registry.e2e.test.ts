@@ -25,7 +25,7 @@ describe('Adapter Registry - E2E', () => {
     const defaultAdapters = ['supabase'];
     AdapterRegistry.listAvailableAdapters().forEach(adapter => {
       if (!defaultAdapters.includes(adapter)) {
-        // @ts-ignore - Accessing private property for testing
+        // @ts-expect-error - Accessing private property for testing
         delete AdapterRegistry.factories[adapter];
       }
     });

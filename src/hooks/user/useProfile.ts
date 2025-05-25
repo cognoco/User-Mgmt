@@ -1,5 +1,3 @@
-import { create } from 'zustand';
-import { api } from '@/lib/api/axios';
 import { useProfileStore } from '@/lib/stores/profile.store';
 
 interface Profile {
@@ -31,19 +29,6 @@ interface Profile {
   };
 }
 
-interface ProfileState {
-  profile: Profile | null;
-  isLoading: boolean;
-  error: string | null;
-  updateProfile: (data: Partial<Profile>) => Promise<void>;
-  uploadAvatar: (file: File) => Promise<void>;
-  toggleTwoFactor: () => Promise<void>;
-  updatePrivacySettings: (settings: Profile['privacySettings']) => Promise<void>;
-  updateNotificationPreferences: (prefs: Profile['notificationPreferences']) => Promise<void>;
-  connectAccount: (provider: keyof Profile['connectedAccounts']) => Promise<void>;
-  disconnectAccount: (provider: keyof Profile['connectedAccounts']) => Promise<void>;
-  deleteAccount: () => Promise<void>;
-}
 
 export const useProfile = () => {
   const profile = useProfileStore((state) => state.profile);

@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Box, Layers, Zap } from "lucide-react";
 // Already uses headless implementation
