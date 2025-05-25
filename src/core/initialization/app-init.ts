@@ -18,6 +18,7 @@ import { getApiTeamService } from "@/services/team/api-team.service"; // client-
 import { createPermissionService } from "@/services/permission";
 import { createWebhookService } from "@/services/webhooks";
 
+
 // Import adapter factories
 import { createSupabaseAuthProvider } from "@/adapters/auth";
 import { createSupabaseUserProvider } from "@/adapters/user";

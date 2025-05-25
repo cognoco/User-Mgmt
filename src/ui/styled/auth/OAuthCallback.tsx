@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { getUserHomePage } from '@/lib/utils/getUserHomePage';

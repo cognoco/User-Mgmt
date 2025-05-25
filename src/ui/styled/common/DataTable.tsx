@@ -5,10 +5,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../ui/table';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
-import { Card, CardContent } from '../ui/card';
+} from '@/ui/primitives/table';
+import { Input } from '@/ui/primitives/input';
+import { Button } from '@/ui/primitives/button';
+import { Card, CardContent } from '@/ui/primitives/card';
 import { ChevronDown, ChevronUp, Search, MoreHorizontal } from 'lucide-react';
 import {
   DropdownMenu,
