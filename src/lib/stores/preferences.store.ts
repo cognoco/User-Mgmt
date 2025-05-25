@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
 import type { UserPreferences } from '@/types/database';
-import { useAuth } from '@/hooks/auth/useAuth'; // To ensure user is authenticated
+import { useAuth } from '@/lib/hooks/useAuth'; // To ensure user is authenticated
 
 export interface PreferencesState {
   preferences: UserPreferences | null;
@@ -17,7 +17,7 @@ export const usePreferencesStore = create<PreferencesState>((set) => ({
   error: null,
 
   fetchPreferences: async () => {
-    const userId = useAuthStore.getState().user?.id;
+    const userId = useAuth().user?.id;
     if (!userId) {
       // Don't set error, maybe just log or handle silently 
       // as this might be called when user is not logged in yet.
@@ -41,7 +41,7 @@ export const usePreferencesStore = create<PreferencesState>((set) => ({
   },
 
   updatePreferences: async (data: Partial<UserPreferences>): Promise<boolean> => {
-    const userId = useAuthStore.getState().user?.id;
+    const userId = useAuth().user?.id;
     if (!userId) {
        set({ error: 'User not authenticated to update preferences' });
        return false;

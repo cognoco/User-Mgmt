@@ -6,7 +6,7 @@ import {
     Profile,
 } from '@/types/profile';
 import { fileToBase64 } from '@/lib/utils/file-upload';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 import { Profile as DbProfile } from '@/types/database';
 import type { ProfileVerification } from '@/types/profile';
@@ -40,7 +40,7 @@ export const useProfileStore = create<ExtendedProfileState & {
 
   fetchProfile: async () => {
     set({ isLoading: true, error: null });
-    const userId = useAuthStore.getState().user?.id;
+    const userId = useAuth().user?.id;
     if (!userId) {
       set({ error: 'User not authenticated', isLoading: false });
       return;
