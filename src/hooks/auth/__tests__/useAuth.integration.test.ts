@@ -3,8 +3,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useAuth } from '../useAuth';
 import { UserManagementConfiguration } from '@/core/config';
 import type { AuthService } from '@/core/auth/interfaces';
-import type { AuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import type { AuthDataProvider } from '@/adapters/auth/interfaces';
 import { DefaultAuthService } from '@/services/auth/default-auth.service';
+import type { AuthStorage } from '@/services/auth/auth-storage';
 
 // helper to build minimal auth service mocks
 function createMockAuthService(): AuthService {
@@ -95,14 +96,17 @@ describe('useAuth integration', () => {
 
   it('handles API responses and errors from the service', async () => {
     const adapter = createMockAdapter();
-    const apiClient = {
-      post: vi
-        .fn()
-        .mockResolvedValueOnce({ data: { user: { id: '3', email: 'c@test.com' }, token: 'tok' } })
-        .mockRejectedValueOnce({ response: { data: { error: 'Invalid credentials' } } }),
-    } as any;
+    const storage: AuthStorage = {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn()
+    };
 
-    const service = new DefaultAuthService(apiClient, adapter);
+    (adapter.login as any)
+      .mockResolvedValueOnce({ success: true, user: { id: '3', email: 'c@test.com' }, token: 'tok' })
+      .mockResolvedValueOnce({ success: false, error: 'Invalid credentials' });
+
+    const service = new DefaultAuthService(adapter, storage);
     UserManagementConfiguration.configureServiceProviders({ authService: service });
 
     const { result } = renderHook(() => useAuth());
@@ -114,7 +118,7 @@ describe('useAuth integration', () => {
       await result.current.login({ email: 'c@test.com', password: 'good' });
     });
 
-    expect(apiClient.post).toHaveBeenCalledWith('/api/auth/login', { email: 'c@test.com', password: 'good' });
+    expect(adapter.login).toHaveBeenCalledWith({ email: 'c@test.com', password: 'good' });
 
     await act(async () => {
       await result.current.login({ email: 'c@test.com', password: 'bad' });

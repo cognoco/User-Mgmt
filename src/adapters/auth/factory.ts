@@ -5,7 +5,7 @@
  * It allows for dependency injection and makes it easy to swap implementations.
  */
 
-import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import type { IAuthDataProvider } from './interfaces';
 import { SupabaseAuthProvider } from './supabase-auth-provider';
 
 /**

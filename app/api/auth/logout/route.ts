@@ -19,7 +19,7 @@ async function handleLogout(req: NextRequest) {
   }
 
   const authService = getApiAuthService();
-  const currentUser = authService.getCurrentUser();
+  const currentUser = await authService.getCurrentUser();
   const userId = currentUser?.id;
 
   await authService.logout();
