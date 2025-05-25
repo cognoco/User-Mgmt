@@ -11,6 +11,7 @@ import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
 import type { AuthStorage } from './auth-storage';
 import { BrowserAuthStorage } from './auth-storage';
 
+
 /**
  * Configuration options for creating an AuthService
  */

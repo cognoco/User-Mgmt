@@ -6,7 +6,7 @@
  */
 
 import { AuthService } from '@/core/auth/interfaces';
-import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import type { IAuthDataProvider } from '@/adapters/auth/interfaces';
 import { DefaultAuthService } from './default-auth.service';
 import type { AuthStorage } from './auth-storage';
 import { BrowserAuthStorage } from './auth-storage';

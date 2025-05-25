@@ -11,7 +11,7 @@ import {
 AuthService,
 AuthState
 } from '@/core/auth/interfaces';
-import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import type { IAuthDataProvider } from '@/adapters/auth/interfaces';
 import { 
   AuthResult, 
   LoginPayload, 
