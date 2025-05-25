@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { TestWrapper } from '../../../../tests/utils/test-wrapper';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { AuditLogViewer } from '../../../styled/audit/AuditLogViewer';
@@ -48,9 +49,13 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
+function renderWithWrapper(ui: React.ReactElement) {
+  return render(<TestWrapper authenticated>{ui}</TestWrapper>);
+}
+
 describe('AuditLogViewer (admin)', () => {
   it('renders audit logs and table headers', async () => {
-    render(<AuditLogViewer isAdmin={true} />);
+    renderWithWrapper(<AuditLogViewer isAdmin={true} />);
     expect(screen.getByText('Audit Logs')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByText('POST')).toBeInTheDocument();
@@ -61,12 +66,12 @@ describe('AuditLogViewer (admin)', () => {
   });
 
   it('shows access denied for non-admin', () => {
-    render(<AuditLogViewer isAdmin={false} />);
+    renderWithWrapper(<AuditLogViewer isAdmin={false} />);
     expect(screen.getByText(/Access denied/i)).toBeInTheDocument();
   });
 
   it('filters logs by method', async () => {
-    render(<AuditLogViewer isAdmin={true} />);
+    renderWithWrapper(<AuditLogViewer isAdmin={true} />);
     await waitFor(() => screen.getByText('POST'));
     await act(async () => {
       fireEvent.change(screen.getByLabelText('Method'), { target: { value: 'DELETE' } });
@@ -77,7 +82,7 @@ describe('AuditLogViewer (admin)', () => {
   });
 
   it('handles export as CSV', async () => {
-    render(<AuditLogViewer isAdmin={true} />);
+    renderWithWrapper(<AuditLogViewer isAdmin={true} />);
     await waitFor(() => screen.getByText('Audit Logs'));
     const exportButton = screen.getByRole('button', { name: /Export options/i });
     await act(async () => {
@@ -92,7 +97,7 @@ describe('AuditLogViewer (admin)', () => {
   });
 
   it('shows log details modal on row click', async () => {
-    render(<AuditLogViewer isAdmin={true} />);
+    renderWithWrapper(<AuditLogViewer isAdmin={true} />);
     await waitFor(() => screen.getByText('POST'));
     const row = screen.getByRole('row', { name: /Log entry from/i });
     await act(async () => {
@@ -108,7 +113,7 @@ describe('AuditLogViewer (admin)', () => {
         HttpResponse.json({ message: 'Failed to fetch audit logs' }, { status: 500 })
       )
     );
-    render(<AuditLogViewer isAdmin={true} />);
+    renderWithWrapper(<AuditLogViewer isAdmin={true} />);
     await waitFor(() => expect(screen.getByText(/Failed to fetch audit logs/i)).toBeInTheDocument());
   });
 }); 

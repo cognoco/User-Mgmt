@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
+import { TestWrapper } from '../../../../tests/utils/test-wrapper';
 import userEvent from '@testing-library/user-event';
 import { vi, MockInstance } from 'vitest';
 import { api } from '@/lib/api/axios';
@@ -20,6 +21,10 @@ vi.mock('@/ui/primitives/tooltip', () => ({
   TooltipContent: (props: any) => <div data-testid="tooltip-content">{props.children}</div>,
   TooltipProvider: (props: any) => <div data-testid="tooltip-provider">{props.children}</div>,
 }));
+
+function renderWithWrapper(ui: React.ReactElement) {
+  return render(<TestWrapper authenticated>{ui}</TestWrapper>);
+}
 
 beforeAll(() => {
   Object.defineProperty(navigator, 'clipboard', {
@@ -62,7 +67,7 @@ describe('IDPConfiguration', () => {
 
   it('renders loading state initially', async () => {
     await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
+      renderWithWrapper(<IDPConfiguration {...mockProps} />);
     });
     expect(screen.getByText(/org.sso.samlConfigTitle/i)).toBeInTheDocument();
     expect(screen.getByText(/org.sso.samlConfigDescription/i)).toBeInTheDocument();
@@ -71,7 +76,7 @@ describe('IDPConfiguration', () => {
   it('loads and displays SAML configuration', async () => {
     let result: ReturnType<typeof render> | undefined;
     await act(async () => {
-      result = render(<IDPConfiguration {...mockProps} />);
+      result = renderWithWrapper(<IDPConfiguration {...mockProps} />);
     });
 
     // Debug: log DOM and api.get calls after render and after 1s
@@ -113,7 +118,7 @@ describe('IDPConfiguration', () => {
     });
 
     await act(async () => {
-      render(<IDPConfiguration {...mockProps} idpType="oidc" />);
+      renderWithWrapper(<IDPConfiguration {...mockProps} idpType="oidc" />);
     });
 
     await waitFor(() => {
@@ -127,7 +132,7 @@ describe('IDPConfiguration', () => {
 
   it('handles certificate file upload', async () => {
     await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
+      renderWithWrapper(<IDPConfiguration {...mockProps} />);
     });
 
     await waitFor(() => {
@@ -146,7 +151,7 @@ describe('IDPConfiguration', () => {
     (api.put as unknown as MockInstance).mockResolvedValueOnce({});
     
     await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
+      renderWithWrapper(<IDPConfiguration {...mockProps} />);
     });
 
     await waitFor(() => {
@@ -174,7 +179,7 @@ describe('IDPConfiguration', () => {
     (api.get as unknown as MockInstance).mockRejectedValueOnce(new Error('Failed to fetch'));
 
     await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
+      renderWithWrapper(<IDPConfiguration {...mockProps} />);
     });
 
     await waitFor(() => {
@@ -186,7 +191,7 @@ describe('IDPConfiguration', () => {
     (api.put as unknown as MockInstance).mockRejectedValueOnce(new Error('Failed to save'));
 
     await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
+      renderWithWrapper(<IDPConfiguration {...mockProps} />);
     });
 
     await waitFor(() => {
@@ -204,7 +209,7 @@ describe('IDPConfiguration', () => {
 
   it('switches between configuration and metadata tabs', async () => {
     await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
+      renderWithWrapper(<IDPConfiguration {...mockProps} />);
     });
 
     await waitFor(() => {
@@ -222,7 +227,7 @@ describe('IDPConfiguration', () => {
 
   it('validates required fields for SAML configuration', async () => {
     await act(async () => {
-      render(<IDPConfiguration {...mockProps} />);
+      renderWithWrapper(<IDPConfiguration {...mockProps} />);
     });
 
     await waitFor(() => {
@@ -251,7 +256,7 @@ describe('IDPConfiguration', () => {
     });
 
     await act(async () => {
-      render(<IDPConfiguration {...mockProps} idpType="oidc" />);
+      renderWithWrapper(<IDPConfiguration {...mockProps} idpType="oidc" />);
     });
 
     await waitFor(() => {

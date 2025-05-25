@@ -1,6 +1,7 @@
 import '@/tests/i18nTestSetup';
 import React from 'react';
 import { render, screen, waitFor, act, cleanup } from '@testing-library/react';
+import { TestWrapper } from '../../../../tests/utils/test-wrapper';
 import userEvent from '@testing-library/user-event';
 import { vi, Mock } from 'vitest';
 import { api } from '@/lib/api/axios';
@@ -20,6 +21,10 @@ vi.mock('@/ui/primitives/tooltip', () => ({
   TooltipContent: (props: any) => <div data-testid="tooltip-content">{props.children}</div>,
   TooltipProvider: (props: any) => <div data-testid="tooltip-provider">{props.children}</div>,
 }));
+
+function renderWithWrapper(ui: React.ReactElement) {
+  return render(<TestWrapper authenticated>{ui}</TestWrapper>);
+}
 
 describe('OrganizationSSO', () => {
   const mockOrgId = 'org123';
@@ -51,7 +56,7 @@ describe('OrganizationSSO', () => {
 
   it('renders BusinessSSOSetup initially', async () => {
     await act(async () => {
-      render(<OrganizationSSO orgId={mockOrgId} />);
+      renderWithWrapper(<OrganizationSSO orgId={mockOrgId} />);
     });
     expect(screen.getByText('Single Sign-On')).toBeInTheDocument();
     expect(screen.getByText('Configure SSO for your organization')).toBeInTheDocument();
@@ -59,7 +64,7 @@ describe('OrganizationSSO', () => {
 
   it('does not show IDP Configuration when SSO is disabled', async () => {
     await act(async () => {
-      render(<OrganizationSSO orgId={mockOrgId} />);
+      renderWithWrapper(<OrganizationSSO orgId={mockOrgId} />);
     });
     
     await waitFor(() => {
@@ -87,7 +92,7 @@ describe('OrganizationSSO', () => {
       return Promise.reject(new Error('Not found'));
     });
 
-    render(<OrganizationSSO orgId={mockOrgId} />);
+    renderWithWrapper(<OrganizationSSO orgId={mockOrgId} />);
 
     // TESTING_ISSUES.md: Wait for SAML-specific help text which confirms configuration loaded
     await waitFor(() => {
@@ -130,7 +135,7 @@ describe('OrganizationSSO', () => {
       return Promise.reject(new Error('Not found'));
     });
 
-    render(<OrganizationSSO orgId={mockOrgId} />);
+    renderWithWrapper(<OrganizationSSO orgId={mockOrgId} />);
 
     // TESTING_ISSUES.md: Wait for OIDC-specific help text which confirms configuration loaded
     await waitFor(() => {
@@ -165,7 +170,7 @@ describe('OrganizationSSO', () => {
       return Promise.reject(new Error('Not found'));
     });
 
-    render(<OrganizationSSO orgId={mockOrgId} />);
+    renderWithWrapper(<OrganizationSSO orgId={mockOrgId} />);
 
     // Initially, IDP Configuration should not be visible
     expect(screen.queryByText('SAML Configuration')).not.toBeInTheDocument();
@@ -212,7 +217,7 @@ describe('OrganizationSSO', () => {
 
   it('does not show status indicator when SSO is disabled', async () => {
     await act(async () => {
-      render(<OrganizationSSO orgId={mockOrgId} />);
+      renderWithWrapper(<OrganizationSSO orgId={mockOrgId} />);
     });
     expect(screen.queryByText('Healthy')).not.toBeInTheDocument();
   });
@@ -237,7 +242,7 @@ describe('OrganizationSSO', () => {
       return Promise.reject(new Error('Not found'));
     });
 
-    render(<OrganizationSSO orgId={mockOrgId} />);
+    renderWithWrapper(<OrganizationSSO orgId={mockOrgId} />);
 
     await waitFor(() => {
       // TESTING_ISSUES.md: Match heading text with "healthy" in it
@@ -285,7 +290,7 @@ describe('OrganizationSSO', () => {
       return Promise.reject(new Error('Not found'));
     });
 
-    render(<OrganizationSSO orgId={mockOrgId} />);
+    renderWithWrapper(<OrganizationSSO orgId={mockOrgId} />);
     await waitFor(() => {
       // TESTING_ISSUES.md: Match heading with "warning" in it
       const warningHeadings = screen.getAllByText((content: string, node: Element | null): boolean => {
@@ -326,7 +331,7 @@ describe('OrganizationSSO', () => {
       return Promise.reject(new Error('Not found'));
     });
 
-    render(<OrganizationSSO orgId={mockOrgId} />);
+    renderWithWrapper(<OrganizationSSO orgId={mockOrgId} />);
     
     await waitFor(() => {
       // TESTING_ISSUES.md: Use getAllByRole for heading elements with "error" text
@@ -386,7 +391,7 @@ describe('OrganizationSSO', () => {
         return Promise.reject(new Error('Not found'));
       });
 
-      render(<OrganizationSSO orgId={mockOrgId} />);
+      renderWithWrapper(<OrganizationSSO orgId={mockOrgId} />);
 
       // Wait for initial API calls to complete
       await waitFor(() => {

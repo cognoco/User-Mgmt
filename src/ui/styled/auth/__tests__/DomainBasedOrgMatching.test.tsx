@@ -1,6 +1,7 @@
 import '@/tests/i18nTestSetup';
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
+import { TestWrapper } from '../../../../tests/utils/test-wrapper';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DomainBasedOrgMatching } from '@/ui/styled/auth/DomainBasedOrgMatching';
@@ -262,6 +263,10 @@ vi.mock('@/ui/primitives/skeleton', () => ({
   ),
 }));
 
+function renderWithWrapper(ui: React.ReactElement) {
+  return render(<TestWrapper authenticated>{ui}</TestWrapper>);
+}
+
 describe('DomainBasedOrgMatching', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -290,7 +295,7 @@ describe('DomainBasedOrgMatching', () => {
 
   it('renders the component with initial state', async () => {
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     await waitFor(() => {
@@ -311,7 +316,7 @@ describe('DomainBasedOrgMatching', () => {
     mockApiGet.mockImplementationOnce(() => new Promise(resolve => setTimeout(resolve, 100)));
     
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
     
     const skeletons = screen.getAllByTestId(/skeleton/);
@@ -334,7 +339,7 @@ describe('DomainBasedOrgMatching', () => {
     });
 
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     await waitFor(() => {
@@ -357,7 +362,7 @@ describe('DomainBasedOrgMatching', () => {
 
   it('toggles domains matching when switch is clicked', async () => {
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     await waitFor(() => {
@@ -389,7 +394,7 @@ describe('DomainBasedOrgMatching', () => {
     });
 
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     await waitFor(() => {
@@ -418,7 +423,7 @@ describe('DomainBasedOrgMatching', () => {
     }));
 
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     // Fill and submit form
@@ -463,7 +468,7 @@ describe('DomainBasedOrgMatching', () => {
     });
 
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     await waitFor(() => {
@@ -497,7 +502,7 @@ describe('DomainBasedOrgMatching', () => {
     });
 
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     // Fill and submit form
@@ -538,7 +543,7 @@ describe('DomainBasedOrgMatching', () => {
     });
 
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     // Fill and submit form
@@ -580,7 +585,7 @@ describe('DomainBasedOrgMatching', () => {
     });
 
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     await waitFor(() => {
@@ -604,7 +609,7 @@ describe('DomainBasedOrgMatching', () => {
 
   it('validates domain format before submission', async () => {
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     // Type an invalid domain
@@ -670,7 +675,7 @@ describe('DomainBasedOrgMatching', () => {
     });
     
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
     
     await waitFor(() => {
@@ -688,7 +693,7 @@ describe('DomainBasedOrgMatching', () => {
     }));
 
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     // Should show skeletons while loading
@@ -709,7 +714,7 @@ describe('DomainBasedOrgMatching', () => {
 
   it('validates domain format on blur', async () => {
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     const input = screen.getByTestId('input');
@@ -726,7 +731,7 @@ describe('DomainBasedOrgMatching', () => {
 
   it('shows form-level validation message on submit with invalid domain', async () => {
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     const input = screen.getByTestId('input');
@@ -746,7 +751,7 @@ describe('DomainBasedOrgMatching', () => {
 
   it('handles successful form submission', async () => {
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     const input = screen.getByTestId('input');
@@ -782,7 +787,7 @@ describe('DomainBasedOrgMatching', () => {
     mockApiPost.mockImplementationOnce(() => new Promise(resolve => setTimeout(resolve, 100)));
 
     await act(async () => {
-      render(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
+      renderWithWrapper(<DomainBasedOrgMatching organizationId="test-org" organizationName="Test Org" />);
     });
 
     // Fill and submit form
