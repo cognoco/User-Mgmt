@@ -2,24 +2,27 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import ProfileForm from '../ProfileForm';
-import { useProfileStore } from '@/lib/stores/profile.store';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { api } from '@/lib/api/axios';
+import { TestWrapper } from '../../../../tests/utils/test-wrapper';
+import { MockAuthService } from '../../../../services/auth/__tests__/mocks/mock-auth-service';
 
-// Mock dependencies
+vi.unmock('@/hooks/auth/useAuth');
+
+// Dynamically replace useProfileStore with a mock store instance per test
+let useProfileStoreMock: any;
 vi.mock('@/lib/stores/profile.store', () => ({
-  useProfileStore: vi.fn(),
+  get useProfileStore() {
+    return useProfileStoreMock;
+  },
 }));
 
-vi.mock('@/hooks/auth/useAuth', () => ({
-  useAuth: vi.fn(),
-}));
-
+// Mock axios instance so we can verify API calls
 vi.mock('@/lib/api/axios', () => ({
   api: {
     put: vi.fn(),
   },
 }));
+
+import { api } from '@/lib/api/axios';
 
 describe('Headless ProfileForm Component', () => {
   const mockProfile = {
@@ -36,30 +39,40 @@ describe('Headless ProfileForm Component', () => {
     is_public: true,
   };
 
-  const mockFetchProfile = vi.fn();
-  const mockUpdateProfile = vi.fn();
-
+  let mockFetchProfile: any;
+  let mockUpdateProfile: any;
+  let mockAuthService: MockAuthService;
+  
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Setup useProfileStore mock
-    (useProfileStore as any).mockImplementation((selector) => {
-      const store = {
-        profile: mockProfile,
-        isLoading: false,
-        error: null,
-        fetchProfile: mockFetchProfile,
-        updateProfile: mockUpdateProfile,
-      };
-      return selector(store);
+    mockFetchProfile = vi.fn();
+    mockUpdateProfile = vi.fn();
+
+    mockAuthService = new MockAuthService();
+    mockAuthService.setMockUser({
+      id: 'user-123',
+      email: 'test@example.com',
+      name: 'Test User',
+      emailVerified: true,
     });
 
-    // Setup useAuth mock
-    (useAuth as any).mockReturnValue({
-      user: { email: 'test@example.com' },
-    });
+    const store = {
+      profile: mockProfile,
+      isLoading: false,
+      error: null,
+      fetchProfile: mockFetchProfile,
+      updateProfile: mockUpdateProfile,
+    };
 
-    // Setup api mock
+    useProfileStoreMock = (selector: any) =>
+      selector ? selector(store) : store;
+    useProfileStoreMock.setState = (partial: any) => {
+      Object.assign(store, partial);
+    };
+    useProfileStoreMock.getState = () => store;
+
+    // Setup api mock response
     (api.put as any).mockResolvedValue({
       data: {
         is_public: false,
@@ -68,25 +81,34 @@ describe('Headless ProfileForm Component', () => {
     });
   });
 
-  it('renders with children function and provides correct props', () => {
+  it('renders with children function and provides correct props', async () => {
     const childrenMock = vi.fn().mockReturnValue(<div>Test Child</div>);
     
-    render(<ProfileForm>{childrenMock}</ProfileForm>);
-    
-    expect(childrenMock).toHaveBeenCalledTimes(1);
-    
-    const props = childrenMock.mock.calls[0][0];
-    expect(props.profile).toEqual(mockProfile);
-    expect(props.isLoading).toBe(false);
-    expect(props.isEditing).toBe(false);
-    expect(typeof props.handleEditToggle).toBe('function');
-    expect(typeof props.handlePrivacyChange).toBe('function');
-    expect(typeof props.onSubmit).toBe('function');
-    expect(props.userEmail).toBe('test@example.com');
+    render(
+      <TestWrapper authenticated customServices={{ authService: mockAuthService }}>
+        <ProfileForm>{childrenMock}</ProfileForm>
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(childrenMock).toHaveBeenCalled();
+      const props = childrenMock.mock.calls.at(-1)[0];
+      expect(props.profile).toEqual(mockProfile);
+      expect(props.isLoading).toBe(false);
+      expect(props.isEditing).toBe(false);
+      expect(typeof props.handleEditToggle).toBe('function');
+      expect(typeof props.handlePrivacyChange).toBe('function');
+      expect(typeof props.onSubmit).toBe('function');
+      expect(props.userEmail).toBe('test@example.com');
+    });
   });
 
   it('fetches profile on mount', () => {
-    render(<ProfileForm>{() => <div>Test</div>}</ProfileForm>);
+    render(
+      <TestWrapper authenticated customServices={{ authService: mockAuthService }}>
+        <ProfileForm>{() => <div>Test</div>}</ProfileForm>
+      </TestWrapper>
+    );
     
     expect(mockFetchProfile).toHaveBeenCalledTimes(1);
   });
@@ -95,14 +117,16 @@ describe('Headless ProfileForm Component', () => {
     let editingState = false;
     
     render(
-      <ProfileForm>
-        {(props) => {
-          editingState = props.isEditing;
-          return (
-            <button onClick={props.handleEditToggle}>Toggle Edit</button>
-          );
-        }}
-      </ProfileForm>
+      <TestWrapper authenticated customServices={{ authService: mockAuthService }}>
+        <ProfileForm>
+          {(props) => {
+            editingState = props.isEditing;
+            return (
+              <button onClick={props.handleEditToggle}>Toggle Edit</button>
+            );
+          }}
+        </ProfileForm>
+      </TestWrapper>
     );
     
     expect(editingState).toBe(false);
@@ -128,11 +152,13 @@ describe('Headless ProfileForm Component', () => {
     };
     
     render(
-      <ProfileForm>
-        {(props) => (
-          <button onClick={() => props.onSubmit(formData)}>Submit</button>
-        )}
-      </ProfileForm>
+      <TestWrapper authenticated customServices={{ authService: mockAuthService }}>
+        <ProfileForm>
+          {(props) => (
+            <button onClick={() => props.onSubmit(formData)}>Submit</button>
+          )}
+        </ProfileForm>
+      </TestWrapper>
     );
     
     fireEvent.click(screen.getByText('Submit'));
@@ -144,13 +170,15 @@ describe('Headless ProfileForm Component', () => {
 
   it('calls api.put when handlePrivacyChange is called', async () => {
     render(
-      <ProfileForm>
-        {(props) => (
-          <button onClick={() => props.handlePrivacyChange(false)}>
-            Change Privacy
-          </button>
-        )}
-      </ProfileForm>
+      <TestWrapper authenticated customServices={{ authService: mockAuthService }}>
+        <ProfileForm>
+          {(props) => (
+            <button onClick={() => props.handlePrivacyChange(false)}>
+              Change Privacy
+            </button>
+          )}
+        </ProfileForm>
+      </TestWrapper>
     );
     
     fireEvent.click(screen.getByText('Change Privacy'));
@@ -162,16 +190,18 @@ describe('Headless ProfileForm Component', () => {
 
   it('updates profile state when privacy is changed', async () => {
     const setState = vi.fn();
-    (useProfileStore as any).setState = setState;
-    
+    (useProfileStoreMock as any).setState = setState;
+
     render(
-      <ProfileForm>
-        {(props) => (
-          <button onClick={() => props.handlePrivacyChange(false)}>
-            Change Privacy
-          </button>
-        )}
-      </ProfileForm>
+      <TestWrapper authenticated customServices={{ authService: mockAuthService }}>
+        <ProfileForm>
+          {(props) => (
+            <button onClick={() => props.handlePrivacyChange(false)}>
+              Change Privacy
+            </button>
+          )}
+        </ProfileForm>
+      </TestWrapper>
     );
     
     fireEvent.click(screen.getByText('Change Privacy'));
