@@ -5,13 +5,11 @@
  */
 
 import { useAuth } from '@/hooks/auth/useAuth';
-import type { 
-  AuthState, 
-  LoginPayload, 
-  RegistrationPayload, 
-  User, 
+import type {
+  LoginPayload,
+  RegistrationPayload,
+  User,
   AuthResult,
-  RateLimitInfo,
   MFASetupResponse,
   MFAVerifyResponse
 } from '@/core/auth/models';

@@ -1,7 +1,7 @@
 // __tests__/integration/account-switching-flow.test.tsx
 import { vi, beforeEach, describe, expect, test, afterEach } from 'vitest';
 import '@/tests/i18nTestSetup';
-import { supabase, setTableMockData } from '@/tests/mocks/supabase';
+import { setTableMockData } from '@/tests/mocks/supabase';
 
 // IMPORTANT: vi.mock must be at the top, BEFORE any variable declarations
 vi.mock('@/lib/database/supabase', async () => await import('../../tests/mocks/supabase'));

@@ -5,7 +5,7 @@
  * It provides the default implementation for authentication operations.
  */
 
-import { AuthService, AuthState } from "@/core/auth/interfaces";
+import { AuthService } from "@/core/auth/interfaces";
 import type { IAuthDataProvider } from "@/core/auth/IAuthDataProvider";
 import { 
   AuthResult, 
@@ -15,7 +15,7 @@ import {
   RegistrationPayload, 
   User 
 } from '@/core/auth/models';
-import { AuthEventHandler, AuthEventTypes } from '@/core/auth/events';
+import { AuthEventTypes } from '@/core/auth/events';
 import { translateError } from '@/lib/utils/error';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
 import type { SessionTracker } from './session-tracker';

@@ -20,9 +20,7 @@ import {
   TeamMemberResult,
   TeamInvitationResult,
   TeamSearchParams,
-  TeamSearchResult,
-  InvitationStatus,
-  TeamVisibility
+  TeamSearchResult
 } from '@/core/team/models';
 import { TeamEventType } from '@/core/team/events';
 import type { TeamDataProvider } from '@/core/team/ITeamDataProvider';

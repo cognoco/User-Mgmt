@@ -15,7 +15,7 @@ const createUserSchema = z.object({
 const getUserHandler = createApiHandler({
   methods: ['GET'],
   requiresAuth: true,
-  async handler(req, res) {
+  async handler(req) {
     const { id } = req.query;
     
     // Validate user ID
@@ -32,7 +32,7 @@ const getUserHandler = createApiHandler({
     }
 
     // Omit sensitive data before sending response
-    const { password, ...safeUser } = user;
+    const { password: _password, ...safeUser } = user;
     return safeUser;
   },
 });
@@ -42,7 +42,7 @@ const updateUserHandler = createApiHandler({
   methods: ['PATCH'],
   requiresAuth: true,
   // schema: createUserSchema.partial(), // Uncomment and use with validation
-  async handler(req, res) {
+  async handler(req) {
     const { id } = req.query;
     const updateData = req.body;
 
@@ -63,7 +63,7 @@ const updateUserHandler = createApiHandler({
     const userService = getApiUserService();
     const updatedUser = await userService.updateUser(idValidation.data, dataValidation.data);
     
-    const { password, ...safeUser } = updatedUser;
+    const { password: _password, ...safeUser } = updatedUser;
     return safeUser;
   },
 });
@@ -73,7 +73,7 @@ const deleteUserHandler = createApiHandler({
   methods: ['DELETE'],
   requiresAuth: true,
   requiredRoles: ['admin'],
-  async handler(req, res) {
+  async handler(req) {
     const { id } = req.query;
     
     const validation = userIdSchema.safeParse(id);

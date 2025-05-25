@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { randomBytes } from 'crypto';
-import { ApiError, ERROR_CODES, createErrorResponse } from '@/lib/api/common';
+import { ApiError, ERROR_CODES } from '@/lib/api/common';
 
 /**
  * Configuration options for the {@link csrf} middleware.
