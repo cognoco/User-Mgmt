@@ -1,6 +1,7 @@
 import { setupI18n } from './i18n-setup';
 import * as dotenv from 'dotenv';
 import { ensureUserExists } from './user-setup';
+import { startMsw, stopMsw } from './msw-supabase';
 
 // Load environment variables
 dotenv.config();
@@ -14,13 +15,16 @@ const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
 export default async () => {
   // Setup i18n
   await setupI18n();
-  
+
+  const useSupabase = process.env.E2E_USE_SUPABASE === 'true';
+
   // Check if Supabase credentials are available
-  const hasSupabaseConfig = process.env.NEXT_PUBLIC_SUPABASE_URL && 
-                         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
-                         process.env.SUPABASE_SERVICE_ROLE_KEY;
-  
-  if (hasSupabaseConfig) {
+  const hasSupabaseConfig =
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+    process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (useSupabase && hasSupabaseConfig) {
     try {
       console.log('Setting up test users in Supabase for E2E tests...');
       
@@ -43,7 +47,17 @@ export default async () => {
       console.warn('E2E tests requiring authentication might fail.');
     }
   } else {
-    console.warn('Supabase configuration missing. Cannot create test users.');
-    console.warn('E2E tests requiring authentication will be skipped.');
+    if (!useSupabase) {
+      console.log('E2E_USE_SUPABASE not enabled. Starting MSW supabase mocks.');
+      await startMsw();
+    } else {
+      console.warn('Supabase configuration missing. Cannot create test users.');
+      console.warn('E2E tests requiring authentication will be skipped.');
+    }
   }
-}; 
+  return async () => {
+    if (!useSupabase) {
+      await stopMsw();
+    }
+  };
+};

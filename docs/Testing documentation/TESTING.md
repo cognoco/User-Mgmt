@@ -50,6 +50,21 @@
 - **E2E:** `pnpm e2e` or `playwright test` (see Playwright config for details).
 - **Coverage:** `pnpm test --coverage` (thresholds enforced in CI).
 
+### Toggling Supabase for E2E
+The E2E suite can run entirely with mocks or against a real Supabase backend.
+
+1. **Default (Mocks Only)**
+   - `E2E_USE_SUPABASE` is set to `false` in `.env.example` and CI.
+   - Playwright global setup starts an MSW server that mocks Supabase endpoints.
+   - Use this mode when developing locally or when the backend is unavailable.
+
+2. **Real Supabase**
+   - Export `E2E_USE_SUPABASE=true` along with your Supabase credentials.
+   - Global setup will create test users using the service role key.
+   - Be aware that tests may modify data in your project; use a dedicated test project.
+
+If setup fails (missing credentials or network issues), tests log the error but continue so they can be skipped or fail gracefully.
+
 ## Test Skeletons & Utilities
 - Templates for new tests are in `src/tests/integration/` and `src/tests/__helpers__/`.
 - Use `renderWithProviders` for all component/integration tests.
