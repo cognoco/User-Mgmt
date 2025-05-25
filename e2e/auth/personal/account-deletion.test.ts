@@ -295,3 +295,5 @@ test.describe('2.5: Account Deletion', () => {
     // ... (rest of the code remains the same)
   });
 });
+
+export {};
