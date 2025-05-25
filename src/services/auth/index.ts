@@ -8,6 +8,8 @@
 import { AuthService } from '@/core/auth/interfaces';
 import { DefaultAuthService } from './default-auth.service';
 import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import type { AuthStorage } from './auth-storage';
+import { BrowserAuthStorage } from './auth-storage';
 
 /**
  * Configuration options for creating an AuthService
@@ -17,6 +19,7 @@ export interface AuthServiceConfig {
    * Auth data provider for database operations
    */
   authDataProvider: IAuthDataProvider;
+  storage?: AuthStorage;
 }
 
 /**
@@ -26,7 +29,10 @@ export interface AuthServiceConfig {
  * @returns An instance of the AuthService
  */
 export function createAuthService(config: AuthServiceConfig): AuthService {
-  return new DefaultAuthService(config.authDataProvider);
+  return new DefaultAuthService(
+    config.authDataProvider,
+    config.storage ?? new BrowserAuthStorage()
+  );
 }
 
 /**
@@ -35,3 +41,6 @@ export function createAuthService(config: AuthServiceConfig): AuthService {
 export default {
   createAuthService
 };
+
+export { BrowserAuthStorage };
+export type { AuthStorage };

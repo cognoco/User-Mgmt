@@ -8,6 +8,8 @@
 import { AuthService } from '@/core/auth/interfaces';
 import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
 import { DefaultAuthService } from './default-auth.service';
+import type { AuthStorage } from './auth-storage';
+import { BrowserAuthStorage } from './auth-storage';
 import { AdapterRegistry } from '@/adapters/registry';
 
 /**
@@ -15,9 +17,11 @@ import { AdapterRegistry } from '@/adapters/registry';
  *
  * @returns New AuthService instance
  */
-export function getApiAuthService(): AuthService {
+export function getApiAuthService(
+  storage: AuthStorage = new BrowserAuthStorage()
+): AuthService {
   const authDataProvider =
     AdapterRegistry.getInstance().getAdapter<IAuthDataProvider>('auth');
 
-  return new DefaultAuthService(authDataProvider);
+  return new DefaultAuthService(authDataProvider, storage);
 }

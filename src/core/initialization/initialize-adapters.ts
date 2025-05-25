@@ -6,7 +6,8 @@
  */
 
 import { createAdapterFactory, validateAdapterConfig } from '@/core/config/adapter-config';
-import { DefaultAuthService } from '@/services/auth/default-auth-service';
+import { DefaultAuthService } from '@/services/auth/default-auth.service';
+import { BrowserAuthStorage } from '@/services/auth/auth-storage';
 import { DefaultUserService } from '@/services/user/default-user-service';
 import { DefaultTeamService } from '@/services/team/default-team-service';
 import { DefaultOrganizationService } from '@/services/organization/default-organization.service';
@@ -90,7 +91,8 @@ export function initializeAdapters(
     registry.registerAdapter('sso', ssoAdapter);
     
     // Create service instances with the adapters
-    const authService = new DefaultAuthService(authAdapter);
+    const storage = new BrowserAuthStorage();
+    const authService = new DefaultAuthService(authAdapter, storage);
     const userService = new DefaultUserService(userAdapter);
     const teamService = new DefaultTeamService(teamAdapter);
     const organizationService = organizationAdapter ? new DefaultOrganizationService(organizationAdapter) : undefined;
