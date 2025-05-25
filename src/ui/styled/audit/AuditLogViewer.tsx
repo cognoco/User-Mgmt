@@ -1,10 +1,10 @@
 "use client";
 
 import { format } from 'date-fns';
-import { Calendar } from '@/components/ui/calendar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from '@/ui/primitives/calendar';
+import { Button } from '@/ui/primitives/button';
+import { Input } from '@/ui/primitives/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/primitives/select';
 import {
   Table,
   TableBody,
@@ -12,25 +12,25 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@/ui/primitives/table';
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+} from '@/ui/primitives/pagination';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
+import { Badge } from '@/ui/primitives/badge';
 import { ChevronDown, Copy } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+} from '@/ui/primitives/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/ui/primitives/dialog';
+import { ScrollArea } from '@/ui/primitives/scroll-area';
 import { useToast } from '@/lib/hooks/use-toast';
 
 import { HeadlessAuditLogViewer, METHODS, STATUS_CODES, STATUS_BADGE } from '@/ui/headless/audit/AuditLogViewer';
@@ -183,68 +183,8 @@ export function AuditLogViewer({ isAdmin = true }: { isAdmin?: boolean }) {
                 </DropdownMenuContent>
               </DropdownMenu>
             </CardHeader>
-            <CardContent>
-              {/* Filters */}
-          <CardTitle>Audit Logs</CardTitle>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                disabled={isExporting}
-                aria-label="Export options"
-                role={isExporting ? "status" : undefined}
-              >
-                Export <ChevronDown className="ml-2 h-4 w-4" aria-hidden="true" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem
-                disabled={isExporting}
-                onClick={() => !isExporting && handleExport('csv')}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    !isExporting && handleExport('csv');
-                  }
-                }}
-                role="menuitem"
-                tabIndex={0}
-              >
-                Export as CSV
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                disabled={isExporting}
-                onClick={() => !isExporting && handleExport('json')}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    !isExporting && handleExport('json');
-                  }
-                }}
-                role="menuitem"
-                tabIndex={0}
-              >
-                Export as JSON
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                disabled={isExporting}
-                onClick={() => !isExporting && handleExport('xlsx')}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    !isExporting && handleExport('xlsx');
-                  }
-                }}
-                role="menuitem"
-                tabIndex={0}
-              >
-                Export as Excel
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </CardHeader>
-        <CardContent>
-          {/* Filters */}
+              <CardContent>
+                {/* Filters */}
           <div 
             className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
             role="search"
@@ -590,7 +530,9 @@ export function AuditLogViewer({ isAdmin = true }: { isAdmin?: boolean }) {
             </DialogClose>
           </div>
         </DialogContent>
-      </Dialog>
-    </>
+        </Dialog>
+      </>
+      )}
+    </HeadlessAuditLogViewer>
   );
-} 
+}

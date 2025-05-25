@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { AuditLogViewer } from '../../../styled/audit/AuditLogViewer';
 import { act } from 'react-dom/test-utils';
@@ -33,17 +33,15 @@ const mockLogs = [
 ];
 
 const server = setupServer(
-  rest.get('/api/audit/user-actions', (req: any, res: any, ctx: any) => {
-    return res(
-      ctx.json({
-        logs: mockLogs,
-        pagination: { page: 1, limit: 20, total: 2, totalPages: 1 },
-      })
-    );
-  }),
-  rest.get('/api/audit/user-actions/export', (req: any, res: any, ctx: any) => {
-    return res(ctx.status(200), ctx.body('csv,data'));
-  })
+  http.get('/api/audit/user-actions', () =>
+    HttpResponse.json({
+      logs: mockLogs,
+      pagination: { page: 1, limit: 20, total: 2, totalPages: 1 },
+    })
+  ),
+  http.get('/api/audit/user-actions/export', () =>
+    new HttpResponse('csv,data', { status: 200 })
+  )
 );
 
 beforeAll(() => server.listen());
@@ -106,9 +104,9 @@ describe('AuditLogViewer (admin)', () => {
 
   it('handles API error gracefully', async () => {
     server.use(
-      rest.get('/api/audit/user-actions', (req: any, res: any, ctx: any) => {
-        return res(ctx.status(500), ctx.json({ message: 'Failed to fetch audit logs' }));
-      })
+      http.get('/api/audit/user-actions', () =>
+        HttpResponse.json({ message: 'Failed to fetch audit logs' }, { status: 500 })
+      )
     );
     render(<AuditLogViewer isAdmin={true} />);
     await waitFor(() => expect(screen.getByText(/Failed to fetch audit logs/i)).toBeInTheDocument());

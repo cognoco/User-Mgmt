@@ -68,7 +68,7 @@ describe('IDPConfiguration', () => {
     expect(screen.getByText(/org.sso.samlConfigDescription/i)).toBeInTheDocument();
   });
 
-  it.only('loads and displays SAML configuration', async () => {
+  it('loads and displays SAML configuration', async () => {
     let result: ReturnType<typeof render> | undefined;
     await act(async () => {
       result = render(<IDPConfiguration {...mockProps} />);
