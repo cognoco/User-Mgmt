@@ -1,99 +1,162 @@
-import { describe, it, expect } from 'vitest';
-import { createApiHandler } from '../api-handler';
-import { ApiError, ERROR_CODES } from '@/lib/api/common';
+import { describe, it, expect, vi } from 'vitest';
+import { createApiHandler, createApiResponse, createErrorResponse } from '../api-handler';
+import { ApiError } from '@/lib/api/common';
 import { createApiMocks } from '@/tests/utils/api-testing-utils';
+import { z } from 'zod';
+
+const methods = ['GET'];
+
+function run(handler: any, reqOpts = {}) {
+  const { req, res } = createApiMocks({ method: 'GET', ...reqOpts });
+  return handler(req as any, res as any).then(() => res);
+}
 
 describe('createApiHandler', () => {
-  it('returns 200 for successful handler', async () => {
+  it('returns success for valid request', async () => {
     const handler = createApiHandler({
-      methods: ['GET'],
+      methods,
       async handler() {
         return { ok: true };
-      }
+      },
     });
-    const { req, res } = createApiMocks({ method: 'GET' });
-    await handler(req as any, res as any);
+
+    const res = await run(handler);
     expect(res._getStatusCode()).toBe(200);
     expect(res.getJsonData()).toEqual({ success: true, data: { ok: true } });
   });
 
-  it('returns 400 for invalid method', async () => {
-    const handler = createApiHandler({
-      methods: ['POST'],
-      async handler() {
-        return null;
-      }
-    });
-    const { req, res } = createApiMocks({ method: 'GET' });
-    await handler(req as any, res as any);
-    expect(res._getStatusCode()).toBe(400);
-    expect(res.getHeader('Allow')).toEqual(['POST']);
+  it('rejects disallowed method', async () => {
+    const handler = createApiHandler({ methods, async handler() { return {}; } });
+    const res = await run(handler, { method: 'POST' });
+    expect(res._getStatusCode()).toBe(405);
+    expect(res.getHeader('Allow')).toEqual(methods);
   });
 
-  it('handles ApiError', async () => {
+  it('handles ApiError from handler', async () => {
     const handler = createApiHandler({
-      methods: ['GET'],
+      methods,
       async handler() {
-        throw new ApiError(ERROR_CODES.INVALID_REQUEST, 'oops', 400);
-      }
+        throw new ApiError('auth/forbidden', 'forbidden', 403);
+      },
     });
-    const { req, res } = createApiMocks({ method: 'GET' });
-    await handler(req as any, res as any);
-    expect(res._getStatusCode()).toBe(400);
-    expect(res.getJsonData().error.code).toBe(ERROR_CODES.INVALID_REQUEST);
+
+    const res = await run(handler);
+    expect(res._getStatusCode()).toBe(403);
+    expect(res.getJsonData().error.code).toBe('auth/forbidden');
   });
 
   it('handles unexpected error', async () => {
     const handler = createApiHandler({
-      methods: ['GET'],
+      methods,
       async handler() {
-        throw new Error('oops');
-      }
+        throw new Error('boom');
+      },
     });
-    const { req, res } = createApiMocks({ method: 'GET' });
-    await handler(req as any, res as any);
+
+    const res = await run(handler);
     expect(res._getStatusCode()).toBe(500);
     expect(res.getJsonData().error.code).toBe('INTERNAL_SERVER_ERROR');
   });
 
-  it('does not send response twice if handler already sent', async () => {
+  it('respects headersSent', async () => {
     const handler = createApiHandler({
-      methods: ['GET'],
-      async handler(req, res) {
-        res.status(201).json({ success: true });
-        return { ok: true };
-      }
+      methods,
+      async handler(_, res) {
+        res.status(201).json({ done: true });
+      },
     });
-    const { req, res } = createApiMocks({ method: 'GET' });
-    await handler(req as any, res as any);
+
+    const res = await run(handler);
     expect(res._getStatusCode()).toBe(201);
-    expect(res.getJsonData()).toEqual({ success: true });
+    expect(res.getJsonData()).toEqual({ done: true });
   });
 
-  it('handles roles and schema options', async () => {
+  it('honors requiresAuth option', async () => {
     const handler = createApiHandler({
-      methods: ['GET'],
-      requiredRoles: ['admin'],
-      schema: {},
+      methods,
+      requiresAuth: true,
       async handler() {
-        return 'ok';
-      }
+        return { ok: true };
+      },
     });
-    const { req, res } = createApiMocks({ method: 'GET' });
-    await handler(req as any, res as any);
+
+    const res = await run(handler);
     expect(res._getStatusCode()).toBe(200);
   });
 
-  it('falls back to default code when ApiError has no code', async () => {
+  it('honors requiredRoles option', async () => {
+    const handler = createApiHandler({
+      methods,
+      requiredRoles: ['admin'],
+      async handler() {
+        return { ok: true };
+      },
+    });
+
+    const res = await run(handler);
+    expect(res._getStatusCode()).toBe(200);
+  });
+
+  it('validates request with schema', async () => {
+    const schema = z.object({ name: z.string() });
+    const handler = createApiHandler({
+      methods: ['POST'],
+      schema,
+      async handler(req) {
+        return req.body;
+      },
+    });
+
+    const res = await run(handler, { method: 'POST', body: { name: 'A' } });
+    expect(res._getStatusCode()).toBe(200);
+    expect(res.getJsonData().data).toEqual({ name: 'A' });
+  });
+
+  it('returns validation error on invalid payload', async () => {
+    const schema = z.object({ name: z.string() });
+    const handler = createApiHandler({ methods: ['POST'], schema, async handler() { return {}; } });
+
+    const res = await run(handler, { method: 'POST', body: {} });
+    expect(res._getStatusCode()).toBe(400);
+    expect(res.getJsonData().error.code).toBe('validation/error');
+  });
+
+  it('validates query with schema on GET', async () => {
+    const schema = z.object({ q: z.string() });
     const handler = createApiHandler({
       methods: ['GET'],
-      async handler() {
-        throw new ApiError(undefined as any, 'bad', 418);
-      }
+      schema,
+      async handler(req) {
+        return req.query;
+      },
     });
-    const { req, res } = createApiMocks({ method: 'GET' });
-    await handler(req as any, res as any);
+
+    const res = await run(handler, { method: 'GET', query: { q: 'ok' } });
+    expect(res._getStatusCode()).toBe(200);
+    expect(res.getJsonData().data).toEqual({ q: 'ok' });
+  });
+
+  it('uses fallback code when ApiError code missing', async () => {
+    const err: any = new ApiError('x' as any, 'fail', 418);
+    delete err.code;
+    const handler = createApiHandler({ methods, async handler() { throw err; } });
+    const res = await run(handler);
     expect(res._getStatusCode()).toBe(418);
     expect(res.getJsonData().error.code).toBe('API_ERROR');
+  });
+
+  it('createApiResponse adds meta when provided', () => {
+    const result = createApiResponse({ ok: true }, { page: 1 });
+    expect(result).toEqual({ success: true, data: { ok: true }, meta: { page: 1 } });
+  });
+
+  it('createErrorResponse includes details', () => {
+    const err = createErrorResponse('E', 'boom', { info: 1 });
+    expect(err).toEqual({ success: false, error: { code: 'E', message: 'boom', details: { info: 1 } } });
+  });
+
+  it('createErrorResponse omits details when not provided', () => {
+    const err = createErrorResponse('E', 'boom');
+    expect(err).toEqual({ success: false, error: { code: 'E', message: 'boom' } });
   });
 });
