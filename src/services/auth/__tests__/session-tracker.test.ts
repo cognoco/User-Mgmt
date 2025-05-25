@@ -22,7 +22,10 @@ describe('DefaultSessionTracker', () => {
   it('refreshes token from storage', async () => {
     (localStorage.getItem as any).mockReturnValue('tok');
     new DefaultSessionTracker({ refreshToken: refresh, onSessionTimeout: onTimeout });
-    await vi.runAllTimersAsync();
+    // Only flush pending microtasks to avoid running the interval in
+    // `initializeSessionCheck`, which would cause an infinite loop with
+    // `runAllTimersAsync`.
+    await vi.runAllTicks();
     expect(refresh).toHaveBeenCalled();
   });
 
