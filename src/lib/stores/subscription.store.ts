@@ -8,7 +8,12 @@ import {
 } from '@/types/subscription';
 import { useUserManagement } from '../auth/UserManagementProvider';
 
-export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
+type SubscriptionInternalState = Omit<SubscriptionState, 'hasFeature' | 'getTier'> & {
+  hasFeature: (cfg: any, featureName: string) => boolean;
+  getTier: (cfg: any) => SubscriptionTier;
+};
+
+const subscriptionStoreBase = create<SubscriptionInternalState>((set, get) => ({
   plans: [],
   userSubscription: null,
   isLoading: false,
@@ -130,18 +135,17 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   },
 
   // Helper: Check if user has access to a specific feature
-  hasFeature: (featureName: string) => {
-    const { userManagement } = useUserManagement();
+  hasFeature: (cfg: any, featureName: string) => {
     const { userSubscription, plans } = get();
-    
+
     // First check if there's a subscription config for the feature
-    const featureConfig = userManagement?.subscription?.features?.[featureName];
+    const featureConfig = cfg?.subscription?.features?.[featureName];
     
     // If no configuration exists for this feature, assume it's available to all
     if (!featureConfig) return true;
     
     // Get user's current tier
-    const currentTier = get().getTier();
+    const currentTier = get().getTier(cfg);
     
     // Check if user's tier is high enough for this feature
     const tierValues = Object.values(SubscriptionTier);
@@ -152,14 +156,13 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   },
 
   // Helper: Get user's current subscription tier
-  getTier: () => {
+  getTier: (cfg: any) => {
     const { userSubscription, plans } = get();
-    const { userManagement } = useUserManagement();
     
     // If no subscription or not active, return default tier (usually FREE)
     if (!userSubscription || 
         (userSubscription.status !== 'active' && userSubscription.status !== 'trial')) {
-      return userManagement?.subscription?.defaultTier || SubscriptionTier.FREE;
+      return cfg?.subscription?.defaultTier || SubscriptionTier.FREE;
     }
     
     // Find the plan to get its tier
@@ -187,4 +190,15 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   clearError: () => {
     set({ error: null });
   },
-})); 
+}));
+
+export function useSubscriptionStore(): SubscriptionState {
+  const store = subscriptionStoreBase();
+  const { userManagement } = useUserManagement();
+
+  return {
+    ...store,
+    hasFeature: (featureName: string) => store.hasFeature(userManagement, featureName),
+    getTier: () => store.getTier(userManagement),
+  };
+}

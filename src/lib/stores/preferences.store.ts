@@ -11,13 +11,17 @@ export interface PreferencesState {
   updatePreferences: (data: Partial<UserPreferences>) => Promise<boolean>; // Return true on success, false on error
 }
 
-export const usePreferencesStore = create<PreferencesState>((set) => ({
+type PreferencesInternalState = Omit<PreferencesState, 'fetchPreferences' | 'updatePreferences'> & {
+  fetchPreferences: (userId: string | undefined) => Promise<void>;
+  updatePreferences: (userId: string | undefined, data: Partial<UserPreferences>) => Promise<boolean>;
+};
+
+const preferencesStoreBase = create<PreferencesInternalState>((set) => ({
   preferences: null,
   isLoading: false,
   error: null,
 
-  fetchPreferences: async () => {
-    const userId = useAuth().user?.id;
+  fetchPreferences: async (userId: string | undefined) => {
     if (!userId) {
       // Don't set error, maybe just log or handle silently 
       // as this might be called when user is not logged in yet.
@@ -39,8 +43,7 @@ export const usePreferencesStore = create<PreferencesState>((set) => ({
     }
   },
 
-  updatePreferences: async (data: Partial<UserPreferences>): Promise<boolean> => {
-    const userId = useAuth().user?.id;
+  updatePreferences: async (userId: string | undefined, data: Partial<UserPreferences>): Promise<boolean> => {
     if (!userId) {
        set({ error: 'User not authenticated to update preferences' });
        return false;
@@ -74,3 +77,14 @@ export const usePreferencesStore = create<PreferencesState>((set) => ({
     }
   },
 }));
+
+export function usePreferencesStore(): PreferencesState {
+  const store = preferencesStoreBase();
+  const { user } = useAuth();
+
+  return {
+    ...store,
+    fetchPreferences: () => store.fetchPreferences(user?.id),
+    updatePreferences: (data) => store.updatePreferences(user?.id, data),
+  };
+}

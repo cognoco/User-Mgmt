@@ -23,9 +23,7 @@ export function LoginForm() {
   
   // React 19 compatibility - Use individual primitive selectors instead of object destructuring
   // This is more efficient and avoids infinite loop with getServerSnapshot in React 19
-  const login = useAuth().login;
-  const authError = useAuth().error;
-  const success = useAuth().success;
+  const { login, error: authError, success, authService } = useAuth();
   
   const [resendStatus, setResendStatus] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [showResendLink, setShowResendLink] = useState(false);
@@ -96,7 +94,6 @@ export function LoginForm() {
     }
     
     try {
-      const { authService } = useAuth();
       const result = await authService.sendVerificationEmail(email);
       if (result.success) {
           setResendStatus({ message: 'Verification email sent successfully.', type: 'success' });
@@ -112,7 +109,6 @@ export function LoginForm() {
   };
 
   const handleMfaSuccess = (user: any, token: string) => {
-    const { authService } = useAuth();
     // Update auth state with authenticated user and token
     authService.setSession?.(user, token);
     

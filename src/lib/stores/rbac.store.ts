@@ -3,7 +3,12 @@ import { api } from '@/lib/api/axios';
 import { RBACState, Role, Permission, RoleSchema, UserRoleSchema } from '../../types/rbac';
 import { useAuth } from '@/lib/hooks/useAuth';
 
-export const useRBACStore = create<RBACState>()((set, get) => ({
+type RBACInternalState = Omit<RBACState, 'hasPermission' | 'hasRole'> & {
+  hasPermission: (userId: string | undefined, permission: Permission) => boolean;
+  hasRole: (userId: string | undefined, role: Role) => boolean;
+};
+
+const rbacStoreBase = create<RBACInternalState>()((set, get) => ({
   roles: [],
   userRoles: [],
   isLoading: false,
@@ -73,15 +78,14 @@ export const useRBACStore = create<RBACState>()((set, get) => ({
     }
   },
 
-  hasPermission: (permission: Permission): boolean => {
+  hasPermission: (userId: string | undefined, permission: Permission): boolean => {
     const state = get();
-    const user = useAuth().user;
-    
-    if (!user) return false;
+
+    if (!userId) return false;
 
     // Get all roles for the current user
     const userRoleIds = state.userRoles
-      .filter((ur) => ur.userId === user.id)
+      .filter((ur) => ur.userId === userId)
       .map((ur) => ur.roleId);
 
     // Get all permissions from user's roles
@@ -92,15 +96,14 @@ export const useRBACStore = create<RBACState>()((set, get) => ({
     return userPermissions.includes(permission);
   },
 
-  hasRole: (role: Role): boolean => {
+  hasRole: (userId: string | undefined, role: Role): boolean => {
     const state = get();
-    const user = useAuth().user;
-    
-    if (!user) return false;
+
+    if (!userId) return false;
 
     // Get all roles for the current user
     const userRoleIds = state.userRoles
-      .filter((ur) => ur.userId === user.id)
+      .filter((ur) => ur.userId === userId)
       .map((ur) => ur.roleId);
 
     // Check if user has the specified role
@@ -112,4 +115,15 @@ export const useRBACStore = create<RBACState>()((set, get) => ({
   clearError: () => {
     set({ error: null });
   },
-})); 
+}));
+
+export function useRBACStore(): RBACState {
+  const store = rbacStoreBase();
+  const { user } = useAuth();
+
+  return {
+    ...store,
+    hasPermission: (permission: Permission) => store.hasPermission(user?.id, permission),
+    hasRole: (role: Role) => store.hasRole(user?.id, role),
+  };
+}
