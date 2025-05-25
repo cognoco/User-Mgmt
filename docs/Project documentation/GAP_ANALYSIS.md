@@ -20,5 +20,11 @@ This document summarises the remaining feature gaps in the User Management modul
 - Validation endpoints for company registration and tax ID are marked as TODO.
 - Some forms rely only on minimal client-side validation.
 
+## Placeholder Implementations
+- The `DefaultTwoFactorAuthService` and `SupabaseTwoFactorAuthProvider` are not implemented.
+- A `DefaultWebhookService` is missing.
+- A generic `use[DomainName]` hook template is still pending.
+- Documentation guides such as the architecture overview and integration guide remain to be written.
+
 ## References
 For a detailed list of implemented features see [Implementation-Checklist](../Product%20documentation/Implementation-Checklist.md).
