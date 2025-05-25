@@ -13,10 +13,10 @@ describe('Environment Variables', () => {
   });
 
   test('required environment variables are defined in development', async () => {
-    process.env.NODE_ENV = 'development';
-    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test-url.supabase.co';
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
-    process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-key';
+    vi.stubEnv('NODE_ENV', 'development');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://test-url.supabase.co');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'test-anon-key');
+    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'test-service-key');
 
     // Check if the environment variables are correctly set
     expect(process.env.NEXT_PUBLIC_SUPABASE_URL).toBe('https://test-url.supabase.co');
@@ -25,9 +25,9 @@ describe('Environment Variables', () => {
   });
 
   test('public variables are accessible but service key is not in client-side code', () => {
-    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test-url.supabase.co';
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
-    process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-key';
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://test-url.supabase.co');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'test-anon-key');
+    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'test-service-key');
 
     // Simulate client-side environment
     const clientEnv = {
