@@ -10,7 +10,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/primitives/tabs";
 import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
-import { formatFileSize } from '@/lib/utils/file-upload';
 import { Upload, User, Trash, Camera, Image } from 'lucide-react';
 import { getPlatformClasses } from '@/hooks/utils/usePlatformStyles';
 import HeadlessAvatarUpload from '@/ui/headless/user/AvatarUpload';
@@ -37,7 +36,6 @@ export function AvatarUpload() {
         selectedAvatarId,
         isLoadingAvatars,
         platform,
-        isNative,
         fileInputRef,
         imgRef,
         

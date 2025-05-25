@@ -106,11 +106,12 @@ export const SocialSharingComponent: React.FC<SocialSharingComponentProps> = ({
             return; 
         }
         break;
-      case 'email':
+      case 'email': {
         const subject = encodeURIComponent(`Check out: ${itemData.title}`);
         const body = encodeURIComponent(`I thought you might find this interesting:\n\n${shareUrl}`);
         url = `mailto:?subject=${subject}&body=${body}`;
         break;
+      }
     }
 
     if (url) {

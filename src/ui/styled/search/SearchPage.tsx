@@ -18,7 +18,6 @@ const SearchPage: React.FC = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
-  const [items, setItems] = useState<SearchItem[]>([]);
   const categories = ['report', 'presentation', 'spreadsheet', 'other'];
 
   const onSearch = useCallback(
@@ -40,10 +39,6 @@ const SearchPage: React.FC = () => {
     setSelectedCategories(prev =>
       prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]
     );
-  };
-
-  const handleDateApply = () => {
-    // Intentionally empty - onSearch handles updates
   };
 
   const resetFilters = (setSearchTerm: (v: string) => void) => {

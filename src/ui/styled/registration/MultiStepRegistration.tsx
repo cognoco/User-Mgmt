@@ -20,12 +20,10 @@ const registrationSchema = z.object({
   }),
 });
 
-type RegistrationData = z.infer<typeof registrationSchema>;
 
 const steps = ['Account', 'Profile', 'Verification', 'Terms'];
 
 export function MultiStepRegistration() {
-  const { t } = useTranslation();
   const [verificationCode, setVerificationCode] = useState('');
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
@@ -70,12 +68,6 @@ export function MultiStepRegistration() {
       onComplete={handleComplete}
       render={({ currentStep, next, back, setValue, values, handleSubmit }) => {
         const progress = ((currentStep + 1) / steps.length) * 100;
-        
-        const handleNext = () => {
-          if (validateStep(currentStep, values)) {
-            next();
-          }
-        };
         
         const renderStep = () => {
           switch (currentStep) {

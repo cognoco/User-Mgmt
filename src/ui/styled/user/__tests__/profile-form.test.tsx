@@ -1,6 +1,5 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { ProfileForm } from '../ProfileForm';
 import HeadlessProfileForm from '@/ui/headless/user/ProfileForm';
@@ -8,7 +7,7 @@ import HeadlessProfileForm from '@/ui/headless/user/ProfileForm';
 // Mock the headless component
 vi.mock('@/ui/headless/user/ProfileForm', () => {
   return {
-    default: ({ children }: { children: Function }) => {
+    default: ({ children }: { children: (props: any) => React.ReactNode }) => {
       const mockProfile = {
         id: 'test-id',
         bio: 'Test bio',

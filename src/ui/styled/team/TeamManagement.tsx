@@ -55,9 +55,6 @@ interface TeamLicense {
   members: TeamMember[];
 }
 
-interface ApiError {
-  message: string;
-}
 
 async function fetchTeamLicense(): Promise<TeamLicense> {
   const response = await fetch('/api/subscriptions/team/license');

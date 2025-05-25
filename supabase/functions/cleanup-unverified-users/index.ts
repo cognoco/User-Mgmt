@@ -43,7 +43,8 @@ Deno.serve(async (req) => {
     let page = 0;
     const pageSize = 100; // Adjust page size as needed
 
-    while (true) {
+    let hasMore = true;
+    while (hasMore) {
       const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers({
           page: page + 1, // API uses 1-based indexing for pages
           perPage: pageSize
@@ -73,9 +74,7 @@ Deno.serve(async (req) => {
       page++;
       
       // Break if we fetched less than page size, indicating last page
-      if (users.length < pageSize) {
-          break;
-      }
+      hasMore = users.length === pageSize;
     }
 
 
