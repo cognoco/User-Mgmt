@@ -1,5 +1,7 @@
 import React from 'react';
 
-export default function AuditLogViewerMock() {
+export function AuditLogViewer() {
   return <div data-testid="audit-log-viewer">Mock AuditLogViewer</div>;
 }
+
+export default AuditLogViewer;
