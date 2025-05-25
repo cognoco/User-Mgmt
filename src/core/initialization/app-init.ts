@@ -10,12 +10,12 @@ import { createSupabaseClient } from "@/lib/database/supabase";
 import { api } from "@/lib/api/axios";
 
 // Import factory functions
-import { getAuthService } from "@/services/auth";
-import { getUserService } from "@/services/user";
+import { createAuthService } from "@/services/auth";
+import { createUserService } from "@/services/user";
 // Import API-based team service for client use
 import { getApiTeamService } from "@/services/team/api-team.service"; // client-safe
-// Do NOT import Prisma-based getTeamService at the top level!
-import { getPermissionService } from "@/services/permission";
+// Do NOT import Prisma-based createTeamService at the top level!
+import { createPermissionService } from "@/services/permission";
 import { createWebhookService } from "@/services/webhooks";
 
 // Import adapter factories
@@ -70,8 +70,8 @@ export function initializeApp() {
     });
 
     // Create services using the providers
-    const authService = getAuthService(authProvider);
-    const userService = getUserService(userProvider);
+    const authService = createAuthService({ authDataProvider: authProvider });
+    const userService = createUserService({ userDataProvider: userProvider });
     // Use API-based team service on client, Prisma-based on server
     let teamService;
     if (typeof window !== "undefined") {
@@ -79,10 +79,12 @@ export function initializeApp() {
     } else {
       // Import here so Prisma code is never bundled to client
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getTeamService } = require("@/services/team");
-      teamService = getTeamService(teamProvider);
+      const { createTeamService } = require("@/services/team");
+      teamService = createTeamService({ teamDataProvider: teamProvider });
     }
-    const permissionService = getPermissionService(permissionProvider);
+    const permissionService = createPermissionService({
+      permissionDataProvider: permissionProvider
+    });
     const webhookService = createWebhookService({
       apiClient: api,
       webhookDataProvider: webhookProvider
