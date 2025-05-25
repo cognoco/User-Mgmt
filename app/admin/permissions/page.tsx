@@ -1,5 +1,3 @@
-'use client';
-
 import { Metadata } from 'next';
 import { Skeleton } from '@/ui/primitives/skeleton';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';

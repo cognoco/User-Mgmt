@@ -9,6 +9,20 @@
 import { Permission, Role, RoleWithPermissions, UserRole } from './models';
 
 /**
+ * Enumeration of all permission event types
+ */
+export enum PermissionEventTypes {
+  ROLE_CREATED = 'ROLE_CREATED',
+  ROLE_UPDATED = 'ROLE_UPDATED',
+  ROLE_DELETED = 'ROLE_DELETED',
+  PERMISSION_ADDED = 'PERMISSION_ADDED',
+  PERMISSION_REMOVED = 'PERMISSION_REMOVED',
+  ROLE_ASSIGNED = 'ROLE_ASSIGNED',
+  ROLE_REMOVED = 'ROLE_REMOVED',
+  ROLE_PERMISSIONS_SYNCED = 'ROLE_PERMISSIONS_SYNCED'
+}
+
+/**
  * Base event interface for all permission events
  */
 export interface PermissionEvent {
@@ -20,7 +34,7 @@ export interface PermissionEvent {
  * Event emitted when a role is created
  */
 export interface RoleCreatedEvent extends PermissionEvent {
-  type: 'ROLE_CREATED';
+  type: PermissionEventTypes.ROLE_CREATED;
   role: RoleWithPermissions;
 }
 
@@ -28,7 +42,7 @@ export interface RoleCreatedEvent extends PermissionEvent {
  * Event emitted when a role is updated
  */
 export interface RoleUpdatedEvent extends PermissionEvent {
-  type: 'ROLE_UPDATED';
+  type: PermissionEventTypes.ROLE_UPDATED;
   role: RoleWithPermissions;
   previousRole: RoleWithPermissions;
 }
@@ -37,7 +51,7 @@ export interface RoleUpdatedEvent extends PermissionEvent {
  * Event emitted when a role is deleted
  */
 export interface RoleDeletedEvent extends PermissionEvent {
-  type: 'ROLE_DELETED';
+  type: PermissionEventTypes.ROLE_DELETED;
   roleId: string;
 }
 
@@ -45,7 +59,7 @@ export interface RoleDeletedEvent extends PermissionEvent {
  * Event emitted when a permission is added to a role
  */
 export interface PermissionAddedEvent extends PermissionEvent {
-  type: 'PERMISSION_ADDED';
+  type: PermissionEventTypes.PERMISSION_ADDED;
   roleId: string;
   permission: Permission;
 }
@@ -54,7 +68,7 @@ export interface PermissionAddedEvent extends PermissionEvent {
  * Event emitted when a permission is removed from a role
  */
 export interface PermissionRemovedEvent extends PermissionEvent {
-  type: 'PERMISSION_REMOVED';
+  type: PermissionEventTypes.PERMISSION_REMOVED;
   roleId: string;
   permission: Permission;
 }
@@ -63,7 +77,7 @@ export interface PermissionRemovedEvent extends PermissionEvent {
  * Event emitted when a role is assigned to a user
  */
 export interface RoleAssignedEvent extends PermissionEvent {
-  type: 'ROLE_ASSIGNED';
+  type: PermissionEventTypes.ROLE_ASSIGNED;
   userRole: UserRole;
 }
 
@@ -71,7 +85,7 @@ export interface RoleAssignedEvent extends PermissionEvent {
  * Event emitted when a role is removed from a user
  */
 export interface RoleRemovedEvent extends PermissionEvent {
-  type: 'ROLE_REMOVED';
+  type: PermissionEventTypes.ROLE_REMOVED;
   userId: string;
   roleId: string;
 }
@@ -80,14 +94,14 @@ export interface RoleRemovedEvent extends PermissionEvent {
  * Event emitted when role permissions are synced
  */
 export interface RolePermissionsSyncedEvent extends PermissionEvent {
-  type: 'ROLE_PERMISSIONS_SYNCED';
+  type: PermissionEventTypes.ROLE_PERMISSIONS_SYNCED;
   roles: RoleWithPermissions[];
 }
 
 /**
  * Union type of all permission events
  */
-export type PermissionEventTypes =
+export type PermissionEvent =
   | RoleCreatedEvent
   | RoleUpdatedEvent
   | RoleDeletedEvent
@@ -100,7 +114,7 @@ export type PermissionEventTypes =
 /**
  * Permission event handler type
  */
-export type PermissionEventHandler = (event: PermissionEventTypes) => void;
+export type PermissionEventHandler = (event: PermissionEvent) => void;
 
 /**
  * Permission event emitter interface
@@ -119,5 +133,5 @@ export interface PermissionEventEmitter {
    * 
    * @param event The event to emit
    */
-  emit(event: PermissionEventTypes): void;
+  emit(event: PermissionEvent): void;
 }

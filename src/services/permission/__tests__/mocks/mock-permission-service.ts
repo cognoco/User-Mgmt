@@ -10,7 +10,11 @@ import {
   RoleCreationPayload,
   RoleUpdatePayload
 } from '../../../../core/permission/models';
-import { PermissionEventHandler, PermissionEventTypes } from '../../../../core/permission/events';
+import {
+  PermissionEvent,
+  PermissionEventHandler,
+  PermissionEventTypes,
+} from '../../../../core/permission/events';
 
 /**
  * Mock implementation of the PermissionService interface for testing
