@@ -6,12 +6,22 @@ import crypto from 'crypto';
 // Mock fetch
 (global.fetch as any) = vi.fn();
 
-vi.mock('crypto', () => ({
-  createHmac: vi.fn().mockReturnValue({
+vi.mock('crypto', () => {
+  const createHmacMock = vi.fn().mockReturnValue({
     update: vi.fn().mockReturnThis(),
     digest: vi.fn().mockReturnValue('mocked-signature')
-  })
-}));
+  });
+  return {
+    default: {
+      createHmac: createHmacMock,
+      randomBytes: vi.fn(() => Buffer.from('1234567890abcdef')),
+      randomUUID: vi.fn(() => 'uuid')
+    },
+    createHmac: createHmacMock,
+    randomBytes: vi.fn(() => Buffer.from('1234567890abcdef')),
+    randomUUID: vi.fn(() => 'uuid')
+  };
+});
 
 describe('webhook sender', () => {
   let provider: IWebhookDataProvider & Record<string, any>;
@@ -88,7 +98,6 @@ describe('webhook sender', () => {
     expect(provider.listDeliveries).toHaveBeenCalledWith('user', 'w', 10);
     expect(res.length).toBe(1);
   });
-});
 
   it('returns empty array when no active webhooks match event', async () => {
     provider.listWebhooks.mockResolvedValueOnce([

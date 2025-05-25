@@ -2,6 +2,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { WebhookService } from '../WebhookService';
 import type { IWebhookDataProvider } from '@/core/webhooks';
 
+vi.mock('@/services/subscription/subscription-access', () => ({
+  ensureSubscriptionTier: vi.fn()
+}));
+
 (global as any).fetch = vi.fn();
 
 describe('WebhookService.triggerEvent', () => {
