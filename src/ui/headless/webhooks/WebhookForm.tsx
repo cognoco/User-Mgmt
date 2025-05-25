@@ -20,19 +20,17 @@ export interface WebhookFormRenderProps {
 export interface WebhookFormProps {
   userId: string;
   onSubmit?: (payload: WebhookCreatePayload) => Promise<void>;
-  availableEvents?: string[];
   loading?: boolean;
   error?: string | null;
   children: (props: WebhookFormRenderProps) => React.ReactNode;
 }
 
-export function WebhookForm({ 
-  userId, 
-  onSubmit, 
-  availableEvents = [], 
-  children, 
-  loading: externalLoading = false, 
-  error: externalError = null 
+export function WebhookForm({
+  userId,
+  onSubmit,
+  children,
+  loading: externalLoading = false,
+  error: externalError = null
 }: WebhookFormProps) {
   const { createWebhook } = useWebhooks(userId);
   const [data, setData] = useState<WebhookCreatePayload>({ 

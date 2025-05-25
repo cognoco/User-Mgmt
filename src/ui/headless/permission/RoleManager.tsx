@@ -8,11 +8,10 @@
 import { useState, FormEvent, useEffect, useCallback } from 'react';
 import { useRoles } from '@/hooks/team/useRoles';
 import { usePermissions } from '@/hooks/permission/usePermissions';
-import { 
-  Role, 
-  RoleWithPermissions, 
-  RoleCreationPayload, 
-  RoleUpdatePayload 
+import {
+  RoleWithPermissions,
+  RoleCreationPayload,
+  RoleUpdatePayload
 } from '@/core/permission/models';
 import { Permission } from '@/core/permission/models';
 import { z } from 'zod';

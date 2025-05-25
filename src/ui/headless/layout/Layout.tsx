@@ -1,4 +1,3 @@
-import { ReactNode } from 'react';
 import { Toaster } from '@/ui/primitives/toaster';
 import { ThemeProvider } from '@/ui/primitives/theme-provider';
 

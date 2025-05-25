@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useOrganizationPolicies, useOrganizationMembers, useTerminateUserSessions } from '@/hooks/user/useOrganizationSession';
-import { useOrganization } from '@/lib/context/OrganizationContext';
 import { OrganizationSecurityPolicy } from '@/types/organizations';
 
 export interface OrganizationSessionManagerProps {
@@ -21,7 +20,6 @@ export interface OrganizationSessionManagerProps {
 }
 
 export function OrganizationSessionManager({ orgId, render }: OrganizationSessionManagerProps) {
-  const { organization } = useOrganization();
   const { policies, loading: policiesLoading, error: policiesError, fetchPolicies, updatePolicies } = useOrganizationPolicies(orgId);
   const { members, loading: membersLoading, error: membersError, refetch: refetchMembers } = useOrganizationMembers(orgId);
   const { terminateUserSessions, loading: terminateLoading, error: terminateError, count } = useTerminateUserSessions(orgId);

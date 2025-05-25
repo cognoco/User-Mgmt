@@ -94,39 +94,6 @@ function setupAuthStoreMock(authMock: any) {
 describe('LoginForm', () => {
   const mockLogin = vi.fn();
 
-  // Helper to reset and setup mocks with specific state
-  const setupMocks = (authState: Partial<ReturnType<typeof useAuth>> = {}, formState: Partial<typeof mockFormState> = {}) => {
-    vi.clearAllMocks();
-    mockLogin.mockReset().mockResolvedValue({ success: true }); 
-    mockRouterPush.mockReset(); 
-    
-    // Reset RHF mocks
-    mockHandleSubmit.mockImplementation((callback: (data: unknown) => void) => {
-      return (data: unknown) => callback(data);
-    });
-
-    // Update form state
-    Object.assign(mockFormState, {
-      errors: {},
-      isValid: true,
-      isDirty: true,
-      isSubmitting: false,
-      ...formState
-    });
-    
-    // Always provide clearError as a function
-    const authMock = {
-      login: mockLogin,
-      isLoading: false,
-      error: null,
-      clearError: vi.fn(),
-      sendVerificationEmail: vi.fn(),
-      setUser: vi.fn(),
-      setToken: vi.fn(),
-      ...authState
-    };
-    setupAuthStoreMock(authMock);
-  };
 
   beforeEach(() => {
     vi.clearAllMocks();

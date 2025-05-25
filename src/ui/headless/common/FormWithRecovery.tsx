@@ -18,7 +18,7 @@ export interface FormWithRecoveryProps {
   }) => React.ReactNode;
 }
 
-export default function FormWithRecovery({ onSubmit, title = 'Form With Error Recovery', render }: FormWithRecoveryProps) {
+export default function FormWithRecovery({ onSubmit, render }: FormWithRecoveryProps) {
   const [formData, setFormData] = useState({ name: '' });
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -34,7 +34,6 @@ export interface ProfileFormProps {
 export default function ProfileForm({ children }: ProfileFormProps) {
   const profile = useProfileStore(state => state.profile);
   const isProfileLoading = useProfileStore(state => state.isLoading);
-  const profileError = useProfileStore(state => state.error);
   const fetchProfile = useProfileStore(state => state.fetchProfile);
   const updateProfile = useProfileStore(state => state.updateProfile);
   

@@ -20,8 +20,6 @@ export interface RateLimitFeedbackProps {
 export default function RateLimitFeedback({
   windowMs = 15 * 60 * 1000,
   retryAfter,
-  maxAttempts = 100,
-  remainingAttempts,
   onCountdownComplete,
   render
 }: RateLimitFeedbackProps) {
