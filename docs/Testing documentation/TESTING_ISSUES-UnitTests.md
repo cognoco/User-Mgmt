@@ -343,8 +343,27 @@
 - **Best Practice:**
     - Always use top-level vi.mock for context hooks used outside of React components, and place the mock before importing the code under test.
     - Avoid using require/spyOn for this use case, as it is less reliable with ESM and hoisting.
-- **Example:**
+  - **Example:**
     - See `src/lib/stores/__tests__/subscription.store.test.ts` for a working example.
+
+### H. Adapter Mock Defaults for Service Tests
+- **Issue:** Service tests that rely on adapters returning `User | null` (e.g.,
+  `IAuthDataProvider.getCurrentUser`) may fail when the mocked adapter returns
+  `undefined` instead of `null`.
+- **Solution:** When creating adapter mocks, explicitly set return values to
+  `Promise.resolve(null)` where the real implementation would return `null`.
+  This keeps assertions consistent and prevents `undefined` from causing
+  unexpected failures.
+- **Example:**
+  ```typescript
+  // Service adapter mock
+  function createAdapter() {
+    return {
+      getCurrentUser: vi.fn().mockResolvedValue(null),
+      // ...other methods
+    } as IAuthDataProvider;
+  }
+  ```
 
 ---
 

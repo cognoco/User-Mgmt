@@ -48,7 +48,8 @@ export default defineConfig({
       // --- Or potentially more specific ---
       // '**/*[Ss]keleton*.test.{ts,tsx}',
 
-      // You might have other custom excludes here too
+      // Explicitly exclude all e2e tests
+      '**/e2e/**',
     ],
   },
 }); 

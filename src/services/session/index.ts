@@ -1,4 +1,5 @@
 import { DefaultSessionService } from './default-session.service';
+export { ApiSessionService, getApiSessionService } from './api-session.service';
 import type { SessionService } from '@/core/session/interfaces';
 import type { SessionDataProvider } from '@/core/session/ISessionDataProvider';
 

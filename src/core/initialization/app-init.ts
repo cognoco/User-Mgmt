@@ -10,13 +10,14 @@ import { createSupabaseClient } from "@/lib/database/supabase";
 import { api } from "@/lib/api/axios";
 
 // Import factory functions
-import { createAuthService } from '@/services/auth';
-import { createUserService } from '@/services/user';
+import { createAuthService } from "@/services/auth";
+import { createUserService } from "@/services/user";
 // Import API-based team service for client use
 import { getApiTeamService } from "@/services/team/api-team.service"; // client-safe
-// Do NOT import Prisma-based getTeamService at the top level!
-import { createPermissionService } from '@/services/permission';
+// Do NOT import Prisma-based createTeamService at the top level!
+import { createPermissionService } from "@/services/permission";
 import { createWebhookService } from "@/services/webhooks";
+
 
 // Import adapter factories
 import { createSupabaseAuthProvider } from "@/adapters/auth";
@@ -79,8 +80,8 @@ export function initializeApp() {
     } else {
       // Import here so Prisma code is never bundled to client
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getTeamService } = require("@/services/team");
-      teamService = getTeamService(teamProvider);
+      const { createTeamService } = require("@/services/team");
+      teamService = createTeamService({ teamDataProvider: teamProvider });
     }
     const permissionService = createPermissionService({
       permissionDataProvider: permissionProvider
