@@ -135,41 +135,47 @@ export function UserManagementClientBoundary({
 
   // Setup Supabase auth listener
   useEffect(() => {
-    console.log(
-      ">>>>>>>>>> [UserManagementClientBoundary] useEffect Supabase Listener RUNNING <<<<<<<<<<",
-    );
-
-    // Get the auth service from the service provider registry
-    const authService =
-      UserManagementConfiguration.getServiceProvider<AuthService>(
-        "authService",
+    void (async () => {
+      console.log(
+        ">>>>>>>>>> [UserManagementClientBoundary] useEffect Supabase Listener RUNNING <<<<<<<<<<",
       );
 
-    if (!authService) {
-      console.error(
-        "[UserManagementClientBoundary] AuthService is not registered in the service provider registry. Attempting to initialize...",
-      );
-      
-      // Try to initialize the application if the service is not found
-      try {
-        const { initializeApp } = require('@/core/initialization/app-init');
-        const services = initializeApp();
-        
-        // Register services with UserManagementConfiguration
-        UserManagementConfiguration.configureServiceProviders({
-          authService: services.authService,
-          userService: services.userService,
-          teamService: services.teamService,
-          permissionService: services.permissionService,
-          webhookService: services.webhookService
-        });
-        
-        console.log("[UserManagementClientBoundary] Successfully initialized application and registered services");
-      } catch (initError) {
-        console.error("[UserManagementClientBoundary] Failed to initialize application:", initError);
-        return;
+      // Get the auth service from the service provider registry
+      const authService =
+        UserManagementConfiguration.getServiceProvider<AuthService>(
+          "authService",
+        );
+
+      if (!authService) {
+        console.error(
+          "[UserManagementClientBoundary] AuthService is not registered in the service provider registry. Attempting to initialize...",
+        );
+
+        // Try to initialize the application if the service is not found
+        try {
+          const { initializeApp } = await import('@/core/initialization/app-init');
+          const services = initializeApp();
+
+          // Register services with UserManagementConfiguration
+          UserManagementConfiguration.configureServiceProviders({
+            authService: services.authService,
+            userService: services.userService,
+            teamService: services.teamService,
+            permissionService: services.permissionService,
+            webhookService: services.webhookService,
+          });
+
+          console.log(
+            "[UserManagementClientBoundary] Successfully initialized application and registered services",
+          );
+        } catch (initError) {
+          console.error(
+            "[UserManagementClientBoundary] Failed to initialize application:",
+            initError,
+          );
+          return;
+        }
       }
-    }
 
     // Initial session check
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -257,6 +263,7 @@ export function UserManagementClientBoundary({
       );
       subscription?.unsubscribe();
     };
+    })();
   }, []); // Empty dependency array ensures this runs only once on mount
 
   // Show initialization error if there is one

@@ -125,7 +125,7 @@ describe("useAuth hook", () => {
       message: "sent",
     });
 
-    const { result, rerender } = renderHook(() => useAuth(), { wrapper });
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {
       await result.current.resetPassword("a@test.com");

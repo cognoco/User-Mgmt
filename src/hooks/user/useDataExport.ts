@@ -6,7 +6,7 @@ import {
   processUserDataExport,
   checkUserExportStatus
 } from '@/lib/exports/export.service';
-import type { ExportOptions, DataExportResponse, ExportStatus } from '@/lib/exports/types';
+import type { ExportOptions, DataExportResponse } from '@/lib/exports/types';
 
 /**
  * Hook for initiating and tracking personal data exports
