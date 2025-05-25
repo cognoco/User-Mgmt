@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/auth/useAuth';
 
 vi.mock('@/hooks/auth/useAuth');
 
+
 const mockService: AddressService = {
   getAddresses: vi.fn(async () => []),
   getAddress: vi.fn(),
