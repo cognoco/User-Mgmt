@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import '@/lib/i18n';
 
 // Import from our new architecture
-import { usePasswordReset } from '@/hooks/auth/use-password-reset';
+import { usePasswordReset } from '@/hooks/auth/usePasswordReset';
 import { Button } from '@/ui/primitives/button';
 import { Input } from '@/ui/primitives/input';
 import { Label } from '@/ui/primitives/label';

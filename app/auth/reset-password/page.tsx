@@ -1,6 +1,6 @@
 'use client';
 
-import { PasswordResetForm } from '@/src/ui/styled/auth/PasswordResetForm';
+import { PasswordResetForm } from '@/ui/styled/auth/PasswordResetForm';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import '@/lib/i18n';
