@@ -12,15 +12,13 @@ describe('Supabase Client', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.NEXT_PUBLIC_SUPABASE_URL = mockSupabaseUrl;
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = mockSupabaseAnonKey;
-    process.env.SUPABASE_SERVICE_ROLE_KEY = mockSupabaseServiceKey;
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', mockSupabaseUrl);
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', mockSupabaseAnonKey);
+    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', mockSupabaseServiceKey);
   });
 
   afterEach(() => {
-    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    vi.unstubAllEnvs();
   });
 
   it('should have a valid Supabase client instance', () => {
@@ -44,8 +42,8 @@ describe('Supabase Client', () => {
   });
 
   it('should throw error when SUPABASE_SERVICE_ROLE_KEY is missing', async () => {
-    // Delete the environment variable
-    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    // Remove the environment variable
+    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', '');
     
     // Import getServiceSupabase function from the actual module
     const { getServiceSupabase } = await import('@/lib/database/supabase');
@@ -56,8 +54,8 @@ describe('Supabase Client', () => {
   });
 
   it('should throw error when NEXT_PUBLIC_SUPABASE_URL is missing', async () => {
-    // Delete the environment variable
-    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    // Remove the environment variable
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', '');
     
     // Import getServiceSupabase function from the actual module
     const { getServiceSupabase } = await import('@/lib/database/supabase');
