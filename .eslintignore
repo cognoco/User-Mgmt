@@ -13,3 +13,4 @@ src/tests/integration/**/*.Skeleton.integration.test.tsx
 # Other test utilities
 src/tests/mocks/**/*
 src/tests/utils/**/* 
+generated/**
