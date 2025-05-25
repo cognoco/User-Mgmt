@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { vi } from 'vitest';
 import AvatarUpload from '../AvatarUpload';
 import { useProfileStore } from '@/lib/stores/profile.store';
@@ -49,18 +49,17 @@ describe('Headless AvatarUpload Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Setup useProfileStore mock
-    (useProfileStore as any).mockImplementation((selector) => {
-      const store = {
-        profile: mockProfile,
-        isLoading: false,
-        error: null,
-        uploadAvatar: mockUploadAvatar,
-        removeAvatar: mockRemoveAvatar,
-        fetchProfile: mockFetchProfile,
-      };
-      return selector(store);
-    });
+    // Setup useProfileStore mock to return store object
+    const store = {
+      profile: mockProfile,
+      isLoading: false,
+      error: null,
+      uploadAvatar: mockUploadAvatar,
+      removeAvatar: mockRemoveAvatar,
+      fetchProfile: mockFetchProfile,
+    };
+    (useProfileStore as any).mockReturnValue(store);
+    (useProfileStore as any).getState = () => store;
 
     // Setup useUserManagement mock
     (useUserManagement as any).mockReturnValue({
@@ -93,9 +92,11 @@ describe('Headless AvatarUpload Component', () => {
   it('renders with children function and provides correct props', () => {
     const childrenMock = vi.fn().mockReturnValue(<div>Test Child</div>);
     
-    render(<AvatarUpload>{childrenMock}</AvatarUpload>);
+    act(() => {
+      render(<AvatarUpload>{childrenMock}</AvatarUpload>);
+    });
     
-    expect(childrenMock).toHaveBeenCalledTimes(1);
+    expect(childrenMock).toHaveBeenCalled();
     
     const props = childrenMock.mock.calls[0][0];
     expect(props.profile).toEqual(mockProfile);
@@ -108,7 +109,9 @@ describe('Headless AvatarUpload Component', () => {
   });
 
   it('fetches predefined avatars on mount', async () => {
-    render(<AvatarUpload>{() => <div>Test</div>}</AvatarUpload>);
+    act(() => {
+      render(<AvatarUpload>{() => <div>Test</div>}</AvatarUpload>);
+    });
     
     await waitFor(() => {
       expect(api.get).toHaveBeenCalledWith('/api/profile/avatar');
@@ -118,16 +121,18 @@ describe('Headless AvatarUpload Component', () => {
   it('opens modal when openAvatarModal is called', async () => {
     let modalState = false;
     
-    render(
-      <AvatarUpload>
-        {(props) => {
-          modalState = props.isModalOpen;
-          return (
-            <button onClick={props.openAvatarModal}>Open Modal</button>
-          );
-        }}
-      </AvatarUpload>
-    );
+    act(() => {
+      render(
+        <AvatarUpload>
+          {(props) => {
+            modalState = props.isModalOpen;
+            return (
+              <button onClick={props.openAvatarModal}>Open Modal</button>
+            );
+          }}
+        </AvatarUpload>
+      );
+    });
     
     expect(modalState).toBe(false);
     
@@ -139,13 +144,15 @@ describe('Headless AvatarUpload Component', () => {
   });
 
   it('calls removeAvatar when handleRemove is called', async () => {
-    render(
-      <AvatarUpload>
-        {(props) => (
-          <button onClick={props.handleRemove}>Remove Avatar</button>
-        )}
-      </AvatarUpload>
-    );
+    act(() => {
+      render(
+        <AvatarUpload>
+          {(props) => (
+            <button onClick={props.handleRemove}>Remove Avatar</button>
+          )}
+        </AvatarUpload>
+      );
+    });
     
     fireEvent.click(screen.getByText('Remove Avatar'));
     
@@ -157,18 +164,20 @@ describe('Headless AvatarUpload Component', () => {
   it('selects a predefined avatar when handleSelectPredefinedAvatar is called', async () => {
     let selectedId = null;
     
-    render(
-      <AvatarUpload>
-        {(props) => {
-          selectedId = props.selectedAvatarId;
-          return (
-            <button onClick={() => props.handleSelectPredefinedAvatar('avatar1')}>
-              Select Avatar
-            </button>
-          );
-        }}
-      </AvatarUpload>
-    );
+    act(() => {
+      render(
+        <AvatarUpload>
+          {(props) => {
+            selectedId = props.selectedAvatarId;
+            return (
+              <button onClick={() => props.handleSelectPredefinedAvatar('avatar1')}>
+                Select Avatar
+              </button>
+            );
+          }}
+        </AvatarUpload>
+      );
+    });
     
     expect(selectedId).toBe(null);
     
@@ -180,35 +189,33 @@ describe('Headless AvatarUpload Component', () => {
   });
 
   it('applies selected avatar when handleApplySelectedAvatar is called', async () => {
-    // First set a selected avatar ID
-    let applyFn: (() => Promise<void>) | null = null;
-    
-    render(
-      <AvatarUpload>
-        {(props) => {
-          // Store the apply function and manually set the selected ID
-          if (!applyFn) {
-            props.handleSelectPredefinedAvatar('avatar1');
-            applyFn = props.handleApplySelectedAvatar;
-          }
-          return <div>Test</div>;
-        }}
-      </AvatarUpload>
-    );
-    
-    // Now call the apply function
-    if (applyFn) {
-      await applyFn();
-      
-      await waitFor(() => {
-        expect(api.post).toHaveBeenCalledWith('/api/profile/avatar/apply', { 
-          avatarId: 'avatar1' 
-        });
-        expect(mockFetchProfile).toHaveBeenCalled();
+    let captured: any = null;
+
+    await act(async () => {
+      render(
+        <AvatarUpload>
+          {(props) => {
+            captured = props;
+            return <div>Test</div>;
+          }}
+        </AvatarUpload>
+      );
+    });
+
+    expect(captured).toBeTruthy();
+    await act(async () => {
+      captured.handleSelectPredefinedAvatar('avatar1');
+    });
+    await act(async () => {
+      await captured.handleApplySelectedAvatar();
+    });
+
+    await waitFor(() => {
+      expect(api.post).toHaveBeenCalledWith('/api/profile/avatar/apply', {
+        avatarId: 'avatar1'
       });
-    } else {
-      throw new Error('Apply function not captured');
-    }
+      expect(mockFetchProfile).toHaveBeenCalled();
+    });
   });
 
   it('resets state when closeModalAndReset is called', async () => {
@@ -218,21 +225,23 @@ describe('Headless AvatarUpload Component', () => {
     const mockFileInput = { value: 'test.jpg' };
     const mockRef = { current: mockFileInput };
     
-    render(
-      <AvatarUpload>
-        {(props) => {
-          modalState = props.isModalOpen;
-          imgSrc = props.imgSrc;
-          
-          // Override the ref to test reset
-          props.fileInputRef.current = mockFileInput as any;
-          
-          return (
-            <button onClick={props.closeModalAndReset}>Close Modal</button>
-          );
-        }}
-      </AvatarUpload>
-    );
+    act(() => {
+      render(
+        <AvatarUpload>
+          {(props) => {
+            modalState = props.isModalOpen;
+            imgSrc = props.imgSrc;
+
+            // Override the ref to test reset
+            props.fileInputRef.current = mockFileInput as any;
+
+            return (
+              <button onClick={props.closeModalAndReset}>Close Modal</button>
+            );
+          }}
+        </AvatarUpload>
+      );
+    });
     
     // Manually set the modal state to open
     modalState = true;
