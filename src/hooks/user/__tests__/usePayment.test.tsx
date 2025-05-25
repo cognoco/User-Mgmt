@@ -2,6 +2,7 @@ import { renderHook, act } from '@testing-library/react';
 import { usePayment } from '../usePayment';
 import { describe, it, expect, vi, beforeEach, MockInstance } from 'vitest';
 import { api } from '@/lib/api/axios';
+import { TestWrapper } from '../../../tests/utils/test-wrapper';
 
 // Define types if they don't exist in the codebase
 interface PaymentMethod {
@@ -22,6 +23,10 @@ vi.mock('@/lib/api/axios', () => ({
   },
 }));
 
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <TestWrapper>{children}</TestWrapper>
+);
+
 describe('usePayment', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -41,7 +46,7 @@ describe('usePayment', () => {
 
     ((api.get as unknown) as MockInstance).mockResolvedValueOnce({ data: mockPaymentMethods });
 
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
 
     await act(async () => {
       await result.current.fetchPaymentMethods();
@@ -56,7 +61,7 @@ describe('usePayment', () => {
   it('should handle fetch payment methods error', async () => {
     ((api.get as unknown) as MockInstance).mockRejectedValueOnce(new Error('API Error'));
 
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
     // Set state to non-empty to verify it gets cleared on error
     result.current.paymentMethods = [
       {
@@ -91,7 +96,7 @@ describe('usePayment', () => {
 
     ((api.post as unknown) as MockInstance).mockResolvedValueOnce({ data: newPaymentMethod });
 
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
 
     await act(async () => {
       await result.current.addPaymentMethod(newPaymentMethod);
@@ -115,7 +120,7 @@ describe('usePayment', () => {
 
     ((api.post as unknown) as MockInstance).mockRejectedValueOnce(new Error('API Error'));
 
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
     // Set state to non-empty to verify it gets cleared on error
     result.current.paymentMethods = [
       {
@@ -143,7 +148,7 @@ describe('usePayment', () => {
     const paymentMethodId = '1';
     ((api.delete as unknown) as MockInstance).mockResolvedValueOnce({});
 
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
     
     // Add a payment method first
     result.current.paymentMethods = [
@@ -171,7 +176,7 @@ describe('usePayment', () => {
     const paymentMethodId = '1';
     ((api.delete as unknown) as MockInstance).mockRejectedValueOnce(new Error('API Error'));
 
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
 
     await act(async () => {
       await result.current.removePaymentMethod(paymentMethodId);
@@ -197,7 +202,7 @@ describe('usePayment', () => {
 
     ((api.get as unknown) as MockInstance).mockResolvedValueOnce({ data: mockSubscription });
 
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
 
     await act(async () => {
       await result.current.fetchSubscription();
@@ -212,7 +217,7 @@ describe('usePayment', () => {
   it('should handle fetch subscription error', async () => {
     ((api.get as unknown) as MockInstance).mockRejectedValueOnce(new Error('API Error'));
 
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
     // Set state to non-null to verify it gets cleared on error
     result.current.activeSubscription = {
       id: '1',
@@ -239,7 +244,7 @@ describe('usePayment', () => {
   it('should cancel subscription successfully', async () => {
     ((api.post as unknown) as MockInstance).mockResolvedValueOnce({});
 
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
 
     await act(async () => {
       await result.current.cancelSubscription();
@@ -254,7 +259,7 @@ describe('usePayment', () => {
   it('should handle cancel subscription error', async () => {
     ((api.post as unknown) as MockInstance).mockRejectedValueOnce(new Error('API Error'));
 
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
 
     await act(async () => {
       await result.current.cancelSubscription();
@@ -278,7 +283,7 @@ describe('usePayment', () => {
 
     ((api.get as unknown) as MockInstance).mockResolvedValueOnce({ data: mockPaymentHistory });
 
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
 
     await act(async () => {
       await result.current.fetchPaymentHistory();
@@ -293,7 +298,7 @@ describe('usePayment', () => {
   it('should handle fetch payment history error', async () => {
     ((api.get as unknown) as MockInstance).mockRejectedValueOnce(new Error('API Error'));
 
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
     // Set state to non-empty to verify it gets cleared on error
     result.current.paymentHistory = [
       {
@@ -318,7 +323,7 @@ describe('usePayment', () => {
 
 describe('cancelSubscription', () => {
   it('should successfully cancel subscription', async () => {
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
     
     // Mock successful API call
     ((api.post as unknown) as MockInstance).mockResolvedValueOnce({});
@@ -334,7 +339,7 @@ describe('cancelSubscription', () => {
   });
 
   it('should handle error when canceling subscription fails', async () => {
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
     
     // Mock failed API call
     ((api.post as unknown) as MockInstance).mockRejectedValueOnce(new Error('API Error'));
@@ -361,7 +366,7 @@ describe('fetchPaymentHistory', () => {
   ];
 
   it('should successfully fetch payment history', async () => {
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
     
     // Mock successful API call
     ((api.get as unknown) as MockInstance).mockResolvedValueOnce({ data: mockPaymentHistory });
@@ -377,7 +382,7 @@ describe('fetchPaymentHistory', () => {
   });
 
   it('should handle error when fetching payment history fails', async () => {
-    const { result } = renderHook(() => usePayment());
+    const { result } = renderHook(() => usePayment(), { wrapper });
     
     // Mock failed API call
     ((api.get as unknown) as MockInstance).mockRejectedValueOnce(new Error('API Error'));
