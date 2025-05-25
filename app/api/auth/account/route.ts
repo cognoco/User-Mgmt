@@ -34,7 +34,7 @@ async function handleDeleteAccount(
     const authService = getApiAuthService();
 
     // 2. Get current user
-    const user = authService.getCurrentUser();
+    const user = await authService.getCurrentUser();
 
     if (!user) {
       throw new ApiError(
@@ -173,7 +173,7 @@ async function handleGetAccount(req: NextRequest) {
     const authService = getApiAuthService();
 
     // Get current user
-    const user = authService.getCurrentUser();
+    const user = await authService.getCurrentUser();
 
     if (!user) {
       throw new ApiError(

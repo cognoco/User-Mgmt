@@ -1,15 +1,19 @@
-'use client';
+"use client";
 
-import React, { useEffect } from 'react';
-import { UserManagementProvider, UserManagementConfig, IntegrationCallbacks } from './UserManagementProvider';
-import { initializeCsrf } from '@/lib/api/axios';
-import { supabase } from '@/lib/database/supabase';
-import { UserManagementConfiguration } from '@/core/config';
-import { AuthService } from '@/core/auth/interfaces';
-import { User } from '@/core/auth/models';
-import toast, { Toaster } from 'react-hot-toast';
-import { OAuthProvider } from '@/types/oauth';
-import { SessionPolicyEnforcer } from '@/ui/styled/session/SessionPolicyEnforcer';
+import React, { useEffect } from "react";
+import {
+  UserManagementProvider,
+  UserManagementConfig,
+  IntegrationCallbacks,
+} from "./UserManagementProvider";
+import { initializeCsrf } from "@/lib/api/axios";
+import { supabase } from "@/lib/database/supabase";
+import { UserManagementConfiguration } from "@/core/config";
+import { AuthService } from "@/core/auth/interfaces";
+import { User } from "@/core/auth/models";
+import toast, { Toaster } from "react-hot-toast";
+import { OAuthProvider } from "@/types/oauth";
+import { SessionPolicyEnforcer } from "@/ui/styled/session/SessionPolicyEnforcer";
 
 // Define the callbacks inside the Client Component
 const clientCallbacks: Required<IntegrationCallbacks> = {
@@ -39,25 +43,37 @@ const clientConfig: UserManagementConfig = {
       {
         enabled: true,
         provider: OAuthProvider.GOOGLE,
-        clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
-        redirectUri: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI || (typeof window !== 'undefined' ? window.location.origin + '/auth/callback' : ''),
+        clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
+        redirectUri:
+          process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI ||
+          (typeof window !== "undefined"
+            ? window.location.origin + "/auth/callback"
+            : ""),
       },
       {
         enabled: true,
         provider: OAuthProvider.APPLE,
-        clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID || '',
-        redirectUri: process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI || (typeof window !== 'undefined' ? window.location.origin + '/auth/callback' : ''),
+        clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID || "",
+        redirectUri:
+          process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI ||
+          (typeof window !== "undefined"
+            ? window.location.origin + "/auth/callback"
+            : ""),
       },
       {
         enabled: true,
         provider: OAuthProvider.GITHUB,
-        clientId: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || '',
-        redirectUri: process.env.NEXT_PUBLIC_GITHUB_REDIRECT_URI || (typeof window !== 'undefined' ? window.location.origin + '/auth/callback' : ''),
+        clientId: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "",
+        redirectUri:
+          process.env.NEXT_PUBLIC_GITHUB_REDIRECT_URI ||
+          (typeof window !== "undefined"
+            ? window.location.origin + "/auth/callback"
+            : ""),
       },
     ],
     autoLink: true,
     allowUnverifiedEmails: false,
-    defaultRedirectPath: '/',
+    defaultRedirectPath: "/",
   },
   // Add other config defaults from UserManagementProvider if they weren't passed from layout
   // Example: (ensure these match defaults in UserManagementProvider or pass props)
@@ -70,36 +86,54 @@ interface UserManagementClientBoundaryProps {
   children: React.ReactNode;
 }
 
-export function UserManagementClientBoundary({ children }: UserManagementClientBoundaryProps) {
-  
+export function UserManagementClientBoundary({
+  children,
+}: UserManagementClientBoundaryProps) {
   // Initialize CSRF token fetching on mount
   useEffect(() => {
-    console.log('>>>>>>>>>> [UserManagementClientBoundary] useEffect CSRF RUNNING <<<<<<<<<<'); 
-    console.log('[UserManagementClientBoundary] Initializing CSRF...');
+    console.log(
+      ">>>>>>>>>> [UserManagementClientBoundary] useEffect CSRF RUNNING <<<<<<<<<<",
+    );
+    console.log("[UserManagementClientBoundary] Initializing CSRF...");
     initializeCsrf()
       .then(() => {
-        console.log('[UserManagementClientBoundary] CSRF initialization successful (or already done).');
+        console.log(
+          "[UserManagementClientBoundary] CSRF initialization successful (or already done).",
+        );
       })
-      .catch(error => {
-        console.error('[UserManagementClientBoundary] CSRF initialization failed:', error);
+      .catch((error) => {
+        console.error(
+          "[UserManagementClientBoundary] CSRF initialization failed:",
+          error,
+        );
       });
-  }, []); 
+  }, []);
 
   // Setup Supabase auth listener
   useEffect(() => {
-    console.log('>>>>>>>>>> [UserManagementClientBoundary] useEffect Supabase Listener RUNNING <<<<<<<<<<');
-    
+    console.log(
+      ">>>>>>>>>> [UserManagementClientBoundary] useEffect Supabase Listener RUNNING <<<<<<<<<<",
+    );
+
     // Get the auth service from the service provider registry
-    const authService = UserManagementConfiguration.getServiceProvider<AuthService>('authService');
-    
+    const authService =
+      UserManagementConfiguration.getServiceProvider<AuthService>(
+        "authService",
+      );
+
     if (!authService) {
-      console.error('[UserManagementClientBoundary] AuthService is not registered in the service provider registry');
+      console.error(
+        "[UserManagementClientBoundary] AuthService is not registered in the service provider registry",
+      );
       return;
     }
 
     // Initial session check
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('[UserManagementClientBoundary] Initial session check:', session);
+      console.log(
+        "[UserManagementClientBoundary] Initial session check:",
+        session,
+      );
       // Check for user and email before setting
       if (session?.user && session.user.email) {
         // Create object conforming to local User type
@@ -119,49 +153,65 @@ export function UserManagementClientBoundary({ children }: UserManagementClientB
     });
 
     // Subscribe to auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('[UserManagementClientBoundary] Auth state change:', event, session);
-      const previousUser = authService.getCurrentUser();
-      
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log(
+        "[UserManagementClientBoundary] Auth state change:",
+        event,
+        session,
+      );
+      const previousUser = await authService.getCurrentUser();
+
       if (session?.user && session.user.email) {
         const localUser: User = {
           id: session.user.id,
-          email: session.user.email, 
+          email: session.user.email,
           app_metadata: session.user.app_metadata,
           user_metadata: session.user.user_metadata,
         };
         authService.setCurrentUser(localUser);
         authService.setAuthToken(session.access_token ?? null);
 
-        if (event === 'SIGNED_IN' && !previousUser) {
-            const isConfirmed = session.user.email_confirmed_at || (session.user.user_metadata as any)?.email_verified;
+        if (event === "SIGNED_IN" && !previousUser) {
+          const isConfirmed =
+            session.user.email_confirmed_at ||
+            (session.user.user_metadata as any)?.email_verified;
 
-            if (isConfirmed) {
-                 console.log('[UserManagementClientBoundary] Detected likely post-verification SIGNED_IN event.');
-                 setTimeout(() => {
-                    toast.success('Email successfully verified! You are now logged in.', { duration: 4000 });
-                 }, 500);
-            } else {
-                 console.log('[UserManagementClientBoundary] SIGNED_IN event, but email not confirmed yet.');
-            }
-             clientCallbacks.onUserLogin(localUser);
+          if (isConfirmed) {
+            console.log(
+              "[UserManagementClientBoundary] Detected likely post-verification SIGNED_IN event.",
+            );
+            setTimeout(() => {
+              toast.success(
+                "Email successfully verified! You are now logged in.",
+                { duration: 4000 },
+              );
+            }, 500);
+          } else {
+            console.log(
+              "[UserManagementClientBoundary] SIGNED_IN event, but email not confirmed yet.",
+            );
+          }
+          clientCallbacks.onUserLogin(localUser);
         }
-
       } else {
         if (previousUser) {
-           authService.setCurrentUser(null);
-           authService.setAuthToken(null);
-           clientCallbacks.onUserLogout();
+          authService.setCurrentUser(null);
+          authService.setAuthToken(null);
+          clientCallbacks.onUserLogout();
         } else {
-           authService.setCurrentUser(null);
-           authService.setAuthToken(null);
+          authService.setCurrentUser(null);
+          authService.setAuthToken(null);
         }
       }
     });
 
     // Cleanup listener on unmount
     return () => {
-      console.log('[UserManagementClientBoundary] Unsubscribing from auth state changes.');
+      console.log(
+        "[UserManagementClientBoundary] Unsubscribing from auth state changes.",
+      );
       subscription?.unsubscribe();
     };
   }, []); // Empty dependency array ensures this runs only once on mount
@@ -169,9 +219,7 @@ export function UserManagementClientBoundary({ children }: UserManagementClientB
   return (
     <UserManagementProvider config={clientConfig}>
       <Toaster position="top-center" reverseOrder={false} />
-      <SessionPolicyEnforcer>
-        {children}
-      </SessionPolicyEnforcer>
+      <SessionPolicyEnforcer>{children}</SessionPolicyEnforcer>
     </UserManagementProvider>
   );
-} 
+}
