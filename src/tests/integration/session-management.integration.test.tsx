@@ -3,7 +3,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SessionPolicyEnforcer } from '@/ui/styled/session/SessionPolicyEnforcer';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { useAuthStore } from '@/lib/stores/auth.store';
 import { api } from '@/lib/api/axios';
 
 // Mock the API module
@@ -14,11 +13,9 @@ vi.mock('@/lib/api/axios', () => ({
 }));
 
 // Mock the auth store
+const mockUseAuth = vi.fn();
 vi.mock('@/hooks/auth/useAuth', () => ({
-  useAuth: vi.fn(() => ({
-    isAuthenticated: true,
-    logout: vi.fn(),
-  })),
+  useAuth: mockUseAuth,
 }));
 
 // Mock the router
@@ -33,9 +30,9 @@ describe('Session Management', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.useFakeTimers();
-    
-    // Setup default auth store mock
-    (useAuthStore as any).mockReturnValue({
+
+    // Setup default auth hook mock
+    mockUseAuth.mockReturnValue({
       isAuthenticated: true,
       logout: vi.fn(),
     });
@@ -108,7 +105,7 @@ describe('Session Management', () => {
   it('should logout and redirect if API returns 401', async () => {
     // Mock the logout function
     const logoutMock = vi.fn();
-    (useAuthStore as any).mockReturnValue({
+    mockUseAuth.mockReturnValue({
       isAuthenticated: true,
       logout: logoutMock,
     });
@@ -129,7 +126,7 @@ describe('Session Management', () => {
 
   it('should not call API if not authenticated', async () => {
     // Mock user as not authenticated
-    (useAuthStore as any).mockReturnValue({
+    mockUseAuth.mockReturnValue({
       isAuthenticated: false,
       logout: vi.fn(),
     });

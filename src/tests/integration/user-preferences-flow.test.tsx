@@ -5,12 +5,12 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserPreferencesComponent } from '@/ui/styled/common/UserPreferences';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { useAuthStore } from '@/lib/stores/auth.store';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
 
 // Mock Zustand stores
+const mockUseAuth = vi.fn();
 vi.mock('@/hooks/auth/useAuth', () => ({
-  useAuth: vi.fn(),
+  useAuth: mockUseAuth,
 }));
 vi.mock('@/lib/stores/preferences.store', () => ({
   usePreferencesStore: vi.fn(),
@@ -40,24 +40,13 @@ describe('User Preferences Flow', () => {
       configurable: true, // Allow re-definition in tests if needed
     });
 
-    // --- Mock useAuthStore ---
+    // --- Mock useAuth ---
     mockAuthStoreState = {
-      user: { id: 'user-123', email: 'user@example.com', user_metadata: {} }, // Added user_metadata for completeness
-      session: { access_token: 'fake-token', user: { id: 'user-123' } }, // Added session for completeness
+      user: { id: 'user-123', email: 'user@example.com', user_metadata: {} },
+      session: { access_token: 'fake-token', user: { id: 'user-123' } },
       isAuthenticated: true,
-      // Add other state properties from actual useAuthStore if needed, with default mock values
-      // For example:
-      // error: null,
-      // isLoading: false,
-      // initializeAuth: vi.fn(), 
-      // etc.
     };
-    (vi.mocked(useAuthStore) as any).mockImplementation((selector?: (state: any) => any) => {
-      if (typeof selector === 'function') {
-        return selector(mockAuthStoreState);
-      }
-      return mockAuthStoreState;
-    });
+    mockUseAuth.mockReturnValue(mockAuthStoreState);
 
     // --- Mock usePreferencesStore ---
     mockFetchPreferences = vi.fn().mockResolvedValue(true); 
