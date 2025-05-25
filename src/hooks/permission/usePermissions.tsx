@@ -41,6 +41,7 @@ export function usePermissions() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const { data: session, status: sessionStatus } = useSession();
   
   // Fetch all permissions
   const fetchAllPermissions = useCallback(async (): Promise<Permission[]> => {
@@ -233,33 +234,31 @@ export function usePermissions() {
    * @param options Permission check options
    * @returns Object containing permission check status and loading state
    */
-  const checkPermission = useCallback((options: UsePermissionOptions) => {
-    const { data: session, status: sessionStatus } = useSession();
-    
-    const { data: hasPermission, isLoading: permissionLoading } = useQuery({
-      queryKey: ['permission-check', options.required, options.resourceId],
-      queryFn: async () => {
-        if (!session?.user?.id) return false;
-        
-        try {
-          // Use the permission service to check if the user has the permission
-          return await permissionService.hasPermission(
-            session.user.id, 
-            options.required as Permission
-          );
-        } catch (error) {
-          console.error('Permission check error:', error);
-          return false;
-        }
-      },
-      enabled: sessionStatus === 'authenticated' && !!permissionService,
-    });
-    
-    return {
-      hasPermission: !!hasPermission,
-      isLoading: sessionStatus === 'loading' || permissionLoading,
-    };
-  }, [permissionService]);
+  const checkPermission = useCallback(
+    async (options: UsePermissionOptions): Promise<{
+      hasPermission: boolean;
+      isLoading: boolean;
+    }> => {
+      if (sessionStatus !== 'authenticated' || !session?.user?.id) {
+        return { hasPermission: false, isLoading: false };
+      }
+
+      setIsLoading(true);
+      try {
+        const hasPermission = await permissionService.hasPermission(
+          session.user.id,
+          options.required as Permission,
+        );
+        setIsLoading(false);
+        return { hasPermission, isLoading: false };
+      } catch (error) {
+        console.error('Permission check error:', error);
+        setIsLoading(false);
+        return { hasPermission: false, isLoading: false };
+      }
+    },
+    [permissionService, session, sessionStatus],
+  );
 
   return {
     // State
@@ -291,8 +290,32 @@ export function usePermissions() {
  * @returns Object containing permission check status and loading state
  */
 export function usePermission(options: UsePermissionOptions) {
-  const { checkPermission } = usePermissions();
-  return checkPermission(options);
+  const permissionService =
+    UserManagementConfiguration.getServiceProvider<PermissionService>(
+      'permissionService',
+    );
+  const { data: session, status: sessionStatus } = useSession();
+
+  const { data, isLoading: queryLoading } = useQuery({
+    queryKey: ['permission-check', options.required, options.resourceId, session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id || !permissionService) return false;
+      try {
+        return await permissionService.hasPermission(
+          session.user.id,
+          options.required as Permission,
+        );
+      } catch {
+        return false;
+      }
+    },
+    enabled: sessionStatus === 'authenticated' && !!permissionService,
+  });
+
+  return {
+    hasPermission: !!data,
+    isLoading: sessionStatus === 'loading' || queryLoading,
+  };
 }
 
 /**
