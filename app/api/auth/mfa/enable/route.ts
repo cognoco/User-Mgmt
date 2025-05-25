@@ -4,7 +4,7 @@ import { withSecurity } from '@/middleware/with-security';
 import { getApiAuthService } from '@/services/auth/factory';
 import { createSuccessResponse, withErrorHandling, ApiError, ERROR_CODES } from '@/lib/api/common';
 
-async function handleEnableMfa(req: NextRequest) {
+async function handleEnableMfa(_req: NextRequest) {
   const authService = getApiAuthService();
   const result = await authService.setupMFA();
   if (!result.success) {

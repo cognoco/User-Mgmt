@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
 
 vi.mock('@/lib/payments/stripe', () => ({
@@ -15,8 +15,8 @@ vi.mock('@/adapters/subscription/factory', () => ({
   }))
 }));
 
-const { stripe } = require('@/lib/payments/stripe');
-const { createSupabaseSubscriptionProvider } = require('@/adapters/subscription/factory');
+import { stripe } from '@/lib/payments/stripe';
+import { createSupabaseSubscriptionProvider } from '@/adapters/subscription/factory';
 
 function createRequest(body: any, signature = 'sig') {
   return new Request('http://localhost', {

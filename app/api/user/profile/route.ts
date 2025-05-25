@@ -9,8 +9,7 @@ import { getApiUserService } from '@/services/user/factory';
 import { profileSchema } from '@/types/database';
 import {
   createUserNotFoundError,
-  createUserUpdateFailedError,
-  mapUserServiceError
+  createUserUpdateFailedError
 } from '@/lib/api/user/error-handler';
 
 const UpdateSchema = profileSchema

@@ -39,7 +39,7 @@ async function navigateToLogin(page: Page): Promise<boolean> {
 }
 
 test.describe('4.4 MFA Verify (TOTP) During Login', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async () => {
     // Nothing needed in beforeEach - each test handles its own login
   });
   
@@ -327,25 +327,19 @@ test.describe('4.4 MFA Verify (TOTP) During Login', () => {
     await initialLoginPage.fill('#password, input[name="password"]', USER_PASSWORD);
     
     // Check the "Remember Me" checkbox (best practice #13 for custom components)
-    const rememberMeLabel = initialLoginPage.getByText('Remember me', { exact: false });
-    
-    // Try multiple approaches to check the box
-    let rememberMeChecked = false;
+  const rememberMeLabel = initialLoginPage.getByText('Remember me', { exact: false });
     
     try {
       // First attempt: Click the label
       await rememberMeLabel.click({ timeout: 5000 });
-      rememberMeChecked = true;
     } catch (e) {
       try {
         // Second attempt: Force click
         await rememberMeLabel.click({ force: true, timeout: 5000 });
-        rememberMeChecked = true;
       } catch (e2) {
         try {
           // Third attempt: Find by data-testid
           await initialLoginPage.locator('[data-testid="remember-me-checkbox"]').click({ timeout: 5000 });
-          rememberMeChecked = true;
         } catch (e3) {
           console.log('All attempts to check "Remember Me" checkbox failed, using JavaScript');
           
@@ -367,7 +361,7 @@ test.describe('4.4 MFA Verify (TOTP) During Login', () => {
             }
             return false;
           });
-          rememberMeChecked = true; // Assume JS approach worked
+          // Assume JS approach worked
         }
       }
     }

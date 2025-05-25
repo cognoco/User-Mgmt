@@ -5,19 +5,6 @@ import { loginAs } from '../../utils/auth';
 const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';
 const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
 
-// Example backup codes for reference/testing
-const SAMPLE_BACKUP_CODES = [
-  'ABCD-1234',
-  'EFGH-5678',
-  'IJKL-9012',
-  'MNOP-3456',
-  'QRST-7890',
-  'UVWX-2345',
-  'YZAB-6789',
-  'CDEF-0123',
-  'GHIJ-4567',
-  'KLMN-8901',
-];
 
 /**
  * Helper function to navigate to security settings with fallbacks

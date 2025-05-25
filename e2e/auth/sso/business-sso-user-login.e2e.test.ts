@@ -6,7 +6,6 @@ import { test, expect } from '@playwright/test';
 
 test.describe('E2E: Business SSO User Login', () => {
   // TODO: VERIFY CONFIG: Adjust URLs/patterns as needed
-  const LOGIN_URL = '/auth/login'; // General login page
   const ORG_LOGIN_URL_PATTERN = (orgId: string) => `/login/${orgId}`; // Example pattern
   const DASHBOARD_URL = '/dashboard/overview';
   const MOCK_SAML_IDP_URL_PATTERN = /^https:\/\/mock-saml-idp\.com\/login.*/;
@@ -17,9 +16,8 @@ test.describe('E2E: Business SSO User Login', () => {
   // Placeholder orgId for tests
   const TEST_ORG_ID_SAML = 'test-org-saml';
   const TEST_ORG_ID_OIDC = 'test-org-oidc';
-  const TEST_USER_EMAIL = 'sso-user@example.com';
 
-  test.beforeEach(async ({ page, context }) => {
+  test.beforeEach(async ({ context }) => {
     // --- START Org/User Setup ---
     // TODO: SETUP: Replace placeholders with actual setup calls.
     // Ensure orgs exist with respective SSO types configured.

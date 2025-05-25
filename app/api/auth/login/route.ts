@@ -6,7 +6,6 @@ import { getApiAuthService } from '@/services/auth/factory';
 import { LoginPayload } from '@/core/auth/models';
 import {
   createSuccessResponse,
-  createErrorResponse,
   ApiError,
   ERROR_CODES
 } from '@/lib/api/common';
