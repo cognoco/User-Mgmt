@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
 
 export interface ConsentManagementProps {
@@ -16,12 +16,18 @@ export interface ConsentManagementProps {
 
 export function ConsentManagement({ render }: ConsentManagementProps) {
   const { preferences, fetchPreferences, updatePreferences, isLoading, error } = usePreferencesStore();
-  const [marketing, setMarketing] = useState(false);
+  const [marketing, setMarketingState] = useState(false);
+  const marketingRef = useRef(marketing);
+  const setMarketing = (val: boolean) => {
+    marketingRef.current = val;
+    setMarketingState(val);
+  };
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     if (!preferences) fetchPreferences();
   }, [preferences, fetchPreferences]);
+
 
   useEffect(() => {
     if (preferences) {
@@ -34,7 +40,7 @@ export function ConsentManagement({ render }: ConsentManagementProps) {
     await updatePreferences({
       notifications: {
         ...preferences?.notifications,
-        marketing,
+        marketing: marketingRef.current,
       },
     });
     setSubmitted(true);

@@ -7,11 +7,13 @@ import { useDataDeletion } from '@/hooks/gdpr/useDataDeletion';
 vi.mock('@/hooks/gdpr/useDataDeletion', () => ({ useDataDeletion: vi.fn() }));
 
 const mockHook = useDataDeletion as unknown as ReturnType<typeof vi.fn>;
+let requestDeletionFn: ReturnType<typeof vi.fn>;
 
 describe('DataDeletionRequest', () => {
   beforeEach(() => {
+    requestDeletionFn = vi.fn();
     mockHook.mockReturnValue({
-      requestDeletion: vi.fn(),
+      requestDeletion: requestDeletionFn,
       isLoading: false,
       success: false,
       error: null,
@@ -19,7 +21,6 @@ describe('DataDeletionRequest', () => {
   });
 
   it('calls requestDeletion', () => {
-    const { requestDeletion } = mockHook.mock.results[0].value;
     const { getByRole } = render(
       <DataDeletionRequest
         render={({ requestDeletion: del }) => (
@@ -28,6 +29,6 @@ describe('DataDeletionRequest', () => {
       />
     );
     fireEvent.click(getByRole('button'));
-    expect(requestDeletion).toHaveBeenCalled();
+    expect(requestDeletionFn).toHaveBeenCalled();
   });
 });
