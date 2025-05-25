@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { AdminDashboard } from '../AdminDashboard';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { TestWrapper } from '../../../../tests/utils/test-wrapper';
 
 // Mock data
 const dashboardUrl = '/api/admin/dashboard';
@@ -50,9 +51,9 @@ const queryClient = new QueryClient({
 // Wrapper component for providing query client
 function wrapper({ children }: { children: React.ReactNode }) {
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <TestWrapper authenticated>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </TestWrapper>
   );
 }
 
