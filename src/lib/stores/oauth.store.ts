@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { OAuthProvider, OAuthState } from '@/types/oauth';
 import { useUserManagement } from '../auth/UserManagementProvider';
 import { api } from '@/lib/api/axios';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 export const useOAuthStore = create<OAuthState>((set, get) => ({
   isLoading: false,
@@ -94,7 +94,7 @@ export const useOAuthStore = create<OAuthState>((set, get) => ({
       });
       
       // Get auth store and update user
-      const authStore = useAuthStore.getState();
+      const authStore = useAuth();
       
       if (response.data.user) {
         // User logged in or account linked
