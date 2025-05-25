@@ -89,3 +89,28 @@ describe('webhook sender', () => {
     expect(res.length).toBe(1);
   });
 });
+
+  it('returns empty array when no active webhooks match event', async () => {
+    provider.listWebhooks.mockResolvedValueOnce([
+      { id: 'w1', url: 'https://a.com', secret: 's', events: ['other'], isActive: true },
+      { id: 'w2', url: 'https://b.com', secret: 's', events: ['user.created'], isActive: false }
+    ]);
+
+    const results = await sendWebhookEvent('user.created', {}, 'user');
+    expect(results).toEqual([]);
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('marks delivery unsuccessful when status code not ok', async () => {
+    provider.listWebhooks.mockResolvedValueOnce([
+      { id: 'w1', url: 'https://a.com', secret: 's', events: ['user.created'], isActive: true }
+    ]);
+    provider.recordDelivery.mockResolvedValue(undefined);
+    (global.fetch as any).mockResolvedValue({ ok: false, status: 500, text: async () => 'err' });
+
+    const results = await sendWebhookEvent('user.created', {}, 'user');
+    expect(results[0].success).toBe(false);
+    expect(results[0].statusCode).toBe(500);
+    expect(provider.recordDelivery).toHaveBeenCalled();
+  });
+});
