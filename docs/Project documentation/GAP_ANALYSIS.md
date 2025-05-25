@@ -27,7 +27,7 @@ This document summarises the remaining feature gaps in the User Management modul
 - Documentation guides such as the architecture overview and integration guide remain to be written.
 
 ## Client/Server Separation Gaps
-- API-based service implementations for user, permission, and other domains are missing. Currently, only the team domain has an API-based service (`ApiTeamService`).
+- API-based service implementations for user, permission, and session domains were missing. These have now been provided (`ApiUserService`, `ApiPermissionService`, `ApiSessionService`) alongside the existing `ApiTeamService`.
 - Prisma-based services/adapters must never be imported or executed on the client. All client-side code must use API-based services to comply with the layered, pluggable architecture.
 - API endpoints for these domains must be implemented and tested to support the client services.
 

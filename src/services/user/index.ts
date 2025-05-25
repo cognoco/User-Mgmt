@@ -7,6 +7,7 @@
 
 import { UserService } from '@/core/user/interfaces';
 import { DefaultUserService } from './default-user.service';
+export { ApiUserService, getApiUserService } from './api-user.service';
 import type { UserDataProvider } from '@/core/user/IUserDataProvider';
 
 /**

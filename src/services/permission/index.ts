@@ -7,6 +7,7 @@
 
 import { PermissionService } from '@/core/permission/interfaces';
 import { DefaultPermissionService } from './default-permission.service';
+export { ApiPermissionService, getApiPermissionService } from './api-permission.service';
 import type { PermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
 
 /**
