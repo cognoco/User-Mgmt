@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { RetentionStatus, RetentionType } from '../../database/schemas/retention';
-import { retentionService } from '../retention.service';
+import { RetentionService } from '../retention.service';
 import { getServiceSupabase } from '../../database/supabase';
 
 vi.mock('../../database/supabase');
@@ -14,11 +14,13 @@ const supabase = {
   update: vi.fn(() => ({ eq: vi.fn(), error: null })),
 };
 
+let service: RetentionService;
 (getServiceSupabase as unknown as vi.Mock).mockReturnValue(supabase);
 
 describe('RetentionService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    service = new RetentionService();
   });
 
   it('reactivates account successfully', async () => {
@@ -30,7 +32,7 @@ describe('RetentionService', () => {
       });
     supabase.update.mockReturnValueOnce({ eq: vi.fn().mockResolvedValue({ error: null }) });
 
-    const result = await retentionService.reactivateAccount('123');
+    const result = await service.reactivateAccount('123');
 
     expect(result).toBe(true);
     expect(supabase.update).toHaveBeenCalled();
@@ -44,13 +46,13 @@ describe('RetentionService', () => {
         error: null,
       });
 
-    await expect(retentionService.reactivateAccount('123')).rejects.toThrow('Cannot reactivate an anonymized account');
+    await expect(service.reactivateAccount('123')).rejects.toThrow('Cannot reactivate an anonymized account');
   });
 
   it('gets user retention status', async () => {
     supabase.maybeSingle.mockResolvedValueOnce({ data: { id: '1' }, error: null });
 
-    const result = await retentionService.getUserRetentionStatus('123');
+    const result = await service.getUserRetentionStatus('123');
 
     expect(result).toEqual({ id: '1' });
     expect(supabase.from).toHaveBeenCalledWith('retention_records');
@@ -59,6 +61,6 @@ describe('RetentionService', () => {
   it('throws on getUserRetentionStatus error', async () => {
     supabase.maybeSingle.mockResolvedValueOnce({ data: null, error: { message: 'fail' } });
 
-    await expect(retentionService.getUserRetentionStatus('123')).rejects.toThrow('fail');
+    await expect(service.getUserRetentionStatus('123')).rejects.toThrow('fail');
   });
 });

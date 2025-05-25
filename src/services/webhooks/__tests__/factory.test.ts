@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AdapterRegistry } from '@/adapters/registry';
-import { UserManagementConfiguration } from '@/core/config';
+let AdapterRegistry: typeof import('@/adapters/registry').AdapterRegistry;
+let UserManagementConfiguration: typeof import('@/core/config').UserManagementConfiguration;
 
 let getApiWebhookService: typeof import('../factory').getApiWebhookService;
 let WebhookServiceClass: typeof import('../WebhookService').WebhookService;
@@ -8,7 +8,9 @@ let WebhookServiceClass: typeof import('../WebhookService').WebhookService;
 describe('getApiWebhookService', () => {
   beforeEach(async () => {
     vi.resetModules();
+    ({ AdapterRegistry } = await import('@/adapters/registry'));
     (AdapterRegistry as any).instance = null;
+    ({ UserManagementConfiguration } = await import('@/core/config'));
     UserManagementConfiguration.reset();
     ({ getApiWebhookService } = await import('../factory'));
     ({ WebhookService: WebhookServiceClass } = await import('../WebhookService'));

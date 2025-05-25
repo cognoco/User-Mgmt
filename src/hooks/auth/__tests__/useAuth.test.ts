@@ -47,10 +47,7 @@ describe("useAuth", () => {
     const { result } = renderHook(() => useAuth());
 
     await act(async () => {
-      await result.current.login({
-        email: "test@example.com",
-        password: "pass",
-      });
+      await result.current.login("test@example.com", "pass");
     });
 
     expect(mockAuthService.login).toHaveBeenCalledWith({
@@ -70,14 +67,30 @@ describe("useAuth", () => {
     const { result } = renderHook(() => useAuth());
 
     await act(async () => {
-      await result.current.login({
-        email: "test@example.com",
-        password: "wrong",
-      });
+      await result.current.login("test@example.com", "wrong");
     });
 
     expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
     expect(result.current.error).toBe("Invalid credentials");
+  });
+
+  it("sends and verifies email", async () => {
+    vi.mocked(mockAuthService.sendVerificationEmail).mockResolvedValue({ success: true });
+    const { result } = renderHook(() => useAuth());
+
+    await act(async () => {
+      await result.current.sendVerificationEmail("a@test.com");
+    });
+
+    expect(mockAuthService.sendVerificationEmail).toHaveBeenCalledWith("a@test.com");
+
+    vi.mocked(mockAuthService.verifyEmail).mockResolvedValue();
+
+    await act(async () => {
+      const res = await result.current.verifyEmail("token");
+      expect(res.success).toBe(true);
+    });
+    expect(mockAuthService.verifyEmail).toHaveBeenCalledWith("token");
   });
 });

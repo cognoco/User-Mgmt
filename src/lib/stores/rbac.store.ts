@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
 import { RBACState, Role, Permission, RoleSchema, UserRoleSchema } from '../../types/rbac';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 export const useRBACStore = create<RBACState>()((set, get) => ({
   roles: [],
@@ -75,7 +75,7 @@ export const useRBACStore = create<RBACState>()((set, get) => ({
 
   hasPermission: (permission: Permission): boolean => {
     const state = get();
-    const user = useAuthStore.getState().user;
+    const user = useAuth().user;
     
     if (!user) return false;
 
@@ -94,7 +94,7 @@ export const useRBACStore = create<RBACState>()((set, get) => ({
 
   hasRole: (role: Role): boolean => {
     const state = get();
-    const user = useAuthStore.getState().user;
+    const user = useAuth().user;
     
     if (!user) return false;
 

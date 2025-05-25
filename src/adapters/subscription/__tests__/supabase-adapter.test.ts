@@ -13,7 +13,7 @@ const subRecord = {
   start_date: '2024-01-01T00:00:00Z',
 };
 
-const planRecord = { id: 'plan-1', name: 'Pro', tier: 'premium', price: 10, period: 'monthly', features: [], is_public: true, trial_days: 0 };
+const planRecord = { id: 'plan-1', name: 'Pro', tier: 'premium', price: 10, period: 'monthly', features: [], is_public: true, is_active: true, trial_days: 0 };
 
 describe('SupabaseSubscriptionProvider', () => {
   beforeEach(() => {
