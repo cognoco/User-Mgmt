@@ -1,12 +1,11 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import '@/tests/i18nTestSetup';
 import { OrganizationSessionManager } from '@/ui/styled/company/OrganizationSessionManager';
 import { DEFAULT_SECURITY_POLICY } from '@/types/organizations';
 import { validatePasswordWithPolicy } from '@/lib/security/password-validation';
-import { supabase } from '@/lib/database/supabase';
 
 // Mock dependencies
 vi.mock('@/hooks/user/useOrganizationSession', () => ({

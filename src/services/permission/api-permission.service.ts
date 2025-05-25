@@ -8,7 +8,7 @@ import {
   RoleCreationPayload,
   RoleUpdatePayload
 } from '@/core/permission/models';
-import { PermissionEventHandler, PermissionEventTypes, PermissionEvent } from '@/core/permission/events';
+import { PermissionEventHandler } from '@/core/permission/events';
 
 /**
  * API-based implementation of {@link PermissionService} for client usage.

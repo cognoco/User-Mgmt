@@ -1,9 +1,8 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
 import { supabase } from '../supabase';
-import { 
-    ProfileState, 
-    Profile,
+import {
+    ProfileState,
 } from '@/types/profile';
 import { fileToBase64 } from '@/lib/utils/file-upload';
 import { useAuth } from '@/lib/hooks/useAuth';

@@ -1,6 +1,6 @@
 // src/services/team/__tests__/mocks/mock-team-service.ts
 import { vi } from 'vitest';
-import { TeamService, TeamState } from '../../../../core/team/interfaces';
+import { TeamService } from '../../../../core/team/interfaces';
 import { 
   Team, 
   TeamMember, 

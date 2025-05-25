@@ -16,6 +16,7 @@ import {
  */
 export class ApiUserService implements UserService {
   async getUserProfile(_userId: string): Promise<UserProfile | null> {
+    void _userId;
     const res = await fetch('/api/user/profile', { credentials: 'include' });
     if (!res.ok) return null;
     const data = await res.json();
@@ -26,6 +27,7 @@ export class ApiUserService implements UserService {
     _userId: string,
     profileData: ProfileUpdatePayload
   ): Promise<UserProfileResult> {
+    void _userId;
     const res = await fetch('/api/user/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -40,6 +42,7 @@ export class ApiUserService implements UserService {
   }
 
   async getUserPreferences(_userId: string): Promise<UserPreferences> {
+    void _userId;
     const res = await fetch('/api/user/settings', { credentials: 'include' });
     if (!res.ok) throw new Error('Failed to fetch preferences');
     const data = await res.json();
@@ -50,6 +53,7 @@ export class ApiUserService implements UserService {
     _userId: string,
     preferences: PreferencesUpdatePayload
   ): Promise<{ success: boolean; preferences?: UserPreferences; error?: string }> {
+    void _userId;
     const res = await fetch('/api/user/settings', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -67,6 +71,7 @@ export class ApiUserService implements UserService {
     _userId: string,
     imageData: Blob
   ): Promise<{ success: boolean; imageUrl?: string; error?: string }> {
+    void _userId;
     const base64 = await imageData.arrayBuffer().then(buf =>
       Buffer.from(buf).toString('base64')
     );
@@ -84,6 +89,7 @@ export class ApiUserService implements UserService {
   }
 
   async deleteProfilePicture(_userId: string): Promise<{ success: boolean; error?: string }> {
+    void _userId;
     const res = await fetch('/api/user/avatar', {
       method: 'DELETE',
       credentials: 'include'
@@ -97,6 +103,7 @@ export class ApiUserService implements UserService {
     _userId: string,
     visibility: ProfileVisibility
   ): Promise<{ success: boolean; visibility?: ProfileVisibility; error?: string }> {
+    void _userId;
     const res = await fetch('/api/profile/privacy', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -118,6 +125,7 @@ export class ApiUserService implements UserService {
   }
 
   async deactivateUser(_userId: string, reason?: string): Promise<{ success: boolean; error?: string }> {
+    void _userId;
     const res = await fetch('/api/retention/deactivate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -132,6 +140,7 @@ export class ApiUserService implements UserService {
   }
 
   async reactivateUser(_userId: string): Promise<{ success: boolean; error?: string }> {
+    void _userId;
     const res = await fetch('/api/retention/reactivate', {
       method: 'POST',
       credentials: 'include'
@@ -148,6 +157,7 @@ export class ApiUserService implements UserService {
     newType: string,
     additionalData?: Record<string, any>
   ): Promise<UserProfileResult> {
+    void _userId;
     const res = await fetch('/api/user/convert-type', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

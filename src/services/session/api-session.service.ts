@@ -6,6 +6,7 @@ import type { SessionInfo } from '@/core/session/models';
  */
 export class ApiSessionService implements SessionService {
   async listUserSessions(_userId: string): Promise<SessionInfo[]> {
+    void _userId;
     const res = await fetch('/api/session', { credentials: 'include' });
     if (!res.ok) throw new Error('Failed to fetch sessions');
     const data = await res.json();
@@ -13,6 +14,7 @@ export class ApiSessionService implements SessionService {
   }
 
   async revokeUserSession(_userId: string, sessionId: string): Promise<{ success: boolean; error?: string }> {
+    void _userId;
     const res = await fetch(`/api/session/${sessionId}`, { method: 'DELETE', credentials: 'include' });
     if (!res.ok) {
       const data = await res.json();

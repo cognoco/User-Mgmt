@@ -8,8 +8,8 @@ vi.mock('@/lib/database/supabase', () => {
   // Define all mocks inside the factory to avoid hoisting issues
   const selectSpy = vi.fn();
   const updateSpy = vi.fn();
-  const insertSpy = vi.fn();
-  const deleteSpy = vi.fn();
+  const _insertSpy = vi.fn();
+  const _deleteSpy = vi.fn();
   const eqSpy = vi.fn();
   const channelSpy = vi.fn();
   const onSpy = vi.fn();
@@ -20,8 +20,8 @@ vi.mock('@/lib/database/supabase', () => {
   (global as any).__supabaseSpies = {
     selectSpy,
     updateSpy,
-    insertSpy,
-    deleteSpy,
+    insertSpy: _insertSpy,
+    deleteSpy: _deleteSpy,
     eqSpy,
     channelSpy,
     onSpy,
@@ -37,8 +37,8 @@ vi.mock('@/lib/database/supabase', () => {
         update: updateSpy.mockImplementation(() => ({
           eq: eqSpy.mockImplementation(() => Promise.resolve({ data: { updated: true }, error: null }))
         })),
-        insert: insertSpy,
-        delete: deleteSpy.mockImplementation(() => ({
+        insert: _insertSpy,
+        delete: _deleteSpy.mockImplementation(() => ({
           eq: eqSpy.mockImplementation(() => Promise.resolve({ data: { deleted: true }, error: null }))
         })),
       })),
@@ -66,8 +66,8 @@ import { describe, test, expect, beforeEach } from 'vitest';
 const {
   selectSpy,
   updateSpy,
-  insertSpy,
-  deleteSpy,
+  insertSpy: _insertSpy,
+  deleteSpy: _deleteSpy,
   eqSpy,
   channelSpy,
   onSpy,
