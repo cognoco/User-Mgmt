@@ -3,8 +3,9 @@ import { render, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { DataDeletionRequest } from '../DataDeletionRequest';
 
-vi.mock('../../headless/gdpr/DataDeletionRequest', () => ({
-  DataDeletionRequest: ({ render }: any) => render({ requestDeletion: vi.fn(), isLoading: false, error: null })
+vi.mock('../../../headless/gdpr/DataDeletionRequest', () => ({
+  DataDeletionRequest: ({ render }: any) =>
+    render({ requestDeletion: vi.fn(), isLoading: false, error: null })
 }));
 
 describe('DataDeletionRequest styled', () => {
