@@ -5,6 +5,7 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserPreferencesComponent } from '@/ui/styled/common/UserPreferences';
 import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuthStore } from '@/lib/stores/auth.store';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
 
 // Mock Zustand stores

@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SessionPolicyEnforcer } from '@/ui/styled/session/SessionPolicyEnforcer';
 import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuthStore } from '@/lib/stores/auth.store';
 import { api } from '@/lib/api/axios';
 
 // Mock the API module
