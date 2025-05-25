@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/ui/primitives/button';
 import { Input } from '@/ui/primitives/input';
@@ -8,7 +8,7 @@ import { Label } from '@/ui/primitives/label';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 import { Checkbox } from '@/ui/primitives/checkbox';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { loginSchema, type LoginData } from '@/core/auth/models';
+
 import { useRouter } from 'next/navigation';
 import { MFAVerificationForm } from './MFAVerificationForm';
 import { RateLimitFeedback } from '@/ui/styled/common/RateLimitFeedback';
@@ -16,7 +16,6 @@ import { OAuthButtons } from './OAuthButtons';
 import { ErrorBoundary, DefaultErrorFallback } from '@/ui/styled/common/ErrorBoundary';
 import Link from 'next/link';
 import { LoginForm as HeadlessLoginForm } from '@/ui/headless/auth/LoginForm';
-import { useAuth } from '@/hooks/auth/useAuth';
 import { LoginPayload } from '@/core/auth/models';
 
 export function LoginForm() {
@@ -25,12 +24,8 @@ export function LoginForm() {
   // React 19 compatibility - Use individual primitive selectors instead of object destructuring
   // This is more efficient and avoids infinite loop with getServerSnapshot in React 19
   const login = useAuth().login;
-  const sendVerificationEmail = useAuth().sendVerificationEmail;
-  const isLoading = useAuth().isLoading;
-  const error = useAuth().error;
-  const clearError = useAuth().clearError;
-  const setUser = useAuth().setUser;
-  const setToken = useAuth().setToken;
+  const authError = useAuth().error;
+  const success = useAuth().success;
   
   const [resendStatus, setResendStatus] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [showResendLink, setShowResendLink] = useState(false);
@@ -40,6 +35,8 @@ export function LoginForm() {
     retryAfter?: number;
     remainingAttempts?: number;
   } | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Handle custom form submission with MFA and rate limit handling
   const handleCustomSubmit = async (credentials: LoginPayload) => {
