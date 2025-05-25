@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AdapterRegistry } from '@/adapters/registry';
-import { UserManagementConfiguration } from '@/core/config';
+
+let AdapterRegistry: typeof import('@/adapters/registry').AdapterRegistry;
+let UserManagementConfiguration: typeof import('@/core/config').UserManagementConfiguration;
 
 let getApiSubscriptionService: typeof import('../factory').getApiSubscriptionService;
 let DefaultSubscriptionService: typeof import('../default-subscription.service').DefaultSubscriptionService;
@@ -8,6 +9,8 @@ let DefaultSubscriptionService: typeof import('../default-subscription.service')
 describe('getApiSubscriptionService', () => {
   beforeEach(async () => {
     vi.resetModules();
+    ({ AdapterRegistry } = await import('@/adapters/registry'));
+    ({ UserManagementConfiguration } = await import('@/core/config'));
     (AdapterRegistry as any).instance = null;
     UserManagementConfiguration.reset();
     ({ getApiSubscriptionService } = await import('../factory'));
