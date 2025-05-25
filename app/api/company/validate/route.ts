@@ -9,8 +9,17 @@ export async function POST(req: Request) {
   if (!parse.success) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
   }
-  // TODO: Implement real company registration validation logic
+  // Basic company name validation
   const { companyName } = parse.data;
-  const isValid = companyName.length > 2; // mock logic
+
+  const cleaned = companyName.trim();
+  const validChars = /^[a-zA-Z0-9 .,&'-]+$/;
+  const words = cleaned.split(/\s+/);
+
+  const isValid =
+    cleaned.length >= 3 &&
+    validChars.test(cleaned) &&
+    words.length >= 2 &&
+    words.every((w) => w.length > 1);
   return NextResponse.json({ valid: isValid });
 } 

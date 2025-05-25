@@ -5,14 +5,14 @@ const mockRequest = (body: any) => new Request('http://localhost', { method: 'PO
 
 describe('POST /api/tax-id/validate', () => {
   it('returns valid: true for a valid tax ID', async () => {
-    const req = mockRequest({ taxId: '123456' });
+    const req = mockRequest({ taxId: 'DE123456789' });
     const res = await POST(req);
     const json = await res.json();
     expect(json.valid).toBe(true);
   });
 
   it('returns valid: false for an invalid tax ID', async () => {
-    const req = mockRequest({ taxId: '12' });
+    const req = mockRequest({ taxId: '123456' });
     const res = await POST(req);
     const json = await res.json();
     expect(json.valid).toBe(false);
