@@ -1,6 +1,6 @@
 import React from 'react';
 import { SessionManagement as HeadlessSessionManagement } from '@/ui/headless/profile/SessionManagement';
-import { toast } from '@/ui/primitives/use-toast';
+import { toast } from '@/lib/hooks/use-toast';
 import {
   AlertDialog,
   AlertDialogTrigger,

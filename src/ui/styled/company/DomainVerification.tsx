@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 import { Badge } from '@/ui/primitives/badge';
 import { api } from '@/lib/api/axios';
-import { useToast } from '@/ui/primitives/use-toast';
+import { useToast } from '@/lib/hooks/use-toast';
 import { CheckCircle, Clock, AlertCircle, Loader2, Copy } from 'lucide-react';
 
 interface DomainVerificationProps {

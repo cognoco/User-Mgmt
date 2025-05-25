@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { getUserHomePage } from '@/lib/utils/getUserHomePage';
-import { toast } from '@/ui/primitives/use-toast';
+import { toast } from '@/lib/hooks/use-toast';
 import { useOAuthStore } from '@/lib/stores/oauth.store';
 import { OAuthProvider } from '@/types/oauth';
 import { useTranslation } from 'react-i18next';

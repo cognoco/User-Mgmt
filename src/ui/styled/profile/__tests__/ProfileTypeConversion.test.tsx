@@ -13,7 +13,7 @@ import { api } from '@/lib/api/axios';
 const mockToastFn = vi.fn();
 
 vi.mock('@/lib/stores/profile.store');
-vi.mock('@/ui/primitives/use-toast', () => ({
+vi.mock('@/lib/hooks/use-toast', () => ({
   useToast: () => ({ toast: mockToastFn }),
 }));
 

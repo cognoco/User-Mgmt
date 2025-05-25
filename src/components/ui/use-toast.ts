@@ -1,1 +1,2 @@
-export * from '../../ui/primitives/use-toast';
+export * from '@/lib/hooks/use-toast';
+

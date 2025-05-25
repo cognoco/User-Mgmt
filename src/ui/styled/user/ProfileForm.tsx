@@ -7,7 +7,7 @@ import { Label } from '@/ui/primitives/label';
 import { Textarea } from '@/ui/primitives/textarea';
 import { Switch } from '@/ui/primitives/switch';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
-import { useToast } from '@/ui/primitives/use-toast';
+import { useToast } from '@/lib/hooks/use-toast';
 import { ProfileFormData } from '@/types/profile';
 import { Edit2, XCircle, Save } from 'lucide-react';
 import HeadlessProfileForm from '@/ui/headless/user/ProfileForm';

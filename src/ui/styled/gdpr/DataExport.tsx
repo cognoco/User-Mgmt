@@ -16,7 +16,7 @@ import { Alert, AlertDescription } from "@/ui/primitives/alert";
 import { RadioGroup, RadioGroupItem } from "@/ui/primitives/radio-group";
 import { Label } from "@/ui/primitives/label";
 import { Progress } from "@/ui/primitives/progress";
-import { useToast } from "@/ui/primitives/use-toast";
+import { useToast } from "@/lib/hooks/use-toast";
 import { useIsMobile } from "@/lib/utils/responsive";
 import {
   DataExport as HeadlessDataExport,
