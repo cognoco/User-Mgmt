@@ -1,22 +1,25 @@
 import { test, expect } from '@playwright/test';
+import { loginAs } from './utils/auth';
+
+const USER_EMAIL = process.env.E2E_USER_EMAIL || 'testuser@example.com';
+const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
+const GDPR_SETTINGS_URL = '/settings/gdpr';
 
 test.describe('Personal Data Export E2E', () => {
   test('User can request and download their data export', async ({ page }) => {
-    // Login as a test user (replace with your login helper or flow)
-    await page.goto('/auth/login');
-    await page.fill('input[name="email"]', 'testuser@example.com');
-    await page.fill('input[name="password"]', 'password123');
-    await page.click('button[type="submit"]');
-    await page.waitForURL('/account/profile');
+    // Log in using shared helper
+    await loginAs(page, USER_EMAIL, USER_PASSWORD);
 
-    // Navigate to profile page (if not redirected)
-    await page.goto('/account/profile');
-    await expect(page.getByText('Export Your Data')).toBeVisible();
+    // Navigate to the GDPR settings page
+    await page.goto(GDPR_SETTINGS_URL);
+    await page.waitForURL(`**${GDPR_SETTINGS_URL}`);
+    await expect(page.getByRole('heading', { name: /privacy & data controls/i })).toBeVisible();
 
-    // Click the export button
-    const exportBtn = page.getByText('Download My Data');
+    // Initiate the export
+    const exportBtn = page.getByRole('button', { name: /export my data/i });
     await exportBtn.click();
-    // Check for success message (download will be triggered in browser)
-    await expect(page.getByText('Your data export has been downloaded successfully.')).toBeVisible();
+
+    // Success message should appear once download starts
+    await expect(page.getByText(/your data export has been downloaded successfully/i)).toBeVisible();
   });
 });
