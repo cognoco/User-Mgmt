@@ -3,7 +3,7 @@
  * Run node scripts/update-test-results.js
  * Runs all Vitest tests and generates a Markdown summary of passing and failing test files.
  * Reads: none (runs Vitest directly)
- * Writes: docs/TestResultLatest.md (summary), docs/TestResultsPrevious.md (previous summary)
+ * Writes: docs/TestResultLatest.md (summary)
  */
 
 
@@ -16,21 +16,10 @@ import os from 'os';
 // --- CONFIG ---
 const DOCS_DIR = path.join(process.cwd(), 'docs');
 const LATEST = path.join(DOCS_DIR, 'TestResultLatest.md');
-const PREVIOUS = path.join(DOCS_DIR, 'TestResultsPrevious.md');
 const TEMP_JSON = path.join(os.tmpdir(), `vitest-results-${Date.now()}.json`);
 
 
-// --- STEP 1: Copy Latest to Previous ---
-if (fs.existsSync(LATEST)) {
-  fs.copyFileSync(LATEST, PREVIOUS);
-  console.log(`Copied ${LATEST} to ${PREVIOUS}`);
-} else {
-  // If LATEST doesn't exist, create empty PREVIOUS
-  fs.writeFileSync(PREVIOUS, '');
-  console.log(`Created empty ${PREVIOUS}`);
-}
-
-// --- STEP 2: Run Vitest with JSON Reporter to File ---
+// --- STEP 1: Run Vitest with JSON Reporter to File ---
 console.log('Running tests...');
 const vitestBin = path.join(process.cwd(), 'node_modules', '.bin', process.platform === 'win32' ? 'vitest.cmd' : 'vitest');
 const result = spawnSync(vitestBin, ['run', '--reporter=json', `--outputFile=${TEMP_JSON}`], {
@@ -58,7 +47,7 @@ try {
   process.exit(1);
 }
 
-// --- STEP 3: Extract Passing and Failing Test Files ---
+// --- STEP 2: Extract Passing and Failing Test Files ---
 const passing = new Set();
 const failing = new Set();
 
@@ -95,7 +84,7 @@ if (Array.isArray(vitestJson.testResults)) {
   }
 }
 
-// --- STEP 4: Write Markdown Summary ---
+// --- STEP 3: Write Markdown Summary ---
 function toMdList(set) {
   return Array.from(set)
     .sort()
