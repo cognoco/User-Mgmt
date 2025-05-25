@@ -2,27 +2,33 @@
  * Subscription Domain Models
  */
 import {
-  SubscriptionPlan,
-  UserSubscription,
   SubscriptionTier,
   SubscriptionStatus,
   SubscriptionPeriod,
   subscriptionPlanSchema,
   userSubscriptionSchema,
+  isSubscriptionUpsertPayload,
+} from '@/types/subscription';
+
+import type {
+  SubscriptionPlan,
+  UserSubscription,
   SubscriptionQuery,
   SubscriptionUpsertPayload,
-  isSubscriptionUpsertPayload
 } from '@/types/subscription';
 
 export {
-  SubscriptionPlan,
-  UserSubscription,
   SubscriptionTier,
   SubscriptionStatus,
   SubscriptionPeriod,
   subscriptionPlanSchema,
   userSubscriptionSchema,
+  isSubscriptionUpsertPayload,
+};
+
+export type {
+  SubscriptionPlan,
+  UserSubscription,
   SubscriptionQuery,
   SubscriptionUpsertPayload,
-  isSubscriptionUpsertPayload,
 };
