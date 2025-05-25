@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DefaultAuthService } from '../default-auth.service';
+import type { AuthStorage } from '../auth-storage';
 import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
 import type { AuthResult, LoginPayload } from '@/core/auth/models';
 
@@ -29,7 +30,12 @@ describe('DefaultAuthService', () => {
 
   beforeEach(() => {
     adapter = createAdapter();
-    service = new DefaultAuthService(adapter);
+    const storage: AuthStorage = {
+      setItem: vi.fn(),
+      getItem: vi.fn(),
+      removeItem: vi.fn()
+    };
+    service = new DefaultAuthService(adapter, storage);
     Object.defineProperty(global, 'localStorage', {
       value: { setItem: vi.fn(), getItem: vi.fn(), removeItem: vi.fn() },
       writable: true
