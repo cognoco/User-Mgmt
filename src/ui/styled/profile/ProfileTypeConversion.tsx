@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/
 import { Alert, AlertDescription } from "@/ui/primitives/alert";
 import { Skeleton } from "@/ui/primitives/skeleton"; // For loading state
 import { useProfileStore } from '@/lib/stores/profile.store';
-import { useToast } from '@/ui/primitives/use-toast';
+import { useToast } from '@/lib/hooks/use-toast';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

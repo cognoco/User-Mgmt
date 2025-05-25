@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/lib/hooks/use-toast';
 
 import { HeadlessAuditLogViewer, METHODS, STATUS_CODES, STATUS_BADGE } from '@/ui/headless/audit/AuditLogViewer';
 

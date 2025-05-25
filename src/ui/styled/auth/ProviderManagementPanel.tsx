@@ -13,7 +13,7 @@ import { OAUTH_PROVIDERS } from '@/lib/constants/oauthProviders';
 import { useLinkedProviders, useLinkProvider, useUnlinkProvider } from '@/lib/hooks/useProviderManagement';
 import { OAuthProvider } from '@/types/oauth';
 import { Button } from '@/ui/primitives/button';
-import { toast } from '@/ui/primitives/use-toast';
+import { toast } from '@/lib/hooks/use-toast';
 
 const ALL_PROVIDERS: OAuthProvider[] = [
   OAuthProvider.GOOGLE,

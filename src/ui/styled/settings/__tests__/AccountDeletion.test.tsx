@@ -14,7 +14,7 @@ vi.mock('@/hooks/auth/useAuth', () => ({
 }));
 
 // Mock the toast component
-vi.mock('@/ui/primitives/use-toast', () => ({
+vi.mock('@/lib/hooks/use-toast', () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
 

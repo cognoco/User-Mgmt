@@ -48,7 +48,7 @@ vi.mock('@/ui/headless/user/ProfileForm', () => {
 });
 
 // Mock the toast hook
-vi.mock('@/ui/primitives/use-toast', () => ({
+vi.mock('@/lib/hooks/use-toast', () => ({
   useToast: () => ({
     toast: vi.fn()
   })

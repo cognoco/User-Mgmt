@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/primitives/select';
-import { useToast } from '@/ui/primitives/use-toast';
+import { useToast } from '@/lib/hooks/use-toast';
 import { CompanyLogoUpload } from '@/ui/styled/profile/CompanyLogoUpload';
 import { CheckCircle, XCircle, Loader2, Search, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { api } from '@/lib/api/axios';
