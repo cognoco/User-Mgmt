@@ -114,6 +114,7 @@ export const OrganizationSSO = ({
   error: externalError,
   children
 }: OrganizationSSOProps) => {
+  void onSuccess;
   // Get authentication hook
   const { 
     getOrganizationSSOProviders, 

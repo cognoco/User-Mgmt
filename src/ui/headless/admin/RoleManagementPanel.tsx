@@ -45,6 +45,7 @@ export interface RoleManagementPanelProps {
 }
 
 export function RoleManagementPanel({ users, children }: RoleManagementPanelProps) {
+  void users;
   // React 19 compatibility - Use individual selectors
   const roles = useRBACStore(state => state.roles);
   const userRoles = useRBACStore(state => state.userRoles);

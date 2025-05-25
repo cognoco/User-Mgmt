@@ -76,6 +76,7 @@ export function LoginForm({
   onValidationChange,
   render
 }: LoginFormProps) {
+  void showRememberMe;
   // Get authentication hook
   const { login, isLoading: authIsLoading, error: authError } = useAuth();
   

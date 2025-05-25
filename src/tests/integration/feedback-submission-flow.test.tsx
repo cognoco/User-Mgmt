@@ -119,6 +119,7 @@ describe('Feedback Submission Flow', () => {
       error: null,
       // Add only necessary methods
       readAsDataURL: vi.fn(function(this: any, blob: Blob) {
+        void blob;
         setTimeout(() => {
           // Set result before calling onload
           this.result = 'data:image/png;base64,c2NyZWVuc2hvdCBkYXRh';

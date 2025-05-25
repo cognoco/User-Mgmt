@@ -36,6 +36,7 @@ export default function Profile({ userId, children }: ProfileProps) {
     deleteProfilePicture,
     clearMessages
   } = useUserProfile();
+  void fetchUserProfile;
 
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
@@ -43,6 +44,7 @@ export default function Profile({ userId, children }: ProfileProps) {
   const updateProfileField = useCallback((field: string, value: string) => {
     if (profile) {
       const updatedProfile = { ...profile, [field]: value };
+      void updatedProfile;
       // This only updates the local state, not the database
       // The actual update happens when updateProfile is called
     }

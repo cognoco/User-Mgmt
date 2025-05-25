@@ -41,6 +41,7 @@ export function DeleteAccountDialog({
   onClose,
   render
 }: DeleteAccountDialogProps) {
+  void open;
   const [confirmText, setConfirmText] = useState('');
   const { deleteAccount, isLoading, error } = useDeleteAccount();
 

@@ -5,7 +5,6 @@ import { Button } from '@/ui/primitives/button';
 import { Input } from '@/ui/primitives/input';
 import { Skeleton } from '@/ui/primitives/skeleton';
 import { RefreshCw, Trash2, Users, Clock, UserX, Archive } from 'lucide-react';
-import { format } from 'date-fns';
 import {
   RetentionDashboard as HeadlessRetentionDashboard,
 } from '@/ui/headless/admin/RetentionDashboard';
@@ -21,7 +20,7 @@ export function RetentionDashboard() {
         setSearchQuery,
         isProcessing,
         metricsLoading,
-        metricsError,
+        metricsError: _metricsError,
         pendingLoading,
         pendingError,
         handleAnonymization,

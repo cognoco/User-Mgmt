@@ -7,12 +7,13 @@ export interface WebhookEventsProps {
   children?: (props: { selected: string[]; toggle: (e: string) => void }) => React.ReactNode;
 }
 
-export function WebhookEvents({ 
-  events = [], 
-  available = [], 
+export function WebhookEvents({
+  events = [],
+  available = [],
   onChange,
-  children 
+  children
 }: WebhookEventsProps) {
+  void available;
   const toggle = (e: string) => {
     if (!onChange) return;
     if (events.includes(e)) {

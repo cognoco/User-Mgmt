@@ -8,7 +8,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ users }) => (
   <HeadlessRoleManagementPanel users={users}>
     {({
       roles,
-      userRoles,
+      userRoles: _userRoles,
       isLoading,
       error,
       getUserRoleAssignments,

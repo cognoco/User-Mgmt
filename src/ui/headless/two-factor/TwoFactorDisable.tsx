@@ -18,6 +18,7 @@ export interface TwoFactorDisableProps {
 export function TwoFactorDisable({ onSuccess, onCancel, children }: TwoFactorDisableProps) {
   const { disableMFA, isLoading, error } = useMFA();
   const [code, setCode] = useState('');
+  void onCancel;
 
   const submit = async () => {
     const res = await disableMFA(code);

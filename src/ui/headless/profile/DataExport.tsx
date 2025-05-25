@@ -36,6 +36,7 @@ export interface DataExportProps {
  */
 export function DataExport({ children }: DataExportProps) {
   const { requestExport, refreshStatus, status, isLoading, error } = useDataExport();
+  void status;
 
   const [exportStatus, setExportStatus] = useState<PersonalExportStatus>('not_started');
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);

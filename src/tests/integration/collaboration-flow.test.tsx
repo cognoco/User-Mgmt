@@ -8,7 +8,9 @@ vi.mock('@/lib/database/supabase', () => {
   // Define all mocks inside the factory to avoid hoisting issues
   const selectSpy = vi.fn();
   const updateSpy = vi.fn();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const insertSpy = vi.fn();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const deleteSpy = vi.fn();
   const eqSpy = vi.fn();
   const channelSpy = vi.fn();
@@ -66,8 +68,8 @@ import { describe, test, expect, beforeEach } from 'vitest';
 const {
   selectSpy,
   updateSpy,
-  insertSpy,
-  deleteSpy,
+  insertSpy: _insertSpy,
+  deleteSpy: _deleteSpy,
   eqSpy,
   channelSpy,
   onSpy,

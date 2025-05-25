@@ -97,6 +97,7 @@ export function DomainManagement({ companyId, onVerificationChange, render }: Do
   };
 
   const handleVerifyDomain = (domain: CompanyDomain) => {
+    void domain;
     onVerificationChange?.();
   };
 

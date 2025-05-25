@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 declare module 'lru-cache' {
   export interface LRUCacheOptions<K = any, V = any> {
     max?: number;

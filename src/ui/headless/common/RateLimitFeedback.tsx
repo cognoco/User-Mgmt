@@ -25,6 +25,8 @@ export default function RateLimitFeedback({
   onCountdownComplete,
   render
 }: RateLimitFeedbackProps) {
+  void maxAttempts;
+  void remainingAttempts;
   const [timeLeft, setTimeLeft] = useState(retryAfter || windowMs);
   const [progress, setProgress] = useState(100);
 

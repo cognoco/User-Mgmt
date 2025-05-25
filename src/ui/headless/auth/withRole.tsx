@@ -115,6 +115,7 @@ export const WithRoleComponent = ({
   bypass = false,
   children
 }: WithRoleProps) => {
+  void fallback;
   // Get authentication hook
   const { 
     getUserRoles, 

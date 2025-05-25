@@ -352,6 +352,8 @@ export function AccountSettings({
 
 // Helper function to update profile (not exported)
 async function updateProfile(userId: string, data: any) {
+  void userId;
+  void data;
   // This is a placeholder function to avoid circular dependencies
   // In a real implementation, we would use the UserService directly
   return { success: true };

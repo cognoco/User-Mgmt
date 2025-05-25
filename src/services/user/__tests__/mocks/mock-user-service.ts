@@ -1,6 +1,6 @@
 // src/services/user/__tests__/mocks/mock-user-service.ts
 import { vi } from 'vitest';
-import { UserService, UserState } from '../../../../core/user/interfaces';
+import { UserService } from '../../../../core/user/interfaces';
 import { 
   UserProfile, 
   ProfileUpdatePayload, 
@@ -127,6 +127,7 @@ export class MockUserService implements UserService {
   });
 
   uploadProfilePicture = vi.fn().mockImplementation(async (userId: string, imageData: Blob): Promise<{ success: boolean; imageUrl?: string; error?: string }> => {
+    void imageData;
     if (!this.mockProfiles[userId]) {
       return { success: false, error: 'User not found' };
     }
@@ -242,6 +243,7 @@ export class MockUserService implements UserService {
   });
 
   deactivateUser = vi.fn().mockImplementation(async (userId: string, reason?: string): Promise<{ success: boolean; error?: string }> => {
+    void reason;
     if (!this.mockProfiles[userId]) {
       return { success: false, error: 'User not found' };
     }

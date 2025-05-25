@@ -10,7 +10,6 @@ import { useUserProfile } from '@/hooks/user/useUserProfile';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { ProfileUpdatePayload, UserProfile } from '@/core/user/models';
 import { z } from 'zod';
-import { UserType } from '@/types/user-type';
 
 export interface ProfileEditorProps {
   /**

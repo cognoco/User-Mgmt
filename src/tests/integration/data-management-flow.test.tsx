@@ -14,12 +14,14 @@ const deleteSpy = vi.fn();
 const eqSpy = vi.fn();
 
 // Create chain-returning mock objects for method chaining
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const updateWithEq = {
   update: vi.fn().mockReturnValue({
     eq: eqSpy
   })
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const deleteWithEq = {
   delete: vi.fn().mockReturnValue({
     eq: eqSpy

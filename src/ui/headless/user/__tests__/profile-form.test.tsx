@@ -44,6 +44,7 @@ describe('Headless ProfileForm Component', () => {
   let mockFetchProfile: any;
   let mockUpdateProfile: any;
   let mockAuthService: MockAuthService;
+  void mockAuthService;
   
   beforeEach(() => {
     vi.clearAllMocks();

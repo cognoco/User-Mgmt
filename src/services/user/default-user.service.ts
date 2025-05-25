@@ -20,7 +20,6 @@ import {
   ProfileVisibility
 } from '@/core/user/models';
 import { UserEventType } from '@/core/user/events';
-import { translateError } from '@/lib/utils/error';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
 
 /**

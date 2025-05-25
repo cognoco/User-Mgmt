@@ -95,6 +95,7 @@ describe('LoginForm', () => {
   const mockLogin = vi.fn();
 
   // Helper to reset and setup mocks with specific state
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const setupMocks = (authState: Partial<ReturnType<typeof useAuth>> = {}, formState: Partial<typeof mockFormState> = {}) => {
     vi.clearAllMocks();
     mockLogin.mockReset().mockResolvedValue({ success: true }); 

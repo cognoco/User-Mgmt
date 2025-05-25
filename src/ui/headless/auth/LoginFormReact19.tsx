@@ -128,6 +128,7 @@ export const LoginFormReact19 = ({
   onValidationChange,
   children
 }: LoginFormReact19Props) => {
+  void showRememberMe;
   // Get authentication hook
   const { login, isLoading: authIsLoading, error: authError } = useAuth();
   

@@ -37,6 +37,7 @@ export default function ProfileForm({ children }: ProfileFormProps) {
   const profileError = useProfileStore(state => state.error);
   const fetchProfile = useProfileStore(state => state.fetchProfile);
   const updateProfile = useProfileStore(state => state.updateProfile);
+  void profileError;
   
   const userEmail = useAuth().user?.email;
   

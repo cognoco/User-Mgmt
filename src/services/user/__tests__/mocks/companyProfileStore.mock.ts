@@ -1,14 +1,14 @@
-import { CompanyProfile, CompanyAddress, AddressType } from '@/types/company';
+import type { CompanyProfile, CompanyAddress } from '@/types/company';
 
 interface CompanyProfileStoreMockState {
-  profile: any;
-  addresses: any[];
+  profile: CompanyProfile | null;
+  addresses: CompanyAddress[];
   isLoading: boolean;
   error: any;
   fetchProfile: () => Promise<void>;
-  updateProfile: (data: any) => Promise<void>;
-  addAddress: (address: any) => Promise<void>;
-  updateAddress: (id: string, data: any) => Promise<void>;
+  updateProfile: (data: Partial<CompanyProfile>) => Promise<void>;
+  addAddress: (address: CompanyAddress) => Promise<void>;
+  updateAddress: (id: string, data: Partial<CompanyAddress>) => Promise<void>;
   deleteAddress: (id: string) => Promise<void>;
   [key: string]: any;
 }

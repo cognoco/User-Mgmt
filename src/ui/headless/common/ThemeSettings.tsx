@@ -30,6 +30,8 @@ export default function ThemeSettings({
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
   const [previewMode, setPreviewMode] = useState(false);
+  void previewMode;
+  void setPreviewMode;
 
   useEffect(() => {
     if (!preferences && !isLoading && !error) fetchPreferences();

@@ -18,6 +18,7 @@ export interface VerificationStatusProps {
 
 export function VerificationStatus({ initialSteps, render }: VerificationStatusProps) {
   const [steps, setSteps] = useState<VerificationStep[]>(initialSteps);
+  void setSteps;
   const completed = steps.filter(s => s.status === 'completed').length;
   const progress = Math.round((completed / steps.length) * 100);
   const overallStatus = steps.every(s => s.status === 'completed') ? 'verified' : 'pending';

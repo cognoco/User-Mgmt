@@ -6,6 +6,7 @@ import { TestWrapper } from '../../../../tests/utils/test-wrapper';
 
 // Mock data
 const dashboardUrl = '/api/admin/dashboard';
+void dashboardUrl;
 
 const mockDashboardData = {
   team: {

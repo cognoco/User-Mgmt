@@ -1,4 +1,3 @@
-import { Mock } from 'jest-mock';
 
 // Type helper for Jest mock functions
 export type JestMockFunction<TReturn, TArgs extends any[]> = jest.Mock<TReturn, TArgs>;
