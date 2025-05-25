@@ -4,7 +4,17 @@ import { useUserManagement } from '../auth/UserManagementProvider';
 import { api } from '@/lib/api/axios';
 import { useAuth } from '@/lib/hooks/useAuth';
 
-export const useOAuthStore = create<OAuthState>((set, get) => ({
+type OAuthInternalState = Omit<OAuthState, 'login' | 'handleCallback'> & {
+  login: (provider: OAuthProvider, oauth: any) => void;
+  handleCallback: (
+    provider: OAuthProvider,
+    code: string,
+    auth: ReturnType<typeof useAuth>,
+    oauth: any
+  ) => Promise<void>;
+};
+
+const oauthStoreBase = create<OAuthInternalState>((set, get) => ({
   isLoading: false,
   error: null,
   connectedProviders: [],
@@ -12,13 +22,14 @@ export const useOAuthStore = create<OAuthState>((set, get) => ({
   /**
    * Initiate OAuth login flow
    */
-  login: (provider: OAuthProvider) => {
+  login: (provider: OAuthProvider, oauthConfig: any) => {
     try {
       set({ isLoading: true, error: null });
       
       // Get provider config from context
-      const { oauth } = useUserManagement();
-      const providerConfig = oauth?.providers.find(p => p.provider === provider);
+      const providerConfig = oauthConfig?.providers.find(
+        (p: any) => p.provider === provider
+      );
       
       if (!providerConfig) {
         throw new Error(`Provider ${provider} is not configured`);
@@ -70,7 +81,12 @@ export const useOAuthStore = create<OAuthState>((set, get) => ({
   /**
    * Handle OAuth callback
    */
-  handleCallback: async (provider: OAuthProvider, code: string) => {
+  handleCallback: async (
+    provider: OAuthProvider,
+    code: string,
+    authStore: ReturnType<typeof useAuth>,
+    oauthConfig: any
+  ) => {
     try {
       set({ isLoading: true, error: null });
       
@@ -94,8 +110,6 @@ export const useOAuthStore = create<OAuthState>((set, get) => ({
       });
       
       // Get auth store and update user
-      const authStore = useAuth();
-      
       if (response.data.user) {
         // User logged in or account linked
         authStore.setUser(response.data.user);
@@ -108,8 +122,7 @@ export const useOAuthStore = create<OAuthState>((set, get) => ({
         }));
         
         // Redirect to home or specified redirect path
-        const { oauth } = useUserManagement();
-        window.location.href = oauth?.defaultRedirectPath || '/';
+        window.location.href = oauthConfig?.defaultRedirectPath || '/';
       } else {
         // Something went wrong
         throw new Error('Failed to authenticate with provider');
@@ -158,6 +171,19 @@ export const useOAuthStore = create<OAuthState>((set, get) => ({
     set({ error: null });
   },
 }));
+
+export function useOAuthStore() {
+  const store = oauthStoreBase();
+  const { oauth } = useUserManagement();
+  const auth = useAuth();
+
+  return {
+    ...store,
+    login: (provider: OAuthProvider) => store.login(provider, oauth),
+    handleCallback: (provider: OAuthProvider, code: string) =>
+      store.handleCallback(provider, code, auth, oauth),
+  };
+}
 
 /**
  * Get default authorization URL for common providers

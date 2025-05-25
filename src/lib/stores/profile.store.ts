@@ -24,7 +24,11 @@ interface ExtendedProfileState extends Omit<ProfileState, 'profile' | 'updatePro
   clearError: () => void;
 }
 
-export const useProfileStore = create<ExtendedProfileState & {
+type ProfileInternalState = Omit<ExtendedProfileState, 'fetchProfile'> & {
+  fetchProfile: (userId: string | undefined) => Promise<void>;
+};
+
+const profileStoreBase = create<ProfileInternalState & {
   verification: ProfileVerification | null;
   verificationLoading: boolean;
   verificationError: string | null;
@@ -38,9 +42,8 @@ export const useProfileStore = create<ExtendedProfileState & {
   verificationLoading: false,
   verificationError: null,
 
-  fetchProfile: async () => {
+  fetchProfile: async (userId: string | undefined) => {
     set({ isLoading: true, error: null });
-    const userId = useAuth().user?.id;
     if (!userId) {
       set({ error: 'User not authenticated', isLoading: false });
       return;
@@ -292,4 +295,14 @@ export const useProfileStore = create<ExtendedProfileState & {
       });
     }
   },
-})); 
+}));
+
+export function useProfileStore() {
+  const store = profileStoreBase();
+  const { user } = useAuth();
+
+  return {
+    ...store,
+    fetchProfile: () => store.fetchProfile(user?.id),
+  };
+}
