@@ -40,7 +40,7 @@ export function validatePasswordWithPolicy(
   const errors: string[] = [];
   
   // Check length requirement
-  if (password.length < policy.password_min_length) {
+  if (password.length <= policy.password_min_length) {
     errors.push(`Password must be at least ${policy.password_min_length} characters long`);
   }
   

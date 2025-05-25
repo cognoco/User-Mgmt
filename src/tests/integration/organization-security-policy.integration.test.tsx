@@ -9,7 +9,7 @@ import { validatePasswordWithPolicy } from '@/lib/security/password-validation';
 import { supabase } from '@/lib/database/supabase';
 
 // Mock dependencies
-vi.mock('@/hooks/useOrganizationSession', () => ({
+vi.mock('@/hooks/user/useOrganizationSession', () => ({
   useOrganizationPolicies: vi.fn(() => ({
     policies: { ...DEFAULT_SECURITY_POLICY },
     loading: false,
@@ -22,21 +22,18 @@ vi.mock('@/hooks/useOrganizationSession', () => ({
     loading: false,
     error: null,
     count: 1
-  }))
-}));
-
-vi.mock('@/hooks/useOrganizationMembers', () => ({
+  })),
   useOrganizationMembers: vi.fn(() => ({
     members: [
-      { 
-        id: 'user1', 
-        email: 'user1@example.com', 
+      {
+        id: 'user1',
+        email: 'user1@example.com',
         name: 'User One',
         active_sessions: 2
       },
-      { 
-        id: 'user2', 
-        email: 'user2@example.com', 
+      {
+        id: 'user2',
+        email: 'user2@example.com',
         name: 'User Two',
         active_sessions: 0
       }
@@ -47,7 +44,7 @@ vi.mock('@/hooks/useOrganizationMembers', () => ({
   }))
 }));
 
-vi.mock('@/hooks/useOrganization', () => ({
+vi.mock('@/lib/context/OrganizationContext', () => ({
   useOrganization: vi.fn(() => ({
     organization: { id: 'org1', name: 'Test Organization' }
   }))
