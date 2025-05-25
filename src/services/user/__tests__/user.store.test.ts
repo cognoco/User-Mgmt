@@ -6,11 +6,11 @@ vi.mock('@/lib/stores/user.store', () => {
 });
 
 import { useUserStore } from '@/lib/stores/user.store';
-import { supabase } from '../../supabase';
+import { supabase } from '@/lib/supabase';
 import { act } from '@testing-library/react';
 
 // Mock the Supabase client
-vi.mock('../../supabase', () => ({
+vi.mock('@/lib/supabase', () => ({
   supabase: {
     auth: {
       getUser: vi.fn()
