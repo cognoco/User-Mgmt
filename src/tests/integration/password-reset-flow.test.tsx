@@ -56,6 +56,7 @@ const apiPostSpy = vi.spyOn(apiModule.api, 'post');
 
 // Import after mocks
 import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuthStore } from '@/lib/stores/auth.store';
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
