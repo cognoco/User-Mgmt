@@ -294,7 +294,7 @@ test.describe('Payment Checkout Flow', () => {
     }
   });
 
-  test('User can view subscription details after purchase', async ({ page, browserName }) => {
+  test('User can view subscription details after purchase', async ({ page }) => {
     // First, mock a subscription or ensure one exists for the test user
     // For this test, we'll assume the user already has an active subscription
 
@@ -390,7 +390,7 @@ test.describe('Payment Checkout Flow', () => {
 });
 
 test.describe('Checkout Edge Cases', () => {
-  test('Handle checkout cancellation gracefully', async ({ page, browserName }) => {
+  test('Handle checkout cancellation gracefully', async ({ page }) => {
     // Log in first
     await loginAs(page, TEST_USER, TEST_PASSWORD);
 
@@ -409,7 +409,7 @@ test.describe('Checkout Edge Cases', () => {
     await expect(returnLink).toBeVisible();
   });
 
-  test('Handle successful checkout return', async ({ page, browserName }) => {
+  test('Handle successful checkout return', async ({ page }) => {
     // Log in first
     await loginAs(page, TEST_USER, TEST_PASSWORD);
 
@@ -428,7 +428,7 @@ test.describe('Checkout Edge Cases', () => {
     await expect(viewSubscriptionLink).toBeVisible();
   });
 
-  test('Handle provider outage gracefully', async ({ page, browserName }) => {
+  test('Handle provider outage gracefully', async ({ page }) => {
     // Log in first
     await loginAs(page, TEST_USER, TEST_PASSWORD);
 

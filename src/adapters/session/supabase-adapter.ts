@@ -42,6 +42,8 @@ export class SupabaseSessionProvider implements ISessionDataProvider {
     _userId: string,
     _payload: SessionCreatePayload
   ): Promise<SessionOperationResult> {
+    void _userId;
+    void _payload;
     return { success: false, error: 'createSession not supported' };
   }
 
@@ -55,6 +57,9 @@ export class SupabaseSessionProvider implements ISessionDataProvider {
     _sessionId: string,
     _update: SessionUpdatePayload
   ): Promise<SessionOperationResult> {
+    void _userId;
+    void _sessionId;
+    void _update;
     return { success: false, error: 'updateSession not supported' };
   }
 

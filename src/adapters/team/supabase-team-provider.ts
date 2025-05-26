@@ -52,17 +52,17 @@ export class SupabaseTeamProvider implements ITeamDataProvider {
    * @param teamData Team creation data including name, description, etc.
    * @returns Result object with success status and created team or error
    */
-  async createTeam(ownerId: string, teamData: TeamCreatePayload): Promise<TeamResult> {
+  async createTeam(ownerId: string, teamDataInput: TeamCreatePayload): Promise<TeamResult> {
     try {
       // Insert the team record
       const { data: teamData, error: teamError } = await this.supabase
         .from('teams')
         .insert({
-          name: teamData.name,
-          description: teamData.description,
+          name: teamDataInput.name,
+          description: teamDataInput.description,
           owner_id: ownerId,
-          is_public: teamData.isPublic || false,
-          settings: teamData.settings || {},
+          is_public: teamDataInput.isPublic || false,
+          settings: teamDataInput.settings || {},
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })

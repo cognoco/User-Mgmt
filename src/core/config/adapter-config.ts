@@ -45,6 +45,7 @@ export function createAdapterFactory(config: AdapterConfig): AdapterFactory {
   const { type, options } = config;
   
   // Import dynamically to avoid circular dependencies
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { AdapterRegistry } = require('@/adapters');
   
   if (!AdapterRegistry.isAdapterAvailable(type)) {

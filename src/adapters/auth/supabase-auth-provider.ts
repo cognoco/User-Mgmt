@@ -352,9 +352,9 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @param code MFA code from authenticator app for verification
    * @returns Authentication result with success status or error
    */
-  async disableMFA(code: string): Promise<AuthResult> {
+  async disableMFA(_code: string): Promise<AuthResult> {
     try {
-      const { data, error } = await this.supabase.auth.mfa.unenroll({
+      const { error } = await this.supabase.auth.mfa.unenroll({
         factorId: 'totp'
       });
       

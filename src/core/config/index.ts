@@ -12,8 +12,7 @@ import {
   UserManagementConfig, 
   FeatureFlags, 
   ServiceProviderRegistry,
-  DEFAULT_CONFIG,
-  DEFAULT_FEATURE_FLAGS
+  DEFAULT_CONFIG
 } from './interfaces';
 
 // The global configuration instance
