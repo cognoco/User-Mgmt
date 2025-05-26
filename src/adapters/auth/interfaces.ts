@@ -13,7 +13,7 @@ import type {
   MFAVerifyResponse,
 } from './models';
 
-export interface IAuthDataProvider {
+export interface AuthDataProvider {
   /**
    * Authenticate a user with email and password.
    *
@@ -127,5 +127,4 @@ export interface IAuthDataProvider {
   handleSessionTimeout(): void;
 }
 
-export type AuthDataProvider = IAuthDataProvider;
 
