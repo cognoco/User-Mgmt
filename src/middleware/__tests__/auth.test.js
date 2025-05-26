@@ -4,9 +4,11 @@ import { createMocks } from 'node-mocks-http';
 import { withAuth } from '../../middleware/auth';
 import { describe, test, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 
-// Import our standardized mock
-vi.mock('../../src/lib/supabase', () => require('../mocks/supabase'));
-import { supabase } from '../../lib/supabase';
+// Mock auth service
+const mockAuthService = { getSession: vi.fn(), getUser: vi.fn() };
+vi.mock('@/services/auth/factory', () => ({
+  getApiAuthService: () => mockAuthService,
+}));
 
 // Import utility functions
 import { setupTestEnvironment } from '../../tests/utils/environment-setup';
@@ -34,10 +36,7 @@ describe('Auth Middleware', () => {
     const mockUser = createMockUser();
     
     // Mock authenticated user with exact structure expected by the middleware
-    supabase.auth.getUser.mockResolvedValue({
-      data: { user: mockUser },
-      error: null,
-    });
+    mockAuthService.getSession.mockResolvedValue({ user: mockUser });
 
     // Create a mock handler that the middleware will wrap
     const handler = vi.fn().mockImplementation((req, res) => {
@@ -69,7 +68,7 @@ describe('Auth Middleware', () => {
     expect(req.user).toEqual(mockUser);
     
     // Verify Supabase was called with the right token
-    expect(supabase.auth.getUser).toHaveBeenCalledWith('valid-token');
+    expect(mockAuthService.getSession).toHaveBeenCalledWith('valid-token');
   });
 
   test('rejects requests without authorization header', async () => {
@@ -101,10 +100,7 @@ describe('Auth Middleware', () => {
 
   test('rejects requests with invalid token', async () => {
     // Mock auth error with exact structure expected by the middleware
-    supabase.auth.getUser.mockResolvedValue({
-      data: { user: null },
-      error: { message: 'Invalid token' },
-    });
+    mockAuthService.getSession.mockResolvedValue(null);
 
     // Create a mock handler that the middleware will wrap
     const handler = vi.fn().mockImplementation((req, res) => {
@@ -130,17 +126,17 @@ describe('Auth Middleware', () => {
     
     // Check if the response is correct (401 Unauthorized)
     expect(res._getStatusCode()).toBe(401);
-    expect(JSON.parse(res._getData())).toEqual({ 
-      error: 'Unauthorized: Invalid token' 
+    expect(JSON.parse(res._getData())).toEqual({
+      error: 'Unauthorized: Invalid token'
     });
-    
-    // Verify Supabase was called with the right token
-    expect(supabase.auth.getUser).toHaveBeenCalledWith('invalid-token');
+
+    // Verify service was called with the right token
+    expect(mockAuthService.getSession).toHaveBeenCalledWith('invalid-token');
   });
 
   test('handles server errors during authentication', async () => {
     // Mock server error
-    supabase.auth.getUser.mockRejectedValue(new Error('Server error'));
+    mockAuthService.getSession.mockRejectedValue(new Error('Server error'));
 
     // Create a mock handler that the middleware will wrap
     const handler = vi.fn().mockImplementation((req, res) => {
@@ -176,12 +172,7 @@ describe('Auth Middleware', () => {
     const mockAdminUser = createMockAdminUser();
     
     // Mock authenticated user with admin role
-    supabase.auth.getUser.mockResolvedValue({
-      data: {
-        user: mockAdminUser
-      },
-      error: null,
-    });
+    mockAuthService.getSession.mockResolvedValue({ user: mockAdminUser });
 
     // Create a mock handler that the middleware will wrap
     const handler = vi.fn().mockImplementation((req, res) => {
@@ -215,12 +206,7 @@ describe('Auth Middleware', () => {
     const mockUser = createMockUser();
     
     // Mock authenticated user without admin role
-    supabase.auth.getUser.mockResolvedValue({
-      data: {
-        user: mockUser
-      },
-      error: null,
-    });
+    mockAuthService.getSession.mockResolvedValue({ user: mockUser });
 
     // Create a mock handler that the middleware will wrap
     const handler = vi.fn().mockImplementation((req, res) => {
@@ -266,12 +252,7 @@ describe('Auth Middleware', () => {
       const mockUser = createMockUser();
       
       // Mock authenticated user
-      supabase.auth.getUser.mockResolvedValue({
-        data: {
-          user: mockUser
-        },
-        error: null,
-      });
+      mockAuthService.getSession.mockResolvedValue({ user: mockUser });
       
       const handler = vi.fn().mockImplementation((req, res) => {
         res.status(200).json({ success: true });
@@ -294,7 +275,7 @@ describe('Auth Middleware', () => {
         : testCase.header;
       
       // Verify the token was extracted correctly
-      expect(supabase.auth.getUser).toHaveBeenCalledWith(expectedToken);
+      expect(mockAuthService.getSession).toHaveBeenCalledWith(expectedToken);
       expect(handler).toHaveBeenCalled();
     }
   });

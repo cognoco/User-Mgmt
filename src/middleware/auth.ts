@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import type { User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { getApiAuthService } from '@/services/auth/factory';
 
 /**
  * Options for {@link withAuth} middleware.
@@ -45,16 +45,15 @@ export function withAuth(
           .json({ error: 'Unauthorized: Missing authorization header' });
       }
 
-      // Support both "Bearer <token>" and raw token formats
       const token = authHeader.startsWith('Bearer ')
         ? authHeader.split(' ')[1]
         : authHeader;
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser(token);
 
-      if (error || !user) {
+      const authService = getApiAuthService();
+      const session = await authService.getSession(token);
+
+      const user = session?.user as User | undefined;
+      if (!user) {
         return res.status(401).json({ error: 'Unauthorized: Invalid token' });
       }
 
@@ -78,7 +77,6 @@ export function withAuth(
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError } from '@/lib/api/common/api-error';
 import { createErrorResponse } from '@/lib/api/common/response-formatter';
-import { getApiAuthService } from '@/services/auth/factory';
 
 /**
  * Authentication middleware for Next.js route handlers.

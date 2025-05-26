@@ -1,18 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { withPermissionCheck } from '../permissions';
+import { getApiAuthService } from '@/services/auth/factory';
 import { Permission } from '@/lib/rbac/roles';
 import { prisma } from '@/lib/database/prisma';
 import { checkRolePermission } from '@/lib/rbac/roleService';
 
 // Mock dependencies
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn(),
-}));
-
-vi.mock('@/lib/auth', () => ({
-  authOptions: {},
+const mockAuthService = { getSession: vi.fn() };
+vi.mock('@/services/auth/factory', () => ({
+  getApiAuthService: () => mockAuthService,
 }));
 
 vi.mock('@/lib/database/prisma', () => ({
@@ -49,7 +46,7 @@ describe('Permission Middleware', () => {
 
   describe('Authentication', () => {
     it('should return 401 when no session exists', async () => {
-      vi.mocked(getServerSession).mockResolvedValue(null);
+      mockAuthService.getSession.mockResolvedValue(null);
 
       const middleware = withPermissionCheck(mockHandler, {
         requiredPermission: Permission.VIEW_TEAM_MEMBERS,
@@ -64,7 +61,7 @@ describe('Permission Middleware', () => {
     });
 
     it('should return 403 when user has no team membership', async () => {
-      vi.mocked(getServerSession).mockResolvedValue({ user: mockUser } as any);
+      mockAuthService.getSession.mockResolvedValue({ user: mockUser } as any);
       vi.mocked(prisma.user.findUnique).mockResolvedValue({ 
         id: mockUser.id, 
         email: mockUser.email,
@@ -86,8 +83,8 @@ describe('Permission Middleware', () => {
 
   describe('Permission Checking', () => {
     beforeEach(() => {
-      vi.mocked(getServerSession).mockResolvedValue({ user: mockUser } as any);
-      vi.mocked(prisma.user.findUnique).mockResolvedValue({ 
+      mockAuthService.getSession.mockResolvedValue({ user: mockUser } as any);
+      vi.mocked(prisma.user.findUnique).mockResolvedValue({
         id: mockUser.id, 
         email: mockUser.email,
         teamMember: mockTeamMember 
@@ -140,8 +137,8 @@ describe('Permission Middleware', () => {
 
   describe('Resource Access', () => {
     beforeEach(() => {
-      vi.mocked(getServerSession).mockResolvedValue({ user: mockUser } as any);
-      vi.mocked(prisma.user.findUnique).mockResolvedValue({ 
+      mockAuthService.getSession.mockResolvedValue({ user: mockUser } as any);
+      vi.mocked(prisma.user.findUnique).mockResolvedValue({
         id: mockUser.id, 
         email: mockUser.email,
         teamMember: mockTeamMember 
@@ -214,7 +211,7 @@ describe('Permission Middleware', () => {
 
   describe('Error Handling', () => {
     it('should handle internal errors gracefully', async () => {
-      vi.mocked(getServerSession).mockRejectedValue(new Error('Database error'));
+      mockAuthService.getSession.mockRejectedValue(new Error('Database error'));
 
       const middleware = withPermissionCheck(mockHandler, {
         requiredPermission: Permission.VIEW_TEAM_MEMBERS,

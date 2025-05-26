@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/database/prisma';
 import { checkRolePermission } from '@/lib/rbac/roleService';
+import { getApiAuthService } from '@/services/auth/factory';
 
 export interface PermissionCheckOptions {
   requiredPermission: string;
@@ -20,8 +19,11 @@ export function withPermissionCheck(
 ) {
   return async (req: NextRequest) => {
     try {
-      const session = await getServerSession(authOptions);
-      
+      const authService = getApiAuthService();
+      const session = await authService.getSession(
+        req.headers.get('authorization') || ''
+      );
+
       if (!session?.user) {
         return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
           status: 401,
