@@ -1,41 +1,70 @@
 import { NextRequest } from 'next/server';
-import { supabase } from '@/lib/database/supabase';
+import { getServiceSupabase } from '@/lib/database/supabase';
+
+/**
+ * Object representing an authenticated user returned by utilities in this file.
+ */
+export interface AuthenticatedUser {
+  id: string;
+  email: string | null;
+  role: string;
+}
+
+/**
+ * Extract the bearer token from a request.
+ *
+ * The function checks the `Authorization` header first and falls back to the
+ * `sb-access-token` cookie. Both `Bearer <token>` and raw token formats are
+ * supported for backwards compatibility.
+ */
+export function extractAuthToken(req: NextRequest): string | null {
+  const authHeader = req.headers.get('authorization') || '';
+  let token = '';
+
+  if (authHeader.startsWith('Bearer ')) {
+    token = authHeader.slice(7).trim();
+  } else if (authHeader) {
+    token = authHeader.trim();
+  } else {
+    token = req.cookies.get('sb-access-token')?.value || '';
+  }
+
+  const finalToken = token || null;
+  console.log('[auth] extracted token', finalToken ? 'present' : 'missing');
+  return finalToken;
+}
 
 /**
  * Get the current user from a request
  * @param req The Next.js request object
  * @returns The user object or null if not authenticated
  */
-export async function getUserFromRequest(req: NextRequest) {
+export async function getUserFromRequest(
+  req: NextRequest
+): Promise<AuthenticatedUser | null> {
   try {
-    // Retrieve the Supabase auth token from the Authorization header
-
-    // or fall back to the sb-access-token cookie
-    let token = '';
-    const authHeader = req.headers.get('Authorization') || '';
-    if (authHeader.startsWith('Bearer ')) {
-      token = authHeader.substring(7);
-    } else if (authHeader) {
-      token = authHeader;
-    } else {
-      token = req.cookies.get('sb-access-token')?.value || '';
-    }
-
+    const token = extractAuthToken(req);
     if (!token) {
+      console.log('[getUserFromRequest] no token provided');
       return null;
     }
 
+    const supabase = getServiceSupabase();
     const { data, error } = await supabase.auth.getUser(token);
-    
+
     if (error || !data.user) {
+      console.error('[getUserFromRequest] invalid token', error);
       return null;
     }
 
-    return {
+    const user: AuthenticatedUser = {
       id: data.user.id,
-      email: data.user.email,
+      email: data.user.email ?? null,
       role: data.user.user_metadata?.role || 'user',
     };
+
+    console.log('[getUserFromRequest] authenticated', user.id);
+    return user;
   } catch (error) {
     console.error('Error getting user from request:', error);
     return null;
@@ -49,7 +78,7 @@ export async function getUserFromRequest(req: NextRequest) {
  */
 export async function verifyEmailToken(token: string): Promise<string | null> {
   try {
-    // Query the email_verification table
+    const supabase = getServiceSupabase();
     const { data, error } = await supabase
       .from('email_verification')
       .select('user_id, expires_at')
@@ -57,20 +86,20 @@ export async function verifyEmailToken(token: string): Promise<string | null> {
       .single();
 
     if (error || !data) {
+      console.error('[verifyEmailToken] lookup failed', error);
       return null;
     }
 
-    // Check if token has expired
-    const now = new Date();
     const expiresAt = new Date(data.expires_at);
-    
-    if (now > expiresAt) {
+    if (Date.now() > expiresAt.getTime()) {
+      console.log('[verifyEmailToken] token expired');
       return null;
     }
 
+    console.log('[verifyEmailToken] valid for user', data.user_id);
     return data.user_id;
   } catch (error) {
     console.error('Error verifying email token:', error);
     return null;
   }
-} 
+}
