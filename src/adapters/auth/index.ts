@@ -6,4 +6,4 @@
 
 export * from './interfaces';
 export * from './factory';
-export * from './supabase-auth-provider';
+export * from './providers/supabase-auth-provider';
