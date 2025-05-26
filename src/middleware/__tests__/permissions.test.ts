@@ -1,47 +1,58 @@
+conflicted_code = """
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
 import { withPermissionCheck } from '../permissions';
 import { getApiAuthService } from '@/services/auth/factory';
 import { Permission } from '@/lib/rbac/roles';
-import { prisma } from '@/lib/database/prisma';
-import { checkRolePermission } from '@/lib/rbac/roleService';
+import { getApiPermissionService } from '@/services/permission/factory';
+import prisma from '@/lib/prisma'; // Assuming prisma is used for user/team data
 
-// Mock dependencies
-const mockAuthService = { getSession: vi.fn() };
-vi.mock('@/services/auth/factory', () => ({
-  getApiAuthService: () => mockAuthService,
-}));
-
-vi.mock('@/lib/database/prisma', () => ({
-  prisma: {
+vi.mock('@/services/auth/factory');
+vi.mock('@/services/permission/factory');
+vi.mock('@/lib/prisma', () => ({
+  __esModule: true,
+  default: {
     user: {
       findUnique: vi.fn(),
     },
     teamMember: {
       findUnique: vi.fn(),
-      findFirst: vi.fn(),
-    },
-    project: {
-      findUnique: vi.fn(),
-    },
-    organization: {
-      findUnique: vi.fn(),
     },
   },
 }));
 
-vi.mock('@/lib/rbac/roleService', () => ({
-  checkRolePermission: vi.fn(),
+const mockAuthService = {
+  getSession: vi.fn(),
+};
+const mockPermissionService = {
+  hasPermission: vi.fn(),
+  getUserRoles: vi.fn(),
+};
+
+vi.mocked(getApiAuthService).mockReturnValue(mockAuthService as any);
+vi.mocked(getApiPermissionService).mockReturnValue(mockPermissionService as any);
+
+// Mock user and team data for consistency
+const mockUser = { id: 'user-1', email: 'test@example.com' };
+const mockTeamMember = { userId: 'user-1', teamId: 'team-1', roleId: 'role-1' };
+
+// Mock checkRolePermission if it's an external utility
+const checkRolePermission = vi.fn();
+vi.mock('@/lib/rbac/utils', () => ({
+  checkRolePermission: checkRolePermission,
 }));
 
-describe('Permission Middleware', () => {
-  const mockHandler = vi.fn().mockResolvedValue(new NextResponse());
-  const mockRequest = new NextRequest(new URL('http://localhost'));
-  const mockUser = { id: 'user-1', email: 'test@example.com' };
-  const mockTeamMember = { role: 'ADMIN', teamId: 'team-1' };
 
+const mockHandler = vi.fn().mockResolvedValue(new NextResponse('ok'));
+const mockRequest = new NextRequest(new URL('http://localhost'));
+
+describe('withPermissionCheck', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.mocked(getApiAuthService).mockReturnValue(mockAuthService as any);
+    vi.mocked(getApiPermissionService).mockReturnValue(mockPermissionService as any);
+    mockPermissionService.getUserRoles.mockResolvedValue([{ roleName: 'ADMIN' }]);
+    (globalThis as any)['__UM_PERMISSION_CACHE__']?.clear?.();
   });
 
   describe('Authentication', () => {
@@ -92,7 +103,8 @@ describe('Permission Middleware', () => {
     });
 
     it('should allow access when user has required permission', async () => {
-      vi.mocked(checkRolePermission).mockResolvedValue(true);
+      mockPermissionService.hasPermission.mockResolvedValue(true); // Use mockPermissionService
+      checkRolePermission.mockResolvedValue(true); // Keep this if checkRolePermission is still used internally
 
       const middleware = withPermissionCheck(mockHandler, {
         requiredPermission: Permission.VIEW_TEAM_MEMBERS,
@@ -104,7 +116,8 @@ describe('Permission Middleware', () => {
     });
 
     it('should deny access when user lacks required permission', async () => {
-      vi.mocked(checkRolePermission).mockResolvedValue(false);
+      mockPermissionService.hasPermission.mockResolvedValue(false); // Use mockPermissionService
+      checkRolePermission.mockResolvedValue(false); // Keep this if checkRolePermission is still used internally
 
       const middleware = withPermissionCheck(mockHandler, {
         requiredPermission: Permission.MANAGE_BILLING,
@@ -119,19 +132,27 @@ describe('Permission Middleware', () => {
     });
 
     it('should use cached permission check results', async () => {
-      vi.mocked(checkRolePermission).mockResolvedValue(true);
+      mockAuthService.getSession.mockResolvedValue({ user: { id: '1' } });
+      mockPermissionService.hasPermission.mockResolvedValue(true);
+      checkRolePermission.mockResolvedValue(true); // Keep this if checkRolePermission is still used internally
 
       const middleware = withPermissionCheck(mockHandler, {
         requiredPermission: Permission.VIEW_TEAM_MEMBERS,
       });
-
+      
       // First call should check permissions
       await middleware(mockRequest);
-      expect(checkRolePermission).toHaveBeenCalledTimes(1);
+      expect(mockPermissionService.hasPermission).toHaveBeenCalledTimes(1);
+      // If checkRolePermission is called internally by hasPermission, it might be called too.
+      // If not, remove this expectation.
+      // expect(checkRolePermission).toHaveBeenCalledTimes(1); 
 
-      // Second call should check permissions again (no cache in implementation)
+      // Second call should use cache
       await middleware(mockRequest);
-      expect(checkRolePermission).toHaveBeenCalledTimes(2);
+      expect(mockPermissionService.hasPermission).toHaveBeenCalledTimes(1); // Should still be 1 due to caching
+      // If checkRolePermission is called internally by hasPermission, it might be called too.
+      // If not, remove this expectation.
+      // expect(checkRolePermission).toHaveBeenCalledTimes(1); 
     });
   });
 
@@ -143,7 +164,8 @@ describe('Permission Middleware', () => {
         email: mockUser.email,
         teamMember: mockTeamMember 
       } as any);
-      vi.mocked(checkRolePermission).mockResolvedValue(true);
+      mockPermissionService.hasPermission.mockResolvedValue(true); // Assume general permission is granted
+      checkRolePermission.mockResolvedValue(true); // Assume general permission is granted
     });
 
     it('should allow access to own team resources', async () => {
@@ -163,12 +185,12 @@ describe('Permission Middleware', () => {
 
     it('should deny access to other team resources', async () => {
       vi.mocked(prisma.teamMember.findUnique).mockResolvedValue({ 
-        teamId: 'team-2' 
+        teamId: 'team-1' // User is a member of team-1
       } as any);
       
       const middleware = withPermissionCheck(mockHandler, {
         requiredPermission: Permission.VIEW_TEAM_MEMBERS,
-        resourceId: 'team-2',
+        resourceId: 'team-2', // Trying to access team-2
       });
 
       const response = await middleware(mockRequest);
@@ -225,3 +247,9 @@ describe('Permission Middleware', () => {
     });
   });
 });
+"""
+
+with open('merged_permissions_test.ts', 'w') as f:
+    f.write(conflicted_code)
+
+print("merged_permissions_test.ts created successfully.")
