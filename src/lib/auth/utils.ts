@@ -9,6 +9,7 @@ import { supabase } from '@/lib/database/supabase';
 export async function getUserFromRequest(req: NextRequest) {
   try {
     // Retrieve the Supabase auth token from the Authorization header
+
     // or fall back to the sb-access-token cookie
     let token = '';
     const authHeader = req.headers.get('Authorization') || '';
