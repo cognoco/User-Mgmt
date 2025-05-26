@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { SupabaseUserProvider } from '../supabase-user-provider';
 import { setTableMockData, resetSupabaseMock } from '@/tests/mocks/supabase';
 
-const SUPABASE_URL = 'http://localhost';
-const SUPABASE_KEY = 'anon';
+const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const sampleProfile = {
   user_id: 'user-1',
@@ -31,7 +31,7 @@ describe('SupabaseUserProvider', () => {
   });
 
   it('retrieves a user profile', async () => {
-    const provider = new SupabaseUserProvider(SUPABASE_URL, SUPABASE_KEY);
+    const provider = new SupabaseUserProvider(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const result = await provider.getUserProfile('user-1');
 
     expect(result).toEqual({

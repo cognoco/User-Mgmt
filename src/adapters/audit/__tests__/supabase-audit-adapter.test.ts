@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { SupabaseAuditAdapter } from '../supabase-adapter';
 import { setTableMockData, resetSupabaseMock } from '@/tests/mocks/supabase';
 
-const SUPABASE_URL = 'http://localhost';
-const SUPABASE_KEY = 'anon';
+const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const logRecord = {
   id: 1,
@@ -25,7 +25,7 @@ describe('SupabaseAuditAdapter', () => {
   });
 
   it('fetches user action logs', async () => {
-    const adapter = new SupabaseAuditAdapter(SUPABASE_URL, SUPABASE_KEY);
+    const adapter = new SupabaseAuditAdapter(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const { logs, count } = await adapter.getLogs({ page: 1, limit: 10 });
 
     expect(count).toBe(1);
@@ -45,7 +45,7 @@ describe('SupabaseAuditAdapter', () => {
 
   it('creates a log entry', async () => {
     setTableMockData('user_actions_log', { data: logRecord, error: null });
-    const adapter = new SupabaseAuditAdapter(SUPABASE_URL, SUPABASE_KEY);
+    const adapter = new SupabaseAuditAdapter(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const result = await adapter.createLog({
       userId: 'user-1',
       action: 'LOGIN',

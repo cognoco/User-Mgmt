@@ -3,8 +3,8 @@ import { SupabasePermissionProvider } from '../supabase-permission-provider';
 import { setTableMockData, resetSupabaseMock } from '@/tests/mocks/supabase';
 import type { Permission } from '@/core/permission/models';
 
-const SUPABASE_URL = 'http://localhost';
-const SUPABASE_KEY = 'anon';
+const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const userRoles = [
   { user_id: 'user-1', role_id: 'role-1' }
@@ -21,7 +21,7 @@ describe('SupabasePermissionProvider', () => {
   });
 
   it('checks user permission', async () => {
-    const provider = new SupabasePermissionProvider(SUPABASE_URL, SUPABASE_KEY);
+    const provider = new SupabasePermissionProvider(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const perm: Permission = { name: 'edit', resource: 'doc' };
     const result = await provider.hasPermission('user-1', perm);
 
