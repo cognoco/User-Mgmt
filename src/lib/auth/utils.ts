@@ -9,10 +9,17 @@ import { supabase } from '@/lib/database/supabase';
 export async function getUserFromRequest(req: NextRequest) {
   try {
     // Retrieve the Supabase auth token from the Authorization header
+
+    // or fall back to the sb-access-token cookie
+    let token = '';
     const authHeader = req.headers.get('Authorization') || '';
-    const token = authHeader.startsWith('Bearer ')
-      ? authHeader.substring(7)
-      : authHeader;
+    if (authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+    } else if (authHeader) {
+      token = authHeader;
+    } else {
+      token = req.cookies.get('sb-access-token')?.value || '';
+    }
 
     if (!token) {
       return null;
