@@ -1,8 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/database/prisma';
-import { checkRolePermission } from '@/lib/rbac/roleService';
+import { getApiAuthService } from '@/services/auth/factory';
+import { getApiPermissionService } from '@/services/permission/factory';
+import type { Permission } from '@/lib/rbac/roles';
+
+interface CacheEntry {
+  result: boolean;
+  expires: number;
+}
+
+const CACHE_TTL = 5_000; // 5 seconds
+const GLOBAL_CACHE_KEY = '__UM_PERMISSION_CACHE__';
+
+function getPermissionCache(): Map<string, CacheEntry> {
+  if (typeof globalThis === 'undefined') {
+    return new Map<string, CacheEntry>();
+  }
+  const globalObj = globalThis as any;
+  if (!globalObj[GLOBAL_CACHE_KEY]) {
+    globalObj[GLOBAL_CACHE_KEY] = new Map<string, CacheEntry>();
+  }
+  return globalObj[GLOBAL_CACHE_KEY] as Map<string, CacheEntry>;
+}
 
 export interface PermissionCheckOptions {
   requiredPermission: string;
@@ -20,40 +38,50 @@ export function withPermissionCheck(
 ) {
   return async (req: NextRequest) => {
     try {
-      const session = await getServerSession(authOptions);
-      
-      if (!session?.user) {
+      const authService = getApiAuthService();
+      const permissionService = getApiPermissionService();
+
+      const session = await authService.getSession(
+        req.headers.get('authorization') || ''
+      );
+
+      if (!session?.user?.id) {
+        console.warn('[withPermissionCheck] no valid session');
         return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
           status: 401,
           headers: { 'Content-Type': 'application/json' },
         });
       }
 
-      // Get user's role from the database
-      const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        include: { teamMember: true },
-      });
+      const userId = session.user.id;
 
-      if (!user?.teamMember?.role) {
-        return new NextResponse(JSON.stringify({ error: 'No role assigned' }), {
-          status: 403,
-          headers: { 'Content-Type': 'application/json' },
+      const cacheKey = `${userId}:${options.requiredPermission}`;
+      const cache = getPermissionCache();
+      let hasPermission: boolean | undefined;
+      const cached = cache.get(cacheKey);
+      if (cached && cached.expires > Date.now()) {
+        hasPermission = cached.result;
+        console.log(`[withPermissionCheck] cache hit for ${cacheKey}`);
+      }
+
+      if (hasPermission === undefined) {
+        console.log(`[withPermissionCheck] checking ${cacheKey}`);
+        hasPermission = await permissionService.hasPermission(
+          userId,
+          options.requiredPermission as Permission
+        );
+        cache.set(cacheKey, {
+          result: hasPermission,
+          expires: Date.now() + CACHE_TTL,
         });
       }
 
-      // Check if the user's role has the required permission
-      const hasPermission = await checkRolePermission(
-        user.teamMember.role,
-        options.requiredPermission
-      );
-
       if (!hasPermission) {
+        console.warn(
+          `[withPermissionCheck] user ${userId} lacks ${options.requiredPermission}`
+        );
         return new NextResponse(
-          JSON.stringify({
-            error: 'Insufficient permissions',
-            requiredPermission: options.requiredPermission,
-          }),
+          JSON.stringify({ error: 'Insufficient permissions' }),
           {
             status: 403,
             headers: { 'Content-Type': 'application/json' },
@@ -61,38 +89,18 @@ export function withPermissionCheck(
         );
       }
 
-      // If resource-specific check is needed
-      if (options.resourceId) {
-        // Add resource-specific permission checks here
-        // For example, checking if user belongs to the same team as the resource
-        const resource = await prisma.teamMember.findUnique({
-          where: { id: options.resourceId },
-          select: { teamId: true },
-        });
+      const userRoles = await permissionService.getUserRoles(userId);
+      const roleName = userRoles[0]?.roleName || userRoles[0]?.role?.name || '';
 
-        if (resource?.teamId !== user.teamMember.teamId) {
-          return new NextResponse(
-            JSON.stringify({ error: 'Resource access denied' }),
-            {
-              status: 403,
-              headers: { 'Content-Type': 'application/json' },
-            }
-          );
-        }
-      }
-
-      // Cache the permission check result in the request context
-      // This can be used by the handler if needed
       const requestWithContext = new Request(req.url, {
         ...req,
         headers: new Headers({
           ...req.headers,
           'x-permission-checked': 'true',
-          'x-user-role': user.teamMember.role,
+          'x-user-role': roleName,
         }),
       });
 
-      // Proceed with the handler if all checks pass
       return handler(requestWithContext as NextRequest);
     } catch (error) {
       console.error('Permission check error:', error);
@@ -126,7 +134,6 @@ export function createProtectedHandler(
 import { ApiError } from '@/lib/api/common/api-error';
 import { createErrorResponse } from '@/lib/api/common/response-formatter';
 import { withRouteAuth } from './auth';
-import { getApiPermissionService } from '@/services/permission/factory';
 import { isPermission, Permission } from '@/lib/rbac/roles';
 
 /**
