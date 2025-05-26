@@ -22,7 +22,7 @@ import { IOrganizationDataProvider } from '@/core/organization/IOrganizationData
 
 
 // Import domain-specific factories
-import createSupabaseAuthProvider from './auth/supabase/factory';
+import { createSupabaseAuthProvider } from './auth/factory';
 import createSupabaseUserProvider from './user/supabase/factory';
 import createSupabaseTeamProvider from './team/supabase/factory';
 import { createSupabaseOrganizationProvider } from './organization/factory';
@@ -66,7 +66,10 @@ export class SupabaseAdapterFactory implements AdapterFactory {
    * Create a Supabase auth provider
    */
   createAuthProvider(): AuthDataProvider {
-    return createSupabaseAuthProvider(this.options);
+    return createSupabaseAuthProvider(
+      this.options.supabaseUrl,
+      this.options.supabaseKey
+    );
   }
 
   /**

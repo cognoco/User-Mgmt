@@ -6,7 +6,7 @@
  */
 
 import { AuthService } from "@/core/auth/interfaces";
-import type { IAuthDataProvider } from "@/core/auth/IAuthDataProvider";
+import type { AuthDataProvider } from "@/adapters/auth/interfaces";
 import { 
   AuthResult, 
   LoginPayload, 
@@ -47,7 +47,7 @@ export class DefaultAuthService
    * @param authDataProvider - Adapter providing auth persistence methods
    */
   constructor(
-    private authDataProvider: IAuthDataProvider,
+    private authDataProvider: AuthDataProvider,
   ) {
     super();
     this.sessionTracker = new DefaultSessionTracker({
