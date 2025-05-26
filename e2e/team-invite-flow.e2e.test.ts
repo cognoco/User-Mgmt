@@ -1,8 +1,9 @@
 import { test, expect, Page } from '@playwright/test';
 import * as dotenv from 'dotenv';
+import path from 'path';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from the root .env file
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 // Test users with fallback values
 const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || 'admin@example.com';

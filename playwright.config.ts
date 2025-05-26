@@ -1,4 +1,9 @@
-import 'dotenv/config';
+import * as dotenv from 'dotenv';
+import path from 'path';
+
+// Explicitly load variables from the root .env file so e2e tests
+// always share the same configuration
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({

@@ -1,10 +1,12 @@
 import { setupI18n } from './i18n-setup';
 import * as dotenv from 'dotenv';
+import path from 'path';
 import { ensureUserExists } from './user-setup';
 import { startMsw, stopMsw } from './msw-supabase';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from the root .env file so test and application
+// share the same values when running E2E
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 // Test credentials - should match the ones used in tests
 const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || 'admin@example.com';
