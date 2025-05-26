@@ -149,8 +149,8 @@ import {
 
 // 2. Configure the module (optional)
 configureUserManagement({
-  supabaseUrl: process.env.SUPABASE_URL,
-  supabaseKey: process.env.SUPABASE_KEY,
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   features: {
     sso: true,
     businessAccounts: true
