@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { SupabaseTeamProvider } from '../supabase-team-provider';
 import { setTableMockData, resetSupabaseMock } from '@/tests/mocks/supabase';
 
-const SUPABASE_URL = 'http://localhost';
-const SUPABASE_KEY = 'anon';
+const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const teamRecord = {
   id: 'team-1',
@@ -23,7 +23,7 @@ describe('SupabaseTeamProvider', () => {
   });
 
   it('retrieves a team by id', async () => {
-    const provider = new SupabaseTeamProvider(SUPABASE_URL, SUPABASE_KEY);
+    const provider = new SupabaseTeamProvider(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const result = await provider.getTeam('team-1');
 
     expect(result).toEqual({

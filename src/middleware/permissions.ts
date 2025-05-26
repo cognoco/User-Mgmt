@@ -39,14 +39,16 @@ export function withPermissionCheck(
   return async (req: NextRequest) => {
     try {
       const authService = getApiAuthService();
-      const permissionService = getApiPermissionService();
 
+      const permissionService = getApiPermissionService();
       const session = await authService.getSession(
         req.headers.get('authorization') || ''
       );
 
+
       if (!session?.user?.id) {
         console.warn('[withPermissionCheck] no valid session');
+
         return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
           status: 401,
           headers: { 'Content-Type': 'application/json' },
