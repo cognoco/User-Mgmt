@@ -8,12 +8,11 @@
  * 3. Configure various options like redirect paths
  */
 
-import { 
-  UserManagementConfig, 
-  FeatureFlags, 
+import {
+  UserManagementConfig,
+  FeatureFlags,
   ServiceProviderRegistry,
-  DEFAULT_CONFIG,
-  DEFAULT_FEATURE_FLAGS
+  DEFAULT_CONFIG
 } from './interfaces';
 
 // The global configuration instance

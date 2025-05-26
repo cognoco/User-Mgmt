@@ -9,7 +9,7 @@ const SUBSCRIPTION_URL = '/subscription';
 const PLANS_URL = '/subscription/plans';
 
 // --- Helper Functions --- //
-async function fillLoginForm(page, browserName) {
+async function fillLoginForm(page) {
   // Use a reliable, browser-independent login approach as mentioned in TESTING ISSUES-E2E.md
   try {
     // Method 1: Standard input filling 
@@ -65,7 +65,7 @@ test.describe('Subscription Management Flow', () => {
     await page.waitForSelector('form', { timeout: 10000 });
     
     // Login with test credentials using our enhanced login helper
-    await fillLoginForm(page, browserName);
+    await fillLoginForm(page);
     
     // Wait for login to complete using multiple indicators (Issue #14)
     try {

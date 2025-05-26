@@ -6,11 +6,9 @@ import { test, expect } from '@playwright/test';
 const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';
 const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
 const LICENSE_URL = '/license';
-const ACTIVATE_LICENSE_URL = '/license/activate';
-const TEST_LICENSE_KEY = 'TEST-LICENSE-KEY-1234-5678-90AB-CDEF';
 
 // --- Helper Functions --- //
-async function fillLoginForm(page, browserName) {
+async function fillLoginForm(page) {
   // Use a reliable, browser-independent login approach as mentioned in TESTING ISSUES-E2E.md
   try {
     // Method 1: Standard input filling
@@ -106,7 +104,7 @@ async function injectLicenseUIIfNeeded(page) {
 
 // --- Test Suite --- //
 test.describe('License Management Flow', () => {
-  test.beforeEach(async ({ page, browserName }) => {
+  test.beforeEach(async ({ page }) => {
     // Navigate to the login page with fallback strategy
     try {
       await page.goto('/auth/login', { timeout: 10000 });
@@ -119,7 +117,7 @@ test.describe('License Management Flow', () => {
     await page.waitForSelector('form', { timeout: 10000 });
     
     // Login with test credentials using our enhanced login helper
-    await fillLoginForm(page, browserName);
+    await fillLoginForm(page);
     
     // Wait for login to complete using multiple indicators
     try {
@@ -148,7 +146,7 @@ test.describe('License Management Flow', () => {
       }
     }
   });
-  test('User can view license information', async ({ page, browserName }) => {
+  test('User can view license information', async ({ page }) => {
     // Navigate to license page with fallback
     try {
       await page.goto(LICENSE_URL, { timeout: 10000 });

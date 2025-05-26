@@ -8,28 +8,28 @@ import type {
 
 export class DefaultOrganizationAdapter implements IOrganizationDataProvider {
   async createOrganization(
-    ownerId: string,
-    data: OrganizationCreatePayload
+    _ownerId: string,
+    _data: OrganizationCreatePayload
   ): Promise<OrganizationResult> {
     return { success: false, error: 'Not implemented' };
   }
 
-  async getOrganization(id: string): Promise<Organization | null> {
+  async getOrganization(_id: string): Promise<Organization | null> {
     return null;
   }
 
-  async getUserOrganizations(userId: string): Promise<Organization[]> {
+  async getUserOrganizations(_userId: string): Promise<Organization[]> {
     return [];
   }
 
   async updateOrganization(
-    id: string,
-    data: OrganizationUpdatePayload
+    _id: string,
+    _data: OrganizationUpdatePayload
   ): Promise<OrganizationResult> {
     return { success: false, error: 'Not implemented' };
   }
 
-  async deleteOrganization(id: string): Promise<{ success: boolean; error?: string }> {
+  async deleteOrganization(_id: string): Promise<{ success: boolean; error?: string }> {
     return { success: false, error: 'Not implemented' };
   }
 }

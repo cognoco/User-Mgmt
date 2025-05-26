@@ -11,7 +11,7 @@ const INVITEE_EMAIL = `test-invite-${Date.now()}@example.com`;
 const INVITEE_PASSWORD = 'Password123!';
 
 // Helper function for reliable login across browsers
-async function fillLoginForm(page: Page, email: string, password: string, browserName: string): Promise<void> {
+async function fillLoginForm(page: Page, email: string, password: string): Promise<void> {
   try {
     // Method 1: Standard input filling 
     await page.locator('#email').fill(email);
@@ -158,7 +158,7 @@ test.describe('Team Invite Flow', () => {
       throw new Error('Login form not found');
     }
     
-    await fillLoginForm(page, ADMIN_EMAIL, ADMIN_PASSWORD, browserName);
+    await fillLoginForm(page, ADMIN_EMAIL, ADMIN_PASSWORD);
     console.log('Admin login successful');
     
     // Step 2: Navigate to team management page
@@ -384,7 +384,7 @@ test.describe('Team Invite Flow', () => {
     } else {
       console.log('On login page, logging in with invite email');
       // We're on a login page, fill it out
-      await fillLoginForm(page, INVITEE_EMAIL, INVITEE_PASSWORD, browserName);
+        await fillLoginForm(page, INVITEE_EMAIL, INVITEE_PASSWORD);
     }
     
     // Step 6: Verify the invited user is now part of the team
@@ -465,7 +465,7 @@ test.describe('Team Invite Flow', () => {
     console.log('=== Testing admin view of pending invites ===');
     // Log in as admin
     await navigateWithFallback(page, '/auth/login');
-    await fillLoginForm(page, ADMIN_EMAIL, ADMIN_PASSWORD, browserName);
+    await fillLoginForm(page, ADMIN_EMAIL, ADMIN_PASSWORD);
     
     // Navigate to team management
     await navigateWithFallback(page, '/team');
