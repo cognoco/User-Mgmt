@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { SupabaseAuthProvider } from '../supabase-auth-provider';
+import { SupabaseAuthProvider } from '../providers/supabase-auth-provider';
 import { supabase, resetSupabaseMock } from '@/tests/mocks/supabase';
 import type { LoginPayload, RegistrationPayload } from '@/core/auth/models';
 

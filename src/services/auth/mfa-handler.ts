@@ -1,4 +1,4 @@
-import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import type { AuthDataProvider } from '@/adapters/auth/interfaces';
 import type { AuthResult, MFASetupResponse, MFAVerifyResponse } from '@/core/auth/models';
 
 export interface MFAHandler {
@@ -8,7 +8,7 @@ export interface MFAHandler {
 }
 
 export class DefaultMFAHandler implements MFAHandler {
-  constructor(private provider: IAuthDataProvider) {}
+  constructor(private provider: AuthDataProvider) {}
 
   setupMFA(): Promise<MFASetupResponse> {
     return this.provider.setupMFA();

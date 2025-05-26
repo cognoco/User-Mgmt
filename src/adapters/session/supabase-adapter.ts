@@ -38,6 +38,7 @@ export class SupabaseSessionProvider implements ISessionDataProvider {
     })) as any;
   }
 
+  // Parameters are unused as this provider does not support creating sessions
   async createSession(
     _userId: string,
     _payload: SessionCreatePayload
@@ -50,6 +51,7 @@ export class SupabaseSessionProvider implements ISessionDataProvider {
     return sessions.find(s => s.id === sessionId) || null;
   }
 
+  // Parameters are unused as this provider does not support updating sessions
   async updateSession(
     _userId: string,
     _sessionId: string,

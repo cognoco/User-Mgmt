@@ -8,7 +8,7 @@ function createWrapper(service: CsrfService) {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <CsrfProvider csrfService={service}>{children}</CsrfProvider>
   );
-  Wrapper.displayName = 'CsrfWrapper';
+  Wrapper.displayName = 'CsrfTestWrapper';
   return Wrapper;
 }
 

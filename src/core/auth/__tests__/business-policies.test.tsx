@@ -69,30 +69,7 @@ describe('Business-specific Session Controls', () => {
     }
   };
   
-  // Mock organization members
-  const mockOrgMembers = [
-    {
-      user_id: 'user-123',
-      email: 'user@example.com',
-      role: 'member',
-      active_sessions: 2,
-      last_active: '2023-06-15T14:30:00Z'
-    },
-    {
-      user_id: 'user-456',
-      email: 'manager@example.com',
-      role: 'manager',
-      active_sessions: 1,
-      last_active: '2023-06-14T16:45:00Z'
-    },
-    {
-      user_id: 'admin-123',
-      email: 'admin@example.com',
-      role: 'admin',
-      active_sessions: 1,
-      last_active: '2023-06-15T09:15:00Z'
-    }
-  ];
+  // Mock organization members (currently not used in tests)
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -323,7 +300,7 @@ describe('Business-specific Session Controls', () => {
     const mockIp = '192.168.1.100'; // Within allowed range
     
     // Mock IP verification RPC
-    supabase.rpc.mockImplementation((procedure: string, params: any) => {
+    supabase.rpc.mockImplementation((procedure: string, _params: any) => {
       if (procedure === 'check_ip_restrictions') {
         // Check if IP is within allowed ranges
         const allowed = mockOrganization.security_settings.allowed_ip_ranges.some(range => {
@@ -362,10 +339,9 @@ describe('Business-specific Session Controls', () => {
     
     // Now test with unauthorized IP
     vi.clearAllMocks();
-    const unauthorizedIp = '203.0.113.1'; // Outside allowed range
     
     // Update mock response for unauthorized IP
-    supabase.rpc.mockImplementation((procedure: string, params: any) => {
+    supabase.rpc.mockImplementation((procedure: string, _params: any) => {
       if (procedure === 'check_ip_restrictions') {
         return Promise.resolve({
           data: { allowed: false },

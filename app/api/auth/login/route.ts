@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { checkRateLimit } from '@/middleware/rate-limit';
+import { withAuthRateLimit } from '@/middleware/with-auth-rate-limit';
+import { withSecurity } from '@/middleware/with-security';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { getApiAuthService } from '@/services/auth/factory';
 import { LoginPayload } from '@/core/auth/models';
@@ -30,17 +31,7 @@ async function handleLogin(req: NextRequest, validatedData: z.infer<typeof Login
   const userAgent = req.headers.get('user-agent') || 'unknown';
   const { email, password, rememberMe } = validatedData;
   
-  // 1. Rate Limiting
-  const isRateLimited = await checkRateLimit(req);
-  if (isRateLimited) {
-    throw new ApiError(
-      ERROR_CODES.INVALID_REQUEST,
-      'Too many requests',
-      429
-    );
-  }
-  
-  // 2. Get AuthService and call login method
+  // 1. Get AuthService and call login method
   const authService = getApiAuthService();
   const loginPayload: LoginPayload = {
     email,
@@ -50,7 +41,7 @@ async function handleLogin(req: NextRequest, validatedData: z.infer<typeof Login
   
   const authResult = await authService.login(loginPayload);
 
-  // 3. Handle Login Errors
+  // 2. Handle Login Errors
   if (!authResult.success) {
     console.error('Login error:', authResult.error);
     
@@ -81,7 +72,7 @@ async function handleLogin(req: NextRequest, validatedData: z.infer<typeof Login
     );
   }
 
-  // 4. Handle Success
+  // 3. Handle Success
   if (!authResult.user) {
     console.error('Login successful but no user returned');
     throw new ApiError(
@@ -120,11 +111,11 @@ async function handleLogin(req: NextRequest, validatedData: z.infer<typeof Login
 /**
  * POST handler for login endpoint
  */
-export async function POST(request: NextRequest) {
-  return withErrorHandling(
-    async (req) => {
-      return withValidation(LoginSchema, handleLogin, req);
-    },
-    request
-  );
-}
+export const POST = withSecurity(async (request: NextRequest) =>
+  withAuthRateLimit(request, (req) =>
+    withErrorHandling(
+      async (r) => withValidation(LoginSchema, handleLogin, r),
+      req
+    )
+  )
+);

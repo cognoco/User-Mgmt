@@ -44,10 +44,10 @@ export function initializeApp() {
     }
 
     // Create data providers (adapters)
-    const authProvider = createSupabaseAuthProvider({
+    const authProvider = createSupabaseAuthProvider(
       supabaseUrl,
       supabaseKey
-    });
+    );
     
     const userProvider = createSupabaseUserProvider({
       supabaseUrl,

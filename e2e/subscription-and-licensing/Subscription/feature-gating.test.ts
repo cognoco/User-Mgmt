@@ -7,7 +7,7 @@ const PREMIUM_USER_EMAIL = process.env.E2E_PREMIUM_USER_EMAIL || 'premium@exampl
 const PREMIUM_USER_PASSWORD = process.env.E2E_PREMIUM_USER_PASSWORD || 'premiumpass123';
 
 // --- Helper Functions --- //
-async function fillLoginForm(page, email, password, browserName) {
+async function fillLoginForm(page, email, password) {
   // Use a reliable, browser-independent login approach as mentioned in TESTING ISSUES-E2E.md
   try {
     // Method 1: Standard input filling 
@@ -186,7 +186,7 @@ test.describe('Feature Gating for Subscription Tiers', () => {
     await page.waitForSelector('form', { timeout: 10000 });
     
     // Login with free user credentials
-    await fillLoginForm(page, USER_EMAIL, USER_PASSWORD, browserName);
+    await fillLoginForm(page, USER_EMAIL, USER_PASSWORD);
     
     // Navigate to dashboard or home page where premium features might be available
     try {
@@ -277,7 +277,7 @@ test.describe('Feature Gating for Subscription Tiers', () => {
     await page.waitForSelector('form', { timeout: 10000 });
     
     // Login with premium user credentials
-    await fillLoginForm(page, PREMIUM_USER_EMAIL, PREMIUM_USER_PASSWORD, browserName);
+    await fillLoginForm(page, PREMIUM_USER_EMAIL, PREMIUM_USER_PASSWORD);
     
     // Navigate to dashboard or home page where premium features are available
     try {
@@ -342,7 +342,7 @@ test.describe('Feature Gating for Subscription Tiers', () => {
     await page.waitForSelector('form', { timeout: 10000 });
     
     // Login with free user credentials
-    await fillLoginForm(page, USER_EMAIL, USER_PASSWORD, browserName);
+    await fillLoginForm(page, USER_EMAIL, USER_PASSWORD);
     
     // Inject premium feature buttons with disabled state if they don't exist
     await page.evaluate(() => {
@@ -430,7 +430,7 @@ test.describe('Feature Gating for Subscription Tiers', () => {
     await page.waitForSelector('form', { timeout: 10000 });
     
     // Login with free user credentials
-    await fillLoginForm(page, USER_EMAIL, USER_PASSWORD, browserName);
+    await fillLoginForm(page, USER_EMAIL, USER_PASSWORD);
     
     // Inject usage limit test UI if it doesn't exist
     await page.evaluate(() => {

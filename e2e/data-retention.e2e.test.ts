@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
 import * as dotenv from 'dotenv';
+import path from 'path';
 import { loginAs } from './utils/auth';
 
-// Load environment variables from .env file
-dotenv.config();
+// Load environment variables from the root .env file
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 // Constants for test credentials
 const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || 'admin@example.com';

@@ -1,7 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { supabase } from '@/lib/database/supabase';
-import { authOptions } from '@/lib/auth';
 
 /**
  * Get the current user from a request
@@ -10,19 +8,23 @@ import { authOptions } from '@/lib/auth';
  */
 export async function getUserFromRequest(req: NextRequest) {
   try {
-    // First try to get the user from the session
-    const session = await getServerSession(authOptions);
-    if (session?.user) {
-      return session.user;
+    // Retrieve the Supabase auth token from the Authorization header
+
+    // or fall back to the sb-access-token cookie
+    let token = '';
+    const authHeader = req.headers.get('Authorization') || '';
+    if (authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+    } else if (authHeader) {
+      token = authHeader;
+    } else {
+      token = req.cookies.get('sb-access-token')?.value || '';
     }
 
-    // If no session, try to get the user from the Authorization header
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
+    if (!token) {
       return null;
     }
 
-    const token = authHeader.substring(7);
     const { data, error } = await supabase.auth.getUser(token);
     
     if (error || !data.user) {

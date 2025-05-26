@@ -1,5 +1,6 @@
 import { type NextRequest } from "next/server";
-import { checkRateLimit } from "@/middleware/rate-limit";
+import { withAuthRateLimit } from "@/middleware/with-auth-rate-limit";
+import { withSecurity } from "@/middleware/with-security";
 import { getApiAuthService } from "@/services/auth/factory";
 import { logUserAction } from "@/lib/audit/auditLogger";
 import {
@@ -8,21 +9,18 @@ import {
   ApiError,
   ERROR_CODES,
 } from "@/lib/api/common";
+import { NextResponse } from "next/server";
 
 async function handleLogout(req: NextRequest) {
   const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
   const userAgent = req.headers.get("user-agent") || "unknown";
-
-  const isRateLimited = await checkRateLimit(req);
-  if (isRateLimited) {
-    throw new ApiError(ERROR_CODES.INVALID_REQUEST, "Too many requests", 429);
-  }
 
   const authService = getApiAuthService();
   const currentUser = await authService.getCurrentUser();
   const userId = currentUser?.id;
 
   await authService.logout();
+  const callbackUrl = req.nextUrl.searchParams.get("callbackUrl");
 
   if (userId) {
     await logUserAction({
@@ -37,9 +35,24 @@ async function handleLogout(req: NextRequest) {
   }
 
   console.log("Logout successful");
-  return createSuccessResponse({ message: "Successfully logged out" });
+  const headers = {
+    "Set-Cookie": "auth_token=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax",
+  };
+
+  if (callbackUrl) {
+    const res = NextResponse.redirect(callbackUrl);
+    Object.entries(headers).forEach(([k, v]) => res.headers.set(k, v));
+    return res;
+  }
+
+  return createSuccessResponse(
+    { message: "Successfully logged out" },
+    200,
+    undefined,
+    headers
+  );
 }
 
-export async function POST(request: NextRequest) {
-  return withErrorHandling(handleLogout, request);
-}
+export const POST = withSecurity(async (request: NextRequest) =>
+  withAuthRateLimit(request, (req) => withErrorHandling(handleLogout, req))
+);

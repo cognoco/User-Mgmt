@@ -55,7 +55,7 @@ export class SupabaseTeamProvider implements ITeamDataProvider {
   async createTeam(ownerId: string, teamData: TeamCreatePayload): Promise<TeamResult> {
     try {
       // Insert the team record
-      const { data: teamData, error: teamError } = await this.supabase
+    const { data: createdTeam, error: teamError } = await this.supabase
         .from('teams')
         .insert({
           name: teamData.name,
@@ -76,7 +76,7 @@ export class SupabaseTeamProvider implements ITeamDataProvider {
         };
       }
       
-      const team = this.mapDbTeamToTeam(teamData);
+      const team = this.mapDbTeamToTeam(createdTeam);
       
       // Add the owner as a team member with the owner role
       await this.addTeamMember(team.id, ownerId, 'owner');

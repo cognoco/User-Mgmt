@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, Page } from '@playwright/test';
 import { loginAs } from '../utils/auth';
 
 const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';

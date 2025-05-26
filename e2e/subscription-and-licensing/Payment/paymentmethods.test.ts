@@ -8,7 +8,7 @@ const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
 const PAYMENT_METHODS_URL = '/payment/methods';
 
 // --- Helper Functions --- //
-async function fillLoginForm(page, browserName) {
+async function fillLoginForm(page) {
   // Use a reliable, browser-independent login approach as mentioned in TESTING ISSUES-E2E.md
   try {
     // Method 1: Standard input filling
@@ -64,7 +64,7 @@ test.describe('Payment Methods Management', () => {
     await page.waitForSelector('form', { timeout: 10000 });
     
     // Login with test credentials using our enhanced login helper
-    await fillLoginForm(page, browserName);
+    await fillLoginForm(page);
     
     // Wait for login to complete using multiple indicators
     try {
