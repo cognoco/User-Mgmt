@@ -11,14 +11,14 @@ import type {
   User,
   MFASetupResponse,
   MFAVerifyResponse,
-} from './models';
+} from '@/core/auth/models';
 
 export interface AuthDataProvider {
   /**
    * Authenticate a user with email and password.
    *
-   * @param credentials Login credentials including email, password and remember me option
-   * @returns Authentication result with success status and user data or error
+   * @param credentials - Login credentials including email, password and optional remember me flag
+   * @returns Promise resolving to an {@link AuthResult} describing the outcome
    */
   login(credentials: LoginPayload): Promise<AuthResult>;
 
@@ -30,7 +30,11 @@ export interface AuthDataProvider {
    */
   register(userData: RegistrationPayload): Promise<AuthResult>;
 
-  /** Log out the current user. */
+  /**
+   * Log out the currently authenticated user.
+   *
+   * Implementations should clear any stored session information.
+   */
   logout(): Promise<void>;
 
   /**
@@ -65,16 +69,16 @@ export interface AuthDataProvider {
   sendVerificationEmail(email: string): Promise<AuthResult>;
 
   /**
-   * Verify an email address using a token.
+   * Verify an email address using a verification token.
    *
-   * @param token Verification token from the email link
+   * @param token - Verification token from the email link
    */
   verifyEmail(token: string): Promise<void>;
 
   /**
-   * Delete the current user's account.
+   * Permanently delete the current user's account.
    *
-   * @param password Current password for verification (optional depending on implementation)
+   * @param password - Current password for verification (optional depending on implementation)
    */
   deleteAccount(password?: string): Promise<void>;
 
