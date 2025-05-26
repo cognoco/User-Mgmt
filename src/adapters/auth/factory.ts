@@ -6,7 +6,7 @@
  */
 
 import type { AuthDataProvider } from './interfaces';
-import { SupabaseAuthProvider } from './supabase-auth-provider';
+import { SupabaseAuthProvider } from './providers/supabase-auth-provider';
 
 /**
  * Create a Supabase auth data provider

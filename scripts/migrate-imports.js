@@ -106,7 +106,7 @@ const exactPathMappings = {
   
   // Database adapters
   '@/lib/database/supabase': '@/adapters/database/supabase-provider',
-  '@/lib/database/auth': '@/adapters/auth/supabase-auth-provider',
+  '@/lib/database/auth': '@/adapters/auth/providers/supabase-auth-provider',
   '@/lib/database/user': '@/adapters/user/supabase-user-provider',
   '@/lib/database/team': '@/adapters/team/supabase-team-provider',
   '@/lib/database/permission': '@/adapters/permission/supabase-permission-provider',
