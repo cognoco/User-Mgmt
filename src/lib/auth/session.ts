@@ -2,22 +2,39 @@
  * Get the current user session from authentication headers
  * This should be used in API routes
  */
+import { cookies } from 'next/headers';
+import { createServerClient } from '@supabase/ssr';
+
+/**
+ * Retrieve the current user session from Supabase.
+ *
+ * This helper is meant for use in API routes where we need to access the
+ * authenticated user. It validates the session using the cookies from the
+ * incoming request.
+ */
 export async function getSession() {
   try {
-    // We'll get the user directly from the JWT token in the cookie or authorization header
-    // in a real API route - this function is mocked for development
-    
-    // This is a simplified version for now - in a real application,
-    // we would extract the token from the request cookies or authorization header
-    // and validate it with Supabase
-    
-    // For now, we'll just return a placeholder user session
-    // In a real implementation, this would verify the token with Supabase
-    
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get: (name: string) => cookieStore.get(name)?.value,
+        },
+      }
+    );
+
+    const { data, error } = await supabase.auth.getSession();
+
+    if (error || !data.session) {
+      return null;
+    }
+
     return {
-      userId: 'current-user-id',
-      email: 'user@example.com',
-      role: 'user',
+      userId: data.session.user.id,
+      email: data.session.user.email ?? '',
+      role: data.session.user.role ?? 'user',
     };
   } catch (error) {
     console.error('Error getting session:', error);

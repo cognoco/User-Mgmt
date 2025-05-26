@@ -1,4 +1,6 @@
-import { prisma } from '@/lib/database/prisma';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import type { User } from '@supabase/supabase-js';
 import { auth } from '@/lib/auth/authConfig';
 
 /**
@@ -24,29 +26,42 @@ export async function getUser() {
   
   try {
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return null;
     }
-    
-    // Get the user from the database
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        emailVerified: true,
-        image: true,
-        createdAt: true,
-        updatedAt: true,
+
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get: (name: string) => cookieStore.get(name)?.value,
+        },
       }
-    });
-    
-    return user;
+    );
+
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error || !data.user) {
+      return null;
+    }
+
+    const user: User = data.user;
+
+    return {
+      id: user.id,
+      name: user.user_metadata?.name || null,
+      email: user.email,
+      role: user.role || 'user',
+      emailVerified: !!user.email_confirmed_at,
+      image: user.user_metadata?.avatar_url || null,
+      createdAt: new Date(user.created_at),
+      updatedAt: new Date(user.updated_at),
+    };
   } catch (error) {
     console.error('Error retrieving user:', error);
     return null;
   }
-} 
+}
