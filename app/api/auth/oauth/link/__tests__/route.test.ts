@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach, MockedFunction } from 'vitest';
 // import { cookies } from 'next/headers'; // Mocked
 // import { createServerClient } from '@supabase/ssr'; // Mocked
 import { logUserAction } from '@/lib/audit/auditLogger'; // Mocked, but type used
+import { sendProviderLinkedNotification } from '@/lib/notifications/sendProviderLinkedNotification';
 
 // --- Mocks ---
 
@@ -59,8 +60,12 @@ function createBuilder(response: any = { data: null, error: null }): Builder {
 vi.mock('@/lib/audit/auditLogger', () => ({
   logUserAction: vi.fn(),
 }));
+vi.mock('@/lib/notifications/sendProviderLinkedNotification', () => ({
+  sendProviderLinkedNotification: vi.fn(),
+}));
 
 const mockLogUserAction = logUserAction as MockedFunction<typeof logUserAction>;
+const mockSendNotification = sendProviderLinkedNotification as MockedFunction<typeof sendProviderLinkedNotification>;
 
 // --- Test Data ---
 const validCode = 'valid-linking-code';
@@ -213,6 +218,7 @@ describe('POST /api/auth/oauth/link', () => {
 
     expect(mockFrom).toHaveBeenCalledTimes(4);
     expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({ userId: loggedInUserId, action: 'SSO_LINK', status: 'SUCCESS' }));
+    expect(mockSendNotification).toHaveBeenCalledWith(loggedInUserId, providerToLink);
   });
 
   it('should handle errors during prisma account create', async () => {
