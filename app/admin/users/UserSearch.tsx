@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { Skeleton } from '@/ui/primitives/skeleton';
 import { useAdminUsers } from '@/hooks/admin/useAdminUsers';
+import { RefreshManager } from '@/utils/refreshManager';
+import { useRealtimeUserSearch } from '@/hooks/admin/useRealtimeUserSearch';
 
 const searchFormSchema = z.object({
   query: z.string().optional(),
@@ -34,7 +36,52 @@ export interface UserSearchProps {
 
 export function UserSearch({ initialSearchParams = {}, onSearch }: UserSearchProps) {
   const [page, setPage] = useState(1);
-  const { users, pagination, isLoading, error, searchUsers } = useAdminUsers();
+  const {
+    users,
+    pagination,
+    isLoading,
+    error,
+    searchUsers,
+    refreshSearch,
+    setUsers,
+    setPagination,
+  } = useAdminUsers();
+
+  const refreshManagerRef = useRef<RefreshManager | null>(null);
+
+  const handleRealtimeUpdate = useCallback(
+    (payload: any) => {
+      const { eventType, new: newRecord, old: oldRecord } = payload;
+      console.log(`Realtime event: ${eventType}`, payload);
+
+      if (eventType === 'UPDATE' && newRecord && users.some((u) => u.id === newRecord.id)) {
+        setUsers((prev) => prev.map((u) => (u.id === newRecord.id ? { ...u, ...newRecord } : u)));
+      } else if (eventType === 'INSERT') {
+        refreshSearch();
+      } else if (eventType === 'DELETE' && oldRecord) {
+        setUsers((prev) => prev.filter((u) => u.id !== oldRecord.id));
+        if (pagination) {
+          setPagination((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  totalCount: Math.max(0, prev.totalCount - 1),
+                  totalPages: Math.ceil(Math.max(0, prev.totalCount - 1) / prev.limit),
+                }
+              : null
+          );
+        }
+      } else {
+        refreshSearch();
+      }
+    },
+    [users, pagination, refreshSearch]
+  );
+
+  const { isConnected } = useRealtimeUserSearch({
+    onUserChange: handleRealtimeUpdate,
+    enabled: true,
+  });
 
   const { register, handleSubmit, control, reset, watch, setValue } = useForm<SearchFormValues>({
     resolver: zodResolver(searchFormSchema),
@@ -47,6 +94,25 @@ export function UserSearch({ initialSearchParams = {}, onSearch }: UserSearchPro
   });
 
   const watchedValues = watch();
+
+  useEffect(() => {
+    refreshManagerRef.current = new RefreshManager(60000);
+    return () => {
+      refreshManagerRef.current?.stopAll();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (refreshManagerRef.current) {
+      refreshManagerRef.current.startRefresh('userSearch', async () => {
+        console.log('Performing background refresh...');
+        await refreshSearch();
+      });
+    }
+    return () => {
+      refreshManagerRef.current?.stopRefresh('userSearch');
+    };
+  }, [refreshSearch, watchedValues]);
 
   useEffect(() => {
     searchUsers({

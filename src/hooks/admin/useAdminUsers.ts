@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useApi } from '@/hooks/core/useApi';
+import { useRealtimeUserSearch } from './useRealtimeUserSearch';
 
 interface SearchParams {
   query?: string;
@@ -44,7 +45,10 @@ export function useAdminUsers() {
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const { isLoading, error, fetchApi } = useApi();
 
-  const searchUsers = async (params: SearchParams) => {
+  const latestSearchParamsRef = useRef<SearchParams | null>(null);
+
+  const searchUsers = useCallback(async (params: SearchParams) => {
+    latestSearchParamsRef.current = params;
     const formattedParams: Record<string, string> = {};
     Object.entries({
       ...params,
@@ -63,7 +67,27 @@ export function useAdminUsers() {
       setUsers(result.users);
       setPagination(result.pagination);
     }
-  };
+  }, [fetchApi]);
 
-  return { users, pagination, isLoading, error, searchUsers };
+  const refreshSearch = useCallback(async () => {
+    if (latestSearchParamsRef.current) {
+      await searchUsers(latestSearchParamsRef.current);
+    }
+  }, [searchUsers]);
+
+  const { isConnected } = useRealtimeUserSearch({
+    onUserChange: refreshSearch,
+    enabled: true,
+  });
+  return {
+    users,
+    pagination,
+    isLoading,
+    error,
+    searchUsers,
+    refreshSearch,
+    isRealtimeConnected: isConnected,
+    setUsers,
+    setPagination,
+  };
 }

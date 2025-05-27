@@ -4,6 +4,7 @@ import type { SearchQuery } from '@/app/api/admin/users/search/route';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { objectsToCSV } from '@/utils/export/csvExport';
 import { formatJSONForExport } from '@/utils/export/jsonExport';
+import { SearchCache } from '@/utils/cache/searchCache';
 
 interface SearchResult {
   users: any[];
@@ -17,9 +18,11 @@ interface SearchResult {
 
 export class DefaultAdminService implements AdminService {
   private supabase: SupabaseClient;
+  private searchCache: SearchCache<SearchResult>;
 
   constructor() {
     this.supabase = getServiceSupabase();
+    this.searchCache = new SearchCache<SearchResult>(60000);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -44,6 +47,13 @@ export class DefaultAdminService implements AdminService {
   }
 
   async searchUsers(params: SearchQuery): Promise<SearchResult> {
+    const cacheKey = this.searchCache.generateKey(params);
+    const cached = this.searchCache.get(cacheKey);
+    if (cached) {
+      console.log('Using cached search result');
+      return cached;
+    }
+
     const {
       query,
       page,
@@ -110,7 +120,7 @@ export class DefaultAdminService implements AdminService {
 
     const totalPages = Math.ceil((count || 0) / limit);
 
-    return {
+    const result = {
       users: users || [],
       pagination: {
         page,
@@ -119,6 +129,9 @@ export class DefaultAdminService implements AdminService {
         totalPages,
       },
     };
+
+    this.searchCache.set(cacheKey, result);
+    return result;
   }
 
   async exportUsers(params: SearchQuery, format: 'csv' | 'json'): Promise<{ data: string; filename: string }> {
@@ -147,5 +160,13 @@ export class DefaultAdminService implements AdminService {
       }),
     });
     return { data: json, filename: `user-export-${timestamp}.json` };
+  }
+
+  invalidateUserSearchCache(): void {
+    this.searchCache.invalidateAll();
+  }
+
+  invalidateUserCache(_userId: string): void {
+    this.searchCache.invalidateAll();
   }
 }
