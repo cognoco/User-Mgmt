@@ -21,7 +21,13 @@ const RegistrationSchema = z.discriminatedUnion('userType', [
   z.object({
     userType: z.literal('private'),
     email: z.string().email({ message: 'Invalid email address' }),
-    password: z.string().min(8, { message: 'Password must be at least 8 characters long' }),
+    password: z
+      .string()
+      .min(8, { message: 'Password must be at least 8 characters long' })
+      .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
+      .regex(/[a-z]/, { message: 'Password must contain at least one lowercase letter' })
+      .regex(/[0-9]/, { message: 'Password must contain at least one number' })
+      .regex(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, { message: 'Password must contain at least one special character' }),
     firstName: z.string().min(1, { message: 'First name is required' }),
     lastName: z.string().min(1, { message: 'Last name is required' }),
     acceptTerms: z.boolean().refine(val => val === true, {
@@ -31,7 +37,13 @@ const RegistrationSchema = z.discriminatedUnion('userType', [
   z.object({
     userType: z.literal('corporate'),
     email: z.string().email({ message: 'Invalid email address' }),
-    password: z.string().min(8, { message: 'Password must be at least 8 characters long' }),
+    password: z
+      .string()
+      .min(8, { message: 'Password must be at least 8 characters long' })
+      .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
+      .regex(/[a-z]/, { message: 'Password must contain at least one lowercase letter' })
+      .regex(/[0-9]/, { message: 'Password must contain at least one number' })
+      .regex(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, { message: 'Password must contain at least one special character' }),
     firstName: z.string().optional(),
     lastName: z.string().optional(),
     companyName: z.string().min(1, { message: 'Company name is required' }),

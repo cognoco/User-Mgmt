@@ -20,6 +20,8 @@ const UpdatePasswordSchema = z.object({
     .regex(/[A-Z]/, {
       message: "Password must contain at least one uppercase letter",
     })
+    .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
+    .regex(/[!@#$%^&*()_+-=[]{};':"|,.<>/?]/, { message: 'Password must contain at least one special character' })
     .regex(/[0-9]/, { message: "Password must contain at least one number" }),
   token: z.string().optional(),
 });

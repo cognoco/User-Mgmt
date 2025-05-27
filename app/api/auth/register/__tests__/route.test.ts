@@ -39,7 +39,7 @@ describe('POST /api/auth/register', () => {
     const res = await POST(createRequest({
       userType: 'private',
       email: 'a@test.com',
-      password: 'Password123',
+      password: 'Password123!',
       firstName: 'A',
       lastName: 'B',
       acceptTerms: true
@@ -55,7 +55,7 @@ describe('POST /api/auth/register', () => {
     const res = await POST(createRequest({
       userType: 'private',
       email: 'a@test.com',
-      password: 'Password123',
+      password: 'Password123!',
       firstName: 'A',
       lastName: 'B',
       acceptTerms: true
@@ -70,7 +70,7 @@ describe('POST /api/auth/register', () => {
     const res = await POST(createRequest({
       userType: 'private',
       email: 'a@test.com',
-      password: 'Password123',
+      password: 'Password123!',
       firstName: 'A',
       lastName: 'B',
       acceptTerms: true
@@ -87,7 +87,7 @@ describe('POST /api/auth/register', () => {
     const res = await POST(createRequest({
       userType: 'private',
       email: 'a@test.com',
-      password: 'Password123',
+      password: 'Password123!',
       firstName: 'A',
       lastName: 'B',
       acceptTerms: true

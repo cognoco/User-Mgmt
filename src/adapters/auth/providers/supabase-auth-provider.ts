@@ -6,14 +6,15 @@
  */
 
 import { createClient, SupabaseClient, type Session } from '@supabase/supabase-js';
-import { 
-  AuthResult, 
-  LoginPayload, 
-  RegistrationPayload, 
+import {
+  AuthResult,
+  LoginPayload,
+  RegistrationPayload,
   User,
   MFASetupResponse,
   MFAVerifyResponse
 } from '../../core/auth/models';
+import { saveRefreshToken, rotateRefreshToken } from '@/lib/auth/refresh-token-store';
 
 import type { AuthDataProvider } from './interfaces';
 
@@ -116,6 +117,9 @@ export class SupabaseAuthProvider implements AuthDataProvider {
       }
       
       this.currentSession = data.session;
+      if (data.session?.refresh_token && data.session.user?.id) {
+        await saveRefreshToken(data.session.user.id, data.session.refresh_token);
+      }
       return {
         success: true,
         user: this.mapSupabaseUser(data.user)
@@ -157,6 +161,9 @@ export class SupabaseAuthProvider implements AuthDataProvider {
       }
       
       this.currentSession = data.session;
+      if (data.session?.refresh_token && data.user?.id) {
+        await saveRefreshToken(data.user.id, data.session.refresh_token);
+      }
       return {
         success: true,
         user: this.mapSupabaseUser(data.user)
@@ -500,11 +507,20 @@ export class SupabaseAuthProvider implements AuthDataProvider {
   > {
     this.log('refreshToken');
     try {
+      const oldToken = this.currentSession?.refresh_token ?? '';
+      const userId = this.currentSession?.user?.id ?? '';
       const { data, error } = await this.supabase.auth.refreshSession();
       if (error || !data.session) {
         return null;
       }
       this.currentSession = data.session;
+      if (oldToken && data.session.refresh_token && userId) {
+        try {
+          await rotateRefreshToken(userId, oldToken, data.session.refresh_token);
+        } catch (err) {
+          this.logError('refresh token rotation failed', err);
+        }
+      }
       return {
         accessToken: data.session.access_token,
         refreshToken: data.session.refresh_token ?? '',

@@ -38,14 +38,14 @@ describe('POST /api/auth/update-password', () => {
   });
 
   it('updates password using token when provided', async () => {
-    const res = await POST(createRequest({ password: 'Password1', token: 't' }) as any);
+    const res = await POST(createRequest({ password: 'Password1!', token: 't' }) as any);
     expect(res.status).toBe(200);
-    expect(mockAuthService.updatePasswordWithToken).toHaveBeenCalledWith('t', 'Password1');
+    expect(mockAuthService.updatePasswordWithToken).toHaveBeenCalledWith('t', 'Password1!');
   });
 
   it('requires auth when no token', async () => {
     mockAuthService.getCurrentUser.mockResolvedValueOnce(null);
-    const res = await POST(createRequest({ password: 'Password1' }) as any);
+    const res = await POST(createRequest({ password: 'Password1!' }) as any);
     const data = await res.json();
     expect(res.status).toBe(401);
     expect(data.error.code).toBe(ERROR_CODES.UNAUTHORIZED);

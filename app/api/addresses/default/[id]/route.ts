@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getApiAddressService } from '@/services/address/factory';
+import { withRouteAuth } from '@/middleware/auth';
+import { withSecurity } from '@/middleware/with-security';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const userId = req.headers.get('x-user-id');
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+async function handlePost(_req: NextRequest, params: { id: string }, userId: string) {
   const service = getApiAddressService();
   await service.setDefaultAddress(params.id, userId);
   return NextResponse.json({}, { status: 204 });
 }
+
+export const POST = withSecurity((req: NextRequest, ctx: { params: { id: string } }) =>
+  withRouteAuth((r, uid) => handlePost(r, ctx.params, uid), req)
+);
