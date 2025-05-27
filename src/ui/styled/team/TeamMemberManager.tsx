@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useIsMobile } from '@/lib/utils/responsive';
 import { TeamMemberManager as HeadlessTeamMemberManager, TeamMemberManagerProps } from '../../headless/team/TeamMemberManager';
 import { Button } from '@/ui/primitives/button';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
@@ -45,6 +46,7 @@ export function TeamMemberManager({
   className,
   ...headlessProps
 }: StyledTeamMemberManagerProps) {
+  const isMobile = useIsMobile();
   return (
     <HeadlessTeamMemberManager
       {...headlessProps}
@@ -85,6 +87,73 @@ export function TeamMemberManager({
             {isLoading ? (
               <div className="flex justify-center items-center py-8">
                 <div className="motion-safe:animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              </div>
+            ) : isMobile ? (
+              <div className="space-y-4">
+                {members.map((member) => (
+                  <div key={member.id} className="border rounded-md p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={member.avatarUrl} alt={member.name} />
+                          <AvatarFallback>
+                            {member.name.split(' ').map(n => n[0]).join('') || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{member.name}</p>
+                          <p className="text-sm text-gray-500">{member.email}</p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={isLoading || member.isCurrentUser || !member.canRemove}
+                        onClick={() => setConfirmationState({ memberId: member.id, memberName: member.name, isOpen: true })}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Select
+                        value={member.role}
+                        onValueChange={(value) => handleRoleChange(member.id, value)}
+                        disabled={isLoading || member.isCurrentUser || !member.canUpdateRole}
+                      >
+                        <SelectTrigger className="w-[120px]">
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableRoles.map((role) => (
+                            <SelectItem key={role.value} value={role.value}>
+                              {role.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <span className="text-sm">{member.joinedAt}</span>
+                    </div>
+                    <Dialog>
+                      {confirmationState.isOpen && confirmationState.memberId === member.id && (
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Remove Team Member</DialogTitle>
+                            <DialogDescription>
+                              Are you sure you want to remove {confirmationState.memberName} from the team? This action cannot be undone.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <DialogFooter className="flex space-x-2 justify-end">
+                            <Button variant="outline" onClick={cancelRemove}>Cancel</Button>
+                            <Button variant="destructive" onClick={() => handleConfirmRemove(member.id)}>Remove Member</Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      )}
+                    </Dialog>
+                  </div>
+                ))}
+                {members.length === 0 && (
+                  <div className="text-center py-6 text-gray-500">No team members found</div>
+                )}
               </div>
             ) : (
               <div className="space-y-6">
