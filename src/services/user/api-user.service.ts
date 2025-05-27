@@ -12,7 +12,10 @@ import {
 
 /**
  * API-based implementation of {@link UserService} for client-side usage.
- * All operations delegate to REST API endpoints under `/api`.
+ *
+ * All operations delegate to REST API endpoints under `/api` and rely on the
+ * user's session cookie for authentication. Ensure calls are made over HTTPS to
+ * protect sensitive data in transit.
  */
 export class ApiUserService implements UserService {
   async getUserProfile(_userId: string): Promise<UserProfile | null> {
@@ -23,6 +26,13 @@ export class ApiUserService implements UserService {
     return data.data ?? null;
   }
 
+  /**
+   * Update the authenticated user's profile via the API.
+   *
+   * @param _userId - Ignored client-side parameter
+   * @param profileData - Data to update
+   * @returns The updated profile or an error message
+   */
   async updateUserProfile(
     _userId: string,
     profileData: ProfileUpdatePayload
@@ -41,6 +51,11 @@ export class ApiUserService implements UserService {
     return { success: true, profile: data.data };
   }
 
+  /**
+   * Retrieve the current user's preference settings.
+   *
+   * @param _userId - Unused parameter for interface compliance
+   */
   async getUserPreferences(_userId: string): Promise<UserPreferences> {
     void _userId;
     const res = await fetch('/api/user/settings', { credentials: 'include' });
@@ -49,6 +64,12 @@ export class ApiUserService implements UserService {
     return data.data;
   }
 
+  /**
+   * Update user preference settings.
+   *
+   * @param _userId - Ignored parameter
+   * @param preferences - Partial preferences object
+   */
   async updateUserPreferences(
     _userId: string,
     preferences: PreferencesUpdatePayload
@@ -67,6 +88,12 @@ export class ApiUserService implements UserService {
     return { success: true, preferences: data.data };
   }
 
+  /**
+   * Upload a new profile picture for the current user.
+   *
+   * @param _userId - Ignored client-side parameter
+   * @param imageData - Image file/blob to upload
+   */
   async uploadProfilePicture(
     _userId: string,
     imageData: Blob
@@ -89,6 +116,11 @@ export class ApiUserService implements UserService {
     return { success: true, imageUrl: data.data.avatarUrl };
   }
 
+  /**
+   * Delete the current user's profile picture.
+   *
+   * @param _userId - Ignored parameter
+   */
   async deleteProfilePicture(_userId: string): Promise<{ success: boolean; error?: string }> {
     void _userId;
     // Use canonical profile avatar route
@@ -101,6 +133,12 @@ export class ApiUserService implements UserService {
     return { success: res.ok, error: data.error };
   }
 
+  /**
+   * Update profile visibility settings.
+   *
+   * @param _userId - Ignored parameter
+   * @param visibility - Desired visibility configuration
+   */
   async updateProfileVisibility(
     _userId: string,
     visibility: ProfileVisibility
@@ -119,6 +157,11 @@ export class ApiUserService implements UserService {
     return { success: true, visibility: data }; // privacy route returns object directly
   }
 
+  /**
+   * Search users using query parameters.
+   *
+   * @param params - Filtering and pagination options
+   */
   async searchUsers(params: UserSearchParams): Promise<UserSearchResult> {
     const url = `/api/user/search?query=${encodeURIComponent(params.query ?? '')}`;
     const res = await fetch(url, { credentials: 'include' });
@@ -126,6 +169,12 @@ export class ApiUserService implements UserService {
     return res.json();
   }
 
+  /**
+   * Deactivate the current user account.
+   *
+   * @param _userId - Ignored
+   * @param reason - Optional reason stored for auditing
+   */
   async deactivateUser(_userId: string, reason?: string): Promise<{ success: boolean; error?: string }> {
     void _userId;
     const res = await fetch('/api/retention/deactivate', {
@@ -141,6 +190,11 @@ export class ApiUserService implements UserService {
     return { success: true };
   }
 
+  /**
+   * Reactivate a previously deactivated account.
+   *
+   * @param _userId - Ignored parameter
+   */
   async reactivateUser(_userId: string): Promise<{ success: boolean; error?: string }> {
     void _userId;
     const res = await fetch('/api/retention/reactivate', {
@@ -154,6 +208,13 @@ export class ApiUserService implements UserService {
     return { success: true };
   }
 
+  /**
+   * Convert the user's account type.
+   *
+   * @param _userId - Ignored
+   * @param newType - New account type identifier
+   * @param additionalData - Extra data required for conversion
+   */
   async convertUserType(
     _userId: string,
     newType: string,
@@ -173,12 +234,20 @@ export class ApiUserService implements UserService {
     return { success: true, profile: data.data };
   }
 
+  /**
+   * Subscribe to profile updates.
+   *
+   * @returns Unsubscribe function (no-op in this client implementation)
+   */
   onUserProfileChanged(): () => void {
     // Client-side implementation could use SSE or websockets; not implemented
     return () => {};
   }
 }
 
+/**
+ * Factory helper for creating the browser {@link ApiUserService}.
+ */
 export function getApiUserService(): UserService {
   return new ApiUserService();
 }

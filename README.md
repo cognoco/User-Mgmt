@@ -13,11 +13,14 @@ This document serves as the main reference for the User Management System. It pr
 - [File Structure Guidelines](./File%20structure%20guidelines.md) - Project organization
 - [Architecture Guidelines](../Product%20documentation/Architecture%20Guidelines.md) - Comprehensive architecture principles
 - [Architecture Rules](../Product%20documentation/Architecture%20Rules.md) - Core architecture requirements
+- [Architecture Overview](./docs/Project%20documentation/Architecture%20Overview.md) - C4 diagrams and layer summaries
 - [Authentication Roles](./auth-roles.md) - Role definitions and permissions
 - [Authentication Setup](./docs/Product%20documentation/authentication-setup.md) - Supabase authentication flow and migration guide
 - [Testing Guide](./docs/Testing%20documentation/TESTING.md) - Testing setup and guidelines
 - [Testing Issues](./docs/Testing%20documentation/TESTING_ISSUES-UnitTests.md) - Known testing issues and workarounds
 - [Implementation Checklist](./Product%20documentation/Implementation-Checklist.md) - Code-verified implementation and test status
+- [Configuration Migration](./docs/Product%20documentation/CONFIGURATION_MIGRATION.md) - Centralized configuration usage
+- [Performance Testing](./docs/performance/performance-testing.md) - Baseline k6 benchmarks
 
 ### Feature Documentation
 - [Phase 1-2 Features](./functionality-features-phase1-2.md) - Core authentication and user management

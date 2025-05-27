@@ -24,6 +24,7 @@ import {
 import type { PermissionDataProvider } from "@/core/permission/IPermissionDataProvider";
 import { translateError } from "@/lib/utils/error";
 import { TypedEventEmitter } from "@/lib/utils/typed-event-emitter";
+import { MemoryCache } from '@/lib/cache';
 
 /**
  * Default implementation of the PermissionService interface
@@ -32,6 +33,7 @@ export class DefaultPermissionService
   extends TypedEventEmitter<PermissionEvent>
   implements PermissionService
 {
+  private static roleCache = new MemoryCache<string, UserRole[]>({ ttl: 30_000 });
   /**
    * Constructor for DefaultPermissionService
    *
@@ -252,12 +254,15 @@ export class DefaultPermissionService
    */
   async getUserRoles(userId: string): Promise<UserRole[]> {
     try {
-      return await this.permissionDataProvider.getUserRoles(userId);
+      return await DefaultPermissionService.roleCache.getOrCreate(userId, () =>
+        this.permissionDataProvider.getUserRoles(userId)
+      );
     } catch (error) {
       const errorMessage = translateError(error, {
         defaultMessage: "Error getting user roles",
       });
       console.error("Error getting user roles:", errorMessage);
+      DefaultPermissionService.roleCache.delete(userId);
       return [];
     }
   }
@@ -299,6 +304,8 @@ export class DefaultPermissionService
         userRole,
       });
 
+      DefaultPermissionService.roleCache.delete(userId);
+
       return userRole;
     } catch (error) {
       const errorMessage = translateError(error, {
@@ -334,6 +341,8 @@ export class DefaultPermissionService
         userId,
         roleId,
       });
+
+      DefaultPermissionService.roleCache.delete(userId);
 
       return true;
     } catch (error) {
