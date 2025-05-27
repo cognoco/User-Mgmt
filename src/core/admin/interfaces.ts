@@ -42,4 +42,5 @@ export interface AdminService {
   deleteUser(id: string): Promise<void>;
   getAuditLogs(params: AuditLogQuery): Promise<{ logs: any[]; pagination: PaginationMeta }>;
   searchUsers(params: SearchUsersParams): Promise<{ users: any[]; pagination: PaginationMeta }>;
+  exportUsers(params: SearchUsersParams, format: 'csv' | 'json'): Promise<{ data: string; filename: string }>;
 }

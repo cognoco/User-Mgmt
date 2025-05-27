@@ -2,6 +2,8 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { AdminService } from '@/core/admin/interfaces';
 import type { SearchQuery } from '@/app/api/admin/users/search/route';
 import { getServiceSupabase } from '@/lib/database/supabase';
+import { objectsToCSV } from '@/utils/export/csvExport';
+import { formatJSONForExport } from '@/utils/export/jsonExport';
 
 interface SearchResult {
   users: any[];
@@ -117,5 +119,33 @@ export class DefaultAdminService implements AdminService {
         totalPages,
       },
     };
+  }
+
+  async exportUsers(params: SearchQuery, format: 'csv' | 'json'): Promise<{ data: string; filename: string }> {
+    const { users } = await this.searchUsers({ ...params, page: 1, limit: 10000 });
+    const timestamp = new Date().toISOString().split('T')[0];
+    if (format === 'csv') {
+      const csv = objectsToCSV(users, [
+        { key: 'id', header: 'ID' },
+        { key: 'firstName', header: 'First Name' },
+        { key: 'lastName', header: 'Last Name' },
+        { key: 'email', header: 'Email' },
+        { key: 'status', header: 'Status' },
+        { key: 'role', header: 'Role' },
+        { key: 'createdAt', header: 'Created At', format: (v) => (v ? new Date(v).toLocaleString() : '') },
+        { key: 'lastLoginAt', header: 'Last Login', format: (v) => (v ? new Date(v).toLocaleString() : 'Never') },
+      ]);
+      return { data: csv, filename: `user-export-${timestamp}.csv` };
+    }
+
+    const json = formatJSONForExport(users, {
+      pretty: true,
+      transform: (u) => ({
+        ...u,
+        createdAt: u.createdAt ? new Date(u.createdAt).toISOString() : null,
+        lastLoginAt: u.lastLoginAt ? new Date(u.lastLoginAt).toISOString() : null,
+      }),
+    });
+    return { data: json, filename: `user-export-${timestamp}.json` };
   }
 }

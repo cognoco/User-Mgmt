@@ -23,6 +23,23 @@ export function useApi() {
     }
   };
 
-  return { isLoading, error, fetchApi };
+  const apiPost = <T>(url: string, body?: any) =>
+    fetchApi<T>(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+  const apiPatch = <T>(url: string, body?: any) =>
+    fetchApi<T>(url, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+  const apiDelete = <T>(url: string) =>
+    fetchApi<T>(url, { method: 'DELETE' });
+
+  return { isLoading, error, fetchApi, apiPost, apiPatch, apiDelete };
 }
 export default useApi;
