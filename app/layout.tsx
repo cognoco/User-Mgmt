@@ -1,8 +1,12 @@
 // import '@/lib/i18n';
+import React from 'react';
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AppInitializer } from '@/core/config/AppInitializer';
 import { UserManagementClientBoundary } from '@/lib/auth/UserManagementClientBoundary';
+import { SkipLink } from '@/ui/styled/navigation/SkipLink';
+import { KeyboardShortcutsDialog } from '@/ui/styled/common/KeyboardShortcutsDialog';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 
 // Define viewport configuration
@@ -38,13 +42,27 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  useKeyboardShortcuts([
+    {
+      keys: ['Shift', '?'],
+      description: 'Show keyboard shortcuts',
+      handler: () => setDialogOpen(true),
+    },
+  ]);
   return (
     <html lang="en" className="antialiased">
       <head />
       <body className="font-sans">
+        <SkipLink />
         <AppInitializer>
           <UserManagementClientBoundary>
             {children}
+            <KeyboardShortcutsDialog
+              shortcuts={[{ keys: ['Shift', '?'], description: 'Show this help' }]}
+              open={dialogOpen}
+              onOpenChange={setDialogOpen}
+            />
           </UserManagementClientBoundary>
         </AppInitializer>
       </body>

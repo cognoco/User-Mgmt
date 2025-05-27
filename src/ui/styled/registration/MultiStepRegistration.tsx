@@ -7,7 +7,7 @@ import { Progress } from '../ui/progress';
 import { Checkbox } from '../ui/checkbox';
 import { MultiStepRegistration as HeadlessMultiStepRegistration } from '@/ui/headless/registration/MultiStepRegistration';
 import { z } from 'zod';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 // Define schema for validation - this is UI-specific validation
 const registrationSchema = z.object({
@@ -67,6 +67,10 @@ export function MultiStepRegistration() {
       steps={steps}
       onComplete={handleComplete}
       render={({ currentStep, next, back, setValue, values, handleSubmit }) => {
+        const firstFieldRef = useRef<HTMLInputElement>(null);
+        useEffect(() => {
+          firstFieldRef.current?.focus();
+        }, [currentStep]);
         const progress = ((currentStep + 1) / steps.length) * 100;
         
         const renderStep = () => {
@@ -79,6 +83,7 @@ export function MultiStepRegistration() {
                     <Input
                       id="email"
                       type="email"
+                      ref={firstFieldRef}
                       value={values.email || ''}
                       onChange={(e) => setValue('email', e.target.value)}
                     />
@@ -109,6 +114,7 @@ export function MultiStepRegistration() {
                     <Label htmlFor="name">Full Name</Label>
                     <Input
                       id="name"
+                      ref={firstFieldRef}
                       value={values.name || ''}
                       onChange={(e) => setValue('name', e.target.value)}
                     />
@@ -136,6 +142,7 @@ export function MultiStepRegistration() {
                 <div className="space-y-4">
                   <p>Enter the verification code sent to your email</p>
                   <Input
+                    ref={firstFieldRef}
                     value={verificationCode}
                     onChange={(e) => {
                       setVerificationCode(e.target.value);
@@ -171,7 +178,7 @@ export function MultiStepRegistration() {
         };
         
         return (
-          <div className="space-y-8">
+          <div className="space-y-8" role="region" aria-live="polite">
             <Progress value={progress} className="w-full" />
             
             <div className="text-center">

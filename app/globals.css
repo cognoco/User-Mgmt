@@ -8,6 +8,21 @@ body {
   /* background-color: theme('colors.background'); */
 }
 
+/* Skip link - hidden until focused */
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -40px;
+  z-index: 100;
+}
+
+@media (prefers-contrast: more) {
+  .skip-link:focus,
+  .skip-link:focus-visible {
+    outline: 3px solid CanvasText;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
