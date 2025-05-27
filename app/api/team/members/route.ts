@@ -37,86 +37,111 @@ async function handleTeamMembers(
   const { page, limit, search, status, sortBy, sortOrder } = data;
   const skip = (page - 1) * limit;
 
-  const baseWhere = {
-    teamMember: {
-      team: {
-        members: {
-          some: {
-            userId: session.user.id,
+  // Get the team ID first to ensure we're looking at the correct team
+  const userTeam = await prisma.teamMember.findFirst({
+    where: { userId: session.user.id },
+    select: { teamId: true },
+  });
+
+  if (!userTeam) {
+    throw new ApiError(ERROR_CODES.NOT_FOUND, 'Team not found', 404);
+  }
+
+  try {
+    // Single query for team data, including subscription info and count
+    const teamWithData = await prisma.team.findUnique({
+      where: { id: userTeam.teamId },
+      select: {
+        subscription: { select: { seats: true } },
+        _count: { select: { members: true } },
+      },
+    });
+
+    // Build query conditions for team members
+    const whereCondition: any = {
+      teamId: userTeam.teamId,
+    };
+
+    if (status !== 'all') {
+      whereCondition.status = status;
+    }
+
+    if (search) {
+      whereCondition.user = {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ],
+      };
+    }
+
+    // Use a transaction to ensure count and data are consistent
+    const [members, totalCount] = await prisma.$transaction([
+      prisma.teamMember.findMany({
+        where: whereCondition,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
           },
         },
-      },
-    },
-  } as any;
-
-  let where: any = { ...baseWhere };
-  if (search) {
-    where = {
-      ...where,
-      OR: [
-        { name: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
-      ],
-    };
-  }
-  if (status !== 'all') {
-    where = {
-      ...where,
-      teamMember: {
-        ...where.teamMember,
-        status,
-      },
-    };
-  }
-
-  const [users, totalCount] = await Promise.all([
-    prisma.user.findMany({
-      where,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
-        teamMember: {
-          select: { id: true, role: true, status: true, joinedAt: true },
+        orderBy: {
+          ...(sortBy === 'joinedAt' && { joinedAt: sortOrder }),
+          ...(sortBy === 'role' && { role: sortOrder }),
+          ...(sortBy === 'status' && { status: sortOrder }),
+          ...(sortBy === 'name' && { user: { name: sortOrder } }),
+          ...(sortBy === 'email' && { user: { email: sortOrder } }),
         },
+        skip,
+        take: limit,
+      }),
+      prisma.teamMember.count({ where: whereCondition }),
+    ]);
+
+    // Transform data to match expected format
+    const users = members.map((member) => ({
+      id: member.user.id,
+      name: member.user.name,
+      email: member.user.email,
+      image: member.user.image,
+      teamMember: {
+        id: member.id,
+        role: member.role,
+        status: member.status,
+        joinedAt: member.joinedAt,
       },
-      orderBy: {
-        ...(sortBy === 'joinedAt' && { teamMember: { joinedAt: sortOrder } }),
-        ...(sortBy === 'name' && { name: sortOrder }),
-        ...(sortBy === 'email' && { email: sortOrder }),
-        ...(sortBy === 'role' && { teamMember: { role: sortOrder } }),
-        ...(sortBy === 'status' && { teamMember: { status: sortOrder } }),
+    }));
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return createSuccessResponse({
+      users,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
       },
-      skip,
-      take: limit,
-    }),
-    prisma.user.count({ where }),
-  ]);
-
-  const team = await prisma.team.findFirst({
-    where: {
-      members: { some: { userId: session.user.id } },
-    },
-    select: {
-      subscription: { select: { seats: true } },
-      _count: { select: { members: true } },
-    },
-  });
-
-  const totalPages = Math.ceil(totalCount / limit);
-  const hasNextPage = page < totalPages;
-  const hasPreviousPage = page > 1;
-
-  return createSuccessResponse({
-    users,
-    pagination: { page, limit, totalCount, totalPages, hasNextPage, hasPreviousPage },
-    seatUsage: {
-      used: team?._count.members ?? 0,
-      total: team?.subscription?.seats ?? 0,
-      percentage: team?.subscription?.seats ? (team._count.members / team.subscription.seats) * 100 : 0,
-    },
-  });
+      seatUsage: {
+        used: teamWithData?._count.members ?? 0,
+        total: teamWithData?.subscription?.seats ?? 0,
+        percentage: teamWithData?.subscription?.seats
+          ? (teamWithData._count.members / teamWithData.subscription.seats) * 100
+          : 0,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('timeout')) {
+      throw new ApiError(ERROR_CODES.TIMEOUT, 'Database query timeout', 504);
+    }
+    throw error;
+  }
 }
 
 async function handleAddMember(req: NextRequest, data: z.infer<typeof addMemberSchema>) {
