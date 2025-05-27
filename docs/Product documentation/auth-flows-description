@@ -1,0 +1,88 @@
+Authentication Flows Verification Checklist
+Email/Password Login
+
+ User can sign up with email and password
+ User can log in with email and password
+ Invalid credentials show appropriate error messages
+ Rate limiting works for repeated failed attempts
+ Login token is properly stored and accessible
+ Session is properly created after login
+ Remember me functionality works correctly
+ User data is correctly retrieved after authentication
+ JWT/token includes necessary claims and proper expiry
+ Logout successfully clears session and tokens
+
+OAuth Providers
+
+ Each OAuth provider (Google, GitHub, etc.) initiates flow correctly
+ OAuth state parameter is properly managed to prevent CSRF
+ Callback handling works for each provider
+ Error handling works for denied permissions
+ New user registration via OAuth works correctly
+ Existing user login via OAuth works correctly
+ Provider profile data is correctly mapped to user profile
+ Appropriate scopes are requested for each provider
+ Token storage and refresh works correctly
+ Provider connections are properly recorded in database
+
+Session Management
+
+ Sessions are correctly initialized after authentication
+ Session expiry works as expected
+ Session validation works on protected routes
+ Session information is accessible in both API and UI
+ Session is properly cleared on logout
+ Multiple active sessions work correctly (if supported)
+ Session revocation works (admin feature)
+ Session cookies have appropriate security settings
+ Session timeout behaviors work as expected
+ Concurrent session handling works correctly
+
+Token Refresh
+
+ Access tokens are refreshed before expiry
+ Refresh tokens are properly secured
+ Failed refresh properly redirects to login
+ Successful refresh updates stored tokens
+ Token rotation works correctly
+ Refresh token expiry is handled properly
+ Invalid refresh tokens are detected and rejected
+ Token revocation cascade works (logout all devices)
+
+Password Reset
+
+ Password reset emails are sent correctly
+ Reset tokens have proper expiry
+ Reset links work correctly
+ Password validation occurs during reset
+ Success/error messages are displayed appropriately
+ Account is properly authenticated after reset
+ Old sessions are invalidated after password reset
+ Rate limiting prevents abuse
+ Reset confirmation is sent to user
+ Reset flow handles non-existent emails gracefully
+
+MFA (Multi-Factor Authentication)
+
+ MFA setup flow works correctly
+ QR codes for TOTP are generated correctly
+ Verification codes are properly validated
+ MFA is correctly required on login when enabled
+ Backup codes work correctly
+ MFA can be disabled with verification
+ MFA settings are saved correctly
+ Different MFA methods work if supported (TOTP, SMS, Email)
+ Recovery options work if user loses MFA device
+ MFA enrollment sends appropriate notifications
+
+Account Linking
+
+ Users can link multiple OAuth providers to one account
+ Email conflicts are properly detected and handled
+ Linked accounts appear in user profile/settings
+ Users can unlink providers (preserving at least one login method)
+ Users can log in with any linked provider
+ Account linking requires verification
+ Linking status is correctly displayed in UI
+ Notifications are sent when new providers are linked
+ Security audit logs record linking/unlinking events
