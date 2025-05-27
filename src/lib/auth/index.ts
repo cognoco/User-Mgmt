@@ -25,3 +25,5 @@ export async function signOut() {
   const supabase = getSupabaseServerClient();
   await supabase.auth.signOut();
 }
+
+export * from './supabase-auth.config';
