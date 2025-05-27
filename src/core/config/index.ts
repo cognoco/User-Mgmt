@@ -41,6 +41,18 @@ export function configureUserManagement(config: Partial<UserManagementConfig>): 
       redirects: {
         ...configInstance.options.redirects,
         ...config?.options?.redirects
+      },
+      api: {
+        ...configInstance.options.api,
+        ...config?.options?.api
+      },
+      ui: {
+        ...configInstance.options.ui,
+        ...config?.options?.ui
+      },
+      security: {
+        ...configInstance.options.security,
+        ...config?.options?.security
       }
     }
   };
@@ -117,6 +129,8 @@ export function getServiceProvider<T>(providerName: string): T | undefined {
 
 // Export the interfaces and default values
 export * from './interfaces';
+export * from './runtime-config';
+export * from './config-context';
 
 // Export a singleton instance for convenience
 export const UserManagementConfiguration = {

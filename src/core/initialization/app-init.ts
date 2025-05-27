@@ -5,7 +5,7 @@
  * and adapters according to the architecture guidelines.
  */
 
-import { UserManagementConfiguration } from "@/core/config";
+import { UserManagementConfiguration, loadUserManagementConfig } from "@/core/config";
 import { api } from "@/lib/api/axios";
 
 // Import factory functions
@@ -34,6 +34,11 @@ export function initializeApp() {
   });
   try {
     console.log("Initializing application...");
+
+    const runtimeConfig = loadUserManagementConfig();
+    if (runtimeConfig.options.api.baseUrl) {
+      api.defaults.baseURL = runtimeConfig.options.api.baseUrl;
+    }
 
     // Get environment variables
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -114,12 +119,11 @@ export function initializeApp() {
     // Configure options
     UserManagementConfiguration.configure({
       options: {
-        redirects: {
-          afterLogin: '/dashboard',
-          afterLogout: '/',
-          afterRegistration: '/auth/verify-email',
-          afterPasswordReset: '/auth/login'
-        }
+        redirects: runtimeConfig.options.redirects,
+        api: runtimeConfig.options.api,
+        ui: runtimeConfig.options.ui,
+        security: runtimeConfig.options.security,
+        baseUrl: runtimeConfig.options.baseUrl,
       }
     });
 

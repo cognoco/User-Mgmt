@@ -32,6 +32,48 @@ export interface FeatureFlags {
   enableInAppNotifications: boolean;
 }
 
+/** API-related configuration */
+export interface ApiOptions {
+  /** Base URL for backend API calls */
+  baseUrl: string;
+  /** Request timeout in milliseconds */
+  timeoutMs: number;
+}
+
+/** UI customisation options */
+export interface UiOptions {
+  /** Theme preference */
+  theme: 'light' | 'dark';
+  /** Primary brand colour */
+  primaryColor: string;
+}
+
+/** Security-related configuration */
+export interface SecurityOptions {
+  /** Header name for CSRF tokens */
+  csrfHeaderName: string;
+  /** Allowed origins for CORS */
+  allowedOrigins: string[];
+}
+
+export interface UserManagementOptions {
+  /** Base URL for the application, used for generating links in emails, etc. */
+  baseUrl: string;
+  /** Default redirect paths */
+  redirects: {
+    afterLogin: string;
+    afterLogout: string;
+    afterRegistration: string;
+    afterPasswordReset: string;
+  };
+  /** API configuration */
+  api: ApiOptions;
+  /** UI customisation */
+  ui: UiOptions;
+  /** Security settings */
+  security: SecurityOptions;
+}
+
 /**
  * Default feature flags configuration
  */
@@ -98,22 +140,7 @@ export interface UserManagementConfig {
   /**
    * Additional configuration options
    */
-  options: {
-    /**
-     * Base URL for the application, used for generating links in emails, etc.
-     */
-    baseUrl: string;
-    
-    /**
-     * Default redirect paths
-     */
-    redirects: {
-      afterLogin: string;
-      afterLogout: string;
-      afterRegistration: string;
-      afterPasswordReset: string;
-    };
-  };
+  options: UserManagementOptions;
 }
 
 /**
@@ -129,6 +156,18 @@ export const DEFAULT_CONFIG: UserManagementConfig = {
       afterLogout: '/',
       afterRegistration: '/onboarding',
       afterPasswordReset: '/auth/login',
+    },
+    api: {
+      baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+      timeoutMs: parseInt(process.env.API_TIMEOUT_MS || '10000', 10),
+    },
+    ui: {
+      theme: (process.env.UI_THEME as 'light' | 'dark') || 'light',
+      primaryColor: process.env.UI_PRIMARY_COLOR || '#6366f1',
+    },
+    security: {
+      csrfHeaderName: process.env.CSRF_HEADER_NAME || 'x-csrf-token',
+      allowedOrigins: (process.env.CORS_ALLOWED_ORIGINS || '').split(',').filter(Boolean),
     },
   },
 };
