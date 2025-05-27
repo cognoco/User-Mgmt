@@ -167,30 +167,53 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Company profile not found' }, { status: 404 });
     }
 
-    // 4. Get Documents
-    const { data: documents, error: documentsError } = await supabaseService
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const limit = Math.min(parseInt(url.searchParams.get('limit') || '20'), 100);
+    const type = url.searchParams.get('type') || undefined;
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit - 1;
+
+    let query = supabaseService
       .from('company_documents')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('company_id', companyProfile.id)
       .order('created_at', { ascending: false });
+
+    if (type) {
+      query = query.eq('type', type);
+    }
+
+    const { data: documents, error: documentsError, count } = await Promise.race([
+      query.range(startIndex, endIndex),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Database query timeout')), 5000)
+      )
+    ]);
 
     if (documentsError) {
       console.error('Error fetching documents:', documentsError);
       return NextResponse.json({ error: 'Failed to fetch documents' }, { status: 500 });
     }
 
-    // 5. Get Signed URLs for Documents
-    const documentsWithUrls = await Promise.all(
-      documents.map(async (doc) => {
-        const { data, error: signedUrlError } = await supabaseService.storage
-          .from('company-documents')
-          .createSignedUrl(doc.file_path, 3600); // 1 hour expiry
+    const generateSignedUrl = async (doc: any) => {
+      try {
+        const { data, error: signedUrlError } = await Promise.race([
+          supabaseService.storage
+            .from('company-documents')
+            .createSignedUrl(doc.file_path, 3600),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('Storage operation timeout')), 3000)
+          )
+        ]);
 
         if (signedUrlError || !data) {
           console.error('Error getting signed URL:', signedUrlError);
           return {
             ...doc,
-            signedUrl: null
+            signedUrl: null,
+            error: signedUrlError?.message || 'Failed to generate URL'
           };
         }
 
@@ -198,10 +221,33 @@ export async function GET(request: NextRequest) {
           ...doc,
           signedUrl: data.signedUrl
         };
-      })
-    );
+      } catch (error) {
+        console.error(`Error generating signed URL for ${doc.file_path}:`, error);
+        return {
+          ...doc,
+          signedUrl: null,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        };
+      }
+    };
 
-    return NextResponse.json(documentsWithUrls);
+    const documentsWithUrls = [] as any[];
+    const batchSize = 5;
+    for (let i = 0; i < documents.length; i += batchSize) {
+      const batch = documents.slice(i, i + batchSize);
+      const results = await Promise.all(batch.map(generateSignedUrl));
+      documentsWithUrls.push(...results);
+    }
+
+    return NextResponse.json({
+      documents: documentsWithUrls,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        pages: count ? Math.ceil(count / limit) : 0
+      }
+    });
 
   } catch (error) {
     console.error('Unexpected error in GET /api/company/documents:', error);
