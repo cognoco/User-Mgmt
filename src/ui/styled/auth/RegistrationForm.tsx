@@ -13,10 +13,12 @@ import { useRouter } from 'next/navigation';
 import { OAuthButtons } from './OAuthButtons';
 import { PasswordRequirements } from './PasswordRequirements';
 import { RegistrationForm as HeadlessRegistrationForm } from '@/ui/headless/auth/RegistrationForm';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export function RegistrationForm() {
   const userManagement = useUserManagement();
   const router = useRouter();
+  const { register: registerUser } = useAuth();
   const [userType, setUserType] = useState<UserType>(userManagement.corporateUsers.defaultUserType);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -46,23 +48,21 @@ export function RegistrationForm() {
         <HeadlessRegistrationForm
           onSubmit={async (userData) => {
             try {
-              // Add user type to metadata
               userData.metadata = {
                 ...userData.metadata,
                 userType
               };
-              
-              // Add company data if corporate user
-              if (userType === UserType.CORPORATE) {
-                // This would be handled in the form values
+
+              const result = await registerUser(userData);
+              if (result.success) {
+                handleRegistrationSuccess(userData.email);
+              } else if (result.error) {
+                throw new Error(result.error);
               }
-              
-              // Handle success
-              handleRegistrationSuccess(userData.email);
-              return Promise.resolve();
             } catch (error) {
               return Promise.reject(error);
             }
+            return Promise.resolve();
           }}
           render={({
             handleSubmit,
@@ -310,7 +310,7 @@ export function RegistrationForm() {
                     checked={acceptTermsValue}
                     onChange={(e) => setAcceptTermsValue(e.target.checked)}
                     onBlur={() => handleBlur('acceptTerms')}
-                    data-testid="terms-checkbox"
+                    data-testid="accept-terms-checkbox"
                     className="w-4 h-4 text-primary bg-background border-primary rounded focus:ring-primary cursor-pointer"
                   />
                 </div>

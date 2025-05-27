@@ -26,7 +26,7 @@ const detectPlatform = (): Platform => {
     return 'react-native';
   }
   
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && window.navigator && window.navigator.userAgent) {
     const userAgent = window.navigator.userAgent.toLowerCase();
     if (/iphone|ipad|ipod/.test(userAgent)) {
       return 'ios';
