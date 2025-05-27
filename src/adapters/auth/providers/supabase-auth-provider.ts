@@ -246,6 +246,67 @@ export class SupabaseAuthProvider implements AuthDataProvider {
       throw new Error(error.message);
     }
   }
+
+  async verifyPasswordResetToken(
+    token: string,
+  ): Promise<{ valid: boolean; user?: User; token?: string; error?: string }> {
+    this.log('verifyPasswordResetToken');
+    try {
+      const { data, error } = await this.supabase.auth.exchangeCodeForSession(token);
+      if (error) {
+        return { valid: false, error: error.message };
+      }
+      this.currentSession = data.session;
+      return {
+        valid: true,
+        user: this.mapSupabaseUser(data.user),
+        token: data.session?.access_token || undefined,
+      };
+    } catch (err: any) {
+      this.logError('verifyPasswordResetToken failed', err);
+      return { valid: false, error: err.message || 'Token verification failed' };
+    }
+  }
+
+  async updatePasswordWithToken(
+    token: string,
+    newPassword: string,
+  ): Promise<AuthResult> {
+    this.log('updatePasswordWithToken');
+    try {
+      // Ensure session from token
+      if (!this.currentSession) {
+        const verifyRes = await this.verifyPasswordResetToken(token);
+        if (!verifyRes.valid) {
+          return { success: false, error: verifyRes.error || 'Invalid token' };
+        }
+      }
+      const { data, error } = await this.supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        this.logError('updatePasswordWithToken failed', error);
+        return { success: false, error: error.message };
+      }
+      this.currentSession = (await this.supabase.auth.getSession()).data.session;
+      return {
+        success: true,
+        user: data.user ? this.mapSupabaseUser(data.user) : undefined,
+        token: this.currentSession?.access_token,
+      };
+    } catch (err: any) {
+      this.logError('updatePasswordWithToken failed', err);
+      return { success: false, error: err.message || 'Password update failed' };
+    }
+  }
+
+  async invalidateSessions(userId: string): Promise<void> {
+    try {
+      // Requires service role key
+      // sign out user from all sessions
+      await (this.supabase as any).auth.admin.signOutUser(userId);
+    } catch (err) {
+      this.logError('invalidateSessions failed', err);
+    }
+  }
   
   /**
    * Send an email verification link to the specified email address
