@@ -6,11 +6,11 @@ import { OAuthProvider } from "@/types/oauth";
 import { logUserAction } from "@/lib/audit/auditLogger";
 import {
   createSuccessResponse,
-  withErrorHandling,
-  withValidation,
   ApiError,
   ERROR_CODES,
 } from "@/lib/api/common";
+import { withErrorHandling } from "@/middleware/error-handling";
+import { withValidation } from "@/middleware/validation";
 
 // Request schema
 const callbackRequestSchema = z.object({
