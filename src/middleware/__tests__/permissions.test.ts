@@ -1,4 +1,3 @@
-conflicted_code = """
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
 import { withPermissionCheck } from '../permissions';
@@ -243,13 +242,7 @@ describe('withPermissionCheck', () => {
       const data = await response.json();
 
       expect(response.status).toBe(500);
-      expect(data.error).toBe('Internal server error');
+  expect(data.error).toBe('Internal server error');
     });
   });
 });
-"""
-
-with open('merged_permissions_test.ts', 'w') as f:
-    f.write(conflicted_code)
-
-print("merged_permissions_test.ts created successfully.")
