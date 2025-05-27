@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError } from '@/lib/api/common/api-error';
 import { createErrorResponse } from '@/lib/api/common/response-formatter';
-import { logUserAction } from '@/lib/audit/auditLogger';
+import { logApiError } from '@/lib/audit/error-logger';
 
 /**
  * Middleware to handle API errors for route handlers.
@@ -13,7 +13,6 @@ export async function withErrorHandling(
   try {
     return await handler(req);
   } catch (error) {
-    console.error('API Error:', error);
     const apiError =
       error instanceof ApiError
         ? error
@@ -23,20 +22,17 @@ export async function withErrorHandling(
             500
           );
 
-    try {
-      await logUserAction({
-        action: 'API_ERROR',
-        status: 'FAILURE',
-        ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
-        userAgent: req.headers.get('user-agent') || 'unknown',
-        targetResourceType: 'api',
-        targetResourceId: req.nextUrl.pathname,
-        details: { code: apiError.code, message: apiError.message }
-      });
-    } catch (logErr) {
-      console.error('Failed to log API error:', logErr);
-    }
+    await logApiError(apiError, {
+      ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
+      userAgent: req.headers.get('user-agent') || 'unknown',
+      path: req.nextUrl.pathname,
+    });
 
-    return createErrorResponse(apiError);
+    const safeError =
+      process.env.NODE_ENV === 'production' && apiError.status >= 500
+        ? new ApiError(apiError.code, 'Internal server error', apiError.status)
+        : apiError;
+
+    return createErrorResponse(safeError);
   }
 }

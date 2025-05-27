@@ -12,6 +12,7 @@ export interface LogUserActionParams {
   userId?: string | null; // Nullable for system actions or unauthenticated attempts
   action: string; // e.g., 'LOGIN_SUCCESS', 'PROFILE_UPDATE'
   status: 'SUCCESS' | 'FAILURE' | 'INITIATED' | 'COMPLETED';
+  severity?: 'INFO' | 'WARN' | 'ERROR';
   ipAddress?: string | null;
   userAgent?: string | null;
   targetResourceType?: string | null;
@@ -34,9 +35,10 @@ export async function logUserAction(params: LogUserActionParams): Promise<void> 
     status, 
     ipAddress, 
     userAgent, 
-    targetResourceType, 
-    targetResourceId, 
-    details, 
+    targetResourceType,
+    targetResourceId,
+    details,
+    severity,
     client = supabase // Use default client if none provided
   } = params;
 
@@ -51,7 +53,7 @@ export async function logUserAction(params: LogUserActionParams): Promise<void> 
         user_agent: userAgent,
         target_resource_type: targetResourceType,
         target_resource_id: targetResourceId,
-        details: details ?? {},
+        details: { ...(details ?? {}), ...(severity ? { severity } : {}) },
       });
 
     if (error) {
