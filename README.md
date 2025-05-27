@@ -99,6 +99,10 @@ This document serves as the main reference for the User Management System. It pr
 - Authentication Store - State management for auth
 - API Layer - RESTful endpoints
 - Database Layer - Supabase integration
+  - Database providers are created via a factory (`src/adapters/database/factory`).
+    Switch between `supabase`, `prisma`, or `mock` by changing the provider name
+    in your configuration. Connection details can be supplied through environment
+    variables or the `user-management.config.ts` file.
 
 ### Integration Points
 - Authentication Flow
