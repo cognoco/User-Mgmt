@@ -54,6 +54,20 @@ export function SetupWizard() {
       ),
     },
     {
+      id: 'features',
+      title: 'Explore Key Features',
+      component: (
+        <div className="space-y-4">
+          <p>Quick tour of the main capabilities:</p>
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>Create and manage teams</li>
+            <li>Update your profile at any time</li>
+            <li>Configure security options</li>
+          </ul>
+        </div>
+      ),
+    },
+    {
       id: 'completion',
       title: 'You\'re All Set!',
       component: (

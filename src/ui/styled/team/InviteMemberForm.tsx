@@ -33,7 +33,8 @@ export function InviteMemberForm({ teamId, onInviteSent }: InviteMemberFormProps
         setRole,
         handleSubmit,
         isSubmitting,
-        error
+        error,
+        successMessage
       }) => (
         <Card>
           <CardHeader>
@@ -43,6 +44,11 @@ export function InviteMemberForm({ teamId, onInviteSent }: InviteMemberFormProps
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {successMessage && (
+              <p className="text-success text-sm" role="status">
+                {successMessage}
+              </p>
+            )}
             {error && (
               <p className="text-destructive text-sm" role="alert">
                 {error}
