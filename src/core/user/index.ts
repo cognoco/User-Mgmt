@@ -7,6 +7,7 @@
 // Export interfaces
 export * from './interfaces';
 export * from './IUserDataProvider';
+export * from './IUserRepository';
 
 // Export models
 export * from './models';
