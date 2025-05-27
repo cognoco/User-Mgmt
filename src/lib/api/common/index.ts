@@ -7,3 +7,4 @@
 export * from './error-codes';
 export * from './api-error';
 export * from './response-formatter';
+export * from '../error-handler';

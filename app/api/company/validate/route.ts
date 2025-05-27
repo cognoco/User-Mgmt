@@ -1,15 +1,16 @@
 import { z } from 'zod';
-import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { withErrorHandling } from '@/middleware/error-handling';
+import { createSuccessResponse, createValidationError } from '@/lib/api/common';
 
 const CompanySchema = z.object({ companyName: z.string() });
 
-export async function POST(req: Request) {
+async function handlePost(req: NextRequest) {
   const body = await req.json();
   const parse = CompanySchema.safeParse(body);
   if (!parse.success) {
-    return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+    throw createValidationError('Invalid input');
   }
-  // Basic company name validation
   const { companyName } = parse.data;
 
   const cleaned = companyName.trim();
@@ -21,5 +22,9 @@ export async function POST(req: Request) {
     validChars.test(cleaned) &&
     words.length >= 2 &&
     words.every((w) => w.length > 1);
-  return NextResponse.json({ valid: isValid });
-} 
+  return createSuccessResponse({ valid: isValid });
+}
+
+export function POST(request: NextRequest) {
+  return withErrorHandling(handlePost, request);
+}

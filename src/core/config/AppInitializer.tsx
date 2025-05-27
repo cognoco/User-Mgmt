@@ -17,6 +17,14 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const handler = (e: ErrorEvent) => {
+      console.error('[App] Unhandled error:', e.error);
+    };
+    window.addEventListener('error', handler);
+    return () => window.removeEventListener('error', handler);
+  }, []);
+
+  useEffect(() => {
     try {
       console.log('[AppInitializer] Initializing application...');
       // Initialize the application and get the service instances

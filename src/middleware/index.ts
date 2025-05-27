@@ -141,4 +141,6 @@ export function withSecurity(
       }
     }
   };
-} 
+}
+
+export { withErrorHandling } from './error-handling';

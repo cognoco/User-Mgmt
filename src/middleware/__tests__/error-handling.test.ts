@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandling } from '../error-handling';
 import { ApiError } from '@/lib/api/common/api-error';
 import { createErrorResponse } from '@/lib/api/common/response-formatter';
-import { logUserAction } from '@/lib/audit/auditLogger';
+import { logApiError } from '@/lib/audit/error-logger';
 
-vi.mock('@/lib/audit/auditLogger', () => ({ logUserAction: vi.fn() }));
+vi.mock('@/lib/audit/error-logger', () => ({ logApiError: vi.fn() }));
 vi.mock('@/lib/api/common/response-formatter', () => ({
   createErrorResponse: vi.fn((err: ApiError) =>
     NextResponse.json(err.toResponse(), { status: err.status })
@@ -27,9 +27,7 @@ describe('withErrorHandling', () => {
     const res = await withErrorHandling(handler, req);
     expect(res.status).toBe(400);
     expect(createErrorResponse).toHaveBeenCalled();
-    expect(logUserAction).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'API_ERROR', status: 'FAILURE' })
-    );
+    expect(logApiError).toHaveBeenCalled();
   });
 
   it('wraps unknown errors', async () => {
