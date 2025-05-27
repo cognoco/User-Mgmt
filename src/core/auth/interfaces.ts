@@ -101,15 +101,30 @@ export interface AuthService {
    * 
    * @param email Email address to verify
    * @returns Authentication result with success status or error
-   */
+  */
   sendVerificationEmail(email: string): Promise<AuthResult>;
-  
+
+  /**
+   * Send a passwordless login link to the specified email address
+   *
+   * @param email Email address to send the magic link to
+   */
+  sendMagicLink(email: string): Promise<{ success: boolean; error?: string }>;
+
   /**
    * Verify an email address using a token
-   * 
+   *
    * @param token Verification token from the email link
    */
   verifyEmail(token: string): Promise<void>;
+
+  /**
+   * Verify a magic link token and authenticate the user
+   *
+   * @param token Magic link token
+   * @returns Authentication result with success status and user data or error
+   */
+  verifyMagicLink(token: string): Promise<AuthResult>;
   
   /**
    * Delete the current user's account

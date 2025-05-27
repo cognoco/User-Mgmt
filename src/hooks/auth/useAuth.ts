@@ -63,9 +63,13 @@ export interface UseAuth {
 
   // Email verification
   sendVerificationEmail: (email: string) => Promise<AuthResult>;
+  sendMagicLink: (email: string) => Promise<{ success: boolean; error?: string }>;
   verifyEmail: (
     token: string,
   ) => Promise<{ success: boolean; error?: string }>;
+  verifyMagicLink: (
+    token: string,
+  ) => Promise<AuthResult>;
 
   // Account management
   deleteAccount: (password?: string) => Promise<{ success: boolean; error?: string }>;
@@ -475,6 +479,30 @@ export function useAuth(): UseAuth {
     [authService],
   );
 
+  const sendMagicLink = useCallback(
+    async (email: string): Promise<{ success: boolean; error?: string }> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const res = await authService.sendMagicLink(email);
+        setIsLoading(false);
+        if (!res.success) {
+          setError(res.error || 'Failed to send magic link');
+        } else {
+          setSuccessMessage('Magic link sent');
+        }
+        return res;
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : 'Failed to send magic link';
+        setIsLoading(false);
+        setError(msg);
+        return { success: false, error: msg };
+      }
+    },
+    [authService],
+  );
+
   // Verify email
   const verifyEmail = useCallback(
     async (token: string): Promise<{ success: boolean; error?: string }> => {
@@ -496,6 +524,32 @@ export function useAuth(): UseAuth {
         setError(errorMessage);
 
         return { success: false, error: errorMessage };
+      }
+    },
+    [authService],
+  );
+
+  const verifyMagicLink = useCallback(
+    async (token: string): Promise<AuthResult> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const res = await authService.verifyMagicLink(token);
+        setIsLoading(false);
+        if (res.success) {
+          setUserState(res.user || null);
+          setTokenState(res.token || null);
+          setIsAuthenticated(true);
+        } else if (res.error) {
+          setError(res.error);
+        }
+        return res;
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : 'Magic link verification failed';
+        setIsLoading(false);
+        setError(msg);
+        return { success: false, error: msg } as AuthResult;
       }
     },
     [authService],
@@ -631,7 +685,9 @@ export function useAuth(): UseAuth {
     verifyMFA,
     disableMFA,
     sendVerificationEmail,
+    sendMagicLink,
     verifyEmail,
+    verifyMagicLink,
     deleteAccount,
     getCurrentUser,
     clearError,

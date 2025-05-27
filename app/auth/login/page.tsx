@@ -24,6 +24,11 @@ export default function LoginPage() { // Use default export for Next.js pages
                 {t('auth.login.forgotPassword', 'Forgot your password?')}
               </Link>
             </div>
+            <div className="mt-2">
+              <Link href="/auth/passwordless" className="text-primary hover:underline">
+                {t('auth.login.magicLink', 'Send me a magic link')}
+              </Link>
+            </div>
             <div className="mt-4">
               {t('auth.login.noAccount', "Don't have an account?")}{' '}
               <Link href="/auth/register" className="text-primary font-medium hover:underline">

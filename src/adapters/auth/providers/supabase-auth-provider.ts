@@ -342,6 +342,20 @@ export class SupabaseAuthProvider implements AuthDataProvider {
       };
     }
   }
+
+  async sendMagicLink(email: string): Promise<{ success: boolean; error?: string }> {
+    this.log('sendMagicLink', email);
+    try {
+      const { error } = await this.supabase.auth.signInWithOtp({ email });
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      return { success: true };
+    } catch (error: any) {
+      this.logError('sendMagicLink failed', error);
+      return { success: false, error: error.message || 'Failed to send magic link' };
+    }
+  }
   
   /**
    * Verify an email address using a token
@@ -368,6 +382,21 @@ export class SupabaseAuthProvider implements AuthDataProvider {
     if (error) {
       this.logError('verifyEmail failed', error);
       throw new Error(error.message);
+    }
+  }
+
+  async verifyMagicLink(token: string): Promise<AuthResult> {
+    this.log('verifyMagicLink');
+    try {
+      const { data, error } = await this.supabase.auth.verifyOtp({ type: 'magiclink', token });
+      if (error || !data.session || !data.user) {
+        return { success: false, error: error?.message || 'Invalid or expired token' };
+      }
+      this.currentSession = data.session;
+      return { success: true, user: this.mapSupabaseUser(data.user), token: data.session.access_token, expiresAt: Date.now() + (data.session.expires_in ?? 0) * 1000 };
+    } catch (error: any) {
+      this.logError('verifyMagicLink failed', error);
+      return { success: false, error: error.message || 'Magic link verification failed' };
     }
   }
   
