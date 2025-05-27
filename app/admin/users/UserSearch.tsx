@@ -27,16 +27,22 @@ const searchFormSchema = z.object({
 
 type SearchFormValues = z.infer<typeof searchFormSchema>;
 
-export function UserSearch() {
+export interface UserSearchProps {
+  initialSearchParams?: Record<string, any>;
+  onSearch?: (params: Record<string, any>) => void;
+}
+
+export function UserSearch({ initialSearchParams = {}, onSearch }: UserSearchProps) {
   const [page, setPage] = useState(1);
   const { users, pagination, isLoading, error, searchUsers } = useAdminUsers();
 
-  const { register, handleSubmit, control, reset, watch } = useForm<SearchFormValues>({
+  const { register, handleSubmit, control, reset, watch, setValue } = useForm<SearchFormValues>({
     resolver: zodResolver(searchFormSchema),
     defaultValues: {
       status: 'all',
       sortBy: 'createdAt',
       sortOrder: 'desc',
+      ...initialSearchParams,
     },
   });
 
@@ -49,9 +55,28 @@ export function UserSearch() {
     });
   }, [page]);
 
+  useEffect(() => {
+    if (initialSearchParams && Object.keys(initialSearchParams).length > 0) {
+      Object.entries(initialSearchParams).forEach(([key, value]) => {
+        if (value !== undefined) {
+          setValue(key as any, value as any);
+        }
+      });
+      searchUsers({
+        ...initialSearchParams,
+        page: 1,
+      });
+      setPage(1);
+    }
+  }, [initialSearchParams, setValue, searchUsers]);
+
   const onSubmit = (data: SearchFormValues) => {
     setPage(1);
-    searchUsers({ ...data, page: 1 });
+    const params = { ...data, page: 1 };
+    searchUsers(params);
+    if (onSearch) {
+      onSearch(params);
+    }
   };
 
   const handleReset = () => {

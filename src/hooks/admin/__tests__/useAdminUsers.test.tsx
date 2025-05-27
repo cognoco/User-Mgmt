@@ -8,8 +8,18 @@ vi.mock('@/hooks/core/useApi');
 
 describe('useAdminUsers', () => {
   const fetchApi = vi.fn();
+  const apiPost = vi.fn();
+  const apiPatch = vi.fn();
+  const apiDelete = vi.fn();
   beforeEach(() => {
-    vi.mocked(useApi).mockReturnValue({ isLoading: false, error: null, fetchApi });
+    vi.mocked(useApi).mockReturnValue({
+      isLoading: false,
+      error: null,
+      fetchApi,
+      apiPost,
+      apiPatch,
+      apiDelete,
+    });
     fetchApi.mockResolvedValue({ users: [{ id: '1' }], pagination: { page: 1, limit: 10, totalCount: 1, totalPages: 1 } });
   });
 
