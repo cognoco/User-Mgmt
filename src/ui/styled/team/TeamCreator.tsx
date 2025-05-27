@@ -213,8 +213,9 @@ export function TeamCreator({
                       className="mt-8"
                       onClick={() => removeInitialMember(index)}
                       disabled={isSubmitting || initialMembers.length <= 1}
+                      aria-label="Remove member"
                     >
-                      ✕
+                      ✕<span className="sr-only">Remove</span>
                     </Button>
                   </div>
                 ))}

@@ -108,10 +108,12 @@ export function MFAVerificationForm({
                         placeholder={isUsingBackupCode ? 'XXXX-XXXX' : '000000'}
                         autoComplete="one-time-code"
                         autoFocus
+                        aria-invalid={touched.verificationCode && !!errors.verificationCode}
+                        aria-describedby={touched.verificationCode && errors.verificationCode ? 'mfa-code-error' : undefined}
                       />
                     </FormControl>
                     {touched.verificationCode && errors.verificationCode && (
-                      <FormMessage>{errors.verificationCode}</FormMessage>
+                      <FormMessage id="mfa-code-error">{errors.verificationCode}</FormMessage>
                     )}
                   </FormItem>
                 )}
@@ -129,7 +131,13 @@ export function MFAVerificationForm({
                   <label htmlFor="remember-device" className="text-sm cursor-pointer">
                     [i18n:auth.mfa.rememberDevice]
                   </label>
-                  <span className="text-xs text-muted-foreground" title="[i18n:auth.mfa.rememberDeviceHelp]">?</span>
+                  <span
+                    className="text-xs text-muted-foreground"
+                    title="[i18n:auth.mfa.rememberDeviceHelp]"
+                    aria-label="[i18n:auth.mfa.rememberDeviceHelp]"
+                  >
+                    ?
+                  </span>
                 </div>
               )}
 

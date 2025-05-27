@@ -134,10 +134,12 @@ export function RegistrationForm() {
                   onBlur={() => handleBlur('email')}
                   placeholder="your.email@example.com"
                   data-testid="email-input"
+                  aria-invalid={touched.email && errors.email ? 'true' : 'false'}
+                  aria-describedby={touched.email && errors.email ? 'email-error' : undefined}
                   className={touched.email && errors.email ? "border-red-500" : ""}
                 />
                 {touched.email && errors.email && (
-                  <p className="text-destructive text-sm mt-1" data-testid="email-error">{errors.email}</p>
+                  <p id="email-error" className="text-destructive text-sm mt-1" data-testid="email-error">{errors.email}</p>
                 )}
               </div>
               
@@ -152,10 +154,12 @@ export function RegistrationForm() {
                     onBlur={() => handleBlur('firstName')}
                     placeholder="First Name"
                     data-testid="first-name-input"
+                    aria-invalid={touched.firstName && errors.firstName ? 'true' : 'false'}
+                    aria-describedby={touched.firstName && errors.firstName ? 'first-name-error' : undefined}
                     className={touched.firstName && errors.firstName ? "border-red-500" : ""}
                   />
                   {touched.firstName && errors.firstName && (
-                    <p className="text-destructive text-sm mt-1" data-testid="first-name-error">{errors.firstName}</p>
+                    <p id="first-name-error" className="text-destructive text-sm mt-1" data-testid="first-name-error">{errors.firstName}</p>
                   )}
                 </div>
                 <div className="space-y-1.5">
@@ -168,10 +172,12 @@ export function RegistrationForm() {
                     onBlur={() => handleBlur('lastName')}
                     placeholder="Last Name"
                     data-testid="last-name-input"
+                    aria-invalid={touched.lastName && errors.lastName ? 'true' : 'false'}
+                    aria-describedby={touched.lastName && errors.lastName ? 'last-name-error' : undefined}
                     className={touched.lastName && errors.lastName ? "border-red-500" : ""}
                   />
                   {touched.lastName && errors.lastName && (
-                    <p className="text-destructive text-sm mt-1" data-testid="last-name-error">{errors.lastName}</p>
+                    <p id="last-name-error" className="text-destructive text-sm mt-1" data-testid="last-name-error">{errors.lastName}</p>
                   )}
                 </div>
               </div>
@@ -181,25 +187,28 @@ export function RegistrationForm() {
                 <div className="relative">
                   <Input
                     id="password"
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     value={passwordValue}
                     onChange={(e) => setPasswordValue(e.target.value)}
                     onBlur={() => handleBlur('password')}
                     placeholder="••••••••"
                     data-testid="password-input"
-                    className={touched.password && errors.password ? "border-red-500 pr-10" : "pr-10"}
+                    aria-invalid={touched.password && errors.password ? 'true' : 'false'}
+                    aria-describedby={touched.password && errors.password ? 'password-error' : undefined}
+                    className={touched.password && errors.password ? 'border-red-500 pr-10' : 'pr-10'}
                   />
                   <button
                     type="button"
                     className="absolute inset-y-0 right-0 flex items-center pr-3"
                     onClick={() => setShowPassword(!showPassword)}
                     data-testid="password-visibility-toggle"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4 text-gray-400" /> : <Eye className="h-4 w-4 text-gray-400" />}
                   </button>
                 </div>
                 {touched.password && errors.password && (
-                  <p className="text-destructive text-sm mt-1" data-testid="password-error">{errors.password}</p>
+                  <p id="password-error" className="text-destructive text-sm mt-1" data-testid="password-error">{errors.password}</p>
                 )}
                 <PasswordRequirements password={passwordValue} />
               </div>
@@ -209,25 +218,28 @@ export function RegistrationForm() {
                 <div className="relative">
                   <Input
                     id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
+                    type={showConfirmPassword ? 'text' : 'password'}
                     value={confirmPasswordValue}
                     onChange={(e) => setConfirmPasswordValue(e.target.value)}
                     onBlur={() => handleBlur('confirmPassword')}
                     placeholder="••••••••"
                     data-testid="confirm-password-input"
-                    className={touched.confirmPassword && errors.confirmPassword ? "border-red-500 pr-10" : "pr-10"}
+                    aria-invalid={touched.confirmPassword && errors.confirmPassword ? 'true' : 'false'}
+                    aria-describedby={touched.confirmPassword && errors.confirmPassword ? 'confirm-password-error' : undefined}
+                    className={touched.confirmPassword && errors.confirmPassword ? 'border-red-500 pr-10' : 'pr-10'}
                   />
                   <button
                     type="button"
                     className="absolute inset-y-0 right-0 flex items-center pr-3"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     data-testid="confirm-password-visibility-toggle"
+                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                   >
                     {showConfirmPassword ? <EyeOff className="h-4 w-4 text-gray-400" /> : <Eye className="h-4 w-4 text-gray-400" />}
                   </button>
                 </div>
                 {touched.confirmPassword && errors.confirmPassword && (
-                  <p className="text-destructive text-sm mt-1" data-testid="confirm-password-error">{errors.confirmPassword}</p>
+                  <p id="confirm-password-error" className="text-destructive text-sm mt-1" data-testid="confirm-password-error">{errors.confirmPassword}</p>
                 )}
               </div>
               
@@ -311,6 +323,8 @@ export function RegistrationForm() {
                     onChange={(e) => setAcceptTermsValue(e.target.checked)}
                     onBlur={() => handleBlur('acceptTerms')}
                     data-testid="accept-terms-checkbox"
+                    aria-invalid={touched.acceptTerms && errors.acceptTerms ? 'true' : 'false'}
+                    aria-describedby={touched.acceptTerms && errors.acceptTerms ? 'terms-error' : undefined}
                     className="w-4 h-4 text-primary bg-background border-primary rounded focus:ring-primary cursor-pointer"
                   />
                 </div>
@@ -323,7 +337,7 @@ export function RegistrationForm() {
                     I accept the <a href="/terms" target="_blank" rel="noopener noreferrer" data-testid="terms-link">Terms and Conditions</a> and <a href="/privacy" target="_blank" rel="noopener noreferrer" data-testid="privacy-link">Privacy Policy</a>
                   </label>
                   {touched.acceptTerms && errors.acceptTerms && (
-                    <p className="text-destructive text-sm mt-1" data-testid="terms-error">{errors.acceptTerms}</p>
+                    <p id="terms-error" className="text-destructive text-sm mt-1" data-testid="terms-error">{errors.acceptTerms}</p>
                   )}
                 </div>
               </div>

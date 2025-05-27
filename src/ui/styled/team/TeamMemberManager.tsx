@@ -84,7 +84,7 @@ export function TeamMemberManager({
             
             {isLoading ? (
               <div className="flex justify-center items-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                <div className="motion-safe:animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
               </div>
             ) : (
               <div className="space-y-6">
