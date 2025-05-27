@@ -1,14 +1,21 @@
 import { OrganizationSecurityPolicy } from '@/types/organizations';
+import { MemoryCache } from '@/lib/cache';
 
 export interface PasswordValidationResult {
   isValid: boolean;
   errors: string[];
 }
 
+const defaultCache = new MemoryCache<string, PasswordValidationResult>({ ttl: 60_000 });
+const policyCache = new MemoryCache<string, PasswordValidationResult>({ ttl: 60_000 });
+
 /**
  * Validates a password against the default application password requirements
  */
 export function validatePassword(password: string): PasswordValidationResult {
+  const cached = defaultCache.get(password);
+  if (cached) return cached;
+
   const errors: string[] = [];
   
   // Default application password requirements
@@ -32,19 +39,25 @@ export function validatePassword(password: string): PasswordValidationResult {
     errors.push('Password must contain at least one special character');
   }
   
-  return {
+  const result = {
     isValid: errors.length === 0,
     errors
   };
+  defaultCache.set(password, result);
+  return result;
 }
 
 /**
  * Validates a password against an organization's security policy
  */
 export function validatePasswordWithPolicy(
-  password: string, 
+  password: string,
   policy: OrganizationSecurityPolicy
 ): PasswordValidationResult {
+  const key = `${JSON.stringify(policy)}:${password}`;
+  const cached = policyCache.get(key);
+  if (cached) return cached;
+
   const errors: string[] = [];
   
   // Check length requirement
@@ -72,10 +85,12 @@ export function validatePasswordWithPolicy(
     errors.push('Password must contain at least one special character');
   }
   
-  return {
+  const result = {
     isValid: errors.length === 0,
     errors
   };
+  policyCache.set(key, result);
+  return result;
 }
 
 /**

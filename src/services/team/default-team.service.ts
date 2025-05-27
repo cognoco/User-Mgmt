@@ -26,6 +26,7 @@ import { TeamEventType } from '@/core/team/events';
 import type { TeamDataProvider } from '@/core/team/ITeamDataProvider';
 import { translateError } from '@/lib/utils/error';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
+import { MemoryCache } from '@/lib/cache';
 import { prisma } from '@/lib/database/prisma';
 
 /**
@@ -35,6 +36,8 @@ export class DefaultTeamService
   extends TypedEventEmitter<TeamEventType>
   implements TeamService
 {
+  private static teamCache = new MemoryCache<string, Team | null>({ ttl: 30_000 });
+  private static memberCache = new MemoryCache<string, TeamMember[]>({ ttl: 30_000 });
   
   /**
    * Constructor for DefaultTeamService
@@ -66,6 +69,7 @@ export class DefaultTeamService
       const result = await this.teamDataProvider.createTeam(ownerId, teamData);
 
       if (!result.success || !result.team) {
+        DefaultTeamService.teamCache.delete(teamId);
         return result;
       }
 
@@ -100,9 +104,12 @@ export class DefaultTeamService
    */
   async getTeam(teamId: string): Promise<Team | null> {
     try {
-      return await this.teamDataProvider.getTeam(teamId);
+      return await DefaultTeamService.teamCache.getOrCreate(teamId, () =>
+        this.teamDataProvider.getTeam(teamId)
+      );
     } catch (error) {
       console.error('Error fetching team:', error);
+      DefaultTeamService.teamCache.delete(teamId);
       return null;
     }
   }
@@ -133,6 +140,8 @@ export class DefaultTeamService
         updatedBy: team.ownerId, // Assuming the owner is making the update
         updatedFields: Object.keys(teamData)
       });
+
+      DefaultTeamService.teamCache.set(teamId, team);
       
       // If visibility was updated, emit a specific event for that
       if (teamData.visibility) {
@@ -192,7 +201,10 @@ export class DefaultTeamService
         teamId,
         deletedBy: team.ownerId // Assuming the owner is deleting the team
       });
-      
+
+      DefaultTeamService.teamCache.delete(teamId);
+      DefaultTeamService.memberCache.delete(teamId);
+
       return { success: true };
     } catch (error: any) {
       const errorMessage = translateError(error, { defaultMessage: 'Failed to delete team' });
@@ -226,9 +238,12 @@ export class DefaultTeamService
    */
   async getTeamMembers(teamId: string): Promise<TeamMember[]> {
     try {
-      return await this.teamDataProvider.getTeamMembers(teamId);
+      return await DefaultTeamService.memberCache.getOrCreate(teamId, () =>
+        this.teamDataProvider.getTeamMembers(teamId)
+      );
     } catch (error) {
       console.error('Error fetching team members:', error);
+      DefaultTeamService.memberCache.delete(teamId);
       return [];
     }
   }
@@ -279,6 +294,8 @@ export class DefaultTeamService
         where: { id: teamId },
         data: { usedSeats: { increment: 1 } },
       });
+
+      DefaultTeamService.memberCache.delete(teamId);
 
       return {
         success: true,
@@ -339,7 +356,9 @@ export class DefaultTeamService
           changedBy: team?.ownerId || userId // If we can't get the team, assume the user changed their own role
         });
       }
-      
+
+      DefaultTeamService.memberCache.delete(teamId);
+
       return {
         success: true,
         member
@@ -379,7 +398,9 @@ export class DefaultTeamService
         userId,
         removedBy: team?.ownerId || userId // If we can't get the team, assume the user removed themselves
       });
-      
+
+      DefaultTeamService.memberCache.delete(teamId);
+
       return { success: true };
     } catch (error: any) {
       const errorMessage = translateError(error, { defaultMessage: 'Failed to remove team member' });
@@ -428,7 +449,10 @@ export class DefaultTeamService
         newOwnerId,
         initiatedBy: previousOwnerId // Assuming the current owner is initiating the transfer
       });
-      
+
+      DefaultTeamService.teamCache.set(teamId, updatedTeam);
+      DefaultTeamService.memberCache.delete(teamId);
+
       return {
         success: true,
         team: updatedTeam

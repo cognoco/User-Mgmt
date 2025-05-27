@@ -2,6 +2,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { ApiError } from '@/lib/api/common';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+/**
+ * Configuration options for {@link createApiHandler}.
+ */
 
 export interface ApiHandlerConfig<T = any> {
   methods: HttpMethod[];
@@ -27,8 +30,9 @@ export interface ApiResponse<T = any> {
 }
 
 /**
- * Creates a type-safe API handler with built-in error handling and request validation
- * @param config Configuration for the API handler
+ * Creates a type-safe API handler with built-in error handling and request validation.
+ *
+ * @param config - Handler configuration
  * @returns Next.js API route handler
  */
 export function createApiHandler<T = any>(config: ApiHandlerConfig<T>) {

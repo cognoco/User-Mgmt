@@ -1,6 +1,9 @@
 import * as dotenv from 'dotenv';
 import path from 'path';
 
+// Node ESM doesn't define __dirname - derive it from import.meta.url
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
 // Explicitly load variables from the root .env file so e2e tests
 // always share the same configuration
 dotenv.config({ path: path.resolve(__dirname, '.env') });

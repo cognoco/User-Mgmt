@@ -21,6 +21,7 @@ import {
 } from '@/core/user/models';
 import { UserEventType } from '@/core/user/events';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
+import { MemoryCache, getFromBrowser, setInBrowser, removeFromBrowser } from '@/lib/cache';
 
 /**
  * Default implementation of the UserService interface
@@ -29,6 +30,8 @@ export class DefaultUserService
   extends TypedEventEmitter<UserEventType>
   implements UserService
 {
+  private static profileCache = new MemoryCache<string, UserProfile | null>({ ttl: 60_000 });
+  private static preferencesCache = new MemoryCache<string, UserPreferences>({ ttl: 60_000 });
   
   /**
    * Constructor for DefaultUserService
@@ -56,9 +59,12 @@ export class DefaultUserService
    */
   async getUserProfile(userId: string): Promise<UserProfile | null> {
     try {
-      return await this.userDataProvider.getUserProfile(userId);
+      return await DefaultUserService.profileCache.getOrCreate(userId, () =>
+        this.userDataProvider.getUserProfile(userId)
+      );
     } catch (error) {
       console.error('Error fetching user profile:', error);
+      DefaultUserService.profileCache.delete(userId);
       return null;
     }
   }
@@ -80,6 +86,9 @@ export class DefaultUserService
         profile: result.profile,
         updatedFields: Object.keys(profileData)
       });
+      DefaultUserService.profileCache.set(userId, result.profile);
+    } else {
+      DefaultUserService.profileCache.delete(userId);
     }
     return result;
   }
@@ -91,7 +100,17 @@ export class DefaultUserService
    * @returns User preferences or default preferences if not set
    */
   async getUserPreferences(userId: string): Promise<UserPreferences> {
-    return this.userDataProvider.getUserPreferences(userId);
+    const localKey = `um_pref_${userId}`;
+    const fromLocal = getFromBrowser<UserPreferences>(localKey);
+    if (fromLocal) {
+      DefaultUserService.preferencesCache.set(userId, fromLocal);
+      return fromLocal;
+    }
+    const prefs = await DefaultUserService.preferencesCache.getOrCreate(userId, () =>
+      this.userDataProvider.getUserPreferences(userId)
+    );
+    setInBrowser(localKey, prefs);
+    return prefs;
   }
 
   /**
@@ -114,6 +133,12 @@ export class DefaultUserService
         preferences: result.preferences,
         updatedFields: Object.keys(preferences)
       });
+      DefaultUserService.preferencesCache.set(userId, result.preferences);
+      setInBrowser(`um_pref_${userId}`, result.preferences);
+    }
+    if (!result.success) {
+      DefaultUserService.preferencesCache.delete(userId);
+      removeFromBrowser(`um_pref_${userId}`);
     }
     return result;
   }
