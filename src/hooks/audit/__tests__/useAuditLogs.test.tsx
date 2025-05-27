@@ -45,8 +45,8 @@ describe('useAuditLogs', () => {
     const { result } = renderHook(() => useAuditLogs(), { wrapper: createWrapper() });
     await waitFor(() => !result.current.isLoading);
     await act(async () => {
-      await result.current.exportLogs();
+      await result.current.exportLogs('pdf');
     });
-    expect(service.exportLogs).toHaveBeenCalled();
+    expect(service.exportLogs).toHaveBeenCalledWith(expect.objectContaining({ format: 'pdf' }));
   });
 });

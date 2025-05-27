@@ -44,4 +44,5 @@ export interface AuditLogQuery {
   search?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  format?: 'csv' | 'json' | 'xlsx' | 'pdf';
 }

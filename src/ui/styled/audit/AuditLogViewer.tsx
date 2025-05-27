@@ -143,6 +143,20 @@ export function AuditLogViewer({ isAdmin = true }: { isAdmin?: boolean }) {
                   >
                     Export as Excel
                   </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={isExporting}
+                    onClick={() => !isExporting && handleExport('pdf')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        !isExporting && handleExport('pdf');
+                      }
+                    }}
+                    role="menuitem"
+                    tabIndex={0}
+                  >
+                    Export as PDF
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </CardHeader>

@@ -40,9 +40,11 @@ const server = setupServer(
       pagination: { page: 1, limit: 20, total: 2, totalPages: 1 },
     })
   ),
-  http.get('/api/audit/user-actions/export', () =>
-    new HttpResponse('csv,data', { status: 200 })
-  )
+  http.get('/api/audit/user-actions/export', ({ request }) => {
+    const url = new URL(request.url);
+    const format = url.searchParams.get('format') || 'csv';
+    return new HttpResponse(`${format},data`, { status: 200, headers: { 'Content-Type': format === 'pdf' ? 'application/pdf' : 'text/plain' } });
+  })
 );
 
 beforeAll(() => server.listen());
@@ -93,6 +95,20 @@ describe('AuditLogViewer (admin)', () => {
       fireEvent.click(csvOption);
     });
     // No error should be thrown, and export should be triggered (mocked)
+    await waitFor(() => expect(screen.getByText(/Export Successful/i)).toBeInTheDocument());
+  });
+
+  it('handles export as PDF', async () => {
+    renderWithWrapper(<AuditLogViewer isAdmin={true} />);
+    await waitFor(() => screen.getByText('Audit Logs'));
+    const exportButton = screen.getByRole('button', { name: /Export options/i });
+    await act(async () => {
+      fireEvent.click(exportButton);
+    });
+    const pdfOption = screen.getByRole('menuitem', { name: /Export as PDF/i });
+    await act(async () => {
+      fireEvent.click(pdfOption);
+    });
     await waitFor(() => expect(screen.getByText(/Export Successful/i)).toBeInTheDocument());
   });
 
