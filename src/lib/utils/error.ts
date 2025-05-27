@@ -16,8 +16,11 @@ const ERROR_TRANSLATIONS: Record<string, string> = {
 };
 
 /**
- * Translate an error object into a user-friendly message.
- * Falls back to the provided default message when no translation is found.
+ * Translate an unknown error into a user friendly message.
+ *
+ * @param error - Error object from API or network
+ * @param options - Optional configuration
+ * @returns Localized message describing the failure
  */
 export function translateError(error: any, options: TranslateErrorOptions = {}): string {
   const code = error?.code || error?.response?.data?.code;
