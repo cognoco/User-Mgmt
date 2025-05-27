@@ -28,9 +28,10 @@ describe('POST /api/auth/refresh-token', () => {
     expect(mockAuthService.refreshToken).toHaveBeenCalled();
   });
 
-  it('returns 401 when refresh fails', async () => {
+  it('redirects to login when refresh fails', async () => {
     mockAuthService.refreshToken.mockResolvedValue(false);
     const res = await POST(createRequest() as any);
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(302);
+    expect(res.headers.get('location')).toBe('http://localhost/login');
   });
 });

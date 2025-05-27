@@ -110,7 +110,10 @@ export interface AuthDataProvider {
    *
    * @returns True if token was refreshed successfully, false otherwise
    */
-  refreshToken(): Promise<boolean>;
+  refreshToken(): Promise<
+    | { accessToken: string; refreshToken: string; expiresAt: number }
+    | null
+  >;
 
   /**
    * Subscribe to authentication state changes.
