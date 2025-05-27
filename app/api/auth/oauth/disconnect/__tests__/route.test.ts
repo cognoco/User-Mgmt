@@ -3,7 +3,6 @@ import { OAuthProvider } from '@/types/oauth';
 import { describe, it, expect, vi, beforeEach, MockedFunction } from 'vitest';
 // import { cookies } from 'next/headers'; // Mocked
 // import { createServerClient } from '@supabase/ssr'; // Mocked
-// import { prisma } from '@/lib/database/prisma'; // Mocked
 import { logUserAction } from '@/lib/audit/auditLogger'; // Mocked
 
 // --- Mocks ---
@@ -29,6 +28,7 @@ vi.mock('next/headers', () => ({
 // 2. Mock Supabase Client
 const mockSupabaseAuth = {
   getUser: vi.fn(),
+  unlinkIdentity: vi.fn(),
 };
 const mockSupabaseClient = {
   auth: mockSupabaseAuth,
@@ -37,15 +37,12 @@ vi.mock('@supabase/ssr', () => ({
   createServerClient: vi.fn(() => mockSupabaseClient),
 }));
 
-// 3. Mock Prisma Client
-const mockPrismaAccount = {
-  findMany: vi.fn(),
-  deleteMany: vi.fn(),
+// 3. Mock Permission Service
+const mockPermissionService = {
+  hasPermission: vi.fn(),
 };
-vi.mock('@/lib/database/prisma', () => ({
-  prisma: {
-    account: mockPrismaAccount,
-  },
+vi.mock('@/services/permission/factory', () => ({
+  getApiPermissionService: () => mockPermissionService,
 }));
 
 // 4. Mock Audit Logger
@@ -62,16 +59,8 @@ const providerToDisconnect = OAuthProvider.GITHUB;
 const mockLoggedInUser = {
   id: loggedInUserId,
   email: 'original@example.com',
-  user_metadata: {
-    // Start with password assumed false for testing last login method
-    hasPassword: false,
-  },
+  identities: [],
 };
-
-const mockUserAccounts = [
-  { user_id: loggedInUserId, provider: 'google' },
-  { user_id: loggedInUserId, provider: providerToDisconnect.toLowerCase() },
-];
 
 // --- Test Suite ---
 
@@ -81,6 +70,7 @@ describe('POST /api/auth/oauth/disconnect', () => {
     mockCookies.clear();
     // Assume user is logged in for most tests
     mockSupabaseAuth.getUser.mockResolvedValue({ data: { user: mockLoggedInUser }, error: null });
+    mockPermissionService.hasPermission.mockResolvedValue(true);
   });
 
   // Helper to create request
@@ -104,6 +94,15 @@ describe('POST /api/auth/oauth/disconnect', () => {
     expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({ status: 'FAILURE' }));
   });
 
+it('should return 403 if user lacks permission', async () => {
+    mockPermissionService.hasPermission.mockResolvedValue(false);
+    const request = createRequest({ provider: providerToDisconnect });
+    const response = await POST(request);
+    const body = await response.json();
+    expect(response.status).toBe(403);
+    expect(body.error).toBe('Insufficient permissions');
+    expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({ status: 'FAILURE' }));
+  });
   it('should return 400 if provider is missing from request', async () => {
     const request = createRequest({}); // No provider
     const response = await POST(request);
@@ -115,26 +114,31 @@ describe('POST /api/auth/oauth/disconnect', () => {
   });
 
   it('should return 400 if trying to unlink the last provider and no password exists', async () => {
-    // Mock user having only one account (the one being disconnected)
-    mockPrismaAccount.findMany.mockResolvedValue([
-      { user_id: loggedInUserId, provider: providerToDisconnect.toLowerCase() },
-    ]);
-    // Ensure user has no password in mock
-    mockSupabaseAuth.getUser.mockResolvedValue({ data: { user: { ...mockLoggedInUser, user_metadata: { hasPassword: false } } }, error: null });
+    mockSupabaseAuth.getUser.mockResolvedValue({
+      data: {
+        user: {
+          ...mockLoggedInUser,
+          identities: [{ provider: providerToDisconnect.toLowerCase(), identity_id: 'id1' }],
+        },
+      },
+      error: null,
+    });
 
     const request = createRequest({ provider: providerToDisconnect });
     const response = await POST(request);
     const body = await response.json();
 
     expect(response.status).toBe(400);
-    expect(body.error).toContain('must have at least one login method');
-    expect(mockPrismaAccount.deleteMany).not.toHaveBeenCalled();
+    expect(body.error).toContain('at least one login method');
+    expect(mockSupabaseAuth.unlinkIdentity).not.toHaveBeenCalled();
     expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({ status: 'FAILURE' }));
   });
 
   it('should return 400 if the specified provider is not linked', async () => {
-    mockPrismaAccount.findMany.mockResolvedValue(mockUserAccounts); // User has accounts
-    mockPrismaAccount.deleteMany.mockResolvedValue({ count: 0 }); // But delete affects none
+    mockSupabaseAuth.getUser.mockResolvedValue({
+      data: { user: { ...mockLoggedInUser, identities: [{ provider: 'google', identity_id: 'idg' }] } },
+      error: null,
+    });
 
     const request = createRequest({ provider: providerToDisconnect });
     const response = await POST(request);
@@ -142,45 +146,61 @@ describe('POST /api/auth/oauth/disconnect', () => {
 
     expect(response.status).toBe(400);
     expect(body.error).toContain('No linked account found');
-    expect(mockPrismaAccount.deleteMany).toHaveBeenCalledWith({
-      where: { user_id: loggedInUserId, provider: providerToDisconnect.toLowerCase() },
-    });
-    expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockSupabaseAuth.unlinkIdentity).not.toHaveBeenCalled();
+    expect(mockLogUserAction).toHaveBeenCalledWith(
+      expect.objectContaining({
         userId: loggedInUserId,
         action: 'SSO_UNLINK',
         status: 'FAILURE',
-        details: expect.objectContaining({ error: 'No linked account found' })
-    }));
+      }),
+    );
   });
 
   it('should successfully disconnect a provider when other methods exist (another provider)', async () => {
-    mockPrismaAccount.findMany.mockResolvedValue(mockUserAccounts); // Has Google and GitHub
-    mockPrismaAccount.deleteMany.mockResolvedValue({ count: 1 }); // Delete successful
+    mockSupabaseAuth.getUser.mockResolvedValue({
+      data: {
+        user: {
+          ...mockLoggedInUser,
+          identities: [
+            { provider: 'google', identity_id: 'idg' },
+            { provider: providerToDisconnect.toLowerCase(), identity_id: 'idh' },
+          ],
+        },
+      },
+      error: null,
+    });
+    mockSupabaseAuth.unlinkIdentity.mockResolvedValue({ data: {}, error: null });
 
-    const request = createRequest({ provider: providerToDisconnect }); // Disconnect GitHub
+    const request = createRequest({ provider: providerToDisconnect });
     const response = await POST(request);
     const body = await response.json();
 
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
-    expect(mockPrismaAccount.deleteMany).toHaveBeenCalledWith({
-      where: { user_id: loggedInUserId, provider: providerToDisconnect.toLowerCase() },
-    });
-    expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockSupabaseAuth.unlinkIdentity).toHaveBeenCalledWith({ provider: providerToDisconnect.toLowerCase(), identity_id: 'idh' });
+    expect(mockLogUserAction).toHaveBeenCalledWith(
+      expect.objectContaining({
         userId: loggedInUserId,
         action: 'SSO_UNLINK',
         status: 'SUCCESS',
-        details: { provider: providerToDisconnect },
-    }));
+      }),
+    );
   });
 
   it('should successfully disconnect the last provider if a password exists', async () => {
-     // Mock user having only one account but also a password
-     mockPrismaAccount.findMany.mockResolvedValue([
-        { user_id: loggedInUserId, provider: providerToDisconnect.toLowerCase() },
-      ]);
-     mockSupabaseAuth.getUser.mockResolvedValue({ data: { user: { ...mockLoggedInUser, user_metadata: { hasPassword: true } } }, error: null });
-     mockPrismaAccount.deleteMany.mockResolvedValue({ count: 1 }); // Delete successful
+    mockSupabaseAuth.getUser.mockResolvedValue({
+      data: {
+        user: {
+          ...mockLoggedInUser,
+          identities: [
+            { provider: providerToDisconnect.toLowerCase(), identity_id: 'idh' },
+            { provider: 'email', identity_id: 'ide' },
+          ],
+        },
+      },
+      error: null,
+    });
+    mockSupabaseAuth.unlinkIdentity.mockResolvedValue({ data: {}, error: null });
 
     const request = createRequest({ provider: providerToDisconnect });
     const response = await POST(request);
@@ -188,27 +208,34 @@ describe('POST /api/auth/oauth/disconnect', () => {
 
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
-    expect(mockPrismaAccount.deleteMany).toHaveBeenCalledWith({
-      where: { user_id: loggedInUserId, provider: providerToDisconnect.toLowerCase() },
-    });
+    expect(mockSupabaseAuth.unlinkIdentity).toHaveBeenCalledWith({ provider: providerToDisconnect.toLowerCase(), identity_id: 'idh' });
     expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({ action: 'SSO_UNLINK', status: 'SUCCESS' }));
   });
 
-  it('should handle errors during prisma deleteMany', async () => {
-    mockPrismaAccount.findMany.mockResolvedValue(mockUserAccounts); // Assume other accounts exist
-    mockPrismaAccount.deleteMany.mockRejectedValue(new Error('DB delete failed'));
+  it('should handle errors during unlink', async () => {
+    mockSupabaseAuth.getUser.mockResolvedValue({
+      data: {
+        user: {
+          ...mockLoggedInUser,
+          identities: [
+            { provider: 'google', identity_id: 'idg' },
+            { provider: providerToDisconnect.toLowerCase(), identity_id: 'idh' },
+          ],
+        },
+      },
+      error: null,
+    });
+    mockSupabaseAuth.unlinkIdentity.mockResolvedValue({ error: new Error('unlink failed'), data: null });
 
     const request = createRequest({ provider: providerToDisconnect });
     const response = await POST(request);
     const body = await response.json();
 
-    expect(response.status).toBe(500); // Or 400 depending on desired error handling
-    expect(body.error).toBe('DB delete failed');
-    expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({
-        action: 'SSO_UNLINK',
-        status: 'FAILURE',
-        details: { error: 'DB delete failed' },
-    }));
+    expect(response.status).toBe(500);
+    expect(body.error).toBe('unlink failed');
+    expect(mockLogUserAction).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'SSO_UNLINK', status: 'FAILURE' }),
+    );
   });
 
 }); 

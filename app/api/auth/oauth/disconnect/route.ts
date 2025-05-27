@@ -1,20 +1,34 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
 import { OAuthProvider } from '@/types/oauth';
 import { logUserAction } from '@/lib/audit/auditLogger';
+import { PermissionValues } from '@/core/permission/models';
+import { getApiPermissionService } from '@/services/permission/factory';
 
 // Request schema
 const disconnectRequestSchema = z.object({
   provider: z.nativeEnum(OAuthProvider),
 });
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     // Parse and validate request body
     const body = await request.json();
-    const { provider } = disconnectRequestSchema.parse(body);
+    const parsed = disconnectRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      await logUserAction({
+        action: 'SSO_UNLINK',
+        status: 'FAILURE',
+        details: { error: parsed.error.message },
+      });
+      return NextResponse.json(
+        { error: parsed.error.message },
+        { status: 400 },
+      );
+    }
+    const { provider } = parsed.data;
 
     // Initialize Supabase client
     const cookieStore = cookies();
@@ -37,66 +51,114 @@ export async function POST(request: Request) {
     );
 
     // Verify user authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
+      await logUserAction({
+        action: 'SSO_UNLINK',
+        status: 'FAILURE',
+        details: { provider, error: 'Authentication required' },
+      });
       return NextResponse.json(
         { error: 'Authentication required' },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    // --- Provider unlink logic using Prisma Account model ---
-    const { prisma } = await import('@/lib/database/prisma');
-    // Find all accounts for this user
-    const userAccounts = await prisma.account.findMany({
-      where: { user_id: user.id },
-    });
-    // Block unlink if this is the last login method (no other accounts and no password)
-    const hasPassword = !!user.user_metadata?.hasPassword; // Adjust if you have a real password check
-    if (userAccounts.length <= 1 && !hasPassword) {
-      return NextResponse.json(
-        { error: 'You must have at least one login method (password or another provider) before disconnecting this provider.' },
-        { status: 400 }
-      );
-    }
-    // Remove the account for this provider
-    const deleted = await prisma.account.deleteMany({
-      where: {
-        user_id: user.id,
-        provider: provider.toLowerCase(),
-      },
-    });
-    if (deleted.count === 0) {
-      // Audit log: SSO unlink failure
-      try {
-        await logUserAction({
-          userId: user.id,
-          action: 'SSO_UNLINK',
-          status: 'FAILURE',
-          details: { provider, error: 'No linked account found for this provider.' },
-        });
-      } catch (logError) {
-        console.error('Failed to log SSO_UNLINK failure:', logError);
-      }
-      return NextResponse.json(
-        { error: 'No linked account found for this provider.' },
-        { status: 400 }
-      );
-    }
-    // Audit log: SSO unlink success
-    try {
+    // Permission check
+    const permissionService = getApiPermissionService();
+    const hasPermission = await permissionService.hasPermission(
+      user.id,
+      PermissionValues.MANAGE_SETTINGS,
+    );
+    if (!hasPermission) {
       await logUserAction({
         userId: user.id,
         action: 'SSO_UNLINK',
-        status: 'SUCCESS',
-        details: { provider },
+        status: 'FAILURE',
+        details: { provider, error: 'Insufficient permissions' },
       });
-    } catch (logError) {
-      console.error('Failed to log SSO_UNLINK success:', logError);
+      return NextResponse.json(
+        { error: 'Insufficient permissions' },
+        { status: 403 },
+      );
     }
+    // Fetch linked identities
+    const {
+      data: identityData,
+      error: identityError,
+    } = await supabase.auth.getUser();
+    if (identityError || !identityData?.user) {
+      return NextResponse.json(
+        { error: identityError?.message || 'Failed to fetch identities' },
+        { status: 400 },
+      );
+    }
+
+    const identities = identityData.user.identities ?? [];
+    const identity = identities.find(
+      (i) => i.provider === provider.toLowerCase(),
+    );
+    if (!identity) {
+      await logUserAction({
+        userId: user.id,
+        action: 'SSO_UNLINK',
+        status: 'FAILURE',
+        details: { provider, error: 'No linked account found' },
+      });
+      return NextResponse.json(
+        { error: 'No linked account found for this provider.' },
+        { status: 400 },
+      );
+    }
+
+    const remaining = identities.filter(
+      (i) => i.identity_id !== identity.identity_id,
+    );
+    if (remaining.length === 0) {
+      await logUserAction({
+        userId: user.id,
+        action: 'SSO_UNLINK',
+        status: 'FAILURE',
+        details: {
+          provider,
+          error:
+            'You must have at least one login method (password or another provider) before disconnecting this provider.',
+        },
+      });
+      return NextResponse.json(
+        {
+          error:
+            'You must have at least one login method (password or another provider) before disconnecting this provider.',
+        },
+        { status: 400 },
+      );
+    }
+
+    const { error: unlinkError } = await supabase.auth.unlinkIdentity(identity);
+    if (unlinkError) {
+      await logUserAction({
+        userId: user.id,
+        action: 'SSO_UNLINK',
+        status: 'FAILURE',
+        details: { provider, error: unlinkError.message },
+      });
+      return NextResponse.json(
+        { error: unlinkError.message },
+        { status: 500 },
+      );
+    }
+
+    await logUserAction({
+      userId: user.id,
+      action: 'SSO_UNLINK',
+      status: 'SUCCESS',
+      details: { provider },
+    });
+
     return NextResponse.json({ success: true });
-    // --- End provider unlink logic ---
   } catch (error) {
     console.error('Error in OAuth disconnect:', error);
     // Audit log: SSO unlink failure (unexpected error)
