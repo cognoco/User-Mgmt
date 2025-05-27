@@ -11,6 +11,29 @@ export interface AuthenticatedUser {
 }
 
 /**
+ * Validate a raw authentication token using Supabase.
+ *
+ * @param token Authentication bearer token
+ * @returns The authenticated user or null when invalid
+ */
+export async function validateAuthToken(token: string): Promise<AuthenticatedUser | null> {
+  if (!token) return null;
+  try {
+    const supabase = getServiceSupabase();
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data.user) return null;
+    return {
+      id: data.user.id,
+      email: data.user.email ?? null,
+      role: data.user.user_metadata?.role || 'user',
+    };
+  } catch (err) {
+    console.error('[auth] token validation failed:', err);
+    return null;
+  }
+}
+
+/**
  * Extract the bearer token from a request.
  *
  * The function checks the `Authorization` header first and falls back to the
@@ -49,21 +72,12 @@ export async function getUserFromRequest(
       return null;
     }
 
-    const supabase = getServiceSupabase();
-    const { data, error } = await supabase.auth.getUser(token);
-
-    if (error || !data.user) {
-      console.error('[getUserFromRequest] invalid token', error);
-      return null;
+    const user = await validateAuthToken(token);
+    if (user) {
+      console.log('[getUserFromRequest] authenticated', user.id);
+    } else {
+      console.warn('[getUserFromRequest] invalid token');
     }
-
-    const user: AuthenticatedUser = {
-      id: data.user.id,
-      email: data.user.email ?? null,
-      role: data.user.user_metadata?.role || 'user',
-    };
-
-    console.log('[getUserFromRequest] authenticated', user.id);
     return user;
   } catch (error) {
     console.error('Error getting user from request:', error);

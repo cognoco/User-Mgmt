@@ -8,7 +8,7 @@ import {
 } from '@/lib/api/common';
 import { withRateLimit } from '@/middleware/rate-limit';
 import { withErrorHandling } from '@/middleware/error-handling';
-import { withRouteAuth } from '@/middleware/auth';
+import { withAuthRequest } from '@/middleware/auth';
 import { withSecurity } from '@/middleware/with-security';
 
 async function handleGet(_req: NextRequest, userId: string) {
@@ -28,11 +28,11 @@ async function handlePost(req: NextRequest, userId: string) {
 
 // Combined approach with both rate limiting and proper authentication
 export const GET = (req: NextRequest) =>
-  withRateLimit(req, r => withSecurity(q => 
-    withRouteAuth((s, uid) => handleGet(s, uid), q)
+  withRateLimit(req, r => withSecurity(q =>
+    withAuthRequest(q, (s, ctx) => handleGet(s, ctx.userId))
   )(r));
 
 export const POST = (req: NextRequest) =>
-  withRateLimit(req, r => withSecurity(q => 
-    withRouteAuth((s, uid) => handlePost(s, uid), q)
+  withRateLimit(req, r => withSecurity(q =>
+    withAuthRequest(q, (s, ctx) => handlePost(s, ctx.userId))
   )(r));

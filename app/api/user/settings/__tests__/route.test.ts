@@ -2,12 +2,12 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, PATCH } from '../route';
 import { getApiUserService } from '@/services/user/factory';
-import { withRouteAuth } from '@/middleware/auth';
+import { withAuthRequest } from '@/middleware/auth';
 import createMockUserService from '@/tests/mocks/user.service.mock';
 
 vi.mock('@/services/user/factory', () => ({ getApiUserService: vi.fn() }));
 vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any, req: any) => handler(req, 'user-1')),
+  withAuthRequest: vi.fn((req: any, handler: any) => handler(req, { userId: 'user-1', role: 'user' })),
 }));
 
 const service = createMockUserService();
