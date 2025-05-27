@@ -311,6 +311,15 @@ export class DefaultAuthService
     }
   }
 
+  async sendMagicLink(email: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      return await this.provider.sendMagicLink(email);
+    } catch (error) {
+      const message = translateError(error, { defaultMessage: 'Failed to send magic link' });
+      return { success: false, error: message };
+    }
+  }
+
   async verifyEmail(token: string): Promise<void> {
     try {
       await this.provider.verifyEmail(token);
@@ -318,6 +327,20 @@ export class DefaultAuthService
     } catch (error) {
       const message = translateError(error, { defaultMessage: 'Email verification failed' });
       throw new Error(message);
+    }
+  }
+
+  async verifyMagicLink(token: string): Promise<AuthResult> {
+    try {
+      const result = await this.provider.verifyMagicLink(token);
+      if (result.success) {
+        this.user = result.user ?? null;
+        this.persistToken(result.token ?? null, result.expiresAt);
+      }
+      return result;
+    } catch (error) {
+      const message = translateError(error, { defaultMessage: 'Magic link verification failed' });
+      return { success: false, error: message };
     }
   }
 

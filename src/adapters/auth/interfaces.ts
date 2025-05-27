@@ -80,15 +80,25 @@ export interface AuthDataProvider {
    *
    * @param email Email address to verify
    * @returns Authentication result with success status or error
-   */
+  */
   sendVerificationEmail(email: string): Promise<AuthResult>;
+
+  /**
+   * Send a passwordless login link to the specified email address.
+   */
+  sendMagicLink(email: string): Promise<{ success: boolean; error?: string }>;
 
   /**
    * Verify an email address using a verification token.
    *
    * @param token - Verification token from the email link
-   */
+  */
   verifyEmail(token: string): Promise<void>;
+
+  /**
+   * Verify a magic link token and authenticate the user.
+   */
+  verifyMagicLink(token: string): Promise<AuthResult>;
 
   /**
    * Permanently delete the current user's account.
