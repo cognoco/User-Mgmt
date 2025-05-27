@@ -20,6 +20,7 @@ export * from './subscription';
 export * from './organization';
 export * from './csrf';
 export * from './webhooks';
+export * from './database';
 
 
 // Import and register the Supabase adapter factory by default
