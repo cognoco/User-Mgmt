@@ -4,6 +4,7 @@ import { createSuccessResponse, createCreatedResponse } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
 import { withValidation } from '@/middleware/validation';
 import { createProtectedHandler } from '@/middleware/permissions';
+import { withSecurity } from '@/middleware/with-security';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { mapPermissionServiceError } from '@/lib/api/permission/error-handler';
 import { PermissionValues } from '@/core/permission/models';
@@ -39,9 +40,12 @@ export const GET = createProtectedHandler(
 
 export const POST = createProtectedHandler(
   (req) =>
-    withErrorHandling(async (r) => {
+    withSecurity(async (r) => {
       const body = await r.json();
-      return withValidation(createSchema, (r2, data) => handlePost(r2, data), r, body);
-    }, req),
+      return withErrorHandling(
+        (r3) => withValidation(createSchema, (r2, data) => handlePost(r2, data), r3, body),
+        r
+      );
+    })(req),
   PermissionValues.MANAGE_ROLES
 );

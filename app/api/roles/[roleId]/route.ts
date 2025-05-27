@@ -4,6 +4,7 @@ import { createSuccessResponse, createNoContentResponse } from '@/lib/api/common
 import { withErrorHandling } from '@/middleware/error-handling';
 import { withValidation } from '@/middleware/validation';
 import { createProtectedHandler } from '@/middleware/permissions';
+import { withSecurity } from '@/middleware/with-security';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { mapPermissionServiceError, createRoleNotFoundError } from '@/lib/api/permission/error-handler';
 import { PermissionValues } from '@/core/permission/models';
@@ -51,14 +52,18 @@ export const GET = createProtectedHandler(
 
 export const PATCH = createProtectedHandler(
   (req, ctx) =>
-    withErrorHandling(async (r) => {
+    withSecurity(async (r) => {
       const body = await r.json();
-      return withValidation(updateSchema, (r2, data) => handlePatch(r2, ctx.params.roleId, data), r, body);
-    }, req),
+      return withErrorHandling(
+        (r3) => withValidation(updateSchema, (r2, data) => handlePatch(r2, ctx.params.roleId, data), r3, body),
+        r
+      );
+    })(req),
   PermissionValues.MANAGE_ROLES
 );
 
 export const DELETE = createProtectedHandler(
-  (req, ctx) => withErrorHandling(() => handleDelete(ctx.params.roleId), req),
+  (req, ctx) =>
+    withSecurity((r) => withErrorHandling(() => handleDelete(ctx.params.roleId), r))(req),
   PermissionValues.MANAGE_ROLES
 );
