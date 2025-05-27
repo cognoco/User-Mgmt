@@ -7,6 +7,7 @@ import { getApiAdminService } from '@/services/admin/factory';
 import { createUserNotFoundError } from '@/lib/api/admin/error-handler';
 import { createProtectedHandler } from '@/middleware/permissions';
 import { withSecurity } from '@/middleware/with-security';
+import { notifyUserChanges } from '@/lib/realtime/notifyUserChanges';
 
 const updateUserSchema = z.object({
   name: z.string().optional(),
@@ -28,13 +29,23 @@ async function handleGetUser(req: NextRequest, { params }: { params: { id: strin
 
 async function handleUpdateUser(req: NextRequest, data: UpdateUser, { params }: { params: { id: string } }) {
   const adminService = getApiAdminService();
+  const existingUser = await adminService.getUserById(params.id);
+  if (!existingUser) {
+    throw createUserNotFoundError(params.id);
+  }
   const updated = await adminService.updateUser(params.id, data);
+  await notifyUserChanges('UPDATE', params.id, updated, existingUser);
   return createSuccessResponse({ user: updated });
 }
 
 async function handleDeleteUser(req: NextRequest, { params }: { params: { id: string } }) {
   const adminService = getApiAdminService();
+  const existingUser = await adminService.getUserById(params.id);
+  if (!existingUser) {
+    throw createUserNotFoundError(params.id);
+  }
   await adminService.deleteUser(params.id);
+  await notifyUserChanges('DELETE', params.id, null, existingUser);
   return createNoContentResponse();
 }
 
