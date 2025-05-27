@@ -79,7 +79,9 @@ test.describe('Internationalization (i18n) Features', () => {
   });
   
   test('Changing language updates the UI content', async ({ page, browserName }) => {
+
     // Adjust timeout based on browser (Issue #27)
+
     
     // First, check what common text exists in English
     const commonEnglishTexts = [
@@ -488,7 +490,9 @@ test.describe('Internationalization (i18n) Features', () => {
       'Sign out'
     ];
     
+
     // Capture current page text (may help debugging if translation fails)
+
     
     // Open language selector
     const languageSelector = page.getByRole('button', { name: /language|idioma|langue/i })
