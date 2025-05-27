@@ -18,7 +18,7 @@ export async function GET() {
       httpOnly: true,
       secure: secure,
       sameSite: sameSite,
-      // Consider adding maxAge or expires if needed
+      maxAge: 60 * 60 * 24,
     });
 
     return response;

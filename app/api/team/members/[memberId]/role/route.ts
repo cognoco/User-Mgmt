@@ -8,6 +8,7 @@ import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
 import { withValidation } from '@/middleware/validation';
 import { createTeamMemberNotFoundError } from '@/lib/api/team/error-handler';
+import { withSecurity } from '@/middleware/with-security';
 
 const updateRoleSchema = z.object({
   role: z.enum(['admin', 'member', 'viewer']),
@@ -79,5 +80,7 @@ async function handler(
   return withValidation(updateRoleSchema, (r, data) => handlePatch(r, data, context.params.memberId), req);
 }
 
-export const PATCH = (req: NextRequest, ctx: { params: { memberId: string } }) =>
-  withErrorHandling((r) => handler(r, ctx), req);
+export const PATCH = (
+  req: NextRequest,
+  ctx: { params: { memberId: string } }
+) => withSecurity((r) => withErrorHandling((req2) => handler(req2, ctx), r))(req);

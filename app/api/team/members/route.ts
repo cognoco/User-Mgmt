@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/index';
 import { prisma } from '@/lib/database/prisma';
 import { createProtectedHandler } from '@/middleware/permissions';
+import { withSecurity } from '@/middleware/with-security';
 import { z } from 'zod';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
@@ -160,6 +161,6 @@ async function postHandler(req: NextRequest) {
 }
 
 export const POST = createProtectedHandler(
-  (req) => withErrorHandling(postHandler, req),
+  (req) => withSecurity((r) => withErrorHandling(postHandler, r))(req),
   'team.members.add'
 );

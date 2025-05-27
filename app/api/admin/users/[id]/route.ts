@@ -6,6 +6,7 @@ import { withValidation } from '@/middleware/validation';
 import { getApiAdminService } from '@/services/admin/factory';
 import { createUserNotFoundError } from '@/lib/api/admin/error-handler';
 import { createProtectedHandler } from '@/middleware/permissions';
+import { withSecurity } from '@/middleware/with-security';
 
 const updateUserSchema = z.object({
   name: z.string().optional(),
@@ -44,14 +45,19 @@ export const GET = createProtectedHandler(
 
 export const PUT = createProtectedHandler(
   (req, ctx) =>
-    withErrorHandling(async () => {
-      const data = await req.json();
-      return withValidation(updateUserSchema, (r, validated) => handleUpdateUser(r, validated, ctx), req, data);
-    }, req),
+    withSecurity(async (r) => {
+      const data = await r.json();
+      return withErrorHandling(
+        () =>
+          withValidation(updateUserSchema, (r2, validated) => handleUpdateUser(r2, validated, ctx), r, data),
+        r
+      );
+    })(req),
   'admin.users.update'
 );
 
 export const DELETE = createProtectedHandler(
-  (req, ctx) => withErrorHandling(() => handleDeleteUser(req, ctx), req),
+  (req, ctx) =>
+    withSecurity((r) => withErrorHandling(() => handleDeleteUser(r, ctx), r))(req),
   'admin.users.delete'
 );

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 
 const securityHeaders = {
   'Content-Security-Policy': 
@@ -20,6 +21,15 @@ const securityHeaders = {
   'Permissions-Policy': 
     'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()'
 };
+
+function safeEqual(a: string, b: string) {
+  const aBuf = Buffer.from(a);
+  const bBuf = Buffer.from(b);
+  if (aBuf.length !== bBuf.length) {
+    return false;
+  }
+  return timingSafeEqual(aBuf, bBuf);
+}
 
 /**
  * Middleware that adds security headers and other security measures
@@ -47,7 +57,7 @@ export function withSecurity(
         const csrfToken = request.headers.get('X-CSRF-Token');
         const storedToken = request.cookies.get('csrf-token')?.value;
 
-        if (!csrfToken || !storedToken || csrfToken !== storedToken) {
+        if (!csrfToken || !storedToken || !safeEqual(csrfToken, storedToken)) {
           return new NextResponse(
             JSON.stringify({ error: 'Invalid CSRF token' }),
             { status: 403, headers: { 'Content-Type': 'application/json' } }
