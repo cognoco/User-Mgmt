@@ -19,6 +19,12 @@ import {
 import { AuthEventType } from '@/core/auth/events';
 import { translateError } from '@/lib/utils/error';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
+import type {
+  OAuthProvider,
+  OAuthProviderConfig,
+  OAuthUserProfile,
+} from '@/types/oauth';
+import type { OAuthDataProvider } from '@/adapters/auth/providers/oauth-provider';
 import type { AuthStorage } from './auth-storage';
 import { BrowserAuthStorage } from './auth-storage';
 import { DefaultSessionTracker, type SessionTracker } from './session-tracker';
@@ -74,6 +80,13 @@ export class DefaultAuthService
       this.storage.removeItem(TOKEN_KEY);
       this.storage.removeItem(LAST_ACTIVITY_KEY);
     }
+  }
+
+  private isOAuthProvider(provider: AuthDataProvider): provider is OAuthDataProvider {
+    return (
+      typeof (provider as OAuthDataProvider).getAuthorizationUrl === 'function' &&
+      typeof (provider as OAuthDataProvider).exchangeCode === 'function'
+    );
   }
 
   private async logAction(params: Parameters<typeof logUserAction>[0]): Promise<void> {
@@ -315,6 +328,40 @@ export class DefaultAuthService
     } catch (error) {
       const message = translateError(error, { defaultMessage: 'Failed to disable MFA' });
       return { success: false, error: message };
+    }
+  }
+
+  configureOAuthProvider(config: OAuthProviderConfig): void {
+    if (!this.isOAuthProvider(this.provider)) {
+      throw new Error('OAuth operations are not supported by the configured provider');
+    }
+    this.provider.configureProvider(config);
+  }
+
+  getOAuthAuthorizationUrl(provider: OAuthProvider, state?: string): string {
+    if (!this.isOAuthProvider(this.provider)) {
+      throw new Error('OAuth operations are not supported by the configured provider');
+    }
+    try {
+      return this.provider.getAuthorizationUrl(provider, state);
+    } catch (error) {
+      const message = translateError(error, { defaultMessage: 'Failed to build authorization URL' });
+      throw new Error(message);
+    }
+  }
+
+  async exchangeOAuthCode(provider: OAuthProvider, code: string): Promise<OAuthUserProfile> {
+    if (!this.isOAuthProvider(this.provider)) {
+      throw new Error('OAuth operations are not supported by the configured provider');
+    }
+    try {
+      const tokens = await this.provider.exchangeCode(provider, code);
+      const profile = await this.provider.fetchUserProfile(provider, tokens.accessToken);
+      this.provider.setProviderMetadata(provider, tokens);
+      return profile;
+    } catch (error) {
+      const message = translateError(error, { defaultMessage: 'OAuth code exchange failed' });
+      throw new Error(message);
     }
   }
 

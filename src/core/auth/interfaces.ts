@@ -6,14 +6,15 @@
  * the contract that any implementation must fulfill.
  */
 
-import { 
-  AuthResult, 
-  LoginPayload, 
-  RegistrationPayload, 
+import {
+  AuthResult,
+  LoginPayload,
+  RegistrationPayload,
   User,
   MFASetupResponse,
   MFAVerifyResponse
 } from './models';
+import type { OAuthProvider, OAuthUserProfile, OAuthProviderConfig } from '@/types/oauth';
 
 /**
  * Core authentication service interface
@@ -126,6 +127,33 @@ export interface AuthService {
    * @returns Authentication result with success status or error
    */
   disableMFA(code: string): Promise<AuthResult>;
+
+  /**
+   * Configure an OAuth provider.
+   *
+   * @param config Provider configuration
+   */
+  configureOAuthProvider(config: OAuthProviderConfig): void;
+
+  /**
+   * Build an authorization URL for the given provider.
+   *
+   * @param provider OAuth provider identifier
+   * @param state Optional state parameter for CSRF protection
+   */
+  getOAuthAuthorizationUrl(provider: OAuthProvider, state?: string): string;
+
+  /**
+   * Exchange an authorization code for an OAuth profile.
+   *
+   * @param provider OAuth provider identifier
+   * @param code Authorization code returned by the provider
+   * @returns The provider user profile
+   */
+  exchangeOAuthCode(
+    provider: OAuthProvider,
+    code: string
+  ): Promise<OAuthUserProfile>;
   
   /**
    * Refresh the authentication token
