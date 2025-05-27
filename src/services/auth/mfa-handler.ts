@@ -5,6 +5,8 @@ export interface MFAHandler {
   setupMFA(): Promise<MFASetupResponse>;
   verifyMFA(code: string): Promise<MFAVerifyResponse>;
   disableMFA(code: string): Promise<AuthResult>;
+  startWebAuthnRegistration(): Promise<MFASetupResponse>;
+  verifyWebAuthnRegistration(data: unknown): Promise<MFAVerifyResponse>;
 }
 
 export class DefaultMFAHandler implements MFAHandler {
@@ -20,5 +22,13 @@ export class DefaultMFAHandler implements MFAHandler {
 
   disableMFA(code: string): Promise<AuthResult> {
     return this.provider.disableMFA(code);
+  }
+
+  startWebAuthnRegistration(): Promise<MFASetupResponse> {
+    return this.provider.startWebAuthnRegistration();
+  }
+
+  verifyWebAuthnRegistration(data: unknown): Promise<MFAVerifyResponse> {
+    return this.provider.verifyWebAuthnRegistration(data);
   }
 }

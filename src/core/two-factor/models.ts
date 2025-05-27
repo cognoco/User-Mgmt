@@ -1,4 +1,4 @@
-export type TwoFactorMethodType = 'totp' | 'sms' | 'email';
+export type TwoFactorMethodType = 'totp' | 'sms' | 'email' | 'webauthn';
 
 export interface TwoFactorSetupPayload {
   userId: string;

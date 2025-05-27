@@ -121,6 +121,16 @@ export interface AuthDataProvider {
   disableMFA(code: string): Promise<AuthResult>;
 
   /**
+   * Begin WebAuthn registration for the current user.
+   */
+  startWebAuthnRegistration(): Promise<MFASetupResponse>;
+
+  /**
+   * Complete WebAuthn registration with client response.
+   */
+  verifyWebAuthnRegistration(data: unknown): Promise<MFAVerifyResponse>;
+
+  /**
    * Refresh the authentication token.
    *
    * @returns True if token was refreshed successfully, false otherwise

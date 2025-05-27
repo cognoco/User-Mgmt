@@ -38,4 +38,10 @@ export interface TwoFactorService {
 
   /** Generate a new set of backup codes for a user */
   regenerateBackupCodes(userId: string): Promise<BackupCodesResponse>;
+
+  /** Begin WebAuthn registration flow */
+  startWebAuthnRegistration(userId: string): Promise<TwoFactorSetupResponse>;
+
+  /** Complete WebAuthn registration */
+  verifyWebAuthnRegistration(payload: TwoFactorVerifyPayload): Promise<TwoFactorVerifyResponse>;
 }

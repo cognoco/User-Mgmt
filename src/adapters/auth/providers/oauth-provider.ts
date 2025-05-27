@@ -215,6 +215,14 @@ export class BasicOAuthProvider implements OAuthDataProvider {
   async disableMFA(_code: string): Promise<AuthResult> {
     return { success: false, error: 'Not implemented' };
   }
+
+  async startWebAuthnRegistration(): Promise<MFASetupResponse> {
+    return { success: false, error: 'WebAuthn registration not implemented' };
+  }
+
+  async verifyWebAuthnRegistration(_data: unknown): Promise<MFAVerifyResponse> {
+    return { success: false, error: 'WebAuthn registration not implemented' };
+  }
   async refreshToken(): Promise<
     { accessToken: string; refreshToken: string; expiresAt: number } | null
   > {
