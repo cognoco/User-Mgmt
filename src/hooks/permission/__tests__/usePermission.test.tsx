@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { usePermission, withPermission } from '@/hooks/permission/usePermissions';
 import { checkRolePermission } from '@/lib/rbac/roleService';
@@ -9,8 +9,8 @@ import { TestWrapper } from '../../../tests/utils/test-wrapper';
 import { setupTestServices } from '../../../tests/utils/test-service-setup';
 
 // Mocks
-vi.mock('next-auth/react', () => ({
-  useSession: vi.fn(),
+vi.mock('@/hooks/auth/useAuth', () => ({
+  useAuth: vi.fn(),
 }));
 
 vi.mock('@/lib/rbac/roleService', () => ({
@@ -48,11 +48,11 @@ describe('usePermission', () => {
   });
 
   it('returns loading state when session is loading', () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: null,
-      status: 'loading',
-      update: vi.fn(),
-    });
+vi.mocked(useAuth).mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+      isLoading: true,
+    } as any);
 
     const { result } = renderHook(
       () => usePermission({ required: 'test.permission' }),
@@ -64,11 +64,11 @@ describe('usePermission', () => {
   });
 
   it('returns false when no session exists', () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: null,
-      status: 'unauthenticated',
-      update: vi.fn(),
-    });
+    vi.mocked(useAuth).mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+    } as any);
 
     const { result } = renderHook(
       () => usePermission({ required: 'test.permission' }),
@@ -80,11 +80,11 @@ describe('usePermission', () => {
   });
 
   it('checks permission when session exists', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { id: 'user1' }, expires: '2099-01-01T00:00:00.000Z' },
-      status: 'authenticated',
-      update: vi.fn(),
-    });
+    vi.mocked(useAuth).mockReturnValue({
+      user: { id: 'user1' } as any,
+      isAuthenticated: true,
+      isLoading: false,
+    } as any);
 
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -106,11 +106,11 @@ describe('usePermission', () => {
   });
 
   it('returns false when role fetch fails', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { id: 'user1' }, expires: '2099-01-01T00:00:00.000Z' },
-      status: 'authenticated',
-      update: vi.fn(),
-    });
+    vi.mocked(useAuth).mockReturnValue({
+      user: { id: 'user1' } as any,
+      isAuthenticated: true,
+      isLoading: false,
+    } as any);
 
     mockFetch.mockResolvedValueOnce({
       ok: false,
@@ -129,11 +129,11 @@ describe('usePermission', () => {
   });
 
   it('returns false when permission check fails', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { id: 'user1' }, expires: '2099-01-01T00:00:00.000Z' },
-      status: 'authenticated',
-      update: vi.fn(),
-    });
+    vi.mocked(useAuth).mockReturnValue({
+      user: { id: 'user1' } as any,
+      isAuthenticated: true,
+      isLoading: false,
+    } as any);
 
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -167,22 +167,22 @@ describe('withPermission HOC', () => {
   });
 
   it('shows loading state initially', () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: null,
-      status: 'loading',
-      update: vi.fn(),
-    });
+    vi.mocked(useAuth).mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+      isLoading: true,
+    } as any);
 
     const { getByText } = render(<WrappedComponent />, { wrapper });
     expect(getByText('Loading permissions...')).toBeInTheDocument();
   });
 
   it('renders nothing when permission check fails', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { id: 'user1' }, expires: '2099-01-01T00:00:00.000Z' },
-      status: 'authenticated',
-      update: vi.fn(),
-    });
+    vi.mocked(useAuth).mockReturnValue({
+      user: { id: 'user1' } as any,
+      isAuthenticated: true,
+      isLoading: false,
+    } as any);
 
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -199,11 +199,11 @@ describe('withPermission HOC', () => {
   });
 
   it('renders component when permission check passes', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { id: 'user1' }, expires: '2099-01-01T00:00:00.000Z' },
-      status: 'authenticated',
-      update: vi.fn(),
-    });
+    vi.mocked(useAuth).mockReturnValue({
+      user: { id: 'user1' } as any,
+      isAuthenticated: true,
+      isLoading: false,
+    } as any);
 
     mockFetch.mockResolvedValueOnce({
       ok: true,

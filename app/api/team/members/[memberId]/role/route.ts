@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { prisma } from '@/lib/database/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { Session } from '@/types/next-auth';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
@@ -19,7 +18,7 @@ async function handlePatch(
   data: z.infer<typeof updateRoleSchema>,
   memberId: string
 ) {
-  const session = (await getServerSession(authOptions)) as Session;
+  const session = await getServerSession(authOptions);
   if (!session?.user) {
     await logUserAction({
       action: 'TEAM_ROLE_UPDATE_ATTEMPT',
