@@ -2,22 +2,34 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/database/prisma';
-import { GET, POST } from '@/app/api/team/members/route';
+import { GET, POST } from '../route';
 import { ERROR_CODES } from '@/lib/api/common';
+import { getApiAuthService } from '@/services/auth/factory';
 
 // Mocks
 vi.mock('next-auth', () => ({
   getServerSession: vi.fn(),
 }));
 
-vi.mock('@/lib/prisma', () => ({
+vi.mock('@/services/auth/factory', () => ({ getApiAuthService: vi.fn() }));
+
+vi.mock('@/services/permission/factory', () => ({
+  getApiPermissionService: () => ({
+    hasPermission: vi.fn().mockResolvedValue(true),
+    getUserRoles: vi.fn().mockResolvedValue([]),
+  }),
+}));
+
+vi.mock('@/lib/database/prisma', () => ({
   prisma: {
-    user: {
+    $transaction: vi.fn((actions) => Promise.all(actions)),
+    teamMember: {
       findMany: vi.fn(),
       count: vi.fn(),
+      findFirst: vi.fn(),
     },
     team: {
-      findFirst: vi.fn(),
+      findUnique: vi.fn(),
     },
     teamLicense: {
       findUnique: vi.fn(),
@@ -33,6 +45,21 @@ describe('Team Members API', () => {
   const mockSession = {
     user: { id: 'user1', name: 'Test User', email: 'test@example.com' },
   };
+
+  const mockMembers = [
+    {
+      id: 'member1',
+      role: 'ADMIN',
+      status: 'active',
+      joinedAt: '2024-01-01T00:00:00Z',
+      user: {
+        id: 'user1',
+        name: 'Test User',
+        email: 'test@example.com',
+        image: null,
+      },
+    },
+  ];
 
   const mockUsers = [
     {
@@ -61,14 +88,21 @@ describe('Team Members API', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(getServerSession).mockResolvedValue(mockSession as any);
-    vi.mocked(prisma.user.findMany).mockResolvedValue(mockUsers as any);
-    vi.mocked(prisma.user.count).mockResolvedValue(1);
-    vi.mocked(prisma.team.findFirst).mockResolvedValue(mockTeam as any);
+    vi.mocked(getApiAuthService).mockReturnValue({
+      getSession: vi.fn().mockResolvedValue({ user: { id: 'user1' } }),
+    } as any);
+    vi.mocked(prisma.teamMember.findMany).mockResolvedValue(mockMembers as any);
+    vi.mocked(prisma.teamMember.count).mockResolvedValue(1);
+    vi.mocked(prisma.teamMember.findFirst).mockResolvedValue({ teamId: 'team1' } as any);
+    vi.mocked(prisma.team.findUnique).mockResolvedValue(mockTeam as any);
     vi.mocked(prisma.teamLicense.findUnique).mockResolvedValue({ usedSeats: 0, totalSeats: 10 });
   });
 
   it('returns 401 when no session exists', async () => {
     vi.mocked(getServerSession).mockResolvedValueOnce(null);
+    vi.mocked(getApiAuthService).mockReturnValueOnce({
+      getSession: vi.fn().mockResolvedValue(null),
+    } as any);
 
     const request = new NextRequest('http://localhost:3000/api/team/members');
     const response = await GET(request);
@@ -108,13 +142,15 @@ describe('Team Members API', () => {
     );
     await GET(request);
 
-    expect(prisma.user.findMany).toHaveBeenCalledWith(
+    expect(prisma.teamMember.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          OR: [
-            { name: { contains: 'test', mode: 'insensitive' } },
-            { email: { contains: 'test', mode: 'insensitive' } },
-          ],
+          user: expect.objectContaining({
+            OR: [
+              { name: { contains: 'test', mode: 'insensitive' } },
+              { email: { contains: 'test', mode: 'insensitive' } },
+            ],
+          }),
         }),
       })
     );
@@ -126,12 +162,10 @@ describe('Team Members API', () => {
     );
     await GET(request);
 
-    expect(prisma.user.findMany).toHaveBeenCalledWith(
+    expect(prisma.teamMember.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          teamMember: expect.objectContaining({
-            status: 'active',
-          }),
+          status: 'active',
         }),
       })
     );
@@ -143,10 +177,10 @@ describe('Team Members API', () => {
     );
     await GET(request);
 
-    expect(prisma.user.findMany).toHaveBeenCalledWith(
+    expect(prisma.teamMember.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         orderBy: {
-          name: 'asc',
+          user: { name: 'asc' },
         },
       })
     );
@@ -158,7 +192,7 @@ describe('Team Members API', () => {
     );
     await GET(request);
 
-    expect(prisma.user.findMany).toHaveBeenCalledWith(
+    expect(prisma.teamMember.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         skip: 5,
         take: 5,
@@ -178,7 +212,7 @@ describe('Team Members API', () => {
   });
 
   it('handles database errors gracefully', async () => {
-    vi.mocked(prisma.user.findMany).mockRejectedValueOnce(
+    vi.mocked(prisma.teamMember.findMany).mockRejectedValueOnce(
       new Error('Database error')
     );
 
