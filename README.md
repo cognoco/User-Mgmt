@@ -18,6 +18,7 @@ This document serves as the main reference for the User Management System. It pr
 - [Testing Guide](./docs/Testing%20documentation/TESTING.md) - Testing setup and guidelines
 - [Testing Issues](./docs/Testing%20documentation/TESTING_ISSUES-UnitTests.md) - Known testing issues and workarounds
 - [Implementation Checklist](./Product%20documentation/Implementation-Checklist.md) - Code-verified implementation and test status
+- [Configuration Migration](./docs/Product%20documentation/CONFIGURATION_MIGRATION.md) - Centralized configuration usage
 
 ### Feature Documentation
 - [Phase 1-2 Features](./functionality-features-phase1-2.md) - Core authentication and user management

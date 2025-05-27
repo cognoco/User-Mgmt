@@ -1,5 +1,7 @@
 /**
  * Central configuration file for backend (Next.js) services within the project
+ *
+ * @deprecated Use the configuration utilities from `@/core/config/runtime-config`.
  */
 
 // Supabase Configuration
@@ -84,4 +86,6 @@ if (!isTest) {
 }
 
 // Log the final API configuration being used at runtime
-console.log(`[config.ts] Runtime API configured with baseUrl: ${apiConfig.baseUrl}`); 
+console.log(`[config.ts] Runtime API configured with baseUrl: ${apiConfig.baseUrl}`);
+
+export { getConfig, getClientConfig, getServerConfig } from '@/core/config/runtime-config';

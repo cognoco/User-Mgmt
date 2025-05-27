@@ -1,7 +1,8 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
-import { apiConfig } from '../config';
+import { getClientConfig } from '@/core/config/runtime-config';
 
-console.log('API URL:', apiConfig.baseUrl);
+const { env } = getClientConfig();
+console.log('API URL:', env.apiBaseUrl);
 
 // --- CSRF Token Handling ---
 let csrfToken: string | null = null;
@@ -62,12 +63,12 @@ export function initializeCsrf(): Promise<void> {
 
 // --- Axios Instance Creation ---
 export const api = axios.create({
-  baseURL: apiConfig.baseUrl,
+  baseURL: env.apiBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
   withCredentials: true, // Important for sending/receiving cookies
-  timeout: apiConfig.timeout,
+  timeout: env.apiTimeout,
 });
 
 // Request interceptor for adding auth token AND CSRF token
