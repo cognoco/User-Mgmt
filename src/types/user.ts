@@ -20,3 +20,10 @@ export const userSchema = z.object({
 });
 
 export type User = z.infer<typeof userSchema>; 
+export interface CreateUserDto {
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+  metadata?: Record<string, any>;
+}
