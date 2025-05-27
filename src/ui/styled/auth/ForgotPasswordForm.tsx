@@ -51,9 +51,10 @@ export function ForgotPasswordForm() {
                     onBlur={handleBlur}
                     disabled={isSubmitting}
                     aria-invalid={touched.email && errors.email ? 'true' : 'false'}
+                    aria-describedby={touched.email && errors.email ? 'forgot-email-error' : undefined}
                   />
                   {touched.email && errors.email && (
-                    <p className="text-destructive text-sm mt-1" role="alert">{errors.email}</p>
+                    <p id="forgot-email-error" className="text-destructive text-sm mt-1" role="alert">{errors.email}</p>
                   )}
                 </div>
 

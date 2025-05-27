@@ -154,8 +154,9 @@ export function InvitationManager({
                           className="mt-8"
                           onClick={() => removeInvitee(index)}
                           disabled={isLoading || newInvitation.invitees.length <= 1}
+                          aria-label="Remove invitee"
                         >
-                          ✕
+                          ✕<span className="sr-only">Remove</span>
                         </Button>
                       </div>
                     ))}

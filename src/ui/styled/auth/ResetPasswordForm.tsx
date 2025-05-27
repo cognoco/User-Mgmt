@@ -60,10 +60,12 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                       value={passwordValue}
                       onChange={e => setPasswordValue(e.target.value)}
                       onBlur={() => handleBlur('password')}
+                      aria-invalid={touched.password && !!errors.password}
+                      aria-describedby={touched.password && errors.password ? 'reset-password-error' : undefined}
                     />
                   </FormControl>
                   {touched.password && errors.password && (
-                    <FormMessage>{errors.password}</FormMessage>
+                    <FormMessage id="reset-password-error">{errors.password}</FormMessage>
                   )}
                   <PasswordRequirements password={passwordValue} />
                 </div>
@@ -77,10 +79,12 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                       value={confirmPasswordValue}
                       onChange={e => setConfirmPasswordValue(e.target.value)}
                       onBlur={() => handleBlur('confirmPassword')}
+                      aria-invalid={touched.confirmPassword && !!errors.confirmPassword}
+                      aria-describedby={touched.confirmPassword && errors.confirmPassword ? 'confirm-reset-error' : undefined}
                     />
                   </FormControl>
                   {touched.confirmPassword && errors.confirmPassword && (
-                    <FormMessage>{errors.confirmPassword}</FormMessage>
+                    <FormMessage id="confirm-reset-error">{errors.confirmPassword}</FormMessage>
                   )}
                 </div>
                 <Button type="submit" className="w-full" disabled={isSubmitting || !isValid}>
