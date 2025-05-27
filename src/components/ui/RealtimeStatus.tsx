@@ -12,10 +12,13 @@ export function RealtimeStatus({ isConnected }: RealtimeStatusProps) {
         <TooltipTrigger asChild>
           <div className="flex items-center">
             {isConnected ? (
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              <CheckCircle2 className="h-4 w-4 text-green-500" aria-hidden="true" />
             ) : (
-              <XCircle className="h-4 w-4 text-red-500" />
+              <XCircle className="h-4 w-4 text-red-500" aria-hidden="true" />
             )}
+            <span className="sr-only">
+              {isConnected ? 'Realtime updates active' : 'Realtime updates not connected'}
+            </span>
           </div>
         </TooltipTrigger>
         <TooltipContent>
