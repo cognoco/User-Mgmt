@@ -11,7 +11,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('/api/user/connected-accounts', () => {
+describe('/api/user/connected-accounts (alias for /api/connected-accounts)', () => {
   it('handles connected accounts endpoints', async () => {
     // TODO
   });
