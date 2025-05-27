@@ -1362,7 +1362,6 @@ See the [technical setup guide](docs/Product%20documentation/SETUP.md) for more 
     │   ├── index.ts
     │   ├── jest-types.ts
     │   ├── lru-cache.d.ts
-    │   ├── next-auth.d.ts
     │   ├── oauth.ts
     │   ├── organizations.ts
     │   ├── platform.ts
