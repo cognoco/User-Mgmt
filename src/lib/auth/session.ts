@@ -3,9 +3,11 @@
  */
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import type { NextRequest } from 'next/server';
 import type { Session } from '@supabase/supabase-js';
 import { getApiAuthService } from '@/services/auth/factory';
 import { authConfig, isProduction } from './config';
+import { extractAuthToken, validateAuthToken } from './utils';
 
 /**
  * Shape of the session object returned by helpers in this module.
@@ -147,5 +149,22 @@ export async function getCurrentUser() {
     id: session.userId,
     email: session.email,
     role: session.role,
+  };
+}
+
+/**
+ * Resolve the authenticated user from a Next.js request using the Authorization header
+ */
+export async function getSessionFromRequest(req: NextRequest): Promise<CurrentSession | null> {
+  const token = extractAuthToken(req);
+  if (!token) return null;
+  const user = await validateAuthToken(token);
+  if (!user) return null;
+  return {
+    userId: user.id,
+    email: user.email ?? '',
+    role: user.role,
+    accessToken: token,
+    expiresAt: Date.now() + authConfig.tokenExpiryDays * 24 * 60 * 60 * 1000,
   };
 }

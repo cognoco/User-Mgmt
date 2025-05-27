@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { createSuccessResponse } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
-import { withRouteAuth } from '@/middleware/auth';
+import { withAuthRequest } from '@/middleware/auth';
 import { withValidation } from '@/middleware/validation';
 import { getApiUserService } from '@/services/user/factory';
 import { userPreferencesSchema } from '@/types/database';
@@ -34,7 +34,7 @@ async function handlePatch(
 
 export async function GET(request: NextRequest) {
   return withErrorHandling(
-    (req) => withRouteAuth((r, uid) => handleGet(r, uid), req),
+    (req) => withAuthRequest(req, (r, ctx) => handleGet(r, ctx.userId)),
     request
   );
 }
@@ -42,10 +42,8 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   return withErrorHandling(
     (req) =>
-      withRouteAuth(
-        (r, uid) =>
-          withValidation(UpdateSchema, (r2, data) => handlePatch(r2, uid, data), r),
-        req
+      withAuthRequest(req, (r, ctx) =>
+        withValidation(UpdateSchema, (r2, data) => handlePatch(r2, ctx.userId, data), r)
       ),
     request
   );

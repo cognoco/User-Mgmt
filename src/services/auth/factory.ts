@@ -12,6 +12,7 @@ import type { AuthStorage } from './auth-storage';
 import { BrowserAuthStorage } from './auth-storage';
 import { AdapterRegistry } from '@/adapters/registry';
 import { createSupabaseAuthProvider } from '@/adapters/auth/factory';
+import { getServiceSupabase } from '@/lib/database/supabase';
 
 /**
  * Options for {@link getApiAuthService}
@@ -94,4 +95,15 @@ export function getApiAuthService(options: ApiAuthServiceOptions = {}): AuthServ
   }
 
   return cachedService;
+}
+
+/**
+ * Retrieve a Supabase user session directly from an access token.
+ */
+export async function getSessionFromToken(token: string) {
+  if (!token) return null;
+  const supabase = getServiceSupabase();
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data.user) return null;
+  return data.user;
 }

@@ -1,6 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import type { User } from '@supabase/supabase-js';
-import { getApiAuthService } from '@/services/auth/factory';
+import { NextRequest, NextResponse } from 'next/server';
+import { getApiAuthService, getSessionFromToken } from '@/services/auth/factory';
+import { hasPermission } from '@/lib/auth/hasPermission';
+import { ApiError } from '@/lib/api/common/api-error';
+import { createErrorResponse } from '@/lib/api/common/response-formatter';
 
 /**
  * Options for {@link withAuth} middleware.
@@ -74,9 +78,7 @@ export function withAuth(
   };
 }
 
-import { NextRequest, NextResponse } from 'next/server';
-import { ApiError } from '@/lib/api/common/api-error';
-import { createErrorResponse } from '@/lib/api/common/response-formatter';
+
 
 /**
  * Authentication middleware for Next.js route handlers.
@@ -86,12 +88,9 @@ export async function withRouteAuth(
   req: NextRequest
 ): Promise<NextResponse> {
   try {
-    const authService = getApiAuthService();
-    const session = await authService.getSession(
-      req.headers.get('authorization') || ''
-    );
-
-    if (!session || !session.user?.id) {
+    const token = req.headers.get('authorization')?.replace('Bearer ', '') || '';
+    const user = await getSessionFromToken(token);
+    if (!user) {
       const unauthorizedError = new ApiError(
         'auth/unauthorized',
         'Authentication required',
@@ -100,7 +99,7 @@ export async function withRouteAuth(
       return createErrorResponse(unauthorizedError);
     }
 
-    return await handler(req, session.user.id);
+    return await handler(req, user.id);
   } catch (error) {
     if (error instanceof ApiError) {
       return createErrorResponse(error);
@@ -114,5 +113,33 @@ export async function withRouteAuth(
 
     return createErrorResponse(serverError);
   }
+}
+
+export interface AuthContext {
+  userId: string;
+  role: string;
+}
+
+export async function withAuthRequest(
+  req: NextRequest,
+  handler: (req: NextRequest, ctx: AuthContext) => Promise<NextResponse>,
+  permission?: string
+): Promise<NextResponse> {
+  const token = req.headers.get('authorization')?.replace('Bearer ', '') || '';
+  const user = await getSessionFromToken(token);
+  if (!user) {
+    const err = new ApiError('auth/unauthorized', 'Authentication required', 401);
+    return createErrorResponse(err);
+  }
+
+  if (permission) {
+    const allowed = await hasPermission(user.id, permission as any);
+    if (!allowed) {
+      const err = new ApiError('auth/forbidden', 'Insufficient permissions', 403);
+      return createErrorResponse(err);
+    }
+  }
+
+  return handler(req, { userId: user.id, role: user.role ?? 'user' });
 }
 
