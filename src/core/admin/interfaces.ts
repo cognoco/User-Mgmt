@@ -8,6 +8,21 @@ export interface ListUsersParams {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface SearchUsersParams {
+  query?: string;
+  page?: number;
+  limit?: number;
+  status?: 'active' | 'inactive' | 'suspended' | 'all';
+  role?: string;
+  dateCreatedStart?: string;
+  dateCreatedEnd?: string;
+  dateLastLoginStart?: string;
+  dateLastLoginEnd?: string;
+  sortBy?: 'name' | 'email' | 'createdAt' | 'lastLoginAt' | 'status';
+  sortOrder?: 'asc' | 'desc';
+  teamId?: string;
+}
+
 export interface AuditLogQuery {
   page: number;
   limit: number;
@@ -26,4 +41,5 @@ export interface AdminService {
   updateUser(id: string, data: Record<string, any>): Promise<any>;
   deleteUser(id: string): Promise<void>;
   getAuditLogs(params: AuditLogQuery): Promise<{ logs: any[]; pagination: PaginationMeta }>;
+  searchUsers(params: SearchUsersParams): Promise<{ users: any[]; pagination: PaginationMeta }>;
 }
