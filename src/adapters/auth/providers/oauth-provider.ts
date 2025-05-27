@@ -1,4 +1,5 @@
 import type { AuthDataProvider } from '../interfaces';
+import { randomBytes, createHash } from "crypto";
 import type {
   OAuthProviderConfig,
   OAuthUserProfile,
@@ -67,6 +68,7 @@ export interface OAuthDataProvider extends AuthDataProvider {
 export class BasicOAuthProvider implements OAuthDataProvider {
   private configs: Map<ProviderId, OAuthProviderConfig> = new Map();
   private metadata: Map<ProviderId, Record<string, any>> = new Map();
+  private codeVerifiers: Map<ProviderId, string> = new Map();
 
   constructor(configs: OAuthProviderConfig[] = []) {
     configs.forEach(cfg => this.configureProvider(cfg));
@@ -89,6 +91,11 @@ export class BasicOAuthProvider implements OAuthDataProvider {
     url.searchParams.set('client_id', cfg.clientId);
     url.searchParams.set('redirect_uri', cfg.redirectUri);
     url.searchParams.set('response_type', 'code');
+    const verifier = this.generateCodeVerifier();
+    this.codeVerifiers.set(provider, verifier);
+    const challenge = this.generateCodeChallenge(verifier);
+    url.searchParams.set('code_challenge', challenge);
+    url.searchParams.set('code_challenge_method', 'S256');
     if (cfg.scope) url.searchParams.set('scope', cfg.scope);
     if (state) url.searchParams.set('state', state);
     return url.toString();
@@ -110,6 +117,11 @@ export class BasicOAuthProvider implements OAuthDataProvider {
       grant_type: 'authorization_code',
       code,
     });
+    const verifier = this.codeVerifiers.get(provider);
+    if (verifier) {
+      body.set('code_verifier', verifier);
+      this.codeVerifiers.delete(provider);
+    }
 
     const res = await fetch(cfg.tokenUrl, {
       method: 'POST',
@@ -214,6 +226,15 @@ export class BasicOAuthProvider implements OAuthDataProvider {
   handleSessionTimeout(): void {
     /* no-op */
   }
+  private generateCodeVerifier(): string {
+    return randomBytes(32).toString("hex");
+  }
+
+  private generateCodeChallenge(verifier: string): string {
+    const hash = createHash("sha256").update(verifier).digest();
+    return hash.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+
 
   // -----------------------------------------------------------------------------
   private requireConfig(provider: ProviderId): OAuthProviderConfig {
