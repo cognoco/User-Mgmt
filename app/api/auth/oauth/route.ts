@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
+import { createServerClient } from '@supabase/ssr';
 import { OAuthProvider, oauthProviderConfigSchema } from '@/types/oauth';
 
 // Request schema
@@ -15,25 +16,7 @@ function generateState(length = 32) {
     .join('');
 }
 
-// PKCE helpers (optional, for providers that require it)
-function base64URLEncode(str: ArrayBuffer) {
-  return Buffer.from(str)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
-}
-async function generatePKCEVerifier() {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return base64URLEncode(array);
-}
-async function generatePKCEChallenge(verifier: string) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(verifier);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return base64URLEncode(hash);
-}
+// Supabase already handles PKCE internally when using signInWithOAuth
 
 // Example: provider config source (replace with actual config source as needed)
 const providerConfigs: Record<OAuthProvider, z.infer<typeof oauthProviderConfigSchema>> = {
@@ -119,37 +102,42 @@ export async function POST(request: Request) {
       path: '/',
     });
 
-    // PKCE (optional, for providers that require it)
-    let codeChallenge: string | undefined;
-    let codeVerifier: string | undefined;
-    if (provider === OAuthProvider.APPLE /* || add others as needed */) {
-      codeVerifier = await generatePKCEVerifier();
-      codeChallenge = await generatePKCEChallenge(codeVerifier);
-      cookieStore.set({
-        name: `oauth_pkce_${provider}`,
-        value: codeVerifier,
-        httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
-        maxAge: 600,
-        path: '/',
-      });
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: any) {
+            cookieStore.set({ name, value, ...options });
+          },
+          remove(name: string, options: any) {
+            cookieStore.set({ name, value: '', ...options });
+          },
+        },
+      }
+    );
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: provider,
+      options: {
+        redirectTo: config.redirectUri,
+        scopes: config.scope,
+        state,
+      },
+    });
+
+    if (error || !data?.url) {
+      return NextResponse.json(
+        { error: error?.message || 'Failed to initiate OAuth flow.' },
+        { status: 400 }
+      );
     }
 
-    // Build authorization URL
-    const url = new URL(config.authorizationUrl!);
-    url.searchParams.append('client_id', config.clientId);
-    url.searchParams.append('redirect_uri', config.redirectUri);
-    url.searchParams.append('response_type', 'code');
-    url.searchParams.append('state', state);
-    if (config.scope) url.searchParams.append('scope', config.scope);
-    if (codeChallenge) {
-      url.searchParams.append('code_challenge', codeChallenge);
-      url.searchParams.append('code_challenge_method', 'S256');
-    }
-
-    return NextResponse.json({ url: url.toString(), state });
+    return NextResponse.json({ url: data.url, state });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Failed to initiate OAuth flow.' }, { status: 400 });
   }
-} 
+}
