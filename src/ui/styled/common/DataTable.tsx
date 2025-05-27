@@ -131,7 +131,16 @@ export function DataTable<T extends Record<string, any>>({
               <TableHeader>
                 <TableRow>
                   {getVisibleColumns().map((column) => (
-                    <TableHead key={String(column.key)}>
+                    <TableHead
+                      key={String(column.key)}
+                      aria-sort={
+                        sortConfig?.key === column.key
+                          ? sortConfig.direction === 'asc'
+                            ? 'ascending'
+                            : 'descending'
+                          : 'none'
+                      }
+                    >
                       {column.sortable ? (
                         <Button
                           variant="ghost"
@@ -157,7 +166,7 @@ export function DataTable<T extends Record<string, any>>({
               </TableHeader>
               <TableBody>
                 {filteredData.map((row, rowIndex) => (
-                  <TableRow key={rowIndex}>
+                  <TableRow key={rowIndex} tabIndex={0}>
                     {getVisibleColumns().map((column) => {
                       const col = column as Column<T>;
                       const cellValue = col.render
