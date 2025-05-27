@@ -5,7 +5,7 @@
  * It adapts Supabase's authentication API to the interface required by our core business logic.
  */
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient, type Session } from '@supabase/supabase-js';
 import { 
   AuthResult, 
   LoginPayload, 
@@ -15,15 +15,25 @@ import {
   MFAVerifyResponse
 } from '../../core/auth/models';
 
-import type { IAuthDataProvider } from './interfaces';
+import type { AuthDataProvider } from './interfaces';
 
 
 /**
  * Supabase implementation of the AuthDataProvider interface
  */
-export class SupabaseAuthProvider implements IAuthDataProvider {
+export class SupabaseAuthProvider implements AuthDataProvider {
   private supabase: SupabaseClient;
   private authStateCallbacks: ((user: User | null) => void)[] = [];
+  private currentSession: Session | null = null;
+
+  private log(...args: unknown[]): void {
+    // Basic logging helper for debugging
+    console.log('[SupabaseAuthProvider]', ...args);
+  }
+
+  private logError(...args: unknown[]): void {
+    console.error('[SupabaseAuthProvider]', ...args);
+  }
   
   /**
    * Create a new SupabaseAuthProvider instance
@@ -33,9 +43,17 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    */
   constructor(supabaseUrl: string, supabaseKey: string) {
     this.supabase = createClient(supabaseUrl, supabaseKey);
+    this.log('Initialized client with url:', supabaseUrl);
     
     // Set up auth state change listener
     this.supabase.auth.onAuthStateChange((event, session) => {
+      this.log('Auth state change event:', event);
+      if (session) {
+        this.currentSession = session;
+      } else {
+        this.currentSession = null;
+      }
+
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
         const user = session ? this.mapSupabaseUser(session.user) : null;
         this.notifyAuthStateChange(user);
@@ -83,6 +101,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @returns Authentication result with success status and user data or error
    */
   async login(credentials: LoginPayload): Promise<AuthResult> {
+    this.log('login attempt', credentials.email);
     try {
       const { data, error } = await this.supabase.auth.signInWithPassword({
         email: credentials.email,
@@ -96,11 +115,13 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
         };
       }
       
+      this.currentSession = data.session;
       return {
         success: true,
         user: this.mapSupabaseUser(data.user)
       };
     } catch (error: any) {
+      this.logError('login failed', error);
       return {
         success: false,
         error: error.message || 'An error occurred during login'
@@ -115,6 +136,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @returns Authentication result with success status and user data or error
    */
   async register(userData: RegistrationPayload): Promise<AuthResult> {
+    this.log('register user', userData.email);
     try {
       const { data, error } = await this.supabase.auth.signUp({
         email: userData.email,
@@ -134,11 +156,13 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
         };
       }
       
+      this.currentSession = data.session;
       return {
         success: true,
         user: this.mapSupabaseUser(data.user)
       };
     } catch (error: any) {
+      this.logError('registration failed', error);
       return {
         success: false,
         error: error.message || 'An error occurred during registration'
@@ -150,7 +174,9 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * Log out the current user
    */
   async logout(): Promise<void> {
+    this.log('logout');
     await this.supabase.auth.signOut();
+    this.currentSession = null;
   }
   
   /**
@@ -159,7 +185,13 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @returns The current user or null if not authenticated
    */
   async getCurrentUser(): Promise<User | null> {
+    this.log('getCurrentUser');
     const { data } = await this.supabase.auth.getUser();
+    if (data.user) {
+      this.currentSession = (await this.supabase.auth.getSession()).data.session;
+    } else {
+      this.currentSession = null;
+    }
     return data.user ? this.mapSupabaseUser(data.user) : null;
   }
   
@@ -170,6 +202,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @returns Result object with success status and message or error
    */
   async resetPassword(email: string): Promise<{ success: boolean; message?: string; error?: string }> {
+    this.log('resetPassword', email);
     try {
       const { error } = await this.supabase.auth.resetPasswordForEmail(email);
       
@@ -185,6 +218,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
         message: 'Password reset email sent'
       };
     } catch (error: any) {
+      this.logError('resetPassword failed', error);
       return {
         success: false,
         error: error.message || 'An error occurred while sending password reset email'
@@ -199,6 +233,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @param newPassword New password to set
    */
   async updatePassword(oldPassword: string, newPassword: string): Promise<void> {
+    this.log('updatePassword');
     // Supabase doesn't have a direct method to update password with old password verification
     // We would need to implement our own verification logic
     // For now, we'll just update the password without verification
@@ -207,7 +242,69 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
     });
     
     if (error) {
+      this.logError('updatePassword failed', error);
       throw new Error(error.message);
+    }
+  }
+
+  async verifyPasswordResetToken(
+    token: string,
+  ): Promise<{ valid: boolean; user?: User; token?: string; error?: string }> {
+    this.log('verifyPasswordResetToken');
+    try {
+      const { data, error } = await this.supabase.auth.exchangeCodeForSession(token);
+      if (error) {
+        return { valid: false, error: error.message };
+      }
+      this.currentSession = data.session;
+      return {
+        valid: true,
+        user: this.mapSupabaseUser(data.user),
+        token: data.session?.access_token || undefined,
+      };
+    } catch (err: any) {
+      this.logError('verifyPasswordResetToken failed', err);
+      return { valid: false, error: err.message || 'Token verification failed' };
+    }
+  }
+
+  async updatePasswordWithToken(
+    token: string,
+    newPassword: string,
+  ): Promise<AuthResult> {
+    this.log('updatePasswordWithToken');
+    try {
+      // Ensure session from token
+      if (!this.currentSession) {
+        const verifyRes = await this.verifyPasswordResetToken(token);
+        if (!verifyRes.valid) {
+          return { success: false, error: verifyRes.error || 'Invalid token' };
+        }
+      }
+      const { data, error } = await this.supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        this.logError('updatePasswordWithToken failed', error);
+        return { success: false, error: error.message };
+      }
+      this.currentSession = (await this.supabase.auth.getSession()).data.session;
+      return {
+        success: true,
+        user: data.user ? this.mapSupabaseUser(data.user) : undefined,
+        token: this.currentSession?.access_token,
+      };
+    } catch (err: any) {
+      this.logError('updatePasswordWithToken failed', err);
+      return { success: false, error: err.message || 'Password update failed' };
+    }
+  }
+
+  async invalidateSessions(userId: string): Promise<void> {
+    try {
+      // Requires service role key
+      // sign out user from all sessions
+      await (this.supabase as any).auth.admin.signOutUser(userId);
+    } catch (err) {
+      this.logError('invalidateSessions failed', err);
     }
   }
   
@@ -218,6 +315,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @returns Authentication result with success status or error
    */
   async sendVerificationEmail(email: string): Promise<AuthResult> {
+    this.log('sendVerificationEmail', email);
     try {
       const { error } = await this.supabase.auth.resend({
         type: 'signup',
@@ -230,6 +328,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
 
       return { success: true };
     } catch (error: any) {
+      this.logError('sendVerificationEmail failed', error);
       return {
         success: false,
         error: error.message || 'An error occurred while sending verification email'
@@ -243,6 +342,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @param token Verification token from the email link
    */
   async verifyEmail(token: string): Promise<void> {
+    this.log('verifyEmail');
     const {
       data: { user },
       error: userError
@@ -259,6 +359,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
     });
 
     if (error) {
+      this.logError('verifyEmail failed', error);
       throw new Error(error.message);
     }
   }
@@ -269,6 +370,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @param password Current password for verification (optional depending on implementation)
    */
   async deleteAccount(password?: string): Promise<void> {
+    this.log('deleteAccount');
     const {
       data: { user },
       error: userError
@@ -280,6 +382,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
 
     const { error } = await this.supabase.rpc('delete_user_account', { password });
     if (error) {
+      this.logError('deleteAccount failed', error);
       throw new Error(error.message);
     }
 
@@ -292,6 +395,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @returns MFA setup response with secret and QR code
    */
   async setupMFA(): Promise<MFASetupResponse> {
+    this.log('setupMFA');
     try {
       const { data, error } = await this.supabase.auth.mfa.enroll({
         factorType: 'totp'
@@ -307,6 +411,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
         qrCode: data.totp.uri
       };
     } catch (error: any) {
+      this.logError('setupMFA failed', error);
       return {
         success: false,
         error: error.message || 'An error occurred during MFA setup'
@@ -321,6 +426,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @returns MFA verification response with success status and token
    */
   async verifyMFA(code: string): Promise<MFAVerifyResponse> {
+    this.log('verifyMFA');
     try {
       const { data, error } = await this.supabase.auth.mfa.verify({
         factorId: 'totp',
@@ -339,6 +445,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
         token: data.token
       };
     } catch (error: any) {
+      this.logError('verifyMFA failed', error);
       return {
         success: false,
         error: error.message || 'An error occurred during MFA verification'
@@ -353,9 +460,11 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @returns Authentication result with success status or error
    */
   async disableMFA(code: string): Promise<AuthResult> {
+    this.log('disableMFA');
     try {
-      const { data, error } = await this.supabase.auth.mfa.unenroll({
-        factorId: 'totp'
+      const { error } = await this.supabase.auth.mfa.unenroll({
+        factorId: 'totp',
+        code
       });
       
       if (error) {
@@ -372,6 +481,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
         user
       };
     } catch (error: any) {
+      this.logError('disableMFA failed', error);
       return {
         success: false,
         error: error.message || 'An error occurred while disabling MFA'
@@ -384,12 +494,25 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * 
    * @returns True if token was refreshed successfully, false otherwise
    */
-  async refreshToken(): Promise<boolean> {
+  async refreshToken(): Promise<
+    | { accessToken: string; refreshToken: string; expiresAt: number }
+    | null
+  > {
+    this.log('refreshToken');
     try {
-      const { error } = await this.supabase.auth.refreshSession();
-      return !error;
-    } catch {
-      return false;
+      const { data, error } = await this.supabase.auth.refreshSession();
+      if (error || !data.session) {
+        return null;
+      }
+      this.currentSession = data.session;
+      return {
+        accessToken: data.session.access_token,
+        refreshToken: data.session.refresh_token ?? '',
+        expiresAt: data.session.expires_at * 1000,
+      };
+    } catch (error: any) {
+      this.logError('refreshToken failed', error);
+      return null;
     }
   }
   
@@ -400,6 +523,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * @returns Unsubscribe function
    */
   onAuthStateChanged(callback: (user: User | null) => void): () => void {
+    this.log('register auth state callback');
     this.authStateCallbacks.push(callback);
     
     // Return unsubscribe function
@@ -415,6 +539,7 @@ export class SupabaseAuthProvider implements IAuthDataProvider {
    * Handle session timeout by logging out the user
    */
   handleSessionTimeout(): void {
+    this.log('handleSessionTimeout');
     this.logout();
   }
 }

@@ -1,78 +1,40 @@
-import { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import { prisma } from '@/lib/database/prisma';
-import { compare } from 'bcryptjs';
+import { cookies } from 'next/headers';
+import { createServerClient } from '@supabase/ssr';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
-export const authOptions: NextAuthOptions = {
-  providers: [
-    CredentialsProvider({
-      name: 'credentials',
-      credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
+// Export an empty object to satisfy existing imports while the codebase
+// migrates away from NextAuth. Supabase is now used for authentication.
+/**
+ * Placeholder export maintained for backward compatibility with legacy
+ * NextAuth based code paths. The object is intentionally empty because the
+ * module now relies solely on Supabase for authentication.
+ */
+export const authOptions: Record<string, never> = {};
+
+/**
+ * Create a Supabase client configured with the current request cookies.
+ */
+export function getSupabaseServerClient(): SupabaseClient {
+  const cookieStore = cookies();
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name: string) => cookieStore.get(name)?.value,
       },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Invalid credentials');
-        }
+    }
+  );
+}
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-          include: { teamMemberships: { select: { teamId: true, role: true } } }
-        });
+/**
+ * Sign the current user out of Supabase.
+ */
+export async function signOut(): Promise<void> {
+  const supabase = getSupabaseServerClient();
+  await supabase.auth.signOut();
+}
 
-        if (!user || !user.password) {
-          throw new Error('Invalid credentials');
-        }
-
-        const isValid = await compare(credentials.password, user.password);
-
-        if (!isValid) {
-          throw new Error('Invalid credentials');
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.teamMemberships[0]?.role,
-          teamId: user.teamMemberships[0]?.teamId
-        };
-      },
-    }),
-  ],
-  session: {
-    strategy: 'jwt',
-  },
-  pages: {
-    signIn: '/auth/login',
-    error: '/auth/error',
-  },
-  callbacks: {
-    jwt: async ({ token, user }) => {
-      if (user) {
-        token.sub = user.id;
-        token.role = user.role;
-        token.teamId = user.teamId;
-      } else if (token.sub) {
-        const dbUser = await prisma.user.findUnique({
-            where: { id: token.sub },
-            include: { teamMemberships: { select: { teamId: true, role: true } } }
-        });
-        if (dbUser) {
-            token.role = dbUser.teamMemberships[0]?.role;
-            token.teamId = dbUser.teamMemberships[0]?.teamId;
-        }
-      }
-      return token;
-    },
-    session: async ({ session, token }) => {
-      if (token?.sub && session.user) {
-        session.user.id = token.sub;
-        session.user.role = token.role;
-        session.user.teamId = token.teamId;
-      }
-      return session;
-    },
-  },
-}; 
+export * from './supabase-auth.config';
+export { initializeSupabaseAuth } from './initialize-supabase-auth';

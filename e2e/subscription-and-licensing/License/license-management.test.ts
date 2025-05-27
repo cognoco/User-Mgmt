@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
 const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';
 const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
 const LICENSE_URL = '/license';
-// Previously used for activation flow tests
+
 
 // --- Helper Functions --- //
 async function fillLoginForm(page) {

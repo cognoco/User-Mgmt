@@ -1,43 +1,151 @@
 /**
- * Get the current user session from authentication headers
- * This should be used in API routes
+ * Server-side helpers for managing Supabase authentication sessions.
  */
-export async function getSession() {
+import { cookies } from 'next/headers';
+import { createServerClient } from '@supabase/ssr';
+import type { Session } from '@supabase/supabase-js';
+import { getApiAuthService } from '@/services/auth/factory';
+import { authConfig, isProduction } from './config';
+
+/**
+ * Shape of the session object returned by helpers in this module.
+ */
+export interface CurrentSession {
+  /** Supabase user identifier */
+  userId: string;
+  /** User email */
+  email: string;
+  /** User role if provided */
+  role: string;
+  /** Access token */
+  accessToken: string;
+  /** Refresh token if available */
+  refreshToken?: string;
+  /** Expiration timestamp in milliseconds */
+  expiresAt: number;
+}
+
+/**
+ * Retrieve the current user session from Supabase cookies.
+ *
+ * @returns The active {@link CurrentSession} or `null` when no valid session
+ *   exists.
+ */
+export async function getCurrentSession(): Promise<CurrentSession | null> {
   try {
-    // We'll get the user directly from the JWT token in the cookie or authorization header
-    // in a real API route - this function is mocked for development
-    
-    // This is a simplified version for now - in a real application,
-    // we would extract the token from the request cookies or authorization header
-    // and validate it with Supabase
-    
-    // For now, we'll just return a placeholder user session
-    // In a real implementation, this would verify the token with Supabase
-    
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get: (name: string) => cookieStore.get(name)?.value,
+        },
+      }
+    );
+
+    const { data, error } = await supabase.auth.getSession();
+
+    if (error || !data.session) {
+      return null;
+    }
+
+    const { session } = data;
+
     return {
-      userId: 'current-user-id',
-      email: 'user@example.com',
-      role: 'user',
+      userId: session.user.id,
+      email: session.user.email ?? '',
+      role: (session.user.role as string) ?? 'user',
+      accessToken: session.access_token,
+      refreshToken: session.refresh_token ?? undefined,
+      expiresAt: session.expires_at * 1000,
     };
   } catch (error) {
-    console.error('Error getting session:', error);
+    console.error('[session] Failed to get current session:', error);
     return null;
   }
 }
 
 /**
- * Get the current user
+ * Determine whether the current session is valid.
  */
-export async function getCurrentUser() {
-  const session = await getSession();
-  
-  if (!session) {
+export async function isSessionValid(): Promise<boolean> {
+  const session = await getCurrentSession();
+  return !!session && session.expiresAt > Date.now();
+}
+
+/**
+ * Refresh the current session token using the configured AuthService.
+ *
+ * @returns The refreshed session or `null` if refresh failed.
+ */
+export async function refreshSession(): Promise<CurrentSession | null> {
+  try {
+    const authService = getApiAuthService();
+    const ok = await authService.refreshToken();
+    if (!ok) {
+      console.warn('[session] Token refresh failed');
+      return null;
+    }
+
+    console.log('[session] Token refreshed');
+    return getCurrentSession();
+  } catch (error) {
+    console.error('[session] Error refreshing session:', error);
     return null;
   }
-  
+}
+
+/**
+ * Handle session timeout by delegating to the AuthService.
+ */
+export function handleSessionTimeout(): void {
+  try {
+    getApiAuthService().handleSessionTimeout();
+    console.log('[session] Session timeout handled');
+  } catch (error) {
+    console.error('[session] Failed to handle session timeout:', error);
+  }
+}
+
+/**
+ * Persist or clear the session access token cookie.
+ */
+export function persistSession(session: Session | null): void {
+  try {
+    const cookieStore = cookies();
+    const name = authConfig.sessionCookieName;
+
+    if (session) {
+      cookieStore.set({
+        name,
+        value: session.access_token,
+        httpOnly: true,
+        secure: isProduction,
+        path: '/',
+        maxAge: session.expires_in,
+      });
+      console.log('[session] Session persisted');
+    } else {
+      cookieStore.delete(name);
+      console.log('[session] Session cleared');
+    }
+  } catch (error) {
+    console.error('[session] Failed to persist session:', error);
+  }
+}
+
+/**
+ * Convenience helper to retrieve the current user from the session.
+ */
+export async function getCurrentUser() {
+  const session = await getCurrentSession();
+
+  if (!session) return null;
+
   return {
     id: session.userId,
     email: session.email,
     role: session.role,
   };
-} 
+}

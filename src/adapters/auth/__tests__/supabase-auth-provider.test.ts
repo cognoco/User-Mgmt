@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { SupabaseAuthProvider } from '../supabase-auth-provider';
+import { SupabaseAuthProvider } from '../providers/supabase-auth-provider';
 import { supabase, resetSupabaseMock } from '@/tests/mocks/supabase';
 import type { LoginPayload, RegistrationPayload } from '@/core/auth/models';
 
-const SUPABASE_URL = 'http://localhost';
-const SUPABASE_KEY = 'anon';
+const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 describe('SupabaseAuthProvider', () => {
   beforeEach(() => {
@@ -12,7 +12,7 @@ describe('SupabaseAuthProvider', () => {
   });
 
   it('logs in a user using Supabase', async () => {
-    const provider = new SupabaseAuthProvider(SUPABASE_URL, SUPABASE_KEY);
+    const provider = new SupabaseAuthProvider(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const credentials: LoginPayload = { email: 'test@example.com', password: 'pw' };
 
     const result = await provider.login(credentials);
@@ -23,7 +23,7 @@ describe('SupabaseAuthProvider', () => {
   });
 
   it('registers a user using Supabase', async () => {
-    const provider = new SupabaseAuthProvider(SUPABASE_URL, SUPABASE_KEY);
+    const provider = new SupabaseAuthProvider(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const payload: RegistrationPayload = {
       email: 'new@example.com',
       password: 'pw',

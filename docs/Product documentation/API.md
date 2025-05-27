@@ -7,15 +7,34 @@ Register a new user.
 
 ```typescript
 interface RegisterRequest {
+  userType: 'private' | 'corporate';
   email: string;
   password: string;
-  name?: string;
-  userType?: 'private' | 'corporate';
+  firstName?: string;
+  lastName?: string;
+  companyName?: string;
+  companyWebsite?: string;
+  department?: string;
+  industry?: string;
+  companySize?:
+    | '1-10'
+    | '11-50'
+    | '51-200'
+    | '201-500'
+    | '501-1000'
+    | '1000+'
+    | 'Other/Not Specified';
+  position?: string;
+  acceptTerms: boolean;
 }
 
 interface RegisterResponse {
+  message: string;
   user: User;
-  session: Session;
+  companyAssociation?: {
+    success: boolean;
+    companyName?: string;
+  } | null;
 }
 ```
 
@@ -27,16 +46,27 @@ interface LoginRequest {
   email: string;
   password: string;
   twoFactorCode?: string;
+  rememberMe?: boolean;
 }
 
 interface LoginResponse {
   user: User;
-  session: Session;
+  token: string;
+  requiresMfa: boolean;
+  expiresAt?: string;
 }
 ```
 
 ### POST /api/auth/logout
 End the current session.
+
+An optional `callbackUrl` query parameter can be provided to redirect the user after logout.
+
+```typescript
+interface LogoutResponse {
+  message: string;
+}
+```
 
 ### POST /api/auth/reset-password
 Request a password reset.

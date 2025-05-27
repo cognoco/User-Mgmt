@@ -52,6 +52,7 @@ const mockSupabaseAuth = {
   exchangeCodeForSession: vi.fn(),
   getSession: vi.fn(),
   getUser: vi.fn(),
+  setSession: vi.fn(),
 };
 const mockSupabaseClient = {
   auth: mockSupabaseAuth,
@@ -133,11 +134,11 @@ describe("POST /api/auth/oauth/callback", () => {
   });
 
   // Helper to create request
-  const createRequest = (body: object) => {
+  const createRequest = (body: Record<string, any>) => {
     return new Request("http://localhost/api/auth/oauth/callback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ redirectUri: "http://localhost/callback", ...body }),
     });
   };
 
@@ -147,7 +148,7 @@ describe("POST /api/auth/oauth/callback", () => {
     const body = await response.json();
 
     expect(response.status).toBe(400);
-    expect(body.error).toContain("Invalid or missing state");
+    expect(body.error.message).toContain("Invalid or missing state");
     expect(mockLogUserAction).toHaveBeenCalledWith(
       expect.objectContaining({ status: "FAILURE" }),
     );
@@ -163,7 +164,7 @@ describe("POST /api/auth/oauth/callback", () => {
     const body = await response.json();
 
     expect(response.status).toBe(400);
-    expect(body.error).toContain("Invalid or missing state");
+    expect(body.error.message).toContain("Invalid or missing state");
     expect(mockLogUserAction).toHaveBeenCalledWith(
       expect.objectContaining({ status: "FAILURE" }),
     );
@@ -184,7 +185,7 @@ describe("POST /api/auth/oauth/callback", () => {
     const body = await response.json();
 
     expect(response.status).toBe(409);
-    expect(body.error).toContain("User already authenticated");
+    expect(body.error.message).toContain("User already authenticated");
     expect(mockLogUserAction).toHaveBeenCalledWith(
       expect.objectContaining({ status: "FAILURE" }),
     );
@@ -209,7 +210,46 @@ describe("POST /api/auth/oauth/callback", () => {
     const body = await response.json();
 
     expect(response.status).toBe(400);
-    expect(body.error).toBe("Invalid code");
+    expect(body.error.message).toBe("Invalid code");
+    expect(mockLogUserAction).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "FAILURE" }),
+    );
+  });
+
+  it("should return 500 if session check fails", async () => {
+    mockSupabaseAuth.getSession.mockResolvedValue({
+      data: null,
+      error: { message: "boom" },
+    });
+
+    const request = createRequest({
+      provider: testProvider,
+      code: validCode,
+      state: validState,
+    });
+    const response = await POST(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(body.error.message).toContain("Failed to check current session");
+    expect(mockLogUserAction).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "FAILURE" }),
+    );
+  });
+
+  it("should return 400 with revoked message if provider access revoked", async () => {
+    mockSupabaseAuth.getSession.mockResolvedValue({ data: { session: null }, error: null });
+    mockSupabaseAuth.exchangeCodeForSession.mockResolvedValue({
+      data: null,
+      error: { message: "Access revoked", status: 400 },
+    });
+
+    const request = createRequest({ provider: testProvider, code: validCode, state: validState });
+    const response = await POST(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.message).toContain("Access to your provider account has been revoked");
     expect(mockLogUserAction).toHaveBeenCalledWith(
       expect.objectContaining({ status: "FAILURE" }),
     );
@@ -238,7 +278,7 @@ describe("POST /api/auth/oauth/callback", () => {
     const body = await response.json();
 
     expect(response.status).toBe(400);
-    expect(body.error).toBe("Failed to fetch");
+    expect(body.error.message).toBe("Failed to fetch");
     expect(mockLogUserAction).toHaveBeenCalledWith(
       expect.objectContaining({ status: "FAILURE" }),
     );
@@ -295,6 +335,14 @@ describe("POST /api/auth/oauth/callback", () => {
         status: "SUCCESS",
       }),
     );
+
+    // cookie cleared and session stored
+    const cleared = mockCookies.get(`oauth_state_${testProvider}`);
+    expect(cleared?.value).toBe("");
+    expect(mockSupabaseAuth.setSession).toHaveBeenCalledWith({
+      access_token: testAccessToken,
+      refresh_token: undefined,
+    });
   });
 
   it("should create a new user and account if not found", async () => {
@@ -337,7 +385,7 @@ describe("POST /api/auth/oauth/callback", () => {
     expect(body.data.user).toEqual(createdAccount.users);
     expect(body.data.token).toBe(testAccessToken);
     expect(body.data.isNewUser).toBe(true);
-    expect(body.info).toContain("New provider account linked");
+    expect(body.data.info).toContain("New provider account linked");
 
     expect(mockPrismaAccount.findUnique).toHaveBeenCalled();
     expect(mockPrismaAccount.findFirst).toHaveBeenCalled();
@@ -393,8 +441,8 @@ describe("POST /api/auth/oauth/callback", () => {
 
     // Assertions
     expect(response.status).toBe(409);
-    expect(body.error).toContain("account with this email already exists");
-    expect(body.collision).toBe(true);
+    expect(body.error.message).toContain("account with this email already exists");
+    expect(body.error.details?.collision).toBe(true);
     expect(mockPrismaAccount.create).not.toHaveBeenCalled();
     expect(mockLogUserAction).toHaveBeenCalledWith(
       expect.objectContaining({ status: "FAILURE" }),
@@ -491,7 +539,7 @@ describe("POST /api/auth/oauth/callback", () => {
 
     // Assertions
     expect(response.status).toBe(500); // Expecting internal server error
-    expect(body.error).toBe(updateError.message);
+    expect(body.error.message).toBe(updateError.message);
     expect(mockPrismaAccount.update).toHaveBeenCalledTimes(1);
     expect(mockLogUserAction).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -532,7 +580,7 @@ describe("POST /api/auth/oauth/callback", () => {
 
     // Assertions
     expect(response.status).toBe(500); // Expecting internal server error
-    expect(body.error).toBe(createError.message);
+    expect(body.error.message).toBe(createError.message);
     expect(mockPrismaAccount.create).toHaveBeenCalledTimes(1);
     expect(mockLogUserAction).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -578,7 +626,9 @@ describe("POST /api/auth/oauth/callback", () => {
 
     // Assertions
     expect(response.status).toBe(400);
-    expect(body.error).toContain("Provider did not return a unique identifier");
+    expect(body.error.message).toContain(
+      "Provider did not return a unique identifier",
+    );
     expect(mockPrismaAccount.findUnique).not.toHaveBeenCalled();
     expect(mockPrismaAccount.findFirst).not.toHaveBeenCalled();
     expect(mockPrismaAccount.create).not.toHaveBeenCalled();
@@ -659,4 +709,8 @@ describe("POST /api/auth/oauth/callback", () => {
 
   // TODO: Add more tests:
   // - PKCE validation test (if applicable for any provider used in the route)
+});
+
+afterAll(() => {
+  vi.restoreAllMocks();
 });

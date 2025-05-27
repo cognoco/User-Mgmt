@@ -5,7 +5,6 @@ const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';
 const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
 const SUBSCRIPTION_URL = '/subscription';
 const PLANS_URL = '/subscription/plans';
-const PORTAL_URL = '/subscription/manage';
 
 // --- Test Suite --- //
 test.describe('Subscription Management Flows', () => {

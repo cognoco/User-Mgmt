@@ -11,14 +11,14 @@ import type {
   User,
   MFASetupResponse,
   MFAVerifyResponse,
-} from './models';
+} from '@/core/auth/models';
 
-export interface IAuthDataProvider {
+export interface AuthDataProvider {
   /**
    * Authenticate a user with email and password.
    *
-   * @param credentials Login credentials including email, password and remember me option
-   * @returns Authentication result with success status and user data or error
+   * @param credentials - Login credentials including email, password and optional remember me flag
+   * @returns Promise resolving to an {@link AuthResult} describing the outcome
    */
   login(credentials: LoginPayload): Promise<AuthResult>;
 
@@ -30,7 +30,11 @@ export interface IAuthDataProvider {
    */
   register(userData: RegistrationPayload): Promise<AuthResult>;
 
-  /** Log out the current user. */
+  /**
+   * Log out the currently authenticated user.
+   *
+   * Implementations should clear any stored session information.
+   */
   logout(): Promise<void>;
 
   /**
@@ -57,6 +61,21 @@ export interface IAuthDataProvider {
   updatePassword(oldPassword: string, newPassword: string): Promise<void>;
 
   /**
+   * Verify a password reset token
+   */
+  verifyPasswordResetToken(token: string): Promise<{ valid: boolean; user?: User; token?: string; error?: string }>;
+
+  /**
+   * Update password using a reset token
+   */
+  updatePasswordWithToken(token: string, newPassword: string): Promise<AuthResult>;
+
+  /**
+   * Invalidate all sessions for the given user
+   */
+  invalidateSessions(userId: string): Promise<void>;
+
+  /**
    * Send an email verification link.
    *
    * @param email Email address to verify
@@ -65,16 +84,16 @@ export interface IAuthDataProvider {
   sendVerificationEmail(email: string): Promise<AuthResult>;
 
   /**
-   * Verify an email address using a token.
+   * Verify an email address using a verification token.
    *
-   * @param token Verification token from the email link
+   * @param token - Verification token from the email link
    */
   verifyEmail(token: string): Promise<void>;
 
   /**
-   * Delete the current user's account.
+   * Permanently delete the current user's account.
    *
-   * @param password Current password for verification (optional depending on implementation)
+   * @param password - Current password for verification (optional depending on implementation)
    */
   deleteAccount(password?: string): Promise<void>;
 
@@ -106,7 +125,10 @@ export interface IAuthDataProvider {
    *
    * @returns True if token was refreshed successfully, false otherwise
    */
-  refreshToken(): Promise<boolean>;
+  refreshToken(): Promise<
+    | { accessToken: string; refreshToken: string; expiresAt: number }
+    | null
+  >;
 
   /**
    * Subscribe to authentication state changes.
@@ -127,5 +149,4 @@ export interface IAuthDataProvider {
   handleSessionTimeout(): void;
 }
 
-export type AuthDataProvider = IAuthDataProvider;
 

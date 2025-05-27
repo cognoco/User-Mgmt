@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { SupabaseWebhookProvider } from '../supabase/supabase-webhook.provider';
 import { setTableMockData, resetSupabaseMock } from '@/tests/mocks/supabase';
 
-const SUPABASE_URL = 'http://localhost';
-const SUPABASE_KEY = 'anon';
+const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const webhookRecord = {
   id: 'wh-1',
@@ -23,20 +23,20 @@ describe('SupabaseWebhookProvider', () => {
   });
 
   it('lists webhooks for a user', async () => {
-    const provider = new SupabaseWebhookProvider(SUPABASE_URL, SUPABASE_KEY);
+    const provider = new SupabaseWebhookProvider(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const hooks = await provider.listWebhooks('user-1');
     expect(hooks[0]?.id).toBe('wh-1');
   });
 
   it('fetches a webhook by id', async () => {
-    const provider = new SupabaseWebhookProvider(SUPABASE_URL, SUPABASE_KEY);
+    const provider = new SupabaseWebhookProvider(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const hook = await provider.getWebhook('user-1', 'wh-1');
     expect(hook?.id).toBe('wh-1');
   });
 
   it('creates a webhook', async () => {
     setTableMockData('webhooks', { data: webhookRecord, error: null });
-    const provider = new SupabaseWebhookProvider(SUPABASE_URL, SUPABASE_KEY);
+    const provider = new SupabaseWebhookProvider(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const result = await provider.createWebhook('user-1', {
       name: 'h',
       url: 'https://example.com',
@@ -49,14 +49,14 @@ describe('SupabaseWebhookProvider', () => {
 
   it('updates a webhook', async () => {
     setTableMockData('webhooks', { data: { ...webhookRecord, url: 'https://new.url' }, error: null });
-    const provider = new SupabaseWebhookProvider(SUPABASE_URL, SUPABASE_KEY);
+    const provider = new SupabaseWebhookProvider(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const result = await provider.updateWebhook('user-1', 'wh-1', { url: 'https://new.url' });
     expect(result.success).toBe(true);
   });
 
   it('deletes a webhook', async () => {
     setTableMockData('webhooks', { data: null, error: null });
-    const provider = new SupabaseWebhookProvider(SUPABASE_URL, SUPABASE_KEY);
+    const provider = new SupabaseWebhookProvider(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const result = await provider.deleteWebhook('user-1', 'wh-1');
     expect(result.success).toBe(true);
   });

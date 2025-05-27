@@ -79,6 +79,9 @@ test.describe('Internationalization (i18n) Features', () => {
   });
   
   test('Changing language updates the UI content', async ({ page, browserName }) => {
+
+    // Adjust timeout based on browser (Issue #27)
+
     
     // First, check what common text exists in English
     const commonEnglishTexts = [
@@ -488,6 +491,8 @@ test.describe('Internationalization (i18n) Features', () => {
     ];
     
 
+    // Capture current page text (may help debugging if translation fails)
+
     
     // Open language selector
     const languageSelector = page.getByRole('button', { name: /language|idioma|langue/i })
@@ -582,7 +587,7 @@ test.describe('Internationalization (i18n) Features', () => {
     await page.screenshot({ path: `translated-logged-in-ui-${browserName}.png` });
   });
   
-  test('Default language detection works correctly', async ({ page, browserName }) => {
+  test('Default language detection works correctly', async ({ page }) => {
     // This test checks if the application respects browser language settings
     
     // First let's set a mock navigator.language

@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { SupabaseSubscriptionProvider } from '../supabase/supabase-subscription.provider';
 import { setTableMockData, resetSupabaseMock } from '@/tests/mocks/supabase';
 
-const SUPABASE_URL = 'http://localhost';
-const SUPABASE_KEY = 'anon';
+const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const subRecord = {
   id: 'sub-1',
@@ -23,14 +23,14 @@ describe('SupabaseSubscriptionProvider', () => {
   });
 
   it('retrieves a user subscription', async () => {
-    const provider = new SupabaseSubscriptionProvider(SUPABASE_URL, SUPABASE_KEY);
+    const provider = new SupabaseSubscriptionProvider(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const result = await provider.getUserSubscription('user-1');
     expect(result?.id).toBe('sub-1');
     expect(result?.planId).toBe('plan-1');
   });
 
   it('lists plans', async () => {
-    const provider = new SupabaseSubscriptionProvider(SUPABASE_URL, SUPABASE_KEY);
+    const provider = new SupabaseSubscriptionProvider(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const plans = await provider.getPlans();
     expect(plans[0]?.id).toBe('plan-1');
   });

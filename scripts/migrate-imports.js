@@ -14,6 +14,7 @@
  * --path=<directory>: Only process files in the specified directory
  */
 
+/* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
@@ -105,7 +106,7 @@ const exactPathMappings = {
   
   // Database adapters
   '@/lib/database/supabase': '@/adapters/database/supabase-provider',
-  '@/lib/database/auth': '@/adapters/auth/supabase-auth-provider',
+  '@/lib/database/auth': '@/adapters/auth/providers/supabase-auth-provider',
   '@/lib/database/user': '@/adapters/user/supabase-user-provider',
   '@/lib/database/team': '@/adapters/team/supabase-team-provider',
   '@/lib/database/permission': '@/adapters/permission/supabase-permission-provider',
@@ -123,11 +124,6 @@ const exactPathMappings = {
   '@/utils/permission': '@/services/permission/permission-utils',
 };
 
-// Function to convert PascalCase to kebab-case
-function pascalToKebabCase(str) {
-  return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
-}
-
 // Generate additional mappings for common patterns
 const pathMappings = [];
 
@@ -141,7 +137,7 @@ Object.entries(exactPathMappings).forEach(([oldPath, newPath]) => {
 
 // Add kebab-case converter for new architecture paths
 pathMappings.push({
-  pattern: /from ['"](\@\/(?:ui|hooks|services|adapters|core)\/[a-zA-Z0-9-/]+)\/([A-Z][a-zA-Z0-9]*)['"]/,
+  pattern: /from ['"](@\/(?:ui|hooks|services|adapters|core)\/[a-zA-Z0-9-/]+)\/([A-Z][a-zA-Z0-9]*)['"]/,
   replacement: (match, p1, p2) => {
     // Convert PascalCase to kebab-case
     const kebabCase = p2.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
@@ -153,7 +149,6 @@ pathMappings.push({
 function processFile(filePath) {
   try {
     let content = fs.readFileSync(filePath, 'utf8');
-    let originalContent = content;
     let hasChanges = false;
     
     // Apply each mapping

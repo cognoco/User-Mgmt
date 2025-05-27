@@ -12,6 +12,7 @@ import { initializeUserManagement } from './initialize-adapters';
 
 // Initialize the User Management Module with default configuration
 // This maintains backward compatibility with existing code
+
 initializeUserManagement({
   type: 'supabase',
   options: {

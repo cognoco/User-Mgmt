@@ -135,9 +135,19 @@ export class MockAuthService implements AuthService {
     return { success: true };
   });
 
-  refreshToken = vi.fn().mockImplementation(async (): Promise<boolean> => {
-    return true;
-  });
+  refreshToken = vi.fn().mockImplementation(
+    async (): Promise<{
+      accessToken: string;
+      refreshToken: string;
+      expiresAt: number;
+    } | null> => {
+      return {
+        accessToken: 'mock-access',
+        refreshToken: 'mock-refresh',
+        expiresAt: Date.now() + 60_000,
+      };
+    },
+  );
 
   handleSessionTimeout = vi.fn().mockImplementation((): void => {
     this.logout();

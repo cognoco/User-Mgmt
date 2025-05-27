@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { SupabaseAddressAdapter } from '../supabase-adapter';
 import { setTableMockData, resetSupabaseMock } from '@/tests/mocks/supabase';
 
-const SUPABASE_URL = 'http://localhost';
-const SUPABASE_KEY = 'anon';
+const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const addressRecord = {
   id: 'addr-1',
@@ -28,21 +28,21 @@ describe('SupabaseAddressAdapter', () => {
   });
 
   it('retrieves addresses with query', async () => {
-    const adapter = new SupabaseAddressAdapter(SUPABASE_URL, SUPABASE_KEY);
+    const adapter = new SupabaseAddressAdapter(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const { addresses, count } = await adapter.getAddresses('comp-1', { page: 1, limit: 10 });
     expect(count).toBe(1);
     expect(addresses[0]?.id).toBe('addr-1');
   });
 
   it('fetches a single address', async () => {
-    const adapter = new SupabaseAddressAdapter(SUPABASE_URL, SUPABASE_KEY);
+    const adapter = new SupabaseAddressAdapter(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const addr = await adapter.getAddress('comp-1', 'addr-1');
     expect(addr?.id).toBe('addr-1');
   });
 
   it('creates an address', async () => {
     setTableMockData('company_addresses', { data: addressRecord, error: null });
-    const adapter = new SupabaseAddressAdapter(SUPABASE_URL, SUPABASE_KEY);
+    const adapter = new SupabaseAddressAdapter(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const result = await adapter.createAddress('comp-1', { type: 'billing', street_line1: '123 Main', postal_code: '12345', city: 'Townsville', country: 'US' });
     expect(result.success).toBe(true);
   });

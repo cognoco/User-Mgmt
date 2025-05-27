@@ -7,7 +7,7 @@
 
 import { AuthService } from '@/core/auth/interfaces';
 import { DefaultAuthService } from './default-auth.service';
-import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import type { AuthDataProvider } from '@/adapters/auth/interfaces';
 import type { AuthStorage } from './auth-storage';
 import { BrowserAuthStorage } from './auth-storage';
 
@@ -19,7 +19,7 @@ export interface AuthServiceConfig {
   /**
    * Auth data provider for database operations
    */
-  authDataProvider: IAuthDataProvider;
+  authDataProvider: AuthDataProvider;
   storage?: AuthStorage;
 }
 

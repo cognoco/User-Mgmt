@@ -64,7 +64,7 @@ export class SupabaseWebhookProvider implements IWebhookDataProvider {
       req = req.limit(query.limit);
     }
 
-    const { data, error, count } = await req;
+    const { data, count } = await req;
     const items = data ? data.map(r => this.mapRecord(r)) : [];
     return {
       webhooks: items,

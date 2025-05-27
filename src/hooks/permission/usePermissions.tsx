@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { PermissionService } from '@/core/permission/interfaces';
 import { 
@@ -41,7 +41,7 @@ export function usePermissions() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const { data: session, status: sessionStatus } = useSession();
+  const { user: sessionUser, isAuthenticated, isLoading: authLoading } = useAuth();
   
   // Fetch all permissions
   const fetchAllPermissions = useCallback(async (): Promise<Permission[]> => {
@@ -239,14 +239,14 @@ export function usePermissions() {
       hasPermission: boolean;
       isLoading: boolean;
     }> => {
-      if (sessionStatus !== 'authenticated' || !session?.user?.id) {
+      if (!isAuthenticated || !sessionUser?.id) {
         return { hasPermission: false, isLoading: false };
       }
 
       setIsLoading(true);
       try {
         const hasPermission = await permissionService.hasPermission(
-          session.user.id,
+          sessionUser.id,
           options.required as Permission,
         );
         setIsLoading(false);
@@ -257,7 +257,7 @@ export function usePermissions() {
         return { hasPermission: false, isLoading: false };
       }
     },
-    [permissionService, session, sessionStatus],
+    [permissionService, sessionUser, isAuthenticated],
   );
 
   return {
@@ -294,27 +294,27 @@ export function usePermission(options: UsePermissionOptions) {
     UserManagementConfiguration.getServiceProvider<PermissionService>(
       'permissionService',
     );
-  const { data: session, status: sessionStatus } = useSession();
+  const { user: sessionUser, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const { data, isLoading: queryLoading } = useQuery({
-    queryKey: ['permission-check', options.required, options.resourceId, session?.user?.id],
+    queryKey: ['permission-check', options.required, options.resourceId, sessionUser?.id],
     queryFn: async () => {
-      if (!session?.user?.id || !permissionService) return false;
+      if (!sessionUser?.id || !permissionService) return false;
       try {
         return await permissionService.hasPermission(
-          session.user.id,
+          sessionUser.id,
           options.required as Permission,
         );
       } catch {
         return false;
       }
     },
-    enabled: sessionStatus === 'authenticated' && !!permissionService,
+    enabled: isAuthenticated && !!permissionService,
   });
 
   return {
     hasPermission: !!data,
-    isLoading: sessionStatus === 'loading' || queryLoading,
+    isLoading: authLoading || queryLoading,
   };
 }
 

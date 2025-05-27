@@ -5,8 +5,8 @@
  * It allows for dependency injection and makes it easy to swap implementations.
  */
 
-import type { IAuthDataProvider } from './interfaces';
-import { SupabaseAuthProvider } from './supabase-auth-provider';
+import type { AuthDataProvider } from './interfaces';
+import { SupabaseAuthProvider } from './providers/supabase-auth-provider';
 
 /**
  * Create a Supabase auth data provider
@@ -18,7 +18,7 @@ import { SupabaseAuthProvider } from './supabase-auth-provider';
 export function createSupabaseAuthProvider(
   supabaseUrl: string,
   supabaseKey: string
-): IAuthDataProvider {
+): AuthDataProvider {
   return new SupabaseAuthProvider(supabaseUrl, supabaseKey);
 }
 
@@ -31,7 +31,7 @@ export function createSupabaseAuthProvider(
 export function createAuthProvider(config: {
   type: 'supabase' | string;
   options: Record<string, any>;
-}): IAuthDataProvider {
+}): AuthDataProvider {
   switch (config.type) {
     case 'supabase':
       return createSupabaseAuthProvider(

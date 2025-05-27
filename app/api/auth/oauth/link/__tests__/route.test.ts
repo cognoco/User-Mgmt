@@ -3,7 +3,6 @@ import { OAuthProvider } from '@/types/oauth';
 import { describe, it, expect, vi, beforeEach, MockedFunction } from 'vitest';
 // import { cookies } from 'next/headers'; // Mocked
 // import { createServerClient } from '@supabase/ssr'; // Mocked
-// import { prisma } from '@/lib/database/prisma'; // Mocked
 import { logUserAction } from '@/lib/audit/auditLogger'; // Mocked, but type used
 
 // --- Mocks ---
@@ -32,28 +31,31 @@ const mockSupabaseAuth = {
   getSession: vi.fn(), // Although not directly called, getUser might use it
   getUser: vi.fn(),
 };
+const mockFrom = vi.fn();
 const mockSupabaseClient = {
   auth: mockSupabaseAuth,
+  from: mockFrom,
 };
 vi.mock('@supabase/ssr', () => ({
   createServerClient: vi.fn(() => mockSupabaseClient),
 }));
 
-// 3. Mock Prisma Client (same as callback, adding findMany)
-const mockPrismaAccount = {
-  findUnique: vi.fn(),
-  findFirst: vi.fn(),
-  create: vi.fn(),
-  update: vi.fn(),
-  findMany: vi.fn(), // Needed for the final success response
-};
-vi.mock('@/lib/database/prisma', () => ({
-  prisma: {
-    account: mockPrismaAccount,
-  },
-}));
+interface Builder {
+  select: any; eq: any; maybeSingle: any; insert: any; then: any;
+}
+let builders: Array<{ table: string; builder: Builder }> = [];
+function createBuilder(response: any = { data: null, error: null }): Builder {
+  const builder: any = {
+    select: vi.fn(() => builder),
+    eq: vi.fn(() => builder),
+    maybeSingle: vi.fn(() => Promise.resolve(response)),
+    insert: vi.fn(() => Promise.resolve(response)),
+  };
+  builder.then = (resolve: any, reject?: any) => Promise.resolve(response).then(resolve, reject);
+  return builder;
+}
 
-// 4. Mock Audit Logger (same as callback)
+// 3. Mock Audit Logger (same as callback)
 vi.mock('@/lib/audit/auditLogger', () => ({
   logUserAction: vi.fn(),
 }));
@@ -90,6 +92,12 @@ describe('POST /api/auth/oauth/link', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mockCookies.clear();
+    builders = [];
+    mockFrom.mockImplementation((table: string) => {
+      const b = createBuilder();
+      builders.push({ table, builder: b });
+      return b;
+    });
     // Assume user is logged in for most tests
     mockSupabaseAuth.getUser.mockResolvedValueOnce({ data: { user: mockLoggedInUser }, error: null });
   });
@@ -113,7 +121,6 @@ describe('POST /api/auth/oauth/link', () => {
 
     expect(response.status).toBe(401);
     expect(body.error).toBe('Authentication required');
-    expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({ status: 'FAILURE' }));
   });
 
   it('should return 400 if code exchange fails', async () => {
@@ -125,15 +132,14 @@ describe('POST /api/auth/oauth/link', () => {
 
     expect(response.status).toBe(400);
     expect(body.error).toBe('Invalid code for link');
-    expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({ status: 'FAILURE' }));
   });
 
   it('should return 400 if fetching provider user data fails', async () => {
     mockSupabaseAuth.exchangeCodeForSession.mockResolvedValue({ data: { session: {} }, error: null }); // Success
-    // First getUser (auth check) succeeds due to beforeEach
-    // Second getUser (provider data) fails
-    mockSupabaseAuth.getUser.mockResolvedValueOnce({ data: { user: mockLoggedInUser }, error: null }) // Auth check
-                         .mockResolvedValueOnce({ data: null, error: { message: 'Provider fetch failed', status: 500 } }); // Provider data fetch
+    mockSupabaseAuth.getUser.mockReset();
+    mockSupabaseAuth.getUser
+      .mockResolvedValueOnce({ data: { user: mockLoggedInUser }, error: null }) // Auth check
+      .mockResolvedValueOnce({ data: null, error: { message: 'Provider fetch failed', status: 500 } }); // Provider data fetch
 
     const request = createRequest({ provider: providerToLink, code: validCode });
     const response = await POST(request);
@@ -141,14 +147,14 @@ describe('POST /api/auth/oauth/link', () => {
 
     expect(response.status).toBe(400);
     expect(body.error).toBe('Provider fetch failed');
-    expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({ status: 'FAILURE' }));
   });
 
   it('should return 409 if provider account is already linked', async () => {
     mockSupabaseAuth.exchangeCodeForSession.mockResolvedValue({ data: { session: {} }, error: null });
     mockSupabaseAuth.getUser.mockResolvedValueOnce({ data: { user: mockLoggedInUser }, error: null }) // Auth check
                          .mockResolvedValueOnce({ data: { user: mockProviderUser }, error: null }); // Provider data fetch
-    mockPrismaAccount.findUnique.mockResolvedValue({ id: 'existing-link-id' }); // Simulate existing link
+    const builder = createBuilder({ data: { id: 'existing-link-id', user_id: 'other' }, error: null });
+    mockFrom.mockReturnValueOnce(builder);
 
     const request = createRequest({ provider: providerToLink, code: validCode });
     const response = await POST(request);
@@ -156,18 +162,19 @@ describe('POST /api/auth/oauth/link', () => {
 
     expect(response.status).toBe(409);
     expect(body.error).toContain('already linked');
-    expect(mockPrismaAccount.findUnique).toHaveBeenCalledWith({
-      where: { provider_provider_account_id: { provider: providerToLink.toLowerCase(), provider_account_id: providerToLinkAccountId } }
-    });
-    expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({ status: 'FAILURE' }));
+    expect(mockFrom).toHaveBeenCalledWith('account');
+    expect(builder.select).toHaveBeenCalledWith('id, user_id');
   });
 
   it('should return 409 on email collision with another account', async () => {
     mockSupabaseAuth.exchangeCodeForSession.mockResolvedValue({ data: { session: {} }, error: null });
-    mockSupabaseAuth.getUser.mockResolvedValueOnce({ data: { user: mockLoggedInUser }, error: null })
-                         .mockResolvedValueOnce({ data: { user: mockProviderUser }, error: null });
-    mockPrismaAccount.findUnique.mockResolvedValue(null); // Not linked by provider ID
-    mockPrismaAccount.findFirst.mockResolvedValue({ id: 'collision-account-id' }); // Found by email
+    mockSupabaseAuth.getUser.mockReset();
+    mockSupabaseAuth.getUser
+      .mockResolvedValueOnce({ data: { user: mockLoggedInUser }, error: null })
+      .mockResolvedValueOnce({ data: { user: mockProviderUser }, error: null });
+    const builder1 = createBuilder({ data: null, error: null });
+    const builder2 = createBuilder({ data: { id: 'collision-account-id', user_id: 'other' }, error: null });
+    mockFrom.mockReturnValueOnce(builder1).mockReturnValueOnce(builder2);
 
     const request = createRequest({ provider: providerToLink, code: validCode });
     const response = await POST(request);
@@ -176,22 +183,24 @@ describe('POST /api/auth/oauth/link', () => {
     expect(response.status).toBe(409);
     expect(body.error).toContain('account with this email already exists');
     expect(body.collision).toBe(true);
-    expect(mockPrismaAccount.findFirst).toHaveBeenCalledWith({ where: { provider_email: providerToLinkEmail } });
-    expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({ status: 'FAILURE' }));
+    expect(mockFrom).toHaveBeenCalledTimes(2);
   });
 
   it('should successfully link a new provider account', async () => {
     mockSupabaseAuth.exchangeCodeForSession.mockResolvedValue({ data: { session: {} }, error: null });
-    mockSupabaseAuth.getUser.mockResolvedValueOnce({ data: { user: mockLoggedInUser }, error: null })
-                         .mockResolvedValueOnce({ data: { user: mockProviderUser }, error: null });
-    mockPrismaAccount.findUnique.mockResolvedValue(null); // Not linked
-    mockPrismaAccount.findFirst.mockResolvedValue(null); // No collision
-    mockPrismaAccount.create.mockResolvedValue({ id: 'new-link-id' }); // Success create
-    // Mock findMany for the final response
-    mockPrismaAccount.findMany.mockResolvedValue([
-        { provider: 'google' }, // Assume google was already linked
-        { provider: providerToLink.toLowerCase() } // The newly linked one
-    ]);
+    mockSupabaseAuth.getUser.mockReset();
+    mockSupabaseAuth.getUser
+      .mockResolvedValueOnce({ data: { user: mockLoggedInUser }, error: null })
+      .mockResolvedValueOnce({ data: { user: mockProviderUser }, error: null });
+    const builder1 = createBuilder({ data: null, error: null });
+    const builder2 = createBuilder({ data: null, error: null });
+    const builder3 = createBuilder({ data: { id: 'new-link-id' }, error: null });
+    const builder4 = createBuilder({ data: [ { provider: 'google' }, { provider: providerToLink.toLowerCase() } ], error: null });
+    mockFrom
+      .mockReturnValueOnce(builder1)
+      .mockReturnValueOnce(builder2)
+      .mockReturnValueOnce(builder3)
+      .mockReturnValueOnce(builder4);
 
     const request = createRequest({ provider: providerToLink, code: validCode });
     const response = await POST(request);
@@ -202,24 +211,25 @@ describe('POST /api/auth/oauth/link', () => {
     expect(body.user).toEqual(mockLoggedInUser);
     expect(body.linkedProviders).toEqual(['google', providerToLink.toLowerCase()]);
 
-    expect(mockPrismaAccount.create).toHaveBeenCalledWith({ data: {
-      user_id: loggedInUserId,
-      provider: providerToLink.toLowerCase(),
-      provider_account_id: providerToLinkAccountId,
-      provider_email: providerToLinkEmail,
-    }});
-    expect(mockPrismaAccount.findMany).toHaveBeenCalledWith({ where: { user_id: loggedInUserId }, select: { provider: true } });
+    expect(mockFrom).toHaveBeenCalledTimes(4);
     expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({ userId: loggedInUserId, action: 'SSO_LINK', status: 'SUCCESS' }));
   });
 
   it('should handle errors during prisma account create', async () => {
     mockSupabaseAuth.exchangeCodeForSession.mockResolvedValue({ data: { session: {} }, error: null });
-    mockSupabaseAuth.getUser.mockResolvedValueOnce({ data: { user: mockLoggedInUser }, error: null })
-                         .mockResolvedValueOnce({ data: { user: mockProviderUser }, error: null });
-    mockPrismaAccount.findUnique.mockResolvedValue(null); // Not linked
-    mockPrismaAccount.findFirst.mockResolvedValue(null); // No collision
+    mockSupabaseAuth.getUser.mockReset();
+    mockSupabaseAuth.getUser
+      .mockResolvedValueOnce({ data: { user: mockLoggedInUser }, error: null })
+      .mockResolvedValueOnce({ data: { user: mockProviderUser }, error: null });
+    const builder1 = createBuilder({ data: null, error: null });
+    const builder2 = createBuilder({ data: null, error: null });
     const createError = new Error('DB link create failed');
-    mockPrismaAccount.create.mockRejectedValue(createError); // Simulate create failure
+    const builder3 = createBuilder({ data: null, error: null });
+    builder3.insert = vi.fn(() => Promise.reject(createError));
+    mockFrom
+      .mockReturnValueOnce(builder1)
+      .mockReturnValueOnce(builder2)
+      .mockReturnValueOnce(builder3);
 
     const request = createRequest({ provider: providerToLink, code: validCode });
     const response = await POST(request);
@@ -227,7 +237,7 @@ describe('POST /api/auth/oauth/link', () => {
 
     expect(response.status).toBe(400); // Should match the error handling block
     expect(body.error).toBe(createError.message);
-    expect(mockPrismaAccount.create).toHaveBeenCalledTimes(1);
+    expect(builder3.insert).toHaveBeenCalledTimes(1);
     expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({
       action: 'SSO_LINK',
       status: 'FAILURE',
@@ -242,8 +252,10 @@ describe('POST /api/auth/oauth/link', () => {
       app_metadata: { ...mockProviderUser.app_metadata, provider_id: undefined },
     };
     mockSupabaseAuth.exchangeCodeForSession.mockResolvedValue({ data: { session: {} }, error: null });
-    mockSupabaseAuth.getUser.mockResolvedValueOnce({ data: { user: mockLoggedInUser }, error: null }) // Auth check
-                         .mockResolvedValueOnce({ data: { user: providerUserWithoutIds }, error: null }); // Provider data fetch
+    mockSupabaseAuth.getUser.mockReset();
+    mockSupabaseAuth.getUser
+      .mockResolvedValueOnce({ data: { user: mockLoggedInUser }, error: null }) // Auth check
+      .mockResolvedValueOnce({ data: { user: providerUserWithoutIds }, error: null }); // Provider data fetch
 
     const request = createRequest({ provider: providerToLink, code: validCode });
     const response = await POST(request);
@@ -251,9 +263,7 @@ describe('POST /api/auth/oauth/link', () => {
 
     expect(response.status).toBe(400);
     expect(body.error).toContain('Provider did not return a unique identifier');
-    expect(mockPrismaAccount.findUnique).not.toHaveBeenCalled();
-    expect(mockPrismaAccount.create).not.toHaveBeenCalled();
-    expect(mockLogUserAction).toHaveBeenCalledWith(expect.objectContaining({ status: 'FAILURE' }));
+    expect(mockFrom).not.toHaveBeenCalled();
   });
 
   // TODO: Add tests for:

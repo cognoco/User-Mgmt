@@ -6,11 +6,11 @@ import { OAuthProvider } from "@/types/oauth";
 import { logUserAction } from "@/lib/audit/auditLogger";
 import {
   createSuccessResponse,
-  withErrorHandling,
-  withValidation,
   ApiError,
   ERROR_CODES,
 } from "@/lib/api/common";
+import { withErrorHandling } from "@/middleware/error-handling";
+import { withValidation } from "@/middleware/validation";
 
 // Request schema
 const callbackRequestSchema = z.object({
@@ -29,6 +29,11 @@ async function handleCallback(
   const cookieStore = cookies();
   const stateCookie = cookieStore.get(`oauth_state_${provider}`)?.value;
   if (!state || !stateCookie || state !== stateCookie) {
+    await logUserAction({
+      action: "SSO_LOGIN",
+      status: "FAILURE",
+      details: { error: "invalid_state" },
+    });
     throw new ApiError(
       ERROR_CODES.INVALID_REQUEST,
       "Invalid or missing state parameter. Possible CSRF attack.",
@@ -63,6 +68,11 @@ async function handleCallback(
   const { data: currentSession, error: sessionError } =
     await supabase.auth.getSession();
   if (sessionError) {
+    await logUserAction({
+      action: "SSO_LOGIN",
+      status: "FAILURE",
+      details: { error: "session_check_failed" },
+    });
     throw new ApiError(
       ERROR_CODES.INTERNAL_ERROR,
       "Failed to check current session.",
@@ -70,6 +80,11 @@ async function handleCallback(
     );
   }
   if (currentSession?.session) {
+    await logUserAction({
+      action: "SSO_LOGIN",
+      status: "FAILURE",
+      details: { error: "already_authenticated" },
+    });
     throw new ApiError(
       ERROR_CODES.INVALID_REQUEST,
       "User already authenticated. Use the account linking endpoint to link a new provider.",
@@ -80,6 +95,11 @@ async function handleCallback(
   const { data: sessionData, error } =
     await supabase.auth.exchangeCodeForSession(code);
   if (error) {
+    await logUserAction({
+      action: "SSO_LOGIN",
+      status: "FAILURE",
+      details: { error: error.message },
+    });
     if (error.message && error.message.toLowerCase().includes("revoked")) {
       throw new ApiError(
         ERROR_CODES.OAUTH_ERROR,
@@ -92,6 +112,11 @@ async function handleCallback(
 
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData?.user) {
+    await logUserAction({
+      action: "SSO_LOGIN",
+      status: "FAILURE",
+      details: { error: userError?.message || "user_fetch_failed" },
+    });
     throw new ApiError(
       ERROR_CODES.OAUTH_ERROR,
       userError?.message || "Failed to fetch user data",
@@ -103,6 +128,11 @@ async function handleCallback(
   const providerAccountId = userData.user.app_metadata?.provider_id;
   const email = userData.user.email;
   if (!providerAccountId && !email) {
+    await logUserAction({
+      action: "SSO_LOGIN",
+      status: "FAILURE",
+      details: { error: "missing_identifier" },
+    });
     throw new ApiError(
       ERROR_CODES.OAUTH_ERROR,
       "Provider did not return a unique identifier (email or provider user ID).",
@@ -125,10 +155,19 @@ async function handleCallback(
 
   if (account) {
     if (email && account.provider_email !== email) {
-      await prisma.account.update({
-        where: { id: account.id },
-        data: { provider_email: email },
-      });
+      try {
+        await prisma.account.update({
+          where: { id: account.id },
+          data: { provider_email: email },
+        });
+      } catch (err: any) {
+        await logUserAction({
+          action: "SSO_LOGIN",
+          status: "FAILURE",
+          details: { error: err.message },
+        });
+        throw new ApiError(ERROR_CODES.INTERNAL_ERROR, err.message, 500);
+      }
     }
 
     await logUserAction({
@@ -139,6 +178,13 @@ async function handleCallback(
       targetResourceId: userData.user.id,
       details: { provider, email, isNewUser: false },
     });
+
+    if (sessionData.session) {
+      await supabase.auth.setSession({
+        access_token: sessionData.session.access_token,
+        refresh_token: sessionData.session.refresh_token,
+      });
+    }
 
     return createSuccessResponse({
       user: account.users,
@@ -169,15 +215,25 @@ async function handleCallback(
     );
   }
 
-  const newAccount = await prisma.account.create({
-    data: {
-      user_id: userData.user.id,
-      provider: provider.toLowerCase(),
-      provider_account_id: providerAccountId || "",
-      provider_email: email || "",
-    },
-    include: { users: true },
-  });
+  let newAccount;
+  try {
+    newAccount = await prisma.account.create({
+      data: {
+        user_id: userData.user.id,
+        provider: provider.toLowerCase(),
+        provider_account_id: providerAccountId || "",
+        provider_email: email || "",
+      },
+      include: { users: true },
+    });
+  } catch (err: any) {
+    await logUserAction({
+      action: "SSO_LOGIN",
+      status: "FAILURE",
+      details: { error: err.message },
+    });
+    throw new ApiError(ERROR_CODES.INTERNAL_ERROR, err.message, 500);
+  }
 
   await logUserAction({
     userId: userData.user.id,
@@ -187,6 +243,13 @@ async function handleCallback(
     targetResourceId: userData.user.id,
     details: { provider, email, isNewUser: true },
   });
+
+  if (sessionData.session) {
+    await supabase.auth.setSession({
+      access_token: sessionData.session.access_token,
+      refresh_token: sessionData.session.refresh_token,
+    });
+  }
 
   return createSuccessResponse({
     user: newAccount.users,

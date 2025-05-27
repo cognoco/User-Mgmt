@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DefaultAuthService } from '../default-auth.service';
 import type { AuthStorage } from '../auth-storage';
-import type { IAuthDataProvider } from '@/core/auth/IAuthDataProvider';
+import type { AuthDataProvider } from '@/adapters/auth/interfaces';
 import type { AuthResult, LoginPayload } from '@/core/auth/models';
 
 function createAdapter(
-  overrides: Partial<IAuthDataProvider> = {},
-): IAuthDataProvider {
+  overrides: Partial<AuthDataProvider> = {},
+): AuthDataProvider {
   return {
     login: vi.fn(),
     register: vi.fn(),
@@ -32,7 +32,7 @@ function createAdapter(
 }
 
 describe("DefaultAuthService", () => {
-  let adapter: IAuthDataProvider;
+  let adapter: AuthDataProvider;
   let service: DefaultAuthService;
 
   beforeEach(() => {

@@ -1,6 +1,5 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { checkRateLimit } from '@/middleware/rate-limit';
 import { withAuthRateLimit } from '@/middleware/with-auth-rate-limit';
 import { withSecurity } from '@/middleware/with-security';
 import { logUserAction } from '@/lib/audit/auditLogger';
@@ -62,17 +61,7 @@ async function handleRegistration(req: NextRequest, validatedData: z.infer<typeo
   const userAgent = req.headers.get('user-agent') || 'unknown';
   const regData = validatedData;
   
-  // 1. Rate Limiting
-  const isRateLimited = await checkRateLimit(req);
-  if (isRateLimited) {
-    throw new ApiError(
-      ERROR_CODES.INVALID_REQUEST,
-      'Too many requests',
-      429
-    );
-  }
-  
-  // 2. Get AuthService and prepare registration payload
+  // 1. Get AuthService and prepare registration payload
   const authService = getApiAuthService();
   
   // Prepare registration payload for the AuthService

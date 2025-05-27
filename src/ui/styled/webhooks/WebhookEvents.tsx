@@ -32,11 +32,7 @@ export function WebhookEvents({
   );
 
   return (
-    <HeadlessWebhookEvents 
-      events={events} 
-      available={available} 
-      onChange={onChange}
-    >
+    <HeadlessWebhookEvents events={events} onChange={onChange}>
       {children || renderDefault}
     </HeadlessWebhookEvents>
   );

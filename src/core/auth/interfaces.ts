@@ -6,14 +6,15 @@
  * the contract that any implementation must fulfill.
  */
 
-import { 
-  AuthResult, 
-  LoginPayload, 
-  RegistrationPayload, 
+import {
+  AuthResult,
+  LoginPayload,
+  RegistrationPayload,
   User,
   MFASetupResponse,
   MFAVerifyResponse
 } from './models';
+import type { OAuthProvider, OAuthUserProfile, OAuthProviderConfig } from '@/types/oauth';
 
 /**
  * Core authentication service interface
@@ -73,14 +74,27 @@ export interface AuthService {
    * @returns Result object with success status and message or error
    */
   resetPassword(email: string): Promise<{ success: boolean; message?: string; error?: string }>;
-  
+
   /**
    * Update the user's password
-   * 
+   *
    * @param oldPassword Current password for verification
    * @param newPassword New password to set
    */
   updatePassword(oldPassword: string, newPassword: string): Promise<void>;
+
+  /**
+   * Verify a password reset token from the email link
+   */
+  verifyPasswordResetToken(token: string): Promise<{ valid: boolean; error?: string }>;
+
+  /**
+   * Update the password using a reset token and automatically log in
+   */
+  updatePasswordWithToken(
+    token: string,
+    newPassword: string,
+  ): Promise<AuthResult>;
   
   /**
    * Send an email verification link to the specified email address
@@ -126,6 +140,33 @@ export interface AuthService {
    * @returns Authentication result with success status or error
    */
   disableMFA(code: string): Promise<AuthResult>;
+
+  /**
+   * Configure an OAuth provider.
+   *
+   * @param config Provider configuration
+   */
+  configureOAuthProvider(config: OAuthProviderConfig): void;
+
+  /**
+   * Build an authorization URL for the given provider.
+   *
+   * @param provider OAuth provider identifier
+   * @param state Optional state parameter for CSRF protection
+   */
+  getOAuthAuthorizationUrl(provider: OAuthProvider, state?: string): string;
+
+  /**
+   * Exchange an authorization code for an OAuth profile.
+   *
+   * @param provider OAuth provider identifier
+   * @param code Authorization code returned by the provider
+   * @returns The provider user profile
+   */
+  exchangeOAuthCode(
+    provider: OAuthProvider,
+    code: string
+  ): Promise<OAuthUserProfile>;
   
   /**
    * Refresh the authentication token

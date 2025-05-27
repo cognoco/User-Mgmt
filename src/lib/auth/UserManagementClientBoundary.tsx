@@ -15,6 +15,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { OAuthProvider } from "@/types/oauth";
 import { SessionPolicyEnforcer } from "@/ui/styled/session/SessionPolicyEnforcer";
 import { diagnoseInitializationIssues, registerAllServices } from "@/scripts/fix-initialization";
+import initializeApp from "@/core/initialization/app-init";
 
 // Define the callbacks inside the Client Component
 const clientCallbacks: Required<IntegrationCallbacks> = {
@@ -153,7 +154,6 @@ export function UserManagementClientBoundary({
 
         // Try to initialize the application if the service is not found
         try {
-          const { initializeApp } = await import('@/core/initialization/app-init');
           const services = initializeApp();
 
           // Register services with UserManagementConfiguration
