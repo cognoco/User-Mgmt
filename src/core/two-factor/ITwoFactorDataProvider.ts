@@ -57,4 +57,10 @@ export interface ITwoFactorDataProvider {
    * @returns New backup codes or an error
    */
   regenerateBackupCodes(userId: string): Promise<BackupCodesResponse>;
+
+  /** Begin WebAuthn registration */
+  startWebAuthnRegistration(userId: string): Promise<TwoFactorSetupResponse>;
+
+  /** Complete WebAuthn registration */
+  verifyWebAuthnRegistration(payload: TwoFactorVerifyPayload): Promise<TwoFactorVerifyResponse>;
 }

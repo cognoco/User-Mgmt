@@ -524,6 +524,28 @@ export class SupabaseAuthProvider implements AuthDataProvider {
       };
     }
   }
+
+  /**
+   * Begin WebAuthn registration for the current user
+   */
+  async startWebAuthnRegistration(): Promise<MFASetupResponse> {
+    this.log('startWebAuthnRegistration');
+    return {
+      success: false,
+      error: 'WebAuthn registration not implemented'
+    };
+  }
+
+  /**
+   * Complete WebAuthn registration
+   */
+  async verifyWebAuthnRegistration(_data: unknown): Promise<MFAVerifyResponse> {
+    this.log('verifyWebAuthnRegistration');
+    return {
+      success: false,
+      error: 'WebAuthn registration not implemented'
+    };
+  }
   
   /**
    * Refresh the authentication token
