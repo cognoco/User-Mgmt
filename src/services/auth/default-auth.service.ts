@@ -30,6 +30,7 @@ import { BrowserAuthStorage } from './auth-storage';
 import { DefaultSessionTracker, type SessionTracker } from './session-tracker';
 import { DefaultMFAHandler, type MFAHandler } from './mfa-handler';
 import { logUserAction } from '@/lib/audit/auditLogger';
+import { authConfig } from '@/lib/auth/config';
 
 /** Keys used for persisting auth data */
 const TOKEN_KEY = 'auth_token';
@@ -68,14 +69,20 @@ export class DefaultAuthService
     if (storedToken) {
       this.token = storedToken;
       this.sessionTracker.initializeSessionCheck();
+      this.sessionTracker.initializeTokenRefresh(
+        Date.now() + authConfig.tokenExpiryDays * 24 * 60 * 60 * 1000,
+      );
     }
   }
 
-  private persistToken(token: string | null): void {
+  private persistToken(token: string | null, expiresAt?: number): void {
     this.token = token;
     if (token) {
       this.storage.setItem(TOKEN_KEY, token);
       this.sessionTracker.updateLastActivity();
+      if (expiresAt) {
+        this.sessionTracker.initializeTokenRefresh(expiresAt);
+      }
     } else {
       this.storage.removeItem(TOKEN_KEY);
       this.storage.removeItem(LAST_ACTIVITY_KEY);
@@ -109,7 +116,10 @@ export class DefaultAuthService
       const result = await this.provider.login(credentials);
       if (result.success) {
         this.user = result.user ?? null;
-        this.persistToken(result.token ?? null);
+        this.persistToken(
+          result.token ?? null,
+          Date.now() + authConfig.tokenExpiryDays * 24 * 60 * 60 * 1000,
+        );
         this.emit({
           type: 'user_logged_in',
           timestamp: Date.now(),
@@ -308,7 +318,11 @@ export class DefaultAuthService
     try {
       const res = await this.mfaHandler.verifyMFA(code);
       if (res.success) {
-        if (res.token) this.persistToken(res.token);
+        if (res.token)
+          this.persistToken(
+            res.token,
+            Date.now() + authConfig.tokenExpiryDays * 24 * 60 * 60 * 1000,
+          );
         this.emit({ type: 'mfa_enabled', timestamp: Date.now(), userId: this.user?.id ?? '' });
       }
       return res;
@@ -367,13 +381,14 @@ export class DefaultAuthService
 
   async refreshToken(): Promise<boolean> {
     try {
-      const success = await this.provider.refreshToken();
-      if (success) {
+      const res = await this.provider.refreshToken();
+      if (res) {
         this.sessionTracker.updateLastActivity();
-      } else {
-        this.handleSessionTimeout();
+        this.persistToken(res.accessToken, res.expiresAt);
+        return true;
       }
-      return success;
+      this.handleSessionTimeout();
+      return false;
     } catch {
       this.handleSessionTimeout();
       return false;

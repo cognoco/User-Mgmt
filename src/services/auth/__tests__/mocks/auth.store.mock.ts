@@ -7,7 +7,11 @@
 import { vi } from 'vitest';
 import type { AuthState, AuthResult, MFASetupResponse, MFAVerifyResponse } from '../../types/auth';
 
-const promiseTrue = vi.fn(async () => true);
+const promiseTrue = vi.fn(async () => ({
+  accessToken: 'mock-access',
+  refreshToken: 'mock-refresh',
+  expiresAt: Date.now() + 60_000,
+}));
 const promiseAuthResult = vi.fn(async () => ({ success: true } as AuthResult));
 const promiseVoid = vi.fn(async () => {});
 const promiseMFAVerify = vi.fn(async () => ({ success: true } as MFAVerifyResponse));

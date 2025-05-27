@@ -203,8 +203,10 @@ export class BasicOAuthProvider implements OAuthDataProvider {
   async disableMFA(_code: string): Promise<AuthResult> {
     return { success: false, error: 'Not implemented' };
   }
-  async refreshToken(): Promise<boolean> {
-    return false;
+  async refreshToken(): Promise<
+    { accessToken: string; refreshToken: string; expiresAt: number } | null
+  > {
+    return null;
   }
   onAuthStateChanged(_callback: (user: User | null) => void): () => void {
     return () => {};

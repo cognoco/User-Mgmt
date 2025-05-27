@@ -433,17 +433,25 @@ export class SupabaseAuthProvider implements AuthDataProvider {
    * 
    * @returns True if token was refreshed successfully, false otherwise
    */
-  async refreshToken(): Promise<boolean> {
+  async refreshToken(): Promise<
+    | { accessToken: string; refreshToken: string; expiresAt: number }
+    | null
+  > {
     this.log('refreshToken');
     try {
       const { data, error } = await this.supabase.auth.refreshSession();
-      if (!error) {
-        this.currentSession = data.session;
+      if (error || !data.session) {
+        return null;
       }
-      return !error;
+      this.currentSession = data.session;
+      return {
+        accessToken: data.session.access_token,
+        refreshToken: data.session.refresh_token ?? '',
+        expiresAt: data.session.expires_at * 1000,
+      };
     } catch (error: any) {
       this.logError('refreshToken failed', error);
-      return false;
+      return null;
     }
   }
   
