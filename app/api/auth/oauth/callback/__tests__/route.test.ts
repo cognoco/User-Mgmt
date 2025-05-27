@@ -710,3 +710,7 @@ describe("POST /api/auth/oauth/callback", () => {
   // TODO: Add more tests:
   // - PKCE validation test (if applicable for any provider used in the route)
 });
+
+afterAll(() => {
+  vi.restoreAllMocks();
+});

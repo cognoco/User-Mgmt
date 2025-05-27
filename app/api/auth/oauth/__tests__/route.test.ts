@@ -1,4 +1,4 @@
-import { POST } from "../route";
+let POST: (req: Request) => Promise<Response>;
 // import { cookies } from 'next/headers';
 // import { NextResponse } from 'next/server';
 import { OAuthProvider } from "@/types/oauth";
@@ -71,32 +71,41 @@ vi.stubGlobal("crypto", {
 });
 
 // Mock environment variables (adjust values as needed)
-vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "test-google-client-id");
-vi.stubEnv(
-  "NEXT_PUBLIC_GOOGLE_REDIRECT_URI",
-  "http://localhost:3000/api/auth/oauth/callback",
-);
-vi.stubEnv("NEXT_PUBLIC_GITHUB_CLIENT_ID", "test-github-client-id");
-vi.stubEnv(
-  "NEXT_PUBLIC_GITHUB_REDIRECT_URI",
-  "http://localhost:3000/api/auth/oauth/callback",
-);
-vi.stubEnv("NEXT_PUBLIC_APPLE_CLIENT_ID", "test-apple-client-id"); // Mock Apple env vars
-vi.stubEnv(
-  "NEXT_PUBLIC_APPLE_REDIRECT_URI",
-  "http://localhost:3000/api/auth/oauth/callback",
-);
+process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID = "test-google-client-id";
+process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI =
+  "http://localhost:3000/api/auth/oauth/callback";
+process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID = "test-github-client-id";
+process.env.NEXT_PUBLIC_GITHUB_REDIRECT_URI =
+  "http://localhost:3000/api/auth/oauth/callback";
+process.env.NEXT_PUBLIC_APPLE_CLIENT_ID = "test-apple-client-id";
+process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI =
+  "http://localhost:3000/api/auth/oauth/callback";
 // Add mocks for other providers if testing them
 
 // --- Test Suite ---
 
 describe("POST /api/auth/oauth", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     mockCookies.clear();
     vi.clearAllMocks(); // Clear mocks between tests
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID = "test-google-client-id";
+    process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI =
+      "http://localhost:3000/api/auth/oauth/callback";
+    process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID = "test-github-client-id";
+    process.env.NEXT_PUBLIC_GITHUB_REDIRECT_URI =
+      "http://localhost:3000/api/auth/oauth/callback";
+    process.env.NEXT_PUBLIC_APPLE_CLIENT_ID = "test-apple-client-id";
+    process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI =
+      "http://localhost:3000/api/auth/oauth/callback";
+
+    POST = (await import("../route")).POST;
   });
 
   it("should return authorization URL and state for a valid provider (Google)", async () => {
+    mockSignInWithOAuth.mockResolvedValue({
+      data: { url: "https://example.com/auth" },
+      error: null,
+    });
     const requestBody = JSON.stringify({ provider: OAuthProvider.GOOGLE });
     const request = new Request("http://localhost/api/auth/oauth", {
       method: "POST",
@@ -108,15 +117,16 @@ describe("POST /api/auth/oauth", () => {
     const responseBody = await response.json();
 
     expect(response.status).toBe(200);
-    expect(responseBody.data).toHaveProperty("url");
-    expect(responseBody.data).toHaveProperty("state", mockStateValue);
+    expect(responseBody).toHaveProperty("url", "https://example.com/auth");
+    expect(responseBody).toHaveProperty("state");
+    const returnedState = responseBody.state;
 
     expect(mockSignInWithOAuth).toHaveBeenCalledWith({
       provider: OAuthProvider.GOOGLE,
       options: {
         redirectTo: "http://localhost:3000/api/auth/oauth/callback",
         scopes: "profile email",
-        state: mockStateValue,
+        state: returnedState,
       },
     });
 
@@ -125,7 +135,8 @@ describe("POST /api/auth/oauth", () => {
     const googleStateCookie = mockCookies.get(
       `oauth_state_${OAuthProvider.GOOGLE}`,
     );
-    expect(googleStateCookie.value).toBe(mockStateValue);
+    expect(googleStateCookie.value).toBe(returnedState);
+
     expect(googleStateCookie.httpOnly).toBe(true);
     expect(googleStateCookie.secure).toBe(true);
     expect(googleStateCookie.sameSite).toBe("lax");
@@ -205,4 +216,8 @@ describe("POST /api/auth/oauth", () => {
 
   // Note: Testing disallowed methods (GET, PUT, etc.) is typically handled
   // automatically by Next.js App Router if only POST is exported.
+});
+
+afterAll(() => {
+  vi.restoreAllMocks();
 });
