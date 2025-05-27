@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { randomBytes } from 'crypto';
+import { randomBytes, timingSafeEqual } from 'crypto';
 import { ApiError, ERROR_CODES } from '@/lib/api/common';
 
 /**
@@ -87,6 +87,15 @@ function generateToken(): string {
   return randomBytes(32).toString('hex');
 }
 
+function safeEqual(a: string, b: string): boolean {
+  const aBuf = Buffer.from(a);
+  const bBuf = Buffer.from(b);
+  if (aBuf.length !== bBuf.length) {
+    return false;
+  }
+  return timingSafeEqual(aBuf, bBuf);
+}
+
 export const defaultTokenProvider: CSRFTokenProvider = {
   generateToken,
   getToken: getCSRFToken,
@@ -128,8 +137,8 @@ export function csrf(options: CSRFOptions = {}) {
     // For non-excluded methods, validate CSRF token
     const cookieToken = tokenProvider.getToken(req, options);
     const headerToken = req.headers[headerName] as string;
-    
-    if (!cookieToken || !headerToken || cookieToken !== headerToken) {
+
+    if (!cookieToken || !headerToken || !safeEqual(cookieToken, headerToken)) {
       if (onError) {
         await onError(req, res);
       } else {

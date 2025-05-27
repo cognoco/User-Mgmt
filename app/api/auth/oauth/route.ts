@@ -79,6 +79,16 @@ const providerConfigs: Record<OAuthProvider, z.infer<typeof oauthProviderConfigS
   },
 };
 
+const redirectAllowList: Record<OAuthProvider, string[]> = {
+  [OAuthProvider.GOOGLE]: [process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI!],
+  [OAuthProvider.GITHUB]: [process.env.NEXT_PUBLIC_GITHUB_REDIRECT_URI!],
+  [OAuthProvider.FACEBOOK]: [],
+  [OAuthProvider.TWITTER]: [],
+  [OAuthProvider.MICROSOFT]: [],
+  [OAuthProvider.APPLE]: [],
+  [OAuthProvider.LINKEDIN]: [],
+};
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -87,6 +97,10 @@ export async function POST(request: Request) {
     const config = providerConfigs[provider];
     if (!config || !config.enabled) {
       return NextResponse.json({ error: 'Provider not supported or not enabled.' }, { status: 400 });
+    }
+
+    if (!redirectAllowList[provider].includes(config.redirectUri)) {
+      return NextResponse.json({ error: 'Redirect URI not allowed' }, { status: 400 });
     }
 
     // Generate state for CSRF protection

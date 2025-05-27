@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { z } from 'zod';
 import { OAuthProvider } from '@/types/oauth';
 import { logUserAction } from '@/lib/audit/auditLogger';
+import { sendProviderLinkedNotification } from '@/lib/notifications/sendProviderLinkedNotification';
 
 // Request schema
 const linkRequestSchema = z.object({
@@ -108,6 +109,9 @@ export async function POST(request: Request) {
     if (insertError) {
       throw insertError;
     }
+
+    // Notify user about newly linked provider
+    await sendProviderLinkedNotification(user.id, provider);
 
     // Audit log: SSO link success
     try {

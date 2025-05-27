@@ -10,6 +10,7 @@ import { authOptions } from '@/lib/auth/index';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
 import { withValidation } from '@/middleware/validation';
+import { withSecurity } from '@/middleware/with-security';
 import {
   createTeamNotFoundError,
   createTeamMemberAlreadyExistsError
@@ -117,7 +118,7 @@ async function handler(req: NextRequest) {
 }
 
 export const POST = createProtectedHandler(
-  (req) => withErrorHandling(handler, req),
+  (req) => withSecurity((r) => withErrorHandling(handler, r))(req),
   Permission.INVITE_TEAM_MEMBER
 );
 

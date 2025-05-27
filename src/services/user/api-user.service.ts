@@ -75,7 +75,8 @@ export class ApiUserService implements UserService {
     const base64 = await imageData.arrayBuffer().then(buf =>
       Buffer.from(buf).toString('base64')
     );
-    const res = await fetch('/api/user/avatar', {
+    // Use canonical profile avatar route
+    const res = await fetch('/api/profile/avatar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -90,7 +91,8 @@ export class ApiUserService implements UserService {
 
   async deleteProfilePicture(_userId: string): Promise<{ success: boolean; error?: string }> {
     void _userId;
-    const res = await fetch('/api/user/avatar', {
+    // Use canonical profile avatar route
+    const res = await fetch('/api/profile/avatar', {
       method: 'DELETE',
       credentials: 'include'
     });

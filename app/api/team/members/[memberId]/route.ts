@@ -8,6 +8,7 @@ import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
 import { withValidation } from '@/middleware/validation';
 import { createTeamMemberNotFoundError } from '@/lib/api/team/error-handler';
+import { withSecurity } from '@/middleware/with-security';
 
 const paramSchema = z.object({ memberId: z.string().uuid() });
 
@@ -52,5 +53,7 @@ async function handler(req: NextRequest, context: { params: { memberId: string }
   return withValidation(paramSchema, handleDelete, req, context.params);
 }
 
-export const DELETE = (req: NextRequest, ctx: { params: { memberId: string } }) =>
-  withErrorHandling((r) => handler(r, ctx), req);
+export const DELETE = (
+  req: NextRequest,
+  ctx: { params: { memberId: string } }
+) => withSecurity((r) => withErrorHandling((req2) => handler(req2, ctx), r))(req);

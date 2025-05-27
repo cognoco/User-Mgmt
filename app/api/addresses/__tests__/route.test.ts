@@ -31,11 +31,25 @@ describe('addresses API', () => {
     expect(service.getAddresses).toHaveBeenCalledWith('u1');
   });
 
+  it('GET requires auth', async () => {
+    const req = new NextRequest('http://test');
+    const res = await GET(req as any);
+    expect(res.status).toBe(401);
+  });
+
   it('POST creates address', async () => {
     const req = new NextRequest('http://test', { method: 'POST', body: JSON.stringify({ type: 'shipping', fullName: 'John', street1: '123', city: 'A', state: 'B', postalCode: '1', country: 'US' }) });
     (req as any).json = async () => ({ type: 'shipping', fullName: 'John', street1: '123', city: 'A', state: 'B', postalCode: '1', country: 'US' });
     const res = await POST(req as any);
     expect(res.status).toBe(201);
     expect(service.createAddress).toHaveBeenCalled();
+  });
+
+  it('POST validates input', async () => {
+    const req = new NextRequest('http://test', { method: 'POST', body: '{}' });
+    req.headers.set('x-user-id', 'u1');
+    (req as any).json = async () => ({}) ;
+    const res = await POST(req as any);
+    expect(res.status).toBe(400);
   });
 });

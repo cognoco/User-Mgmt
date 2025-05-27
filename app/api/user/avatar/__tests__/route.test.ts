@@ -11,7 +11,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('/api/user/avatar', () => {
+describe('/api/user/avatar (alias for /api/profile/avatar)', () => {
   it('handles avatar endpoints', async () => {
     // TODO
   });

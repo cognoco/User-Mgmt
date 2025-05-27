@@ -38,6 +38,12 @@ describe('[id] address API', () => {
     expect(service.getAddress).toHaveBeenCalledWith('1', 'u1');
   });
 
+  it('GET requires auth', async () => {
+    const req = new NextRequest('http://test');
+    const res = await GET(req as any, { params: { id: '1' } });
+    expect(res.status).toBe(401);
+  });
+
   it('PUT updates address', async () => {
     const req = new NextRequest('http://test', { method: 'PUT', body: '{}' });
     (req as unknown as { json: () => Promise<{ fullName: string }> }).json = async () => ({ fullName: 'John' });
@@ -46,10 +52,24 @@ describe('[id] address API', () => {
     expect(service.updateAddress).toHaveBeenCalled();
   });
 
+  it('PUT validates input', async () => {
+    const req = new NextRequest('http://test', { method: 'PUT', body: '{}' });
+    req.headers.set('x-user-id', 'u1');
+    (req as any).json = async () => ({ postalCode: 123 });
+    const res = await PUT(req as any, { params: { id: '1' } });
+    expect(res.status).toBe(400);
+  });
+
   it('DELETE deletes address', async () => {
     const req = new NextRequest('http://test', { method: 'DELETE' });
     const res = await DELETE(req as unknown as NextRequest, { params: { id: '1' } });
     expect(res.status).toBe(204);
     expect(service.deleteAddress).toHaveBeenCalledWith('1', 'u1');
+  });
+
+  it('DELETE requires auth', async () => {
+    const req = new NextRequest('http://test', { method: 'DELETE' });
+    const res = await DELETE(req as any, { params: { id: '1' } });
+    expect(res.status).toBe(401);
   });
 });

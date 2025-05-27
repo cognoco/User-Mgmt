@@ -7,6 +7,7 @@ const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';
 const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
 const LICENSE_URL = '/license';
 
+
 // --- Helper Functions --- //
 async function fillLoginForm(page) {
   // Use a reliable, browser-independent login approach as mentioned in TESTING ISSUES-E2E.md

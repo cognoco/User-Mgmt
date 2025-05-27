@@ -7,6 +7,7 @@ import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
 import { withValidation } from '@/middleware/validation';
 import { createTeamMemberNotFoundError } from '@/lib/api/team/error-handler';
+import { withSecurity } from '@/middleware/with-security';
 
 const acceptInviteSchema = z.object({ token: z.string() });
 
@@ -53,4 +54,5 @@ async function handler(req: NextRequest) {
   return withValidation(acceptInviteSchema, handleAccept, req, body);
 }
 
-export const POST = (req: NextRequest) => withErrorHandling(handler, req);
+export const POST = (req: NextRequest) =>
+  withSecurity((r) => withErrorHandling(handler, r))(req);

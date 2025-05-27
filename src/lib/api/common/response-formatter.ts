@@ -138,7 +138,7 @@ export function createErrorResponse(
  * Create a no content response (204)
  */
 export function createNoContentResponse(headers?: Record<string, string>) {
-  return NextResponse.json(null, {
+  return new NextResponse(null, {
     status: 204,
     headers: {
       ...headers,
