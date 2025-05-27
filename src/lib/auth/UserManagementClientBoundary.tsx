@@ -193,11 +193,11 @@ export function UserManagementClientBoundary({
           user_metadata: session.user.user_metadata,
           // Add other fields from session.user if needed by local User type
         };
-        authService.setCurrentUser(localUser);
-        authService.setAuthToken(session.access_token ?? null);
+        (authService as any).setCurrentUser?.(localUser);
+        (authService as any).setAuthToken?.(session.access_token ?? null);
       } else {
-        authService.setCurrentUser(null);
-        authService.setAuthToken(null);
+        (authService as any).setCurrentUser?.(null);
+        (authService as any).setAuthToken?.(null);
       }
     });
 
@@ -219,8 +219,8 @@ export function UserManagementClientBoundary({
           app_metadata: session.user.app_metadata,
           user_metadata: session.user.user_metadata,
         };
-        authService.setCurrentUser(localUser);
-        authService.setAuthToken(session.access_token ?? null);
+        (authService as any).setCurrentUser?.(localUser);
+        (authService as any).setAuthToken?.(session.access_token ?? null);
 
         if (event === "SIGNED_IN" && !previousUser) {
           const isConfirmed =
@@ -246,12 +246,12 @@ export function UserManagementClientBoundary({
         }
       } else {
         if (previousUser) {
-          authService.setCurrentUser(null);
-          authService.setAuthToken(null);
+          (authService as any).setCurrentUser?.(null);
+          (authService as any).setAuthToken?.(null);
           clientCallbacks.onUserLogout();
         } else {
-          authService.setCurrentUser(null);
-          authService.setAuthToken(null);
+          (authService as any).setCurrentUser?.(null);
+          (authService as any).setAuthToken?.(null);
         }
       }
     });
