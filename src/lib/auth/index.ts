@@ -37,3 +37,4 @@ export async function signOut(): Promise<void> {
 }
 
 export * from './supabase-auth.config';
+export { initializeSupabaseAuth } from './initialize-supabase-auth';
