@@ -257,3 +257,10 @@ export const registerSchema = z.object({
 // Type inference from schemas
 export type LoginData = z.infer<typeof loginSchema>;
 export type RegisterData = z.infer<typeof registerSchema>;
+
+// Password reset token model
+export interface PasswordResetToken {
+  token: string;
+  userId: string;
+  expiresAt: number;
+}

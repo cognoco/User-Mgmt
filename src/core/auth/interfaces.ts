@@ -74,14 +74,27 @@ export interface AuthService {
    * @returns Result object with success status and message or error
    */
   resetPassword(email: string): Promise<{ success: boolean; message?: string; error?: string }>;
-  
+
   /**
    * Update the user's password
-   * 
+   *
    * @param oldPassword Current password for verification
    * @param newPassword New password to set
    */
   updatePassword(oldPassword: string, newPassword: string): Promise<void>;
+
+  /**
+   * Verify a password reset token from the email link
+   */
+  verifyPasswordResetToken(token: string): Promise<{ valid: boolean; error?: string }>;
+
+  /**
+   * Update the password using a reset token and automatically log in
+   */
+  updatePasswordWithToken(
+    token: string,
+    newPassword: string,
+  ): Promise<AuthResult>;
   
   /**
    * Send an email verification link to the specified email address

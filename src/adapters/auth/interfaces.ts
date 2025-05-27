@@ -61,6 +61,21 @@ export interface AuthDataProvider {
   updatePassword(oldPassword: string, newPassword: string): Promise<void>;
 
   /**
+   * Verify a password reset token
+   */
+  verifyPasswordResetToken(token: string): Promise<{ valid: boolean; user?: User; token?: string; error?: string }>;
+
+  /**
+   * Update password using a reset token
+   */
+  updatePasswordWithToken(token: string, newPassword: string): Promise<AuthResult>;
+
+  /**
+   * Invalidate all sessions for the given user
+   */
+  invalidateSessions(userId: string): Promise<void>;
+
+  /**
    * Send an email verification link.
    *
    * @param email Email address to verify

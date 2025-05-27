@@ -21,6 +21,7 @@ const UpdatePasswordSchema = z.object({
       message: "Password must contain at least one uppercase letter",
     })
     .regex(/[0-9]/, { message: "Password must contain at least one number" }),
+  token: z.string().optional(),
 });
 
 async function handleUpdatePassword(
@@ -32,23 +33,27 @@ async function handleUpdatePassword(
   let userIdForLogging: string | null = null;
 
   const authService = getApiAuthService();
-  const currentUser = await authService.getCurrentUser();
 
-  if (!currentUser) {
-    await logUserAction({
-      action: "PASSWORD_UPDATE_UNAUTHORIZED",
-      status: "FAILURE",
-      ipAddress,
-      userAgent,
-      targetResourceType: "auth",
-      details: { reason: "No user session found" },
-    });
-    throw new ApiError(ERROR_CODES.UNAUTHORIZED, "Unauthorized", 401);
-  }
-
-  userIdForLogging = currentUser.id;
-
-  try {
+  if (data.token) {
+    const result = await authService.updatePasswordWithToken(data.token, data.password);
+    userIdForLogging = result.user?.id || null;
+    if (!result.success) {
+      throw new ApiError(ERROR_CODES.INVALID_REQUEST, result.error || 'Failed to update password', 400);
+    }
+  } else {
+    const currentUser = await authService.getCurrentUser();
+    if (!currentUser) {
+      await logUserAction({
+        action: "PASSWORD_UPDATE_UNAUTHORIZED",
+        status: "FAILURE",
+        ipAddress,
+        userAgent,
+        targetResourceType: "auth",
+        details: { reason: "No user session found" },
+      });
+      throw new ApiError(ERROR_CODES.UNAUTHORIZED, "Unauthorized", 401);
+    }
+    userIdForLogging = currentUser.id;
     await authService.updatePassword("", data.password);
   } catch (error) {
     const errorMessage =

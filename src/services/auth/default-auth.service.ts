@@ -253,12 +253,48 @@ export class DefaultAuthService
   async updatePassword(oldPassword: string, newPassword: string): Promise<void> {
     try {
       await this.provider.updatePassword(oldPassword, newPassword);
+      if (this.user?.id) {
+        await this.provider.invalidateSessions(this.user.id);
+      }
       this.emit({ type: 'password_updated', timestamp: Date.now(), userId: this.user?.id ?? '' });
       await this.logAction({ userId: this.user?.id, action: 'PASSWORD_UPDATE', status: 'SUCCESS', targetResourceType: 'user', targetResourceId: this.user?.id });
     } catch (error) {
       const message = translateError(error, { defaultMessage: 'Password update failed' });
       await this.logAction({ userId: this.user?.id, action: 'PASSWORD_UPDATE', status: 'FAILURE', details: { error: message } });
       throw new Error(message);
+    }
+  }
+
+  async verifyPasswordResetToken(token: string): Promise<{ valid: boolean; error?: string }> {
+    try {
+      const result = await this.provider.verifyPasswordResetToken(token);
+      if (result.valid && result.user) {
+        this.user = result.user;
+        if (result.token) this.persistToken(result.token);
+      }
+      return { valid: result.valid, error: result.error };
+    } catch (error) {
+      const message = translateError(error, { defaultMessage: 'Invalid reset token' });
+      return { valid: false, error: message };
+    }
+  }
+
+  async updatePasswordWithToken(token: string, newPassword: string): Promise<AuthResult> {
+    try {
+      const res = await this.provider.updatePasswordWithToken(token, newPassword);
+      if (res.success) {
+        if (res.user) this.user = res.user;
+        if (res.token) this.persistToken(res.token);
+        if (res.user?.id) {
+          await this.provider.invalidateSessions(res.user.id);
+        }
+        this.emit({ type: 'password_reset_completed', timestamp: Date.now(), userId: res.user?.id ?? '' });
+      }
+      return res;
+    } catch (error) {
+      const message = translateError(error, { defaultMessage: 'Password update failed' });
+      await this.logAction({ action: 'PASSWORD_RESET_COMPLETED', status: 'FAILURE', details: { error: message } });
+      return { success: false, error: message };
     }
   }
 
