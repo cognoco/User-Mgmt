@@ -22,54 +22,12 @@ const oauthStoreBase = create<OAuthInternalState>((set, get) => ({
   /**
    * Initiate OAuth login flow
    */
-  login: (provider: OAuthProvider, oauthConfig: any) => {
+  login: async (provider: OAuthProvider, _oauthConfig: any) => {
     try {
       set({ isLoading: true, error: null });
-      
-      // Get provider config from context
-      const providerConfig = oauthConfig?.providers.find(
-        (p: any) => p.provider === provider
-      );
-      
-      if (!providerConfig) {
-        throw new Error(`Provider ${provider} is not configured`);
-      }
-      
-      // Generate random state for CSRF protection
-      const state = Math.random().toString(36).substring(2, 15);
-      localStorage.setItem('oauth_state', state);
-      
-      // Build authorization URL
-      const authUrl = providerConfig.authorizationUrl || getDefaultAuthUrl(provider);
-      const url = new URL(authUrl);
-      
-      // Add query parameters
-      url.searchParams.append('client_id', providerConfig.clientId);
-      url.searchParams.append('redirect_uri', providerConfig.redirectUri);
-      url.searchParams.append('response_type', 'code');
-      url.searchParams.append('state', state);
-      
-      if (providerConfig.scope) {
-        url.searchParams.append('scope', providerConfig.scope);
-      } else {
-        // Default scopes for common providers
-        switch (provider) {
-          case OAuthProvider.GOOGLE:
-            url.searchParams.append('scope', 'profile email');
-            break;
-          case OAuthProvider.GITHUB:
-            url.searchParams.append('scope', 'user:email');
-            break;
-          case OAuthProvider.FACEBOOK:
-            url.searchParams.append('scope', 'email,public_profile');
-            break;
-          default:
-            url.searchParams.append('scope', 'email profile');
-        }
-      }
-      
-      // Redirect to authorization URL
-      window.location.href = url.toString();
+      const res = await api.post('/auth/oauth', { provider });
+      if (!res.data.url) throw new Error('No authorization URL returned');
+      window.location.href = res.data.url;
     } catch (error: any) {
       set({
         error: error.response?.data?.error || error.response?.data?.message || (error instanceof Error ? error.message : 'Failed to initiate OAuth login'),
@@ -90,23 +48,15 @@ const oauthStoreBase = create<OAuthInternalState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      // Verify state for CSRF protection
-      const storedState = localStorage.getItem('oauth_state');
       const urlParams = new URLSearchParams(window.location.search);
       const returnedState = urlParams.get('state');
-      
-      if (!storedState || storedState !== returnedState) {
-        throw new Error('Invalid state parameter. Possible CSRF attack.');
-      }
-      
-      // Clear state from storage
-      localStorage.removeItem('oauth_state');
-      
+
       // Exchange code for tokens
       const response = await api.post('/auth/oauth/callback', {
         provider,
         code,
         redirectUri: window.location.origin + '/auth/callback',
+        state: returnedState ?? undefined,
       });
       
       // Get auth store and update user
