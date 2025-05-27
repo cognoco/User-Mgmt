@@ -274,18 +274,25 @@ export function LoginForm() {
               </div>
 
               <div className="flex items-center space-x-2">
-                <Checkbox 
+                <Checkbox
                   id="rememberMe"
                   checked={rememberMeValue}
                   onCheckedChange={(checked) => setRememberMeValue(!!checked)}
                   aria-label="Remember me"
                 />
-                <Label 
-                  htmlFor="rememberMe" 
+                <Label
+                  htmlFor="rememberMe"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
                   Remember me
                 </Label>
+                <span
+                  className="text-xs text-muted-foreground"
+                  title="Keep me logged in on this device for up to 30 days"
+                  aria-label="Remember me help"
+                >
+                  ?
+                </span>
               </div>
 
               <Button type="submit" className="w-full" disabled={isSubmitting || !isValid}>

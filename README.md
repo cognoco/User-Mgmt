@@ -21,6 +21,7 @@ This document serves as the main reference for the User Management System. It pr
 - [Implementation Checklist](./Product%20documentation/Implementation-Checklist.md) - Code-verified implementation and test status
 - [Configuration Migration](./docs/Product%20documentation/CONFIGURATION_MIGRATION.md) - Centralized configuration usage
 - [Performance Testing](./docs/performance/performance-testing.md) - Baseline k6 benchmarks
+- [Optimized User Journeys](./docs/Product%20documentation/optimized-user-journeys.md) - Key flows and improvements
 
 ### Feature Documentation
 - [Phase 1-2 Features](./functionality-features-phase1-2.md) - Core authentication and user management
