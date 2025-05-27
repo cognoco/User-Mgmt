@@ -63,7 +63,10 @@ interface UserState {
       totalPages: number;
     };
   }>;
-  exportUserAuditLogs: (filters: Omit<AuditLogFilters, 'page' | 'limit'>) => Promise<Blob>;
+  exportUserAuditLogs: (
+    filters: Omit<AuditLogFilters, 'page' | 'limit'>,
+    format?: 'csv' | 'json' | 'xlsx' | 'pdf'
+  ) => Promise<Blob>;
 }
 
 export const useUserStore = create<UserState>((set, get) => ({
@@ -235,7 +238,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     }
   },
 
-  exportUserAuditLogs: async (filters) => {
+  exportUserAuditLogs: async (filters, format = 'csv') => {
     try {
       set({ isLoading: true, error: null });
 
@@ -251,7 +254,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       });
       // Always filter by current user
       params.append('userId', user.user.id);
-      params.append('format', 'csv');
+      params.append('format', format);
 
       const response = await fetch(`/api/audit/user-actions/export?${params.toString()}`);
       if (!response.ok) {

@@ -14,7 +14,7 @@ export interface UseAuditLogsResult {
   filters: AuditLogFilters;
   setFilter: (key: keyof AuditLogFilters, value: unknown) => void;
   setPage: (page: number) => void;
-  exportLogs: () => Promise<Blob>;
+  exportLogs: (format?: 'csv' | 'json' | 'xlsx' | 'pdf') => Promise<Blob>;
 }
 
 export function useAuditLogs(
@@ -42,7 +42,8 @@ export function useAuditLogs(
     setPage(1);
   };
 
-  const exportLogs = () => service.exportLogs(filters);
+  const exportLogs = (format?: 'csv' | 'json' | 'xlsx' | 'pdf') =>
+    service.exportLogs({ ...filters, format });
 
   return {
     logs: data?.logs ?? [],

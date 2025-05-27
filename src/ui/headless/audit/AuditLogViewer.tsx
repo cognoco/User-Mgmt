@@ -49,7 +49,7 @@ export interface AuditLogData {
   pagination: AuditLogPagination;
 }
 
-export type ExportFormat = 'csv' | 'json' | 'xlsx';
+export type ExportFormat = 'csv' | 'json' | 'xlsx' | 'pdf';
 
 export type CalendarDate = Date | undefined;
 
@@ -199,7 +199,7 @@ export function useAuditLogViewer({ isAdmin = true }: UseAuditLogViewerProps): U
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `audit-logs-${format === 'csv' ? 'spreadsheet' : 'data'}.${format}`;
+        a.download = `audit-logs.${format}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
