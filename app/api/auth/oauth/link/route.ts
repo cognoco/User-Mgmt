@@ -63,43 +63,51 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Provider did not return a unique identifier (email or provider user ID).' }, { status: 400 });
     }
 
-    // Use Prisma to check for existing account
-    const { prisma } = await import('@/lib/database/prisma');
-    const existingAccount = await prisma.account.findUnique({
-      where: {
-        provider_provider_account_id: {
-          provider: provider.toLowerCase(),
-          provider_account_id: providerAccountId,
-        },
-      },
-    });
+    // Check for existing linked provider using Supabase
+    const { data: existingAccount } = await supabase
+      .from('account')
+      .select('id, user_id')
+      .eq('provider', provider.toLowerCase())
+      .eq('provider_account_id', providerAccountId)
+      .maybeSingle();
     if (existingAccount) {
-      return NextResponse.json({ error: 'This provider is already linked to an account.' }, { status: 409 });
+      return NextResponse.json(
+        { error: 'This provider is already linked to an account.' },
+        { status: 409 }
+      );
     }
 
     // Check for email collision
-    let emailCollision = null;
+    let emailCollision: { id: string; user_id: string } | null = null;
     if (email) {
-      emailCollision = await prisma.account.findFirst({
-        where: { provider_email: email },
-      });
+      const { data } = await supabase
+        .from('account')
+        .select('id, user_id')
+        .eq('provider_email', email)
+        .maybeSingle();
+      emailCollision = data;
     }
-    if (emailCollision) {
-      return NextResponse.json({
-        error: 'An account with this email already exists. Please use another provider or contact support.',
-        collision: true,
-      }, { status: 409 });
+    if (emailCollision && emailCollision.user_id !== user.id) {
+      return NextResponse.json(
+        {
+          error:
+            'An account with this email already exists. Please use another provider or contact support.',
+          collision: true,
+        },
+        { status: 409 }
+      );
     }
 
     // Create new account record
-    await prisma.account.create({
-      data: {
-        user_id: user.id,
-        provider: provider.toLowerCase(),
-        provider_account_id: providerAccountId || '',
-        provider_email: email || '',
-      },
+    const { error: insertError } = await supabase.from('account').insert({
+      user_id: user.id,
+      provider: provider.toLowerCase(),
+      provider_account_id: providerAccountId || '',
+      provider_email: email || '',
     });
+    if (insertError) {
+      throw insertError;
+    }
 
     // Audit log: SSO link success
     try {
@@ -114,13 +122,18 @@ export async function POST(request: Request) {
     }
 
     // Return updated provider list and user info
-    const linkedAccounts = await prisma.account.findMany({
-      where: { user_id: user.id },
-      select: { provider: true },
-    });
+    const { data: linkedAccounts, error: listError } = await supabase
+      .from('account')
+      .select('provider')
+      .eq('user_id', user.id);
+
+    if (listError) {
+      console.error('Failed to fetch linked providers:', listError);
+    }
+
     return NextResponse.json({
       success: true,
-      linkedProviders: linkedAccounts.map((a: { provider: string }) => a.provider),
+      linkedProviders: linkedAccounts?.map((a: { provider: string }) => a.provider) ?? [],
       user,
     });
   } catch (error: any) {
