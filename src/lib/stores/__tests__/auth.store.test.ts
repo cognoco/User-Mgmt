@@ -161,7 +161,7 @@ describe('Auth Store', () => {
   describe('register', () => {
     const registrationPayload: RegistrationPayload = {
         email: 'new@example.com',
-        password: 'Password123',
+        password: 'Password123!',
         firstName: 'New',
         lastName: 'User'
     };

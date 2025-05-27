@@ -11,7 +11,8 @@ export const changePasswordSchema = z.object({
     .min(8, 'New password must be at least 8 characters')
     .regex(/[A-Z]/, 'New password must contain at least one uppercase letter')
     .regex(/[a-z]/, 'New password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'New password must contain at least one number'),
+    .regex(/[0-9]/, 'New password must contain at least one number')
+    .regex(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, 'New password must contain at least one special character'),
   confirmPassword: z.string(),
 }).refine(data => data.newPassword === data.confirmPassword, {
   message: 'New passwords do not match',
@@ -226,6 +227,7 @@ export const ChangePasswordForm = ({
           .regex(/[A-Z]/, 'New password must contain at least one uppercase letter')
           .regex(/[a-z]/, 'New password must contain at least one lowercase letter')
           .regex(/[0-9]/, 'New password must contain at least one number')
+          .regex(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, 'New password must contain at least one special character')
           .parse(newPasswordValue);
         
         // Also check if new password is different from current

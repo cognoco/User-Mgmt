@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/database/supabase';
 import { OrganizationSecurityPolicy, DEFAULT_SECURITY_POLICY } from '@/types/organizations';
-import { validatePasswordWithPolicy } from './password-validation';
+import { validatePasswordWithPolicy, validatePassword } from './password-validation';
 
 /**
  * Fetches the security policy for an organization
@@ -93,17 +93,7 @@ export async function validatePasswordAgainstOrgPolicy(
 ): Promise<{ isValid: boolean; errors: string[] }> {
   const policy = await getOrganizationPolicy(orgId);
   if (!policy) {
-    // Fall back to default validation
-    const isValid = password.length >= 8 && 
-                    /[A-Z]/.test(password) && 
-                    /[0-9]/.test(password);
-    
-    const errors = [];
-    if (!isValid) {
-      errors.push('Password does not meet the minimum requirements');
-    }
-    
-    return { isValid, errors };
+    return validatePassword(password);
   }
   
   return validatePasswordWithPolicy(password, policy);

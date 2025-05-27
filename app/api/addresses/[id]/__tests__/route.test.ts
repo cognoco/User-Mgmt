@@ -2,9 +2,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, PUT, DELETE } from '../route';
 import { getApiAddressService } from '@/services/address/factory';
+import { withRouteAuth } from '@/middleware/auth';
+import { withSecurity } from '@/middleware/with-security';
 
 vi.mock('@/services/address/factory', () => ({
   getApiAddressService: vi.fn(),
+}));
+vi.mock('@/middleware/with-security', () => ({ withSecurity: (h: any) => h }));
+vi.mock('@/middleware/auth', () => ({
+  withRouteAuth: vi.fn((handler: any, req: any) => handler(req, 'u1')),
 }));
 
 describe('[id] address API', () => {
@@ -27,7 +33,6 @@ describe('[id] address API', () => {
 
   it('GET returns address', async () => {
     const req = new NextRequest('http://test');
-    req.headers.set('x-user-id', 'u1');
     const res = await GET(req as unknown as NextRequest, { params: { id: '1' } });
     expect(res.status).toBe(200);
     expect(service.getAddress).toHaveBeenCalledWith('1', 'u1');
@@ -41,7 +46,6 @@ describe('[id] address API', () => {
 
   it('PUT updates address', async () => {
     const req = new NextRequest('http://test', { method: 'PUT', body: '{}' });
-    req.headers.set('x-user-id', 'u1');
     (req as unknown as { json: () => Promise<{ fullName: string }> }).json = async () => ({ fullName: 'John' });
     const res = await PUT(req as unknown as NextRequest, { params: { id: '1' } });
     expect(res.status).toBe(200);
@@ -58,7 +62,6 @@ describe('[id] address API', () => {
 
   it('DELETE deletes address', async () => {
     const req = new NextRequest('http://test', { method: 'DELETE' });
-    req.headers.set('x-user-id', 'u1');
     const res = await DELETE(req as unknown as NextRequest, { params: { id: '1' } });
     expect(res.status).toBe(204);
     expect(service.deleteAddress).toHaveBeenCalledWith('1', 'u1');

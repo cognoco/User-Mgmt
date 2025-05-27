@@ -7,6 +7,8 @@ import { logUserAction } from '@/lib/audit/auditLogger';
 import { createSuccessResponse } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
 
+const failedRefreshAttempts: Record<string, { count: number; last: number }> = {};
+
 async function handleRefreshToken(req: NextRequest) {
   const ipAddress = req.headers.get('x-forwarded-for') || 'unknown';
   const userAgent = req.headers.get('user-agent') || 'unknown';
@@ -19,6 +21,8 @@ async function handleRefreshToken(req: NextRequest) {
     } catch {
       session = null;
     }
+    const key = ipAddress;
+    delete failedRefreshAttempts[key];
   }
 
   await logUserAction({
@@ -31,6 +35,25 @@ async function handleRefreshToken(req: NextRequest) {
   });
 
   if (!success) {
+    const key = ipAddress;
+    const entry = failedRefreshAttempts[key] || { count: 0, last: Date.now() };
+    if (Date.now() - entry.last > 5 * 60 * 1000) {
+      entry.count = 0;
+    }
+    entry.count += 1;
+    entry.last = Date.now();
+    failedRefreshAttempts[key] = entry;
+    if (entry.count >= 5) {
+      await logUserAction({
+        action: 'TOKEN_REFRESH_SUSPICIOUS',
+        status: 'FAILURE',
+        ipAddress,
+        userAgent,
+        targetResourceType: 'auth',
+        targetResourceId: 'current',
+        details: { attempts: entry.count },
+      });
+    }
     return Response.redirect(new URL('/login', req.url));
   }
 
