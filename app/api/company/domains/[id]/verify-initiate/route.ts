@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 import { v4 as uuidv4 } from 'uuid';
 
 const VERIFICATION_PREFIX = 'user-management-verification=';
 
 const supabaseService = getServiceSupabase();
 
-export async function POST(
+async function handlePost(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  params: { id: string },
+  auth: RouteAuthContext
 ) {
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
@@ -17,18 +19,7 @@ export async function POST(
   }
 
   try {
-    const authHeader = request.headers.get('authorization');
-    const token = authHeader && authHeader.startsWith('Bearer ')
-      ? authHeader.split(' ')[1]
-      : undefined;
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseService.auth.getUser(token);
-
-    if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-    }
+    const userId = auth.userId!;
 
     const { data: domainRecord, error: domainError } = await supabaseService
       .from('company_domains')
@@ -41,7 +32,7 @@ export async function POST(
       return NextResponse.json({ error: 'Domain not found.' }, { status: 404 });
     }
 
-    if (domainRecord.user_id && domainRecord.user_id !== user.id) {
+    if (domainRecord.user_id && domainRecord.user_id !== userId) {
       return NextResponse.json({ error: 'You do not have permission to verify this domain.' }, { status: 403 });
     }
 
@@ -73,3 +64,9 @@ export async function POST(
     return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
   }
 }
+
+export const POST = (
+  req: NextRequest,
+  ctx: { params: { id: string } }
+) => withRouteAuth((r, auth) => handlePost(r, ctx.params, auth), req);
+

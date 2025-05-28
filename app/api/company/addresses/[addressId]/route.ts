@@ -2,15 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 import { addressUpdateSchema } from '@/core/address/models';
 import { createSupabaseAddressProvider } from '@/adapters/address/factory';
 
 // Use the shared address update schema from the core layer
 type AddressUpdateRequest = z.infer<typeof addressUpdateSchema>;
 
-export async function PUT(
+async function handlePut(
   request: NextRequest,
-  { params }: { params: { addressId: string } }
+  params: { addressId: string },
+  auth: RouteAuthContext
 ) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
@@ -19,25 +21,14 @@ export async function PUT(
   }
 
   try {
-    // 2. Authentication & Get User
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-    const token = authHeader.split(' ')[1];
-
     const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
-
-    if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-    }
+    const userId = auth.userId!;
 
     // 3. Get Company Profile
     const { data: companyProfile, error: companyError } = await supabaseService
       .from('company_profiles')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     if (companyError || !companyProfile) {
@@ -84,9 +75,10 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
+async function handleDelete(
   request: NextRequest,
-  { params }: { params: { addressId: string } }
+  params: { addressId: string },
+  auth: RouteAuthContext
 ) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
@@ -95,25 +87,14 @@ export async function DELETE(
   }
 
   try {
-    // 2. Authentication & Get User
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-    const token = authHeader.split(' ')[1];
-
     const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
-
-    if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-    }
+    const userId = auth.userId!;
 
     // 3. Get Company Profile
     const { data: companyProfile, error: companyError } = await supabaseService
       .from('company_profiles')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     if (companyError || !companyProfile) {
@@ -141,4 +122,14 @@ export async function DELETE(
     console.error('Unexpected error in DELETE /api/company/addresses/[addressId]:', error);
     return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
   }
-} 
+}
+
+export const PUT = (
+  req: NextRequest,
+  ctx: { params: { addressId: string } }
+) => withRouteAuth((r, auth) => handlePut(r, ctx.params, auth), req);
+
+export const DELETE = (
+  req: NextRequest,
+  ctx: { params: { addressId: string } }
+) => withRouteAuth((r, auth) => handleDelete(r, ctx.params, auth), req);

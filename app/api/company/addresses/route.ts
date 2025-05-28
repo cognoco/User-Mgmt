@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 import { addressCreateSchema } from '@/core/address/models';
 import { createSupabaseAddressProvider } from '@/adapters/address/factory';
 
 import { z } from 'zod';
 type AddressRequest = z.infer<typeof addressCreateSchema>;
 
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest, auth: RouteAuthContext) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
@@ -15,25 +16,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // 2. Authentication & Get User
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-    const token = authHeader.split(' ')[1];
-
     const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
-
-    if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-    }
+    const userId = auth.userId!;
 
     // 3. Get Company Profile
     const { data: companyProfile, error: companyError } = await supabaseService
       .from('company_profiles')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     if (companyError || !companyProfile) {
@@ -79,7 +69,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+async function handleGet(request: NextRequest, auth: RouteAuthContext) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
@@ -87,25 +77,14 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // 2. Authentication & Get User
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-    const token = authHeader.split(' ')[1];
-
     const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
-
-    if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-    }
+    const userId = auth.userId!;
 
     // 3. Get Company Profile
     const { data: companyProfile, error: companyError } = await supabaseService
       .from('company_profiles')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     if (companyError || !companyProfile) {
@@ -125,4 +104,7 @@ export async function GET(request: NextRequest) {
     console.error('Unexpected error in GET /api/company/addresses:', error);
     return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
   }
-} 
+}
+
+export const POST = (req: NextRequest) => withRouteAuth(handlePost, req);
+export const GET = (req: NextRequest) => withRouteAuth(handleGet, req);

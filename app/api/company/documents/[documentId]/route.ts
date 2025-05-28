@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 
 // --- DELETE Handler for removing company documents ---
-export async function DELETE(
+async function handleDelete(
   request: NextRequest,
-  { params }: { params: { documentId: string } }
+  params: { documentId: string },
+  auth: RouteAuthContext
 ) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
@@ -14,25 +16,14 @@ export async function DELETE(
   }
 
   try {
-    // 2. Authentication & Get User
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-    const token = authHeader.split(' ')[1];
-
     const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
-
-    if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-    }
+    const userId = auth.userId!;
 
     // 3. Get Company Profile
     const { data: companyProfile, error: companyError } = await supabaseService
       .from('company_profiles')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     if (companyError || !companyProfile) {
@@ -79,4 +70,9 @@ export async function DELETE(
     console.error('Unexpected error in DELETE /api/company/documents/[documentId]:', error);
     return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
   }
-} 
+}
+
+export const DELETE = (
+  req: NextRequest,
+  ctx: { params: { documentId: string } }
+) => withRouteAuth((r, auth) => handleDelete(r, ctx.params, auth), req);
