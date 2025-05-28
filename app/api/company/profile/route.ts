@@ -4,9 +4,13 @@ import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
-import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
+import { type RouteAuthContext } from '@/middleware/auth';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware
+} from '@/middleware/createMiddlewareChain';
 
 // Company Profile Schema
 const CompanyProfileSchema = z.object({
@@ -39,12 +43,17 @@ const CompanyProfileUpdateSchema = z.object({
 });
 
 type CompanyProfileUpdateRequest = z.infer<typeof CompanyProfileUpdateSchema>;
+const middleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+]);
 
 async function handlePost(
-  request: NextRequest,
+  request: NextRequest, 
   auth: RouteAuthContext,
-  data: CompanyProfileRequest
+  data?: CompanyProfileRequest
 ) {
+
   const ipAddress = request.ip;
   const userAgent = request.headers.get('user-agent');
   let userIdForLogging: string | null = null;
@@ -140,19 +149,14 @@ async function handlePost(
     );
   }
 }
+// Update middleware chain to include validation
+const middleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+  validationMiddleware(CompanyProfileSchema)
+]);
 
-export const POST = (req: NextRequest) =>
-  withErrorHandling(
-    (r) =>
-      withRouteAuth((r2, auth) =>
-        withValidation(
-          CompanyProfileSchema,
-          (r3, data) => handlePost(r3, auth, data),
-          r2
-        )
-      , r),
-    req
-  );
+export const POST = middleware(handlePost);
 
 
 async function handleGet(request: NextRequest, auth: RouteAuthContext) {
@@ -180,8 +184,7 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const GET = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handleGet, r), req);
+export const GET = middleware(handleGet);
 
 async function handlePut(
   request: NextRequest,
@@ -288,18 +291,14 @@ async function handlePut(
   }
 }
 
-export const PUT = (req: NextRequest) =>
-  withErrorHandling(
-    (r) =>
-      withRouteAuth((r2, auth) =>
-        withValidation(
-          CompanyProfileUpdateSchema,
-          (r3, data) => handlePut(r3, auth, data),
-          r2
-        )
-      , r),
-    req
-  );
+// Update middleware chain for PUT to include its specific validation schema
+const putMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+  validationMiddleware(CompanyProfileUpdateSchema)
+]);
+
+export const PUT = putMiddleware(handlePut);
 
 async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
   // Get IP and User Agent early
@@ -425,5 +424,4 @@ async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const DELETE = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handleDelete, r), req);
+export const DELETE = middleware(handleDelete);
