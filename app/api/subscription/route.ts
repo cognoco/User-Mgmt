@@ -1,29 +1,18 @@
 import { stripe, createCustomer, createSubscription } from '@/lib/payments/stripe';
-import { getServiceSupabase } from '@/lib/database/supabase';
 import { createSupabaseSubscriptionProvider } from '@/adapters/subscription/factory';
 import { z } from 'zod';
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
+import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 
 const SubscriptionSchema = z.object({ plan: z.string() });
 
-export async function GET(request: Request) {
-  // Assume auth header is present and valid
-  const supabase = getServiceSupabase();
+async function handleGet(_req: NextRequest, auth: RouteAuthContext) {
   const provider = createSupabaseSubscriptionProvider({
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
     supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
   });
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-  }
-  const token = authHeader.split(' ')[1];
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-  if (userError || !user) {
-    return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-  }
   // Fetch subscription from DB
-  const subscription = await provider.getUserSubscription(user.id);
+  const subscription = await provider.getUserSubscription(auth.userId!);
   if (!subscription) {
     return NextResponse.json({ subscription: null });
   }
@@ -39,21 +28,14 @@ export async function GET(request: Request) {
   return NextResponse.json({ subscription, stripe: stripeSub });
 }
 
-export async function POST(request: Request) {
-  const supabase = getServiceSupabase();
+export const GET = (req: NextRequest) =>
+  withRouteAuth((r, auth) => handleGet(r, auth), req);
+
+async function handlePost(request: NextRequest, auth: RouteAuthContext) {
   const provider = createSupabaseSubscriptionProvider({
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
     supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
   });
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-  }
-  const token = authHeader.split(' ')[1];
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-  if (userError || !user) {
-    return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-  }
   const body = await request.json();
   const parse = SubscriptionSchema.safeParse(body);
   if (!parse.success) {
@@ -61,14 +43,14 @@ export async function POST(request: Request) {
   }
   // Check if user already has a Stripe customer
   let customerId = null;
-  const existing = await provider.getUserSubscription(user.id);
+  const existing = await provider.getUserSubscription(auth.userId!);
   if (existing && (existing as any).customer_id) {
     customerId = (existing as any).customer_id;
   } else {
     // Create Stripe customer
     const customer = await createCustomer({
-      email: user.email,
-      metadata: { user_id: user.id },
+      email: auth.user?.email || '',
+      metadata: { user_id: auth.userId! },
     });
     customerId = customer.id;
   }
@@ -87,11 +69,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: e.message || 'Stripe error' }, { status: 400 });
   }
   await provider.upsertSubscription({
-    userId: user.id,
+    userId: auth.userId!,
     planId: priceId,
     id: existing?.id,
     status: stripeSub.status,
     startDate: new Date().toISOString(),
   });
   return NextResponse.json({ success: true, subscription: stripeSub });
-} 
+}
+
+export const POST = (req: NextRequest) =>
+  withRouteAuth((r, auth) => handlePost(r, auth), req, { includeUser: true });

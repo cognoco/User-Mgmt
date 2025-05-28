@@ -1,46 +1,20 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiConsentService } from '@/services/consent/factory';
+import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 
-export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-  }
-  const token = authHeader.split(' ')[1];
-  const supabaseService = getServiceSupabase();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabaseService.auth.getUser(token);
-
-  if (userError || !user) {
-    return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-  }
-
+async function handleGet(_req: NextRequest, auth: RouteAuthContext) {
   const consentService = getApiConsentService();
-  const consent = await consentService.getUserConsent(user.id);
+  const consent = await consentService.getUserConsent(auth.userId!);
   if (!consent) {
     return NextResponse.json({ error: 'Consent not found' }, { status: 404 });
   }
   return NextResponse.json(consent);
 }
 
-export async function POST(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-  }
-  const token = authHeader.split(' ')[1];
-  const supabaseService = getServiceSupabase();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabaseService.auth.getUser(token);
+export const GET = (req: NextRequest) =>
+  withRouteAuth((r, auth) => handleGet(r, auth), req);
 
-  if (userError || !user) {
-    return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-  }
+async function handlePost(request: NextRequest, auth: RouteAuthContext) {
 
   let body: any;
   try {
@@ -54,9 +28,12 @@ export async function POST(request: NextRequest) {
   }
 
   const consentService = getApiConsentService();
-  const result = await consentService.updateUserConsent(user.id, { marketing: body.marketing });
+  const result = await consentService.updateUserConsent(auth.userId!, { marketing: body.marketing });
   if (!result.success || !result.consent) {
     return NextResponse.json({ error: result.error || 'Failed to save consent' }, { status: 500 });
   }
   return NextResponse.json(result.consent);
 }
+
+export const POST = (req: NextRequest) =>
+  withRouteAuth((r, auth) => handlePost(r, auth), req);
