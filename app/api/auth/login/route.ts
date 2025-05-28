@@ -5,12 +5,8 @@ import { withSecurity } from '@/middleware/with-security';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { getApiAuthService } from '@/services/auth/factory';
 import { LoginPayload } from '@/core/auth/models';
-import {
-  createSuccessResponse,
-  ApiError,
-  ERROR_CODES
-} from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
+import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api';
+import { createErrorHandledRoute } from '@/middleware/with-error-handling';
 import { withValidation } from '@/middleware/validation';
 import { createInvalidCredentialsError, createEmailNotVerifiedError } from '@/lib/api/auth/error-handler';
 
@@ -113,9 +109,6 @@ async function handleLogin(req: NextRequest, validatedData: z.infer<typeof Login
  */
 export const POST = withSecurity(async (request: NextRequest) =>
   withAuthRateLimit(request, (req) =>
-    withErrorHandling(
-      async (r) => withValidation(LoginSchema, handleLogin, r),
-      req
-    )
+    createErrorHandledRoute((r) => withValidation(LoginSchema, handleLogin, r))(req)
   )
 );

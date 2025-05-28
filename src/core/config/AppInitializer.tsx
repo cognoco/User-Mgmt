@@ -21,6 +21,11 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
       console.log('[AppInitializer] Initializing application...');
       // Initialize the application and get the service instances
       const services = initializeApp();
+
+      // Example: register global error handler for API calls
+      window.addEventListener('unhandledrejection', (e) => {
+        console.error('[AppInitializer] Unhandled promise rejection', e.reason);
+      });
       
       // Ensure services are properly registered with UserManagementConfiguration
       UserManagementConfiguration.configureServiceProviders({

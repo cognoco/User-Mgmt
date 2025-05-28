@@ -140,5 +140,7 @@ export function withSecurity(
         res.status(500).json({ error: 'Internal server error' });
       }
     }
-  };
-} 
+  }; 
+}
+
+export * from './with-error-handling';

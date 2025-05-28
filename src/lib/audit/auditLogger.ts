@@ -12,6 +12,7 @@ export interface LogUserActionParams {
   userId?: string | null; // Nullable for system actions or unauthenticated attempts
   action: string; // e.g., 'LOGIN_SUCCESS', 'PROFILE_UPDATE'
   status: 'SUCCESS' | 'FAILURE' | 'INITIATED' | 'COMPLETED';
+  severity?: 'info' | 'warn' | 'error';
   ipAddress?: string | null;
   userAgent?: string | null;
   targetResourceType?: string | null;
@@ -47,6 +48,7 @@ export async function logUserAction(params: LogUserActionParams): Promise<void> 
         user_id: userId,
         action: action,
         status: status,
+        severity: params.severity ?? 'info',
         ip_address: ipAddress, // Assumes INET type in DB can handle string representation
         user_agent: userAgent,
         target_resource_type: targetResourceType,
