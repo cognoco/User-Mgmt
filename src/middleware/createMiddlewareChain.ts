@@ -4,6 +4,10 @@ import { withRouteAuth, type RouteAuthOptions } from './auth';
 import { withValidation } from './validation';
 import type { ZodSchema } from 'zod';
 import { createRateLimit, type RateLimitOptions } from './rate-limit';
+import {
+  middlewareConfigSchema,
+  type MiddlewareConfig,
+} from '@/lib/schemas/middleware-config.schema';
 
 /**
  * Generic route handler used by the middleware chain.
@@ -84,4 +88,30 @@ export function rateLimitMiddleware(
   return (handler: RouteHandler): RouteHandler =>
     (req: NextRequest, ctx?: any, data?: any) =>
       limiter(req, (r) => handler(r, ctx, data));
+}
+
+/**
+ * Builds a middleware chain based on a configuration object.
+ * The configuration is validated using {@link middlewareConfigSchema}.
+ */
+export function createMiddlewareChainFromConfig(
+  config: MiddlewareConfig
+): RouteMiddleware {
+  const cfg = middlewareConfigSchema.parse(config);
+  const mws: RouteMiddleware[] = [];
+
+  if (cfg.errorHandling) {
+    mws.push(errorHandlingMiddleware());
+  }
+  if (cfg.auth) {
+    mws.push(routeAuthMiddleware(cfg.auth));
+  }
+  if (cfg.validationSchema) {
+    mws.push(validationMiddleware(cfg.validationSchema));
+  }
+  if (cfg.rateLimit) {
+    mws.push(rateLimitMiddleware(cfg.rateLimit));
+  }
+
+  return createMiddlewareChain(mws);
 }
