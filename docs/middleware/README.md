@@ -53,3 +53,18 @@ import { withRouteAuth } from '@/middleware/auth-adapter';
 export const POST = (req: NextRequest) =>
   withRouteAuth((r, ctx) => handler(r, ctx), req);
 ```
+
+## Extracting the authenticated user
+
+`withRouteAuth` populates a `RouteAuthContext` object for the handler. To access the full Supabase user (including email), enable `includeUser` when applying the middleware:
+
+```ts
+const middleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ includeUser: true })
+]);
+
+export const POST = middleware((req, auth) => {
+  // auth.user contains the authenticated Supabase user
+});
+```
