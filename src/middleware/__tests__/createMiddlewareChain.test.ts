@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 vi.mock('../auth', () => ({
   withRouteAuth: vi.fn(async (handler: any, req: NextRequest) => {
@@ -29,6 +30,7 @@ import {
   routeAuthMiddleware,
   validationMiddleware,
   rateLimitMiddleware,
+  createMiddlewareChainFromConfig,
   type RouteMiddleware,
 } from '../createMiddlewareChain';
 import { withRouteAuth } from '../auth';
@@ -77,7 +79,7 @@ describe('createMiddlewareChain', () => {
     const res = await chain(handler)(req);
 
     expect(res.status).toBe(200);
-    expect(handler).toHaveBeenCalledWith(req, { userId: '1' });
+    expect(handler).toHaveBeenCalledWith(req, { userId: '1' }, undefined);
     expect(withRouteAuth).toHaveBeenCalled();
     expect(withErrorHandling).toHaveBeenCalled();
   });
@@ -110,5 +112,29 @@ describe('createMiddlewareChain', () => {
     expect(createRateLimit).toHaveBeenCalled();
     expect(limitFn).toHaveBeenCalled();
     expect(handler).toHaveBeenCalled();
+  });
+
+  it('creates middleware chain from valid config', async () => {
+    const chain = createMiddlewareChainFromConfig({
+      auth: { optional: true },
+      validationSchema: z.object({}),
+      rateLimit: { max: 5 },
+    });
+
+    const handler = vi.fn().mockResolvedValue(new NextResponse('ok'));
+    const res = await chain(handler)(req);
+
+    expect(res.status).toBe(200);
+    expect(withRouteAuth).toHaveBeenCalled();
+    expect(withValidation).toHaveBeenCalled();
+    expect(createRateLimit).toHaveBeenCalledWith({ max: 5 });
+    expect(withErrorHandling).toHaveBeenCalled();
+    expect(handler).toHaveBeenCalled();
+  });
+
+  it('throws on invalid config', () => {
+    expect(() =>
+      createMiddlewareChainFromConfig({ rateLimit: { max: -1 } } as any)
+    ).toThrow();
   });
 });
