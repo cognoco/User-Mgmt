@@ -20,6 +20,8 @@ vi.mock('@/middleware/createMiddlewareChain', async () => {
             user_metadata: { role: 'ADMIN', teamId: '1' }
           }
         }, data)),
+    rateLimitMiddleware: vi.fn(() => (handler: any) =>
+      (req: any, ctx?: any, data?: any) => handler(req, ctx, data)),
   };
 });
 
