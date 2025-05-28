@@ -5,6 +5,7 @@ import { prisma } from '@/lib/database/prisma';
 import { GET, POST } from '../route';
 import { ERROR_CODES } from '@/lib/api/common';
 import { getApiAuthService } from '@/services/auth/factory';
+import { checkRateLimit } from '@/middleware/rate-limit';
 
 // Mocks
 vi.mock('next-auth', () => ({
@@ -39,6 +40,10 @@ vi.mock('@/lib/database/prisma', () => ({
 
 vi.mock('@/lib/rbac/roleService', () => ({
   checkRolePermission: vi.fn().mockResolvedValue(true),
+}));
+
+vi.mock('@/middleware/rate-limit', () => ({
+  checkRateLimit: vi.fn(),
 }));
 
 describe('Team Members API', () => {
@@ -96,6 +101,7 @@ describe('Team Members API', () => {
     vi.mocked(prisma.teamMember.findFirst).mockResolvedValue({ teamId: 'team1' } as any);
     vi.mocked(prisma.team.findUnique).mockResolvedValue(mockTeam as any);
     vi.mocked(prisma.teamLicense.findUnique).mockResolvedValue({ usedSeats: 0, totalSeats: 10 });
+    vi.mocked(checkRateLimit).mockResolvedValue(false);
   });
 
   it('returns 401 when no session exists', async () => {
@@ -222,6 +228,13 @@ describe('Team Members API', () => {
     expect(response.status).toBe(500);
     const data = await response.json();
     expect(data.error.code).toBe(ERROR_CODES.INTERNAL_ERROR);
+  });
+
+  it('returns 429 when rate limited', async () => {
+    vi.mocked(checkRateLimit).mockResolvedValueOnce(true);
+    const request = new NextRequest('http://localhost:3000/api/team/members');
+    const response = await GET(request);
+    expect(response.status).toBe(429);
   });
 
   it('returns 400 when seat limit reached', async () => {

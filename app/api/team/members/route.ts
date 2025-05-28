@@ -2,12 +2,10 @@ import { type NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/index';
 import { prisma } from '@/lib/database/prisma';
-import { createProtectedHandler } from '@/middleware/permissions';
 import { withSecurity } from '@/middleware/with-security';
 import { z } from 'zod';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
+import { createRouteHandler } from '@/lib/api/routeHandler';
 import { getApiTeamService } from '@/services/team/factory';
 
 const querySchema = z.object({
@@ -169,23 +167,17 @@ async function handleAddMember(req: NextRequest, data: z.infer<typeof addMemberS
   return createSuccessResponse(result.member, 201);
 }
 
-async function handler(req: NextRequest) {
-  const url = new URL(req.url);
-  const params = Object.fromEntries(url.searchParams.entries());
-  return withValidation(querySchema, handleTeamMembers, req, params);
-}
+export const GET = createRouteHandler({
+  permission: 'team.members.list',
+  schema: querySchema,
+  parse: (req) => Object.fromEntries(new URL(req.url).searchParams.entries()),
+  handler: handleTeamMembers,
+});
 
-export const GET = createProtectedHandler(
-  (req) => withErrorHandling(handler, req),
-  'team.members.list'
-);
+const postRoute = createRouteHandler({
+  permission: 'team.members.add',
+  schema: addMemberSchema,
+  handler: handleAddMember,
+});
 
-async function postHandler(req: NextRequest) {
-  const body = await req.json();
-  return withValidation(addMemberSchema, handleAddMember, req, body);
-}
-
-export const POST = createProtectedHandler(
-  (req) => withSecurity((r) => withErrorHandling(postHandler, r))(req),
-  'team.members.add'
-);
+export const POST = (req: NextRequest) => withSecurity(postRoute)(req);
