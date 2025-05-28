@@ -1,28 +1,53 @@
 import { type NextRequest } from 'next/server';
+
+
 import { getServerSession } from '@/middleware/auth-adapter';
+
 import { prisma } from '@/lib/database/prisma';
-import { hasPermission } from '@/lib/auth/hasPermission';
 import { z } from 'zod';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
 import { createTeamMemberNotFoundError } from '@/lib/api/team/error-handler';
-import { withSecurity } from '@/middleware/with-security';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware
+} from '@/middleware/createMiddlewareChain';
+import type { RouteAuthContext } from '@/middleware/auth';
+import { Permission } from '@/lib/rbac/roles';
 
 const paramSchema = z.object({ memberId: z.string().uuid() });
 
 async function handleDelete(
-  req: NextRequest,
+  _req: NextRequest,
+  auth: RouteAuthContext,
   params: z.infer<typeof paramSchema>
 ) {
-  const session = await getServerSession();
-  if (!session?.user) {
-    throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
+async function handleDelete(req: NextRequest, auth: RouteAuthContext) {
+  // If we're using the new middleware approach, auth context is already provided
+  if (!auth?.userId) {
+    // Fall back to previous approach for backward compatibility
+    const session = await getServerSession();
+    if (!session?.user) {
+      throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
+    }
+    
+    if (!(await hasPermission(session.user.id, 'REMOVE_TEAM_MEMBER'))) {
+      throw new ApiError(ERROR_CODES.FORBIDDEN, 'Forbidden', 403);
+    }
+    
+    // Set auth to use session data for the rest of the function
+    auth = { userId: session.user.id, role: session.user.role };
+  } else {
+    // With the middleware chain approach, we still need to check permissions
+    // This can be done via the Permission enum that's already imported
+    if (!(auth.permissions?.includes(Permission.REMOVE_TEAM_MEMBER))) {
+      throw new ApiError(ERROR_CODES.FORBIDDEN, 'Forbidden', 403);
+    }
   }
-
-  if (!(await hasPermission(session.user.id, 'REMOVE_TEAM_MEMBER'))) {
-    throw new ApiError(ERROR_CODES.FORBIDDEN, 'Forbidden', 403);
-  }
+  
+  // Continue with the rest of the function using auth.userId
+  // ...
+}
 
   const teamMember = await prisma.teamMember.findUnique({
     where: { id: params.memberId },
@@ -35,7 +60,7 @@ async function handleDelete(
     throw createTeamMemberNotFoundError();
   }
 
-  if (teamMember.userId === session.user.id) {
+  if (teamMember.userId === auth.userId) {
     throw new ApiError(ERROR_CODES.INVALID_REQUEST, 'Cannot remove yourself from the team', 400);
   }
 
@@ -48,11 +73,12 @@ async function handleDelete(
   return createSuccessResponse({ message: 'Team member removed successfully' });
 }
 
-async function handler(req: NextRequest, context: { params: { memberId: string } }) {
-  return withValidation(paramSchema, handleDelete, req, context.params);
-}
+const middleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: [Permission.REMOVE_TEAM_MEMBER] })
+]);
 
 export const DELETE = (
   req: NextRequest,
   ctx: { params: { memberId: string } }
-) => withSecurity((r) => withErrorHandling((req2) => handler(req2, ctx), r))(req);
+) => middleware((r, auth) => handleDelete(r, auth, paramSchema.parse(ctx.params)))(req);

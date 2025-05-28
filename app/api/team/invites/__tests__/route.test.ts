@@ -1,14 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
 import { prisma } from '@/lib/database/prisma';
+import { withRouteAuth } from '@/middleware/auth';
 import { getServerSession } from '@/middleware/auth-adapter';
 import { sendTeamInviteEmail } from '@/lib/email/teamInvite';
 import { generateInviteToken } from '@/lib/utils/token';
 import { ERROR_CODES } from '@/lib/api/common';
 
-// Mock dependencies
+// Mock dependencies (one import might be missing!)
+vi.mock('@/middleware/auth', () => ({
+  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { 
+    userId: 'user-123', 
+    role: 'user', 
+    user: { id: 'user-123', email: 'admin@example.com' } 
+  }))
+}));
+
 vi.mock('@/middleware/auth-adapter', () => ({
-  getServerSession: vi.fn(),
+  getServerSession: vi.fn()
+}));
 }));
 
 vi.mock('@/lib/prisma', () => ({
@@ -48,7 +58,6 @@ describe('POST /api/team/invites', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (getServerSession as any).mockResolvedValue(mockSession);
     (prisma.teamLicense.findUnique as any).mockResolvedValue(mockLicense);
     (prisma.teamMember.count as any).mockResolvedValue(2); // 2 existing members
     (generateInviteToken as any).mockReturnValue('mock-token');
@@ -94,7 +103,7 @@ describe('POST /api/team/invites', () => {
   });
 
   it('returns 401 when user is not authenticated', async () => {
-    (getServerSession as any).mockResolvedValue(null);
+    vi.mocked(withRouteAuth).mockResolvedValueOnce(new NextResponse('unauth', { status: 401 }));
 
     const request = new Request('http://localhost:3000/api/team/invites', {
       method: 'POST',

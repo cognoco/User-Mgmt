@@ -1,44 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getApiTeamService } from '@/services/team/factory';
-import { withErrorHandling } from '@/middleware/error-handling';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware
+} from '@/middleware/createMiddlewareChain';
+import type { RouteAuthContext } from '@/middleware/auth';
 
 const CreateTeamSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional()
 });
 
-async function handleGet(req: NextRequest) {
-  const userId = req.headers.get('x-user-id');
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+async function handleGet(_req: NextRequest, auth: RouteAuthContext) {
   const service = getApiTeamService();
-  const teams = await service.getUserTeams(userId);
+  const teams = await service.getUserTeams(auth.userId!);
   return NextResponse.json({ teams });
 }
 
-async function handlePost(req: NextRequest) {
-  const userId = req.headers.get('x-user-id');
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
-  }
-  const parsed = CreateTeamSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.message }, { status: 400 });
-  }
-  const result = await getApiTeamService().createTeam(userId, parsed.data);
+async function handlePost(
+  _req: NextRequest,
+  auth: RouteAuthContext,
+  data: z.infer<typeof CreateTeamSchema>
+) {
+  const result = await getApiTeamService().createTeam(auth.userId!, data);
   if (!result.success || !result.team) {
     return NextResponse.json({ error: result.error || 'Failed to create team' }, { status: 400 });
   }
   return NextResponse.json({ team: result.team }, { status: 201 });
 }
 
-export const GET = (req: NextRequest) => withErrorHandling(handleGet, req);
-export const POST = (req: NextRequest) => withErrorHandling(handlePost, req);
+const getMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware()
+]);
+
+const postMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+  validationMiddleware(CreateTeamSchema)
+]);
+
+export const GET = getMiddleware(handleGet);
+export const POST = postMiddleware(handlePost);

@@ -3,8 +3,15 @@ import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { z } from 'zod';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
-import { createRouteHandler } from '@/lib/api/routeHandler';
 import { getApiTeamService } from '@/services/team/factory';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware
+} from '@/middleware/createMiddlewareChain';
+import type { RouteAuthContext } from '@/middleware/auth';
+import { Permission } from '@/lib/rbac/roles';
 
 const querySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
@@ -23,20 +30,45 @@ const addMemberSchema = z.object({
 
 async function handleTeamMembers(
   req: NextRequest,
-  _ctx: any,
-  data: z.infer<typeof querySchema>
+  auth: RouteAuthContext
 ) {
-  const session = await getServerSession();
-  if (!session?.user) {
-    throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
+async function handleTeamMembers(req: NextRequest, auth: RouteAuthContext, data?: z.infer<typeof querySchema>) {
+  // If we have data passed from middleware validation, use it
+  let params;
+  
+  if (data) {
+    // New approach: validated data is passed from middleware
+    params = data;
+  } else {
+    // Legacy approach: parse and validate query params manually
+    const query = Object.fromEntries(new URL(req.url).searchParams.entries());
+    params = querySchema.parse(query);
+  }
+  
+  // Check auth context from middleware first
+  if (!auth?.userId) {
+    // Fall back to session-based auth if middleware didn't provide auth context
+    const session = await getServerSession();
+    if (!session?.user) {
+      throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
+    }
+    // Set auth using session data
+    auth = { 
+      userId: session.user.id,
+      role: session.user.role as string,
+      user: session.user
+    };
   }
 
-  const { page, limit, search, status, sortBy, sortOrder } = data;
+  const { page, limit, search, status, sortBy, sortOrder } = params;
   const skip = (page - 1) * limit;
+  
+  // Continue with the rest of the function...
+}
 
   // Get the team ID first to ensure we're looking at the correct team
   const userTeam = await prisma.teamMember.findFirst({
-    where: { userId: session.user.id },
+    where: { userId: auth.userId! },
     select: { teamId: true },
   });
 
@@ -142,14 +174,29 @@ async function handleTeamMembers(
 }
 
 async function handleAddMember(
-  req: NextRequest,
-  _ctx: any,
+  _req: NextRequest,
+  auth: RouteAuthContext,
   data: z.infer<typeof addMemberSchema>
 ) {
+// If using the middleware chain approach, auth context will already be available
+// But we need to handle both the new and old patterns during transition
+
+// Check if we're using the middleware approach (auth context available)
+if (!auth?.userId) {
+  // Fall back to session-based auth if middleware didn't provide auth context
   const session = await getServerSession();
   if (!session?.user) {
     throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
   }
+  // Set auth using session data for compatibility
+  auth = { 
+    userId: session.user.id,
+    role: session.user.role as string,
+    user: session.user
+  };
+}
+
+// Continue with the rest of the function using auth.userId
   const license = await prisma.teamLicense.findUnique({
     where: { id: data.teamId },
     select: { usedSeats: true, totalSeats: true },
@@ -170,15 +217,16 @@ async function handleAddMember(
   return createSuccessResponse(result.member, 201);
 }
 
-export const GET = createRouteHandler<z.infer<typeof querySchema>>({
-  handler: handleTeamMembers,
-  schema: querySchema,
-  permission: 'team.members.list',
-});
+const getMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: [Permission.VIEW_TEAM_MEMBERS] })
+]);
 
-export const POST = createRouteHandler<z.infer<typeof addMemberSchema>>({
-  handler: handleAddMember,
-  schema: addMemberSchema,
-  permission: 'team.members.add',
-  applySecurity: true,
-});
+const postMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: [Permission.INVITE_TEAM_MEMBER] }),
+  validationMiddleware(addMemberSchema)
+]);
+
+export const GET = getMiddleware(handleTeamMembers);
+export const POST = postMiddleware(handleAddMember);

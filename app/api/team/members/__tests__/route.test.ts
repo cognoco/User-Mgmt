@@ -1,15 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { GET, POST } from '../route';
 import { ERROR_CODES } from '@/lib/api/common';
 import { getApiAuthService } from '@/services/auth/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { withRouteAuth } from '@/middleware/auth';
 
 // Mocks
 vi.mock('@/middleware/auth-adapter', () => ({
-  getServerSession: vi.fn(),
+  getServerSession: vi.fn()
+}));
+
+vi.mock('@/middleware/auth', () => ({
+  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { 
+    userId: 'user1', 
+    role: 'user', 
+    user: { id: 'user1', email: 'test@example.com' } 
+  }))
 }));
 
 vi.mock('@/services/auth/factory', () => ({ getApiAuthService: vi.fn() }));
@@ -92,7 +101,6 @@ describe('Team Members API', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getServerSession).mockResolvedValue(mockSession as any);
     vi.mocked(getApiAuthService).mockReturnValue({
       getSession: vi.fn().mockResolvedValue({ user: { id: 'user1' } }),
     } as any);
@@ -105,10 +113,7 @@ describe('Team Members API', () => {
   });
 
   it('returns 401 when no session exists', async () => {
-    vi.mocked(getServerSession).mockResolvedValueOnce(null);
-    vi.mocked(getApiAuthService).mockReturnValueOnce({
-      getSession: vi.fn().mockResolvedValue(null),
-    } as any);
+    vi.mocked(withRouteAuth).mockResolvedValueOnce(new NextResponse('unauth', { status: 401 }));
 
     const request = new NextRequest('http://localhost:3000/api/team/members');
     const response = await GET(request);
