@@ -5,7 +5,7 @@ import { withErrorHandling } from '@/middleware/error-handling';
 import { withValidation } from '@/middleware/validation';
 import { getApiAdminService } from '@/services/admin/factory';
 import { createUserNotFoundError } from '@/lib/api/admin/error-handler';
-import { createProtectedHandler } from '@/middleware/permissions';
+import { withResourcePermission } from '@/middleware/withResourcePermission';
 import { withSecurity } from '@/middleware/with-security';
 import { notifyUserChanges } from '@/lib/realtime/notifyUserChanges';
 
@@ -49,26 +49,37 @@ async function handleDeleteUser(req: NextRequest, { params }: { params: { id: st
   return createNoContentResponse();
 }
 
-export const GET = createProtectedHandler(
-  (req, ctx) => withErrorHandling(() => handleGetUser(req, ctx), req),
-  'admin.users.view'
-);
+export const GET = (
+  req: NextRequest,
+  ctx: { params: { id: string } }
+) =>
+  withResourcePermission(
+    (r, auth) => withErrorHandling(() => handleGetUser(r, ctx), r),
+    { permission: 'admin.users.view' }
+  )(req, ctx);
 
-export const PUT = createProtectedHandler(
-  (req, ctx) =>
-    withSecurity(async (r) => {
-      const data = await r.json();
-      return withErrorHandling(
-        () =>
-          withValidation(updateUserSchema, (r2, validated) => handleUpdateUser(r2, validated, ctx), r, data),
-        r
-      );
-    })(req),
-  'admin.users.update'
-);
+export const PUT = (
+  req: NextRequest,
+  ctx: { params: { id: string } }
+) =>
+  withResourcePermission(
+    (r, auth) =>
+      withSecurity(async (r2) => {
+        const data = await r2.json();
+        return withErrorHandling(
+          () => withValidation(updateUserSchema, (rr, v) => handleUpdateUser(rr, v, ctx), r2, data),
+          r2
+        );
+      })(r),
+    { permission: 'admin.users.update' }
+  )(req, ctx);
 
-export const DELETE = createProtectedHandler(
-  (req, ctx) =>
-    withSecurity((r) => withErrorHandling(() => handleDeleteUser(r, ctx), r))(req),
-  'admin.users.delete'
-);
+export const DELETE = (
+  req: NextRequest,
+  ctx: { params: { id: string } }
+) =>
+  withResourcePermission(
+    (r, auth) =>
+      withSecurity((r2) => withErrorHandling(() => handleDeleteUser(r2, ctx), r2))(r),
+    { permission: 'admin.users.delete' }
+  )(req, ctx);

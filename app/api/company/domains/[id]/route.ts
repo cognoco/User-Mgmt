@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { withErrorHandling } from '@/middleware/error-handling';
+import { withResourcePermission } from '@/middleware/withResourcePermission';
+import { Permission } from '@/lib/rbac/roles';
 import { z } from 'zod';
 
 // Validation schema for updating a domain
@@ -9,9 +11,21 @@ const domainUpdateSchema = z.object({
   is_primary: z.boolean().optional(),
 });
 
+async function canAccessDomain(userId: string, domainId: string) {
+  const supabase = getServiceSupabase();
+  const { data, error } = await supabase
+    .from('company_domains')
+    .select('company_profiles!inner(user_id)')
+    .eq('id', domainId)
+    .single();
+  if (error || !data) return false;
+  return data.company_profiles.user_id === userId;
+}
+
 // DELETE /api/company/domains/[id] - Delete a domain
 async function handleDelete(
   request: NextRequest,
+  _userId: string,
   { params }: { params: { id: string } }
 ) {
   // 1. Rate Limiting
@@ -27,19 +41,7 @@ async function handleDelete(
       return NextResponse.json({ error: 'Domain ID is required' }, { status: 400 });
     }
 
-    // 3. Authentication & Get User
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-    const token = authHeader.split(' ')[1];
-
     const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
-
-    if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-    }
 
     // 4. Get the domain details to check permissions and primary status
     const { data: domain, error: domainError } = await supabaseService
@@ -53,17 +55,12 @@ async function handleDelete(
       return NextResponse.json({ error: 'Domain not found.' }, { status: 404 });
     }
 
-    // 5. Verify user has permission to delete (owns the company profile)
-    if (domain.company_profiles.user_id !== user.id) {
-      return NextResponse.json({ error: 'You do not have permission to delete this domain.' }, { status: 403 });
-    }
-
-    // 6. Check if this is a primary domain - can't delete primary domain
+    // 5. Check if this is a primary domain - can't delete primary domain
     if (domain.is_primary) {
       return NextResponse.json({ error: 'Cannot delete the primary domain. Set another domain as primary first.' }, { status: 400 });
     }
 
-    // 7. Delete the domain
+    // 6. Delete the domain
     const { error: deleteError } = await supabaseService
       .from('company_domains')
       .delete()
@@ -86,6 +83,7 @@ async function handleDelete(
 // PATCH /api/company/domains/[id] - Update a domain (currently just primary status)
 async function handlePatch(
   request: NextRequest,
+  _userId: string,
   { params }: { params: { id: string } }
 ) {
   // 1. Rate Limiting
@@ -101,19 +99,7 @@ async function handlePatch(
       return NextResponse.json({ error: 'Domain ID is required' }, { status: 400 });
     }
 
-    // 3. Authentication & Get User
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-    const token = authHeader.split(' ')[1];
-
     const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
-
-    if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-    }
 
     // 4. Parse and validate request body
     const body = await request.json();
@@ -140,12 +126,7 @@ async function handlePatch(
       return NextResponse.json({ error: 'Domain not found.' }, { status: 404 });
     }
 
-    // 6. Verify user has permission to update (owns the company profile)
-    if (domain.company_profiles.user_id !== user.id) {
-      return NextResponse.json({ error: 'You do not have permission to update this domain.' }, { status: 403 });
-    }
-
-    // 7. Special handling for setting a domain as primary
+    // 6. Special handling for setting a domain as primary
     if (is_primary) {
       // First, clear primary status from all domains of this company
       const { error: updateError } = await supabaseService
@@ -187,9 +168,23 @@ async function handlePatch(
 export const DELETE = (
   req: NextRequest,
   ctx: { params: { id: string } }
-) => withErrorHandling((r) => handleDelete(r, ctx), req);
+) =>
+  withResourcePermission(
+    (r, auth) => withErrorHandling(() => handleDelete(r, auth.userId!, ctx), r),
+    {
+      permission: Permission.MANAGE_DOMAINS,
+      checkAccess: (uid) => canAccessDomain(uid, ctx.params.id),
+    }
+  )(req, ctx);
 
 export const PATCH = (
   req: NextRequest,
   ctx: { params: { id: string } }
-) => withErrorHandling((r) => handlePatch(r, ctx), req);
+) =>
+  withResourcePermission(
+    (r, auth) => withErrorHandling(() => handlePatch(r, auth.userId!, ctx), r),
+    {
+      permission: Permission.MANAGE_DOMAINS,
+      checkAccess: (uid) => canAccessDomain(uid, ctx.params.id),
+    }
+  )(req, ctx);
