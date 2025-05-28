@@ -51,8 +51,8 @@ This checklist tracks the existence of API endpoints for the User Management Mod
 ## 2. User Profile & Account Management
 
 **API Endpoints:**
- - [x] `/api/user/profile` (GET, PATCH)
- - [x] `/api/user/settings` (GET, PATCH)
+ - [x] `/api/profile` (GET, PATCH)
+ - [x] `/api/settings` (GET, PATCH)
  - [x] `/api/profile/avatar` (GET, POST, DELETE) - canonical
  - [x] `/api/user/avatar` (alias, DEPRECATED)
  - [x] `/api/connected-accounts` (GET, DELETE)

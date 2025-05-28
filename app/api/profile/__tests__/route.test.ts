@@ -17,9 +17,9 @@ beforeEach(() => {
   (getApiUserService as unknown as vi.Mock).mockReturnValue(service);
 });
 
-describe('/api/user/profile GET', () => {
+describe('/api/profile GET', () => {
   it('returns user profile', async () => {
-    const req = createAuthenticatedRequest('GET', 'http://localhost/api/user/profile');
+    const req = createAuthenticatedRequest('GET', 'http://localhost/api/profile');
     const res = await GET(req);
     const data = await res.json();
     expect(res.status).toBe(200);
@@ -29,15 +29,15 @@ describe('/api/user/profile GET', () => {
 
   it('returns 404 when profile missing', async () => {
     (service.getUserProfile as vi.Mock).mockResolvedValueOnce(null);
-    const req = createAuthenticatedRequest('GET', 'http://localhost/api/user/profile');
+    const req = createAuthenticatedRequest('GET', 'http://localhost/api/profile');
     const res = await GET(req);
     expect(res.status).toBe(404);
   });
 });
 
-describe('/api/user/profile PATCH', () => {
+describe('/api/profile PATCH', () => {
   it('updates user profile', async () => {
-    const req = createAuthenticatedRequest('PATCH', 'http://localhost/api/user/profile', { bio: 'Updated bio' });
+    const req = createAuthenticatedRequest('PATCH', 'http://localhost/api/profile', { bio: 'Updated bio' });
     (req as any).json = async () => ({ bio: 'Updated bio' });
     const res = await PATCH(req);
     const data = await res.json();
@@ -50,7 +50,7 @@ describe('/api/user/profile PATCH', () => {
 
   it('returns 500 when update fails', async () => {
     (service.updateUserProfile as vi.Mock).mockResolvedValueOnce({ success: false, error: 'fail' });
-    const req = createAuthenticatedRequest('PATCH', 'http://localhost/api/user/profile', { name: 'Bad' });
+    const req = createAuthenticatedRequest('PATCH', 'http://localhost/api/profile', { name: 'Bad' });
     (req as any).json = async () => ({ name: 'Bad' });
     const res = await PATCH(req);
     expect(res.status).toBe(500);

@@ -17,9 +17,9 @@ beforeEach(() => {
   (getApiUserService as unknown as vi.Mock).mockReturnValue(service);
 });
 
-describe('/api/user/settings GET', () => {
+describe('/api/settings GET', () => {
   it('returns user settings', async () => {
-    const req = createAuthenticatedRequest('GET', 'http://localhost/api/user/settings');
+    const req = createAuthenticatedRequest('GET', 'http://localhost/api/settings');
     const res = await GET(req);
     const body = await res.json();
     expect(res.status).toBe(200);
@@ -28,9 +28,9 @@ describe('/api/user/settings GET', () => {
   });
 });
 
-describe('/api/user/settings PATCH', () => {
+describe('/api/settings PATCH', () => {
   it('updates user settings', async () => {
-    const req = createAuthenticatedRequest('PATCH', 'http://localhost/api/user/settings', { notifications: { email: false } });
+    const req = createAuthenticatedRequest('PATCH', 'http://localhost/api/settings', { notifications: { email: false } });
     (req as any).json = async () => ({ notifications: { email: false } });
     const res = await PATCH(req);
     const body = await res.json();
@@ -46,7 +46,7 @@ describe('/api/user/settings PATCH', () => {
 
   it('returns 500 on failure', async () => {
     (service.updateUserPreferences as vi.Mock).mockResolvedValueOnce({ success: false, error: 'fail' });
-    const req = createAuthenticatedRequest('PATCH', 'http://localhost/api/user/settings', { notifications: { email: false } });
+    const req = createAuthenticatedRequest('PATCH', 'http://localhost/api/settings', { notifications: { email: false } });
     (req as any).json = async () => ({ notifications: { email: false } });
     const res = await PATCH(req);
     expect(res.status).toBe(500);

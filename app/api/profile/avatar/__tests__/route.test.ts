@@ -17,9 +17,9 @@ beforeEach(() => {
   (getApiUserService as unknown as vi.Mock).mockReturnValue(service);
 });
 
-describe('/api/user/avatar alias', () => {
+describe('/api/profile/avatar', () => {
   it('returns predefined avatars', async () => {
-    const req = createAuthenticatedRequest('GET', 'http://localhost/api/user/avatar');
+    const req = createAuthenticatedRequest('GET', 'http://localhost/api/profile/avatar');
     const res = await GET(req);
     const body = await res.json();
     expect(res.status).toBe(200);
@@ -27,7 +27,7 @@ describe('/api/user/avatar alias', () => {
   });
 
   it('updates avatar using predefined id', async () => {
-    const req = createAuthenticatedRequest('POST', 'http://localhost/api/user/avatar', { avatarId: 'avatar1' });
+    const req = createAuthenticatedRequest('POST', 'http://localhost/api/profile/avatar', { avatarId: 'avatar1' });
     (req as any).json = async () => ({ avatarId: 'avatar1' });
     const res = await POST(req);
     expect(res.status).toBe(200);
@@ -36,7 +36,7 @@ describe('/api/user/avatar alias', () => {
 
   it('uploads custom avatar', async () => {
     const data = 'data:image/png;base64,aGVsbG8=';
-    const req = createAuthenticatedRequest('POST', 'http://localhost/api/user/avatar', { avatar: data });
+    const req = createAuthenticatedRequest('POST', 'http://localhost/api/profile/avatar', { avatar: data });
     (req as any).json = async () => ({ avatar: data });
     const res = await POST(req);
     expect(res.status).toBe(200);
@@ -44,7 +44,7 @@ describe('/api/user/avatar alias', () => {
   });
 
   it('deletes avatar', async () => {
-    const req = createAuthenticatedRequest('DELETE', 'http://localhost/api/user/avatar');
+    const req = createAuthenticatedRequest('DELETE', 'http://localhost/api/profile/avatar');
     const res = await DELETE(req);
     expect(res.status).toBe(204);
     expect(service.deleteProfilePicture).toHaveBeenCalled();
