@@ -1,5 +1,4 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { checkRolePermission } from '@/lib/rbac/roleService';
 import { Role } from '@/types/rbac';
@@ -10,22 +9,25 @@ import {
   type RouteAuthContext,
 } from '@/middleware/createMiddlewareChain';
 
-async function handleGet(req: NextRequest, auth: RouteAuthContext) {
+async function handleGet(_req: NextRequest, auth: RouteAuthContext) {
   try {
-    // Get the current session
-    const session = await getServerSession(req);
-    if (!session?.user) {
+    // Authentication middleware attaches the Supabase user when valid
+    if (!auth.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if user has admin permission
+    const role = (auth.user.app_metadata?.role || auth.user.user_metadata?.role || auth.role) as Role;
+
+    // Check if user has admin permission using Supabase metadata
     const hasAdminAccess = await checkRolePermission(
-      session.user.role as Role, 
+      role,
       'ACCESS_ADMIN_DASHBOARD'
     );
     if (!hasAdminAccess) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
+
+    const teamId = auth.user.app_metadata?.teamId || auth.user.user_metadata?.teamId;
 
     // Get team statistics
     const teamStats = await prisma.teamMember.groupBy({
@@ -34,14 +36,14 @@ async function handleGet(req: NextRequest, auth: RouteAuthContext) {
         _all: true
       },
       where: {
-        teamId: session.user.teamId
+        teamId
       }
     });
 
     // Get subscription info
     const subscription = await prisma.subscription.findUnique({
       where: {
-        teamId: session.user.teamId
+        teamId
       },
       select: {
         plan: true,
@@ -58,7 +60,7 @@ async function handleGet(req: NextRequest, auth: RouteAuthContext) {
 
     const recentActivity = await prisma.activityLog.findMany({
       where: {
-        teamId: session.user.teamId,
+        teamId,
         createdAt: {
           gte: thirtyDaysAgo
         }
