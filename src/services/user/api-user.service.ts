@@ -20,7 +20,7 @@ import {
 export class ApiUserService implements UserService {
   async getUserProfile(_userId: string): Promise<UserProfile | null> {
     void _userId;
-    const res = await fetch('/api/user/profile', { credentials: 'include' });
+    const res = await fetch('/api/profile', { credentials: 'include' });
     if (!res.ok) return null;
     const data = await res.json();
     return data.data ?? null;
@@ -38,7 +38,7 @@ export class ApiUserService implements UserService {
     profileData: ProfileUpdatePayload
   ): Promise<UserProfileResult> {
     void _userId;
-    const res = await fetch('/api/user/profile', {
+    const res = await fetch('/api/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -58,7 +58,7 @@ export class ApiUserService implements UserService {
    */
   async getUserPreferences(_userId: string): Promise<UserPreferences> {
     void _userId;
-    const res = await fetch('/api/user/settings', { credentials: 'include' });
+    const res = await fetch('/api/settings', { credentials: 'include' });
     if (!res.ok) throw new Error('Failed to fetch preferences');
     const data = await res.json();
     return data.data;
@@ -75,7 +75,7 @@ export class ApiUserService implements UserService {
     preferences: PreferencesUpdatePayload
   ): Promise<{ success: boolean; preferences?: UserPreferences; error?: string }> {
     void _userId;
-    const res = await fetch('/api/user/settings', {
+    const res = await fetch('/api/settings', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
