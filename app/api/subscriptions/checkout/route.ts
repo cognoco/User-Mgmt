@@ -1,6 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createCheckoutSession } from '@/lib/payments/stripe';
+import {
+  createSuccessResponse,
+  createValidationError,
+  createServerError,
+} from '@/lib/api/common';
 
 const bodySchema = z.object({ plan: z.string() });
 
@@ -12,11 +17,11 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    throw createValidationError('Invalid JSON');
   }
   const parse = bodySchema.safeParse(body);
   if (!parse.success) {
-    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+    throw createValidationError('Invalid payload', parse.error.flatten());
   }
 
   try {
@@ -26,8 +31,8 @@ export async function POST(req: NextRequest) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing/success`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing/cancel`,
     });
-    return NextResponse.json({ url: session.url });
+    return createSuccessResponse({ url: session.url });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    throw createServerError(err.message);
   }
 }

@@ -1,10 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { getCurrentUser } from '@/lib/auth/session';
 import crypto from 'crypto';
+import {
+  createSuccessResponse,
+  createCreatedResponse,
+  createValidationError,
+  createUnauthorizedError,
+  createServerError,
+  createForbiddenError,
+  ApiError,
+  ERROR_CODES,
+} from '@/lib/api/common';
 
 // Zod schema for webhook creation
 const CreateWebhookSchema = z.object({
@@ -19,14 +29,14 @@ export async function GET(request: NextRequest) {
   // Rate limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    throw new ApiError(ERROR_CODES.INVALID_REQUEST, 'Too many requests', 429);
   }
 
   try {
     // Get current user
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw createUnauthorizedError();
     }
 
     // Get Supabase instance
@@ -40,13 +50,13 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching webhooks:', error);
-      return NextResponse.json({ error: 'Failed to fetch webhooks' }, { status: 500 });
+      throw createServerError('Failed to fetch webhooks');
     }
 
-    return NextResponse.json({ webhooks });
+    return createSuccessResponse({ webhooks });
   } catch (error) {
     console.error('Unexpected error in webhooks GET:', error);
-    return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
+    throw createServerError('An internal server error occurred');
   }
 }
 
@@ -59,14 +69,14 @@ export async function POST(request: NextRequest) {
   // Rate limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    throw new ApiError(ERROR_CODES.INVALID_REQUEST, 'Too many requests', 429);
   }
 
   try {
     // Get current user
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw createUnauthorizedError();
     }
 
     // Parse and validate request body
@@ -74,7 +84,7 @@ export async function POST(request: NextRequest) {
     try {
       body = await request.json();
     } catch (e) {
-      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+      throw createValidationError('Invalid request body');
     }
 
     const parseResult = CreateWebhookSchema.safeParse(body);
@@ -83,7 +93,7 @@ export async function POST(request: NextRequest) {
         field: err.path.join('.'),
         message: err.message,
       }));
-      return NextResponse.json({ error: 'Validation failed', details: errors }, { status: 400 });
+      throw createValidationError('Validation failed', { errors });
     }
 
     const { name, url, events, is_active } = parseResult.data;
@@ -110,7 +120,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error creating webhook:', error);
-      return NextResponse.json({ error: 'Failed to create webhook' }, { status: 500 });
+      throw createServerError('Failed to create webhook');
     }
 
     // Log the action
@@ -126,37 +136,37 @@ export async function POST(request: NextRequest) {
     });
 
     // Return the webhook details (including the secret, which should only be shown once)
-    return NextResponse.json({
+    return createCreatedResponse({
       ...data,
-      secret // Include the secret in the response (only time it will be available)
+      secret, // Include the secret in the response
     });
   } catch (error) {
     console.error('Unexpected error in webhooks POST:', error);
-    return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
+    throw createServerError('An internal server error occurred');
   }
-} 
+}
 // DELETE handler to remove a webhook
 export async function DELETE(request: NextRequest) {
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    throw new ApiError(ERROR_CODES.INVALID_REQUEST, 'Too many requests', 429);
   }
 
   const user = await getCurrentUser();
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    throw createUnauthorizedError();
   }
 
   let body: any;
   try {
     body = await request.json();
   } catch (e) {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    throw createValidationError('Invalid request body');
   }
 
   const id = body?.id;
   if (!id) {
-    return NextResponse.json({ error: 'Webhook id required' }, { status: 400 });
+    throw createValidationError('Webhook id required');
   }
 
   const supabase = getServiceSupabase();
@@ -168,7 +178,7 @@ export async function DELETE(request: NextRequest) {
 
   if (error) {
     console.error('Error deleting webhook:', error);
-    return NextResponse.json({ error: 'Failed to delete webhook' }, { status: 500 });
+    throw createServerError('Failed to delete webhook');
   }
 
   await logUserAction({
@@ -182,5 +192,5 @@ export async function DELETE(request: NextRequest) {
     details: { id }
   });
 
-  return NextResponse.json({ success: true });
+  return createSuccessResponse({ success: true });
 }
