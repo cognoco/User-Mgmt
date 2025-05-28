@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { getUser } from '@/lib/auth/getUser';
+import { getSupabaseServerClient } from '@/lib/auth';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { hasPermission } from '@/lib/auth/hasPermission';
 import { AdminAuditLogs } from '@/ui/styled/admin/audit-logs/AdminAuditLogs';
 
@@ -11,9 +12,11 @@ export const metadata: Metadata = {
 
 export default async function AdminAuditLogsPage(): Promise<JSX.Element> {
   // Get current user and check permissions
-  const user = await getUser();
-  
-  if (!user) {
+  const supabase = getSupabaseServerClient();
+  const { data, error } = await supabase.auth.getUser();
+  const user: SupabaseUser | null = data.user;
+
+  if (error || !user) {
     redirect('/auth/login');
   }
   
