@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PATCH } from '../route';
 import { prisma } from '@/lib/database/prisma';
-import { getServerSession } from '@/middleware/auth-adapter';
+import { withRouteAuth } from '@/middleware/auth';
 import { NextResponse } from 'next/server';
 
 // Mock dependencies
-vi.mock('@/middleware/auth-adapter', () => ({
-  getServerSession: vi.fn(),
+vi.mock('@/middleware/auth', () => ({
+  withRouteAuth: vi.fn((handler: any) => async (req: any) =>
+    handler(req, { userId: 'user-123', role: 'admin', permissions: [] }))
 }));
 
 vi.mock('@/lib/database/prisma', () => ({
@@ -19,12 +20,6 @@ vi.mock('@/lib/database/prisma', () => ({
 }));
 
 describe('PATCH /api/team/members/[memberId]/role', () => {
-  const mockSession = {
-    user: {
-      id: 'user-123',
-      email: 'admin@example.com',
-    },
-  };
 
   const mockTeamMember = {
     id: 'member-1',
@@ -44,7 +39,6 @@ describe('PATCH /api/team/members/[memberId]/role', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (getServerSession as any).mockResolvedValue(mockSession);
     (prisma.teamMember.findFirst as any).mockResolvedValue(mockAdminMember);
     (prisma.teamMember.update as any).mockResolvedValue({
       ...mockTeamMember,
@@ -82,7 +76,9 @@ describe('PATCH /api/team/members/[memberId]/role', () => {
   });
 
   it('returns 401 when user is not authenticated', async () => {
-    (getServerSession as any).mockResolvedValue(null);
+    vi.mocked(withRouteAuth).mockResolvedValueOnce(
+      new NextResponse('unauth', { status: 401 })
+    );
 
     const request = new Request(
       'http://localhost:3000/api/team/members/member-1/role',

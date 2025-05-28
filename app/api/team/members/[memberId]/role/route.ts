@@ -1,7 +1,7 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/database/prisma';
-import { getServerSession } from '@/middleware/auth-adapter';
+import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
@@ -14,28 +14,17 @@ const updateRoleSchema = z.object({
 });
 
 async function handlePatch(
-  req: NextRequest,
+  _req: NextRequest,
+  auth: RouteAuthContext,
   data: z.infer<typeof updateRoleSchema>,
   memberId: string
 ) {
-  const session = await getServerSession();
-  if (!session?.user) {
-    await logUserAction({
-      action: 'TEAM_ROLE_UPDATE_ATTEMPT',
-      status: 'FAILURE',
-      targetResourceType: 'team_member',
-      targetResourceId: memberId,
-      details: { reason: 'Unauthorized' }
-    });
-    throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Unauthorized', 401);
-  }
-
   const currentUserMember = await prisma.teamMember.findFirst({
-    where: { userId: session.user.id, role: 'admin' },
+    where: { userId: auth.userId!, role: 'admin' },
   });
   if (!currentUserMember) {
     await logUserAction({
-      userId: session.user.id,
+      userId: auth.userId!,
       action: 'TEAM_ROLE_UPDATE_ATTEMPT',
       status: 'FAILURE',
       targetResourceType: 'team_member',
@@ -51,7 +40,7 @@ async function handlePatch(
       data: { role: data.role },
     });
     await logUserAction({
-      userId: session.user.id,
+      userId: auth.userId!,
       action: 'TEAM_ROLE_UPDATE_SUCCESS',
       status: 'SUCCESS',
       targetResourceType: 'team_member',
@@ -61,7 +50,7 @@ async function handlePatch(
     return createSuccessResponse(updatedMember);
   } catch (error) {
     await logUserAction({
-      userId: session.user.id,
+      userId: auth.userId!,
       action: 'TEAM_ROLE_UPDATE_NOT_FOUND',
       status: 'FAILURE',
       targetResourceType: 'team_member',
@@ -76,7 +65,11 @@ async function handler(
   req: NextRequest,
   context: { params: { memberId: string } }
 ) {
-  return withValidation(updateRoleSchema, (r, data) => handlePatch(r, data, context.params.memberId), req);
+  return withRouteAuth(
+    (r, auth) =>
+      withValidation(updateRoleSchema, (r2, data) => handlePatch(r2, auth, data, context.params.memberId), r),
+    req
+  );
 }
 
 export const PATCH = (
