@@ -10,6 +10,7 @@ const config: Partial<RuntimeConfig> = {
     rateLimitMax: 100,
     sessionCookieName: 'user-management-session',
     tokenExpiryDays: 7,
+    database: { provider: 'supabase' },
   },
   featureFlags: {},
 };
