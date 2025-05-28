@@ -6,9 +6,9 @@
  */
 
 import { AdminService } from '@/core/admin/interfaces';
-import { UserManagementConfiguration } from '@/core/config';
 import type { IAdminDataProvider } from '@/core/admin';
 import { AdapterRegistry } from '@/adapters/registry';
+import { DefaultAdminService } from './default-admin.service';
 
 // Singleton instance for API routes
 let adminServiceInstance: AdminService | null = null;
@@ -20,16 +20,8 @@ let adminServiceInstance: AdminService | null = null;
  */
 export function getApiAdminService(): AdminService {
   if (!adminServiceInstance) {
-    // Get the admin adapter from the registry
-    AdapterRegistry.getInstance().getAdapter<IAdminDataProvider>('admin');
-
-    // Retrieve the service implementation
-    adminServiceInstance = UserManagementConfiguration.getServiceProvider('adminService') as AdminService;
-
-    // If no admin service is registered, throw an error
-    if (!adminServiceInstance) {
-      throw new Error('Admin service not registered in UserManagementConfiguration');
-    }
+    const provider = AdapterRegistry.getInstance().getAdapter<IAdminDataProvider>('admin');
+    adminServiceInstance = new DefaultAdminService(provider);
   }
 
   return adminServiceInstance;

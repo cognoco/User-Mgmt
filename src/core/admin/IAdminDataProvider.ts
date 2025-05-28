@@ -9,7 +9,7 @@
 import type { UserProfile } from '../user/models';
 import type { AuditLogEntry, AuditLogQuery } from '../audit/models';
 import type { PaginationMeta } from '@/lib/api/common/response-formatter';
-import type { ListUsersParams } from './interfaces';
+import type { ListUsersParams, SearchUsersParams } from './interfaces';
 
 export interface IAdminDataProvider {
   /**
@@ -45,6 +45,13 @@ export interface IAdminDataProvider {
    * @param id Unique identifier of the user
    */
   deleteUser(id: string): Promise<void>;
+
+  /**
+   * Search users with advanced filtering and pagination.
+   */
+  searchUsers(
+    params: SearchUsersParams
+  ): Promise<{ users: UserProfile[]; pagination: PaginationMeta }>;
 
   /**
    * Retrieve audit logs based on query parameters.

@@ -19,6 +19,7 @@ import { SubscriptionDataProvider } from './subscription/interfaces';
 import { ApiKeyDataProvider } from './api-keys/interfaces';
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
+import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
 
 
 // Import domain-specific factories
@@ -34,6 +35,7 @@ import createSupabaseSsoProvider from './sso/supabase/factory';
 import createSupabaseSubscriptionProvider from './subscription/factory';
 import createSupabaseApiKeyProvider from './api-keys/supabase/factory';
 import { createSupabaseWebhookProvider } from './webhooks';
+import createSupabaseAdminProvider from './admin/supabase/factory';
 
 
 /**
@@ -77,6 +79,13 @@ export class SupabaseAdapterFactory implements AdapterFactory {
    */
   createUserProvider(): UserDataProvider {
     return createSupabaseUserProvider(this.options);
+  }
+
+  /**
+   * Create a Supabase admin provider
+   */
+  createAdminProvider(): IAdminDataProvider {
+    return createSupabaseAdminProvider(this.options);
   }
 
   /**

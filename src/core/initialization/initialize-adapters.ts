@@ -24,6 +24,7 @@ import { DefaultNotificationService } from '@/services/notification/default-noti
 import { DefaultAuditService } from '@/services/audit/default-audit.service';
 import { DefaultCsrfService } from '@/services/csrf/default-csrf.service';
 import { DefaultNotificationHandler } from '@/services/notification/default-notification.handler';
+import { DefaultAdminService } from '@/services/admin/default-admin.service';
 import {
   createAddressProvider
 } from '@/adapters/address/factory';
@@ -101,6 +102,7 @@ export function initializeAdapters(
     const subscriptionAdapter = factory.createSubscriptionProvider();
     const apiKeyAdapter = factory.createApiKeyProvider();
     const webhookAdapter = factory.createWebhookProvider?.();
+    const adminAdapter = factory.createAdminProvider?.();
 
     const addressAdapter = createAddressProvider(config);
     const auditAdapter = createAuditProvider(config);
@@ -111,6 +113,7 @@ export function initializeAdapters(
     registry.registerAdapter('auth', authAdapter);
     registry.registerAdapter('user', userAdapter);
     registry.registerAdapter('team', teamAdapter);
+    if (adminAdapter) registry.registerAdapter('admin', adminAdapter);
     if (organizationAdapter) registry.registerAdapter('organization', organizationAdapter);
     registry.registerAdapter('permission', permissionAdapter);
     if (gdprAdapter) registry.registerAdapter('gdpr', gdprAdapter);
@@ -143,6 +146,7 @@ export function initializeAdapters(
     const csrfService = new DefaultCsrfService(csrfAdapter);
     const notificationService = new DefaultNotificationService(notificationAdapter, new DefaultNotificationHandler());
     const ssoService = new DefaultSsoService(ssoAdapter);
+    const adminService = adminAdapter ? new DefaultAdminService(adminAdapter) : undefined;
     
     return {
       authService,
@@ -161,6 +165,7 @@ export function initializeAdapters(
       csrfService,
       notificationService,
       ssoService,
+      adminService,
       adapters: {
         authAdapter,
         userAdapter,
@@ -177,7 +182,8 @@ export function initializeAdapters(
         auditAdapter,
         csrfAdapter,
         notificationAdapter,
-        ssoAdapter
+        ssoAdapter,
+        adminAdapter
       }
       };
   } catch (error) {
@@ -214,6 +220,7 @@ export function initializeUserManagement(config = {}, options = {}) {
       csrfService: services.csrfService,
       notificationService: services.notificationService,
       ssoService: services.ssoService,
+      adminService: services.adminService,
       ...options.serviceProviders
     },
     options: {
