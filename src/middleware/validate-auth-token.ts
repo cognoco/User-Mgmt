@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import type { User } from '@supabase/supabase-js';
 import { getSessionFromToken } from '@/services/auth/factory';
 import { ApiError } from '@/lib/api/common/api-error';
+import { createAuthApiError } from './auth-errors';
 import { extractAuthToken } from '@/lib/auth/utils';
 
 export interface TokenValidationResult {
@@ -24,7 +25,7 @@ export async function validateAuthToken(req: NextRequest): Promise<TokenValidati
   if (!token) {
     return {
       success: false,
-      error: new ApiError('auth/unauthorized', 'Authentication required', 401),
+      error: createAuthApiError('MISSING_TOKEN'),
     };
   }
 
@@ -33,7 +34,7 @@ export async function validateAuthToken(req: NextRequest): Promise<TokenValidati
     if (!user) {
       return {
         success: false,
-        error: new ApiError('auth/unauthorized', 'Authentication required', 401),
+        error: createAuthApiError('INVALID_TOKEN'),
       };
     }
 

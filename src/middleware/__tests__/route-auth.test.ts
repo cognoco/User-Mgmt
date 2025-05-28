@@ -25,7 +25,8 @@ describe('withRouteAuth', () => {
   });
 
   it('returns 401 when token missing', async () => {
-    vi.mocked(validateAuthToken).mockResolvedValue({ success: false, error: new Error('unauthorized') } as any);
+    const { createAuthApiError } = await import('../auth-errors');
+    vi.mocked(validateAuthToken).mockResolvedValue({ success: false, error: createAuthApiError('MISSING_TOKEN') } as any);
     const req = new NextRequest('http://test');
     const res = await withRouteAuth(() => Promise.resolve(new NextResponse('ok')), req);
     expect(res.status).toBe(401);
