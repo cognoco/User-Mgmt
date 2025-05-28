@@ -21,5 +21,6 @@ Each middleware lives in `src/middleware` and can be imported individually or vi
 | `validation.ts` | Validates request bodies using Zod schemas. | `zod`, `ApiError` utilities. |
 | `with-auth-rate-limit.ts` | Convenience wrapper applying strict rate limits to auth endpoints. | `createRateLimit` from `rate-limit.ts`. |
 | `with-security.ts` | Middleware for App Router route handlers adding security headers and CSRF protection. | None |
+| `protected-route.ts` | Combines rate limiting, authentication and optional permission checks. | `checkRateLimit`, `withRouteAuth` |
 
 Importing from `registry.ts` ensures a consistent entry point and avoids duplicate imports.
