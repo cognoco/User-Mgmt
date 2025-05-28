@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getApiTeamService } from '@/services/team/factory';
+import { withErrorHandling } from '@/middleware/error-handling';
 
 const UpdateTeamSchema = z.object({
   name: z.string().optional(),
   description: z.string().optional()
 });
 
-export async function GET(req: NextRequest, { params }: { params: { teamId: string } }) {
+async function handleGet(req: NextRequest, { params }: { params: { teamId: string } }) {
   const service = getApiTeamService();
   const team = await service.getTeam(params.teamId);
   if (!team) {
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest, { params }: { params: { teamId: stri
   return NextResponse.json({ team });
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { teamId: string } }) {
+async function handlePatch(req: NextRequest, { params }: { params: { teamId: string } }) {
   let body: unknown;
   try {
     body = await req.json();
@@ -34,10 +35,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { teamId: st
   return NextResponse.json({ team: result.team });
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { teamId: string } }) {
+async function handleDelete(req: NextRequest, { params }: { params: { teamId: string } }) {
   const result = await getApiTeamService().deleteTeam(params.teamId);
   if (!result.success) {
     return NextResponse.json({ error: result.error || 'Failed to delete team' }, { status: 400 });
   }
   return NextResponse.json({ success: true });
 }
+
+export const GET = (req: NextRequest, ctx: { params: { teamId: string } }) => withErrorHandling((r) => handleGet(r, ctx), req);
+export const PATCH = (req: NextRequest, ctx: { params: { teamId: string } }) => withErrorHandling((r) => handlePatch(r, ctx), req);
+export const DELETE = (req: NextRequest, ctx: { params: { teamId: string } }) => withErrorHandling((r) => handleDelete(r, ctx), req);

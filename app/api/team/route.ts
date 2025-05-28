@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getApiTeamService } from '@/services/team/factory';
+import { withErrorHandling } from '@/middleware/error-handling';
 
 const CreateTeamSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional()
 });
 
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   const userId = req.headers.get('x-user-id');
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ teams });
 }
 
-export async function POST(req: NextRequest) {
+async function handlePost(req: NextRequest) {
   const userId = req.headers.get('x-user-id');
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -38,3 +39,6 @@ export async function POST(req: NextRequest) {
   }
   return NextResponse.json({ team: result.team }, { status: 201 });
 }
+
+export const GET = (req: NextRequest) => withErrorHandling(handleGet, req);
+export const POST = (req: NextRequest) => withErrorHandling(handlePost, req);

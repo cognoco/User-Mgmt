@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { middleware } from '@/middleware';
 import { logUserAction } from '@/lib/audit/auditLogger';
+import { withErrorHandling } from '@/middleware/error-handling';
 
 // Helper to fetch all relevant company data for export
 async function getCompanyExportData(companyId: string) {
@@ -45,7 +46,7 @@ async function getCompanyExportData(companyId: string) {
   };
 }
 
-export const GET = middleware(['cors', 'csrf', 'rateLimit'], async (req: NextRequest) => {
+async function handleGet(req: NextRequest) {
   const user = (req as any).user;
   if (!user) {
     return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
@@ -137,4 +138,9 @@ export const GET = middleware(['cors', 'csrf', 'rateLimit'], async (req: NextReq
       'Content-Disposition': `attachment; filename="${filename}"`,
     },
   });
-});
+}
+
+export const GET = middleware(
+  ['cors', 'csrf', 'rateLimit'],
+  (req: NextRequest) => withErrorHandling(handleGet, req)
+);

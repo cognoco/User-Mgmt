@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { withErrorHandling } from '@/middleware/error-handling';
 import { z } from 'zod';
 
 // Validation schema for creating a new notification preference
@@ -12,7 +13,7 @@ const preferenceSchema = z.object({
 });
 
 // GET /api/company/notifications/preferences - Get all notification preferences for the current user's company
-export async function GET(request: NextRequest) {
+async function handleGet(request: NextRequest) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/company/notifications/preferences - Create a new notification preference
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
@@ -197,3 +198,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
   }
 } 
+export const GET = (req: NextRequest) => withErrorHandling(handleGet, req);
+export const POST = (req: NextRequest) => withErrorHandling(handlePost, req);

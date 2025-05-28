@@ -4,6 +4,7 @@ import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
+import { withErrorHandling } from '@/middleware/error-handling';
 
 const ValidationRequestSchema = z.object({
   taxId: z.string().min(1),
@@ -110,4 +111,5 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const POST = (req: NextRequest) => withRouteAuth(handlePost, req);
+export const POST = (req: NextRequest) =>
+  withErrorHandling((r) => withRouteAuth(handlePost, r), req);

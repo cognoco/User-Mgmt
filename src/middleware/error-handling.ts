@@ -22,6 +22,9 @@ export async function withErrorHandling(
             500
           );
 
+    // Log to console for easier debugging during development/testing
+    console.error('API error:', apiError);
+
     await logApiError(apiError, {
       ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
       userAgent: req.headers.get('user-agent') || 'unknown',

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { withErrorHandling } from '@/middleware/error-handling';
 import { z } from 'zod';
 
 // Validation schema for updating a notification preference
@@ -10,7 +11,7 @@ const updateSchema = z.object({
 });
 
 // PATCH /api/company/notifications/preferences/[id] - Update a notification preference
-export async function PATCH(
+async function handlePatch(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -109,3 +110,4 @@ export async function PATCH(
     return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
   }
 } 
+export const PATCH = (req: NextRequest, ctx: { params: { id: string } }) => withErrorHandling((r) => handlePatch(r, ctx), req);

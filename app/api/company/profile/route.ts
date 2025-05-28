@@ -5,6 +5,7 @@ import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
+import { withErrorHandling } from '@/middleware/error-handling';
 
 // Company Profile Schema
 const CompanyProfileSchema = z.object({
@@ -150,7 +151,8 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const POST = (req: NextRequest) => withRouteAuth(handlePost, req);
+export const POST = (req: NextRequest) =>
+  withErrorHandling((r) => withRouteAuth(handlePost, r), req);
 
 
 async function handleGet(request: NextRequest, auth: RouteAuthContext) {
@@ -178,7 +180,8 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const GET = (req: NextRequest) => withRouteAuth(handleGet, req);
+export const GET = (req: NextRequest) =>
+  withErrorHandling((r) => withRouteAuth(handleGet, r), req);
 
 async function handlePut(request: NextRequest, auth: RouteAuthContext) {
   // Get IP and User Agent early
@@ -294,7 +297,8 @@ async function handlePut(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const PUT = (req: NextRequest) => withRouteAuth(handlePut, req);
+export const PUT = (req: NextRequest) =>
+  withErrorHandling((r) => withRouteAuth(handlePut, r), req);
 
 async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
   // Get IP and User Agent early
@@ -420,4 +424,5 @@ async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const DELETE = (req: NextRequest) => withRouteAuth(handleDelete, req);
+export const DELETE = (req: NextRequest) =>
+  withErrorHandling((r) => withRouteAuth(handleDelete, r), req);

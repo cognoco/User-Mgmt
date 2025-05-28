@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { withErrorHandling } from '@/middleware/error-handling';
 import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -12,7 +13,7 @@ const querySchema = z.object({
 
 type QueryParams = z.infer<typeof querySchema>;
 
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   const url = new URL(req.url);
   const parseResult = querySchema.safeParse(Object.fromEntries(url.searchParams.entries()));
   if (!parseResult.success) {
@@ -73,3 +74,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: message }, { status });
   }
 }
+
+export const GET = (req: NextRequest) => withErrorHandling(handleGet, req);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { withErrorHandling } from '@/middleware/error-handling';
 import { z } from 'zod';
 
 // Validation schema for adding a new recipient
@@ -12,7 +13,7 @@ const recipientSchema = z.object({
 });
 
 // POST /api/company/notifications/recipients - Add a new notification recipient
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
@@ -152,3 +153,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
   }
 } 
+export const POST = (req: NextRequest) => withErrorHandling(handlePost, req);

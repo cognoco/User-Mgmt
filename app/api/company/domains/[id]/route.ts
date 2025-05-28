@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { withErrorHandling } from '@/middleware/error-handling';
 import { z } from 'zod';
 
 // Validation schema for updating a domain
@@ -9,7 +10,7 @@ const domainUpdateSchema = z.object({
 });
 
 // DELETE /api/company/domains/[id] - Delete a domain
-export async function DELETE(
+async function handleDelete(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -83,7 +84,7 @@ export async function DELETE(
 }
 
 // PATCH /api/company/domains/[id] - Update a domain (currently just primary status)
-export async function PATCH(
+async function handlePatch(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -181,4 +182,14 @@ export async function PATCH(
     console.error(`Unexpected error in PATCH /api/company/domains/${params.id}:`, error);
     return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
   }
-} 
+}
+
+export const DELETE = (
+  req: NextRequest,
+  ctx: { params: { id: string } }
+) => withErrorHandling((r) => handleDelete(r, ctx), req);
+
+export const PATCH = (
+  req: NextRequest,
+  ctx: { params: { id: string } }
+) => withErrorHandling((r) => handlePatch(r, ctx), req);
