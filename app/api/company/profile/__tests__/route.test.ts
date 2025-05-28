@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { POST, GET } from '../route';
 import { getServiceSupabase } from '@/lib/database/supabase';
+import { withRouteAuth } from '@/middleware/auth';
+import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
 // Mock Supabase client
 vi.mock('@/lib/database/supabase', () => ({
@@ -38,6 +40,10 @@ vi.mock('@/middleware/rate-limit', () => ({
   checkRateLimit: vi.fn(() => Promise.resolve(false))
 }));
 
+vi.mock('@/middleware/auth', () => ({
+  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'test-user-id', role: 'user' })),
+}));
+
 describe('Company Profile API', () => {
   const mockUser = {
     id: 'test-user-id',
@@ -71,19 +77,12 @@ describe('Company Profile API', () => {
       (supabase.from('company_profiles').insert().select().single as any)
         .mockResolvedValue({ data: mockProfile, error: null });
 
-      const request = new NextRequest('http://localhost/api/company/profile', {
-        method: 'POST',
-        headers: {
-          'authorization': 'Bearer test-token',
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: mockProfile.name,
-          legal_name: mockProfile.legal_name,
-          industry: mockProfile.industry,
-          size_range: mockProfile.size_range,
-          founded_year: mockProfile.founded_year
-        })
+      const request = createAuthenticatedRequest('POST', 'http://localhost/api/company/profile', {
+        name: mockProfile.name,
+        legal_name: mockProfile.legal_name,
+        industry: mockProfile.industry,
+        size_range: mockProfile.size_range,
+        founded_year: mockProfile.founded_year,
       });
 
       const response = await POST(request);
@@ -94,12 +93,11 @@ describe('Company Profile API', () => {
     });
 
     it('should return 401 if not authenticated', async () => {
-      const request = new NextRequest('http://localhost/api/company/profile', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json'
-        }
-      });
+      vi.mocked(withRouteAuth).mockResolvedValueOnce(
+        new NextResponse('unauthorized', { status: 401 })
+      );
+
+      const request = createAuthenticatedRequest('POST', 'http://localhost/api/company/profile', {});
 
       const response = await POST(request);
       expect(response.status).toBe(401);
@@ -113,12 +111,7 @@ describe('Company Profile API', () => {
       (supabase.from('company_profiles').select('*').eq('user_id', mockUser.id).single as any)
         .mockResolvedValue({ data: mockProfile, error: null });
 
-      const request = new NextRequest('http://localhost/api/company/profile', {
-        method: 'GET',
-        headers: {
-          'authorization': 'Bearer test-token'
-        }
-      });
+      const request = createAuthenticatedRequest('GET', 'http://localhost/api/company/profile');
 
       const response = await GET(request);
       const data = await response.json();
@@ -136,12 +129,7 @@ describe('Company Profile API', () => {
           error: { code: 'PGRST116' } 
         });
 
-      const request = new NextRequest('http://localhost/api/company/profile', {
-        method: 'GET',
-        headers: {
-          'authorization': 'Bearer test-token'
-        }
-      });
+      const request = createAuthenticatedRequest('GET', 'http://localhost/api/company/profile');
 
       const response = await GET(request);
       expect(response.status).toBe(404);

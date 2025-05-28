@@ -4,6 +4,7 @@ import { GET, POST, DELETE, PATCH } from '../route';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { withRouteAuth } from '@/middleware/auth';
 import { z } from 'zod';
+import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
 // Mock dependencies
 vi.mock('@/middleware/rate-limit', () => ({
@@ -166,8 +167,9 @@ describe('Company Domains API', () => {
         })
       }));
 
-      const request = new NextRequest(
-        new URL('http://localhost/api/company/domains?companyId=' + mockCompanyId)
+      const request = createAuthenticatedRequest(
+        'GET',
+        'http://localhost/api/company/domains?companyId=' + mockCompanyId
       );
 
       const response = await GET(request);
@@ -190,8 +192,9 @@ describe('Company Domains API', () => {
         )
       );
 
-      const request = new NextRequest(
-        new URL('http://localhost/api/company/domains?companyId=' + mockCompanyId)
+      const request = createAuthenticatedRequest(
+        'GET',
+        'http://localhost/api/company/domains?companyId=' + mockCompanyId
       );
 
       const response = await GET(request);
@@ -202,9 +205,7 @@ describe('Company Domains API', () => {
     });
     
     test('returns 400 if companyId is missing', async () => {
-      const request = new NextRequest(
-        new URL('http://localhost/api/company/domains')
-      );
+      const request = createAuthenticatedRequest('GET', 'http://localhost/api/company/domains');
       
       const response = await GET(request);
       expect(response.status).toBe(400);
@@ -224,8 +225,9 @@ describe('Company Domains API', () => {
         })
       }));
       
-      const request = new NextRequest(
-        new URL('http://localhost/api/company/domains?companyId=' + mockCompanyId)
+      const request = createAuthenticatedRequest(
+        'GET',
+        'http://localhost/api/company/domains?companyId=' + mockCompanyId
       );
       
       const response = await GET(request);
@@ -241,12 +243,10 @@ describe('Company Domains API', () => {
     test('adds a new domain successfully', async () => {
       const requestBody = { domain: mockDomain, companyId: mockCompanyId };
       
-      const request = new NextRequest(
-        new URL('http://localhost/api/company/domains'),
-        {
-          method: 'POST',
-          body: JSON.stringify(requestBody)
-        }
+      const request = createAuthenticatedRequest(
+        'POST',
+        'http://localhost/api/company/domains',
+        requestBody
       );
       
       const response = await POST(request);
@@ -276,12 +276,10 @@ describe('Company Domains API', () => {
       
       const requestBody = { domain: 'invalid-domain', companyId: mockCompanyId };
       
-      const request = new NextRequest(
-        new URL('http://localhost/api/company/domains'),
-        {
-          method: 'POST',
-          body: JSON.stringify(requestBody)
-        }
+      const request = createAuthenticatedRequest(
+        'POST',
+        'http://localhost/api/company/domains',
+        requestBody
       );
       
       const response = await POST(request);
@@ -301,12 +299,10 @@ describe('Company Domains API', () => {
       
       const requestBody = { domain: mockDomain, companyId: mockCompanyId };
       
-      const request = new NextRequest(
-        new URL('http://localhost/api/company/domains'),
-        {
-          method: 'POST',
-          body: JSON.stringify(requestBody)
-        }
+      const request = createAuthenticatedRequest(
+        'POST',
+        'http://localhost/api/company/domains',
+        requestBody
       );
       
       const response = await POST(request);
@@ -325,12 +321,10 @@ describe('Company Domains API', () => {
       
       const requestBody = { domain: mockDomain, companyId: mockCompanyId };
       
-      const request = new NextRequest(
-        new URL('http://localhost/api/company/domains'),
-        {
-          method: 'POST',
-          body: JSON.stringify(requestBody)
-        }
+      const request = createAuthenticatedRequest(
+        'POST',
+        'http://localhost/api/company/domains',
+        requestBody
       );
       
       const response = await POST(request);
@@ -351,8 +345,9 @@ describe('Company Domains API', () => {
         })
       }));
       
-      const request = new NextRequest(
-        new URL(`http://localhost/api/company/domains/${mockDomainId}`)
+      const request = createAuthenticatedRequest(
+        'DELETE',
+        `http://localhost/api/company/domains/${mockDomainId}`
       );
       
       const response = await DELETE(request, { params: { id: mockDomainId } });
@@ -374,8 +369,9 @@ describe('Company Domains API', () => {
         })
       }));
       
-      const request = new NextRequest(
-        new URL(`http://localhost/api/company/domains/${mockDomainId}`)
+      const request = createAuthenticatedRequest(
+        'DELETE',
+        `http://localhost/api/company/domains/${mockDomainId}`
       );
       
       const response = await DELETE(request, { params: { id: mockDomainId } });
@@ -398,12 +394,10 @@ describe('Company Domains API', () => {
       
       const requestBody = { is_primary: true };
       
-      const request = new NextRequest(
-        new URL(`http://localhost/api/company/domains/${mockDomainId}`),
-        {
-          method: 'PATCH',
-          body: JSON.stringify(requestBody)
-        }
+      const request = createAuthenticatedRequest(
+        'PATCH',
+        `http://localhost/api/company/domains/${mockDomainId}`,
+        requestBody
       );
       
       const response = await PATCH(request, { params: { id: mockDomainId } });
@@ -446,12 +440,10 @@ describe('Company Domains API', () => {
       
       const requestBody = { is_primary: true };
       
-      const request = new NextRequest(
-        new URL(`http://localhost/api/company/domains/${mockDomainId}`),
-        {
-          method: 'PATCH',
-          body: JSON.stringify(requestBody)
-        }
+      const request = createAuthenticatedRequest(
+        'PATCH',
+        `http://localhost/api/company/domains/${mockDomainId}`,
+        requestBody
       );
       
       const response = await PATCH(request, { params: { id: mockDomainId } });
@@ -473,12 +465,10 @@ describe('Company Domains API', () => {
       
       const requestBody = { is_primary: true };
       
-      const request = new NextRequest(
-        new URL(`http://localhost/api/company/domains/${mockDomainId}`),
-        {
-          method: 'PATCH',
-          body: JSON.stringify(requestBody)
-        }
+      const request = createAuthenticatedRequest(
+        'PATCH',
+        `http://localhost/api/company/domains/${mockDomainId}`,
+        requestBody
       );
       
       const response = await PATCH(request, { params: { id: mockDomainId } });
