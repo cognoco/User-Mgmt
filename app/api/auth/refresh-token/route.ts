@@ -1,11 +1,14 @@
 import { type NextRequest } from 'next/server';
-import { withAuthRateLimit } from '@/middleware/with-auth-rate-limit';
 import { withSecurity } from '@/middleware/with-security';
 import { getApiAuthService } from '@/services/auth/factory';
 import { getCurrentSession } from '@/lib/auth/session';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { createSuccessResponse } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  rateLimitMiddleware
+} from '@/middleware/createMiddlewareChain';
 
 const failedRefreshAttempts: Record<string, { count: number; last: number }> = {};
 
@@ -60,10 +63,11 @@ async function handleRefreshToken(req: NextRequest) {
   return createSuccessResponse({ success: true, expiresAt: session?.expiresAt });
 }
 
-async function handler(req: NextRequest) {
-  return withErrorHandling(handleRefreshToken, req);
-}
+const middleware = createMiddlewareChain([
+  rateLimitMiddleware({ windowMs: 15 * 60 * 1000, max: 30 }),
+  errorHandlingMiddleware()
+]);
 
-export const POST = withSecurity(async (request: NextRequest) =>
-  withAuthRateLimit(request, handler)
+export const POST = withSecurity((request: NextRequest) =>
+  middleware(handleRefreshToken)(request)
 );
