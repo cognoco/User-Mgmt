@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ZodSchema } from 'zod';
-import { ApiError } from '@/lib/api/common/api-error';
-import { createErrorResponse } from '@/lib/api/common/response-formatter';
+import { ZodSchema, ZodError } from 'zod';
+import {
+  createErrorResponse,
+  createValidationError,
+} from '@/lib/api/common';
 
 /**
  * Middleware to validate request body or provided data against a schema.
@@ -17,12 +19,10 @@ export async function withValidation<T>(
     const validatedData = schema.parse(input);
     return await handler(req, validatedData);
   } catch (error: any) {
-    if (error.name === 'ZodError') {
-      const validationError = new ApiError(
-        'validation/error',
+    if (error instanceof ZodError) {
+      const validationError = createValidationError(
         'Validation failed',
-        400,
-        { errors: error.errors }
+        error.flatten()
       );
       return createErrorResponse(validationError);
     }

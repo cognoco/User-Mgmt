@@ -6,6 +6,7 @@ import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 import { withErrorHandling } from '@/middleware/error-handling';
+import { withValidation } from '@/middleware/validation';
 
 // Company Profile Schema
 const CompanyProfileSchema = z.object({
@@ -39,7 +40,11 @@ const CompanyProfileUpdateSchema = z.object({
 
 type CompanyProfileUpdateRequest = z.infer<typeof CompanyProfileUpdateSchema>;
 
-async function handlePost(request: NextRequest, auth: RouteAuthContext) {
+async function handlePost(
+  request: NextRequest,
+  auth: RouteAuthContext,
+  data: CompanyProfileRequest
+) {
   const ipAddress = request.ip;
   const userAgent = request.headers.get('user-agent');
   let userIdForLogging: string | null = null;
@@ -74,25 +79,10 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
       );
     }
 
-    let body: CompanyProfileRequest;
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
-    }
-
-    const parseResult = CompanyProfileSchema.safeParse(body);
-    if (!parseResult.success) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: parseResult.error.format() },
-        { status: 400 }
-      );
-    }
-
     const { data: profile, error: createError } = await supabaseService
       .from('company_profiles')
       .insert({
-        ...parseResult.data,
+        ...data,
         user_id: userId,
         status: 'pending',
         verified: false,
@@ -152,7 +142,17 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
 }
 
 export const POST = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handlePost, r), req);
+  withErrorHandling(
+    (r) =>
+      withRouteAuth((r2, auth) =>
+        withValidation(
+          CompanyProfileSchema,
+          (r3, data) => handlePost(r3, auth, data),
+          r2
+        )
+      , r),
+    req
+  );
 
 
 async function handleGet(request: NextRequest, auth: RouteAuthContext) {
@@ -183,7 +183,11 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
 export const GET = (req: NextRequest) =>
   withErrorHandling((r) => withRouteAuth(handleGet, r), req);
 
-async function handlePut(request: NextRequest, auth: RouteAuthContext) {
+async function handlePut(
+  request: NextRequest,
+  auth: RouteAuthContext,
+  data: CompanyProfileUpdateRequest
+) {
   // Get IP and User Agent early
   const ipAddress = request.ip;
   const userAgent = request.headers.get('user-agent');
@@ -220,21 +224,8 @@ async function handlePut(request: NextRequest, auth: RouteAuthContext) {
     }
     companyProfileIdForLogging = existingProfile.id; // Store for logging
 
-    // 4. Parse and Validate Request Body
-    let body: CompanyProfileUpdateRequest;
-    try {
-      body = await request.json();
-    } catch (e) {
-      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
-    }
-
-    const parseResult = CompanyProfileUpdateSchema.safeParse(body);
-    if (!parseResult.success) {
-      return NextResponse.json({ error: 'Validation failed', details: parseResult.error.format() }, { status: 400 });
-    }
-
-    // 5. Update Profile
-    const fieldsToUpdate = parseResult.data;
+    // 4. Update Profile
+    const fieldsToUpdate = data;
     const { data: updatedProfile, error: updateError } = await supabaseService
       .from('company_profiles')
       .update({
@@ -298,7 +289,17 @@ async function handlePut(request: NextRequest, auth: RouteAuthContext) {
 }
 
 export const PUT = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handlePut, r), req);
+  withErrorHandling(
+    (r) =>
+      withRouteAuth((r2, auth) =>
+        withValidation(
+          CompanyProfileUpdateSchema,
+          (r3, data) => handlePut(r3, auth, data),
+          r2
+        )
+      , r),
+    req
+  );
 
 async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
   // Get IP and User Agent early
