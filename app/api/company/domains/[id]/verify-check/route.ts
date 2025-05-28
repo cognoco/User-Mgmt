@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 import dns from 'dns/promises';
@@ -30,8 +31,13 @@ async function handlePost(
       return NextResponse.json({ error: 'Domain not found.' }, { status: 404 });
     }
 
-    if (domainRecord.user_id && domainRecord.user_id !== userId) {
-      return NextResponse.json({ error: 'You do not have permission to verify this domain.' }, { status: 403 });
+    const companyService = getApiCompanyService();
+    const profile = await companyService.getProfileByUserId(userId);
+    if (!profile || profile.id !== domainRecord.company_id) {
+      return NextResponse.json(
+        { error: 'You do not have permission to verify this domain.' },
+        { status: 403 }
+      );
     }
 
     if (!domainRecord.verification_token) {

@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 
@@ -53,6 +54,11 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
   try {
     const supabaseService = getServiceSupabase();
     const userId = auth.userId!;
+    const companyService = getApiCompanyService();
+    const companyProfile = await companyService.getProfileByUserId(userId);
+    if (!companyProfile) {
+      return NextResponse.json({ error: 'Company profile not found' }, { status: 404 });
+    }
 
     // 3. Parse and Validate Body
     let body: ValidationRequest;
