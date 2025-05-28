@@ -22,6 +22,7 @@ import { IOrganizationDataProvider } from '@/core/organization/IOrganizationData
 import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
 
 
+
 /**
  * Interface for adapter factory options
  */
@@ -102,6 +103,13 @@ export interface AdapterFactory {
 }
 
 /**
+ * Factory function for creating a {@link DatabaseProvider}.
+ */
+export type DatabaseProviderFactory = (
+  config: DatabaseConfig
+) => DatabaseProvider;
+
+/**
  * Factory creator function type
  */
 export type FactoryCreator = (options: AdapterFactoryOptions) => AdapterFactory;
@@ -112,9 +120,12 @@ export type FactoryCreator = (options: AdapterFactoryOptions) => AdapterFactory;
  */
 export class AdapterRegistry {
   private static factories: Record<string, FactoryCreator> = {};
+  private static databaseFactories: Record<string, DatabaseProviderFactory> = {};
+  private static defaultDatabaseProviderName: string | null = null;
   private static instance: AdapterRegistry | null = null;
 
   private adapters: Record<string, unknown> = {};
+  private activeDatabaseProvider: DatabaseProvider | null = null;
 
   private constructor() {}
 
@@ -198,5 +209,95 @@ export class AdapterRegistry {
    */
   static isAdapterAvailable(name: string): boolean {
     return !!this.factories[name];
+  }
+
+  /**
+   * Register a database provider factory.
+   *
+   * @param name    Unique provider name.
+   * @param factory Factory function that creates the provider.
+   */
+  static registerDatabaseFactory(
+    name: string,
+    factory: DatabaseProviderFactory
+  ): void {
+    if (this.databaseFactories[name]) {
+      throw new Error(`Database provider '${name}' is already registered`);
+    }
+    this.databaseFactories[name] = factory;
+  }
+
+  /**
+   * Retrieve a database provider instance by name.
+   *
+   * @param name   Provider identifier.
+   * @param config Configuration object passed to the factory.
+   * @returns A database provider instance.
+   */
+  static getDatabaseProvider(
+    name: string,
+    config: DatabaseConfig
+  ): DatabaseProvider {
+    const factory = this.databaseFactories[name];
+    if (!factory) {
+      throw new Error(
+        `Database provider '${name}' not registered. Available providers: ${Object.keys(
+          this.databaseFactories
+        ).join(', ')}`
+      );
+    }
+    return factory(config);
+  }
+
+  /**
+   * Set the default database provider for the application.
+   *
+   * @param name Provider name previously registered.
+   */
+  static setDefaultDatabaseProvider(name: string): void {
+    if (!this.databaseFactories[name]) {
+      throw new Error(`Database provider '${name}' is not registered`);
+    }
+    this.defaultDatabaseProviderName = name;
+  }
+
+  /**
+   * Get an instance of the default database provider.
+   *
+   * @param config Configuration passed to the provider factory.
+   */
+  static getDefaultDatabaseProvider(config: DatabaseConfig): DatabaseProvider {
+    if (!this.defaultDatabaseProviderName) {
+      throw new Error('Default database provider not set');
+    }
+    return this.getDatabaseProvider(this.defaultDatabaseProviderName, config);
+  }
+
+  /**
+   * Set the currently active database provider for this registry instance.
+   *
+   * @param name   Provider name.
+   * @param config Configuration passed to the factory.
+   * @returns The created provider instance.
+   */
+  setActiveDatabaseProvider(
+    name: string,
+    config: DatabaseConfig
+  ): DatabaseProvider {
+    const provider = AdapterRegistry.getDatabaseProvider(name, config);
+    this.activeDatabaseProvider = provider;
+    return provider;
+  }
+
+  /**
+   * Retrieve the active database provider.
+   *
+   * @returns The active provider instance.
+   */
+  getActiveDatabaseProvider(): DatabaseProvider {
+    if (!this.activeDatabaseProvider) {
+      throw new Error('Active database provider not set');
+    }
+    return this.activeDatabaseProvider;
   }
 }
