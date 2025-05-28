@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
+import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 
 // Company Profile Schema
 const CompanyProfileSchema = z.object({
@@ -36,171 +37,138 @@ const CompanyProfileUpdateSchema = z.object({
 
 type CompanyProfileUpdateRequest = z.infer<typeof CompanyProfileUpdateSchema>;
 
-export async function POST(request: NextRequest) {
-  // Get IP and User Agent early
+async function handlePost(request: NextRequest, auth: RouteAuthContext) {
   const ipAddress = request.ip;
   const userAgent = request.headers.get('user-agent');
   let userIdForLogging: string | null = null;
 
-  // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 
   try {
-    // 2. Authentication & Get User
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-    const token = authHeader.split(' ')[1];
-
     const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
+    const userId = auth.userId!;
+    userIdForLogging = userId;
 
-    if (userError || !user) {
-      // Log unauthorized attempt
-      await logUserAction({
-          action: 'COMPANY_PROFILE_CREATE_UNAUTHORIZED',
-          status: 'FAILURE',
-          ipAddress: ipAddress,
-          userAgent: userAgent,
-          targetResourceType: 'company_profile',
-          details: { reason: userError?.message ?? 'Invalid token' }
-      });
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-    }
-    userIdForLogging = user.id; // Store for logging
-
-    // 3. Check if user already has a company profile
-    const { data: existingProfile /*, error: existingProfileError */ } = await supabaseService
+    const { data: existingProfile } = await supabaseService
       .from('company_profiles')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     if (existingProfile) {
-      // Log attempt to create duplicate profile
       await logUserAction({
-          userId: userIdForLogging,
-          action: 'COMPANY_PROFILE_CREATE_DUPLICATE_ATTEMPT',
-          status: 'FAILURE',
-          ipAddress: ipAddress,
-          userAgent: userAgent,
-          targetResourceType: 'company_profile',
-          targetResourceId: userIdForLogging, 
-          details: { existingProfileId: existingProfile.id }
+        userId: userIdForLogging,
+        action: 'COMPANY_PROFILE_CREATE_DUPLICATE_ATTEMPT',
+        status: 'FAILURE',
+        ipAddress,
+        userAgent,
+        targetResourceType: 'company_profile',
+        targetResourceId: userIdForLogging,
+        details: { existingProfileId: existingProfile.id },
       });
-      return NextResponse.json({ error: 'User already has a company profile' }, { status: 409 });
+      return NextResponse.json(
+        { error: 'User already has a company profile' },
+        { status: 409 }
+      );
     }
 
-    // 4. Parse and Validate Request Body
     let body: CompanyProfileRequest;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
     }
 
     const parseResult = CompanyProfileSchema.safeParse(body);
     if (!parseResult.success) {
-      return NextResponse.json({ 
-        error: 'Validation failed', 
-        details: parseResult.error.format() 
-      }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Validation failed', details: parseResult.error.format() },
+        { status: 400 }
+      );
     }
 
-    // 5. Create Company Profile
     const { data: profile, error: createError } = await supabaseService
       .from('company_profiles')
       .insert({
         ...parseResult.data,
-        user_id: user.id,
+        user_id: userId,
         status: 'pending',
-        verified: false
+        verified: false,
       })
       .select()
       .single();
 
     if (createError) {
       console.error('Error creating company profile:', createError);
-      // Log creation failure
       await logUserAction({
-          userId: userIdForLogging,
-          action: 'COMPANY_PROFILE_CREATE_FAILURE',
-          status: 'FAILURE',
-          ipAddress: ipAddress,
-          userAgent: userAgent,
-          targetResourceType: 'company_profile',
-          targetResourceId: userIdForLogging, // Target is the user attempting creation
-          details: { 
-              reason: createError.message, 
-              code: createError.code
-          }
+        userId: userIdForLogging,
+        action: 'COMPANY_PROFILE_CREATE_FAILURE',
+        status: 'FAILURE',
+        ipAddress,
+        userAgent,
+        targetResourceType: 'company_profile',
+        targetResourceId: userIdForLogging,
+        details: { reason: createError.message, code: createError.code },
       });
-      return NextResponse.json({ error: 'Failed to create company profile' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Failed to create company profile' },
+        { status: 500 }
+      );
     }
 
-    // Log successful creation
     await logUserAction({
-        userId: userIdForLogging,
-        action: 'COMPANY_PROFILE_CREATE_SUCCESS',
-        status: 'SUCCESS',
-        ipAddress: ipAddress,
-        userAgent: userAgent,
-        targetResourceType: 'company_profile',
-        targetResourceId: profile.id, // The ID of the newly created profile
-        details: { companyName: profile.name } // Log company name as context
+      userId: userIdForLogging,
+      action: 'COMPANY_PROFILE_CREATE_SUCCESS',
+      status: 'SUCCESS',
+      ipAddress,
+      userAgent,
+      targetResourceType: 'company_profile',
+      targetResourceId: profile.id,
+      details: { companyName: profile.name },
     });
 
     return NextResponse.json(profile);
-
   } catch (error) {
     console.error('Unexpected error in POST /api/company/profile:', error);
-    const message = error instanceof Error ? error.message : 'An unexpected error occurred';
-    // Log unexpected error
+    const message =
+      error instanceof Error ? error.message : 'An unexpected error occurred';
     await logUserAction({
-        userId: userIdForLogging, // May be null
-        action: 'COMPANY_PROFILE_CREATE_UNEXPECTED_ERROR',
-        status: 'FAILURE',
-        ipAddress: ipAddress,
-        userAgent: userAgent,
-        targetResourceType: 'company_profile',
-        targetResourceId: userIdForLogging,
-        details: { error: message }
+      userId: userIdForLogging,
+      action: 'COMPANY_PROFILE_CREATE_UNEXPECTED_ERROR',
+      status: 'FAILURE',
+      ipAddress,
+      userAgent,
+      targetResourceType: 'company_profile',
+      targetResourceId: userIdForLogging,
+      details: { error: message },
     });
-    return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'An internal server error occurred' },
+      { status: 500 }
+    );
   }
 }
 
-export async function GET(request: NextRequest) {
-  // 1. Rate Limiting
+export const POST = (req: NextRequest) => withRouteAuth(handlePost, req);
+
+
+async function handleGet(request: NextRequest, auth: RouteAuthContext) {
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 
   try {
-    // 2. Authentication & Get User
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-    const token = authHeader.split(' ')[1];
-
     const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
+    const userId = auth.userId!;
 
-    if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-    }
-
-    // 3. Get Company Profile
     const { data: profile, error: profileError } = await supabaseService
       .from('company_profiles')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     if (profileError) {
@@ -212,12 +180,13 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(profile);
-
   } catch (error) {
     console.error('Unexpected error in GET /api/company/profile:', error);
     return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
   }
 }
+
+export const GET = (req: NextRequest) => withRouteAuth(handleGet, req);
 
 export async function PUT(request: NextRequest) {
   // Get IP and User Agent early
