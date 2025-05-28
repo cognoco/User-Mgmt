@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 import { addressUpdateSchema } from '@/core/address/models';
@@ -24,14 +25,10 @@ async function handlePut(
     const supabaseService = getServiceSupabase();
     const userId = auth.userId!;
 
-    // 3. Get Company Profile
-    const { data: companyProfile, error: companyError } = await supabaseService
-      .from('company_profiles')
-      .select('id')
-      .eq('user_id', userId)
-      .single();
+    const companyService = getApiCompanyService();
+    const companyProfile = await companyService.getProfileByUserId(userId);
 
-    if (companyError || !companyProfile) {
+    if (!companyProfile) {
       return NextResponse.json({ error: 'Company profile not found' }, { status: 404 });
     }
 
@@ -90,14 +87,10 @@ async function handleDelete(
     const supabaseService = getServiceSupabase();
     const userId = auth.userId!;
 
-    // 3. Get Company Profile
-    const { data: companyProfile, error: companyError } = await supabaseService
-      .from('company_profiles')
-      .select('id')
-      .eq('user_id', userId)
-      .single();
+    const companyService = getApiCompanyService();
+    const companyProfile = await companyService.getProfileByUserId(userId);
 
-    if (companyError || !companyProfile) {
+    if (!companyProfile) {
       return NextResponse.json({ error: 'Company profile not found' }, { status: 404 });
     }
 

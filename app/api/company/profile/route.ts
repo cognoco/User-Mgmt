@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
@@ -52,11 +53,8 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
     const userId = auth.userId!;
     userIdForLogging = userId;
 
-    const { data: existingProfile } = await supabaseService
-      .from('company_profiles')
-      .select('id')
-      .eq('user_id', userId)
-      .single();
+    const companyService = getApiCompanyService();
+    const existingProfile = await companyService.getProfileByUserId(userId);
 
     if (existingProfile) {
       await logUserAction({
@@ -162,21 +160,15 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
   }
 
   try {
-    const supabaseService = getServiceSupabase();
     const userId = auth.userId!;
+    const companyService = getApiCompanyService();
+    const profile = await companyService.getProfileByUserId(userId);
 
-    const { data: profile, error: profileError } = await supabaseService
-      .from('company_profiles')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-
-    if (profileError) {
-      if (profileError.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Company profile not found' }, { status: 404 });
-      }
-      console.error('Error fetching company profile:', profileError);
-      return NextResponse.json({ error: 'Failed to fetch company profile' }, { status: 500 });
+    if (!profile) {
+      return NextResponse.json(
+        { error: 'Company profile not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(profile);
@@ -206,12 +198,8 @@ async function handlePut(request: NextRequest, auth: RouteAuthContext) {
     const userId = auth.userId!;
     userIdForLogging = userId;
 
-    // 3. Get Existing Profile ID (needed for logging and update)
-    const { data: existingProfile /*, error: profileError - not used */ } = await supabaseService
-      .from('company_profiles')
-      .select('id') // Only select ID
-      .eq('user_id', userId)
-      .single();
+    const companyService = getApiCompanyService();
+    const existingProfile = await companyService.getProfileByUserId(userId);
 
     if (!existingProfile) {
         // Log attempt to update non-existent profile
@@ -326,12 +314,8 @@ async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
     const userId = auth.userId!;
     userIdForLogging = userId;
 
-    // 3. Get Profile ID to delete
-    const { data: profileToDelete /*, error: profileError */ } = await supabaseService // Commented out unused error variable
-      .from('company_profiles')
-      .select('id')
-      .eq('user_id', userId)
-      .single();
+    const companyService = getApiCompanyService();
+    const profileToDelete = await companyService.getProfileByUserId(userId);
 
     if (!profileToDelete) {
        // Log attempt to delete non-existent profile
