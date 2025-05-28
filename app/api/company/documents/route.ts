@@ -3,8 +3,13 @@ import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
-import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
-import { withErrorHandling } from '@/middleware/error-handling';
+import { type RouteAuthContext } from '@/middleware/auth';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware,
+} from '@/middleware/createMiddlewareChain';
 import {
   createCreatedResponse,
   createPaginatedResponse,
@@ -28,6 +33,17 @@ const DocumentUploadSchema = z.object({
 
 type DocumentUploadRequest = z.infer<typeof DocumentUploadSchema>;
 
+const baseMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+]);
+
+const postMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+  validationMiddleware(DocumentUploadSchema),
+]);
+
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB limit
 const ALLOWED_MIME_TYPES = [
   'application/pdf',
@@ -38,7 +54,11 @@ const ALLOWED_MIME_TYPES = [
 ];
 
 // --- POST Handler for uploading company documents ---
-async function handlePost(request: NextRequest, auth: RouteAuthContext) {
+async function handlePost(
+  request: NextRequest,
+  auth: RouteAuthContext,
+  data: DocumentUploadRequest
+) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
@@ -56,20 +76,7 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
       throw createNotFoundError('Company profile');
     }
 
-    // 4. Parse and Validate Body
-    let body: DocumentUploadRequest;
-    try {
-      body = await request.json();
-    } catch (e) {
-      throw createValidationError('Invalid request body');
-    }
-
-    const parseResult = DocumentUploadSchema.safeParse(body);
-    if (!parseResult.success) {
-      throw createValidationError('Validation failed', parseResult.error.format());
-    }
-
-    const { type, file } = parseResult.data;
+    const { type, file } = data;
 
     // 5. Validate File
     if (file.size > MAX_FILE_SIZE) {
@@ -242,7 +249,5 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const POST = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handlePost, r), req);
-export const GET = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handleGet, r), req);
+export const POST = postMiddleware(handlePost);
+export const GET = baseMiddleware(handleGet);

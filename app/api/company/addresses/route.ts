@@ -2,15 +2,35 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
-import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
-import { withErrorHandling } from '@/middleware/error-handling';
+import { type RouteAuthContext } from '@/middleware/auth';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware,
+} from '@/middleware/createMiddlewareChain';
 import { addressCreateSchema } from '@/core/address/models';
 import { createSupabaseAddressProvider } from '@/adapters/address/factory';
 
 import { z } from 'zod';
 type AddressRequest = z.infer<typeof addressCreateSchema>;
 
-async function handlePost(request: NextRequest, auth: RouteAuthContext) {
+const baseMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+]);
+
+const postMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+  validationMiddleware(addressCreateSchema),
+]);
+
+async function handlePost(
+  request: NextRequest,
+  auth: RouteAuthContext,
+  data: AddressRequest
+) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
@@ -28,22 +48,6 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
       return NextResponse.json({ error: 'Company profile not found' }, { status: 404 });
     }
 
-    // 4. Parse and Validate Request Body
-    let body: AddressRequest;
-    try {
-      body = await request.json();
-    } catch (e) {
-      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
-    }
-
-    const parseResult = addressCreateSchema.safeParse(body);
-    if (!parseResult.success) {
-      return NextResponse.json({ 
-        error: 'Validation failed', 
-        details: parseResult.error.format() 
-      }, { status: 400 });
-    }
-
     const addressProvider = createSupabaseAddressProvider(
       process.env.NEXT_PUBLIC_SUPABASE_URL || '',
       process.env.SUPABASE_SERVICE_ROLE_KEY || ''
@@ -51,7 +55,7 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
 
     const result = await addressProvider.createAddress(
       companyProfile.id,
-      parseResult.data
+      data
     );
 
     if (!result.success) {
@@ -100,7 +104,5 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const POST = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handlePost, r), req);
-export const GET = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handleGet, r), req);
+export const POST = postMiddleware(handlePost);
+export const GET = baseMiddleware(handleGet);

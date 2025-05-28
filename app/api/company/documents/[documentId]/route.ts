@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
-import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
-import { withErrorHandling } from '@/middleware/error-handling';
+import { type RouteAuthContext } from '@/middleware/auth';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+} from '@/middleware/createMiddlewareChain';
+
+const middleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+]);
 
 // --- DELETE Handler for removing company documents ---
 async function handleDelete(
@@ -73,8 +82,4 @@ async function handleDelete(
 export const DELETE = (
   req: NextRequest,
   ctx: { params: { documentId: string } }
-) =>
-  withErrorHandling(
-    (r) => withRouteAuth((r2, auth) => handleDelete(r2, ctx.params, auth), r),
-    req
-  );
+) => middleware((r, auth) => handleDelete(r, ctx.params, auth))(req);
