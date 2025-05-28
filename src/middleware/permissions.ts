@@ -3,6 +3,7 @@ import { getApiAuthService } from '@/services/auth/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
 import type { Permission } from '@/lib/rbac/roles';
 import { isPermission } from '@/lib/rbac/roles';
+import { createAuthApiError } from './auth-errors';
 import { withRouteAuth, type RouteAuthContext, type RouteAuthOptions } from './auth';
 
 interface CacheEntry {
@@ -140,7 +141,6 @@ export function createProtectedHandler(
     return withRouteAuth((r, ctx) => handler(r, ctx), req, options);
   };
 }
-import { ApiError } from '@/lib/api/common/api-error';
 import { createErrorResponse } from '@/lib/api/common/response-formatter';
 
 /**
@@ -155,7 +155,7 @@ export async function withPermission(
   return withRouteAuth(
     async (r, ctx) => {
       if (!ctx.userId) {
-        const err = new ApiError('auth/unauthorized', 'Authentication required', 401);
+        const err = createAuthApiError('MISSING_TOKEN');
         return createErrorResponse(err);
       }
 
@@ -169,11 +169,7 @@ export async function withPermission(
       }
 
       if (!hasPermission) {
-        const forbiddenError = new ApiError(
-          'auth/forbidden',
-          `You don't have permission to perform this action`,
-          403
-        );
+        const forbiddenError = createAuthApiError('INSUFFICIENT_PERMISSIONS', { permission });
         return createErrorResponse(forbiddenError);
       }
 

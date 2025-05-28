@@ -5,6 +5,7 @@ import { getApiAuthService } from '@/services/auth/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { Permission } from '@/lib/rbac/roles';
 import { ApiError } from '@/lib/api/common/api-error';
+import { createAuthApiError } from './auth-errors';
 import { createErrorResponse } from '@/lib/api/common/response-formatter';
 import { validateAuthToken } from './validate-auth-token';
 
@@ -46,9 +47,8 @@ export function withAuth(
     try {
       const authHeader = req.headers.authorization;
       if (!authHeader) {
-        return res
-          .status(401)
-          .json({ error: 'Unauthorized: Missing authorization header' });
+        const err = createAuthApiError('MISSING_TOKEN');
+        return res.status(err.status).json(err.toResponse());
       }
 
       const token = authHeader.startsWith('Bearer ')
@@ -60,14 +60,16 @@ export function withAuth(
 
       const user = session?.user as User | undefined;
       if (!user) {
-        return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+        const err = createAuthApiError('INVALID_TOKEN');
+        return res.status(err.status).json(err.toResponse());
       }
 
       if (
         options.requireAdmin &&
         (!user.app_metadata?.role || user.app_metadata.role !== 'admin')
       ) {
-        return res.status(403).json({ error: 'Forbidden: Admin access required' });
+        const err = createAuthApiError('INSUFFICIENT_PERMISSIONS');
+        return res.status(err.status).json(err.toResponse());
       }
 
       const authedReq = req as AuthenticatedRequest;
@@ -75,7 +77,12 @@ export function withAuth(
       return handler(authedReq, res);
     } catch (err) {
       console.error('Auth middleware error:', err);
-      return res.status(500).json({ error: 'Server error during authentication' });
+      const apiErr = new ApiError(
+        'server/internal_error',
+        err instanceof Error ? err.message : 'Server error during authentication',
+        500
+      );
+      return res.status(apiErr.status).json(apiErr.toResponse());
     }
   };
 }
@@ -132,7 +139,7 @@ export async function withRouteAuth(
         options.requiredRoles!.includes(r.roleName || r.role?.name || '')
       );
       if (!hasRole) {
-        const err = new ApiError('auth/forbidden', 'Insufficient role', 403);
+        const err = createAuthApiError('INSUFFICIENT_PERMISSIONS', { reason: 'role' });
         return createErrorResponse(err);
       }
     }
@@ -141,11 +148,7 @@ export async function withRouteAuth(
       for (const p of options.requiredPermissions) {
         const allowed = await permissionService.hasPermission(user.id, p);
         if (!allowed) {
-          const err = new ApiError(
-            'auth/forbidden',
-            'Insufficient permissions',
-            403
-          );
+          const err = createAuthApiError('INSUFFICIENT_PERMISSIONS', { permission: p });
           return createErrorResponse(err);
         }
       }
@@ -186,12 +189,12 @@ export async function withAuthRequest(
   return withRouteAuth(
     (r, ctx) => {
       if (!ctx.userId) {
-        const err = new ApiError('auth/unauthorized', 'Authentication required', 401);
+        const err = createAuthApiError('MISSING_TOKEN');
         return createErrorResponse(err);
       }
 
       if (permission && !ctx.permissions.includes(permission)) {
-        const err = new ApiError('auth/forbidden', 'Insufficient permissions', 403);
+        const err = createAuthApiError('INSUFFICIENT_PERMISSIONS');
         return createErrorResponse(err);
       }
 

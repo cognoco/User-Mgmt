@@ -93,8 +93,12 @@ describe('Auth Middleware', () => {
     
     // Check if the response is correct (401 Unauthorized)
     expect(res._getStatusCode()).toBe(401);
-    expect(JSON.parse(res._getData())).toEqual({ 
-      error: 'Unauthorized: Missing authorization header' 
+    expect(JSON.parse(res._getData())).toEqual({
+      error: {
+        code: 'auth/unauthorized',
+        message: 'Authentication required',
+        category: 'auth'
+      }
     });
   });
 
@@ -127,7 +131,11 @@ describe('Auth Middleware', () => {
     // Check if the response is correct (401 Unauthorized)
     expect(res._getStatusCode()).toBe(401);
     expect(JSON.parse(res._getData())).toEqual({
-      error: 'Unauthorized: Invalid token'
+      error: {
+        code: 'auth/unauthorized',
+        message: 'Invalid authentication token',
+        category: 'auth'
+      }
     });
 
     // Verify service was called with the right token
@@ -162,8 +170,12 @@ describe('Auth Middleware', () => {
     
     // Check if the response is correct (500 Server Error)
     expect(res._getStatusCode()).toBe(500);
-    expect(JSON.parse(res._getData())).toEqual({ 
-      error: 'Server error during authentication' 
+    expect(JSON.parse(res._getData())).toEqual({
+      error: {
+        code: 'server/internal_error',
+        message: 'Server error',
+        category: 'server'
+      }
     });
   });
 
@@ -232,8 +244,12 @@ describe('Auth Middleware', () => {
     
     // Check if the response is correct (403 Forbidden)
     expect(res._getStatusCode()).toBe(403);
-    expect(JSON.parse(res._getData())).toEqual({ 
-      error: 'Forbidden: Admin access required' 
+    expect(JSON.parse(res._getData())).toEqual({
+      error: {
+        code: 'auth/forbidden',
+        message: 'Insufficient permissions',
+        category: 'auth'
+      }
     });
   });
   
