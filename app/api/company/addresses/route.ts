@@ -3,6 +3,7 @@ import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
+import { withErrorHandling } from '@/middleware/error-handling';
 import { addressCreateSchema } from '@/core/address/models';
 import { createSupabaseAddressProvider } from '@/adapters/address/factory';
 
@@ -99,5 +100,7 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const POST = (req: NextRequest) => withRouteAuth(handlePost, req);
-export const GET = (req: NextRequest) => withRouteAuth(handleGet, req);
+export const POST = (req: NextRequest) =>
+  withErrorHandling((r) => withRouteAuth(handlePost, r), req);
+export const GET = (req: NextRequest) =>
+  withErrorHandling((r) => withRouteAuth(handleGet, r), req);

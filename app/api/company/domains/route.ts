@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
+import { withErrorHandling } from '@/middleware/error-handling';
 import { z } from 'zod';
 
 // Validation schema for adding a new domain
@@ -135,5 +136,7 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const GET = (req: NextRequest) => withRouteAuth(handleGet, req);
-export const POST = (req: NextRequest) => withRouteAuth(handlePost, req);
+export const GET = (req: NextRequest) =>
+  withErrorHandling((r) => withRouteAuth(handleGet, r), req);
+export const POST = (req: NextRequest) =>
+  withErrorHandling((r) => withRouteAuth(handlePost, r), req);

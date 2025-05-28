@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { withErrorHandling } from '@/middleware/error-handling';
 
 // DELETE /api/company/notifications/recipients/[id] - Delete a notification recipient
-export async function DELETE(
+async function handleDelete(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -101,3 +102,4 @@ export async function DELETE(
     return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
   }
 } 
+export const DELETE = (req: NextRequest, ctx: { params: { id: string } }) => withErrorHandling((r) => handleDelete(r, ctx), req);

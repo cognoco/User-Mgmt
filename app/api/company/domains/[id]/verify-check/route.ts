@@ -3,6 +3,7 @@ import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
+import { withErrorHandling } from '@/middleware/error-handling';
 import dns from 'dns/promises';
 
 const supabaseService = getServiceSupabase();
@@ -107,5 +108,6 @@ async function handlePost(
 export const POST = (
   req: NextRequest,
   ctx: { params: { id: string } }
-) => withRouteAuth((r, auth) => handlePost(r, ctx.params, auth), req);
+) =>
+  withErrorHandling((r) => withRouteAuth((r2, auth) => handlePost(r2, ctx.params, auth), r), req);
 
