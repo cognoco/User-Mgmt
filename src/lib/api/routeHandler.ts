@@ -1,3 +1,12 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { ZodSchema } from 'zod';
+import { withProtectedRoute } from '@/middleware/protected-route';
+import { withValidation } from '@/middleware/validation';
+import { withErrorHandling } from '@/middleware/error-handling';
+import type { RouteAuthContext } from '@/middleware/auth';
+import type { RateLimitOptions } from '@/middleware/rate-limit';
+import { withSecurity } from '@/middleware/with-security';
+
 export interface RouteHandlerOptions<T, C = any> {
   handler: (
     req: NextRequest,
@@ -86,7 +95,5 @@ export function createRouteHandler<T, C = any>(options: RouteHandlerOptions<T, C
     
     // Always wrap with error handling
     return withErrorHandling(responseHandler, req);
-  };
-}
   };
 }
