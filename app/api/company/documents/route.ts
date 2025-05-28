@@ -1,10 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 import { withErrorHandling } from '@/middleware/error-handling';
+import {
+  createCreatedResponse,
+  createPaginatedResponse,
+  createValidationError,
+  createNotFoundError,
+  createServerError,
+  ApiError,
+  ERROR_CODES,
+} from '@/lib/api/common';
 
 // Document upload schema
 const DocumentUploadSchema = z.object({
@@ -33,7 +42,7 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    throw new ApiError(ERROR_CODES.INVALID_REQUEST, 'Too many requests', 429);
   }
 
   try {
@@ -44,7 +53,7 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
     const companyProfile = await companyService.getProfileByUserId(userId);
 
     if (!companyProfile) {
-      return NextResponse.json({ error: 'Company profile not found' }, { status: 404 });
+      throw createNotFoundError('Company profile');
     }
 
     // 4. Parse and Validate Body
@@ -52,23 +61,23 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
     try {
       body = await request.json();
     } catch (e) {
-      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+      throw createValidationError('Invalid request body');
     }
 
     const parseResult = DocumentUploadSchema.safeParse(body);
     if (!parseResult.success) {
-      return NextResponse.json({ error: 'Validation failed', details: parseResult.error.format() }, { status: 400 });
+      throw createValidationError('Validation failed', parseResult.error.format());
     }
 
     const { type, file } = parseResult.data;
 
     // 5. Validate File
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: 'File size exceeds limit' }, { status: 400 });
+      throw createValidationError('File size exceeds limit');
     }
 
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      return NextResponse.json({ error: 'Invalid file type' }, { status: 400 });
+      throw createValidationError('Invalid file type');
     }
 
     // 6. Upload File to Storage
@@ -84,7 +93,7 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
 
     if (uploadError) {
       console.error('File upload error:', uploadError);
-      return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
+      throw createServerError('Failed to upload file');
     }
 
     // 7. Create Document Record
@@ -110,14 +119,14 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
         .remove([filePath]);
 
       console.error('Document record creation error:', documentError);
-      return NextResponse.json({ error: 'Failed to create document record' }, { status: 500 });
+      throw createServerError('Failed to create document record');
     }
 
-    return NextResponse.json(document);
+    return createCreatedResponse(document);
 
   } catch (error) {
     console.error('Unexpected error in POST /api/company/documents:', error);
-    return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
+    throw createServerError('An internal server error occurred');
   }
 }
 
@@ -126,7 +135,7 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    throw new ApiError(ERROR_CODES.INVALID_REQUEST, 'Too many requests', 429);
   }
 
   try {
@@ -138,7 +147,7 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
     const companyProfile = await companyService.getProfileByUserId(userId);
 
     if (!companyProfile) {
-      return NextResponse.json({ error: 'Company profile not found' }, { status: 404 });
+      throw createNotFoundError('Company profile');
     }
 
     const url = new URL(request.url);
@@ -168,7 +177,7 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
 
     if (documentsError) {
       console.error('Error fetching documents:', documentsError);
-      return NextResponse.json({ error: 'Failed to fetch documents' }, { status: 500 });
+      throw createServerError('Failed to fetch documents');
     }
 
     const generateSignedUrl = async (doc: any) => {
@@ -213,19 +222,23 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
       documentsWithUrls.push(...results);
     }
 
-    return NextResponse.json({
-      documents: documentsWithUrls,
-      pagination: {
+    const totalItems = count || 0;
+    const totalPages = totalItems ? Math.ceil(totalItems / limit) : 0;
+    return createPaginatedResponse(
+      documentsWithUrls,
+      {
         page,
-        limit,
-        total: count || 0,
-        pages: count ? Math.ceil(count / limit) : 0
+        pageSize: limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
       }
-    });
+    );
 
   } catch (error) {
     console.error('Unexpected error in GET /api/company/documents:', error);
-    return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
+    throw createServerError('An internal server error occurred');
   }
 }
 

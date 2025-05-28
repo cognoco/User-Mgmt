@@ -1,7 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { withErrorHandling } from '@/middleware/error-handling';
+import {
+  createCreatedResponse,
+  createForbiddenError,
+  createUnauthorizedError,
+  createValidationError,
+  createServerError,
+  ApiError,
+  ERROR_CODES,
+} from '@/lib/api/common';
 import { z } from 'zod';
 
 // Validation schema for adding a new recipient
@@ -17,14 +26,14 @@ async function handlePost(request: NextRequest) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    throw new (createServerError('Too many requests'));
   }
 
   try {
     // 2. Authentication & Get User
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+      throw createUnauthorizedError();
     }
     const token = authHeader.split(' ')[1];
 
@@ -32,7 +41,7 @@ async function handlePost(request: NextRequest) {
     const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
 
     if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
+      throw createUnauthorizedError(userError?.message || 'Invalid token');
     }
 
     // 3. Parse and validate request body
@@ -40,10 +49,7 @@ async function handlePost(request: NextRequest) {
     const validationResult = recipientSchema.safeParse(body);
 
     if (!validationResult.success) {
-      return NextResponse.json({ 
-        error: 'Validation failed', 
-        details: validationResult.error.format() 
-      }, { status: 400 });
+      throw createValidationError('Validation failed', validationResult.error.format());
     }
 
     const { company_id, preference_id, email, is_admin } = validationResult.data;
@@ -57,7 +63,7 @@ async function handlePost(request: NextRequest) {
       .single();
 
     if (profileError || !companyProfile) {
-      return NextResponse.json({ error: 'You do not have permission to add recipients for this company.' }, { status: 403 });
+      throw createForbiddenError('You do not have permission to add recipients for this company.');
     }
     
     // 5. Check if this is a duplicate email for the company's notifications
@@ -68,7 +74,7 @@ async function handlePost(request: NextRequest) {
       .eq('preference.company_id', company_id);
     
     if (existingRecipients && existingRecipients.length > 0) {
-      return NextResponse.json({ error: 'This email address is already receiving notifications for this company.' }, { status: 400 });
+      throw createValidationError('This email address is already receiving notifications for this company.');
     }
     
     // 6. Get all notification preferences for the company if no specific preference_id is provided
@@ -83,7 +89,7 @@ async function handlePost(request: NextRequest) {
         .single();
         
       if (prefError || !specificPreference) {
-        return NextResponse.json({ error: 'The specified notification preference does not exist or belongs to a different company.' }, { status: 400 });
+        throw createValidationError('The specified notification preference does not exist or belongs to a different company.');
       }
       
       preferencesToUpdate = [specificPreference];
@@ -113,7 +119,7 @@ async function handlePost(request: NextRequest) {
           
         if (createError || !createdPreferences) {
           console.error('Error creating default preferences:', createError);
-          return NextResponse.json({ error: 'Failed to create notification preferences.' }, { status: 500 });
+          throw createServerError('Failed to create notification preferences.');
         }
         
         preferencesToUpdate = createdPreferences;
@@ -138,19 +144,18 @@ async function handlePost(request: NextRequest) {
       
     if (addError) {
       console.error('Error adding recipients:', addError);
-      return NextResponse.json({ error: 'Failed to add recipient.' }, { status: 500 });
+      throw createServerError('Failed to add recipient.');
     }
     
     // 8. Return success
-    return NextResponse.json({ 
-      success: true, 
+    return createCreatedResponse({
+      recipients: addedRecipients,
       message: 'Recipient added successfully',
-      data: addedRecipients
     });
 
   } catch (error) {
     console.error('Unexpected error in POST /api/company/notifications/recipients:', error);
-    return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
+    throw createServerError('An internal server error occurred');
   }
-} 
+}
 export const POST = (req: NextRequest) => withErrorHandling(handlePost, req);
