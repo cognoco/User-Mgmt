@@ -147,25 +147,33 @@ export async function withPermission(
   handler: (req: NextRequest, userId: string) => Promise<NextResponse>,
   req: NextRequest
 ): Promise<NextResponse> {
-  return withRouteAuth(async (r, userId) => {
-    const service = getApiPermissionService();
-    let hasPermission = false;
+  return withRouteAuth(
+    async (r, ctx) => {
+      if (!ctx.userId) {
+        const err = new ApiError('auth/unauthorized', 'Authentication required', 401);
+        return createErrorResponse(err);
+      }
 
-    if (isPermission(permission)) {
-      hasPermission = await service.hasPermission(userId, permission as Permission);
-    } else {
-      console.warn(`Invalid permission '${permission}' passed to withPermission`);
-    }
+      const service = getApiPermissionService();
+      let hasPermission = false;
 
-    if (!hasPermission) {
-      const forbiddenError = new ApiError(
-        'auth/forbidden',
-        `You don't have permission to perform this action`,
-        403
-      );
-      return createErrorResponse(forbiddenError);
-    }
+      if (isPermission(permission)) {
+        hasPermission = await service.hasPermission(ctx.userId, permission as Permission);
+      } else {
+        console.warn(`Invalid permission '${permission}' passed to withPermission`);
+      }
 
-    return handler(r, userId);
-  }, req);
+      if (!hasPermission) {
+        const forbiddenError = new ApiError(
+          'auth/forbidden',
+          `You don't have permission to perform this action`,
+          403
+        );
+        return createErrorResponse(forbiddenError);
+      }
+
+      return handler(r, ctx.userId);
+    },
+    req
+  );
 }

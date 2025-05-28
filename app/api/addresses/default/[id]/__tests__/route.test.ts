@@ -10,7 +10,7 @@ vi.mock('@/services/address/factory', () => ({
 }));
 vi.mock('@/middleware/with-security', () => ({ withSecurity: (h: any) => h }));
 vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any, req: any) => handler(req, 'u1')),
+  withRouteAuth: vi.fn((handler: any, req: any) => handler(req, { userId: 'u1', role: 'user', permissions: [] })),
 }));
 
 describe('default address API', () => {

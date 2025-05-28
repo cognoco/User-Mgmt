@@ -120,14 +120,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   return withErrorHandling(
     (req) =>
-      withRouteAuth((r, userId) => withValidation(AvatarUploadSchema, (r2, data) => handleUploadAvatar(r2, userId, data), r), req),
+      withRouteAuth((r, auth) => withValidation(AvatarUploadSchema, (r2, data) => handleUploadAvatar(r2, auth.userId!, data), r), req),
     request
   );
 }
 
 export async function DELETE(request: NextRequest) {
   return withErrorHandling(
-    (req) => withRouteAuth((r, userId) => handleDeleteAvatar(userId), req),
+    (req) => withRouteAuth((r, auth) => handleDeleteAvatar(auth.userId!), req),
     request
   );
 }

@@ -35,16 +35,16 @@ async function handleDelete(_req: NextRequest, id: string, userId: string): Prom
 
 // Use both rate limiting and security middleware with proper auth
 export const GET = (req: NextRequest, { params }: { params: { id: string } }) =>
-  withRateLimit(req, r => withSecurity(q => 
-    withRouteAuth((s, uid) => handleGet(s, params.id, uid), q)
+  withRateLimit(req, r => withSecurity(q =>
+    withRouteAuth((s, ctx) => handleGet(s, params.id, ctx.userId!), q)
   )(r));
 
 export const PUT = (req: NextRequest, { params }: { params: { id: string } }) =>
-  withRateLimit(req, r => withSecurity(q => 
-    withRouteAuth((s, uid) => handlePut(s, params.id, uid), q)
+  withRateLimit(req, r => withSecurity(q =>
+    withRouteAuth((s, ctx) => handlePut(s, params.id, ctx.userId!), q)
   )(r));
 
 export const DELETE = (req: NextRequest, { params }: { params: { id: string } }) =>
-  withRateLimit(req, r => withSecurity(q => 
-    withRouteAuth((s, uid) => handleDelete(s, params.id, uid), q)
+  withRateLimit(req, r => withSecurity(q =>
+    withRouteAuth((s, ctx) => handleDelete(s, params.id, ctx.userId!), q)
   )(r));

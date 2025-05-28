@@ -2,7 +2,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import type { User } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { getApiAuthService, getSessionFromToken } from '@/services/auth/factory';
-import { hasPermission } from '@/lib/auth/hasPermission';
+import { getApiPermissionService } from '@/services/permission/factory';
+import { Permission } from '@/lib/rbac/roles';
 import { ApiError } from '@/lib/api/common/api-error';
 import { createErrorResponse } from '@/lib/api/common/response-formatter';
 
@@ -83,14 +84,32 @@ export function withAuth(
 /**
  * Authentication middleware for Next.js route handlers.
  */
+export interface RouteAuthContext {
+  userId: string | null;
+  role?: string;
+  permissions?: string[];
+  user?: User;
+}
+
+export interface RouteAuthOptions {
+  optional?: boolean;
+  includeUser?: boolean;
+  requiredPermissions?: Permission[];
+  requiredRoles?: string[];
+}
+
 export async function withRouteAuth(
-  handler: (req: NextRequest, userId: string) => Promise<NextResponse>,
-  req: NextRequest
+  handler: (req: NextRequest, ctx: RouteAuthContext) => Promise<NextResponse>,
+  req: NextRequest,
+  options: RouteAuthOptions = {}
 ): Promise<NextResponse> {
   try {
     const token = req.headers.get('authorization')?.replace('Bearer ', '') || '';
-    const user = await getSessionFromToken(token);
-    if (!user) {
+
+    if (!token) {
+      if (options.optional) {
+        return handler(req, { userId: null });
+      }
       const unauthorizedError = new ApiError(
         'auth/unauthorized',
         'Authentication required',
@@ -99,7 +118,60 @@ export async function withRouteAuth(
       return createErrorResponse(unauthorizedError);
     }
 
-    return await handler(req, user.id);
+    const user = await getSessionFromToken(token);
+    if (!user) {
+      if (options.optional) {
+        return handler(req, { userId: null });
+      }
+      const unauthorizedError = new ApiError(
+        'auth/unauthorized',
+        'Authentication required',
+        401
+      );
+      return createErrorResponse(unauthorizedError);
+    }
+
+    const permissionService = getApiPermissionService();
+    const roles = await permissionService.getUserRoles(user.id);
+    const roleName = roles[0]?.roleName || roles[0]?.role?.name;
+
+    const permissionsSet = new Set<string>();
+    for (const r of roles) {
+      const role = await permissionService.getRoleById(r.roleId);
+      role?.permissions.forEach(p => permissionsSet.add(p));
+    }
+    const permissions = Array.from(permissionsSet);
+
+    if (options.requiredRoles?.length) {
+      const hasRole = roles.some(r =>
+        options.requiredRoles!.includes(r.roleName || r.role?.name || '')
+      );
+      if (!hasRole) {
+        const err = new ApiError('auth/forbidden', 'Insufficient role', 403);
+        return createErrorResponse(err);
+      }
+    }
+
+    if (options.requiredPermissions?.length) {
+      for (const p of options.requiredPermissions) {
+        const allowed = await permissionService.hasPermission(user.id, p);
+        if (!allowed) {
+          const err = new ApiError(
+            'auth/forbidden',
+            'Insufficient permissions',
+            403
+          );
+          return createErrorResponse(err);
+        }
+      }
+    }
+
+    return await handler(req, {
+      userId: user.id,
+      role: roleName,
+      permissions,
+      user: options.includeUser ? (user as any) : undefined,
+    });
   } catch (error) {
     if (error instanceof ApiError) {
       return createErrorResponse(error);
@@ -117,29 +189,35 @@ export async function withRouteAuth(
 
 export interface AuthContext {
   userId: string;
-  role: string;
+  role: string | undefined;
+  permissions: string[];
 }
 
 export async function withAuthRequest(
   req: NextRequest,
   handler: (req: NextRequest, ctx: AuthContext) => Promise<NextResponse>,
-  permission?: string
+  permission?: Permission
 ): Promise<NextResponse> {
-  const token = req.headers.get('authorization')?.replace('Bearer ', '') || '';
-  const user = await getSessionFromToken(token);
-  if (!user) {
-    const err = new ApiError('auth/unauthorized', 'Authentication required', 401);
-    return createErrorResponse(err);
-  }
+  return withRouteAuth(
+    (r, ctx) => {
+      if (!ctx.userId) {
+        const err = new ApiError('auth/unauthorized', 'Authentication required', 401);
+        return createErrorResponse(err);
+      }
 
-  if (permission) {
-    const allowed = await hasPermission(user.id, permission as any);
-    if (!allowed) {
-      const err = new ApiError('auth/forbidden', 'Insufficient permissions', 403);
-      return createErrorResponse(err);
-    }
-  }
+      if (permission && !ctx.permissions.includes(permission)) {
+        const err = new ApiError('auth/forbidden', 'Insufficient permissions', 403);
+        return createErrorResponse(err);
+      }
 
-  return handler(req, { userId: user.id, role: user.role ?? 'user' });
+      return handler(r, {
+        userId: ctx.userId,
+        role: ctx.role,
+        permissions: ctx.permissions,
+      });
+    },
+    req,
+    { includeUser: false, requiredPermissions: permission ? [permission] : undefined }
+  );
 }
 

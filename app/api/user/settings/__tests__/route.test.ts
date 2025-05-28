@@ -7,7 +7,7 @@ import createMockUserService from '@/tests/mocks/user.service.mock';
 
 vi.mock('@/services/user/factory', () => ({ getApiUserService: vi.fn() }));
 vi.mock('@/middleware/auth', () => ({
-  withAuthRequest: vi.fn((req: any, handler: any) => handler(req, { userId: 'user-1', role: 'user' })),
+  withAuthRequest: vi.fn((req: any, handler: any) => handler(req, { userId: 'user-1', role: 'user', permissions: [] })),
 }));
 
 const service = createMockUserService();

@@ -10,5 +10,5 @@ async function handlePost(_req: NextRequest, params: { id: string }, userId: str
 }
 
 export const POST = withSecurity((req: NextRequest, ctx: { params: { id: string } }) =>
-  withRouteAuth((r, uid) => handlePost(r, ctx.params, uid), req)
+  withRouteAuth((r, auth) => handlePost(r, ctx.params, auth.userId!), req)
 );
