@@ -188,7 +188,7 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
 
 export const GET = (req: NextRequest) => withRouteAuth(handleGet, req);
 
-export async function PUT(request: NextRequest) {
+async function handlePut(request: NextRequest, auth: RouteAuthContext) {
   // Get IP and User Agent early
   const ipAddress = request.ip;
   const userAgent = request.headers.get('user-agent');
@@ -202,35 +202,15 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    // 2. Authentication & Get User
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-    const token = authHeader.split(' ')[1];
-
     const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
-
-    if (userError || !user) {
-      // Log unauthorized attempt
-      await logUserAction({
-          action: 'COMPANY_PROFILE_UPDATE_UNAUTHORIZED',
-          status: 'FAILURE',
-          ipAddress: ipAddress,
-          userAgent: userAgent,
-          targetResourceType: 'company_profile',
-          details: { reason: userError?.message ?? 'Invalid token' }
-      });
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-    }
-    userIdForLogging = user.id;
+    const userId = auth.userId!;
+    userIdForLogging = userId;
 
     // 3. Get Existing Profile ID (needed for logging and update)
     const { data: existingProfile /*, error: profileError - not used */ } = await supabaseService
       .from('company_profiles')
       .select('id') // Only select ID
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     if (!existingProfile) {
@@ -326,7 +306,9 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export const PUT = (req: NextRequest) => withRouteAuth(handlePut, req);
+
+async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
   // Get IP and User Agent early
   const ipAddress = request.ip;
   const userAgent = request.headers.get('user-agent');
@@ -340,35 +322,15 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    // 2. Authentication & Get User
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-    const token = authHeader.split(' ')[1];
-
     const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
-
-    if (userError || !user) {
-      // Log unauthorized attempt
-      await logUserAction({
-          action: 'COMPANY_PROFILE_DELETE_UNAUTHORIZED',
-          status: 'FAILURE',
-          ipAddress: ipAddress,
-          userAgent: userAgent,
-          targetResourceType: 'company_profile',
-          details: { reason: userError?.message ?? 'Invalid token' }
-      });
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-    }
-    userIdForLogging = user.id;
+    const userId = auth.userId!;
+    userIdForLogging = userId;
 
     // 3. Get Profile ID to delete
     const { data: profileToDelete /*, error: profileError */ } = await supabaseService // Commented out unused error variable
       .from('company_profiles')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
     if (!profileToDelete) {
@@ -472,4 +434,6 @@ export async function DELETE(request: NextRequest) {
     });
     return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
   }
-} 
+}
+
+export const DELETE = (req: NextRequest) => withRouteAuth(handleDelete, req);

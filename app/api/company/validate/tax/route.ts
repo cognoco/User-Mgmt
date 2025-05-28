@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 
 const ValidationRequestSchema = z.object({
   taxId: z.string().min(1),
@@ -42,7 +43,7 @@ const countryValidators: Record<string, (taxId: string) => Promise<ValidationRes
   // Add more countries here as needed
 };
 
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest, auth: RouteAuthContext) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
@@ -50,19 +51,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // 2. Authentication & Get User
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-    const token = authHeader.split(' ')[1];
-
     const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
-
-    if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-    }
+    const userId = auth.userId!;
 
     // 3. Parse and Validate Body
     let body: ValidationRequest;
@@ -100,7 +90,7 @@ export async function POST(request: NextRequest) {
         tax_id_last_checked: new Date().toISOString(),
         tax_id_validation_details: validationResult.details,
       })
-      .eq('user_id', user.id);
+      .eq('user_id', userId);
 
     return NextResponse.json({
       status: validationResult.status,
@@ -112,4 +102,6 @@ export async function POST(request: NextRequest) {
     console.error('Unexpected error in POST /api/company/validate/tax:', error);
     return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
   }
-} 
+}
+
+export const POST = (req: NextRequest) => withRouteAuth(handlePost, req);
