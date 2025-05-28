@@ -26,9 +26,11 @@ export * from './database';
 // Import and register the Supabase adapter factory by default
 import { AdapterRegistry } from './registry';
 import { createSupabaseAdapterFactory } from './supabase-factory';
+import { createSupabaseDatabaseProvider } from './database/factory/supabase-factory';
 
 // Register the Supabase adapter factory
 AdapterRegistry.registerFactory('supabase', createSupabaseAdapterFactory);
+AdapterRegistry.registerDatabaseFactory('supabase', createSupabaseDatabaseProvider);
 
 // Re-export the registry instance for convenience
 export { AdapterRegistry as default } from "./registry";

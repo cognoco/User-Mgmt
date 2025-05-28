@@ -138,3 +138,25 @@ Each adapter should have corresponding tests in its `__tests__` directory. Tests
     - `supabaseKey`: Your Supabase anon/public key
 
 - **Custom**: Implement the `AdapterFactory` interface
+
+## Database Providers
+
+Database providers encapsulate the low-level database clients. Register provider
+factories with `AdapterRegistry.registerDatabaseFactory` and optionally set a
+default provider using `AdapterRegistry.setDefaultDatabaseProvider`.
+
+```typescript
+import { AdapterRegistry } from '@/adapters';
+import { createSupabaseDatabaseProvider } from '@/adapters/database/factory';
+
+AdapterRegistry.registerDatabaseFactory('supabase', createSupabaseDatabaseProvider);
+AdapterRegistry.setDefaultDatabaseProvider('supabase');
+
+const db = AdapterRegistry.getDefaultDatabaseProvider({
+  provider: 'supabase',
+  connectionString: 'https://project.supabase.co'
+});
+```
+
+Call `setActiveDatabaseProvider` on the registry instance to switch providers at
+runtime.
