@@ -4,8 +4,12 @@ import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
-import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
-import { withErrorHandling } from '@/middleware/error-handling';
+import { type RouteAuthContext } from '@/middleware/auth';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+} from '@/middleware/createMiddlewareChain';
 
 // Company Profile Schema
 const CompanyProfileSchema = z.object({
@@ -38,6 +42,11 @@ const CompanyProfileUpdateSchema = z.object({
 });
 
 type CompanyProfileUpdateRequest = z.infer<typeof CompanyProfileUpdateSchema>;
+
+const middleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+]);
 
 async function handlePost(request: NextRequest, auth: RouteAuthContext) {
   const ipAddress = request.ip;
@@ -151,8 +160,7 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const POST = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handlePost, r), req);
+export const POST = middleware(handlePost);
 
 
 async function handleGet(request: NextRequest, auth: RouteAuthContext) {
@@ -180,8 +188,7 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const GET = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handleGet, r), req);
+export const GET = middleware(handleGet);
 
 async function handlePut(request: NextRequest, auth: RouteAuthContext) {
   // Get IP and User Agent early
@@ -297,8 +304,7 @@ async function handlePut(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const PUT = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handlePut, r), req);
+export const PUT = middleware(handlePut);
 
 async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
   // Get IP and User Agent early
@@ -424,5 +430,4 @@ async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const DELETE = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handleDelete, r), req);
+export const DELETE = middleware(handleDelete);
