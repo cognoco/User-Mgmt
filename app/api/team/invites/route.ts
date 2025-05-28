@@ -4,7 +4,6 @@ import { prisma } from '@/lib/database/prisma';
 import { generateInviteToken } from '@/lib/utils/token';
 import { sendTeamInviteEmail } from '@/lib/email/teamInvite';
 import { Permission } from '@/lib/rbac/roles';
-import { getServerSession } from '@/middleware/auth-adapter';
 
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import {
@@ -37,45 +36,20 @@ async function listInvites(req: NextRequest, _auth: RouteAuthContext) {
   return createSuccessResponse(invites);
 }
 async function handleInvite(
-  req: NextRequest,
+  _req: NextRequest,
   auth: RouteAuthContext | undefined,
   data: z.infer<typeof inviteSchema>
 ) {
-  // Handle both authentication methods for transition period
-  let userId: string;
-  let userEmail: string;
-  
-  if (auth?.userId) {
-    // New middleware-based authentication
-    userId = auth.userId;
-    userEmail = auth.user?.email || '';
-    
-    // If we don't have user email from auth context but need it,
-    // we might need to fetch additional user data
-    if (!userEmail) {
-      // Option to fetch user details if needed
-      // const user = await fetchUserDetails(userId);
-      // userEmail = user.email;
-    }
-  } else {
-    // Legacy session-based authentication
-    const session = await getServerSession();
-    if (!session?.user?.email || !session?.user?.id) {
-      throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Unauthorized', 401);
-    }
-    userId = session.user.id;
-    userEmail = session.user.email;
-  }
-  
-  // Continue with the rest of the function using userId and userEmail
-  // ...
-}
+  if (!auth?.userId) {
     throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Unauthorized', 401);
   }
 
   const invokingUser = await prisma.user.findUnique({
     where: { id: auth.userId },
-    select: { id: true, teamMemberships: { select: { teamId: true, role: true } } },
+    select: {
+      id: true,
+      teamMemberships: { select: { teamId: true, role: true } },
+    },
   });
   if (!invokingUser || !invokingUser.teamMemberships || invokingUser.teamMemberships.length === 0) {
     throw new ApiError(ERROR_CODES.FORBIDDEN, 'Invoking user not found or not part of any team', 403);
@@ -147,12 +121,12 @@ async function handleInvite(
 
 const getMiddleware = createMiddlewareChain([
   errorHandlingMiddleware(),
-  routeAuthMiddleware({ requiredPermissions: [Permission.INVITE_TEAM_MEMBER] })
+  routeAuthMiddleware({ requiredPermissions: [Permission.INVITE_TEAM_MEMBER], includeUser: true })
 ]);
 
 const postMiddleware = createMiddlewareChain([
   errorHandlingMiddleware(),
-  routeAuthMiddleware({ requiredPermissions: [Permission.INVITE_TEAM_MEMBER] }),
+  routeAuthMiddleware({ requiredPermissions: [Permission.INVITE_TEAM_MEMBER], includeUser: true }),
   validationMiddleware(inviteSchema)
 ]);
 
