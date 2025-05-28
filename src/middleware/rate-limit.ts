@@ -22,19 +22,22 @@ if (redisConfig.enabled && redisConfig.url && redisConfig.token) {
 interface RateLimitConfig {
   windowMs: number;
   max: number;
+  enabled: boolean;
 }
 
 /** Options passed to {@link rateLimit} */
 interface RateLimitOptions {
   windowMs?: number;
   max?: number;
-  keyPrefix?: string; // Add optional keyPrefix here
+  keyPrefix?: string;
+  enabled?: boolean;
 }
 
 // Configure rate limiting options
 const defaultConfig: RateLimitConfig = {
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 100, // limit each IP to 100 requests per windowMs
+  enabled: true,
 };
 
 // Create a cache to store rate limit data
@@ -52,17 +55,21 @@ const rateLimitCache = new LRUCache({
  * @returns Promise<boolean> - True if rate limited, false otherwise.
  */
 export async function checkRateLimit(
-  request: NextRequest, 
+  request: NextRequest,
   options: RateLimitOptions = {} // Use the new options type
 ): Promise<boolean> {
   console.log('REAL checkRateLimit CALLED');
+  if (options.enabled === false || !rateLimitConfig.enabled) {
+    return false;
+  }
+
   if (!redis) {
     return false; // Not rate limited if Redis is not available
   }
 
   const { 
-    windowMs = rateLimitConfig.windowMs, 
-    max = rateLimitConfig.max, 
+    windowMs = rateLimitConfig.windowMs,
+    max = rateLimitConfig.max,
     keyPrefix = 'rate-limit'
   } = { ...defaultConfig, ...options }; // Merge with defaults
 
@@ -130,7 +137,15 @@ export function rateLimit(options: RateLimitOptions = {}, injectedCheckRateLimit
     next: () => Promise<void>
   ) {
     try {
-      const isRateLimited = await injectedCheckRateLimit(req as unknown as NextRequest, options);
+      if (options.enabled === false || !rateLimitConfig.enabled) {
+        await next();
+        return;
+      }
+
+      const isRateLimited = await injectedCheckRateLimit(
+        req as unknown as NextRequest,
+        options
+      );
       
       if (isRateLimited) {
         const error = new ApiError(
@@ -168,7 +183,10 @@ export async function withRateLimit(
   handler: (request: NextRequest) => Promise<NextResponse>,
   config: RateLimitOptions = {} // Use the new options type
 ): Promise<NextResponse> {
-  const mergedConfig = { ...defaultConfig, ...config }; // Merge with defaults
+  const mergedConfig = { ...defaultConfig, ...config };
+  if (mergedConfig.enabled === false || !rateLimitConfig.enabled) {
+    return handler(request);
+  }
   try {
     // Get client IP
     const ip = request.ip || 
@@ -212,12 +230,13 @@ export async function withRateLimit(
  * Creates a rate limit middleware with custom configuration
  */
 export function createRateLimit(options?: RateLimitOptions) { // Use the new options type
-  const config = { ...defaultConfig, ...options };
-  
+  const config = { ...defaultConfig, ...rateLimitConfig, ...options };
+
   return async function rateLimit(
     request: NextRequest,
     handler: (request: NextRequest) => Promise<NextResponse>
   ) {
     return withRateLimit(request, handler, config);
   };
-} 
+}
+
