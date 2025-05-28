@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { middleware } from '@/middleware';
 import { logUserAction } from '@/lib/audit/auditLogger';
-import { withErrorHandling } from '@/middleware/error-handling';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  type RouteAuthContext,
+} from '@/middleware/createMiddlewareChain';
+import { withSecurity } from '@/middleware/with-security';
 
 // Helper to fetch all relevant company data for export
 async function getCompanyExportData(companyId: string) {
@@ -46,8 +51,8 @@ async function getCompanyExportData(companyId: string) {
   };
 }
 
-async function handleGet(req: NextRequest) {
-  const user = (req as any).user;
+async function handleGet(req: NextRequest, auth: RouteAuthContext) {
+  const user = auth.user;
   if (!user) {
     return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
@@ -140,7 +145,10 @@ async function handleGet(req: NextRequest) {
   });
 }
 
-export const GET = middleware(
-  ['cors', 'csrf', 'rateLimit'],
-  (req: NextRequest) => withErrorHandling(handleGet, req)
-);
+const getMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ includeUser: true }),
+]);
+
+export const GET = (req: NextRequest) =>
+  withSecurity((r) => getMiddleware((rr, auth) => handleGet(rr, auth))(r))(req);

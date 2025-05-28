@@ -1,11 +1,15 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createSuccessResponse, createNoContentResponse } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware,
+  type RouteAuthContext,
+} from '@/middleware/createMiddlewareChain';
 import { getApiAdminService } from '@/services/admin/factory';
 import { createUserNotFoundError } from '@/lib/api/admin/error-handler';
-import { withResourcePermission } from '@/middleware/withResourcePermission';
 import { withSecurity } from '@/middleware/with-security';
 import { notifyUserChanges } from '@/lib/realtime/notifyUserChanges';
 
@@ -18,7 +22,11 @@ const updateUserSchema = z.object({
 
 type UpdateUser = z.infer<typeof updateUserSchema>;
 
-async function handleGetUser(req: NextRequest, { params }: { params: { id: string } }) {
+async function handleGetUser(
+  req: NextRequest,
+  _auth: RouteAuthContext,
+  { params }: { params: { id: string } }
+) {
   const adminService = getApiAdminService();
   const user = await adminService.getUserById(params.id);
   if (!user) {
@@ -27,7 +35,12 @@ async function handleGetUser(req: NextRequest, { params }: { params: { id: strin
   return createSuccessResponse({ user });
 }
 
-async function handleUpdateUser(req: NextRequest, data: UpdateUser, { params }: { params: { id: string } }) {
+async function handleUpdateUser(
+  req: NextRequest,
+  _auth: RouteAuthContext,
+  data: UpdateUser,
+  { params }: { params: { id: string } }
+) {
   const adminService = getApiAdminService();
   const existingUser = await adminService.getUserById(params.id);
   if (!existingUser) {
@@ -38,7 +51,11 @@ async function handleUpdateUser(req: NextRequest, data: UpdateUser, { params }: 
   return createSuccessResponse({ user: updated });
 }
 
-async function handleDeleteUser(req: NextRequest, { params }: { params: { id: string } }) {
+async function handleDeleteUser(
+  req: NextRequest,
+  _auth: RouteAuthContext,
+  { params }: { params: { id: string } }
+) {
   const adminService = getApiAdminService();
   const existingUser = await adminService.getUserById(params.id);
   if (!existingUser) {
@@ -49,37 +66,39 @@ async function handleDeleteUser(req: NextRequest, { params }: { params: { id: st
   return createNoContentResponse();
 }
 
+const getMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: ['admin.users.view'] }),
+]);
+
 export const GET = (
   req: NextRequest,
   ctx: { params: { id: string } }
-) =>
-  withResourcePermission(
-    (r, auth) => withErrorHandling(() => handleGetUser(r, ctx), r),
-    { permission: 'admin.users.view' }
-  )(req, ctx);
+) => getMiddleware((r, auth) => handleGetUser(r, auth, ctx))(req);
+
+const putMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: ['admin.users.update'] }),
+  validationMiddleware(updateUserSchema),
+]);
 
 export const PUT = (
   req: NextRequest,
   ctx: { params: { id: string } }
 ) =>
-  withResourcePermission(
-    (r, auth) =>
-      withSecurity(async (r2) => {
-        const data = await r2.json();
-        return withErrorHandling(
-          () => withValidation(updateUserSchema, (rr, v) => handleUpdateUser(rr, v, ctx), r2, data),
-          r2
-        );
-      })(r),
-    { permission: 'admin.users.update' }
-  )(req, ctx);
+  withSecurity((r) =>
+    putMiddleware(async (r2, auth, data) => handleUpdateUser(r2, auth, data, ctx))(r)
+  )(req);
+
+const deleteMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: ['admin.users.delete'] }),
+]);
 
 export const DELETE = (
   req: NextRequest,
   ctx: { params: { id: string } }
 ) =>
-  withResourcePermission(
-    (r, auth) =>
-      withSecurity((r2) => withErrorHandling(() => handleDeleteUser(r2, ctx), r2))(r),
-    { permission: 'admin.users.delete' }
-  )(req, ctx);
+  withSecurity((r) =>
+    deleteMiddleware((r2, auth) => handleDeleteUser(r2, auth, ctx))(r)
+  )(req);

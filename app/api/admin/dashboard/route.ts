@@ -3,12 +3,17 @@ import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { checkRolePermission } from '@/lib/rbac/roleService';
 import { Role } from '@/types/rbac';
-import { withErrorHandling } from '@/middleware/error-handling';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  type RouteAuthContext,
+} from '@/middleware/createMiddlewareChain';
 
-async function handleGet() {
+async function handleGet(req: NextRequest, auth: RouteAuthContext) {
   try {
     // Get the current session
-    const session = await getServerSession();
+    const session = await getServerSession(req);
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -116,4 +121,10 @@ async function handleGet() {
     );
   }
 }
-export const GET = (req: NextRequest) => withErrorHandling(() => handleGet(), req);
+const getMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ includeUser: true }),
+]);
+
+export const GET = (req: NextRequest) =>
+  getMiddleware((r, auth) => handleGet(r, auth))(req);

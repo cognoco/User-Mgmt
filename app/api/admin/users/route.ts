@@ -1,6 +1,11 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware,
+  type RouteAuthContext,
+} from '@/middleware/createMiddlewareChain';
 import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -14,7 +19,11 @@ const querySchema = z.object({
 
 type QueryParams = z.infer<typeof querySchema>;
 
-async function handleGet(_req: NextRequest, params: QueryParams) {
+async function handleGet(
+  _req: NextRequest,
+  _auth: RouteAuthContext,
+  params: QueryParams
+) {
   const { page, limit, search, sortBy, sortOrder } = params;
 
   const startIndex = (page - 1) * limit;
@@ -70,14 +79,11 @@ async function handleGet(_req: NextRequest, params: QueryParams) {
   }
 }
 
+const getMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: ['admin.users.list'] }),
+  validationMiddleware(querySchema),
+]);
+
 export const GET = (req: NextRequest) =>
-  withErrorHandling(
-    (r) =>
-      withValidation(
-        querySchema,
-        (r2, data) => handleGet(r2, data),
-        r,
-        Object.fromEntries(new URL(r.url).searchParams.entries())
-      ),
-    req
-  );
+  getMiddleware((r, auth, data) => handleGet(r, auth, data))(req);
