@@ -1,12 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from '../route';
-
-const mockAuthService = {
-  getSession: vi.fn(),
-};
-vi.mock('@/services/auth/factory', () => ({
-  getApiAuthService: () => mockAuthService,
-}));
+import { withRouteAuth } from '@/middleware/auth';
 
 const mockPermissionService = {
   hasPermission: vi.fn(),
@@ -21,7 +15,12 @@ vi.mock('@/lib/api/permission/error-handler', async () => {
 
 beforeEach(() => {
   vi.resetAllMocks();
-  mockAuthService.getSession.mockResolvedValue({ user: { id: 'user-1' } });
+  (withRouteAuth as any).mockImplementation((handler: any, req: any) =>
+    handler(req, {
+      userId: 'user-1',
+      user: { id: 'user-1', app_metadata: { permissions: ['VIEW_PROJECTS'] } },
+    })
+  );
 });
 
 describe('GET /api/permissions/check', () => {
@@ -32,7 +31,7 @@ describe('GET /api/permissions/check', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.data.hasPermission).toBe(true);
-    expect(mockPermissionService.hasPermission).toHaveBeenCalledWith('user-1', 'VIEW_PROJECTS');
+    expect(mockPermissionService.hasPermission).not.toHaveBeenCalled();
   });
 
   it('returns 404 for invalid permission', async () => {
@@ -53,6 +52,9 @@ describe('GET /api/permissions/check', () => {
 
   it('maps service errors using error handler', async () => {
     mockPermissionService.hasPermission.mockRejectedValue(new Error('permission not found'));
+    (withRouteAuth as any).mockImplementationOnce((handler: any, req: any) =>
+      handler(req, { userId: 'user-1', user: { id: 'user-1', app_metadata: {} } })
+    );
     const req = new Request('http://localhost/api/permissions/check?permission=VIEW_PROJECTS');
     const res = await GET(req as any);
     expect(res.status).toBe(404);

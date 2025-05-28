@@ -1,27 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { GET, POST } from '../route';
 import { ERROR_CODES } from '@/lib/api/common';
-import { getApiAuthService } from '@/services/auth/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { withRouteAuth } from '@/middleware/auth';
 
 // Mocks
-vi.mock('@/middleware/auth-adapter', () => ({
-  getServerSession: vi.fn()
-}));
+vi.mock('@/middleware/auth-adapter', () => ({}));
 
 vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { 
-    userId: 'user1', 
-    role: 'user', 
-    user: { id: 'user1', email: 'test@example.com' } 
-  }))
+  withRouteAuth: vi.fn(async (handler: any, req: any) =>
+    handler(req, {
+      userId: 'user1',
+      role: 'user',
+      user: { id: 'user1', email: 'test@example.com' }
+    })
+  )
 }));
 
-vi.mock('@/services/auth/factory', () => ({ getApiAuthService: vi.fn() }));
+vi.mock('@/services/auth/factory', () => ({}));
 
 vi.mock('@/services/permission/factory', () => ({
   getApiPermissionService: () => ({
@@ -101,9 +99,6 @@ describe('Team Members API', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getApiAuthService).mockReturnValue({
-      getSession: vi.fn().mockResolvedValue({ user: { id: 'user1' } }),
-    } as any);
     vi.mocked(prisma.teamMember.findMany).mockResolvedValue(mockMembers as any);
     vi.mocked(prisma.teamMember.count).mockResolvedValue(1);
     vi.mocked(prisma.teamMember.findFirst).mockResolvedValue({ teamId: 'team1' } as any);
@@ -113,7 +108,11 @@ describe('Team Members API', () => {
   });
 
   it('returns 401 when no session exists', async () => {
-    vi.mocked(withRouteAuth).mockResolvedValueOnce(new NextResponse('unauth', { status: 401 }));
+    vi.mocked(withRouteAuth).mockResolvedValueOnce(
+      Promise.resolve(
+        NextResponse.json({ error: { code: ERROR_CODES.UNAUTHORIZED } }, { status: 401 })
+      )
+    );
 
     const request = new NextRequest('http://localhost:3000/api/team/members');
     const response = await GET(request);
