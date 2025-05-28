@@ -3,18 +3,35 @@ import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
-import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
-import { withErrorHandling } from '@/middleware/error-handling';
+import { type RouteAuthContext } from '@/middleware/auth';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware,
+} from '@/middleware/createMiddlewareChain';
 import { addressUpdateSchema } from '@/core/address/models';
 import { createSupabaseAddressProvider } from '@/adapters/address/factory';
 
 // Use the shared address update schema from the core layer
 type AddressUpdateRequest = z.infer<typeof addressUpdateSchema>;
 
+const baseMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+]);
+
+const putMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+  validationMiddleware(addressUpdateSchema),
+]);
+
 async function handlePut(
   request: NextRequest,
   params: { addressId: string },
-  auth: RouteAuthContext
+  auth: RouteAuthContext,
+  data: AddressUpdateRequest
 ) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
@@ -33,22 +50,6 @@ async function handlePut(
       return NextResponse.json({ error: 'Company profile not found' }, { status: 404 });
     }
 
-    // 4. Parse and Validate Request Body
-    let body: AddressUpdateRequest;
-    try {
-      body = await request.json();
-    } catch (e) {
-      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
-    }
-
-    const parseResult = addressUpdateSchema.safeParse(body);
-    if (!parseResult.success) {
-      return NextResponse.json({ 
-        error: 'Validation failed', 
-        details: parseResult.error.format() 
-      }, { status: 400 });
-    }
-
     const addressProvider = createSupabaseAddressProvider(
       process.env.NEXT_PUBLIC_SUPABASE_URL || '',
       process.env.SUPABASE_SERVICE_ROLE_KEY || ''
@@ -57,7 +58,7 @@ async function handlePut(
     const result = await addressProvider.updateAddress(
       companyProfile.id,
       params.addressId,
-      parseResult.data
+      data
     );
 
     if (!result.success) {
@@ -122,16 +123,10 @@ export const PUT = (
   req: NextRequest,
   ctx: { params: { addressId: string } }
 ) =>
-  withErrorHandling(
-    (r) => withRouteAuth((r2, auth) => handlePut(r2, ctx.params, auth), r),
-    req
-  );
+  putMiddleware((r, auth, data) => handlePut(r, ctx.params, auth, data))(req);
 
 export const DELETE = (
   req: NextRequest,
   ctx: { params: { addressId: string } }
 ) =>
-  withErrorHandling(
-    (r) => withRouteAuth((r2, auth) => handleDelete(r2, ctx.params, auth), r),
-    req
-  );
+  baseMiddleware((r, auth) => handleDelete(r, ctx.params, auth))(req);

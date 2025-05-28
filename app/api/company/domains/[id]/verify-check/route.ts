@@ -2,11 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
-import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
-import { withErrorHandling } from '@/middleware/error-handling';
+import { type RouteAuthContext } from '@/middleware/auth';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+} from '@/middleware/createMiddlewareChain';
 import dns from 'dns/promises';
 
 const supabaseService = getServiceSupabase();
+
+const middleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+]);
 
 async function handlePost(
   request: NextRequest,
@@ -108,6 +117,5 @@ async function handlePost(
 export const POST = (
   req: NextRequest,
   ctx: { params: { id: string } }
-) =>
-  withErrorHandling((r) => withRouteAuth((r2, auth) => handlePost(r2, ctx.params, auth), r), req);
+) => middleware((r, auth) => handlePost(r, ctx.params, auth))(req);
 
