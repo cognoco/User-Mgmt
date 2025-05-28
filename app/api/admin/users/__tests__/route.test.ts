@@ -5,6 +5,15 @@ import { GET } from '../route';
 vi.mock('@/lib/database/supabase', () => ({
   getServiceSupabase: vi.fn(),
 }));
+vi.mock('@/middleware/createMiddlewareChain', async () => {
+  const actual = await vi.importActual<any>('@/middleware/createMiddlewareChain');
+  return {
+    ...actual,
+    routeAuthMiddleware: () => (handler: any) =>
+      (req: any, ctx?: any, data?: any) =>
+        handler(req, { userId: 'u1', role: 'admin', permissions: ['admin.users.list'] }, data),
+  };
+});
 
 import { getServiceSupabase } from '@/lib/database/supabase';
 

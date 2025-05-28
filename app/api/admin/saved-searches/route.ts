@@ -1,12 +1,15 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createSuccessResponse, createCreatedResponse } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
-import { createProtectedHandler } from '@/middleware/permissions';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware,
+  type RouteAuthContext,
+} from '@/middleware/createMiddlewareChain';
 import { withSecurity } from '@/middleware/with-security';
 import { getServiceSupabase } from '@/lib/database/supabase';
-import { getCurrentUser } from '@/lib/auth/session';
 
 const savedSearchParamsSchema = z.object({
   query: z.string().optional(),
@@ -28,16 +31,18 @@ const createSavedSearchSchema = z.object({
   isPublic: z.boolean().default(false),
 });
 
-async function getAllSavedSearches(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user) {
+async function getAllSavedSearches(
+  _req: NextRequest,
+  auth: RouteAuthContext
+) {
+  if (!auth.userId) {
     return createSuccessResponse({ savedSearches: [] });
   }
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
     .from('saved_searches')
     .select('*')
-    .or(`user_id.eq.${user.id},is_public.eq.true`)
+    .or(`user_id.eq.${auth.userId},is_public.eq.true`)
     .order('created_at', { ascending: false });
   if (error) {
     console.error('Error fetching saved searches:', error);
@@ -46,16 +51,19 @@ async function getAllSavedSearches(req: NextRequest) {
   return createSuccessResponse({ savedSearches: data || [] });
 }
 
-async function createSavedSearch(req: NextRequest, data: z.infer<typeof createSavedSearchSchema>) {
-  const user = await getCurrentUser();
-  if (!user) {
+async function createSavedSearch(
+  _req: NextRequest,
+  auth: RouteAuthContext,
+  data: z.infer<typeof createSavedSearchSchema>
+) {
+  if (!auth.userId) {
     throw new Error('Authentication required');
   }
   const supabase = getServiceSupabase();
   const { data: savedSearch, error } = await supabase
     .from('saved_searches')
     .insert({
-      user_id: user.id,
+      user_id: auth.userId,
       name: data.name,
       description: data.description || '',
       search_params: data.searchParams,
@@ -70,19 +78,19 @@ async function createSavedSearch(req: NextRequest, data: z.infer<typeof createSa
   return createCreatedResponse({ savedSearch });
 }
 
-export const GET = createProtectedHandler(
-  (req) => withErrorHandling(() => getAllSavedSearches(req), req),
-  'admin.users.list'
-);
+const getMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: ['admin.users.list'] }),
+]);
 
-export const POST = createProtectedHandler(
-  (req) =>
-    withSecurity(async (r) => {
-      const body = await r.json();
-      return withErrorHandling(
-        () => withValidation(createSavedSearchSchema, createSavedSearch, r, body),
-        r
-      );
-    })(req),
-  'admin.users.list'
-);
+const postMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: ['admin.users.list'] }),
+  validationMiddleware(createSavedSearchSchema),
+]);
+
+export const GET = (req: NextRequest) =>
+  getMiddleware((r, auth) => getAllSavedSearches(r, auth))(req);
+
+export const POST = (req: NextRequest) =>
+  withSecurity((r) => postMiddleware((r2, auth, data) => createSavedSearch(r2, auth, data))(r))(req);

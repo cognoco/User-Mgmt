@@ -1,12 +1,15 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createSuccessResponse, createNoContentResponse } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
-import { createProtectedHandler } from '@/middleware/permissions';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware,
+  type RouteAuthContext,
+} from '@/middleware/createMiddlewareChain';
 import { withSecurity } from '@/middleware/with-security';
 import { getServiceSupabase } from '@/lib/database/supabase';
-import { getCurrentUser } from '@/lib/auth/session';
 
 const updateSavedSearchSchema = z.object({
   name: z.string().min(1).optional(),
@@ -15,9 +18,12 @@ const updateSavedSearchSchema = z.object({
   isPublic: z.boolean().optional(),
 });
 
-async function getSavedSearch(req: NextRequest, { params }: { params: { id: string } }) {
-  const user = await getCurrentUser();
-  if (!user) {
+async function getSavedSearch(
+  _req: NextRequest,
+  auth: RouteAuthContext,
+  { params }: { params: { id: string } }
+) {
+  if (!auth.userId) {
     throw new Error('Authentication required');
   }
   const supabase = getServiceSupabase();
@@ -25,7 +31,7 @@ async function getSavedSearch(req: NextRequest, { params }: { params: { id: stri
     .from('saved_searches')
     .select('*')
     .eq('id', params.id)
-    .or(`user_id.eq.${user.id},is_public.eq.true`)
+    .or(`user_id.eq.${auth.userId},is_public.eq.true`)
     .single();
   if (error) {
     console.error('Error fetching saved search:', error);
@@ -35,12 +41,12 @@ async function getSavedSearch(req: NextRequest, { params }: { params: { id: stri
 }
 
 async function updateSavedSearch(
-  req: NextRequest,
+  _req: NextRequest,
+  auth: RouteAuthContext,
   data: z.infer<typeof updateSavedSearchSchema>,
   { params }: { params: { id: string } }
 ) {
-  const user = await getCurrentUser();
-  if (!user) {
+  if (!auth.userId) {
     throw new Error('Authentication required');
   }
   const supabase = getServiceSupabase();
@@ -52,7 +58,7 @@ async function updateSavedSearch(
   if (checkError || !existingSearch) {
     throw new Error('Saved search not found');
   }
-  if (existingSearch.user_id !== user.id) {
+  if (existingSearch.user_id !== auth.userId) {
     throw new Error('You can only update your own saved searches');
   }
   const { data: updatedSearch, error: updateError } = await supabase
@@ -74,9 +80,12 @@ async function updateSavedSearch(
   return createSuccessResponse({ savedSearch: updatedSearch });
 }
 
-async function deleteSavedSearch(req: NextRequest, { params }: { params: { id: string } }) {
-  const user = await getCurrentUser();
-  if (!user) {
+async function deleteSavedSearch(
+  _req: NextRequest,
+  auth: RouteAuthContext,
+  { params }: { params: { id: string } }
+) {
+  if (!auth.userId) {
     throw new Error('Authentication required');
   }
   const supabase = getServiceSupabase();
@@ -88,7 +97,7 @@ async function deleteSavedSearch(req: NextRequest, { params }: { params: { id: s
   if (checkError || !existingSearch) {
     throw new Error('Saved search not found');
   }
-  if (existingSearch.user_id !== user.id) {
+  if (existingSearch.user_id !== auth.userId) {
     throw new Error('You can only delete your own saved searches');
   }
   const { error: deleteError } = await supabase.from('saved_searches').delete().eq('id', params.id);
@@ -99,24 +108,34 @@ async function deleteSavedSearch(req: NextRequest, { params }: { params: { id: s
   return createNoContentResponse();
 }
 
-export const GET = createProtectedHandler(
-  (req, ctx) => withErrorHandling(() => getSavedSearch(req, ctx), req),
-  'admin.users.list'
-);
+const baseMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: ['admin.users.list'] }),
+]);
 
-export const PATCH = createProtectedHandler(
-  (req, ctx) =>
-    withSecurity(async (r) => {
-      const body = await r.json();
-      return withErrorHandling(
-        () => withValidation(updateSavedSearchSchema, (r2, data) => updateSavedSearch(r2, data, ctx), r, body),
-        r
-      );
-    })(req),
-  'admin.users.list'
-);
+const patchMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: ['admin.users.list'] }),
+  validationMiddleware(updateSavedSearchSchema),
+]);
 
-export const DELETE = createProtectedHandler(
-  (req, ctx) => withSecurity((r) => withErrorHandling(() => deleteSavedSearch(r, ctx), r))(req),
-  'admin.users.list'
-);
+export const GET = (
+  req: NextRequest,
+  ctx: { params: { id: string } }
+) => baseMiddleware((r, auth) => getSavedSearch(r, auth, ctx))(req);
+
+export const PATCH = (
+  req: NextRequest,
+  ctx: { params: { id: string } }
+) =>
+  withSecurity((r) =>
+    patchMiddleware((r2, auth, data) => updateSavedSearch(r2, auth, data, ctx))(r)
+  )(req);
+
+export const DELETE = (
+  req: NextRequest,
+  ctx: { params: { id: string } }
+) =>
+  withSecurity((r) =>
+    baseMiddleware((r2, auth) => deleteSavedSearch(r2, auth, ctx))(r)
+  )(req);
