@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { GET, POST } from '../route';
 import { ERROR_CODES } from '@/lib/api/common';
@@ -8,7 +8,7 @@ import { getApiAuthService } from '@/services/auth/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 
 // Mocks
-vi.mock('next-auth', () => ({
+vi.mock('@/middleware/auth-adapter', () => ({
   getServerSession: vi.fn(),
 }));
 

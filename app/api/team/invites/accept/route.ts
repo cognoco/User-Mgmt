@@ -1,8 +1,7 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/database/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/index';
+import { getServerSession } from '@/middleware/auth-adapter';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
 import { withValidation } from '@/middleware/validation';
@@ -12,7 +11,7 @@ import { withSecurity } from '@/middleware/with-security';
 const acceptInviteSchema = z.object({ token: z.string() });
 
 async function handleAccept(req: NextRequest, data: z.infer<typeof acceptInviteSchema>) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession();
   if (!session?.user) {
     throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Unauthorized', 401);
   }

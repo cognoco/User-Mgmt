@@ -9,6 +9,7 @@ Each middleware lives in `src/middleware` and can be imported individually or vi
 | File | Purpose | Dependencies |
 |------|---------|--------------|
 | `auth.ts` | Adds authentication to API and route handlers. | Depends on `getApiAuthService` from `src/services/auth/factory`. |
+| `auth-adapter.ts` | Compatibility layer replacing NextAuth functions with Supabase equivalents. | Permission service, auth session |
 | `audit-log.ts` | Logs API requests and responses for auditing. | Uses `supabase` client from `src/lib/database/supabase`. |
 | `cors.ts` | Adds CORS headers and handles preflight requests. | None |
 | `csrf.ts` | Provides CSRF protection for API routes. | `ApiError` from `src/lib/api/common`. |
@@ -24,3 +25,31 @@ Each middleware lives in `src/middleware` and can be imported individually or vi
 | `protected-route.ts` | Combines rate limiting, authentication and optional permission checks. | `checkRateLimit`, `withRouteAuth` |
 
 Importing from `registry.ts` ensures a consistent entry point and avoids duplicate imports.
+
+## Auth Adapter Usage
+
+The `auth-adapter.ts` module provides `getServerSession` and re-exports `withRouteAuth`.
+It serves as a drop-in replacement for `next-auth` utilities while using Supabase
+sessions under the hood.
+
+```ts
+import { getServerSession } from '@/middleware/auth-adapter';
+
+export async function POST(req: NextRequest) {
+  const session = await getServerSession();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  // session.user contains id, role and permissions
+  return NextResponse.json({ userId: session.user.id });
+}
+```
+
+When composing middleware chains you can continue to use `withRouteAuth` from the
+same module:
+
+```ts
+import { withRouteAuth } from '@/middleware/auth-adapter';
+
+export const POST = (req: NextRequest) =>
+  withRouteAuth((r, ctx) => handler(r, ctx), req);
+```
