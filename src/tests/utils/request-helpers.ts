@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { generateTestJwt } from '@/tests/utils/supabase-auth-utils';
 
 /**
  * Create a request object with an Authorization header set.
@@ -22,6 +23,5 @@ export function createAuthenticatedRequest(
     init.body = JSON.stringify(body);
     headers['content-type'] = 'application/json';
   }
-
   return new NextRequest(new URL(url), init);
 }

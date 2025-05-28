@@ -6,6 +6,7 @@ import {
   createMiddlewareChain,
   errorHandlingMiddleware,
   routeAuthMiddleware,
+  rateLimitMiddleware,
   type RouteAuthContext,
 } from '@/middleware/createMiddlewareChain';
 
@@ -124,6 +125,7 @@ async function handleGet(_req: NextRequest, auth: RouteAuthContext) {
   }
 }
 const getMiddleware = createMiddlewareChain([
+  rateLimitMiddleware(),
   errorHandlingMiddleware(),
   routeAuthMiddleware({ includeUser: true }),
 ]);
