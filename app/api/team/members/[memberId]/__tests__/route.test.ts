@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DELETE } from '../route';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { hasPermission } from '@/lib/auth/hasPermission';
 
-vi.mock('next-auth');
+vi.mock('@/middleware/auth-adapter');
 vi.mock('@/lib/database/prisma');
 vi.mock('@/lib/auth/hasPermission');
 

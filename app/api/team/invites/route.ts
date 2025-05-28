@@ -5,8 +5,7 @@ import { generateInviteToken } from '@/lib/utils/token';
 import { sendTeamInviteEmail } from '@/lib/email/teamInvite';
 import { createProtectedHandler } from '@/middleware/permissions';
 import { Permission } from '@/lib/rbac/roles';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/index';
+import { getServerSession } from '@/middleware/auth-adapter';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
 import { withValidation } from '@/middleware/validation';
@@ -35,7 +34,7 @@ async function listInvites(req: NextRequest) {
 }
 
 async function handleInvite(req: NextRequest, data: z.infer<typeof inviteSchema>) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession();
   if (!session?.user?.email || !session?.user?.id) {
     throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Unauthorized', 401);
   }

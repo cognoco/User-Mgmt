@@ -1,6 +1,5 @@
 import { type NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { hasPermission } from '@/lib/auth/hasPermission';
 import { z } from 'zod';
@@ -16,7 +15,7 @@ async function handleDelete(
   req: NextRequest,
   params: z.infer<typeof paramSchema>
 ) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession();
   if (!session?.user) {
     throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
   }

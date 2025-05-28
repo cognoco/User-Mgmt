@@ -1,6 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/index';
+import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { checkRolePermission } from '@/lib/rbac/roleService';
 import { Role } from '@/types/rbac';
@@ -9,7 +8,7 @@ import { withErrorHandling } from '@/middleware/error-handling';
 async function handleGet() {
   try {
     // Get the current session
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
