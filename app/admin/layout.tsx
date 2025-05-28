@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
-import { getUser } from '@/lib/auth/getUser';
+import { getSupabaseServerClient } from '@/lib/auth';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { hasPermission } from '@/lib/auth/hasPermission';
 import Link from 'next/link';
 import { Button } from '@/ui/primitives/button';
@@ -11,13 +12,15 @@ interface AdminLayoutProps {
 }
 
 export default async function AdminLayout({ children }: AdminLayoutProps): Promise<JSX.Element> {
-  // Get current user and check permissions
-  const user = await getUser();
-  
-  if (!user) {
+  // Create a Supabase client tied to the server session
+  const supabase = getSupabaseServerClient();
+  const { data, error } = await supabase.auth.getUser();
+  const user: SupabaseUser | null = data.user;
+
+  if (error || !user) {
     redirect('/auth/login');
   }
-  
+
   // Check if user has admin access
   const isAdmin = await hasPermission(user.id, 'ADMIN_ACCESS');
   
