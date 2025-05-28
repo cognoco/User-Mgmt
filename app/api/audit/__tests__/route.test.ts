@@ -1,19 +1,19 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { GET } from '../route';
-import { getUserFromRequest } from '@/lib/auth/utils';
+import { withRouteAuth } from '@/middleware/auth';
 import { hasPermission } from '@/lib/auth/hasPermission';
 import { setTableMockData, resetSupabaseMock } from '@/tests/mocks/supabase';
-import { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
-vi.mock('@/lib/auth/utils', () => ({
-  getUserFromRequest: vi.fn(),
+vi.mock('@/middleware/auth', () => ({
+  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'u1', role: 'user' })),
 }));
 vi.mock('@/lib/auth/hasPermission', () => ({
   hasPermission: vi.fn(),
 }));
 
 describe('GET /api/audit', () => {
-  const createRequest = (url: string) => new NextRequest(url);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -26,32 +26,29 @@ describe('GET /api/audit', () => {
   });
 
   it('returns 401 when unauthenticated', async () => {
-    (getUserFromRequest as unknown as vi.Mock).mockResolvedValue(null);
-    const res = await GET(createRequest('http://localhost/api/audit'));
+    vi.mocked(withRouteAuth).mockResolvedValueOnce(new NextResponse('unauth', { status: 401 }));
+    const res = await GET(createAuthenticatedRequest('GET', 'http://localhost/api/audit'));
     expect(res.status).toBe(401);
   });
 
   it('validates query parameters', async () => {
-    (getUserFromRequest as unknown as vi.Mock).mockResolvedValue({ id: 'u1' });
-    const res = await GET(createRequest('http://localhost/api/audit?page=bad'));
+    const res = await GET(createAuthenticatedRequest('GET', 'http://localhost/api/audit?page=bad'));
     expect(res.status).toBe(400);
   });
 
   it('checks permissions when requesting another user', async () => {
-    (getUserFromRequest as unknown as vi.Mock).mockResolvedValue({ id: 'u1' });
     (hasPermission as unknown as vi.Mock).mockResolvedValue(false);
-    const res = await GET(createRequest('http://localhost/api/audit?userId=u2'));
+    const res = await GET(createAuthenticatedRequest('GET', 'http://localhost/api/audit?userId=u2'));
     expect(res.status).toBe(403);
   });
 
   it('returns logs from database', async () => {
-    (getUserFromRequest as unknown as vi.Mock).mockResolvedValue({ id: 'u1' });
     setTableMockData('user_actions_log', {
       data: [{ id: '1', created_at: '2023-01-01', user_id: 'u1', action: 'LOGIN', status: 'SUCCESS' }],
       error: null,
     });
 
-    const res = await GET(createRequest('http://localhost/api/audit?page=1&limit=10'));
+    const res = await GET(createAuthenticatedRequest('GET', 'http://localhost/api/audit?page=1&limit=10'));
     const data = await res.json();
     expect(res.status).toBe(200);
     expect(data.logs.length).toBe(1);

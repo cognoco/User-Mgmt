@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET, DELETE } from '../route';
-import { getUserFromRequest } from '@/lib/auth/utils';
+import { withRouteAuth } from '@/middleware/auth';
 import { createSessionProvider } from '@/adapters/session/factory';
+import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
-vi.mock('@/lib/auth/utils', () => ({
-  getUserFromRequest: vi.fn(),
+vi.mock('@/middleware/auth', () => ({
+  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'user-1', role: 'user' })),
 }));
 
 vi.mock('@/adapters/session/factory', () => ({
@@ -14,10 +15,6 @@ vi.mock('@/adapters/session/factory', () => ({
 interface MockProvider {
   listUserSessions?: vi.Mock;
   deleteAllUserSessions?: vi.Mock;
-}
-
-function mockRequest(method: string) {
-  return { method, headers: {}, json: vi.fn() } as any;
 }
 
 describe('/api/session', () => {
@@ -33,9 +30,8 @@ describe('/api/session', () => {
   });
 
   it('GET returns sessions for authenticated user', async () => {
-    (getUserFromRequest as vi.Mock).mockResolvedValue(user);
     provider.listUserSessions!.mockResolvedValue([{ id: '1' }]);
-    const res = await GET(mockRequest('GET'));
+    const res = await GET(createAuthenticatedRequest('GET', 'http://localhost/api/session'));
     const data = await res.json();
     expect(res.status).toBe(200);
     expect(data.sessions.length).toBe(1);
@@ -43,22 +39,20 @@ describe('/api/session', () => {
   });
 
   it('GET returns 401 for unauthenticated user', async () => {
-    (getUserFromRequest as vi.Mock).mockResolvedValue(null);
-    const res = await GET(mockRequest('GET'));
+    vi.mocked(withRouteAuth).mockResolvedValueOnce(new NextResponse('unauth', { status: 401 }));
+    const res = await GET(createAuthenticatedRequest('GET', 'http://localhost/api/session'));
     expect(res.status).toBe(401);
   });
 
   it('GET returns 500 on provider error', async () => {
-    (getUserFromRequest as vi.Mock).mockResolvedValue(user);
     provider.listUserSessions!.mockRejectedValue(new Error('fail'));
-    const res = await GET(mockRequest('GET'));
+    const res = await GET(createAuthenticatedRequest('GET', 'http://localhost/api/session'));
     expect(res.status).toBe(500);
   });
 
   it('DELETE revokes all sessions for authenticated user', async () => {
-    (getUserFromRequest as vi.Mock).mockResolvedValue(user);
     provider.deleteAllUserSessions!.mockResolvedValue({ success: true, count: 2 });
-    const res = await DELETE(mockRequest('DELETE'));
+    const res = await DELETE(createAuthenticatedRequest('DELETE', 'http://localhost/api/session'));
     const data = await res.json();
     expect(res.status).toBe(200);
     expect(data.success).toBe(true);
@@ -66,15 +60,14 @@ describe('/api/session', () => {
   });
 
   it('DELETE returns 401 for unauthenticated user', async () => {
-    (getUserFromRequest as vi.Mock).mockResolvedValue(null);
-    const res = await DELETE(mockRequest('DELETE'));
+    vi.mocked(withRouteAuth).mockResolvedValueOnce(new NextResponse('unauth', { status: 401 }));
+    const res = await DELETE(createAuthenticatedRequest('DELETE', 'http://localhost/api/session'));
     expect(res.status).toBe(401);
   });
 
   it('DELETE returns 500 on provider error', async () => {
-    (getUserFromRequest as vi.Mock).mockResolvedValue(user);
     provider.deleteAllUserSessions!.mockRejectedValue(new Error('fail'));
-    const res = await DELETE(mockRequest('DELETE'));
+    const res = await DELETE(createAuthenticatedRequest('DELETE', 'http://localhost/api/session'));
     expect(res.status).toBe(500);
   });
 });
