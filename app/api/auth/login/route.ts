@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { withAuthRateLimit } from '@/middleware/with-auth-rate-limit';
 import { withSecurity } from '@/middleware/with-security';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { getApiAuthService } from '@/services/auth/factory';
@@ -10,8 +9,12 @@ import {
   ApiError,
   ERROR_CODES
 } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  validationMiddleware,
+  rateLimitMiddleware
+} from '@/middleware/createMiddlewareChain';
 import { createInvalidCredentialsError, createEmailNotVerifiedError } from '@/lib/api/auth/error-handler';
 
 // Zod schema for login data (matches original)
@@ -111,11 +114,12 @@ async function handleLogin(req: NextRequest, validatedData: z.infer<typeof Login
 /**
  * POST handler for login endpoint
  */
-export const POST = withSecurity(async (request: NextRequest) =>
-  withAuthRateLimit(request, (req) =>
-    withErrorHandling(
-      async (r) => withValidation(LoginSchema, handleLogin, r),
-      req
-    )
-  )
+const middleware = createMiddlewareChain([
+  rateLimitMiddleware({ windowMs: 15 * 60 * 1000, max: 30 }),
+  errorHandlingMiddleware(),
+  validationMiddleware(LoginSchema)
+]);
+
+export const POST = withSecurity((request: NextRequest) =>
+  middleware(handleLogin)(request)
 );
