@@ -1,3 +1,5 @@
+import type { DatabaseConfig } from '@/lib/database/types';
+
 export interface EnvironmentConfig {
   supabaseUrl: string;
   supabaseAnonKey: string;
@@ -9,6 +11,7 @@ export interface EnvironmentConfig {
   rateLimitMax: number;
   sessionCookieName: string;
   tokenExpiryDays: number;
+  database: DatabaseConfig;
 }
 
 const defaults: Pick<EnvironmentConfig, 'apiTimeout' | 'rateLimitWindowMs' | 'rateLimitMax' | 'sessionCookieName' | 'tokenExpiryDays'> = {
@@ -44,6 +47,16 @@ export function loadEnvironment(): EnvironmentConfig {
       process.env.TOKEN_EXPIRY_DAYS || String(defaults.tokenExpiryDays),
       10
     ),
+    database: {
+      provider: (process.env.DATABASE_PROVIDER as DatabaseConfig['provider']) || 'supabase',
+      connectionString: process.env.DATABASE_URL,
+      host: process.env.DATABASE_HOST,
+      port: process.env.DATABASE_PORT ? parseInt(process.env.DATABASE_PORT, 10) : undefined,
+      database: process.env.DATABASE_NAME,
+      username: process.env.DATABASE_USERNAME,
+      password: process.env.DATABASE_PASSWORD,
+      ssl: process.env.DATABASE_SSL === 'true',
+    },
   };
 }
 
@@ -54,6 +67,7 @@ export function validateEnvironment(env: EnvironmentConfig): boolean {
   if (typeof window === 'undefined' && !env.serviceRoleKey) {
     missing.push('SUPABASE_SERVICE_ROLE_KEY');
   }
+  if (!env.database.provider) missing.push('DATABASE_PROVIDER');
   if (missing.length > 0) {
     console.error(`[config] Missing required environment variables: ${missing.join(', ')}`);
     return false;
