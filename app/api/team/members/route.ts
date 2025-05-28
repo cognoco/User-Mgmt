@@ -2,7 +2,6 @@ import { type NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/index';
 import { prisma } from '@/lib/database/prisma';
-import { withSecurity } from '@/middleware/with-security';
 import { z } from 'zod';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { createRouteHandler } from '@/lib/api/routeHandler';
@@ -25,6 +24,7 @@ const addMemberSchema = z.object({
 
 async function handleTeamMembers(
   req: NextRequest,
+  _ctx: any,
   data: z.infer<typeof querySchema>
 ) {
   const session = await getServerSession(authOptions);
@@ -142,7 +142,11 @@ async function handleTeamMembers(
   }
 }
 
-async function handleAddMember(req: NextRequest, data: z.infer<typeof addMemberSchema>) {
+async function handleAddMember(
+  req: NextRequest,
+  _ctx: any,
+  data: z.infer<typeof addMemberSchema>
+) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
@@ -167,17 +171,15 @@ async function handleAddMember(req: NextRequest, data: z.infer<typeof addMemberS
   return createSuccessResponse(result.member, 201);
 }
 
-export const GET = createRouteHandler({
-  permission: 'team.members.list',
-  schema: querySchema,
-  parse: (req) => Object.fromEntries(new URL(req.url).searchParams.entries()),
+export const GET = createRouteHandler<z.infer<typeof querySchema>>({
   handler: handleTeamMembers,
+  schema: querySchema,
+  permission: 'team.members.list',
 });
 
-const postRoute = createRouteHandler({
-  permission: 'team.members.add',
-  schema: addMemberSchema,
+export const POST = createRouteHandler<z.infer<typeof addMemberSchema>>({
   handler: handleAddMember,
+  schema: addMemberSchema,
+  permission: 'team.members.add',
+  applySecurity: true,
 });
-
-export const POST = (req: NextRequest) => withSecurity(postRoute)(req);
