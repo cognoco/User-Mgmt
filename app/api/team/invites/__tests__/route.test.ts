@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
 import { prisma } from '@/lib/database/prisma';
-import { getServerSession } from 'next-auth';
+import { getSupabaseServerClient } from '@/lib/auth';
 import { sendTeamInviteEmail } from '@/lib/email/teamInvite';
 import { generateInviteToken } from '@/lib/utils/token';
 import { ERROR_CODES } from '@/lib/api/common';
 
 // Mock dependencies
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn(),
+vi.mock('@/lib/auth', () => ({
+  getSupabaseServerClient: vi.fn(),
 }));
 
 vi.mock('@/lib/prisma', () => ({
@@ -46,9 +46,12 @@ describe('POST /api/team/invites', () => {
     status: 'active',
   };
 
+  const mockSupabase = { auth: { getUser: vi.fn() } } as any;
+
   beforeEach(() => {
     vi.clearAllMocks();
-    (getServerSession as any).mockResolvedValue(mockSession);
+    vi.mocked(getSupabaseServerClient).mockReturnValue(mockSupabase);
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockSession.user }, error: null });
     (prisma.teamLicense.findUnique as any).mockResolvedValue(mockLicense);
     (prisma.teamMember.count as any).mockResolvedValue(2); // 2 existing members
     (generateInviteToken as any).mockReturnValue('mock-token');
@@ -94,7 +97,7 @@ describe('POST /api/team/invites', () => {
   });
 
   it('returns 401 when user is not authenticated', async () => {
-    (getServerSession as any).mockResolvedValue(null);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: null }, error: { message: 'auth', status: 401 } });
 
     const request = new Request('http://localhost:3000/api/team/invites', {
       method: 'POST',

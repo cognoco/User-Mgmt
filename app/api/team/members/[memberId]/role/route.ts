@@ -1,8 +1,7 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/database/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getSupabaseServerClient } from '@/lib/auth';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
@@ -19,8 +18,9 @@ async function handlePatch(
   data: z.infer<typeof updateRoleSchema>,
   memberId: string
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
+  const supabase = getSupabaseServerClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
     await logUserAction({
       action: 'TEAM_ROLE_UPDATE_ATTEMPT',
       status: 'FAILURE',
@@ -32,11 +32,11 @@ async function handlePatch(
   }
 
   const currentUserMember = await prisma.teamMember.findFirst({
-    where: { userId: session.user.id, role: 'admin' },
+    where: { userId: user.id, role: 'admin' },
   });
   if (!currentUserMember) {
     await logUserAction({
-      userId: session.user.id,
+      userId: user.id,
       action: 'TEAM_ROLE_UPDATE_ATTEMPT',
       status: 'FAILURE',
       targetResourceType: 'team_member',
@@ -52,7 +52,7 @@ async function handlePatch(
       data: { role: data.role },
     });
     await logUserAction({
-      userId: session.user.id,
+      userId: user.id,
       action: 'TEAM_ROLE_UPDATE_SUCCESS',
       status: 'SUCCESS',
       targetResourceType: 'team_member',
@@ -62,7 +62,7 @@ async function handlePatch(
     return createSuccessResponse(updatedMember);
   } catch (error) {
     await logUserAction({
-      userId: session.user.id,
+      userId: user.id,
       action: 'TEAM_ROLE_UPDATE_NOT_FOUND',
       status: 'FAILURE',
       targetResourceType: 'team_member',

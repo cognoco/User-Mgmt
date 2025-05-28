@@ -1,6 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/index';
+import { getSupabaseServerClient } from '@/lib/auth';
 import { prisma } from '@/lib/database/prisma';
 import { checkRolePermission } from '@/lib/rbac/roleService';
 import { Role } from '@/types/rbac';
@@ -8,15 +7,15 @@ import { withErrorHandling } from '@/middleware/error-handling';
 
 async function handleGet() {
   try {
-    // Get the current session
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const supabase = getSupabaseServerClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if user has admin permission
     const hasAdminAccess = await checkRolePermission(
-      session.user.role as Role, 
+      user.app_metadata?.role as Role,
       'ACCESS_ADMIN_DASHBOARD'
     );
     if (!hasAdminAccess) {
@@ -30,14 +29,14 @@ async function handleGet() {
         _all: true
       },
       where: {
-        teamId: session.user.teamId
+        teamId: user.app_metadata?.teamId
       }
     });
 
     // Get subscription info
     const subscription = await prisma.subscription.findUnique({
       where: {
-        teamId: session.user.teamId
+        teamId: user.app_metadata?.teamId
       },
       select: {
         plan: true,
@@ -54,7 +53,7 @@ async function handleGet() {
 
     const recentActivity = await prisma.activityLog.findMany({
       where: {
-        teamId: session.user.teamId,
+        teamId: user.app_metadata?.teamId,
         createdAt: {
           gte: thirtyDaysAgo
         }

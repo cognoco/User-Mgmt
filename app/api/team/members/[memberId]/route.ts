@@ -1,6 +1,5 @@
 import { type NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getSupabaseServerClient } from '@/lib/auth';
 import { prisma } from '@/lib/database/prisma';
 import { hasPermission } from '@/lib/auth/hasPermission';
 import { z } from 'zod';
@@ -16,12 +15,13 @@ async function handleDelete(
   req: NextRequest,
   params: z.infer<typeof paramSchema>
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
+  const supabase = getSupabaseServerClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
     throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
   }
 
-  if (!(await hasPermission(session.user.id, 'REMOVE_TEAM_MEMBER'))) {
+  if (!(await hasPermission(user.id, 'REMOVE_TEAM_MEMBER'))) {
     throw new ApiError(ERROR_CODES.FORBIDDEN, 'Forbidden', 403);
   }
 
@@ -36,7 +36,7 @@ async function handleDelete(
     throw createTeamMemberNotFoundError();
   }
 
-  if (teamMember.userId === session.user.id) {
+  if (teamMember.userId === user.id) {
     throw new ApiError(ERROR_CODES.INVALID_REQUEST, 'Cannot remove yourself from the team', 400);
   }
 

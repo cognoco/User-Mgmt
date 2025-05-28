@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from '../route';
-import { getServerSession } from 'next-auth';
+import { getSupabaseServerClient } from '@/lib/auth';
 import { prisma } from '@/lib/database/prisma';
 import { checkRolePermission } from '@/lib/rbac/roleService';
 
 // Mock dependencies
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn()
+vi.mock('@/lib/auth', () => ({
+  getSupabaseServerClient: vi.fn(),
 }));
 
 vi.mock('@/lib/prisma', () => ({
@@ -28,12 +28,15 @@ vi.mock('@/lib/rbac/roleService', () => ({
 }));
 
 describe('Admin Dashboard API', () => {
+  const mockSupabase = { auth: { getUser: vi.fn() } } as any;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getSupabaseServerClient).mockReturnValue(mockSupabase);
   });
 
   it('returns 401 when user is not authenticated', async () => {
-    vi.mocked(getServerSession).mockResolvedValueOnce(null);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: null }, error: { message: 'Auth', status: 401 } });
 
     const response = await GET();
     const data = await response.json();
@@ -43,9 +46,7 @@ describe('Admin Dashboard API', () => {
   });
 
   it('returns 403 when user lacks admin permission', async () => {
-    vi.mocked(getServerSession).mockResolvedValueOnce({
-      user: { id: '1', teamId: '1', role: 'USER' }
-    } as any);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: '1', app_metadata: { teamId: '1', role: 'USER' } } }, error: null });
     vi.mocked(checkRolePermission).mockResolvedValueOnce(false);
 
     const response = await GET();
@@ -57,9 +58,7 @@ describe('Admin Dashboard API', () => {
 
   it('returns dashboard data for authorized admin', async () => {
     // Mock session
-    vi.mocked(getServerSession).mockResolvedValueOnce({
-      user: { id: '1', teamId: '1', role: 'ADMIN' }
-    } as any);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: '1', app_metadata: { teamId: '1', role: 'ADMIN' } } }, error: null });
     vi.mocked(checkRolePermission).mockResolvedValueOnce(true);
 
     // Mock team stats
@@ -117,9 +116,7 @@ describe('Admin Dashboard API', () => {
   });
 
   it('handles database errors gracefully', async () => {
-    vi.mocked(getServerSession).mockResolvedValueOnce({
-      user: { id: '1', teamId: '1', role: 'ADMIN' }
-    } as any);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: '1', app_metadata: { teamId: '1', role: 'ADMIN' } } }, error: null });
     vi.mocked(checkRolePermission).mockResolvedValueOnce(true);
     vi.mocked(prisma.teamMember.groupBy).mockRejectedValueOnce(new Error('Database error'));
 
@@ -131,9 +128,7 @@ describe('Admin Dashboard API', () => {
   });
 
   it('handles missing subscription data', async () => {
-    vi.mocked(getServerSession).mockResolvedValueOnce({
-      user: { id: '1', teamId: '1', role: 'ADMIN' }
-    } as any);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: '1', app_metadata: { teamId: '1', role: 'ADMIN' } } }, error: null });
     vi.mocked(checkRolePermission).mockResolvedValueOnce(true);
     vi.mocked(prisma.teamMember.groupBy).mockResolvedValueOnce([]);
     vi.mocked(prisma.subscription.findUnique).mockResolvedValueOnce(null);

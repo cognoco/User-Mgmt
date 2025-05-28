@@ -5,8 +5,7 @@ import { generateInviteToken } from '@/lib/utils/token';
 import { sendTeamInviteEmail } from '@/lib/email/teamInvite';
 import { createProtectedHandler } from '@/middleware/permissions';
 import { Permission } from '@/lib/rbac/roles';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/index';
+import { getSupabaseServerClient } from '@/lib/auth';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
 import { withValidation } from '@/middleware/validation';
@@ -35,13 +34,14 @@ async function listInvites(req: NextRequest) {
 }
 
 async function handleInvite(req: NextRequest, data: z.infer<typeof inviteSchema>) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email || !session?.user?.id) {
+  const supabase = getSupabaseServerClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user?.email || !user?.id) {
     throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Unauthorized', 401);
   }
 
   const invokingUser = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: user.id },
     select: { id: true, teamMemberships: { select: { teamId: true, role: true } } },
   });
   if (!invokingUser || !invokingUser.teamMemberships || invokingUser.teamMemberships.length === 0) {
@@ -104,7 +104,7 @@ async function handleInvite(req: NextRequest, data: z.infer<typeof inviteSchema>
   await sendTeamInviteEmail({
     to: data.email,
     inviteToken,
-    invitedByEmail: session.user.email,
+    invitedByEmail: user.email,
     teamName: 'Your Team',
     role: data.role,
   });

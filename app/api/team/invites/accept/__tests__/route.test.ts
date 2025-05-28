@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
+import { getSupabaseServerClient } from '@/lib/auth';
 import { ERROR_CODES } from '@/lib/api/common';
 
 // Mock dependencies
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn(),
+vi.mock('@/lib/auth', () => ({
+  getSupabaseServerClient: vi.fn(),
 }));
 
 vi.mock('@/lib/prisma', () => ({
@@ -36,9 +36,12 @@ describe('POST /api/team/invites/accept', () => {
     },
   };
 
+  const mockSupabase = { auth: { getUser: vi.fn() } } as any;
+
   beforeEach(() => {
     vi.clearAllMocks();
-    (getServerSession as any).mockResolvedValue(mockSession);
+    vi.mocked(getSupabaseServerClient).mockReturnValue(mockSupabase);
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockSession.user }, error: null });
     (prisma.teamMember.findUnique as any).mockResolvedValue(mockInvite);
     (prisma.teamMember.update as any).mockResolvedValue({
       ...mockInvite,
@@ -81,7 +84,7 @@ describe('POST /api/team/invites/accept', () => {
   });
 
   it('returns 401 when user is not authenticated', async () => {
-    (getServerSession as any).mockResolvedValue(null);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: null }, error: { message: 'auth', status: 401 } });
 
     const request = new Request('http://localhost:3000/api/team/invites/accept', {
       method: 'POST',
@@ -159,12 +162,7 @@ describe('POST /api/team/invites/accept', () => {
   });
 
   it('should return 400 when request body is invalid', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'user-1',
-        email: 'test@example.com'
-      }
-    } as any);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: 'user-1', email: 'test@example.com' } }, error: null });
 
     const response = await POST(new Request('http://localhost', {
       method: 'POST',
@@ -180,12 +178,7 @@ describe('POST /api/team/invites/accept', () => {
   });
 
   it('should return 500 when database operation fails', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'user-1',
-        email: 'test@example.com'
-      }
-    } as any);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: 'user-1', email: 'test@example.com' } }, error: null });
 
     vi.mocked(prisma.teamMember.findUnique).mockRejectedValue(new Error('Database error'));
 

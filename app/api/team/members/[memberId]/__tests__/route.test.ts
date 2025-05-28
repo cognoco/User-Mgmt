@@ -1,26 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DELETE } from '../route';
-import { getServerSession } from 'next-auth';
+import { getSupabaseServerClient } from '@/lib/auth';
 import { prisma } from '@/lib/database/prisma';
 import { hasPermission } from '@/lib/auth/hasPermission';
 
-vi.mock('next-auth');
+vi.mock('@/lib/auth');
 vi.mock('@/lib/database/prisma');
 vi.mock('@/lib/auth/hasPermission');
 
 describe('DELETE /api/team/members/[memberId]', () => {
+  const mockSupabase = { auth: { getUser: vi.fn() } } as any;
+
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.mocked(getSupabaseServerClient).mockReturnValue(mockSupabase);
   });
 
   it('should successfully remove a team member', async () => {
-    // Mock authenticated session
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'current-user-id',
-        email: 'admin@example.com'
-      }
-    } as any);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: 'current-user-id', email: 'admin@example.com' } }, error: null });
 
     // Mock permission check
     vi.mocked(hasPermission).mockResolvedValue(true);
@@ -52,7 +49,7 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should return 401 when user is not authenticated', async () => {
-    vi.mocked(getServerSession).mockResolvedValue(null);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: null }, error: { message: 'auth', status: 401 } });
 
     const response = await DELETE(
       new Request('http://localhost'),
@@ -65,12 +62,7 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should return 403 when user lacks permission', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'current-user-id',
-        email: 'user@example.com'
-      }
-    } as any);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: 'current-user-id', email: 'user@example.com' } }, error: null });
 
     vi.mocked(hasPermission).mockResolvedValue(false);
 
@@ -85,12 +77,7 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should return 400 when trying to remove self', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'current-user-id',
-        email: 'admin@example.com'
-      }
-    } as any);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: 'current-user-id', email: 'admin@example.com' } }, error: null });
 
     vi.mocked(hasPermission).mockResolvedValue(true);
 
@@ -117,12 +104,7 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should return 400 when trying to remove last admin', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'current-user-id',
-        email: 'admin@example.com'
-      }
-    } as any);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: 'current-user-id', email: 'admin@example.com' } }, error: null });
 
     vi.mocked(hasPermission).mockResolvedValue(true);
 
@@ -148,12 +130,7 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should return 404 when team member is not found', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'current-user-id',
-        email: 'admin@example.com'
-      }
-    } as any);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: 'current-user-id', email: 'admin@example.com' } }, error: null });
 
     vi.mocked(hasPermission).mockResolvedValue(true);
     vi.mocked(prisma.teamMember.findUnique).mockResolvedValue(null);
@@ -169,12 +146,7 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should return 400 when memberId is invalid', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'current-user-id',
-        email: 'admin@example.com'
-      }
-    } as any);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: 'current-user-id', email: 'admin@example.com' } }, error: null });
 
     vi.mocked(hasPermission).mockResolvedValue(true);
 
@@ -189,12 +161,7 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should return 500 when database operation fails', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'current-user-id',
-        email: 'admin@example.com'
-      }
-    } as any);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: 'current-user-id', email: 'admin@example.com' } }, error: null });
 
     vi.mocked(hasPermission).mockResolvedValue(true);
 

@@ -1,6 +1,5 @@
 import { type NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/index';
+import { getSupabaseServerClient } from '@/lib/auth';
 import { prisma } from '@/lib/database/prisma';
 import { z } from 'zod';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
@@ -27,8 +26,9 @@ async function handleTeamMembers(
   _ctx: any,
   data: z.infer<typeof querySchema>
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
+  const supabase = getSupabaseServerClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
     throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
   }
 
@@ -37,7 +37,7 @@ async function handleTeamMembers(
 
   // Get the team ID first to ensure we're looking at the correct team
   const userTeam = await prisma.teamMember.findFirst({
-    where: { userId: session.user.id },
+    where: { userId: user.id },
     select: { teamId: true },
   });
 
@@ -147,8 +147,9 @@ async function handleAddMember(
   _ctx: any,
   data: z.infer<typeof addMemberSchema>
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
+  const supabase = getSupabaseServerClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
     throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
   }
   const license = await prisma.teamLicense.findUnique({

@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PATCH } from '../route';
 import { prisma } from '@/lib/database/prisma';
-import { getServerSession } from 'next-auth';
+import { getSupabaseServerClient } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 
 // Mock dependencies
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn(),
+vi.mock('@/lib/auth', () => ({
+  getSupabaseServerClient: vi.fn(),
 }));
 
 vi.mock('@/lib/database/prisma', () => ({
@@ -42,9 +42,12 @@ describe('PATCH /api/team/members/[memberId]/role', () => {
     status: 'active',
   };
 
+  const mockSupabase = { auth: { getUser: vi.fn() } } as any;
+
   beforeEach(() => {
     vi.clearAllMocks();
-    (getServerSession as any).mockResolvedValue(mockSession);
+    vi.mocked(getSupabaseServerClient).mockReturnValue(mockSupabase);
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockSession.user }, error: null });
     (prisma.teamMember.findFirst as any).mockResolvedValue(mockAdminMember);
     (prisma.teamMember.update as any).mockResolvedValue({
       ...mockTeamMember,
@@ -82,7 +85,7 @@ describe('PATCH /api/team/members/[memberId]/role', () => {
   });
 
   it('returns 401 when user is not authenticated', async () => {
-    (getServerSession as any).mockResolvedValue(null);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: null }, error: { message: 'auth', status: 401 } });
 
     const request = new Request(
       'http://localhost:3000/api/team/members/member-1/role',

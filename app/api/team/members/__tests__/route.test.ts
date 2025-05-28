@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getSupabaseServerClient } from '@/lib/auth';
 import { prisma } from '@/lib/database/prisma';
 import { GET, POST } from '../route';
 import { ERROR_CODES } from '@/lib/api/common';
@@ -8,8 +8,8 @@ import { getApiAuthService } from '@/services/auth/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 
 // Mocks
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn(),
+vi.mock('@/lib/auth', () => ({
+  getSupabaseServerClient: vi.fn(),
 }));
 
 vi.mock('@/services/auth/factory', () => ({ getApiAuthService: vi.fn() }));
@@ -90,9 +90,12 @@ describe('Team Members API', () => {
     },
   };
 
+  const mockSupabase = { auth: { getUser: vi.fn() } } as any;
+
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getServerSession).mockResolvedValue(mockSession as any);
+    vi.mocked(getSupabaseServerClient).mockReturnValue(mockSupabase);
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: mockSession.user }, error: null });
     vi.mocked(getApiAuthService).mockReturnValue({
       getSession: vi.fn().mockResolvedValue({ user: { id: 'user1' } }),
     } as any);
@@ -105,7 +108,7 @@ describe('Team Members API', () => {
   });
 
   it('returns 401 when no session exists', async () => {
-    vi.mocked(getServerSession).mockResolvedValueOnce(null);
+    mockSupabase.auth.getUser.mockResolvedValueOnce({ data: { user: null }, error: { message: 'auth', status: 401 } });
     vi.mocked(getApiAuthService).mockReturnValueOnce({
       getSession: vi.fn().mockResolvedValue(null),
     } as any);
