@@ -46,10 +46,10 @@ async function handlePermissionCheck(
 export async function GET(request: NextRequest) {
   return withErrorHandling(
     (req) =>
-      withRouteAuth((r, userId) => {
+      withRouteAuth((r, ctx) => {
         const url = new URL(r.url);
         const params = Object.fromEntries(url.searchParams.entries());
-        return withValidation(querySchema, (r2, data) => handlePermissionCheck(r2, userId, data), r, params);
+        return withValidation(querySchema, (r2, data) => handlePermissionCheck(r2, ctx.userId!, data), r, params);
       }, req),
     request
   );
