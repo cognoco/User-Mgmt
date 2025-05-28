@@ -14,3 +14,4 @@ export * from './security-headers';
 export * from './validation';
 export * from './with-auth-rate-limit';
 export * from './with-security';
+export * from './protected-route';
