@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { withErrorHandling } from '@/middleware/error-handling';
+import { withValidation } from '@/middleware/validation';
 import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
@@ -13,14 +14,8 @@ const querySchema = z.object({
 
 type QueryParams = z.infer<typeof querySchema>;
 
-async function handleGet(req: NextRequest) {
-  const url = new URL(req.url);
-  const parseResult = querySchema.safeParse(Object.fromEntries(url.searchParams.entries()));
-  if (!parseResult.success) {
-    return NextResponse.json({ error: 'Invalid query parameters' }, { status: 400 });
-  }
-
-  const { page, limit, search, sortBy, sortOrder } = parseResult.data;
+async function handleGet(_req: NextRequest, params: QueryParams) {
+  const { page, limit, search, sortBy, sortOrder } = params;
 
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + limit - 1;
@@ -75,4 +70,14 @@ async function handleGet(req: NextRequest) {
   }
 }
 
-export const GET = (req: NextRequest) => withErrorHandling(handleGet, req);
+export const GET = (req: NextRequest) =>
+  withErrorHandling(
+    (r) =>
+      withValidation(
+        querySchema,
+        (r2, data) => handleGet(r2, data),
+        r,
+        Object.fromEntries(new URL(r.url).searchParams.entries())
+      ),
+    req
+  );
