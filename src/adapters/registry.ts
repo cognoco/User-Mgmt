@@ -19,10 +19,8 @@ import { SubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataP
 import { ApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
-import type {
-  DatabaseProvider,
-  DatabaseConfig
-} from '@/lib/database/types';
+import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
+
 
 
 /**
@@ -51,6 +49,11 @@ export interface AdapterFactory {
    * Create a team data provider
    */
   createTeamProvider(): TeamDataProvider;
+
+  /**
+   * Create an admin data provider
+   */
+  createAdminProvider?(): IAdminDataProvider;
 
   /**
    * Create an organization data provider

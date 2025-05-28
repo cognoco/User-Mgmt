@@ -1,10 +1,13 @@
 import { AdminService } from '@/core/admin/interfaces';
 import { DefaultAdminService } from './default-admin.service';
+import type { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
 
-export interface AdminServiceConfig {}
+export interface AdminServiceConfig {
+  adminDataProvider: IAdminDataProvider;
+}
 
-export function createAdminService(_: AdminServiceConfig = {}): AdminService {
-  return new DefaultAdminService();
+export function createAdminService(config: AdminServiceConfig): AdminService {
+  return new DefaultAdminService(config.adminDataProvider);
 }
 
 export default { createAdminService };
