@@ -1,11 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import type { User } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiAuthService, getSessionFromToken } from '@/services/auth/factory';
+import { getApiAuthService } from '@/services/auth/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { Permission } from '@/lib/rbac/roles';
 import { ApiError } from '@/lib/api/common/api-error';
 import { createErrorResponse } from '@/lib/api/common/response-formatter';
+import { validateAuthToken } from './validate-auth-token';
 
 /**
  * Options for {@link withAuth} middleware.
@@ -104,32 +105,16 @@ export async function withRouteAuth(
   options: RouteAuthOptions = {}
 ): Promise<NextResponse> {
   try {
-    const token = req.headers.get('authorization')?.replace('Bearer ', '') || '';
+    const validation = await validateAuthToken(req);
 
-    if (!token) {
+    if (!validation.success) {
       if (options.optional) {
         return handler(req, { userId: null });
       }
-      const unauthorizedError = new ApiError(
-        'auth/unauthorized',
-        'Authentication required',
-        401
-      );
-      return createErrorResponse(unauthorizedError);
+      return createErrorResponse(validation.error!);
     }
 
-    const user = await getSessionFromToken(token);
-    if (!user) {
-      if (options.optional) {
-        return handler(req, { userId: null });
-      }
-      const unauthorizedError = new ApiError(
-        'auth/unauthorized',
-        'Authentication required',
-        401
-      );
-      return createErrorResponse(unauthorizedError);
-    }
+    const user = validation.user!;
 
     const permissionService = getApiPermissionService();
     const roles = await permissionService.getUserRoles(user.id);
