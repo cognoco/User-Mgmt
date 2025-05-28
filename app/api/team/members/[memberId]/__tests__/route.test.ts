@@ -1,10 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DELETE } from '../route';
+// RESOLVED VERSION
+import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { withRouteAuth } from '@/middleware/auth';
 
+// Combined mocks
+vi.mock('@/middleware/auth-adapter');
 vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'current-user-id', role: 'user', user: { id: 'current-user-id', email: 'admin@example.com' } }))
+  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { 
+    userId: 'current-user-id', 
+    role: 'user', 
+    user: { id: 'current-user-id', email: 'admin@example.com' } 
+  }))
 }));
 vi.mock('@/lib/database/prisma');
 

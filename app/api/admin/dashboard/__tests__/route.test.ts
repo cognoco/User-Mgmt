@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from '../route';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { checkRolePermission } from '@/lib/rbac/roleService';
 
 // Mock dependencies
-vi.mock('next-auth', () => ({
-  getServerSession: vi.fn()
+vi.mock('@/middleware/auth-adapter', () => ({
+  getServerSession: vi.fn(),
 }));
 
 vi.mock('@/lib/prisma', () => ({

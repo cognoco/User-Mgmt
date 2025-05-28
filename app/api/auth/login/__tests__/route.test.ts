@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
 import { getApiAuthService } from '@/services/auth/factory';
-import { withAuthRateLimit } from '@/middleware/with-auth-rate-limit';
+import { createRateLimit } from '@/middleware/rate-limit';
 import { ERROR_CODES } from '@/lib/api/common';
 import { NextResponse } from 'next/server';
 
 vi.mock('@/services/auth/factory', () => ({ getApiAuthService: vi.fn() }));
-vi.mock('@/middleware/with-auth-rate-limit', () => ({
-  withAuthRateLimit: vi.fn((_req, handler) => handler(_req))
+vi.mock('@/middleware/rate-limit', () => ({
+  createRateLimit: vi.fn(() => vi.fn((_req: any, h: any) => h(_req)))
 }));
 vi.mock('@/middleware/with-security', () => ({ withSecurity: (h: any) => h }));
 
@@ -57,8 +57,8 @@ describe('POST /api/auth/login', () => {
   });
 
   it('returns 429 when rate limited', async () => {
-    (withAuthRateLimit as unknown as vi.Mock).mockImplementationOnce(async () =>
-      NextResponse.json({ error: { code: ERROR_CODES.INVALID_REQUEST } }, { status: 429 })
+    (createRateLimit as unknown as vi.Mock).mockImplementationOnce(() =>
+      async () => NextResponse.json({ error: { code: ERROR_CODES.INVALID_REQUEST } }, { status: 429 })
     );
     const res = await POST(createRequest({ email: 'a@test.com', password: 'p' }) as any);
     expect(res.status).toBe(429);

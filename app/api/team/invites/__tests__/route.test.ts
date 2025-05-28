@@ -2,14 +2,23 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
 import { prisma } from '@/lib/database/prisma';
 import { withRouteAuth } from '@/middleware/auth';
-import { NextResponse } from 'next/server';
+import { getServerSession } from '@/middleware/auth-adapter';
 import { sendTeamInviteEmail } from '@/lib/email/teamInvite';
 import { generateInviteToken } from '@/lib/utils/token';
 import { ERROR_CODES } from '@/lib/api/common';
 
-// Mock dependencies
+// Mock dependencies (one import might be missing!)
 vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'user-123', role: 'user', user: { id: 'user-123', email: 'admin@example.com' } }))
+  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { 
+    userId: 'user-123', 
+    role: 'user', 
+    user: { id: 'user-123', email: 'admin@example.com' } 
+  }))
+}));
+
+vi.mock('@/middleware/auth-adapter', () => ({
+  getServerSession: vi.fn()
+}));
 }));
 
 vi.mock('@/lib/prisma', () => ({

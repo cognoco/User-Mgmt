@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
-import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
-import { withErrorHandling } from '@/middleware/error-handling';
+import { type RouteAuthContext } from '@/middleware/auth';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware,
+} from '@/middleware/createMiddlewareChain';
 import { z } from 'zod';
 
 // Validation schema for adding a new domain
@@ -13,6 +18,19 @@ const domainSchema = z.object({
     .regex(/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/, 'Enter a valid domain (e.g. example.com)'),
   companyId: z.string().uuid('Invalid company ID format')
 });
+
+type DomainRequest = z.infer<typeof domainSchema>;
+
+const baseMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+]);
+
+const postMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+  validationMiddleware(domainSchema),
+]);
 
 async function handleGet(request: NextRequest, auth: RouteAuthContext) {
   const isRateLimited = await checkRateLimit(request);
@@ -55,24 +73,18 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-async function handlePost(request: NextRequest, auth: RouteAuthContext) {
+async function handlePost(
+  request: NextRequest,
+  auth: RouteAuthContext,
+  data: DomainRequest
+) {
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 
   try {
-    const body = await request.json();
-    const validationResult = domainSchema.safeParse(body);
-
-    if (!validationResult.success) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: validationResult.error.format() },
-        { status: 400 }
-      );
-    }
-
-    const { domain, companyId } = validationResult.data;
+    const { domain, companyId } = data;
 
     const supabaseService = getServiceSupabase();
     const { data: companyProfile, error: profileError } = await supabaseService
@@ -136,7 +148,5 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const GET = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handleGet, r), req);
-export const POST = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handlePost, r), req);
+export const GET = baseMiddleware(handleGet);
+export const POST = postMiddleware(handlePost);

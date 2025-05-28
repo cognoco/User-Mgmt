@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { GET, POST } from '../route';
 import { ERROR_CODES } from '@/lib/api/common';
@@ -8,8 +9,16 @@ import { checkRateLimit } from '@/middleware/rate-limit';
 import { withRouteAuth } from '@/middleware/auth';
 
 // Mocks
+vi.mock('@/middleware/auth-adapter', () => ({
+  getServerSession: vi.fn()
+}));
+
 vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'user1', role: 'user', user: { id: 'user1', email: 'test@example.com' } }))
+  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { 
+    userId: 'user1', 
+    role: 'user', 
+    user: { id: 'user1', email: 'test@example.com' } 
+  }))
 }));
 
 vi.mock('@/services/auth/factory', () => ({ getApiAuthService: vi.fn() }));

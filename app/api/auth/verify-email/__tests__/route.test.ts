@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
 import { getApiAuthService } from '@/services/auth/factory';
+import { createRateLimit } from '@/middleware/rate-limit';
 
 vi.mock('@/services/auth/factory', () => ({ getApiAuthService: vi.fn() }));
-vi.mock('@/middleware/with-auth-rate-limit', () => ({
-  withAuthRateLimit: vi.fn((_req, handler) => handler(_req))
+vi.mock('@/middleware/rate-limit', () => ({
+  createRateLimit: vi.fn(() => vi.fn((_req: any, h: any) => h(_req)))
 }));
 vi.mock('@/middleware/with-security', () => ({
   withSecurity: (handler: any) => handler

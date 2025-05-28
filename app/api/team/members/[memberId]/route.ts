@@ -1,4 +1,8 @@
 import { type NextRequest } from 'next/server';
+
+
+import { getServerSession } from '@/middleware/auth-adapter';
+
 import { prisma } from '@/lib/database/prisma';
 import { z } from 'zod';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
@@ -18,6 +22,32 @@ async function handleDelete(
   auth: RouteAuthContext,
   params: z.infer<typeof paramSchema>
 ) {
+async function handleDelete(req: NextRequest, auth: RouteAuthContext) {
+  // If we're using the new middleware approach, auth context is already provided
+  if (!auth?.userId) {
+    // Fall back to previous approach for backward compatibility
+    const session = await getServerSession();
+    if (!session?.user) {
+      throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
+    }
+    
+    if (!(await hasPermission(session.user.id, 'REMOVE_TEAM_MEMBER'))) {
+      throw new ApiError(ERROR_CODES.FORBIDDEN, 'Forbidden', 403);
+    }
+    
+    // Set auth to use session data for the rest of the function
+    auth = { userId: session.user.id, role: session.user.role };
+  } else {
+    // With the middleware chain approach, we still need to check permissions
+    // This can be done via the Permission enum that's already imported
+    if (!(auth.permissions?.includes(Permission.REMOVE_TEAM_MEMBER))) {
+      throw new ApiError(ERROR_CODES.FORBIDDEN, 'Forbidden', 403);
+    }
+  }
+  
+  // Continue with the rest of the function using auth.userId
+  // ...
+}
 
   const teamMember = await prisma.teamMember.findUnique({
     where: { id: params.memberId },

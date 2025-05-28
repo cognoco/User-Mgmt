@@ -1,16 +1,19 @@
 import { type NextRequest } from "next/server";
 import { z } from "zod";
-import { withAuthRateLimit } from "@/middleware/with-auth-rate-limit";
 import { withSecurity } from "@/middleware/with-security";
 import { logUserAction } from "@/lib/audit/auditLogger";
 import { getApiAuthService } from "@/services/auth/factory";
 import {
   createSuccessResponse,
-  withErrorHandling,
-  withValidation,
   ApiError,
   ERROR_CODES,
 } from "@/lib/api/common";
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  validationMiddleware,
+  rateLimitMiddleware,
+} from "@/middleware/createMiddlewareChain";
 
 // Zod schema for password update
 const UpdatePasswordSchema = z.object({
@@ -94,14 +97,12 @@ async function handleUpdatePassword(
   return createSuccessResponse({ message: "Password updated successfully" });
 }
 
-async function handler(request: NextRequest) {
-  return withErrorHandling(
-    async (req) =>
-      withValidation(UpdatePasswordSchema, handleUpdatePassword, req),
-    request,
-  );
-}
+const middleware = createMiddlewareChain([
+  rateLimitMiddleware({ windowMs: 15 * 60 * 1000, max: 30 }),
+  errorHandlingMiddleware(),
+  validationMiddleware(UpdatePasswordSchema),
+]);
 
-export const POST = withSecurity(async (request: NextRequest) =>
-  withAuthRateLimit(request, handler),
+export const POST = withSecurity((request: NextRequest) =>
+  middleware(handleUpdatePassword)(request),
 );

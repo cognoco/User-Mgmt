@@ -1,6 +1,5 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { withAuthRateLimit } from '@/middleware/with-auth-rate-limit';
 import { withSecurity } from '@/middleware/with-security';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { associateUserWithCompanyByDomain } from '@/lib/auth/domainMatcher';
@@ -12,8 +11,12 @@ import {
   ApiError,
   ERROR_CODES
 } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  validationMiddleware,
+  rateLimitMiddleware
+} from '@/middleware/createMiddlewareChain';
 import { createUserAlreadyExistsError } from '@/lib/api/user/error-handler';
 
 // Zod schema for registration data (matches original)
@@ -195,21 +198,12 @@ async function handleRegistration(req: NextRequest, validatedData: z.infer<typeo
   });
 }
 
-/**
- * Handler function that combines validation, error handling, and security middleware
- */
-async function handler(request: NextRequest): Promise<NextResponse> {
-  return withErrorHandling(
-    async (req) => {
-      return withValidation(RegistrationSchema, handleRegistration, req);
-    },
-    request
-  );
-}
+const middleware = createMiddlewareChain([
+  rateLimitMiddleware({ windowMs: 15 * 60 * 1000, max: 30 }),
+  errorHandlingMiddleware(),
+  validationMiddleware(RegistrationSchema)
+]);
 
-/**
- * POST handler for registration endpoint with security middleware
- */
-export const POST = withSecurity(
-  async (request: NextRequest) => withAuthRateLimit(request, handler)
+export const POST = withSecurity((request: NextRequest) =>
+  middleware(handleRegistration)(request)
 );

@@ -1,15 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { checkRateLimit } from '@/middleware/rate-limit';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withResourcePermission } from '@/middleware/withResourcePermission';
-import { Permission } from '@/lib/rbac/roles';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware,
+} from '@/middleware/createMiddlewareChain';
 import { z } from 'zod';
 
 // Validation schema for updating a domain
 const domainUpdateSchema = z.object({
   is_primary: z.boolean().optional(),
 });
+
+type DomainUpdateRequest = z.infer<typeof domainUpdateSchema>;
+
+const baseMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+]);
+
+const patchMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+  validationMiddleware(domainUpdateSchema),
+]);
 
 async function canAccessDomain(userId: string, domainId: string) {
   const supabase = getServiceSupabase();
@@ -25,8 +41,8 @@ async function canAccessDomain(userId: string, domainId: string) {
 // DELETE /api/company/domains/[id] - Delete a domain
 async function handleDelete(
   request: NextRequest,
-  _userId: string,
-  { params }: { params: { id: string } }
+  auth: RouteAuthContext,
+  params: { id: string }
 ) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
@@ -53,6 +69,11 @@ async function handleDelete(
     if (domainError) {
       console.error(`Error fetching domain ${domainId}:`, domainError);
       return NextResponse.json({ error: 'Domain not found.' }, { status: 404 });
+    }
+
+    // Check access rights
+    if (domain.company_profiles.user_id !== auth.userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // 5. Check if this is a primary domain - can't delete primary domain
@@ -83,8 +104,9 @@ async function handleDelete(
 // PATCH /api/company/domains/[id] - Update a domain (currently just primary status)
 async function handlePatch(
   request: NextRequest,
-  _userId: string,
-  { params }: { params: { id: string } }
+  auth: RouteAuthContext,
+  params: { id: string },
+  data: DomainUpdateRequest
 ) {
   // 1. Rate Limiting
   const isRateLimited = await checkRateLimit(request);
@@ -101,18 +123,7 @@ async function handlePatch(
 
     const supabaseService = getServiceSupabase();
 
-    // 4. Parse and validate request body
-    const body = await request.json();
-    const validationResult = domainUpdateSchema.safeParse(body);
-
-    if (!validationResult.success) {
-      return NextResponse.json({ 
-        error: 'Validation failed', 
-        details: validationResult.error.format() 
-      }, { status: 400 });
-    }
-
-    const { is_primary } = validationResult.data;
+    const { is_primary } = data;
 
     // 5. Get the domain details to check permissions
     const { data: domain, error: domainError } = await supabaseService
@@ -124,6 +135,10 @@ async function handlePatch(
     if (domainError) {
       console.error(`Error fetching domain ${domainId}:`, domainError);
       return NextResponse.json({ error: 'Domain not found.' }, { status: 404 });
+    }
+
+    if (domain.company_profiles.user_id !== auth.userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // 6. Special handling for setting a domain as primary
@@ -168,23 +183,10 @@ async function handlePatch(
 export const DELETE = (
   req: NextRequest,
   ctx: { params: { id: string } }
-) =>
-  withResourcePermission(
-    (r, auth) => withErrorHandling(() => handleDelete(r, auth.userId!, ctx), r),
-    {
-      permission: Permission.MANAGE_DOMAINS,
-      checkAccess: (uid) => canAccessDomain(uid, ctx.params.id),
-    }
-  )(req, ctx);
+) => baseMiddleware((r, auth) => handleDelete(r, auth, ctx.params))(req);
 
 export const PATCH = (
   req: NextRequest,
   ctx: { params: { id: string } }
 ) =>
-  withResourcePermission(
-    (r, auth) => withErrorHandling(() => handlePatch(r, auth.userId!, ctx), r),
-    {
-      permission: Permission.MANAGE_DOMAINS,
-      checkAccess: (uid) => canAccessDomain(uid, ctx.params.id),
-    }
-  )(req, ctx);
+  patchMiddleware((r, auth, data) => handlePatch(r, auth, ctx.params, data))(req);

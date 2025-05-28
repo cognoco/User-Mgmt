@@ -4,6 +4,8 @@ import { prisma } from '@/lib/database/prisma';
 import { generateInviteToken } from '@/lib/utils/token';
 import { sendTeamInviteEmail } from '@/lib/email/teamInvite';
 import { Permission } from '@/lib/rbac/roles';
+import { getServerSession } from '@/middleware/auth-adapter';
+
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import {
   createMiddlewareChain,
@@ -34,13 +36,40 @@ async function listInvites(req: NextRequest, _auth: RouteAuthContext) {
   });
   return createSuccessResponse(invites);
 }
-
 async function handleInvite(
-  _req: NextRequest,
-  auth: RouteAuthContext,
+  req: NextRequest,
+  auth: RouteAuthContext | undefined,
   data: z.infer<typeof inviteSchema>
 ) {
-  if (!auth.userId) {
+  // Handle both authentication methods for transition period
+  let userId: string;
+  let userEmail: string;
+  
+  if (auth?.userId) {
+    // New middleware-based authentication
+    userId = auth.userId;
+    userEmail = auth.user?.email || '';
+    
+    // If we don't have user email from auth context but need it,
+    // we might need to fetch additional user data
+    if (!userEmail) {
+      // Option to fetch user details if needed
+      // const user = await fetchUserDetails(userId);
+      // userEmail = user.email;
+    }
+  } else {
+    // Legacy session-based authentication
+    const session = await getServerSession();
+    if (!session?.user?.email || !session?.user?.id) {
+      throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Unauthorized', 401);
+    }
+    userId = session.user.id;
+    userEmail = session.user.email;
+  }
+  
+  // Continue with the rest of the function using userId and userEmail
+  // ...
+}
     throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Unauthorized', 401);
   }
 

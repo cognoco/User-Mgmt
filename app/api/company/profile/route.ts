@@ -43,7 +43,8 @@ const CompanyProfileUpdateSchema = z.object({
 });
 
 type CompanyProfileUpdateRequest = z.infer<typeof CompanyProfileUpdateSchema>;
-const middleware = createMiddlewareChain([
+
+const baseMiddleware = createMiddlewareChain([
   errorHandlingMiddleware(),
   routeAuthMiddleware(),
 ]);
@@ -150,13 +151,13 @@ async function handlePost(
   }
 }
 // Update middleware chain to include validation
-const middleware = createMiddlewareChain([
+const postMiddleware = createMiddlewareChain([
   errorHandlingMiddleware(),
   routeAuthMiddleware(),
   validationMiddleware(CompanyProfileSchema)
 ]);
 
-export const POST = middleware(handlePost);
+export const POST = postMiddleware(handlePost);
 
 
 async function handleGet(request: NextRequest, auth: RouteAuthContext) {
@@ -184,7 +185,7 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const GET = middleware(handleGet);
+export const GET = baseMiddleware(handleGet);
 
 async function handlePut(
   request: NextRequest,
@@ -424,4 +425,4 @@ async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const DELETE = middleware(handleDelete);
+export const DELETE = baseMiddleware(handleDelete);

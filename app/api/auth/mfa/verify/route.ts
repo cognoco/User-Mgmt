@@ -3,15 +3,18 @@ import { z } from "zod";
 import { TwoFactorMethod } from "@/types/2fa";
 import { getApiAuthService } from "@/services/auth/factory";
 import { logUserAction } from "@/lib/audit/auditLogger";
-import { withAuthRateLimit } from "@/middleware/rate-limit";
 import { withSecurity } from '@/middleware/with-security';
 import {
   createSuccessResponse,
-  withErrorHandling,
-  withValidation,
   ApiError,
   ERROR_CODES,
 } from "@/lib/api/common";
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  validationMiddleware,
+  rateLimitMiddleware,
+} from '@/middleware/createMiddlewareChain';
 
 // Request schema for MFA verification
 const mfaVerifySchema = z.object({
@@ -104,13 +107,12 @@ async function handleMfaVerify(
 }
 
 // Apply rate limiting and security middleware
-async function handler(req: NextRequest) {
-  return withErrorHandling(
-    async (r) => withValidation(mfaVerifySchema, handleMfaVerify, r),
-    req,
-  );
-}
+const middleware = createMiddlewareChain([
+  rateLimitMiddleware({ windowMs: 15 * 60 * 1000, max: 30 }),
+  errorHandlingMiddleware(),
+  validationMiddleware(mfaVerifySchema),
+]);
 
-export const POST = withSecurity(async (request: NextRequest) =>
-  withAuthRateLimit(request, handler),
+export const POST = withSecurity((request: NextRequest) =>
+  middleware(handleMfaVerify)(request),
 );

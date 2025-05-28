@@ -1,4 +1,5 @@
 import { type NextRequest } from 'next/server';
+import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { z } from 'zod';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
@@ -31,9 +32,39 @@ async function handleTeamMembers(
   req: NextRequest,
   auth: RouteAuthContext
 ) {
-  const query = Object.fromEntries(new URL(req.url).searchParams.entries());
-  const { page, limit, search, status, sortBy, sortOrder } = querySchema.parse(query);
+async function handleTeamMembers(req: NextRequest, auth: RouteAuthContext, data?: z.infer<typeof querySchema>) {
+  // If we have data passed from middleware validation, use it
+  let params;
+  
+  if (data) {
+    // New approach: validated data is passed from middleware
+    params = data;
+  } else {
+    // Legacy approach: parse and validate query params manually
+    const query = Object.fromEntries(new URL(req.url).searchParams.entries());
+    params = querySchema.parse(query);
+  }
+  
+  // Check auth context from middleware first
+  if (!auth?.userId) {
+    // Fall back to session-based auth if middleware didn't provide auth context
+    const session = await getServerSession();
+    if (!session?.user) {
+      throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
+    }
+    // Set auth using session data
+    auth = { 
+      userId: session.user.id,
+      role: session.user.role as string,
+      user: session.user
+    };
+  }
+
+  const { page, limit, search, status, sortBy, sortOrder } = params;
   const skip = (page - 1) * limit;
+  
+  // Continue with the rest of the function...
+}
 
   // Get the team ID first to ensure we're looking at the correct team
   const userTeam = await prisma.teamMember.findFirst({
@@ -147,6 +178,25 @@ async function handleAddMember(
   auth: RouteAuthContext,
   data: z.infer<typeof addMemberSchema>
 ) {
+// If using the middleware chain approach, auth context will already be available
+// But we need to handle both the new and old patterns during transition
+
+// Check if we're using the middleware approach (auth context available)
+if (!auth?.userId) {
+  // Fall back to session-based auth if middleware didn't provide auth context
+  const session = await getServerSession();
+  if (!session?.user) {
+    throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
+  }
+  // Set auth using session data for compatibility
+  auth = { 
+    userId: session.user.id,
+    role: session.user.role as string,
+    user: session.user
+  };
+}
+
+// Continue with the rest of the function using auth.userId
   const license = await prisma.teamLicense.findUnique({
     where: { id: data.teamId },
     select: { usedSeats: true, totalSeats: true },
