@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getApiAuthService } from '@/services/auth/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
 import type { Permission } from '@/lib/rbac/roles';
+import { isPermission } from '@/lib/rbac/roles';
+import { withRouteAuth, type RouteAuthContext, type RouteAuthOptions } from './auth';
 
 interface CacheEntry {
   result: boolean;
@@ -121,22 +123,25 @@ export function withPermissionCheck(
  * Helper function to create a permission-protected route handler
  */
 export function createProtectedHandler(
-  handler: (req: NextRequest) => Promise<NextResponse>,
+  handler: (req: NextRequest, ctx?: RouteAuthContext) => Promise<NextResponse>,
   permission: string,
-  resourceIdExtractor?: (req: NextRequest) => string | undefined
+  _resourceIdExtractor?: (req: NextRequest) => string | undefined
 ) {
   return (req: NextRequest) => {
-    const resourceId = resourceIdExtractor?.(req);
-    return withPermissionCheck(handler, {
-      requiredPermission: permission,
-      resourceId,
-    })(req);
+    const options: RouteAuthOptions = {};
+    if (isPermission(permission)) {
+      options.requiredPermissions = [permission as Permission];
+    } else {
+      console.warn(
+        `Invalid permission '${permission}' passed to createProtectedHandler`
+      );
+    }
+
+    return withRouteAuth((r, ctx) => handler(r, ctx), req, options);
   };
 }
 import { ApiError } from '@/lib/api/common/api-error';
 import { createErrorResponse } from '@/lib/api/common/response-formatter';
-import { withRouteAuth } from './auth';
-import { isPermission, Permission } from '@/lib/rbac/roles';
 
 /**
  * Simple permission middleware used by some API routes.
