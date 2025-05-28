@@ -1,7 +1,8 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { GET, POST, DELETE, PATCH } from '../route';
 import { getServiceSupabase } from '@/lib/database/supabase';
+import { withRouteAuth } from '@/middleware/auth';
 import { z } from 'zod';
 
 // Mock dependencies
@@ -32,6 +33,10 @@ vi.mock('@/lib/database/supabase', () => {
     getServiceSupabase: vi.fn().mockReturnValue(mockSupabaseClient),
   };
 });
+
+vi.mock('@/middleware/auth', () => ({
+  withRouteAuth: vi.fn((handler: any, req: any) => handler(req, { userId: 'user-123' })),
+}));
 
 // Mock Zod schema (used in the routes)
 vi.mock('zod', () => {
@@ -178,16 +183,20 @@ describe('Company Domains API', () => {
     });
     
     test('returns 401 for unauthenticated requests', async () => {
-      // Mock authentication failure
-      supabase.auth.getUser.mockResolvedValueOnce({ data: { user: null }, error: { message: 'Invalid token' } });
-      
+      vi.mocked(withRouteAuth).mockImplementationOnce(() =>
+        new NextResponse(
+          JSON.stringify({ error: 'Authentication required' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+
       const request = new NextRequest(
         new URL('http://localhost/api/company/domains?companyId=' + mockCompanyId)
       );
-      
+
       const response = await GET(request);
       expect(response.status).toBe(401);
-      
+
       const data = await response.json();
       expect(data.error).toBeDefined();
     });
