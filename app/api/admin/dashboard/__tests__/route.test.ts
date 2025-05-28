@@ -1,13 +1,29 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from '../route';
-import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { checkRolePermission } from '@/lib/rbac/roleService';
+import { routeAuthMiddleware } from '@/middleware/createMiddlewareChain';
+
+vi.mock('@/middleware/createMiddlewareChain', async () => {
+  const actual = await vi.importActual<any>('@/middleware/createMiddlewareChain');
+  return {
+    ...actual,
+    routeAuthMiddleware: vi.fn(() => (handler: any) =>
+      (req: any, ctx?: any, data?: any) =>
+        handler(req, {
+          userId: '1',
+          role: 'ADMIN',
+          user: {
+            id: '1',
+            email: 'admin@example.com',
+            app_metadata: { role: 'ADMIN', teamId: '1' },
+            user_metadata: { role: 'ADMIN', teamId: '1' }
+          }
+        }, data)),
+  };
+});
 
 // Mock dependencies
-vi.mock('@/middleware/auth-adapter', () => ({
-  getServerSession: vi.fn(),
-}));
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
@@ -33,9 +49,12 @@ describe('Admin Dashboard API', () => {
   });
 
   it('returns 401 when user is not authenticated', async () => {
-    vi.mocked(getServerSession).mockResolvedValueOnce(null);
+    vi.mocked(checkRolePermission).mockResolvedValueOnce(true);
+    vi.mocked(routeAuthMiddleware).mockReturnValueOnce((handler: any) =>
+      (_req: any, _ctx?: any, data?: any) => handler(_req, { userId: null }, data)
+    );
 
-    const response = await GET();
+    const response = await GET({} as any);
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -43,12 +62,22 @@ describe('Admin Dashboard API', () => {
   });
 
   it('returns 403 when user lacks admin permission', async () => {
-    vi.mocked(getServerSession).mockResolvedValueOnce({
-      user: { id: '1', teamId: '1', role: 'USER' }
-    } as any);
+    vi.mocked(routeAuthMiddleware).mockReturnValueOnce((handler: any) =>
+      (req: any, _ctx?: any, data?: any) =>
+        handler(req, {
+          userId: '1',
+          role: 'USER',
+          user: {
+            id: '1',
+            email: 'user@example.com',
+            app_metadata: { role: 'USER', teamId: '1' },
+            user_metadata: { role: 'USER', teamId: '1' }
+          }
+        }, data)
+    );
     vi.mocked(checkRolePermission).mockResolvedValueOnce(false);
 
-    const response = await GET();
+    const response = await GET({} as any);
     const data = await response.json();
 
     expect(response.status).toBe(403);
@@ -56,10 +85,6 @@ describe('Admin Dashboard API', () => {
   });
 
   it('returns dashboard data for authorized admin', async () => {
-    // Mock session
-    vi.mocked(getServerSession).mockResolvedValueOnce({
-      user: { id: '1', teamId: '1', role: 'ADMIN' }
-    } as any);
     vi.mocked(checkRolePermission).mockResolvedValueOnce(true);
 
     // Mock team stats
@@ -91,7 +116,7 @@ describe('Admin Dashboard API', () => {
     };
     vi.mocked(prisma.activityLog.findMany).mockResolvedValueOnce([mockActivity] as any);
 
-    const response = await GET();
+    const response = await GET({} as any);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -117,13 +142,10 @@ describe('Admin Dashboard API', () => {
   });
 
   it('handles database errors gracefully', async () => {
-    vi.mocked(getServerSession).mockResolvedValueOnce({
-      user: { id: '1', teamId: '1', role: 'ADMIN' }
-    } as any);
     vi.mocked(checkRolePermission).mockResolvedValueOnce(true);
     vi.mocked(prisma.teamMember.groupBy).mockRejectedValueOnce(new Error('Database error'));
 
-    const response = await GET();
+    const response = await GET({} as any);
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -131,15 +153,12 @@ describe('Admin Dashboard API', () => {
   });
 
   it('handles missing subscription data', async () => {
-    vi.mocked(getServerSession).mockResolvedValueOnce({
-      user: { id: '1', teamId: '1', role: 'ADMIN' }
-    } as any);
     vi.mocked(checkRolePermission).mockResolvedValueOnce(true);
     vi.mocked(prisma.teamMember.groupBy).mockResolvedValueOnce([]);
     vi.mocked(prisma.subscription.findUnique).mockResolvedValueOnce(null);
     vi.mocked(prisma.activityLog.findMany).mockResolvedValueOnce([]);
 
-    const response = await GET();
+    const response = await GET({} as any);
     const data = await response.json();
 
     expect(response.status).toBe(200);
