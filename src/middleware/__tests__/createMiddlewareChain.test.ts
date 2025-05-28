@@ -11,14 +11,30 @@ vi.mock('../error-handling', () => ({
   withErrorHandling: vi.fn(async (handler: any, req: NextRequest) => handler(req))
 }));
 
+vi.mock('../validation', () => ({
+  withValidation: vi.fn(async (_schema: any, handler: any, req: NextRequest) =>
+    handler(req, { name: 'valid' })
+  )
+}));
+
+vi.mock('../rate-limit', () => ({
+  createRateLimit: vi.fn(() =>
+    vi.fn(async (_req: NextRequest, handler: any) => handler(req))
+  )
+}));
+
 import {
   createMiddlewareChain,
   errorHandlingMiddleware,
   routeAuthMiddleware,
+  validationMiddleware,
+  rateLimitMiddleware,
   type RouteMiddleware,
 } from '../createMiddlewareChain';
 import { withRouteAuth } from '../auth';
 import { withErrorHandling } from '../error-handling';
+import { withValidation } from '../validation';
+import { createRateLimit } from '../rate-limit';
 
 const req = new NextRequest('http://test');
 
@@ -64,5 +80,35 @@ describe('createMiddlewareChain', () => {
     expect(handler).toHaveBeenCalledWith(req, { userId: '1' });
     expect(withRouteAuth).toHaveBeenCalled();
     expect(withErrorHandling).toHaveBeenCalled();
+  });
+
+  it('passes validated data to the handler', async () => {
+    const chain = createMiddlewareChain([
+      validationMiddleware({} as any),
+    ]);
+
+    const handler = vi.fn().mockResolvedValue(new NextResponse('ok'));
+    const res = await chain(handler)(req);
+
+    expect(res.status).toBe(200);
+    expect(withValidation).toHaveBeenCalled();
+    expect(handler).toHaveBeenCalledWith(req, undefined, { name: 'valid' });
+  });
+
+  it('applies rate limiting before calling handler', async () => {
+    const limitFn = vi.fn(async (_req: NextRequest, h: any) => h(req));
+    vi.mocked(createRateLimit).mockReturnValue(limitFn);
+
+    const chain = createMiddlewareChain([
+      rateLimitMiddleware(),
+    ]);
+
+    const handler = vi.fn().mockResolvedValue(new NextResponse('ok'));
+    const res = await chain(handler)(req);
+
+    expect(res.status).toBe(200);
+    expect(createRateLimit).toHaveBeenCalled();
+    expect(limitFn).toHaveBeenCalled();
+    expect(handler).toHaveBeenCalled();
   });
 });
