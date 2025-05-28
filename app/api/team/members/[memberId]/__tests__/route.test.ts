@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DELETE } from '../route';
-import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/database/prisma';
-import { hasPermission } from '@/lib/auth/hasPermission';
+import { withRouteAuth } from '@/middleware/auth';
 
-vi.mock('next-auth');
+vi.mock('@/middleware/auth', () => ({
+  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'current-user-id', role: 'user', user: { id: 'current-user-id', email: 'admin@example.com' } }))
+}));
 vi.mock('@/lib/database/prisma');
-vi.mock('@/lib/auth/hasPermission');
 
 describe('DELETE /api/team/members/[memberId]', () => {
   beforeEach(() => {
@@ -14,16 +14,7 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should successfully remove a team member', async () => {
-    // Mock authenticated session
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'current-user-id',
-        email: 'admin@example.com'
-      }
-    } as any);
 
-    // Mock permission check
-    vi.mocked(hasPermission).mockResolvedValue(true);
 
     // Mock team member data
     vi.mocked(prisma.teamMember.findUnique).mockResolvedValue({
@@ -52,7 +43,7 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should return 401 when user is not authenticated', async () => {
-    vi.mocked(getServerSession).mockResolvedValue(null);
+    vi.mocked(withRouteAuth).mockResolvedValueOnce(new NextResponse('unauth', { status: 401 }));
 
     const response = await DELETE(
       new Request('http://localhost'),
@@ -65,14 +56,7 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should return 403 when user lacks permission', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'current-user-id',
-        email: 'user@example.com'
-      }
-    } as any);
-
-    vi.mocked(hasPermission).mockResolvedValue(false);
+    vi.mocked(withRouteAuth).mockResolvedValueOnce(new NextResponse('forbidden', { status: 403 }));
 
     const response = await DELETE(
       new Request('http://localhost'),
@@ -85,14 +69,6 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should return 400 when trying to remove self', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'current-user-id',
-        email: 'admin@example.com'
-      }
-    } as any);
-
-    vi.mocked(hasPermission).mockResolvedValue(true);
 
     vi.mocked(prisma.teamMember.findUnique).mockResolvedValue({
       id: 'member-1',
@@ -117,14 +93,6 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should return 400 when trying to remove last admin', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'current-user-id',
-        email: 'admin@example.com'
-      }
-    } as any);
-
-    vi.mocked(hasPermission).mockResolvedValue(true);
 
     vi.mocked(prisma.teamMember.findUnique).mockResolvedValue({
       id: 'admin-1',
@@ -148,14 +116,6 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should return 404 when team member is not found', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'current-user-id',
-        email: 'admin@example.com'
-      }
-    } as any);
-
-    vi.mocked(hasPermission).mockResolvedValue(true);
     vi.mocked(prisma.teamMember.findUnique).mockResolvedValue(null);
 
     const response = await DELETE(
@@ -169,14 +129,6 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should return 400 when memberId is invalid', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'current-user-id',
-        email: 'admin@example.com'
-      }
-    } as any);
-
-    vi.mocked(hasPermission).mockResolvedValue(true);
 
     const response = await DELETE(
       new Request('http://localhost'),
@@ -189,14 +141,6 @@ describe('DELETE /api/team/members/[memberId]', () => {
   });
 
   it('should return 500 when database operation fails', async () => {
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: {
-        id: 'current-user-id',
-        email: 'admin@example.com'
-      }
-    } as any);
-
-    vi.mocked(hasPermission).mockResolvedValue(true);
 
     vi.mocked(prisma.teamMember.findUnique).mockResolvedValue({
       id: 'member-1',

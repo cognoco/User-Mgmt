@@ -1,11 +1,16 @@
 import { type NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/index';
 import { prisma } from '@/lib/database/prisma';
 import { z } from 'zod';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
-import { createRouteHandler } from '@/lib/api/routeHandler';
 import { getApiTeamService } from '@/services/team/factory';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware
+} from '@/middleware/createMiddlewareChain';
+import type { RouteAuthContext } from '@/middleware/auth';
+import { Permission } from '@/lib/rbac/roles';
 
 const querySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
@@ -24,20 +29,15 @@ const addMemberSchema = z.object({
 
 async function handleTeamMembers(
   req: NextRequest,
-  _ctx: any,
-  data: z.infer<typeof querySchema>
+  auth: RouteAuthContext
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
-  }
-
-  const { page, limit, search, status, sortBy, sortOrder } = data;
+  const query = Object.fromEntries(new URL(req.url).searchParams.entries());
+  const { page, limit, search, status, sortBy, sortOrder } = querySchema.parse(query);
   const skip = (page - 1) * limit;
 
   // Get the team ID first to ensure we're looking at the correct team
   const userTeam = await prisma.teamMember.findFirst({
-    where: { userId: session.user.id },
+    where: { userId: auth.userId! },
     select: { teamId: true },
   });
 
@@ -143,14 +143,10 @@ async function handleTeamMembers(
 }
 
 async function handleAddMember(
-  req: NextRequest,
-  _ctx: any,
+  _req: NextRequest,
+  auth: RouteAuthContext,
   data: z.infer<typeof addMemberSchema>
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
-  }
   const license = await prisma.teamLicense.findUnique({
     where: { id: data.teamId },
     select: { usedSeats: true, totalSeats: true },
@@ -171,15 +167,16 @@ async function handleAddMember(
   return createSuccessResponse(result.member, 201);
 }
 
-export const GET = createRouteHandler<z.infer<typeof querySchema>>({
-  handler: handleTeamMembers,
-  schema: querySchema,
-  permission: 'team.members.list',
-});
+const getMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: [Permission.VIEW_TEAM_MEMBERS] })
+]);
 
-export const POST = createRouteHandler<z.infer<typeof addMemberSchema>>({
-  handler: handleAddMember,
-  schema: addMemberSchema,
-  permission: 'team.members.add',
-  applySecurity: true,
-});
+const postMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: [Permission.INVITE_TEAM_MEMBER] }),
+  validationMiddleware(addMemberSchema)
+]);
+
+export const GET = getMiddleware(handleTeamMembers);
+export const POST = postMiddleware(handleAddMember);

@@ -3,14 +3,15 @@ import { z } from 'zod';
 import { prisma } from '@/lib/database/prisma';
 import { generateInviteToken } from '@/lib/utils/token';
 import { sendTeamInviteEmail } from '@/lib/email/teamInvite';
-import { createProtectedHandler } from '@/middleware/permissions';
 import { Permission } from '@/lib/rbac/roles';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/index';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
-import { withSecurity } from '@/middleware/with-security';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware
+} from '@/middleware/createMiddlewareChain';
+import type { RouteAuthContext } from '@/middleware/auth';
 import {
   createTeamNotFoundError,
   createTeamMemberAlreadyExistsError
@@ -22,7 +23,7 @@ const inviteSchema = z.object({
   teamLicenseId: z.string(),
 });
 
-async function listInvites(req: NextRequest) {
+async function listInvites(req: NextRequest, _auth: RouteAuthContext) {
   const url = new URL(req.url);
   const licenseId = url.searchParams.get('teamLicenseId');
   if (!licenseId) {
@@ -34,14 +35,17 @@ async function listInvites(req: NextRequest) {
   return createSuccessResponse(invites);
 }
 
-async function handleInvite(req: NextRequest, data: z.infer<typeof inviteSchema>) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email || !session?.user?.id) {
+async function handleInvite(
+  _req: NextRequest,
+  auth: RouteAuthContext,
+  data: z.infer<typeof inviteSchema>
+) {
+  if (!auth.userId) {
     throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Unauthorized', 401);
   }
 
   const invokingUser = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: auth.userId },
     select: { id: true, teamMemberships: { select: { teamId: true, role: true } } },
   });
   if (!invokingUser || !invokingUser.teamMemberships || invokingUser.teamMemberships.length === 0) {
@@ -104,7 +108,7 @@ async function handleInvite(req: NextRequest, data: z.infer<typeof inviteSchema>
   await sendTeamInviteEmail({
     to: data.email,
     inviteToken,
-    invitedByEmail: session.user.email,
+    invitedByEmail: auth.user?.email || '',
     teamName: 'Your Team',
     role: data.role,
   });
@@ -112,14 +116,16 @@ async function handleInvite(req: NextRequest, data: z.infer<typeof inviteSchema>
   return createSuccessResponse(invite, 201);
 }
 
-async function handler(req: NextRequest) {
-  const body = await req.json();
-  return withValidation(inviteSchema, handleInvite, req, body);
-}
+const getMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: [Permission.INVITE_TEAM_MEMBER] })
+]);
 
-export const POST = createProtectedHandler(
-  (req) => withSecurity((r) => withErrorHandling(handler, r))(req),
-  Permission.INVITE_TEAM_MEMBER
-);
+const postMiddleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: [Permission.INVITE_TEAM_MEMBER] }),
+  validationMiddleware(inviteSchema)
+]);
 
-export const GET = (req: NextRequest) => withErrorHandling(listInvites, req);
+export const POST = postMiddleware(handleInvite);
+export const GET = getMiddleware(listInvites);

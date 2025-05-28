@@ -1,29 +1,23 @@
 import { type NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/database/prisma';
-import { hasPermission } from '@/lib/auth/hasPermission';
 import { z } from 'zod';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
 import { createTeamMemberNotFoundError } from '@/lib/api/team/error-handler';
-import { withSecurity } from '@/middleware/with-security';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware
+} from '@/middleware/createMiddlewareChain';
+import type { RouteAuthContext } from '@/middleware/auth';
+import { Permission } from '@/lib/rbac/roles';
 
 const paramSchema = z.object({ memberId: z.string().uuid() });
 
 async function handleDelete(
-  req: NextRequest,
+  _req: NextRequest,
+  auth: RouteAuthContext,
   params: z.infer<typeof paramSchema>
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    throw new ApiError(ERROR_CODES.UNAUTHORIZED, 'Authentication required', 401);
-  }
-
-  if (!(await hasPermission(session.user.id, 'REMOVE_TEAM_MEMBER'))) {
-    throw new ApiError(ERROR_CODES.FORBIDDEN, 'Forbidden', 403);
-  }
 
   const teamMember = await prisma.teamMember.findUnique({
     where: { id: params.memberId },
@@ -36,7 +30,7 @@ async function handleDelete(
     throw createTeamMemberNotFoundError();
   }
 
-  if (teamMember.userId === session.user.id) {
+  if (teamMember.userId === auth.userId) {
     throw new ApiError(ERROR_CODES.INVALID_REQUEST, 'Cannot remove yourself from the team', 400);
   }
 
@@ -49,11 +43,12 @@ async function handleDelete(
   return createSuccessResponse({ message: 'Team member removed successfully' });
 }
 
-async function handler(req: NextRequest, context: { params: { memberId: string } }) {
-  return withValidation(paramSchema, handleDelete, req, context.params);
-}
+const middleware = createMiddlewareChain([
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ requiredPermissions: [Permission.REMOVE_TEAM_MEMBER] })
+]);
 
 export const DELETE = (
   req: NextRequest,
   ctx: { params: { memberId: string } }
-) => withSecurity((r) => withErrorHandling((req2) => handler(req2, ctx), r))(req);
+) => middleware((r, auth) => handleDelete(r, auth, paramSchema.parse(ctx.params)))(req);
