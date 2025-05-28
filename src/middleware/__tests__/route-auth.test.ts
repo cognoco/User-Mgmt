@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
 import { withRouteAuth } from '../auth';
-import { getSessionFromToken } from '@/services/auth/factory';
+import { validateAuthToken } from '../validate-auth-token';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { Permission } from '@/lib/rbac/roles';
 
-vi.mock('@/services/auth/factory');
+vi.mock('../validate-auth-token');
 vi.mock('@/services/permission/factory');
 
 const mockPermissionService = {
@@ -25,14 +25,14 @@ describe('withRouteAuth', () => {
   });
 
   it('returns 401 when token missing', async () => {
-    vi.mocked(getSessionFromToken).mockResolvedValue(null);
+    vi.mocked(validateAuthToken).mockResolvedValue({ success: false, error: new Error('unauthorized') } as any);
     const req = new NextRequest('http://test');
     const res = await withRouteAuth(() => Promise.resolve(new NextResponse('ok')), req);
     expect(res.status).toBe(401);
   });
 
   it('passes context on success', async () => {
-    vi.mocked(getSessionFromToken).mockResolvedValue(mockUser);
+    vi.mocked(validateAuthToken).mockResolvedValue({ success: true, user: mockUser } as any);
     mockPermissionService.getUserRoles.mockResolvedValue([]);
     mockPermissionService.getRoleById.mockResolvedValue({ permissions: [] });
     const handler = vi.fn().mockResolvedValue(new NextResponse('ok'));
@@ -43,7 +43,7 @@ describe('withRouteAuth', () => {
   });
 
   it('checks required permission', async () => {
-    vi.mocked(getSessionFromToken).mockResolvedValue(mockUser);
+    vi.mocked(validateAuthToken).mockResolvedValue({ success: true, user: mockUser } as any);
     mockPermissionService.getUserRoles.mockResolvedValue([]);
     mockPermissionService.getRoleById.mockResolvedValue({ permissions: [] });
     mockPermissionService.hasPermission.mockResolvedValue(false);
