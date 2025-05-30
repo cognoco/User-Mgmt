@@ -17,6 +17,7 @@ import { ErrorBoundary, DefaultErrorFallback } from '@/ui/styled/common/ErrorBou
 import Link from 'next/link';
 import { LoginForm as HeadlessLoginForm } from '@/ui/headless/auth/LoginForm';
 import { LoginPayload } from '@/core/auth/models';
+import { WebAuthnLogin } from '@/ui/styled/auth/WebAuthnLogin';
 
 export function LoginForm() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export function LoginForm() {
   // React 19 compatibility - Use individual primitive selectors instead of object destructuring
   // This is more efficient and avoids infinite loop with getServerSnapshot in React 19
   const { login, error: authError, success, authService } = useAuth();
+  const user = useAuth().user;
   
   const [resendStatus, setResendStatus] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [showResendLink, setShowResendLink] = useState(false);
@@ -111,8 +113,15 @@ export function LoginForm() {
   const handleMfaSuccess = (user: any, token: string) => {
     // Update auth state with authenticated user and token
     authService.setSession?.(user, token);
-    
+
     // Redirect to dashboard
+    router.push('/dashboard/overview');
+  };
+
+  const handleLoginSuccess = (data: any) => {
+    if (data?.user && data?.token) {
+      authService.setSession?.(data.user, data.token);
+    }
     router.push('/dashboard/overview');
   };
 
@@ -126,14 +135,19 @@ export function LoginForm() {
     setRateLimitInfo(null);
   };
 
-  // If MFA is required, show the MFA verification form instead
+  // If MFA is required, show the MFA verification form and WebAuthn option
   if (mfaRequired && tempAccessToken) {
     return (
-      <MFAVerificationForm 
-        accessToken={tempAccessToken}
-        onSuccess={handleMfaSuccess}
-        onCancel={handleMfaCancel}
-      />
+      <>
+        {user?.mfaMethods?.includes('webauthn') && (
+          <WebAuthnLogin userId={user.id} onSuccess={handleLoginSuccess} />
+        )}
+        <MFAVerificationForm
+          accessToken={tempAccessToken}
+          onSuccess={handleMfaSuccess}
+          onCancel={handleMfaCancel}
+        />
+      </>
     );
   }
 
