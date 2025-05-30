@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DELETE } from '../route';
 // RESOLVED VERSION
-import { getServerSession } from '@/middleware/auth-adapter';
 import { prisma } from '@/lib/database/prisma';
 import { withRouteAuth } from '@/middleware/auth';
 

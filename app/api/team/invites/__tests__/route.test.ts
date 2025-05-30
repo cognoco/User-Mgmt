@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
 import { prisma } from '@/lib/database/prisma';
 import { withRouteAuth } from '@/middleware/auth';
-import { getServerSession } from '@/middleware/auth-adapter';
 import { sendTeamInviteEmail } from '@/lib/email/teamInvite';
 import { generateInviteToken } from '@/lib/utils/token';
 import { ERROR_CODES } from '@/lib/api/common';
@@ -16,10 +15,7 @@ vi.mock('@/middleware/auth', () => ({
   }))
 }));
 
-vi.mock('@/middleware/auth-adapter', () => ({
-  getServerSession: vi.fn()
-}));
-}));
+vi.mock('@/middleware/auth-adapter', () => ({}));
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
