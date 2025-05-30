@@ -8,6 +8,10 @@ import {
   middlewareConfigSchema,
   type MiddlewareConfig,
 } from '@/lib/schemas/middleware-config.schema';
+import {
+  getDefaultMiddlewareConfig,
+  type ApiRouteType,
+} from '../../config/api-routes.config';
 
 /**
  * Generic route handler used by the middleware chain.
@@ -95,9 +99,11 @@ export function rateLimitMiddleware(
  * The configuration is validated using {@link middlewareConfigSchema}.
  */
 export function createMiddlewareChainFromConfig(
-  config: MiddlewareConfig
+  config: Partial<MiddlewareConfig> = {},
+  routeType: ApiRouteType = 'public'
 ): RouteMiddleware {
-  const cfg = middlewareConfigSchema.parse(config);
+  const defaults = getDefaultMiddlewareConfig(routeType);
+  const cfg = middlewareConfigSchema.parse({ ...defaults, ...config });
   const mws: RouteMiddleware[] = [];
 
   if (cfg.errorHandling) {

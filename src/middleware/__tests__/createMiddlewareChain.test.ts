@@ -33,6 +33,10 @@ import {
   createMiddlewareChainFromConfig,
   type RouteMiddleware,
 } from '../createMiddlewareChain';
+import {
+  configureApiRoutes,
+  resetApiRoutesConfig,
+} from '../../../config/api-routes.config';
 import { withRouteAuth } from '../auth';
 import { withErrorHandling } from '../error-handling';
 import { withValidation } from '../validation';
@@ -43,6 +47,7 @@ const req = new NextRequest('http://test');
 describe('createMiddlewareChain', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetApiRoutesConfig();
   });
 
   it('executes middleware in the given order', async () => {
@@ -130,6 +135,20 @@ describe('createMiddlewareChain', () => {
     expect(createRateLimit).toHaveBeenCalledWith({ max: 5 });
     expect(withErrorHandling).toHaveBeenCalled();
     expect(handler).toHaveBeenCalled();
+  });
+
+  it('merges global defaults for route type', async () => {
+    configureApiRoutes({
+      protected: { errorHandling: true, auth: {} },
+    });
+
+    const chain = createMiddlewareChainFromConfig({}, 'protected');
+    const handler = vi.fn().mockResolvedValue(new NextResponse('ok'));
+    const res = await chain(handler)(req);
+
+    expect(res.status).toBe(200);
+    expect(withRouteAuth).toHaveBeenCalled();
+    expect(withErrorHandling).toHaveBeenCalled();
   });
 
   it('throws on invalid config', () => {
