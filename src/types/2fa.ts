@@ -2,10 +2,10 @@ import { z } from 'zod';
 
 // 2FA methods
 export enum TwoFactorMethod {
-  TOTP = 'totp', // Time-based One-Time Password
-  SMS = 'sms',   // SMS-based verification
-  EMAIL = 'email', // Email-based verification
-  WEBAUTHN = 'webauthn' // Hardware security key (WebAuthn)
+  TOTP = 'totp',
+  SMS = 'sms',
+  EMAIL = 'email',
+  WEBAUTHN = 'webauthn'
 }
 
 // 2FA status
