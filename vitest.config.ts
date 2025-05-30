@@ -9,6 +9,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      '@simplewebauthn/server': path.resolve(
+        __dirname,
+        'src/tests/mocks/simplewebauthn-server.ts'
+      ),
     },
   },
   test: {
