@@ -5,7 +5,7 @@
  * and adapters according to the architecture guidelines.
  */
 
-import { UserManagementConfiguration, loadUserManagementConfig } from "@/core/config";
+import { UserManagementConfiguration, getConfiguration } from "@/core/config";
 import { api } from "@/lib/api/axios";
 
 // Import factory functions
@@ -24,6 +24,8 @@ import { createSupabaseUserProvider } from "@/adapters/user";
 import { createSupabaseTeamProvider } from "@/adapters/team";
 import { createSupabasePermissionProvider } from "@/adapters/permission";
 import { createSupabaseWebhookProvider } from "@/adapters/webhooks";
+import { AdapterRegistry } from '@/adapters/registry';
+import SupabaseCsrfProvider from '@/adapters/csrf/supabase/supabase-csrf.provider';
 
 // Initialize the application
 export function initializeApp() {
@@ -35,17 +37,35 @@ export function initializeApp() {
   try {
     console.log("Initializing application...");
 
-    const runtimeConfig = loadUserManagementConfig();
+    const runtimeConfig = getConfiguration();
     if (runtimeConfig.options.api.baseUrl) {
       api.defaults.baseURL = runtimeConfig.options.api.baseUrl;
     }
 
     // Get environment variables
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+    let supabaseUrl = "";
+    let supabaseKey = "";
+    if (typeof window === "undefined") {
+      // Server-side: use private keys
+      supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+      supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+    } else {
+      // Client-side: use public keys
+      supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+      supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+    }
     
     if (!supabaseUrl || !supabaseKey) {
       throw new Error("Missing Supabase environment variables");
+    }
+
+    // Register CSRF adapter if not already registered
+    const adapterRegistry = AdapterRegistry.getInstance();
+    try {
+      adapterRegistry.getAdapter('csrf');
+    } catch {
+      adapterRegistry.registerAdapter('csrf', new SupabaseCsrfProvider(supabaseUrl, supabaseKey));
+      console.log('Registered SupabaseCsrfProvider as csrf adapter');
     }
 
     // Create data providers (adapters)
@@ -54,20 +74,20 @@ export function initializeApp() {
       supabaseKey
     );
     
-    const userProvider = createSupabaseUserProvider({
+    const userProvider = createSupabaseUserProvider(
       supabaseUrl,
       supabaseKey
-    });
+    );
     
-    const teamProvider = createSupabaseTeamProvider({
+    const teamProvider = createSupabaseTeamProvider(
       supabaseUrl,
       supabaseKey
-    });
+    );
     
-    const permissionProvider = createSupabasePermissionProvider({
+    const permissionProvider = createSupabasePermissionProvider(
       supabaseUrl,
       supabaseKey
-    });
+    );
     
     const webhookProvider = createSupabaseWebhookProvider({
       supabaseUrl,
@@ -91,7 +111,6 @@ export function initializeApp() {
       permissionDataProvider: permissionProvider
     });
     const webhookService = createWebhookService({
-      apiClient: api,
       webhookDataProvider: webhookProvider
     });
 
@@ -106,14 +125,20 @@ export function initializeApp() {
 
     // Configure feature flags
     UserManagementConfiguration.configureFeatures({
-      registration: true,
-      emailVerification: true,
-      passwordReset: true,
-      profileManagement: true,
-      teamManagement: true,
-      roleBasedAccess: true,
-      multiFactorAuth: false, // Disabled as noted in GAP_ANALYSIS.md
-      accountLinking: false   // Disabled as noted in GAP_ANALYSIS.md
+      enableRegistration: true,
+      enablePasswordReset: true,
+      enableMFA: false, // Disabled as noted in GAP_ANALYSIS.md
+      enableSocialAuth: true,
+      enableSSOAuth: true,
+      enableProfileManagement: true,
+      enableAccountSettings: true,
+      enableTeams: true,
+      enableTeamInvitations: true,
+      enableTeamRoles: true,
+      enableRoleManagement: true,
+      enablePermissionManagement: true,
+      enableEmailNotifications: true,
+      enableInAppNotifications: true
     });
 
     // Configure options

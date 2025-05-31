@@ -129,7 +129,6 @@ export function getServiceProvider<T>(providerName: string): T | undefined {
 
 // Export the interfaces and default values
 export * from './interfaces';
-export * from './runtime-config';
 export * from './config-context';
 
 // Export a singleton instance for convenience

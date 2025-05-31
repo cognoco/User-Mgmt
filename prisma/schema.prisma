@@ -334,6 +334,8 @@ model users {
   user_preferences              user_preferences?
   user_roles                    user_roles[]
   user_settings                 user_settings?
+  api_keys                      api_keys[]
+  webhooks                      webhooks[]
 
   @@index([instance_id])
   @@index([is_anonymous])
@@ -472,6 +474,8 @@ model organizations {
   payment_history      payment_history[]
   subscriptions        subscriptions[]
   user_invitations     user_invitations[]
+  api_keys             api_keys[]
+  webhooks             webhooks[]
 
   @@schema("public")
 }

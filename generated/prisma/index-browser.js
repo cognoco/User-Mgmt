@@ -599,6 +599,45 @@ exports.Prisma.AccountScalarFieldEnum = {
   updated_at: 'updated_at'
 };
 
+exports.Prisma.Api_keysScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  organization_id: 'organization_id',
+  name: 'name',
+  key_hash: 'key_hash',
+  prefix: 'prefix',
+  scopes: 'scopes',
+  expires_at: 'expires_at',
+  last_used_at: 'last_used_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  is_revoked: 'is_revoked'
+};
+
+exports.Prisma.WebhooksScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  organization_id: 'organization_id',
+  name: 'name',
+  url: 'url',
+  events: 'events',
+  secret: 'secret',
+  is_active: 'is_active',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+};
+
+exports.Prisma.Webhook_deliveriesScalarFieldEnum = {
+  id: 'id',
+  webhook_id: 'webhook_id',
+  event_type: 'event_type',
+  payload: 'payload',
+  status_code: 'status_code',
+  response: 'response',
+  error: 'error',
+  created_at: 'created_at'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -720,7 +759,10 @@ exports.Prisma.ModelName = {
   user_preferences: 'user_preferences',
   user_roles: 'user_roles',
   user_settings: 'user_settings',
-  account: 'account'
+  account: 'account',
+  api_keys: 'api_keys',
+  webhooks: 'webhooks',
+  webhook_deliveries: 'webhook_deliveries'
 };
 
 /**

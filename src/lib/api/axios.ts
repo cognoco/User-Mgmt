@@ -1,7 +1,7 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
-import { getClientConfig } from '@/core/config/runtime-config';
+import { clientConfig } from '@/core/config/client-config';
 
-const { env } = getClientConfig();
+const { env } = clientConfig;
 console.log('API URL:', env.apiBaseUrl);
 
 // --- CSRF Token Handling ---

@@ -293,11 +293,11 @@ declare type Exact<A, W> = (A extends unknown ? (W extends A ? {
 
 export declare function getRuntime(): GetRuntimeOutput;
 
-declare interface GetRuntimeOutput {
+declare type GetRuntimeOutput = {
     id: RuntimeName;
     prettyName: string;
     isEdge: boolean;
-}
+};
 
 declare class JsonNull extends NullTypesEnumValue {
     #private;
