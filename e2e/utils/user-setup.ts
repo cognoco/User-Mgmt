@@ -1,9 +1,10 @@
 import { User } from '@supabase/supabase-js';
 import { getServiceSupabase } from '../../src/lib/database/supabase'; // Adjust path if necessary
 
-// Ensure you have configured a way to get the service role client
-// This might involve setting env vars specifically for the test environment
-const supabaseAdmin = getServiceSupabase();
+// Lazy initialization to avoid module-load-time errors
+function getSupabaseAdmin() {
+  return getServiceSupabase();
+}
 
 /**
  * Ensures a user exists in the database for testing purposes.
@@ -27,6 +28,8 @@ export async function ensureUserExists(
   const { password = 'password123', isSSO = false, metadata = {}, confirmEmail = true } = options;
 
   try {
+    const supabaseAdmin = getSupabaseAdmin();
+    
     // Check if user already exists (using admin API)
     // Note: listUsers might paginate, for simple existence check this is usually fine.
     // If dealing with many users, consider filtering more precisely or handling pagination.
@@ -38,7 +41,7 @@ export async function ensureUserExists(
     });
 
     // Attempt to find the user by email in the potentially fetched list (or first page)
-    const existingUser = existingUserData?.users.find(u => u.email === email);
+    const existingUser = existingUserData?.users.find((u: User) => u.email === email);
 
     if (listError) {
         // Handle specific errors if needed, otherwise rethrow
@@ -99,6 +102,8 @@ export async function ensureUserExists(
  */
 export async function linkProviderIdentity(userId: string, provider: string, providerUserId: string, identityData: object) {
   console.log(`[Test Setup] Linking ${provider} (ID: ${providerUserId}) to user ${userId}...`);
+  const supabaseAdmin = getSupabaseAdmin();
+  
   // IMPORTANT: This requires direct DB access, as admin API doesn't manage identities directly.
   // Use the service role client to insert into auth.identities.
   const { error } = await supabaseAdmin
@@ -134,6 +139,8 @@ export async function linkProviderIdentity(userId: string, provider: string, pro
  */
 export async function unlinkProviderIdentity(userId: string, provider: string) {
     console.log(`[Test Setup] Unlinking ${provider} from user ${userId}...`);
+    const supabaseAdmin = getSupabaseAdmin();
+    
     // IMPORTANT: Requires direct DB access.
     const { error } = await supabaseAdmin
       .from('identities')
