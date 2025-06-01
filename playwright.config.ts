@@ -1,8 +1,10 @@
 import * as dotenv from 'dotenv';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Node ESM doesn't define __dirname - derive it from import.meta.url
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+// Correct ESM path resolution
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Explicitly load variables from the root .env file so e2e tests
 // always share the same configuration
@@ -15,19 +17,19 @@ export default defineConfig({
   retries: 0,
   globalSetup: './e2e/utils/global-setup.ts',
   use: {
-    baseURL: 'http://localhost:3001',
+    baseURL: 'http://localhost:3002',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
-  webServer: {
-    command: process.platform === 'win32'
-      ? 'set NODE_ENV=development&& set PORT=3001&& npm run dev'
-      : 'NODE_ENV=development PORT=3001 npm run dev',
-    url: 'http://localhost:3001',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
+  // webServer: {
+  //   command: process.platform === 'win32'
+  //     ? 'set NODE_ENV=development&& set PORT=3001&& npm run dev'
+  //     : 'NODE_ENV=development PORT=3001 npm run dev',
+  //   url: 'http://localhost:3001',
+  //   reuseExistingServer: !process.env.CI,
+  //   timeout: 120 * 1000,
+  // },
   projects: [
     {
       name: 'Desktop Chrome',

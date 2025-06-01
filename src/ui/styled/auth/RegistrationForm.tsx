@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { UserType } from '@/types/user-type';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { Button } from '@/ui/primitives/button';
@@ -38,9 +38,20 @@ export function RegistrationForm() {
     
     // Set a timer to redirect after showing success message
     setTimeout(() => {
-      router.push(`/check-email?email=${encodeURIComponent(email)}`);
+      router.push(`/auth/check-email?email=${encodeURIComponent(email)}`);
     }, 2000);
   };
+
+  // Debug effect to log form errors
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[RegistrationForm] Form state changed:', {
+        userType,
+        shouldRedirect,
+        apiSuccess
+      });
+    }
+  }, [userType, shouldRedirect, apiSuccess]);
 
   return (
     <div className="w-full max-w-md mx-auto space-y-6">

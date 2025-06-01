@@ -153,10 +153,64 @@ export class SupabaseAuthProvider implements AuthDataProvider {
         }
       });
       
+      // Enhanced logging to debug duplicate email issues
+      console.log('[SupabaseAuthProvider] Registration response:', {
+        data,
+        error,
+        user: data?.user,
+        session: data?.session,
+        userEmail: data?.user?.email,
+        userEmailConfirmed: data?.user?.email_confirmed_at
+      });
+      
       if (error) {
+        // Improve error messages for common Supabase errors
+        let errorMessage = error.message;
+        
+        if (error.message === 'Required' || error.message.includes('required')) {
+          errorMessage = 'Please fill in all required fields correctly.';
+        } else if (error.message.includes('already registered') || error.message.includes('already exists')) {
+          errorMessage = 'An account with this email address already exists. Please try signing in instead.';
+        } else if (error.message.includes('email')) {
+          errorMessage = 'Please enter a valid email address.';
+        } else if (error.message.includes('password')) {
+          errorMessage = 'Password does not meet requirements. Please ensure it is at least 8 characters long.';
+        } else if (error.message.includes('signup') && error.message.includes('disabled')) {
+          errorMessage = 'Account registration is currently disabled. Please contact support.';
+        }
+        
+        this.logError('Registration error:', error.message, '→ Translated to:', errorMessage);
+        
         return {
           success: false,
-          error: error.message
+          error: errorMessage
+        };
+      }
+      
+      // Check for the case where Supabase returns success but no session (duplicate email)
+      // This happens when email confirmation is enabled and user already exists
+      if (data.user && !data.session && !data.user.email_confirmed_at) {
+        // This typically means the email already exists but account isn't confirmed
+        // OR it's a new registration requiring confirmation
+        console.log('[SupabaseAuthProvider] User created but no session - checking if duplicate');
+        
+        // For security, we don't reveal if email exists, but we should handle this consistently
+        // Return success for new registrations, they'll get the confirmation email
+        this.logError('Registration: User created without session (likely duplicate or email confirmation required)');
+        
+        return {
+          success: true,
+          user: this.mapSupabaseUser(data.user),
+          requiresEmailConfirmation: true
+        };
+      }
+      
+      // Check if we got a user but no session (another duplicate indicator)
+      if (data.user && !data.session) {
+        console.log('[SupabaseAuthProvider] User exists but no session created - likely duplicate email');
+        return {
+          success: false,
+          error: 'An account with this email address already exists. Please try signing in instead.'
         };
       }
       

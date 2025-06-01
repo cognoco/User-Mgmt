@@ -137,6 +137,20 @@ export function RegistrationForm({
             newErrors[err.path[0] as string] = err.message;
           }
         });
+        
+        // Debug logging to help identify validation issues
+        console.log('[RegistrationForm] Validation failed:', {
+          errors: newErrors,
+          formData: {
+            email: emailValue,
+            password: passwordValue ? '***' : '',
+            confirmPassword: confirmPasswordValue ? '***' : '',
+            firstName: firstNameValue,
+            lastName: lastNameValue,
+            acceptTerms: acceptTermsValue
+          }
+        });
+        
         setErrors(newErrors);
       }
       return false;
@@ -225,11 +239,13 @@ export function RegistrationForm({
     }
     
     // Prepare user data
-    const userData: RegistrationPayload = {
+    const userData: RegistrationPayload & { acceptTerms: boolean; confirmPassword: string } = {
       email: emailValue,
       password: passwordValue,
+      confirmPassword: confirmPasswordValue,
       firstName: firstNameValue,
       lastName: lastNameValue,
+      acceptTerms: acceptTermsValue,
       metadata: {
         acceptedTerms: acceptTermsValue
       }
@@ -252,6 +268,16 @@ export function RegistrationForm({
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Registration failed';
+      console.log('[RegistrationForm] Submit error:', {
+        error: errorMessage,
+        originalError: error,
+        formData: {
+          email: emailValue,
+          firstName: firstNameValue,
+          lastName: lastNameValue,
+          acceptTerms: acceptTermsValue
+        }
+      });
       setErrors({ ...errors, form: errorMessage });
     } finally {
       setIsSubmitting(false);
@@ -284,7 +310,7 @@ export function RegistrationForm({
     isValid,
     errors: {
       ...errors,
-      form: errors.form || formError
+      form: errors.form || formError || undefined
     },
     touched,
     handleBlur
