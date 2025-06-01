@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
+import { useOAuthStore } from '@/lib/stores/oauth.store';
 import { OAuthProvider } from '@/types/oauth';
 import { Button } from '@/ui/primitives/button';
 import { useTranslation } from 'react-i18next';
@@ -49,14 +49,8 @@ export function OAuthButtons({
 }: OAuthButtonsProps) {
   const { t } = useTranslation();
   const { oauth } = useUserManagement();
-  const { loginWithProvider, isLoading, error, clearError } = useAuth();
-  
-  // Clear error on unmount
-  useEffect(() => {
-    return () => {
-      clearError();
-    };
-  }, [clearError]);
+  const { isLoading, error } = useAuth();
+  const oauthStore = useOAuthStore();
   
   // For tests, always include default providers if we're in a test environment
   // Use multiple detection methods to ensure reliable test environment detection
@@ -117,10 +111,14 @@ export function OAuthButtons({
   };
   
   // Handle login with provider
-  const handleLogin = (provider: OAuthProvider) => {
-    loginWithProvider(provider);
-    if (typeof onSuccess === 'function') {
-      onSuccess(provider);
+  const handleLogin = async (provider: OAuthProvider) => {
+    try {
+      await oauthStore.login(provider);
+      if (typeof onSuccess === 'function') {
+        onSuccess(provider);
+      }
+    } catch (error) {
+      console.error('OAuth login failed:', error);
     }
   };
   
@@ -133,9 +131,9 @@ export function OAuthButtons({
   
   return (
     <div className={`${className}`}>
-      {error && (
+      {(error || oauthStore.error) && (
         <Alert variant="destructive" className="mb-4">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{error || oauthStore.error}</AlertDescription>
         </Alert>
       )}
       
@@ -149,7 +147,7 @@ export function OAuthButtons({
                 ? onProviderClick(providerConfig.provider)
                 : handleLogin(providerConfig.provider)
             }
-            disabled={isLoading}
+            disabled={isLoading || oauthStore.isLoading}
           >
             {providerIcons[providerConfig.provider]}
             {showLabels && getButtonText(providerConfig.provider)}

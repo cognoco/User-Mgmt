@@ -66,8 +66,7 @@ interface IDPConfigurationProps {
   onConfigurationUpdate?: (success: boolean) => void;
 }
 
-const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onConfigurationUpdate }) => {
-  console.log('[DEBUG] IDPConfiguration component mounted', { orgId, idpType });
+const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onConfigurationUpdate }): React.JSX.Element => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -113,48 +112,8 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
     },
   });
 
-  // Add debug before useEffect
-  console.log('[DEBUG] Before useEffect', { orgId, idpType });
-
-  // Reset form when IDP type changes
-  useEffect(() => {
-    console.log('[DEBUG] useEffect (start)', { orgId, idpType });
-    form.reset({
-      type: idpType,
-      ...(idpType === 'saml' 
-        ? {
-          entity_id: '',
-          sign_in_url: '',
-          sign_out_url: '',
-          certificate: '',
-          attribute_mapping: {
-            email: 'email',
-            name: 'name',
-            role: '',
-          }
-        } 
-        : {
-          client_id: '',
-          client_secret: '',
-          discovery_url: '',
-          scopes: 'openid email profile',
-          attribute_mapping: {
-            email: 'email',
-            name: 'name',
-            role: '',
-          }
-        }) as any // Use type assertion to handle the discriminated union
-    });
-    setError(null);
-    setSuccess(null);
-    fetchConfiguration().then(() => {
-      console.log('[DEBUG] fetchConfiguration completed', { orgId, idpType });
-    });
-  }, [idpType, orgId]);
-
   // Fetch existing configuration
-  const fetchConfiguration = async () => {
-    console.log('[DEBUG] fetchConfiguration called', { orgId, idpType });
+  const fetchConfiguration = async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
     try {
@@ -167,10 +126,6 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
           type: 'saml',
           ...configResponse.data,
         } as SamlConfig);
-        // Debug: log form state after reset
-        setTimeout(() => {
-          console.log('Form state after reset:', form.getValues());
-        }, 0);
       } else {
         form.reset({
           type: 'oidc',
@@ -185,55 +140,86 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
       setSpMetadata(metadataResponse.xml);
       
     } catch (err) {
-      if (process.env.NODE_ENV === 'development') { console.error(`Failed to fetch ${idpType.toUpperCase()} configuration:`, err); }
+      if (process.env.NODE_ENV === 'development') { 
+        // eslint-disable-next-line no-console
+        console.error(`Failed to fetch ${idpType.toUpperCase()} configuration:`, err); 
+      }
       setError(t('org.sso.fetchConfigError'));
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Reset form when IDP type changes
+  useEffect(() => {
+    const defaultConfig = idpType === 'saml' 
+      ? {
+        type: idpType,
+        entity_id: '',
+        sign_in_url: '',
+        sign_out_url: '',
+        certificate: '',
+        attribute_mapping: {
+          email: 'email',
+          name: 'name',
+          role: '',
+        }
+      } 
+      : {
+        type: idpType,
+        client_id: '',
+        client_secret: '',
+        discovery_url: '',
+        scopes: 'openid email profile',
+        attribute_mapping: {
+          email: 'email',
+          name: 'name',
+          role: '',
+        }
+      };
+
+    form.reset(defaultConfig as IdpConfig);
+    setError(null);
+    setSuccess(null);
+    fetchConfiguration();
+  }, [idpType, orgId, form, fetchConfiguration]);
+
   // Handle form submission
-  const onSubmit = async (data: IdpConfig) => {
+  const onSubmit = async (data: IdpConfig): Promise<void> => {
     setIsSaving(true);
     setError(null);
     setSuccess(null);
     
-      try {
-        const { type: _unused, ...configData } = data;
-      
-      await updateIdpConfig(idpType, configData);
-      setSuccess(t('org.sso.saveConfigSuccess'));
-      
-      if (onConfigurationUpdate) {
-        onConfigurationUpdate(true);
-      }
+    try {
+      await updateIdpConfig(idpType, data);
+      setSuccess(t('org.sso.configUpdated'));
+      onConfigurationUpdate?.(true);
     } catch (err) {
-      if (process.env.NODE_ENV === 'development') { console.error(`Failed to save ${idpType.toUpperCase()} configuration:`, err); }
-      setError(t('org.sso.saveConfigError'));
-      
-      if (onConfigurationUpdate) {
-        onConfigurationUpdate(false);
+      if (process.env.NODE_ENV === 'development') { 
+        // eslint-disable-next-line no-console
+        console.error(`Failed to update ${idpType.toUpperCase()} configuration:`, err); 
       }
+      setError(t('org.sso.updateConfigError'));
+      onConfigurationUpdate?.(false);
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Handle file upload for certificate
-  const handleCertificateUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle certificate file upload for SAML
+  const handleCertificateUpload = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
-      form.setValue('certificate', content, { shouldValidate: true });
-    };
-    reader.readAsText(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event): void => {
+        const certificate = event.target?.result as string;
+        form.setValue('certificate', certificate);
+      };
+      reader.readAsText(file);
+    }
   };
 
   if (isLoading) {
-    console.log('[DEBUG] isLoading is true, rendering loading state', { orgId, idpType });
     return (
       <Card>
         <CardHeader>
@@ -251,7 +237,6 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
       </Card>
     );
   }
-  console.log('[DEBUG] isLoading is false, rendering main form', { orgId, idpType });
 
   return (
     <Card>

@@ -34,12 +34,21 @@ function registerAllServices() {
   try {
     console.log("Registering all services...");
 
-    // Get environment variables
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+    // Get environment variables - use same pattern as working supabase client
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    console.log("[fix-initialization] Environment variables:", {
+      supabaseUrl: supabaseUrl || 'MISSING',
+      supabaseKey: supabaseKey ? 'EXISTS' : 'MISSING'
+    });
     
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error("Missing Supabase environment variables");
+      const missingVars = [];
+      if (!supabaseUrl) missingVars.push('NEXT_PUBLIC_SUPABASE_URL');
+      if (!supabaseKey) missingVars.push('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+      console.error("Missing required environment variables:", missingVars);
+      throw new Error(`Missing Supabase environment variables: ${missingVars.join(', ')}`);
     }
 
     // Create data providers (adapters)
@@ -48,20 +57,20 @@ function registerAllServices() {
       supabaseKey
     );
     
-    const userProvider = createSupabaseUserProvider({
+    const userProvider = createSupabaseUserProvider(
       supabaseUrl,
       supabaseKey
-    });
+    );
     
-    const teamProvider = createSupabaseTeamProvider({
+    const teamProvider = createSupabaseTeamProvider(
       supabaseUrl,
       supabaseKey
-    });
+    );
     
-    const permissionProvider = createSupabasePermissionProvider({
+    const permissionProvider = createSupabasePermissionProvider(
       supabaseUrl,
       supabaseKey
-    });
+    );
     
     const webhookProvider = createSupabaseWebhookProvider({
       supabaseUrl,

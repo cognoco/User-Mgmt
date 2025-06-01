@@ -1,18 +1,17 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/ui/primitives/button';
 import { Input } from '@/ui/primitives/input';
 import { Label } from '@/ui/primitives/label';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 import { PasswordRequirements } from './PasswordRequirements';
-import { ChangePasswordForm as HeadlessChangePasswordForm, type ChangePasswordFormValues } from '@/ui/headless/auth/ChangePasswordForm';
+import { ChangePasswordForm as HeadlessChangePasswordForm } from '@/ui/headless/auth/ChangePasswordForm';
 
 /**
  * Styled ChangePasswordForm component that uses the headless component for behavior
  * This follows the architecture guidelines by separating behavior and appearance
  */
-export function ChangePasswordForm() {
+export function ChangePasswordForm(): React.JSX.Element {
   // Track if password is visible (feature not implemented yet)
   
   return (

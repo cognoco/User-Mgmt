@@ -10,7 +10,11 @@ import { BackupCodesDisplay } from './BackupCodesDisplay';
 import { Dialog, DialogContent } from '@/ui/primitives/dialog';
 import { MFAManagementSection as HeadlessMFAManagementSection, type MFAMethod } from '@/ui/headless/auth/MFAManagementSection';
 
-export function MFAManagementSection() {
+interface MFAManagementSectionProps {
+  // Reserved for future use
+}
+
+const MFAManagementSection: React.FC<MFAManagementSectionProps> = (): React.JSX.Element => {
   const { t } = useTranslation();
   const user = useAuth().user;
 
@@ -145,3 +149,5 @@ export function MFAManagementSection() {
     </HeadlessMFAManagementSection>
   );
 }
+
+export default MFAManagementSection;

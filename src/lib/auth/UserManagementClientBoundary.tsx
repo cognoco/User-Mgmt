@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   UserManagementProvider,
   UserManagementConfig,
@@ -14,6 +14,8 @@ import { User } from "@/core/auth/models";
 import toast, { Toaster } from "react-hot-toast";
 import { OAuthProvider } from "@/types/oauth";
 import { SessionPolicyEnforcer } from "@/ui/styled/session/SessionPolicyEnforcer";
+import { registerAllServices } from "@/scripts/fix-initialization";
+import { AuthProvider } from '@/lib/context/AuthContext';
 
 // Define the callbacks inside the Client Component
 const clientCallbacks: Required<IntegrationCallbacks> = {
@@ -89,10 +91,33 @@ interface UserManagementClientBoundaryProps {
 export function UserManagementClientBoundary({
   children,
 }: UserManagementClientBoundaryProps) {
-  // Get the auth service from the service provider registry (move to top-level of component)
-  const authService = UserManagementConfiguration.getServiceProvider<AuthService>(
-    "authService"
-  );
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
+
+  // Initialize services on mount
+  useEffect(() => {
+    console.log(
+      ">>>>>>>>>> [UserManagementClientBoundary] useEffect SERVICE INITIALIZATION RUNNING <<<<<<<<<<",
+    );
+    
+    async function initializeServices() {
+      try {
+        console.log("[UserManagementClientBoundary] Initializing services...");
+        await registerAllServices();
+        console.log("[UserManagementClientBoundary] Services initialized successfully");
+        setIsInitialized(true);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error during service initialization';
+        console.error("[UserManagementClientBoundary] Service initialization failed:", errorMessage);
+        setInitError(errorMessage);
+      }
+    }
+
+    initializeServices();
+  }, []);
+
+  // Get the auth service from the service provider registry (only after initialization)
+  const authService = isInitialized ? UserManagementConfiguration.getServiceProvider<AuthService>("authService") : null;
 
   // Initialize CSRF token fetching on mount
   useEffect(() => {
@@ -186,8 +211,25 @@ export function UserManagementClientBoundary({
     };
   }, [authService]);
 
+  // Show error screen if initialization failed
+  if (initError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-red-50">
+        <div className="p-6 max-w-md bg-white rounded-lg shadow-lg">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Initialization Error</h1>
+          <p className="text-gray-700 mb-4">
+            The application failed to initialize properly. Please try refreshing the page or contact support if the issue persists.
+          </p>
+          <div className="p-3 bg-red-50 rounded text-sm text-red-800 font-mono overflow-auto">
+            {initError}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Show loading indicator while initializing
-  if (!authService) {
+  if (!isInitialized || !authService) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -197,8 +239,10 @@ export function UserManagementClientBoundary({
   
   return (
     <UserManagementProvider config={clientConfig}>
-      <Toaster position="top-center" reverseOrder={false} />
-      <SessionPolicyEnforcer>{children}</SessionPolicyEnforcer>
+      <AuthProvider authService={authService}>
+        <Toaster position="top-center" reverseOrder={false} />
+        <SessionPolicyEnforcer>{children}</SessionPolicyEnforcer>
+      </AuthProvider>
     </UserManagementProvider>
   );
 }

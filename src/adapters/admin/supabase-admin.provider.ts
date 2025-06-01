@@ -92,13 +92,35 @@ export class SupabaseAdminProvider implements IAdminDataProvider {
       throw new Error(error.message);
     }
 
-    const pagination = {
+    const pagination: PaginationMeta = {
       page,
-      limit,
-      totalCount: count || 0,
+      pageSize: limit,
+      totalItems: count || 0,
       totalPages: Math.ceil((count || 0) / limit),
+      hasNextPage: page < Math.ceil((count || 0) / limit),
+      hasPreviousPage: page > 1,
     };
 
     return { users: (users as any[]) || [], pagination };
+  }
+
+  async getUsers(_params?: GetUsersParams): Promise<GetUsersResult> {
+    throw new Error('Method not implemented.');
+  }
+
+  async getUser(_id: string): Promise<GetUserResult> {
+    throw new Error('Method not implemented.');
+  }
+
+  async updateUser(_id: string, _data: UpdateUserData): Promise<UpdateUserResult> {
+    throw new Error('Method not implemented.');
+  }
+
+  async deleteUser(_id: string): Promise<DeleteUserResult> {
+    throw new Error('Method not implemented.');
+  }
+
+  async searchUsers(_query: SearchUsersQuery): Promise<SearchUsersResult> {
+    throw new Error('Method not implemented.');
   }
 }

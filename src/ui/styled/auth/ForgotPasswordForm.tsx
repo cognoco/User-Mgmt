@@ -7,7 +7,11 @@ import { Label } from '@/ui/primitives/label';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 import ForgotPasswordFormHeadless from '@/ui/headless/auth/ForgotPasswordForm';
 
-export function ForgotPasswordForm() {
+interface ForgotPasswordFormProps {
+  // Reserved for future use
+}
+
+const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = (): React.JSX.Element => {
   const { successMessage } = useAuth();
 
   return (
@@ -74,3 +78,5 @@ export function ForgotPasswordForm() {
     />
   );
 }
+
+export default ForgotPasswordForm;

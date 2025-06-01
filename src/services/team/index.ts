@@ -5,6 +5,11 @@
  * It follows the factory pattern to allow dependency injection and configuration.
  */
 
+// Import required types and classes
+import type { ITeamDataProvider } from '@/core/team/ITeamDataProvider';
+import type { TeamService } from '@/core/team/interfaces';
+import { DefaultTeamService } from './default-team.service';
+
 // Client-safe exports only
 export * from './api-team.service';
 export type { TeamService } from '@/core/team/interfaces';
@@ -16,7 +21,7 @@ export interface TeamServiceConfig {
   /**
    * Team data provider for database operations
    */
-  teamDataProvider: TeamDataProvider;
+  teamDataProvider: ITeamDataProvider;
 }
 
 /**

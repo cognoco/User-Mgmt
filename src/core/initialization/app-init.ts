@@ -42,21 +42,21 @@ export function initializeApp() {
       api.defaults.baseURL = runtimeConfig.options.api.baseUrl;
     }
 
-    // Get environment variables
-    let supabaseUrl = "";
-    let supabaseKey = "";
-    if (typeof window === "undefined") {
-      // Server-side: use private keys
-      supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-      supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-    } else {
-      // Client-side: use public keys
-      supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-      supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-    }
+    // Get environment variables - use same pattern as working supabase client
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    console.log("[app-init] Environment variables:", {
+      supabaseUrl: supabaseUrl || 'MISSING',
+      supabaseKey: supabaseKey ? 'EXISTS' : 'MISSING'
+    });
     
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error("Missing Supabase environment variables");
+      const missingVars = [];
+      if (!supabaseUrl) missingVars.push('NEXT_PUBLIC_SUPABASE_URL');
+      if (!supabaseKey) missingVars.push('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+      console.error("Missing required environment variables:", missingVars);
+      throw new Error(`Missing Supabase environment variables: ${missingVars.join(', ')}`);
     }
 
     // Register CSRF adapter if not already registered

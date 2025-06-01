@@ -10,7 +10,9 @@ interface MFATroubleshootProps {
 /**
  * MFA troubleshooting guidance.
  */
-export function MFATroubleshoot({ helpUrl }: MFATroubleshootProps) {
+const MFATroubleshoot: React.FC<MFATroubleshootProps> = ({
+  helpUrl
+}): React.JSX.Element => {
   return (
     <Alert className="mt-4" role="alert">
       <AlertTitle>Having trouble with your MFA code?</AlertTitle>
@@ -31,4 +33,5 @@ export function MFATroubleshoot({ helpUrl }: MFATroubleshootProps) {
     </Alert>
   );
 }
+
 export default MFATroubleshoot;

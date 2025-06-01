@@ -11,13 +11,13 @@ interface ProtectedRouteProps {
   accessDeniedComponent?: React.ReactNode;
 }
 
-export function ProtectedRoute({
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requiredRoles = [],
   requiredPermissions = [],
   redirectPath = '/auth/login',
   accessDeniedComponent,
-}: ProtectedRouteProps) {
+}): React.JSX.Element => {
   const router = useRouter();
   
   // Update to use individual selectors for React 19 compatibility
@@ -75,4 +75,6 @@ export function ProtectedRoute({
   }
 
   return <>{children}</>;
-} 
+}
+
+export default ProtectedRoute; 

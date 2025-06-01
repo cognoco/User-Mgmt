@@ -43,6 +43,12 @@ export async function logUserAction(params: LogUserActionParams): Promise<void> 
   } = params;
 
   try {
+    // Validate required parameters
+    if (!action || !status) {
+      console.warn('[AuditLogger] Skipping log - missing required fields (action, status)', { action, status });
+      return;
+    }
+
     const { error } = await client
       .from('user_actions_log')
       .insert({
@@ -57,12 +63,25 @@ export async function logUserAction(params: LogUserActionParams): Promise<void> 
       });
 
     if (error) {
-      console.error('Error logging user action:', error);
-      // Depending on severity, might add more robust error handling/reporting here
+      console.warn('[AuditLogger] Failed to log user action (non-critical):', {
+        error: error.message,
+        code: error.code,
+        action,
+        status,
+        userId
+      });
+      // Don't throw - audit logging failure should not break the main flow
+    } else {
+      console.debug('[AuditLogger] Successfully logged action:', { action, status, userId });
     }
-  } catch (err) {
-    console.error('Failed to execute logUserAction insert:', err);
-    // Handle unexpected errors during the logging process
+  } catch (err: any) {
+    console.warn('[AuditLogger] Exception during log attempt (non-critical):', {
+      error: err.message,
+      action,
+      status,
+      userId
+    });
+    // Don't throw - audit logging failure should not break the main flow
   }
 }
 

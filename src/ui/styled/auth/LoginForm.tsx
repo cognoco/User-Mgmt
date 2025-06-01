@@ -19,7 +19,11 @@ import { LoginForm as HeadlessLoginForm } from '@/ui/headless/auth/LoginForm';
 import { LoginPayload } from '@/core/auth/models';
 import { WebAuthnLogin } from '@/ui/styled/auth/WebAuthnLogin';
 
-export function LoginForm() {
+interface LoginFormProps {
+  // Reserved for future use
+}
+
+const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
   const router = useRouter();
   
   // React 19 compatibility - Use individual primitive selectors instead of object destructuring
@@ -329,3 +333,5 @@ export function LoginForm() {
     </ErrorBoundary>
   );
 }
+
+export default LoginForm;
