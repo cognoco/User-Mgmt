@@ -113,46 +113,12 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
   });
 
   // Fetch existing configuration
-  const fetchConfiguration = async (): Promise<void> => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // Fetch IDP configuration
-      const configResponse = await getIdpConfig(idpType);
-      
-      // Set form values
-      if (idpType === 'saml') {
-        form.reset({
-          type: 'saml',
-          ...configResponse.data,
-        } as SamlConfig);
-      } else {
-        form.reset({
-          type: 'oidc',
-          ...configResponse.data,
-        } as OidcConfig);
-      }
-
-      // Fetch service provider metadata
-      const metadataResponse = await getMetadata();
-      setMetadataUrl(metadataResponse.url);
-      setSpEntityId(metadataResponse.entity_id);
-      setSpMetadata(metadataResponse.xml);
-      
-    } catch (err) {
-      if (process.env.NODE_ENV === 'development') { 
-        // eslint-disable-next-line no-console
-        console.error(`Failed to fetch ${idpType.toUpperCase()} configuration:`, err); 
-      }
-      setError(t('org.sso.fetchConfigError'));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Defined inside the effect to avoid recreating a new function on each render.
+  // This prevents the effect from running in an endless loop.
 
   // Reset form when IDP type changes
   useEffect(() => {
-    const defaultConfig = idpType === 'saml' 
+    const defaultConfig = idpType === 'saml'
       ? {
         type: idpType,
         entity_id: '',
@@ -163,8 +129,8 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
           email: 'email',
           name: 'name',
           role: '',
-        }
-      } 
+        },
+      }
       : {
         type: idpType,
         client_id: '',
@@ -175,14 +141,48 @@ const IDPConfiguration: React.FC<IDPConfigurationProps> = ({ orgId, idpType, onC
           email: 'email',
           name: 'name',
           role: '',
-        }
+        },
       };
 
     form.reset(defaultConfig as IdpConfig);
     setError(null);
     setSuccess(null);
-    fetchConfiguration();
-  }, [idpType, orgId, form, fetchConfiguration]);
+
+    const fetchData = async (): Promise<void> => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const configResponse = await getIdpConfig(idpType);
+        if (idpType === 'saml') {
+          form.reset({
+            type: 'saml',
+            ...configResponse.data,
+          } as SamlConfig);
+        } else {
+          form.reset({
+            type: 'oidc',
+            ...configResponse.data,
+          } as OidcConfig);
+        }
+
+        const metadataResponse = await getMetadata();
+        setMetadataUrl(metadataResponse.url);
+        setSpEntityId(metadataResponse.entity_id);
+        setSpMetadata(metadataResponse.xml);
+      } catch (err) {
+        if (process.env.NODE_ENV === 'development') {
+          // eslint-disable-next-line no-console
+          console.error(`Failed to fetch ${idpType.toUpperCase()} configuration:`, err);
+        }
+        setError(t('org.sso.fetchConfigError'));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    fetchData();
+  }, [idpType, orgId]);
 
   // Handle form submission
   const onSubmit = async (data: IdpConfig): Promise<void> => {
