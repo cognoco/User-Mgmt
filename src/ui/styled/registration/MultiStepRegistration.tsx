@@ -1,34 +1,39 @@
 import { useTranslation } from 'react-i18next';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Alert } from '../ui/alert';
-import { Progress } from '../ui/progress';
-import { Checkbox } from '../ui/checkbox';
-import { MultiStepRegistration as HeadlessMultiStepRegistration } from '@/ui/headless/registration/MultiStepRegistration';
-import { z } from 'zod';
 import { useState, useRef, useEffect } from 'react';
+import { z } from 'zod';
 
-// Define schema for validation - this is UI-specific validation
+import { Label } from '@/ui/primitives/label';
+import { Input } from '@/ui/primitives/input';
+import { Button } from '@/ui/primitives/button';
+import { Alert } from '@/ui/primitives/alert';
+import { Checkbox } from '@/ui/primitives/checkbox';
+import { Progress } from '@/ui/primitives/progress';
+import { HeadlessMultiStepRegistration } from '@/ui/headless/registration/MultiStepRegistration';
+
 const registrationSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   name: z.string().min(2),
   phone: z.string().optional(),
-  acceptTerms: z.boolean().refine((val) => val === true, {
-    message: 'You must accept the terms and conditions',
-  }),
+  verificationCode: z.string().optional(),
+  acceptTerms: z.boolean()
 });
-
 
 const steps = ['Account', 'Profile', 'Verification', 'Terms'];
 
-export function MultiStepRegistration() {
+export function MultiStepRegistration(): React.ReactElement {
   const [verificationCode, setVerificationCode] = useState('');
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [currentStepState, setCurrentStepState] = useState(0);
+  const firstFieldRef = useRef<HTMLInputElement>(null);
+
+  // Focus first field when step changes
+  useEffect(() => {
+    firstFieldRef.current?.focus();
+  }, [currentStepState]);
 
   // Handle final submission
-  const handleComplete = async (data: Record<string, any>) => {
+  const handleComplete = async (data: Record<string, any>): Promise<void> => {
     if (process.env.NODE_ENV === 'development') { 
       console.log('Registration data:', data); 
     }
@@ -67,13 +72,14 @@ export function MultiStepRegistration() {
       steps={steps}
       onComplete={handleComplete}
       render={({ currentStep, next, back, setValue, values, handleSubmit }) => {
-        const firstFieldRef = useRef<HTMLInputElement>(null);
-        useEffect(() => {
-          firstFieldRef.current?.focus();
-        }, [currentStep]);
+        // Update local state when currentStep changes
+        if (currentStep !== currentStepState) {
+          setCurrentStepState(currentStep);
+        }
+
         const progress = ((currentStep + 1) / steps.length) * 100;
         
-        const renderStep = () => {
+        const renderStep = (): React.ReactNode => {
           switch (currentStep) {
             case 0:
               return (

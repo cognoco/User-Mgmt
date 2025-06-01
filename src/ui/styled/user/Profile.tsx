@@ -1,148 +1,115 @@
-import React from 'react';
-import HeadlessProfile from '@/ui/headless/user/Profile';
-import { ProfileUpdatePayload } from '@/core/user/models';
+import React, { useState } from 'react';
+import { Button } from '@/ui/primitives/button';
+import { Input } from '@/ui/primitives/input';
+import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import DataExport from '../profile/DataExport';
 import CompanyDataExport from '../profile/CompanyDataExport';
 import NotificationPreferences from '../profile/NotificationPreferences';
 import ActivityLog from '../profile/ActivityLog';
+import ProfileHeadless from '@/ui/headless/user/Profile';
 
-interface ProfileProps {
-  userId?: string;
+interface FormState {
+  firstName: string;
+  lastName: string;
+  username: string;
+  avatarUrl: string;
 }
 
 /**
  * Styled Profile component that uses the headless Profile component
  * This component only contains UI elements and styling, with all business logic in the headless component
  */
-export default function Profile({ userId }: ProfileProps) {
+export default function Profile(): React.ReactElement {
+  const [form, setForm] = useState<FormState>({ firstName: '', lastName: '', username: '', avatarUrl: '' });
+
   return (
-    <HeadlessProfile userId={userId}>
-      {({
-        profile,
-        isLoading,
-        error,
-        successMessage,
-        uploadingAvatar,
-        updateProfile,
-        uploadAvatar,
-        deleteAvatar,
-        updateProfileField
-      }) => {
-        if (isLoading) return <div>Loading...</div>;
-        if (!profile) return <div>No profile found</div>;
+    <ProfileHeadless>
+      {({ profile, isLoading, error, successMessage, uploadingAvatar, updateProfile, uploadAvatar }) => {
+        // Update form when profile changes (avoiding hooks inside render prop)
+        if (profile && (form.firstName !== (profile.firstName || '') || 
+                       form.lastName !== (profile.lastName || '') ||
+                       form.username !== (profile.username || '') || 
+                       form.avatarUrl !== (profile.profilePictureUrl || ''))) {
+          setForm({
+            firstName: profile.firstName || '',
+            lastName: profile.lastName || '',
+            username: profile.username || '',
+            avatarUrl: profile.profilePictureUrl || ''
+          });
+        }
 
-        const handleSubmit = async (e: React.FormEvent) => {
+        const handleSubmit = async (e: React.FormEvent): Promise<void> => {
           e.preventDefault();
-          if (profile) {
-            const profileData: ProfileUpdatePayload = {
-              fullName: profile.fullName,
-              website: profile.website,
-              avatarUrl: profile.avatarUrl
-            };
-            await updateProfile(profileData);
-          }
+          await updateProfile({ 
+            firstName: form.firstName, 
+            lastName: form.lastName,
+            username: form.username 
+          });
         };
 
-        const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-          if (!e.target.files || e.target.files.length === 0) {
-            return;
-          }
-          const file = e.target.files[0];
-          await uploadAvatar(file);
+        const handleFile = (e: React.ChangeEvent<HTMLInputElement>): void => {
+          const file = e.target.files?.[0];
+          if (file) uploadAvatar(file);
         };
+
+        if (isLoading && !profile) return <div>Loading...</div>;
+        if (!profile) return <div>No profile found</div>;
 
         return (
           <div className="profile">
             <h2>Profile</h2>
-            {error && <div className="error-message">{error}</div>}
-            {successMessage && <div className="success-message">{successMessage}</div>}
-            
+            {error && (
+              <Alert variant="destructive" role="alert" className="error-message">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            {successMessage && (
+              <Alert role="alert">
+                <AlertDescription>{successMessage}</AlertDescription>
+              </Alert>
+            )}
             <div className="avatar">
               <img 
-                src={profile.avatarUrl || 'https://example.com/avatar.jpg'} 
+                src={profile.profilePictureUrl || 'https://example.com/avatar.jpg'} 
                 alt="Avatar" 
-                className="avatar-image"
               />
               <div className="avatar-upload">
-                <label htmlFor="avatar-upload" className="avatar-upload-label">
+                <label htmlFor="avatar-upload">
                   Upload Avatar
-                  <input
-                    id="avatar-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    disabled={uploadingAvatar}
-                    className="hidden-file-input"
-                  />
+                  <input id="avatar-upload" type="file" accept="image/*" onChange={handleFile} disabled={uploadingAvatar} />
                 </label>
-                {profile.avatarUrl && (
-                  <button 
-                    onClick={() => deleteAvatar()}
-                    className="delete-avatar-button"
-                    type="button"
-                  >
-                    Remove Avatar
-                  </button>
-                )}
               </div>
             </div>
-
-            <form onSubmit={handleSubmit} className="profile-form">
-              <div className="form-group">
-                <label htmlFor="fullName" className="form-label">
-                  Full Name:
-                  <input
-                    id="fullName"
-                    type="text"
-                    value={profile.fullName || ''}
-                    onChange={(e) => updateProfileField('fullName', e.target.value)}
-                    className="form-input"
-                  />
+            <form onSubmit={handleSubmit}>
+              <div>
+                <label>
+                  First Name:
+                  <Input type="text" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
                 </label>
               </div>
-              
-              <div className="form-group">
-                <label htmlFor="website" className="form-label">
-                  Website:
-                  <input
-                    id="website"
-                    type="url"
-                    value={profile.website || ''}
-                    onChange={(e) => updateProfileField('website', e.target.value)}
-                    className="form-input"
-                  />
+              <div>
+                <label>
+                  Last Name:
+                  <Input type="text" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
                 </label>
               </div>
-              
+              <div>
+                <label>
+                  Username:
+                  <Input type="text" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />
+                </label>
+              </div>
               <div className="button-container">
-                <button 
-                  type="submit" 
-                  disabled={isLoading || uploadingAvatar}
-                  className="submit-button"
-                >
-                  Update Profile
-                </button>
+                <Button type="submit" disabled={isLoading}>Update Profile</Button>
               </div>
             </form>
-
-            <hr className="section-divider" />
-            
-            {/* Data Export Section */}
+            <hr style={{ margin: '2rem 0' }} />
             <DataExport />
-            
-            {/* Company Data Export Section (admin only) */}
             <CompanyDataExport />
-            
-            <hr className="section-divider" />
-            
-            {/* Notification Preferences Section */}
+            <hr style={{ margin: '2rem 0' }} />
             <NotificationPreferences />
-            
-            <hr className="section-divider" />
-            
-            {/* Activity Log Section */}
-            {profile.id && <ActivityLog />}
-
+            <hr style={{ margin: '2rem 0' }} />
+            <ActivityLog />
             <style jsx>{`
               .profile {
                 max-width: 500px;
@@ -153,7 +120,7 @@ export default function Profile({ userId }: ProfileProps) {
                 margin: 20px 0;
                 text-align: center;
               }
-              .avatar-image {
+              .avatar img {
                 width: 150px;
                 height: 150px;
                 border-radius: 50%;
@@ -161,15 +128,11 @@ export default function Profile({ userId }: ProfileProps) {
               }
               .avatar-upload {
                 margin-top: 10px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
               }
-              .hidden-file-input {
+              .avatar-upload input[type='file'] {
                 display: none;
               }
-              .avatar-upload-label {
+              .avatar-upload label {
                 cursor: pointer;
                 padding: 8px 16px;
                 background-color: #3b82f6;
@@ -177,19 +140,11 @@ export default function Profile({ userId }: ProfileProps) {
                 border-radius: 4px;
                 display: inline-block;
               }
-              .delete-avatar-button {
-                padding: 8px 16px;
-                background-color: #ef4444;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-              }
-              .form-label {
+              label {
                 display: block;
                 margin: 10px 0;
               }
-              .form-input {
+              input {
                 width: 100%;
                 padding: 8px;
                 margin-top: 5px;
@@ -200,41 +155,11 @@ export default function Profile({ userId }: ProfileProps) {
                 margin-top: 20px;
                 text-align: center;
               }
-              .submit-button {
-                padding: 8px 16px;
-                background-color: #3b82f6;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-              }
-              .submit-button:disabled {
-                background-color: #9ca3af;
-                cursor: not-allowed;
-              }
-              .error-message {
-                margin: 10px 0;
-                padding: 10px;
-                background-color: #fee2e2;
-                color: #b91c1c;
-                border-radius: 4px;
-              }
-              .success-message {
-                margin: 10px 0;
-                padding: 10px;
-                background-color: #dcfce7;
-                color: #166534;
-                border-radius: 4px;
-              }
-              .section-divider {
-                margin: 2rem 0;
-                border: 0;
-                border-top: 1px solid #e5e7eb;
-              }
             `}</style>
           </div>
         );
       }}
-    </HeadlessProfile>
+    </ProfileHeadless>
   );
 }
+

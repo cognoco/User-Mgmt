@@ -9,11 +9,6 @@ const nextConfig = {
       poll: 1000,
     };
     
-    // Enable source maps for better error debugging
-    if (!isServer) {
-      config.devtool = 'source-map';
-    }
-    
     return config;
   },
   // Your existing configuration here

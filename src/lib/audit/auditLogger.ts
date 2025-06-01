@@ -63,39 +63,24 @@ export async function logUserAction(params: LogUserActionParams): Promise<void> 
       });
 
     if (error) {
-      // Provide more detailed error information for debugging
-      const errorContext = {
+      console.warn('[AuditLogger] Failed to log user action (non-critical):', {
         error: error.message,
         code: error.code,
         action,
         status,
-        userId,
-        hasAuth: !!client.auth.getUser,
-        isServiceRole: client === supabase ? 'default' : 'custom'
-      };
-      
-      console.warn('[AuditLogger] Failed to log user action (non-critical):', errorContext);
-      
-      // If it's an RLS error, provide specific guidance
-      if (error.code === '42501' || error.message.includes('row-level security')) {
-        console.warn('[AuditLogger] RLS Policy Issue: Check if user_actions_log table has proper RLS policies for INSERT operations');
-      }
-      
+        userId
+      });
       // Don't throw - audit logging failure should not break the main flow
     } else {
       console.debug('[AuditLogger] Successfully logged action:', { action, status, userId });
     }
   } catch (err: any) {
-    const errorContext = {
+    console.warn('[AuditLogger] Exception during log attempt (non-critical):', {
       error: err.message,
       action,
       status,
-      userId,
-      stack: err.stack
-    };
-    
-    console.warn('[AuditLogger] Exception during log attempt (non-critical):', errorContext);
-    
+      userId
+    });
     // Don't throw - audit logging failure should not break the main flow
   }
 }
