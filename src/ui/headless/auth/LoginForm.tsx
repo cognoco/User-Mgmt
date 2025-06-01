@@ -178,8 +178,18 @@ export function LoginForm({
     const credentials: LoginPayload = {
       email: emailValue,
       password: passwordValue,
-      rememberMe: rememberMeValue
+      rememberMe: Boolean(rememberMeValue)
     };
+    
+    // Debug logging to identify the validation issue
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Login credentials being sent:', {
+        email: typeof emailValue,
+        password: typeof passwordValue,
+        rememberMe: typeof rememberMeValue,
+        credentials
+      });
+    }
     
     // Submit form
     setIsSubmitting(true);

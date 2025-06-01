@@ -103,24 +103,4 @@ export class SupabaseAdminProvider implements IAdminDataProvider {
 
     return { users: (users as any[]) || [], pagination };
   }
-
-  async getUsers(_params?: GetUsersParams): Promise<GetUsersResult> {
-    throw new Error('Method not implemented.');
-  }
-
-  async getUser(_id: string): Promise<GetUserResult> {
-    throw new Error('Method not implemented.');
-  }
-
-  async updateUser(_id: string, _data: UpdateUserData): Promise<UpdateUserResult> {
-    throw new Error('Method not implemented.');
-  }
-
-  async deleteUser(_id: string): Promise<DeleteUserResult> {
-    throw new Error('Method not implemented.');
-  }
-
-  async searchUsers(_query: SearchUsersQuery): Promise<SearchUsersResult> {
-    throw new Error('Method not implemented.');
-  }
-}
+} 

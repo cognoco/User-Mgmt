@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import { startAuthentication } from '@simplewebauthn/browser';
 import { Button } from '@/ui/primitives/button';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
-import { Card, CardContent } from '@/ui/primitives/card';
-import { Shield } from 'lucide-react';
 
 interface WebAuthnLoginProps {
   userId: string;
@@ -81,7 +79,6 @@ export function WebAuthnLogin({ userId, onSuccess }: WebAuthnLoginProps) {
         className="w-full"
         size="lg"
       >
-        <Shield className="mr-2 h-5 w-5" />
         {isAuthenticating ? 'Authenticating...' : 'Use Security Key or Biometrics'}
       </Button>
     </div>

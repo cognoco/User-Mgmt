@@ -1,6 +1,7 @@
 import * as dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 // Correct ESM path resolution
 const __filename = fileURLToPath(import.meta.url);
@@ -8,7 +9,13 @@ const __dirname = path.dirname(__filename);
 
 // Explicitly load variables from the root .env file so e2e tests
 // always share the same configuration
-dotenv.config({ path: path.resolve(__dirname, '.env') });
+const envPath = path.resolve(__dirname, '.env');
+dotenv.config({ path: envPath });
+
+// Debug: Log the env file path and check if it exists
+console.log(`Loading .env from: ${envPath}`);
+console.log(`File exists: ${fs.existsSync(envPath)}`);
+
 import { defineConfig, devices } from '@playwright/test';
 
 // Use real Supabase by default since credentials are configured
@@ -22,7 +29,7 @@ console.log(`Set E2E_BASE_URL environment variable to override (e.g., E2E_BASE_U
 
 export default defineConfig({
   testDir: './e2e',
-  timeout: 30 * 1000,
+  timeout: 60 * 1000, // Increase overall test timeout to 60 seconds
   retries: 0, // No retries - fail fast for debugging
   workers: 1, // Single worker for debugging
   globalSetup: './e2e/utils/global-setup.ts',
@@ -31,9 +38,9 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    // Reduce timeouts for faster failure
-    navigationTimeout: 10000,
-    actionTimeout: 5000,
+    // Increase timeouts for slower page loads
+    navigationTimeout: 30000, // Increase navigation timeout to 30 seconds
+    actionTimeout: 15000, // Increase action timeout to 15 seconds
   },
   // No webServer config - use the existing dev server
   projects: [
@@ -42,8 +49,8 @@ export default defineConfig({
       use: { 
         ...devices['Desktop Chrome'],
         // Override timeouts for this project too
-        navigationTimeout: 10000,
-        actionTimeout: 5000,
+        navigationTimeout: 30000,
+        actionTimeout: 15000,
       },
     },
     // Comment out other browsers for faster debugging

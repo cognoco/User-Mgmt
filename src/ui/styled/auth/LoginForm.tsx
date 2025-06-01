@@ -295,7 +295,10 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
                 <Checkbox
                   id="rememberMe"
                   checked={rememberMeValue}
-                  onCheckedChange={(checked) => setRememberMeValue(!!checked)}
+                  onCheckedChange={(checked) => {
+                    // Handle the checked value properly - it can be boolean, "indeterminate", or other values
+                    setRememberMeValue(checked === true);
+                  }}
                   aria-label="Remember me"
                 />
                 <Label

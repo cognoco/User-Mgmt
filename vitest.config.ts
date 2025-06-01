@@ -18,28 +18,28 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    threads: false,
     setupFiles: ['./vitest.setup.ts'],
+    // Aggressive timeouts to identify stuck tests
+    testTimeout: 10000, // 10 seconds max per test
+    hookTimeout: 5000,  // 5 seconds for setup/teardown
+    teardownTimeout: 5000,
+    // Pool configuration for better resource management
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        maxThreads: 4,
+        minThreads: 1,
+        isolate: true
+      }
+    },
+    // Better error reporting
+    reporter: ['verbose', 'json'],
+    outputFile: 'test-results.json',
     include: [
       'src/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}',
       'src/tests/**/*.{test,spec,integration}.{js,jsx,ts,tsx}',
       'app/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}'
     ],
-    // Add coverage config if needed
-    // coverage: {
-    //   reporter: ['text', 'json', 'html'],
-    //   exclude: [
-    //     'node_modules/',
-    //     'src/test/setup.ts',
-    //     // Add other exclusions like .next/, config files etc.
-    //     '.next/',
-    //     '*.config.js',
-    //     '*.config.mjs',
-    //     '*.config.ts',
-    //   ],
-    // },
-    // Consider adding options for Next.js specific mocks if needed
-    // environmentOptions: { ... }
     exclude: [
       // Default excludes (keep these)
       '**/node_modules/**',

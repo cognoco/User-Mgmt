@@ -4,12 +4,34 @@ test.describe('Admin Dashboard', () => {
   test('should display admin dashboard for users with admin role', async ({ page }) => {
     // Login as admin
     await page.goto('/auth/login');
-    await page.fill('input[name="email"]', 'admin@example.com');
-    await page.fill('input[name="password"]', 'Password123!');
-    await page.click('button[type="submit"]');
     
-    // Wait for login to complete
-    await page.waitForURL('**/dashboard');
+    // Wait for the login form to be fully loaded
+    await expect(page.locator('#email')).toBeVisible();
+    await expect(page.locator('#password')).toBeVisible();
+    await expect(page.getByRole('button', { name: /login/i })).toBeVisible();
+    
+    // Fill the form with proper timing
+    await page.locator('#email').fill('admin@example.com');
+    await page.locator('#password').fill('Password123!');
+    
+    // Wait a moment for form validation to complete
+    await page.waitForTimeout(500);
+    
+    // Submit the form
+    await page.getByRole('button', { name: /login/i }).click();
+    
+    // Wait for login to complete or handle any validation errors
+    try {
+      await page.waitForURL('**/dashboard', { timeout: 10000 });
+    } catch (timeoutError) {
+      // If login fails, check for error messages to provide better debugging
+      const errorAlert = page.locator('[role="alert"]').filter({ hasText: 'Login Failed' });
+      if (await errorAlert.isVisible()) {
+        const errorText = await errorAlert.textContent();
+        console.log('Login error:', errorText);
+      }
+      throw timeoutError;
+    }
     
     // Navigate to admin dashboard
     await page.goto('/admin/dashboard');
@@ -34,9 +56,18 @@ test.describe('Admin Dashboard', () => {
   test('should redirect non-admin users attempting to access admin dashboard', async ({ page }) => {
     // Login as regular user
     await page.goto('/auth/login');
-    await page.fill('input[name="email"]', 'user@example.com');
-    await page.fill('input[name="password"]', 'Password123!');
-    await page.click('button[type="submit"]');
+    
+    // Wait for the login form to be fully loaded
+    await expect(page.locator('#email')).toBeVisible();
+    await expect(page.locator('#password')).toBeVisible();
+    
+    await page.locator('#email').fill('user@example.com');
+    await page.locator('#password').fill('Password123!');
+    
+    // Wait for form validation
+    await page.waitForTimeout(500);
+    
+    await page.getByRole('button', { name: /login/i }).click();
     
     // Wait for login to complete
     await page.waitForURL('**/dashboard');
@@ -51,9 +82,18 @@ test.describe('Admin Dashboard', () => {
   test('should load dashboard data correctly', async ({ page }) => {
     // Login as admin
     await page.goto('/auth/login');
-    await page.fill('input[name="email"]', 'admin@example.com');
-    await page.fill('input[name="password"]', 'Password123!');
-    await page.click('button[type="submit"]');
+    
+    // Wait for the login form to be fully loaded
+    await expect(page.locator('#email')).toBeVisible();
+    await expect(page.locator('#password')).toBeVisible();
+    
+    await page.locator('#email').fill('admin@example.com');
+    await page.locator('#password').fill('Password123!');
+    
+    // Wait for form validation
+    await page.waitForTimeout(500);
+    
+    await page.getByRole('button', { name: /login/i }).click();
     
     // Wait for login to complete
     await page.waitForURL('**/dashboard');

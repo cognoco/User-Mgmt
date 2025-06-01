@@ -15,9 +15,9 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 // Test credentials - should match the ones used in tests
 const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || 'admin@example.com';
-const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'adminpassword';
+const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'Password123!';
 const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';
-const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';
+const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'Password123!';
 
 export default async () => {
   // Setup i18n
