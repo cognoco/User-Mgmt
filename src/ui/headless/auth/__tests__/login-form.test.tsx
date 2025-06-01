@@ -91,6 +91,18 @@ function setupAuthStoreMock(authMock: any) {
   (useAuth as any).mockImplementation(() => authMock);
 }
 
+let props: any;
+const renderForm = (p = {}) =>
+  render(
+    <LoginForm
+      {...p}
+      render={(rp) => {
+        props = rp;
+        return <div />;
+      }}
+    />
+  );
+
 describe('LoginForm', () => {
   const mockLogin = vi.fn();
 
