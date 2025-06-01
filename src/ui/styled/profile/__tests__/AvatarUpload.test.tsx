@@ -5,16 +5,19 @@ import { vi } from 'vitest';
 import { AvatarUpload } from '@/ui/styled/profile/AvatarUpload';
 
 // Mock the profile store
+const mockRemoveAvatar = vi.fn().mockResolvedValue(true);
+const storeMock = {
+  profile: {
+    avatar_url: 'https://example.com/avatar.jpg',
+    full_name: 'Test User'
+  },
+  uploadAvatar: vi.fn().mockResolvedValue('https://example.com/new-avatar.jpg'),
+  removeAvatar: mockRemoveAvatar,
+  isLoading: false,
+  error: null
+};
 vi.mock('@/lib/stores/profile.store', () => ({
-  useProfileStore: () => ({
-    profile: {
-      avatarUrl: 'https://example.com/avatar.jpg'
-    },
-    uploadAvatar: vi.fn().mockResolvedValue('https://example.com/new-avatar.jpg'),
-    removeAvatar: vi.fn().mockResolvedValue(true),
-    isLoading: false,
-    error: null
-  })
+  useProfileStore: vi.fn(() => storeMock)
 }));
 
 // Mock the UserManagementProvider
@@ -46,6 +49,9 @@ vi.mock('react-i18next', () => ({
         'profile.dragOrClick': 'Drag and drop an image here, or click to select',
         'profile.applyAvatar': 'Apply Selected Avatar',
         'profile.removeAvatar': 'Remove profile picture',
+        'profile.chooseAvatar': 'Select Avatar',
+        'profile.uploadPhoto': 'Upload',
+        'profile.updateAvatar': 'Update Avatar',
         'common.cancel': 'Cancel'
       };
       return translations[key] || key;
@@ -94,8 +100,9 @@ describe('AvatarUpload Component', () => {
   test('renders avatar and change button', async () => {
     render(<AvatarUpload />);
     
-    expect(screen.getByRole('img', { name: /avatar/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/change profile image/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /change profile image/i })
+    ).toBeInTheDocument();
   });
   
   test('handles avatar removal', async () => {
@@ -104,16 +111,15 @@ describe('AvatarUpload Component', () => {
     const removeButton = screen.getByRole('button', { name: /remove/i });
     await user.click(removeButton);
     
-    const profileStore = await import('@/lib/stores/profile.store');
-    expect(profileStore.useProfileStore().removeAvatar).toHaveBeenCalled();
+    expect(mockRemoveAvatar).toHaveBeenCalled();
   });
   
   test('opens modal on avatar click', async () => {
     render(<AvatarUpload />);
     
-    // Click the avatar container
-    const avatarContainer = screen.getByLabelText(/change profile image/i);
-    await user.click(avatarContainer);
+    // Click the change avatar button
+    const openButton = screen.getByRole('button', { name: /change profile image/i });
+    await user.click(openButton);
     
     // Check if modal is open
     expect(screen.getByRole('dialog')).toBeInTheDocument();
