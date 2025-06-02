@@ -2,14 +2,23 @@
 // PUT /api/permissions/[id] - Update permission
 // DELETE /api/permissions/[id] - Delete permission
 
-export function GET() {
-  return new Response('Not implemented', { status: 501 });
-}
+import { createProtectedHandler } from '@/middleware/permissions';
+import { withSecurity } from '@/middleware/with-security';
+import { PermissionValues } from '@/core/permission/models';
 
-export function PUT() {
-  return new Response('Not implemented', { status: 501 });
-}
+export const GET = createProtectedHandler(
+  async () => new Response('Not implemented', { status: 501 }),
+  PermissionValues.MANAGE_ROLES,
+);
 
-export function DELETE() {
-  return new Response('Not implemented', { status: 501 });
-}
+export const PUT = createProtectedHandler(
+  (req) =>
+    withSecurity(async () => new Response('Not implemented', { status: 501 }))(req),
+  PermissionValues.MANAGE_ROLES,
+);
+
+export const DELETE = createProtectedHandler(
+  (req) =>
+    withSecurity(async () => new Response('Not implemented', { status: 501 }))(req),
+  PermissionValues.MANAGE_ROLES,
+);

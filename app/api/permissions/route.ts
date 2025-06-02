@@ -4,6 +4,9 @@
 import { type NextRequest } from 'next/server';
 import { createSuccessResponse } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
+import { createProtectedHandler } from '@/middleware/permissions';
+import { withSecurity } from '@/middleware/with-security';
+import { PermissionValues } from '@/core/permission/models';
 import { getApiPermissionService } from '@/services/permission/factory';
 
 async function handleGet() {
@@ -12,10 +15,13 @@ async function handleGet() {
   return createSuccessResponse({ permissions });
 }
 
-export async function GET(req: NextRequest) {
-  return withErrorHandling(() => handleGet(), req);
-}
+export const GET = createProtectedHandler(
+  (req) => withErrorHandling(() => handleGet(), req),
+  PermissionValues.MANAGE_ROLES,
+);
 
-export async function POST() {
-  return new Response('Not implemented', { status: 501 });
-}
+export const POST = createProtectedHandler(
+  (req) =>
+    withSecurity(async () => new Response('Not implemented', { status: 501 }))(req),
+  PermissionValues.MANAGE_ROLES,
+);
