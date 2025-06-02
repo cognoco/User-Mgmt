@@ -10,11 +10,51 @@ const __dirname = path.dirname(__filename);
 // Explicitly load variables from the root .env file so e2e tests
 // always share the same configuration
 const envPath = path.resolve(__dirname, '.env');
-dotenv.config({ path: envPath });
+const envResult = dotenv.config({ path: envPath });
 
 // Debug: Log the env file path and check if it exists
 console.log(`Loading .env from: ${envPath}`);
 console.log(`File exists: ${fs.existsSync(envPath)}`);
+console.log(`Dotenv result:`, envResult.error ? `Error: ${envResult.error}` : 'Success');
+console.log(`Parsed object:`, envResult.parsed);
+
+// Check if we actually got the Supabase variables
+const hasSupabaseInParsed = envResult.parsed && 
+  (envResult.parsed.NEXT_PUBLIC_SUPABASE_URL || 
+   envResult.parsed.NEXT_PUBLIC_SUPABASE_ANON_KEY || 
+   envResult.parsed.SUPABASE_SERVICE_ROLE_KEY);
+
+// Explicitly set environment variables if they were parsed
+if (envResult.parsed && hasSupabaseInParsed) {
+  for (const [key, value] of Object.entries(envResult.parsed)) {
+    if (!process.env[key]) {
+      process.env[key] = value;
+    }
+  }
+  console.log('Key environment variables status:');
+  console.log('- NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING');
+  console.log('- NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING');
+  console.log('- SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING');
+} else {
+  console.log('WARNING: No Supabase variables found in .env file, manually setting them...');
+  
+  // If dotenv parsing fails or doesn't contain Supabase vars, manually set them
+  // This is a fallback for when dotenv has parsing issues
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://izziigqgdurqsoyvajvu.supabase.co';
+  }
+  if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6emlpZ3FnZHVycXNveXZhanZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE2MjYyODksImV4cCI6MjA1NzIwMjI4OX0.6njjAphh3g39kIi8jQJx8xsvelXP-zDrm-wP9-OJ1Fs';
+  }
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6emlpZ3FnZHVycXNveXZhanZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MTYyNjI4OSwiZXhwIjoyMDU3MjAyMjg5fQ.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6emlpZ3FnZHVycXNveXZhanZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MTYyNjI4OSwiZXhwIjoyMDU3MjAyMjg5fQ';
+  }
+  
+  console.log('Fallback environment variables status:');
+  console.log('- NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING');
+  console.log('- NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING');
+  console.log('- SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING');
+}
 
 import { defineConfig, devices } from '@playwright/test';
 

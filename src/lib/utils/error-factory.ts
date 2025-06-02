@@ -110,5 +110,23 @@ export function createNotFoundError(
   const code = USER_ERROR_CODES.NOT_FOUND;
   const defaultMsg = `${resourceType} ${resourceId} not found`;
   const msg = getLocalizedMessage(code, locale) || defaultMsg;
-  return createError(code as ErrorCode, msg, { resourceType, resourceId }, cause, 404);
+  return createError(code, msg, { resourceType, resourceId }, cause, 404);
+}
+
+/**
+ * Simple error enhancement - converts unknown errors to ApplicationError format
+ */
+export function enhanceError(error: unknown): Error {
+  // If it's already an Error, return as-is
+  if (error instanceof Error) {
+    return error;
+  }
+  
+  // If it's a string, create an Error from it
+  if (typeof error === 'string') {
+    return new Error(error);
+  }
+  
+  // For anything else, create a generic error
+  return new Error('Unknown error occurred');
 }

@@ -174,3 +174,18 @@ export function deserializeError(json: string): ApplicationError {
 export type DataProviderError = ApplicationError;
 export const isDataProviderError = isApplicationError;
 
+// createError function for service compatibility
+export function createError(
+  code: ErrorCode,
+  message: string,
+  details?: Record<string, any>,
+  cause?: unknown,
+  httpStatus?: number
+): ApplicationError {
+  const err = new ApplicationError(code, message, httpStatus || 500, details);
+  if (cause instanceof Error && cause.stack) {
+    err.stack = `${err.stack}\nCaused by: ${cause.stack}`;
+  }
+  return err;
+}
+

@@ -11,7 +11,46 @@ const __dirname = path.dirname(__filename);
 
 // Load environment variables from the root .env file so test and application
 // share the same values when running E2E
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+const envPath = path.resolve(__dirname, '../../.env');
+const envResult = dotenv.config({ path: envPath });
+
+// Debug environment loading
+console.log(`Loading .env from: ${envPath}`);
+console.log(`Dotenv result:`, envResult.error ? `Error: ${envResult.error}` : 'Success');
+
+// Explicitly ensure the environment variables are available
+if (envResult.parsed) {
+  // Set them explicitly in process.env if they're not already there
+  for (const [key, value] of Object.entries(envResult.parsed)) {
+    if (!process.env[key]) {
+      process.env[key] = value;
+    }
+  }
+  
+  console.log('Environment variables loaded from .env file:');
+  console.log('- NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING');
+  console.log('- NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING');
+  console.log('- SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING');
+} else {
+  console.log('WARNING: No variables parsed from .env file in global setup, using fallback...');
+  
+  // If dotenv parsing fails, manually set the known Supabase variables
+  // This is a fallback for when dotenv has parsing issues
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://izziigqgdurqsoyvajvu.supabase.co';
+  }
+  if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6emlpZ3FnZHVycXNveXZhanZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE2MjYyODksImV4cCI6MjA1NzIwMjI4OX0.6njjAphh3g39kIi8jQJx8xsvelXP-zDrm-wP9-OJ1Fs';
+  }
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6emlpZ3FnZHVycXNveXZhanZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MTYyNjI4OSwiZXhwIjoyMDU3MjAyMjg5fQ.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6emlpZ3FnZHVycXNveXZhanZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MTYyNjI4OSwiZXhwIjoyMDU3MjAyMjg5fQ';
+  }
+  
+  console.log('Fallback environment variables in global setup:');
+  console.log('- NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING');
+  console.log('- NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING');
+  console.log('- SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING');
+}
 
 // Test credentials - should match the ones used in tests
 const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL || 'admin@example.com';

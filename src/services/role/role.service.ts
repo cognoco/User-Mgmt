@@ -46,7 +46,6 @@ export class RoleService {
     private supabase = getServiceSupabase(),
     private maxHierarchyDepth = Infinity,
   ) {}
-}
 
   async getAllRoles(filters?: { isSystemRole?: boolean }): Promise<Role[]> {
     let query = this.supabase.from('roles').select('*');
