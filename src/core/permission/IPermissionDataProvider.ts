@@ -168,6 +168,58 @@ export interface IPermissionDataProvider {
   getRolePermissions(roleId: string): Promise<Permission[]>;
 
   /**
+   * Assign a permission scoped to a specific resource to a user.
+   */
+  assignResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<ResourcePermission>;
+
+  /**
+   * Remove a resource scoped permission from a user.
+   */
+  removeResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<boolean>;
+
+  /**
+   * Check if a user holds a permission for a specific resource.
+   */
+  hasResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<boolean>;
+
+  /**
+   * List all resource permissions granted to a user.
+   */
+  getUserResourcePermissions(userId: string): Promise<ResourcePermission[]>;
+
+  /**
+   * List all permissions for a given resource.
+   */
+  getPermissionsForResource(
+    resourceType: string,
+    resourceId: string,
+  ): Promise<ResourcePermission[]>;
+
+  /**
+   * Get all users that have a specific permission for a resource.
+   */
+  getUsersWithResourcePermission(
+    resourceType: string,
+    resourceId: string,
+    permission: Permission,
+  ): Promise<string[]>;
+
+  /**
    * Sync default role permissions with persistent storage.
    *
    * Implementations should ensure that the stored roles match the default

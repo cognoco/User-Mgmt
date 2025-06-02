@@ -229,3 +229,21 @@ export const DefaultRoleDefinitions: RolePermissionMap = {
     PermissionValues.CREATE_PROJECT,
   ],
 };
+
+/**
+ * Permission assignment tied to a specific resource
+ */
+export interface ResourcePermission {
+  /** Unique identifier */
+  id: string;
+  /** User that holds the permission */
+  userId: string;
+  /** Permission granted */
+  permission: Permission;
+  /** Resource type, e.g. "project" */
+  resourceType: string;
+  /** Resource identifier */
+  resourceId: string;
+  /** Date the permission was created */
+  createdAt: Date;
+}

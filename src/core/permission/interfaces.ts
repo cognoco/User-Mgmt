@@ -160,6 +160,52 @@ export interface PermissionService {
    * @returns An array of permissions assigned to the role
    */
   getRolePermissions(roleId: string): Promise<Permission[]>;
+
+  /**
+   * Assign a permission scoped to a specific resource to a user
+   */
+  assignResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<ResourcePermission>;
+
+  /**
+   * Remove a resource scoped permission from a user
+   */
+  removeResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<boolean>;
+
+  /**
+   * Check if a user has a permission for a specific resource
+   */
+  hasResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<boolean>;
+
+  /** Get all resource permissions for a user */
+  getUserResourcePermissions(userId: string): Promise<ResourcePermission[]>;
+
+  /** Get all permissions for a specific resource */
+  getPermissionsForResource(
+    resourceType: string,
+    resourceId: string,
+  ): Promise<ResourcePermission[]>;
+
+  /** Get all users with a permission for a resource */
+  getUsersWithResourcePermission(
+    resourceType: string,
+    resourceId: string,
+    permission: Permission,
+  ): Promise<string[]>;
   
   /**
    * Sync role permissions with the database
