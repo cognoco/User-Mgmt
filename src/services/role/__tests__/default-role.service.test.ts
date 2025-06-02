@@ -60,14 +60,26 @@ describe('DefaultRoleService', () => {
     expect(first).toEqual(second);
   });
 
-  it('validateHierarchy enforces depth limits', () => {
-    service.addRole({ id: 'D', permissionIds: ['p5'], parentRoleId: 'C' });
-    expect(() => service.validateHierarchy(3)).toThrow('Role hierarchy depth limit exceeded');
-  });
+it('removes parent role relationship', () => {
+  service.removeParentRole('B');
+  expect(service.getAncestorRoles('B')).toEqual([]);
+});
 
-  it('validateHierarchy detects circular references', () => {
-    const map = (service as any).roles as Map<string, any>;
-    map.get('A')!.parentRoleId = 'C';
-    expect(() => service.validateHierarchy()).toThrow('Circular role hierarchy');
-  });
+it('provides full hierarchy tree', () => {
+  const tree = service.getRoleHierarchy();
+  expect(tree[0].id).toBe('A');
+  expect(tree[0].children[0].id).toBe('B');
+  expect(tree[0].children[0].children[0].id).toBe('C');
+});
+
+it('validateHierarchy enforces depth limits', () => {
+  service.addRole({ id: 'D', permissionIds: ['p5'], parentRoleId: 'C' });
+  expect(() => service.validateHierarchy(3)).toThrow('Role hierarchy depth limit exceeded');
+});
+
+it('validateHierarchy detects circular references', () => {
+  const map = (service as any).roles as Map<string, any>;
+  map.get('A')!.parentRoleId = 'C';
+  expect(() => service.validateHierarchy()).toThrow('Circular role hierarchy');
+});
 });
