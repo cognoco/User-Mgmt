@@ -28,6 +28,8 @@ import { translateError } from '@/lib/utils/error';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
 import { MemoryCache } from '@/lib/cache';
 import { prisma } from '@/lib/database/prisma';
+import { handleServiceError } from '@/services/common/service-error-handler';
+import { ERROR_CODES } from '@/core/common/error-codes';
 
 /**
  * Default implementation of the TeamService interface
@@ -108,9 +110,14 @@ export class DefaultTeamService
         this.teamDataProvider.getTeam(teamId)
       );
     } catch (error) {
-      console.error('Error fetching team:', error);
+      const { error: err } = handleServiceError(error, {
+        service: 'DefaultTeamService',
+        method: 'getTeam',
+        resourceType: 'team',
+        resourceId: teamId,
+      }, ERROR_CODES.NOT_FOUND);
       DefaultTeamService.teamCache.delete(teamId);
-      return null;
+      throw err;
     }
   }
   
