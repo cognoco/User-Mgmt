@@ -56,9 +56,6 @@ export default defineConfig({
       '**/e2e/**',
       
       // Temporarily exclude problematic tests to find other stuck ones
-      '**/DomainBasedOrgMatching.test.tsx',
-      '**/RegistrationForm.integration.test.tsx',
-      '**/app/api/auth/oauth/callback/__tests__/route.test.ts',
     ],
   },
 }); 
