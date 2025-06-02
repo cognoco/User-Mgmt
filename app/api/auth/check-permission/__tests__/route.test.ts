@@ -30,11 +30,19 @@ function createRequest(body: any) {
 
 describe('POST /api/auth/check-permission', () => {
   it('returns permission result', async () => {
-    const res = await POST(createRequest({ permission: 'ADMIN_ACCESS' }) as any);
+    const res = await POST(
+      createRequest({ permission: 'ADMIN_ACCESS' }) as any
+    );
     const data = await res.json();
     expect(res.status).toBe(200);
     expect(data.data.hasPermission).toBe(true);
     expect(mockService.hasPermission).toHaveBeenCalledWith('user-1', 'ADMIN_ACCESS');
+  });
+
+  it('caches permission checks', async () => {
+    await POST(createRequest({ permission: 'ADMIN_ACCESS' }) as any);
+    await POST(createRequest({ permission: 'ADMIN_ACCESS' }) as any);
+    expect(mockService.hasPermission).toHaveBeenCalledTimes(1);
   });
 
   it('validates request body', async () => {
