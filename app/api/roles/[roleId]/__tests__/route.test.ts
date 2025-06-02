@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET, PATCH, DELETE } from '../route';
+import { GET, PATCH, PUT, DELETE } from '../route';
 
 const mockService = {
   getRoleById: vi.fn(),
@@ -26,6 +26,15 @@ describe('roles id API', () => {
     (req as any).json = async () => ({ name: 'n' });
     mockService.updateRole.mockResolvedValue({ id: '1' });
     const res = await PATCH(req as any, { params: { roleId: '1' } } as any);
+    expect(res.status).toBe(200);
+    expect(mockService.updateRole).toHaveBeenCalled();
+  });
+
+  it('PUT updates role', async () => {
+    const req = new Request('http://test', { method: 'PUT', body: JSON.stringify({ name: 'n' }) });
+    (req as any).json = async () => ({ name: 'n' });
+    mockService.updateRole.mockResolvedValue({ id: '1' });
+    const res = await PUT(req as any, { params: { roleId: '1' } } as any);
     expect(res.status).toBe(200);
     expect(mockService.updateRole).toHaveBeenCalled();
   });

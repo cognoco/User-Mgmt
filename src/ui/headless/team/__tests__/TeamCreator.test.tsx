@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, act } from '@testing-library/react';
+import { render, act, waitFor } from '@testing-library/react';
 import { TeamCreator } from '../TeamCreator';
 import { useTeams } from '@/hooks/team/useTeams';
 import { useAuth } from '@/hooks/auth/useAuth';
@@ -7,17 +7,17 @@ import { useAuth } from '@/hooks/auth/useAuth';
 vi.mock('@/hooks/team/useTeams');
 vi.mock('@/hooks/auth/useAuth');
 
+let lastProps: any;
 const renderWithProps = () => {
-  let props: any;
   render(
     <TeamCreator
       render={(p) => {
-        props = p;
+        lastProps = p;
         return <div />;
       }}
     />
   );
-  return props;
+  return () => lastProps;
 };
 
 describe('TeamCreator', () => {
@@ -36,17 +36,19 @@ describe('TeamCreator', () => {
   });
 
   it('calls createTeam with user id when submitted', async () => {
-    const props = renderWithProps();
+    const getProps = renderWithProps();
 
-    act(() => {
-      props.setNameValue('My Team');
+    await act(async () => {
+      getProps().setNameValue('My Team');
     });
 
     await act(async () => {
-      await props.handleSubmit({ preventDefault() {} } as any);
+      await getProps().handleSubmit({ preventDefault() {} } as any);
     });
 
-    expect(createTeam).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(createTeam).toHaveBeenCalledTimes(1);
+    });
     expect(createTeam.mock.calls[0][0]).toBe('u1');
     expect(createTeam.mock.calls[0][1]).toEqual({
       name: 'My Team',
@@ -57,23 +59,23 @@ describe('TeamCreator', () => {
 
   it('uses custom onSubmit when provided', async () => {
     const onSubmit = vi.fn();
-    let props: any;
+    let currentProps: any;
     render(
       <TeamCreator
         onSubmit={onSubmit}
         render={(p) => {
-          props = p;
+          currentProps = p;
           return <div />;
         }}
       />
     );
 
     act(() => {
-      props.setNameValue('Custom');
+      currentProps.setNameValue('Custom');
     });
 
     await act(async () => {
-      await props.handleSubmit({ preventDefault() {} } as any);
+      await currentProps.handleSubmit({ preventDefault() {} } as any);
     });
 
     expect(onSubmit).toHaveBeenCalledWith({
@@ -84,14 +86,14 @@ describe('TeamCreator', () => {
     expect(createTeam).not.toHaveBeenCalled();
   });
 
-  it('reports validation state via onValidationChange', () => {
+  it('reports validation state via onValidationChange', async () => {
     const onValidationChange = vi.fn();
-    let props: any;
+    let currentProps: any;
     render(
       <TeamCreator
         onValidationChange={onValidationChange}
         render={(p) => {
-          props = p;
+          currentProps = p;
           return <div />;
         }}
       />
@@ -100,10 +102,17 @@ describe('TeamCreator', () => {
     expect(onValidationChange).toHaveBeenCalledWith(false);
 
     act(() => {
-      props.setNameValue('ok');
-      props.handleBlur('name');
+      currentProps.setNameValue('ok');
     });
 
-    expect(onValidationChange).toHaveBeenLastCalledWith(true);
+    act(() => {
+      currentProps.handleBlur('name');
+    });
+
+    expect(onValidationChange).toHaveBeenCalledWith(false);
+
+    await waitFor(() => {
+      expect(onValidationChange).toHaveBeenLastCalledWith(true);
+    });
   });
 });

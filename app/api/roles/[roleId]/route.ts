@@ -36,6 +36,16 @@ async function handlePatch(_req: NextRequest, id: string, data: UpdateRole) {
   }
 }
 
+async function handlePut(_req: NextRequest, id: string, data: UpdateRole) {
+  const service = getApiPermissionService();
+  try {
+    const role = await service.updateRole(id, data);
+    return createSuccessResponse({ role });
+  } catch (e) {
+    throw mapPermissionServiceError(e as Error);
+  }
+}
+
 async function handleDelete(id: string) {
   const service = getApiPermissionService();
   const ok = await service.deleteRole(id);
@@ -60,6 +70,18 @@ export const PATCH = createProtectedHandler(
       );
     })(req),
   PermissionValues.MANAGE_ROLES
+);
+
+export const PUT = createProtectedHandler(
+  (req, ctx) =>
+    withSecurity(async (r) => {
+      const body = await r.json();
+      return withErrorHandling(
+        (r3) => withValidation(updateSchema, (r2, data) => handlePut(r2, ctx.params.roleId, data), r3, body),
+        r,
+      );
+    })(req),
+  PermissionValues.MANAGE_ROLES,
 );
 
 export const DELETE = createProtectedHandler(

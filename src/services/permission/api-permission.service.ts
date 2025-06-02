@@ -6,7 +6,8 @@ import {
   UserRole,
   PermissionAssignment,
   RoleCreationPayload,
-  RoleUpdatePayload
+  RoleUpdatePayload,
+  ResourcePermission
 } from '@/core/permission/models';
 import { PermissionEventHandler } from '@/core/permission/events';
 
@@ -135,6 +136,74 @@ export class ApiPermissionService implements PermissionService {
   async getRolePermissions(roleId: string): Promise<Permission[]> {
     const role = await this.getRoleById(roleId);
     return role ? role.permissions : [];
+  }
+
+  async assignResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<ResourcePermission> {
+    const res = await fetch('/api/permissions/resource', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ userId, permission, resourceType, resourceId }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'assign failed');
+    return data.data.permission ?? data.data;
+  }
+
+  async removeResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<boolean> {
+    const url = `/api/permissions/resource?userId=${userId}&permission=${permission}&type=${resourceType}&id=${resourceId}`;
+    const res = await fetch(url, { method: 'DELETE', credentials: 'include' });
+    return res.ok;
+  }
+
+  async hasResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<boolean> {
+    const url = `/api/permissions/resource/check?userId=${userId}&permission=${permission}&type=${resourceType}&id=${resourceId}`;
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) return false;
+    const data = await res.json();
+    return !!data.data?.allowed;
+  }
+
+  async getUserResourcePermissions(userId: string): Promise<ResourcePermission[]> {
+    const res = await fetch(`/api/permissions/resource?userId=${userId}`, { credentials: 'include' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.data.permissions;
+  }
+
+  async getPermissionsForResource(resourceType: string, resourceId: string): Promise<ResourcePermission[]> {
+    const url = `/api/permissions/resource?type=${resourceType}&id=${resourceId}`;
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.data.permissions;
+  }
+
+  async getUsersWithResourcePermission(
+    resourceType: string,
+    resourceId: string,
+    permission: Permission,
+  ): Promise<string[]> {
+    const url = `/api/permissions/resource/users?permission=${permission}&type=${resourceType}&id=${resourceId}`;
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.data.users;
   }
 
   async syncRolePermissions(): Promise<boolean> {

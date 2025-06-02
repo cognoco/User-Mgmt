@@ -18,6 +18,8 @@ import {
 } from '@/core/auth/models';
 import { AuthEventType } from '@/core/auth/events';
 import { translateError } from '@/lib/utils/error';
+import { handleServiceError } from '@/services/common/service-error-handler';
+import { ERROR_CODES } from '@/core/common/error-codes';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
 import type {
   OAuthProvider,
@@ -225,9 +227,13 @@ export class DefaultAuthService
       this.user = await this.provider.getCurrentUser();
       return this.user;
     } catch (error) {
-      const message = translateError(error, { defaultMessage: 'Failed to get user' });
-      console.error(message);
-      throw new Error(message);
+      const { error: err } = handleServiceError(error, {
+        service: 'DefaultAuthService',
+        method: 'getCurrentUser',
+        resourceType: 'user',
+        resourceId: 'current',
+      }, ERROR_CODES.INTERNAL_ERROR);
+      throw err;
     }
   }
 

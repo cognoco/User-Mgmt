@@ -5,7 +5,6 @@ import ProfileForm from '../ProfileForm';
 import { TestWrapper } from '../../../../tests/utils/test-wrapper';
 import { createMockProfileStore } from '../../../../tests/mocks/profile.store.mock';
 import { api } from '@/lib/api/axios';
-
 vi.unmock('@/hooks/auth/useAuth');
 
 let mockStore: ReturnType<typeof createMockProfileStore>;
@@ -43,19 +42,21 @@ describe('Headless ProfileForm Component', () => {
 
   let mockFetchProfile: any;
   let mockUpdateProfile: any;
-  
+
   beforeEach(() => {
     vi.clearAllMocks();
-mockStore = createMockProfileStore(
-  { profile: mockProfile },
-  { fetchProfile: mockFetchProfile, updateProfile: mockUpdateProfile }
-);
-// Support setState updater functions
-const originalSetState = mockStore.setState;
-mockStore.setState = (partial: any, replace?: boolean) => {
-  const value = typeof partial === 'function' ? partial(mockStore.getState()) : partial;
-  originalSetState(value, replace);
-};
+    mockFetchProfile = vi.fn();
+    mockUpdateProfile = vi.fn();
+    mockStore = createMockProfileStore(
+      { profile: mockProfile },
+      { fetchProfile: mockFetchProfile, updateProfile: mockUpdateProfile }
+    );
+    // Support setState updater functions
+    const originalSetState = mockStore.setState;
+    mockStore.setState = (partial: any, replace?: boolean) => {
+      const value = typeof partial === 'function' ? partial(mockStore.getState()) : partial;
+      originalSetState(value, replace);
+    };
     (api.put as any).mockResolvedValue({
       data: { is_public: false, message: 'Privacy settings updated' },
     });

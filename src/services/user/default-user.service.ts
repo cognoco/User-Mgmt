@@ -22,6 +22,8 @@ import {
 import { UserEventType } from '@/core/user/events';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
 import { MemoryCache, getFromBrowser, setInBrowser, removeFromBrowser } from '@/lib/cache';
+import { handleServiceError } from '@/services/common/service-error-handler';
+import { ERROR_CODES } from '@/core/common/error-codes';
 
 /**
  * Default implementation of the UserService interface
@@ -63,9 +65,14 @@ export class DefaultUserService
         this.userDataProvider.getUserProfile(userId)
       );
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      const { error: err } = handleServiceError(error, {
+        service: 'DefaultUserService',
+        method: 'getUserProfile',
+        resourceType: 'user',
+        resourceId: userId,
+      }, ERROR_CODES.NOT_FOUND);
       DefaultUserService.profileCache.delete(userId);
-      return null;
+      throw err;
     }
   }
 

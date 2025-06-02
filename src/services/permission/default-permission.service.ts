@@ -15,6 +15,7 @@ import {
   RoleCreationPayload,
   RoleUpdatePayload,
   DefaultRoleDefinitions,
+  ResourcePermission,
 } from "@/core/permission/models";
 import {
   PermissionEventTypes,
@@ -25,6 +26,8 @@ import type { PermissionDataProvider } from "@/core/permission/IPermissionDataPr
 import { translateError } from "@/lib/utils/error";
 import { TypedEventEmitter } from "@/lib/utils/typed-event-emitter";
 import { MemoryCache } from '@/lib/cache';
+import { RoleService } from '@/services/role';
+import { ResourcePermissionResolver } from './resource-permission-resolver';
 
 /**
  * Default implementation of the PermissionService interface
@@ -34,13 +37,24 @@ export class DefaultPermissionService
   implements PermissionService
 {
   private static roleCache = new MemoryCache<string, UserRole[]>({ ttl: 30_000 });
+  private static resourceCache = new MemoryCache<string, boolean>({ ttl: 30_000 });
+  private static userPermissionCache = new MemoryCache<string, boolean>({ ttl: 30_000 });
+
+  private roleService: RoleService;
+  private resourcePermissionResolver: ResourcePermissionResolver;
   /**
    * Constructor for DefaultPermissionService
    *
    * @param permissionDataProvider - The data provider for permission operations
    */
-  constructor(private permissionDataProvider: PermissionDataProvider) {
+  constructor(
+    private permissionDataProvider: PermissionDataProvider,
+    roleService: RoleService = new RoleService(),
+    resourceResolver: ResourcePermissionResolver = new ResourcePermissionResolver(),
+  ) {
     super();
+    this.roleService = roleService;
+    this.resourcePermissionResolver = resourceResolver;
   }
 
   /**
@@ -50,6 +64,15 @@ export class DefaultPermissionService
    */
   private emitEvent(event: PermissionEvent): void {
     this.emit(event);
+  }
+
+  private cacheKey(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): string {
+    return `${userId}:${permission}:${resourceType}:${resourceId}`;
   }
 
   /**
@@ -63,26 +86,22 @@ export class DefaultPermissionService
     userId: string,
     permission: Permission,
   ): Promise<boolean> {
-    try {
-      // Get all roles assigned to the user
-      const userRoles = await this.getUserRoles(userId);
-
-      // For each role, check if it has the permission
-      for (const userRole of userRoles) {
-        const hasPermission = await this.roleHasPermission(
-          userRole.roleId,
-          permission,
-        );
-        if (hasPermission) {
-          return true;
+    const cacheKey = `${userId}:${permission}`;
+    return DefaultPermissionService.userPermissionCache.getOrCreate(cacheKey, async () => {
+      try {
+        const userRoles = await this.getUserRoles(userId);
+        for (const userRole of userRoles) {
+          const perms = await this.roleService.getEffectivePermissions(userRole.roleId);
+          if (perms.includes(permission)) {
+            return true;
+          }
         }
+        return false;
+      } catch (error) {
+        console.error("Error checking user permission:", error);
+        return false;
       }
-
-      return false;
-    } catch (error) {
-      console.error("Error checking user permission:", error);
-      return false;
-    }
+    });
   }
 
   /**
@@ -448,6 +467,82 @@ export class DefaultPermissionService
       console.error("Error removing permission from role:", errorMessage);
       return false;
     }
+  }
+
+  async assignResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<ResourcePermission> {
+    const rp = await this.permissionDataProvider.assignResourcePermission(
+      userId,
+      permission,
+      resourceType,
+      resourceId,
+    );
+    DefaultPermissionService.resourceCache.delete(
+      this.cacheKey(userId, permission, resourceType, resourceId),
+    );
+    return rp;
+  }
+
+  async removeResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<boolean> {
+    const ok = await this.permissionDataProvider.removeResourcePermission(
+      userId,
+      permission,
+      resourceType,
+      resourceId,
+    );
+    DefaultPermissionService.resourceCache.delete(
+      this.cacheKey(userId, permission, resourceType, resourceId),
+    );
+    return ok;
+  }
+
+  async hasResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<boolean> {
+    const key = this.cacheKey(userId, permission, resourceType, resourceId);
+    return DefaultPermissionService.resourceCache.getOrCreate(key, async () => {
+      const effectivePermissions = await this.resourcePermissionResolver.getEffectivePermissions(
+        userId,
+        resourceType,
+        resourceId,
+      );
+      return effectivePermissions.includes(permission);
+    });
+  }
+
+  async getUserResourcePermissions(userId: string): Promise<ResourcePermission[]> {
+    return this.permissionDataProvider.getUserResourcePermissions(userId);
+  }
+
+  async getPermissionsForResource(
+    resourceType: string,
+    resourceId: string,
+  ): Promise<ResourcePermission[]> {
+    return this.permissionDataProvider.getPermissionsForResource(resourceType, resourceId);
+  }
+
+  async getUsersWithResourcePermission(
+    resourceType: string,
+    resourceId: string,
+    permission: Permission,
+  ): Promise<string[]> {
+    return this.permissionDataProvider.getUsersWithResourcePermission(
+      resourceType,
+      resourceId,
+      permission,
+    );
   }
 
   /**

@@ -1,6 +1,7 @@
 // src/tests/utils/test-wrapper.tsx
 import React, { useEffect } from 'react';
 import { setupTestServices } from './test-service-setup';
+import { AuthProvider } from '@/lib/context/AuthContext';
 
 interface TestWrapperProps {
   children: React.ReactNode;
@@ -41,5 +42,5 @@ export function TestWrapper({
     }
   }, [authenticated, mockAuthService]);
   
-  return <>{children}</>;
+  return <AuthProvider authService={mockAuthService}>{children}</AuthProvider>;
 }

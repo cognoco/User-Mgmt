@@ -124,4 +124,14 @@ export interface RoleFeatures {
     permissions: Permission[];
     description: string;
   };
-} 
+}
+
+// Resource-specific permission assignment
+export interface ResourcePermission {
+  id: string;
+  userId: string;
+  permissionId: string;
+  resourceType: string;
+  resourceId: string;
+  createdAt?: string | Date;
+}

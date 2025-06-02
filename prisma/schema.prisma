@@ -567,12 +567,16 @@ model roles {
   id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name             String             @unique
   description      String?
+  parent_role_id   String?            @db.Uuid
+  parent_role      roles?             @relation("RoleParent", fields: [parent_role_id], references: [id])
+  child_roles      roles[]            @relation("RoleParent")
   created_at       DateTime?          @default(now()) @db.Timestamptz(6)
   updated_at       DateTime?          @default(now()) @db.Timestamptz(6)
   role_permissions role_permissions[]
   user_invitations user_invitations[]
   user_roles       user_roles[]
 
+  @@index([parent_role_id], map: "idx_roles_parent_role_id")
   @@schema("public")
 }
 
@@ -850,20 +854,20 @@ enum subscription_status {
 
 // API Key Management
 model api_keys {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id      String    @db.Uuid
-  organization_id String? @db.Uuid
-  name         String
-  key_hash     String    @unique
-  prefix       String    @unique
-  scopes       String[]
-  expires_at   DateTime? @db.Timestamptz(6)
-  last_used_at DateTime? @db.Timestamptz(6)
-  created_at   DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime  @default(now()) @db.Timestamptz(6)
-  is_revoked   Boolean   @default(false)
-  users        users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  organizations organizations? @relation(fields: [organization_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id         String         @db.Uuid
+  organization_id String?        @db.Uuid
+  name            String
+  key_hash        String         @unique
+  prefix          String         @unique
+  scopes          String[]
+  expires_at      DateTime?      @db.Timestamptz(6)
+  last_used_at    DateTime?      @db.Timestamptz(6)
+  created_at      DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime       @default(now()) @db.Timestamptz(6)
+  is_revoked      Boolean        @default(false)
+  users           users          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  organizations   organizations? @relation(fields: [organization_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id])
   @@index([organization_id])
@@ -872,18 +876,18 @@ model api_keys {
 
 // Webhook Management
 model webhooks {
-  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id           String    @db.Uuid
-  organization_id   String?   @db.Uuid
-  name              String
-  url               String
-  events            String[]
-  secret            String?
-  is_active         Boolean   @default(true)
-  created_at        DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime  @default(now()) @db.Timestamptz(6)
-  users             users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  organizations     organizations? @relation(fields: [organization_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id            String               @db.Uuid
+  organization_id    String?              @db.Uuid
+  name               String
+  url                String
+  events             String[]
+  secret             String?
+  is_active          Boolean              @default(true)
+  created_at         DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime             @default(now()) @db.Timestamptz(6)
+  users              users                @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  organizations      organizations?       @relation(fields: [organization_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   webhook_deliveries webhook_deliveries[]
 
   @@index([user_id])
@@ -892,15 +896,15 @@ model webhooks {
 }
 
 model webhook_deliveries {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  webhook_id   String    @db.Uuid
-  event_type   String
-  payload      Json      @db.Json
-  status_code  Int?
-  response     String?
-  error        String?
-  created_at   DateTime  @default(now()) @db.Timestamptz(6)
-  webhook      webhooks  @relation(fields: [webhook_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  webhook_id  String   @db.Uuid
+  event_type  String
+  payload     Json     @db.Json
+  status_code Int?
+  response    String?
+  error       String?
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  webhook     webhooks @relation(fields: [webhook_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([webhook_id])
   @@schema("public")

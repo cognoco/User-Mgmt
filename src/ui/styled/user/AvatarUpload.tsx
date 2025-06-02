@@ -36,6 +36,7 @@ export function AvatarUpload() {
         selectedAvatarId,
         isLoadingAvatars,
         platform,
+        isNative,
         fileInputRef,
         imgRef,
         
@@ -54,7 +55,7 @@ export function AvatarUpload() {
         setCompletedCrop,
         setIsModalOpen
       }) => {
-        const platformClasses = getPlatformClasses(platform);
+        const platformClasses = getPlatformClasses({}, { platform, isNative });
         
         return (
           <Card className={`${platformClasses}`}>

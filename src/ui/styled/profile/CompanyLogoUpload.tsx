@@ -10,10 +10,13 @@ import { Avatar } from '@/ui/primitives/avatar';
 import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Upload, Building, Trash, Camera } from 'lucide-react';
+import { useProfileStore } from '@/lib/stores/profile.store';
 import { CompanyLogoUpload as HeadlessCompanyLogoUpload } from '@/ui/headless/profile/CompanyLogoUpload';
 
 export function CompanyLogoUpload() {
   const { t } = useTranslation();
+  const { profile } = useProfileStore();
+  const hasLogo = Boolean(profile?.companyLogoUrl);
 
   return (
     <HeadlessCompanyLogoUpload>
@@ -39,6 +42,8 @@ export function CompanyLogoUpload() {
               <Avatar className="h-32 w-32 rounded-md border-4 border-background flex items-center justify-center overflow-hidden bg-muted">
                 {imgSrc ? (
                   <img ref={imgRef} src={imgSrc} alt="logo" className="h-full w-full object-cover" />
+                ) : hasLogo && profile?.companyLogoUrl ? (
+                  <img src={profile.companyLogoUrl} alt="logo" className="h-full w-full object-cover" />
                 ) : (
                   <Building className="h-1/2 w-1/2 text-muted-foreground" />
                 )}
@@ -63,10 +68,12 @@ export function CompanyLogoUpload() {
               data-testid="company-logo-file-input"
             />
 
-            <Button type="button" variant="outline" onClick={handleRemove} disabled={isLoading} size="sm">
-              <Trash className="mr-2 h-4 w-4" />
-              {t('profile.removeCompanyLogo')}
-            </Button>
+            {hasLogo && (
+              <Button type="button" variant="outline" onClick={handleRemove} disabled={isLoading} size="sm">
+                <Trash className="mr-2 h-4 w-4" />
+                {t('profile.removeCompanyLogo')}
+              </Button>
+            )}
 
             {error && (
               <Alert variant="destructive" className="w-full">

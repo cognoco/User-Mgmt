@@ -9,11 +9,12 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { 
   Permission, 
   Role, 
-  RoleWithPermissions, 
+  RoleWithPermissions,
   UserRole,
   PermissionAssignment,
   RoleCreationPayload,
-  RoleUpdatePayload
+  RoleUpdatePayload,
+  ResourcePermission
 } from '../../core/permission/models';
 import type { IPermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
 import {
@@ -556,6 +557,120 @@ export class SupabasePermissionProvider implements IPermissionDataProvider {
     } catch (error) {
       return false;
     }
+  }
+
+  async assignResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<ResourcePermission> {
+    const { data, error } = await this.supabase
+      .from('resource_permissions')
+      .insert({
+        user_id: userId,
+        permission_name: permission.name,
+        resource_type: resourceType,
+        resource_id: resourceId,
+        created_at: new Date().toISOString(),
+      })
+      .select('*')
+      .single();
+    if (error || !data) {
+      throw new Error(error?.message || 'assign failed');
+    }
+    return {
+      id: data.id,
+      userId: data.user_id,
+      permission,
+      resourceType: data.resource_type,
+      resourceId: data.resource_id,
+      createdAt: new Date(data.created_at),
+    };
+  }
+
+  async removeResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<boolean> {
+    const { error } = await this.supabase
+      .from('resource_permissions')
+      .delete()
+      .eq('user_id', userId)
+      .eq('permission_name', permission.name)
+      .eq('resource_type', resourceType)
+      .eq('resource_id', resourceId);
+    return !error;
+  }
+
+  async hasResourcePermission(
+    userId: string,
+    permission: Permission,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<boolean> {
+    const { data, error } = await this.supabase
+      .from('resource_permissions')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('permission_name', permission.name)
+      .eq('resource_type', resourceType)
+      .eq('resource_id', resourceId)
+      .single();
+    return !error && !!data;
+  }
+
+  async getUserResourcePermissions(userId: string): Promise<ResourcePermission[]> {
+    const { data, error } = await this.supabase
+      .from('resource_permissions')
+      .select('*')
+      .eq('user_id', userId);
+    if (error || !data) return [];
+    return data.map((d: any) => ({
+      id: d.id,
+      userId: d.user_id,
+      permission: { name: d.permission_name, resource: d.resource_type },
+      resourceType: d.resource_type,
+      resourceId: d.resource_id,
+      createdAt: new Date(d.created_at),
+    }));
+  }
+
+  async getPermissionsForResource(
+    resourceType: string,
+    resourceId: string,
+  ): Promise<ResourcePermission[]> {
+    const { data, error } = await this.supabase
+      .from('resource_permissions')
+      .select('*')
+      .eq('resource_type', resourceType)
+      .eq('resource_id', resourceId);
+    if (error || !data) return [];
+    return data.map((d: any) => ({
+      id: d.id,
+      userId: d.user_id,
+      permission: { name: d.permission_name, resource: d.resource_type },
+      resourceType: d.resource_type,
+      resourceId: d.resource_id,
+      createdAt: new Date(d.created_at),
+    }));
+  }
+
+  async getUsersWithResourcePermission(
+    resourceType: string,
+    resourceId: string,
+    permission: Permission,
+  ): Promise<string[]> {
+    const { data, error } = await this.supabase
+      .from('resource_permissions')
+      .select('user_id')
+      .eq('resource_type', resourceType)
+      .eq('resource_id', resourceId)
+      .eq('permission_name', permission.name);
+    if (error || !data) return [];
+    return data.map((d: any) => d.user_id);
   }
   
   /**
