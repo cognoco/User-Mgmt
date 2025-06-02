@@ -171,4 +171,64 @@ export class RoleService {
       } as Role) : undefined,
     }));
   }
+
+  async setParentRole(roleId: string, parentRoleId: string | null): Promise<void> {
+    if (parentRoleId && (await this.hasCircularDependency(roleId, parentRoleId))) {
+      throw new Error('Circular role hierarchy');
+    }
+    const { error } = await this.supabase
+      .from('roles')
+      .update({ parent_role_id: parentRoleId, updated_at: new Date().toISOString() })
+      .eq('id', roleId);
+    if (error) throw error;
+  }
+
+  async getAncestorRoles(roleId: string): Promise<Role[]> {
+    const ancestors: Role[] = [];
+    const visited = new Set<string>();
+    let current = await this.getRoleById(roleId);
+    while (current?.parentRoleId) {
+      const parentId = current.parentRoleId;
+      if (!parentId || visited.has(parentId)) break;
+      const parent = await this.getRoleById(parentId);
+      if (!parent) break;
+      visited.add(parentId);
+      ancestors.push(parent);
+      current = parent;
+    }
+    return ancestors;
+  }
+
+  async getDescendantRoles(roleId: string): Promise<Role[]> {
+    const allRoles = await this.getAllRoles();
+    const descendants: Role[] = [];
+    const visited = new Set<string>();
+    const traverse = (id: string) => {
+      for (const role of allRoles) {
+        if (role.parentRoleId === id && !visited.has(role.id)) {
+          visited.add(role.id);
+          descendants.push(role);
+          traverse(role.id);
+        }
+      }
+    };
+    traverse(roleId);
+    return descendants;
+  }
+
+  async getEffectivePermissions(roleId: string): Promise<Permission[]> {
+    const ancestors = await this.getAncestorRoles(roleId);
+    const ids = [roleId, ...ancestors.map((r) => r.id)];
+    if (ids.length === 0) return [];
+    const { data, error } = await this.supabase
+      .from('role_permissions')
+      .select('permissions(*)')
+      .in('role_id', ids);
+    if (error) throw error;
+    const perms = new Set<Permission>();
+    for (const r of data || []) {
+      perms.add(r.permissions as Permission);
+    }
+    return Array.from(perms);
+  }
 }
