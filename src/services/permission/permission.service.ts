@@ -186,11 +186,11 @@ export class PermissionService {
     if (error) throw error;
   }
 
-  // Grant resource-specific permission to a user
-  async grantResourcePermission(
-    userId: string, 
-    permissionId: string, 
-    resourceType: string, 
+  // Assign resource-specific permission to a user
+  async assignResourcePermission(
+    userId: string,
+    permissionId: string,
+    resourceType: string,
     resourceId: string
   ): Promise<ResourcePermission> {
     const { data, error } = await supabase
@@ -206,6 +206,43 @@ export class PermissionService {
       
     if (error) throw error;
     return data;
+  }
+
+  // Remove a resource-specific permission from a user
+  async removeResourcePermission(
+    userId: string,
+    permissionId: string,
+    resourceType: string,
+    resourceId: string
+  ): Promise<void> {
+    const { error } = await supabase
+      .from('resource_permissions')
+      .delete()
+      .eq('user_id', userId)
+      .eq('permission_id', permissionId)
+      .eq('resource_type', resourceType)
+      .eq('resource_id', resourceId);
+
+    if (error) throw error;
+  }
+
+  // Check if a user has a permission for a specific resource
+  async hasPermissionForResource(
+    userId: string,
+    permissionId: string,
+    resourceType: string,
+    resourceId: string
+  ): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('resource_permissions')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('permission_id', permissionId)
+      .eq('resource_type', resourceType)
+      .eq('resource_id', resourceId)
+      .single();
+
+    return !error && !!data;
   }
 }
 
