@@ -1,0 +1,174 @@
+export interface Role {
+  id: string;
+  name: string;
+  description?: string;
+  isSystemRole: boolean;
+  parentRoleId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RoleCreateData {
+  name: string;
+  description?: string;
+  parentRoleId?: string | null;
+  isSystemRole?: boolean;
+}
+
+export interface RoleUpdateData {
+  name?: string;
+  description?: string;
+  parentRoleId?: string | null;
+}
+
+export interface UserRoleAssignment {
+  id: string;
+  userId: string;
+  roleId: string;
+  assignedBy: string;
+  createdAt: string;
+  expiresAt?: string | null;
+  role?: Role;
+}
+
+import { getServiceSupabase } from '@/lib/database/supabase';
+import type { Permission } from '@/types/rbac';
+
+export class RoleService {
+  constructor(private supabase = getServiceSupabase()) {}
+
+  async getAllRoles(filters?: { isSystemRole?: boolean }): Promise<Role[]> {
+    let query = this.supabase.from('roles').select('*');
+    if (filters?.isSystemRole !== undefined) {
+      query = query.eq('is_system_role', filters.isSystemRole);
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    return (data as Role[]) || [];
+  }
+
+  async getRoleById(id: string): Promise<Role | null> {
+    const { data, error } = await this.supabase
+      .from('roles')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      throw error;
+    }
+    return data as Role;
+  }
+
+  private async ensureUniqueName(name: string, excludeId?: string) {
+    let query = this.supabase.from('roles').select('id').eq('name', name);
+    if (excludeId) {
+      query = query.neq('id', excludeId);
+    }
+    const { data, error } = await query.single();
+    if (!error && data) {
+      throw new Error('Role name must be unique');
+    }
+    if (error && error.code !== 'PGRST116') {
+      throw error;
+    }
+  }
+
+  private async hasCircularDependency(roleId: string, parentId: string | null): Promise<boolean> {
+    let current = parentId;
+    const visited = new Set<string>();
+    while (current) {
+      if (current === roleId) return true;
+      if (visited.has(current)) break;
+      visited.add(current);
+      const { data, error } = await this.supabase
+        .from('roles')
+        .select('parent_role_id')
+        .eq('id', current)
+        .single();
+      if (error || !data) break;
+      current = (data as { parent_role_id: string | null }).parent_role_id;
+    }
+    return false;
+  }
+
+  async createRole(name: string, description = '', parentRoleId?: string | null): Promise<Role> {
+    await this.ensureUniqueName(name);
+    if (parentRoleId && (await this.hasCircularDependency('', parentRoleId))) {
+      throw new Error('Circular role hierarchy');
+    }
+    const { data, error } = await this.supabase
+      .from('roles')
+      .insert({ name, description, parent_role_id: parentRoleId })
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data as Role;
+  }
+
+  async updateRole(id: string, data: RoleUpdateData): Promise<Role> {
+    if (data.name) {
+      await this.ensureUniqueName(data.name, id);
+    }
+    if (data.parentRoleId && (await this.hasCircularDependency(id, data.parentRoleId))) {
+      throw new Error('Circular role hierarchy');
+    }
+    const { data: updated, error } = await this.supabase
+      .from('roles')
+      .update({
+        name: data.name,
+        description: data.description,
+        parent_role_id: data.parentRoleId,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (error) throw error;
+    return updated as Role;
+  }
+
+  async deleteRole(id: string): Promise<void> {
+    const role = await this.getRoleById(id);
+    if (!role) return;
+    if (role.isSystemRole) {
+      throw new Error('Cannot delete system role');
+    }
+    const { error } = await this.supabase.from('roles').delete().eq('id', id);
+    if (error) throw error;
+  }
+
+  async getRolePermissions(roleId: string): Promise<Permission[]> {
+    const { data, error } = await this.supabase
+      .from('role_permissions')
+      .select('permissions(*)')
+      .eq('role_id', roleId);
+    if (error) throw error;
+    return (data || []).map((r: any) => r.permissions as Permission);
+  }
+
+  async getUserRoles(userId: string): Promise<UserRoleAssignment[]> {
+    const { data, error } = await this.supabase
+      .from('user_roles')
+      .select('*, roles(*)')
+      .eq('user_id', userId);
+    if (error) throw error;
+    return (data || []).map((r: any) => ({
+      id: r.id,
+      userId: r.user_id,
+      roleId: r.role_id,
+      assignedBy: r.assigned_by,
+      createdAt: r.created_at,
+      expiresAt: r.expires_at,
+      role: r.roles ? ({
+        id: r.roles.id,
+        name: r.roles.name,
+        description: r.roles.description,
+        isSystemRole: r.roles.is_system_role,
+        parentRoleId: r.roles.parent_role_id,
+        createdAt: r.roles.created_at,
+        updatedAt: r.roles.updated_at,
+      } as Role) : undefined,
+    }));
+  }
+}
