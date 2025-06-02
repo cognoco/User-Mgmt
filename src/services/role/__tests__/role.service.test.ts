@@ -2,10 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { RoleService } from '../role.service';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
+// Use a shared Supabase mock so tests can control return values
+const supabase = {
+  from: vi.fn(),
+};
 vi.mock('@/lib/database/supabase', () => ({
-  getServiceSupabase: vi.fn(() => ({
-    from: vi.fn(),
-  })),
+  getServiceSupabase: vi.fn(() => supabase),
 }));
 
 function mockFrom(returnValue: any) {
@@ -15,6 +17,7 @@ function mockFrom(returnValue: any) {
 describe('RoleService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    supabase.from.mockReset();
   });
 
   it('rejects creating duplicate role names', async () => {
@@ -50,22 +53,22 @@ describe('RoleService', () => {
   });
 
   it('detects circular hierarchy on update', async () => {
-    const supabase = getServiceSupabase();
-    (getServiceSupabase as any).mockReturnValue(supabase);
-    // unique name check
-    const nameCheck = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      neq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockRejectedValue({ code: 'PGRST116' }),
-    };
-    // circular check: parent role's parent is the role itself
-    const parentQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({ data: { parent_role_id: 'r1' }, error: null }),
-    };
-    (supabase.from as any).mockReturnValue(nameCheck);
+const supabase = getServiceSupabase();
+(getServiceSupabase as any).mockReturnValue(supabase);
+// unique name check
+const nameCheck = {
+  select: vi.fn().mockReturnThis(),
+  eq: vi.fn().mockReturnThis(),
+  neq: vi.fn().mockReturnThis(),
+  single: vi.fn().mockRejectedValue({ code: 'PGRST116' }),
+};
+// circular check: parent role's parent is the role itself
+const parentQuery = {
+  select: vi.fn().mockReturnThis(),
+  eq: vi.fn().mockReturnThis(),
+  single: vi.fn().mockResolvedValue({ data: { parent_role_id: 'r1' }, error: null }),
+};
+(supabase.from as any).mockReturnValue(nameCheck);
     vi.spyOn(RoleService.prototype as any, 'hasCircularDependency').mockResolvedValue(true);
     const service = new RoleService();
     await expect(service.updateRole('r1', { parentRoleId: 'r2' })).rejects.toThrow('Circular role hierarchy');
@@ -82,6 +85,16 @@ describe('RoleService', () => {
     expect(from.update).toHaveBeenCalledWith({ parent_role_id: 'A', updated_at: expect.any(String) });
     const updateObj = (from.update as any).mock.results[0].value;
     expect(updateObj.eq).toHaveBeenCalledWith('id', 'B');
+  });
+
+  it('rejects parent role when depth limit exceeded', async () => {
+    const supabase = getServiceSupabase();
+    const from = { update: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnValue({ error: null }) };
+    (supabase.from as any).mockReturnValue(from);
+    vi.spyOn(RoleService.prototype as any, 'hasCircularDependency').mockResolvedValue(false);
+    vi.spyOn(RoleService.prototype as any, 'exceedsDepthLimit').mockResolvedValue(true);
+    const service = new RoleService();
+    await expect(service.setParentRole('B', 'A')).rejects.toThrow('Role hierarchy depth limit exceeded');
   });
 
   it('returns ancestor roles in order', async () => {
@@ -133,26 +146,41 @@ describe('RoleService', () => {
     const perms = await service.getEffectivePermissions('C');
     expect(perms.sort()).toEqual(['p1', 'p2', 'p3', 'p4']);
   });
+it('removes parent role via removeParentRole', async () => {
+  const service = new RoleService();
+  const spy = vi.spyOn(service, 'setParentRole').mockResolvedValue(undefined);
+  await service.removeParentRole('B');
+  expect(spy).toHaveBeenCalledWith('B', null);
+});
 
-  it('removes parent role via removeParentRole', async () => {
-    const service = new RoleService();
-    const spy = vi.spyOn(service, 'setParentRole').mockResolvedValue(undefined);
-    await service.removeParentRole('B');
-    expect(spy).toHaveBeenCalledWith('B', null);
-  });
+it('builds full role hierarchy', async () => {
+  const roles = [
+    { id: 'A', name: 'A', isSystemRole: false, createdAt: '', updatedAt: '', parentRoleId: null },
+    { id: 'B', name: 'B', isSystemRole: false, createdAt: '', updatedAt: '', parentRoleId: 'A' },
+    { id: 'C', name: 'C', isSystemRole: false, createdAt: '', updatedAt: '', parentRoleId: 'B' },
+  ];
+  const service = new RoleService();
+  vi.spyOn(service, 'getAllRoles').mockResolvedValue(roles as any);
+  const tree = await service.getRoleHierarchy();
+  expect(tree).toHaveLength(1);
+  expect(tree[0].id).toBe('A');
+  expect(tree[0].children[0].id).toBe('B');
+  expect(tree[0].children[0].children[0].id).toBe('C');
+});
 
-  it('builds full role hierarchy', async () => {
-    const roles = [
-      { id: 'A', name: 'A', isSystemRole: false, createdAt: '', updatedAt: '', parentRoleId: null },
-      { id: 'B', name: 'B', isSystemRole: false, createdAt: '', updatedAt: '', parentRoleId: 'A' },
-      { id: 'C', name: 'C', isSystemRole: false, createdAt: '', updatedAt: '', parentRoleId: 'B' },
-    ];
-    const service = new RoleService();
-    vi.spyOn(service, 'getAllRoles').mockResolvedValue(roles as any);
-    const tree = await service.getRoleHierarchy();
-    expect(tree).toHaveLength(1);
-    expect(tree[0].id).toBe('A');
-    expect(tree[0].children[0].id).toBe('B');
-    expect(tree[0].children[0].children[0].id).toBe('C');
+it('caches effective permission results', async () => {
+  const service = new RoleService();
+  vi.spyOn(service, 'getAncestorRoles').mockResolvedValue([] as any);
+  const supabase = getServiceSupabase();
+  const from = {
+    select: vi.fn().mockReturnThis(),
+    in: vi.fn().mockResolvedValue({ data: [{ permissions: 'p1' }], error: null }),
+  };
+  (supabase.from as any).mockReturnValue(from);
+  const first = await service.getEffectivePermissions('A');
+  const second = await service.getEffectivePermissions('A');
+  expect(from.in).toHaveBeenCalledTimes(1);
+  expect(first).toEqual(second);
+});
   });
 });
