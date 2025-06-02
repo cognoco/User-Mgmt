@@ -7,3 +7,4 @@ export type {
   RoleUpdateData,
   UserRoleAssignment,
 } from './role.service';
+export { getApiRoleService } from './factory';
