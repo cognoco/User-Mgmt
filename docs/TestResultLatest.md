@@ -1,28 +1,364 @@
-# Test Results (from verbose output - timed out)
+# Test Results
 
-**Completed Test Files:** 0  |  **Failed Test Files:** 0  |  **Queued/Never Ran:** 0  |  **Stuck/Running:** 0
+**Passed Test Files:** 200  |  **Failed Test Files:** 146  |  **Skipped/Timeout Test Files:** 6
 
-## Completed Test Files
+## Passing Test Files
 
-_None_
+- app\api\2fa\webauthn\register\__tests__\route.test.ts
+- app\api\2fa\webauthn\verify\__tests__\route.test.ts
+- app\api\api-keys\[keyId]\__tests__\route.test.ts
+- app\api\api-keys\__tests__\route.test.ts
+- app\api\auth\logout\__tests__\route.test.ts
+- app\api\auth\mfa\enable\__tests__\route.test.ts
+- app\api\auth\oauth\__tests__\route.test.ts
+- app\api\auth\oauth\disconnect\__tests__\route.test.ts
+- app\api\auth\oauth\link\__tests__\route.test.ts
+- app\api\auth\oauth\verify\__tests__\route.test.ts
+- app\api\auth\refresh-token\__tests__\route.test.ts
+- app\api\openapi\__tests__\route.test.ts
+- app\api\organizations\[orgId]\sso\[idpType]\config\__tests__\route.test.ts
+- app\api\organizations\[orgId]\sso\__tests__\route.test.ts
+- app\api\organizations\__tests__\route.test.ts
+- app\api\permissions\__tests__\route.test.ts
+- app\api\profile\business\__tests__\route.test.ts
+- app\api\subscriptions\cancel\__tests__\route.test.ts
+- app\api\subscriptions\plans\__tests__\route.test.ts
+- app\api\subscriptions\status\__tests__\route.test.ts
+- app\api\tax-id\validate\__tests__\route.test.ts
+- app\api\team\roles\__tests__\route.test.ts
+- app\api\user\connected-accounts\__tests__\route.test.ts
+- app\api\webhooks\[webhookId]\deliveries\__tests__\route.test.ts
+- app\settings\gdpr\__tests__\page.test.tsx
+- app\settings\sessions\__tests__\page.test.tsx
+- src\adapters\__tests__\database-provider-registry.test.ts
+- src\adapters\__tests__\registry.test.ts
+- src\adapters\audit\__tests__\supabase-audit-adapter.test.ts
+- src\adapters\auth\__tests__\supabase-auth-provider.test.ts
+- src\adapters\csrf\__tests__\default-adapter.test.ts
+- src\adapters\database\__tests__\mock-repository.test.ts
+- src\adapters\notification\__tests__\in-memory-provider.test.ts
+- src\adapters\organization\__tests__\default-organization-adapter.test.ts
+- src\adapters\permission\__tests__\supabase-permission-provider.test.ts
+- src\adapters\subscription\__tests__\supabase-adapter.test.ts
+- src\adapters\team\__tests__\supabase-team-provider.test.ts
+- src\adapters\user\__tests__\supabase-user-provider.test.ts
+- src\adapters\webhooks\__tests__\supabase-webhook-provider.test.ts
+- src\core\access-control\__tests__\evaluator.test.ts
+- src\core\address\__tests__\validation.test.ts
+- src\core\auth\__tests__\mfa.test.ts
+- src\core\config\__tests__\runtime-config.test.ts
+- src\core\database\interfaces\__tests__\typeGuards.test.ts
+- src\core\platform\__tests__\node.spec.ts
+- src\core\webhooks\__tests__\models.test.ts
+- src\hooks\__tests__\useKeyboardShortcuts.test.tsx
+- src\hooks\address\__tests__\useAddresses.test.tsx
+- src\hooks\admin\__tests__\useAdminUsers.test.tsx
+- src\hooks\admin\__tests__\useSavedSearches.test.tsx
+- src\hooks\api-keys\__tests__\useApiKeys.test.tsx
+- src\hooks\audit\__tests__\useAuditLogs.test.tsx
+- src\hooks\core\__tests__\useApi.test.ts
+- src\hooks\csrf\__tests__\useCsrf.test.tsx
+- src\hooks\gdpr\__tests__\useDataDeletion.test.ts
+- src\hooks\gdpr\__tests__\useDataExport.test.ts
+- src\hooks\notification\__tests__\useNotifications.test.tsx
+- src\hooks\notification\__tests__\useToast.test.ts
+- src\hooks\permission\__tests__\usePermission.test.tsx
+- src\hooks\sso\__tests__\useOrgSsoConfig.test.ts
+- src\hooks\sso\__tests__\useSso.test.tsx
+- src\hooks\subscription\__tests__\useBilling.test.ts
+- src\hooks\subscription\__tests__\useSubscription.test.ts
+- src\hooks\team\__tests__\useApiKeys.test.tsx
+- src\hooks\user\__tests__\useDataExport.test.ts
+- src\hooks\user\__tests__\usePayment.test.tsx
+- src\hooks\user\__tests__\useSubscription.test.tsx
+- src\hooks\webhooks\__tests__\useWebhooks.test.tsx
+- src\lib\__tests__\config.test.js
+- src\lib\api-utils\__tests__\api-handler.test.ts
+- src\lib\api\common\__tests__\middleware.test.ts
+- src\lib\auth\__tests__\UserManagementProvider.test.tsx
+- src\lib\auth\__tests__\auth-env.test.ts
+- src\lib\auth\__tests__\getUser.test.ts
+- src\lib\auth\__tests__\index.test.ts
+- src\lib\auth\__tests__\initialize-supabase-auth.test.ts
+- src\lib\auth\__tests__\mfa\mfa.test.ts
+- src\lib\auth\__tests__\supabase-auth-config.test.ts
+- src\lib\cache\__tests__\memory-cache.test.ts
+- src\lib\database\__tests__\database.test.tsx
+- src\lib\database\__tests__\supabase.test.tsx
+- src\lib\hooks\__tests__\use-toast.test.tsx
+- src\lib\security\__tests__\password-validation.test.ts
+- src\lib\services\__tests__\notification.service.marketing.test.ts
+- src\lib\services\__tests__\retention.service.test.ts
+- src\lib\stores\__tests__\auth.store.test.ts
+- src\lib\stores\__tests__\connected-accounts.store.test.ts
+- src\lib\stores\__tests__\user.store.test.ts
+- src\lib\utils\__tests__\error.test.ts
+- src\lib\utils\__tests__\responsive.test.tsx
+- src\lib\utils\__tests__\typed-event-emitter.test.ts
+- src\lib\webauthn\__tests__\webauthn.service.test.ts
+- src\lib\webhooks\__tests__\webhook-sender.test.ts
+- src\middleware\__tests__\audit-log.test.ts
+- src\middleware\__tests__\auth-adapter.test.ts
+- src\middleware\__tests__\auth-errors.test.ts
+- src\middleware\__tests__\auth.test.js
+- src\middleware\__tests__\createMiddlewareChain.test.ts
+- src\middleware\__tests__\error-handling.test.ts
+- src\middleware\__tests__\index.test.ts
+- src\middleware\__tests__\protected-route.test.ts
+- src\middleware\__tests__\route-auth.test.ts
+- src\middleware\__tests__\security-headers.test.ts
+- src\middleware\__tests__\withResourcePermission.test.ts
+- src\repositories\__tests__\supabase-user.repository.test.ts
+- src\services\address\__tests__\factory.test.ts
+- src\services\admin\__tests__\default-admin.service.test.ts
+- src\services\auth\__tests__\auth.store.test.ts
+- src\services\auth\__tests__\factory.test.ts
+- src\services\auth\__tests__\mfa-handler.test.ts
+- src\services\auth\__tests__\oauth.service.test.ts
+- src\services\auth\__tests__\session-tracker.test.ts
+- src\services\csrf\__tests__\browser-csrf.service.test.ts
+- src\services\csrf\__tests__\default-csrf.service.test.ts
+- src\services\gdpr\__tests__\factory.test.ts
+- src\services\notification\__tests__\factory.test.ts
+- src\services\notification\__tests__\push-setup.test.ts
+- src\services\organization\__tests__\factory.test.ts
+- src\services\permission\__tests__\api\api-permission.service.test.ts
+- src\services\permission\__tests__\factory.test.ts
+- src\services\session\__tests__\api-session.service.test.ts
+- src\services\subscription\__tests__\factory.test.ts
+- src\services\team\__tests__\default-team.service.test.ts
+- src\services\team\__tests__\factory.test.ts
+- src\services\user\__tests__\api-user.service.test.ts
+- src\services\user\__tests__\factory.test.ts
+- src\services\user\__tests__\repository-user.service.test.ts
+- src\services\user\__tests__\user.store.test.ts
+- src\services\webhooks\__tests__\factory.test.ts
+- src\services\webhooks\__tests__\webhook-service.test.ts
+- src\tests\integration\account-settings-flow.test.tsx
+- src\tests\integration\account-switching-flow.test.tsx
+- src\tests\integration\admin-users-flow.test.tsx
+- src\tests\integration\collaboration-flow.test.tsx
+- src\tests\integration\connected-accounts.integration.test.tsx
+- src\tests\integration\dashboard-view-flow.test.tsx
+- src\tests\integration\data-management-flow.test.tsx
+- src\tests\integration\minimal.smoke.test.tsx
+- src\tests\integration\organization-security-policy.integration.test.tsx
+- src\tests\integration\social-sharing-flow.test.tsx
+- src\tests\smoke\app.smoke.test.tsx
+- src\tests\smoke\billing.smoke.test.tsx
+- src\tests\ui\DuplicateUIElements.test.tsx
+- src\ui\headless\address\__tests__\AddressList.test.tsx
+- src\ui\headless\api-keys\__tests__\ApiKeyList.test.tsx
+- src\ui\headless\auth\__tests__\MFASetup.integration.test.tsx
+- src\ui\headless\auth\__tests__\account-deletion.test.tsx
+- src\ui\headless\auth\__tests__\email-verification.test.tsx
+- src\ui\headless\auth\__tests__\password-reset-form.test.tsx
+- src\ui\headless\gdpr\__tests__\ConsentManagement.test.tsx
+- src\ui\headless\gdpr\__tests__\DataDeletionRequest.test.tsx
+- src\ui\headless\gdpr\__tests__\DataExportRequest.test.tsx
+- src\ui\headless\profile\__tests__\data-export.test.tsx
+- src\ui\headless\sso\__tests__\SSOConnector.test.tsx
+- src\ui\headless\team\__tests__\InviteMemberForm.test.tsx
+- src\ui\headless\team\__tests__\InviteMemberModal.test.tsx
+- src\ui\headless\team\__tests__\RemoveMemberDialog.test.tsx
+- src\ui\headless\team\__tests__\TeamInviteDialog.test.tsx
+- src\ui\headless\team\__tests__\TeamList.test.tsx
+- src\ui\headless\team\__tests__\TeamManagement.test.tsx
+- src\ui\headless\team\__tests__\TeamMembersList.test.tsx
+- src\ui\headless\two-factor\__tests__\TwoFactorDisable.test.tsx
+- src\ui\headless\two-factor\__tests__\TwoFactorSetup.test.tsx
+- src\ui\headless\two-factor\__tests__\TwoFactorStatus.test.tsx
+- src\ui\headless\two-factor\__tests__\TwoFactorVerify.test.tsx
+- src\ui\headless\user\__tests__\avatar-upload.test.tsx
+- src\ui\headless\webhooks\__tests__\WebhookManager.test.tsx
+- src\ui\primitives\__tests__\loading-button.test.tsx
+- src\ui\primitives\__tests__\page-loader.test.tsx
+- src\ui\styled\account\__tests__\DeleteAccountDialog.test.tsx
+- src\ui\styled\admin\__tests__\AdminAuditLogs.test.tsx
+- src\ui\styled\admin\__tests__\AdminDashboard.test.tsx
+- src\ui\styled\admin\__tests__\FeatureFlagsPanel.test.tsx
+- src\ui\styled\admin\__tests__\RoleManagementPanel.test.tsx
+- src\ui\styled\auth\__tests__\BusinessSSOAuth.test.tsx
+- src\ui\styled\auth\__tests__\BusinessSSOSetup.test.tsx
+- src\ui\styled\auth\__tests__\ChangePasswordForm.test.tsx
+- src\ui\styled\auth\__tests__\MFASetup.test.tsx
+- src\ui\styled\auth\__tests__\MinimalTextareaForm.test.tsx
+- src\ui\styled\auth\__tests__\WebAuthnLogin.test.tsx
+- src\ui\styled\common\__tests__\DataTable.a11y.test.tsx
+- src\ui\styled\common\__tests__\KeyboardShortcutsDialog.test.tsx
+- src\ui\styled\company\__tests__\AddressCard.test.tsx
+- src\ui\styled\gdpr\__tests__\ConsentManager.test.tsx
+- src\ui\styled\gdpr\__tests__\DataDeletionRequest.test.tsx
+- src\ui\styled\gdpr\__tests__\DataExportRequest.test.tsx
+- src\ui\styled\gdpr\__tests__\PrivacyPreferences.test.tsx
+- src\ui\styled\navigation\__tests__\SkipLink.test.tsx
+- src\ui\styled\profile\__tests__\AccountSettings.test.tsx
+- src\ui\styled\profile\__tests__\ActivityLog.test.tsx
+- src\ui\styled\profile\__tests__\CompanyDataExport.test.tsx
+- src\ui\styled\profile\__tests__\ProfileTypeConversion.test.tsx
+- src\ui\styled\profile\__tests__\ProfileVerification.test.tsx
+- src\ui\styled\profile\__tests__\SessionManagement.test.tsx
+- src\ui\styled\session\__tests__\SessionTimeout.test.tsx
+- src\ui\styled\settings\__tests__\AccountDeletion.test.tsx
+- src\utils\__tests__\refreshManager.test.ts
+- src\utils\cache\__tests__\searchCache.test.ts
+- src\utils\export\__tests__\csvExport.test.ts
+- src\utils\export\__tests__\jsonExport.test.ts
 
-## Failed Test Files
+## Failing Test Files
 
-_None_
+- app\api\addresses\[id]\__tests__\route.test.ts
+- app\api\addresses\__tests__\route.test.ts
+- app\api\addresses\default\[id]\__tests__\route.test.ts
+- app\api\admin\dashboard\__tests__\route.test.ts
+- app\api\admin\users\[id]\__tests__\route.test.ts
+- app\api\admin\users\__tests__\route.test.ts
+- app\api\admin\users\search\__tests__\route.test.ts
+- app\api\audit\__tests__\route.test.ts
+- app\api\auth\delete-account\__tests__\route.test.ts
+- app\api\auth\disable-mfa\__tests__\route.test.ts
+- app\api\auth\login\__tests__\route.test.ts
+- app\api\auth\mfa\disable\__tests__\route.test.ts
+- app\api\auth\passwordless\__tests__\route.test.ts
+- app\api\auth\register\__tests__\route.test.ts
+- app\api\auth\send-verification-email\__tests__\route.test.ts
+- app\api\auth\setup-mfa\__tests__\route.test.ts
+- app\api\auth\update-password\__tests__\route.test.ts
+- app\api\auth\verify-email\__tests__\route.test.ts
+- app\api\auth\verify-mfa\__tests__\route.test.ts
+- app\api\auth\verify-reset-token\__tests__\route.test.ts
+- app\api\company\addresses\__tests__\route.test.ts
+- app\api\company\domains\[id]\__tests__\route.test.ts
+- app\api\company\domains\[id]\verify-check\__tests__\route.test.ts
+- app\api\company\domains\[id]\verify-initiate\__tests__\route.test.ts
+- app\api\company\domains\__tests__\route.test.ts
+- app\api\company\profile\__tests__\route.test.ts
+- app\api\company\validate\__tests__\route.test.ts
+- app\api\organizations\[orgId]\sso\domains\__tests__\route.test.ts
+- app\api\permissions\check\__tests__\route.test.ts
+- app\api\profile\__tests__\route.test.ts
+- app\api\profile\avatar\__tests__\route.test.ts
+- app\api\roles\[roleId]\__tests__\route.test.ts
+- app\api\roles\__tests__\route.test.ts
+- app\api\session\__tests__\route.test.ts
+- app\api\settings\__tests__\route.test.ts
+- app\api\sso\__tests__\route.test.ts
+- app\api\subscription\__tests__\route.test.ts
+- app\api\subscriptions\checkout\__tests__\route.test.ts
+- app\api\subscriptions\portal\__tests__\route.test.ts
+- app\api\team\__tests__\route.test.ts
+- app\api\team\invites\__tests__\route.test.ts
+- app\api\team\invites\accept\__tests__\route.test.ts
+- app\api\team\members\[memberId]\__tests__\route.test.ts
+- app\api\team\members\[memberId]\role\__tests__\route.test.ts
+- app\api\team\members\__tests__\route.test.ts
+- app\api\team\roles\[roleId]\__tests__\route.test.ts
+- app\api\webhooks\[webhookId]\__tests__\route.test.ts
+- app\api\webhooks\__tests__\route.test.ts
+- app\api\webhooks\stripe\__tests__\route.test.ts
+- app\settings\addresses\__tests__\page.test.tsx
+- src\adapters\database\factory\__tests__\database-factory.test.ts
+- src\core\auth\__tests__\business-policies.test.tsx
+- src\core\permission\__tests__\permissions.test.ts
+- src\core\platform\__tests__\browser.spec.ts
+- src\core\platform\__tests__\platform.spec.ts
+- src\hooks\__tests__\useOptimistic.test.tsx
+- src\hooks\auth\__tests__\useAuth.integration.test.ts
+- src\hooks\auth\__tests__\useAuth.test.ts
+- src\hooks\auth\__tests__\useAuth.test.tsx
+- src\hooks\session\__tests__\useSession.test.tsx
+- src\hooks\team\__tests__\useTeamInvite.test.tsx
+- src\lib\auth\__tests__\authConfig.test.ts
+- src\lib\auth\__tests__\mfa\email-verification.test.tsx
+- src\lib\auth\__tests__\mfa\email.test.tsx
+- src\lib\auth\__tests__\mfa\setup.test.tsx
+- src\lib\auth\__tests__\mfa\sms-verification.test.tsx
+- src\lib\auth\__tests__\mfa\verification.test.tsx
+- src\lib\auth\__tests__\session\business-policies.test.tsx
+- src\lib\auth\__tests__\sso\business-sso.test.tsx
+- src\lib\auth\__tests__\sso\personal-sso.test.tsx
+- src\lib\email\__tests__\sendEmail.test.ts
+- src\lib\i18n\__tests__\initialize-i18n.test.ts
+- src\lib\rbac\__tests__\roleService.test.ts
+- src\lib\sms\__tests__\sendSms.test.ts
+- src\lib\stores\__tests__\auth.store.direct.test.ts
+- src\lib\stores\__tests__\auth.store.minimal.test.ts
+- src\lib\stores\__tests__\preferences.store.test.ts
+- src\lib\stores\__tests__\subscription.store.test.ts
+- src\middleware\__tests__\csrf.test.ts
+- src\middleware\__tests__\permissions.test.ts
+- src\middleware\__tests__\rate-limit.test.ts
+- src\pages\api\user\__tests__\user.test.ts
+- src\services\api-keys\__tests__\factory.test.ts
+- src\services\audit\__tests__\factory.test.ts
+- src\services\auth\__tests__\business-sso.test.tsx
+- src\services\company\__tests__\companyService.test.ts
+- src\services\company\__tests__\factory.test.ts
+- src\services\consent\__tests__\factory.test.ts
+- src\services\csrf\__tests__\factory.test.ts
+- src\services\permission\__tests__\service\default-permission.service.test.ts
+- src\tests\integration\api-error-messages.test.tsx
+- src\tests\integration\backup.integration.test.tsx
+- src\tests\integration\change-password.integration.test.tsx
+- src\tests\integration\empty-states.test.tsx
+- src\tests\integration\error-recovery-flow.test.tsx
+- src\tests\integration\export-import-flow.test.tsx
+- src\tests\integration\feedback-submission-flow.test.tsx
+- src\tests\integration\file-upload-flow.test.tsx
+- src\tests\integration\form-validation-errors-isolated.test.tsx
+- src\tests\integration\form-validation-errors.test.tsx
+- src\tests\integration\login-mfa.integration.test.tsx
+- src\tests\integration\notification-delivery.integration.test.tsx
+- src\tests\integration\notification-flow.test.tsx
+- src\tests\integration\notification-preferences.integration.test.tsx
+- src\tests\integration\oauth-buttons.integration.test.tsx
+- src\tests\integration\password-reset-flow.test.tsx
+- src\tests\integration\registration-flow.integration.test.tsx
+- src\tests\integration\search-filter-flow.test.tsx
+- src\tests\integration\session-management.integration.test.tsx
+- src\tests\integration\sso-mfa-error-handling.integration.test.tsx
+- src\tests\integration\supabase-integration.test.ts
+- src\tests\integration\theme-settings-flow.test.tsx
+- src\tests\integration\user-auth-flow.test.tsx
+- src\tests\integration\user-preferences-flow.test.tsx
+- src\tests\smoke\login.smoke.test.tsx
+- src\tests\smoke\profile.smoke.test.tsx
+- src\tests\smoke\registration.smoke.test.tsx
+- src\ui\headless\audit\__tests__\BusinessFormErrorHandling.test.tsx
+- src\ui\headless\auth\__tests__\login-form.test.tsx
+- src\ui\headless\auth\__tests__\registration-form.test.tsx
+- src\ui\headless\team\__tests__\TeamCreator.test.tsx
+- src\ui\headless\user\__tests__\profile-form.test.tsx
+- src\ui\headless\user\__tests__\profile.test.tsx
+- src\ui\styled\__tests__\headless-wrappers.test.tsx
+- src\ui\styled\audit\__tests__\AuditLogViewer.test.tsx
+- src\ui\styled\auth\__tests__\EmailVerification.test.tsx
+- src\ui\styled\auth\__tests__\LoginForm.test.tsx
+- src\ui\styled\auth\__tests__\MFAManagementSection.test.tsx
+- src\ui\styled\auth\__tests__\MFAVerificationForm.test.tsx
+- src\ui\styled\auth\__tests__\ProtectedRoute.test.tsx
+- src\ui\styled\auth\__tests__\UpgradeToBusinessFlow.test.tsx
+- src\ui\styled\company\__tests__\DomainManagement.test.tsx
+- src\ui\styled\company\__tests__\SingleDomainVerification.test.tsx
+- src\ui\styled\layout\__tests__\Header.test.tsx
+- src\ui\styled\profile\__tests__\AvatarUpload.test.tsx
+- src\ui\styled\profile\__tests__\CompanyLogoUpload.test.tsx
+- src\ui\styled\profile\__tests__\CorporateProfileSection.test.tsx
+- src\ui\styled\profile\__tests__\DataExport.test.tsx
+- src\ui\styled\profile\__tests__\NotificationPreferences.test.tsx
+- src\ui\styled\profile\__tests__\PrivacySettings.test.tsx
+- src\ui\styled\profile\__tests__\Profile.test.tsx
+- src\ui\styled\profile\__tests__\ProfilePrivacySettings.test.tsx
+- src\ui\styled\registration\__tests__\MultiStepRegistration.test.tsx
+- src\ui\styled\two-factor\__tests__\WebAuthnRegistration.test.tsx
+- src\ui\styled\user\__tests__\profile-form.test.tsx
+- src\utils\__tests__\domain-validation.test.ts
 
-## Queued/Never Ran (Likely Stuck Tests)
+## Skipped/Timeout Test Files
 
-_None_
-
-## Stuck/Running When Timeout Occurred
-
-_None_
-
-## Raw Output (last 2000 chars)
-
-```
-
-[1m[46m RUN [49m[22m [36mv3.1.3 [39m[90mC:/Dev/Projects/Products/Apps/user-management-reorganized[39m
-
-
-```
+- src\adapters\address\__tests__\supabase-adapter.test.ts (TIMEOUT)
+- src\ui\styled\auth\__tests__\IDPConfiguration.test.tsx (TIMEOUT)
+- src\ui\styled\auth\__tests__\OrganizationSSO.test.tsx (TIMEOUT)
+- src\ui\styled\profile\__tests__\ProfileEditor.test.tsx (TIMEOUT)
+- src\ui\styled\profile\__tests__\ProfileForm.test.tsx (TIMEOUT)
+- src\ui\styled\user\__tests__\profile.test.tsx (TIMEOUT)

@@ -27,6 +27,7 @@ import { translateError } from "@/lib/utils/error";
 import { TypedEventEmitter } from "@/lib/utils/typed-event-emitter";
 import { MemoryCache } from '@/lib/cache';
 import { RoleService } from '@/services/role';
+import { ResourcePermissionResolver } from './resource-permission-resolver';
 
 /**
  * Default implementation of the PermissionService interface
@@ -40,6 +41,7 @@ export class DefaultPermissionService
   private static userPermissionCache = new MemoryCache<string, boolean>({ ttl: 30_000 });
 
   private roleService: RoleService;
+  private resourcePermissionResolver: ResourcePermissionResolver;
   /**
    * Constructor for DefaultPermissionService
    *
@@ -48,9 +50,11 @@ export class DefaultPermissionService
   constructor(
     private permissionDataProvider: PermissionDataProvider,
     roleService: RoleService = new RoleService(),
+    resourceResolver: ResourcePermissionResolver = new ResourcePermissionResolver(),
   ) {
     super();
     this.roleService = roleService;
+    this.resourcePermissionResolver = resourceResolver;
   }
 
   /**
@@ -509,14 +513,12 @@ export class DefaultPermissionService
   ): Promise<boolean> {
     const key = this.cacheKey(userId, permission, resourceType, resourceId);
     return DefaultPermissionService.resourceCache.getOrCreate(key, async () => {
-      const has = await this.permissionDataProvider.hasResourcePermission(
+      const effectivePermissions = await this.resourcePermissionResolver.getEffectivePermissions(
         userId,
-        permission,
         resourceType,
         resourceId,
       );
-      if (has) return true;
-      return this.hasPermission(userId, permission);
+      return effectivePermissions.includes(permission);
     });
   }
 

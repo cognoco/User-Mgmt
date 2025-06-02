@@ -2,12 +2,14 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { DefaultPermissionService } from "../../default-permission.service";
 import { PermissionValues } from "@/core/permission/models";
 import { MemoryCache } from '@/lib/cache';
+import { ResourcePermissionResolver } from '../../resource-permission-resolver';
 
 const USER_ID = "u1";
 const ROLE_ID = "r1";
 
 describe("DefaultPermissionService", () => {
   let provider: any;
+  let resolver: any;
   let service: DefaultPermissionService;
 
   beforeEach(() => {
@@ -18,12 +20,12 @@ describe("DefaultPermissionService", () => {
       getRoleById: vi.fn(),
       assignResourcePermission: vi.fn(),
       removeResourcePermission: vi.fn(),
-      hasResourcePermission: vi.fn(),
       getUserResourcePermissions: vi.fn(),
       getPermissionsForResource: vi.fn(),
       getUsersWithResourcePermission: vi.fn(),
     };
-    service = new DefaultPermissionService(provider);
+    resolver = { getEffectivePermissions: vi.fn().mockResolvedValue([]) } as ResourcePermissionResolver;
+    service = new DefaultPermissionService(provider, { getEffectivePermissions: vi.fn() } as any, resolver);
     (DefaultPermissionService as any).roleCache = new MemoryCache({ ttl: 30000 });
     (DefaultPermissionService as any).resourceCache = new MemoryCache({ ttl: 30000 });
   });
@@ -91,26 +93,26 @@ describe("DefaultPermissionService", () => {
   });
 
   it("caches resource permission checks", async () => {
-    provider.hasResourcePermission.mockResolvedValue(false);
+    resolver.getEffectivePermissions.mockResolvedValue([]);
     provider.getUserRoles.mockResolvedValue([]);
     const perm = PermissionValues.VIEW_PROJECTS;
     const allowed1 = await service.hasResourcePermission(USER_ID, perm, 'project', 'p1');
-    expect(provider.hasResourcePermission).toHaveBeenCalledTimes(1);
+    expect(resolver.getEffectivePermissions).toHaveBeenCalledTimes(1);
     expect(allowed1).toBe(false);
     const allowed2 = await service.hasResourcePermission(USER_ID, perm, 'project', 'p1');
-    expect(provider.hasResourcePermission).toHaveBeenCalledTimes(1);
+    expect(resolver.getEffectivePermissions).toHaveBeenCalledTimes(1);
     expect(allowed2).toBe(false);
   });
 
   it("assignResourcePermission invalidates cache", async () => {
-    provider.hasResourcePermission.mockResolvedValue(true);
+    resolver.getEffectivePermissions.mockResolvedValue([PermissionValues.VIEW_PROJECTS]);
     provider.assignResourcePermission.mockResolvedValue({ id: 'rp1' });
     const perm = PermissionValues.VIEW_PROJECTS;
     await service.hasResourcePermission(USER_ID, perm, 'project', 'p1');
-    expect(provider.hasResourcePermission).toHaveBeenCalledTimes(1);
+    expect(resolver.getEffectivePermissions).toHaveBeenCalledTimes(1);
     await service.assignResourcePermission(USER_ID, perm, 'project', 'p1');
     const allowed = await service.hasResourcePermission(USER_ID, perm, 'project', 'p1');
-    expect(provider.hasResourcePermission).toHaveBeenCalledTimes(2);
+    expect(resolver.getEffectivePermissions).toHaveBeenCalledTimes(2);
     expect(allowed).toBe(true);
   });
 
