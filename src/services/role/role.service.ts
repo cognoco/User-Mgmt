@@ -33,8 +33,11 @@ export interface UserRoleAssignment {
 
 import { getServiceSupabase } from '@/lib/database/supabase';
 import type { Permission } from '@/types/rbac';
+import { MemoryCache } from '@/lib/cache';
 
 export class RoleService {
+  private static permissionCache = new MemoryCache<string, Permission[]>({ ttl: 30_000 });
+
   constructor(private supabase = getServiceSupabase()) {}
 
   async getAllRoles(filters?: { isSystemRole?: boolean }): Promise<Role[]> {
@@ -217,18 +220,32 @@ export class RoleService {
   }
 
   async getEffectivePermissions(roleId: string): Promise<Permission[]> {
-    const ancestors = await this.getAncestorRoles(roleId);
-    const ids = [roleId, ...ancestors.map((r) => r.id)];
-    if (ids.length === 0) return [];
-    const { data, error } = await this.supabase
-      .from('role_permissions')
-      .select('permissions(*)')
-      .in('role_id', ids);
-    if (error) throw error;
-    const perms = new Set<Permission>();
-    for (const r of data || []) {
-      perms.add(r.permissions as Permission);
-    }
-    return Array.from(perms);
+    return RoleService.permissionCache.getOrCreate(roleId, async () => {
+      const visited = new Set<string>();
+      const ids: string[] = [];
+      let current: string | undefined = roleId;
+      while (current && !visited.has(current)) {
+        visited.add(current);
+        ids.push(current);
+        const role = await this.getRoleById(current);
+        current = role?.parentRoleId || undefined;
+      }
+
+      if (ids.length === 0) return [];
+
+      const { data, error } = await this.supabase
+        .from('role_permissions')
+        .select('permissions(*)')
+        .in('role_id', ids);
+
+      if (error) throw error;
+
+      const perms = new Set<Permission>();
+      for (const r of data || []) {
+        perms.add(r.permissions as Permission);
+      }
+
+      return Array.from(perms);
+    });
   }
 }

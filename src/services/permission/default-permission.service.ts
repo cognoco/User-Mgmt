@@ -26,6 +26,7 @@ import type { PermissionDataProvider } from "@/core/permission/IPermissionDataPr
 import { translateError } from "@/lib/utils/error";
 import { TypedEventEmitter } from "@/lib/utils/typed-event-emitter";
 import { MemoryCache } from '@/lib/cache';
+import { RoleService } from '@/services/role';
 
 /**
  * Default implementation of the PermissionService interface
@@ -36,13 +37,20 @@ export class DefaultPermissionService
 {
   private static roleCache = new MemoryCache<string, UserRole[]>({ ttl: 30_000 });
   private static resourceCache = new MemoryCache<string, boolean>({ ttl: 30_000 });
+  private static userPermissionCache = new MemoryCache<string, boolean>({ ttl: 30_000 });
+
+  private roleService: RoleService;
   /**
    * Constructor for DefaultPermissionService
    *
    * @param permissionDataProvider - The data provider for permission operations
    */
-  constructor(private permissionDataProvider: PermissionDataProvider) {
+  constructor(
+    private permissionDataProvider: PermissionDataProvider,
+    roleService: RoleService = new RoleService(),
+  ) {
     super();
+    this.roleService = roleService;
   }
 
   /**
@@ -74,26 +82,22 @@ export class DefaultPermissionService
     userId: string,
     permission: Permission,
   ): Promise<boolean> {
-    try {
-      // Get all roles assigned to the user
-      const userRoles = await this.getUserRoles(userId);
-
-      // For each role, check if it has the permission
-      for (const userRole of userRoles) {
-        const hasPermission = await this.roleHasPermission(
-          userRole.roleId,
-          permission,
-        );
-        if (hasPermission) {
-          return true;
+    const cacheKey = `${userId}:${permission}`;
+    return DefaultPermissionService.userPermissionCache.getOrCreate(cacheKey, async () => {
+      try {
+        const userRoles = await this.getUserRoles(userId);
+        for (const userRole of userRoles) {
+          const perms = await this.roleService.getEffectivePermissions(userRole.roleId);
+          if (perms.includes(permission)) {
+            return true;
+          }
         }
+        return false;
+      } catch (error) {
+        console.error("Error checking user permission:", error);
+        return false;
       }
-
-      return false;
-    } catch (error) {
-      console.error("Error checking user permission:", error);
-      return false;
-    }
+    });
   }
 
   /**

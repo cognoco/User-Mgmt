@@ -131,4 +131,19 @@ describe('RoleService', () => {
     const perms = await service.getEffectivePermissions('C');
     expect(perms.sort()).toEqual(['p1', 'p2', 'p3', 'p4']);
   });
+
+  it('caches effective permission results', async () => {
+    const service = new RoleService();
+    vi.spyOn(service, 'getAncestorRoles').mockResolvedValue([] as any);
+    const supabase = getServiceSupabase();
+    const from = {
+      select: vi.fn().mockReturnThis(),
+      in: vi.fn().mockResolvedValue({ data: [{ permissions: 'p1' }], error: null }),
+    };
+    (supabase.from as any).mockReturnValue(from);
+    const first = await service.getEffectivePermissions('A');
+    const second = await service.getEffectivePermissions('A');
+    expect(from.in).toHaveBeenCalledTimes(1);
+    expect(first).toEqual(second);
+  });
 });

@@ -113,4 +113,18 @@ describe("DefaultPermissionService", () => {
     expect(provider.hasResourcePermission).toHaveBeenCalledTimes(2);
     expect(allowed).toBe(true);
   });
+
+  it("hasPermission checks hierarchy and caches result", async () => {
+    provider.getUserRoles.mockResolvedValue([{ roleId: ROLE_ID }]);
+    const mockRoleService = { getEffectivePermissions: vi.fn().mockResolvedValue([PermissionValues.MANAGE_ROLES]) } as any;
+    service = new DefaultPermissionService(provider, mockRoleService);
+    (DefaultPermissionService as any).userPermissionCache = new MemoryCache({ ttl: 30000 });
+
+    const allowed1 = await service.hasPermission(USER_ID, PermissionValues.MANAGE_ROLES);
+    const allowed2 = await service.hasPermission(USER_ID, PermissionValues.MANAGE_ROLES);
+
+    expect(mockRoleService.getEffectivePermissions).toHaveBeenCalledTimes(1);
+    expect(allowed1).toBe(true);
+    expect(allowed2).toBe(true);
+  });
 });
