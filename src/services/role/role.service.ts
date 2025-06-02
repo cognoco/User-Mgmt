@@ -31,6 +31,10 @@ export interface UserRoleAssignment {
   role?: Role;
 }
 
+export interface RoleHierarchyNode extends Role {
+  children: RoleHierarchyNode[];
+}
+
 import { getServiceSupabase } from '@/lib/database/supabase';
 import type { Permission } from '@/types/rbac';
 
@@ -183,6 +187,10 @@ export class RoleService {
     if (error) throw error;
   }
 
+  async removeParentRole(roleId: string): Promise<void> {
+    await this.setParentRole(roleId, null);
+  }
+
   async getAncestorRoles(roleId: string): Promise<Role[]> {
     const ancestors: Role[] = [];
     const visited = new Set<string>();
@@ -214,6 +222,28 @@ export class RoleService {
     };
     traverse(roleId);
     return descendants;
+  }
+
+  async getRoleHierarchy(): Promise<RoleHierarchyNode[]> {
+    const allRoles = await this.getAllRoles();
+    const map = new Map<string, RoleHierarchyNode>();
+    for (const role of allRoles) {
+      map.set(role.id, { ...(role as RoleHierarchyNode), children: [] });
+    }
+    const roots: RoleHierarchyNode[] = [];
+    for (const node of map.values()) {
+      if (node.parentRoleId) {
+        const parent = map.get(node.parentRoleId);
+        if (parent) {
+          parent.children.push(node);
+        } else {
+          roots.push(node);
+        }
+      } else {
+        roots.push(node);
+      }
+    }
+    return roots;
   }
 
   async getEffectivePermissions(roleId: string): Promise<Permission[]> {

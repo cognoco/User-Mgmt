@@ -61,4 +61,16 @@ describe('DefaultRoleService', () => {
     const second = service.getEffectivePermissions('C');
     expect(first).toEqual(second);
   });
+
+  it('removes parent role relationship', () => {
+    service.removeParentRole('B');
+    expect(service.getAncestorRoles('B')).toEqual([]);
+  });
+
+  it('provides full hierarchy tree', () => {
+    const tree = service.getRoleHierarchy();
+    expect(tree[0].id).toBe('A');
+    expect(tree[0].children[0].id).toBe('B');
+    expect(tree[0].children[0].children[0].id).toBe('C');
+  });
 });

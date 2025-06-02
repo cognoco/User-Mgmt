@@ -4,6 +4,10 @@ export interface RoleRecord {
   parentRoleId?: string | null;
 }
 
+export interface RoleHierarchyRecord extends RoleRecord {
+  children: RoleHierarchyRecord[];
+}
+
 /**
  * Simple in-memory role service supporting hierarchy and permission inheritance.
  */
@@ -22,6 +26,10 @@ export class DefaultRoleService {
       role.parentRoleId = parentRoleId;
       this.permissionCache.clear();
     }
+  }
+
+  removeParentRole(roleId: string): void {
+    this.setParentRole(roleId, null);
   }
 
   getAncestorRoles(roleId: string): RoleRecord[] {
@@ -54,6 +62,27 @@ export class DefaultRoleService {
     };
     traverse(roleId);
     return descendants;
+  }
+
+  getRoleHierarchy(): RoleHierarchyRecord[] {
+    const map = new Map<string, RoleHierarchyRecord>();
+    for (const role of this.roles.values()) {
+      map.set(role.id, { ...(role as RoleHierarchyRecord), children: [] });
+    }
+    const roots: RoleHierarchyRecord[] = [];
+    for (const node of map.values()) {
+      if (node.parentRoleId) {
+        const parent = map.get(node.parentRoleId);
+        if (parent) {
+          parent.children.push(node);
+        } else {
+          roots.push(node);
+        }
+      } else {
+        roots.push(node);
+      }
+    }
+    return roots;
   }
 
   getEffectivePermissions(roleId: string): string[] {
