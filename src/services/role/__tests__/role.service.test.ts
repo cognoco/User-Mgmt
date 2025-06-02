@@ -70,6 +70,16 @@ describe('RoleService', () => {
     expect(from.eq).toHaveBeenCalledWith('id', 'B');
   });
 
+  it('rejects parent role when depth limit exceeded', async () => {
+    const supabase = getServiceSupabase();
+    const from = { update: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnValue({ error: null }) };
+    (supabase.from as any).mockReturnValue(from);
+    vi.spyOn(RoleService.prototype as any, 'hasCircularDependency').mockResolvedValue(false);
+    vi.spyOn(RoleService.prototype as any, 'exceedsDepthLimit').mockResolvedValue(true);
+    const service = new RoleService();
+    await expect(service.setParentRole('B', 'A')).rejects.toThrow('Role hierarchy depth limit exceeded');
+  });
+
   it('returns ancestor roles in order', async () => {
     const roles: any = {
       A: { id: 'A', name: 'A', isSystemRole: false, createdAt: '', updatedAt: '', parentRoleId: null },
