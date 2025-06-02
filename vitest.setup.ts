@@ -57,19 +57,35 @@ vi.mock('react-i18next', async (importOriginal) => {
   return {
     ...actual,
     useTranslation: () => ({
-      t: (key: string, params?: Record<string, string>) => {
-        // Handle [i18n:KEY] pattern
+      t: (key: string, options?: any) => {
+        // Support [i18n:KEY] pattern used in some tests
         let lookupKey = key;
         const i18nMatch = /^\[i18n:(.+)\]$/.exec(key);
         if (i18nMatch) {
           lookupKey = i18nMatch[1];
         }
+
+        let defaultValue: string | undefined;
+        let params: Record<string, string> | undefined;
+
+        if (typeof options === 'string') {
+          defaultValue = options;
+        } else if (options) {
+          ({ defaultValue, ...params } = options);
+        }
+
         let value = getNestedTranslation(en, lookupKey);
+
+        if (value === lookupKey && defaultValue) {
+          value = defaultValue;
+        }
+
         if (params) {
           Object.entries(params).forEach(([k, v]) => {
-            value = value.replace(new RegExp(`{{${k}}}`, 'g'), v);
+            value = value.replace(new RegExp(`{{${k}}}`, 'g'), String(v));
           });
         }
+
         return value;
       },
       i18n: { changeLanguage: () => Promise.resolve() },
