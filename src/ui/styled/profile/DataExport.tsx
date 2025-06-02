@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Button } from '@/ui/primitives/button';
@@ -6,9 +7,18 @@ import { DataExport as DataExportHeadless } from '@/ui/headless/settings/DataExp
 
 export default function DataExport() {
   const { t } = useTranslation();
+  const [success, setSuccess] = useState<string | null>(null);
 
   return (
     <DataExportHeadless
+      onComplete={() =>
+        setSuccess(
+          t(
+            'profile.dataExport.success',
+            'Your data export has been downloaded successfully.'
+          )
+        )
+      }
       render={({ isLoading, error, handleExport }) => (
         <Card className="rounded border p-4 max-w-lg mx-auto bg-white shadow mt-6">
           <CardHeader>
@@ -20,7 +30,16 @@ export default function DataExport() {
           {error && (
             <CardContent>
               <Alert variant="destructive" role="alert">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>
+                  {t('profile.dataExport.error', error)}
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          )}
+          {success && (
+            <CardContent>
+              <Alert role="status">
+                <AlertDescription>{success}</AlertDescription>
               </Alert>
             </CardContent>
           )}

@@ -56,7 +56,30 @@ function resolveKey(key: string, obj: any): string {
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => resolveKey(key, en),
+    t: (key: string, options?: any) => {
+      let defaultValue: string | undefined;
+      let params: Record<string, string> | undefined;
+
+      if (typeof options === 'string') {
+        defaultValue = options;
+      } else if (options) {
+        ({ defaultValue, ...params } = options);
+      }
+
+      let value = resolveKey(key, en);
+
+      if (value === key && defaultValue) {
+        value = defaultValue;
+      }
+
+      if (params) {
+        Object.entries(params).forEach(([k, v]) => {
+          value = value.replace(new RegExp(`{{${k}}}`, 'g'), String(v));
+        });
+      }
+
+      return value;
+    },
   }),
   Trans: ({ i18nKey }: { i18nKey: string }) => resolveKey(i18nKey, en),
   initReactI18next: {
