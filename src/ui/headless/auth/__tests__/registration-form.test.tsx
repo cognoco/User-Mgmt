@@ -143,8 +143,14 @@ describe('RegistrationForm (headless)', () => {
       expect(mockRegisterUserAction).toHaveBeenCalledWith({
         email: 'test@example.com',
         password: 'Password123',
+        confirmPassword: 'Password123',
         firstName: 'A',
-        lastName: 'B'
+        lastName: 'B',
+        acceptTerms: true,
+        metadata: {
+          acceptedTerms: true,
+          userType: 'corporate'
+        }
       });
     });
   });
@@ -179,6 +185,7 @@ describe('RegistrationForm (headless)', () => {
     renderWithProvider();
     await userEvent.type(screen.getByTestId('password-input'), 'Password123');
     await userEvent.type(screen.getByTestId('confirm-password-input'), 'Password124');
+    await userEvent.tab();
     expect(await screen.findByText(/passwords do not match/i)).toBeInTheDocument();
   });
 
@@ -232,8 +239,14 @@ describe('RegistrationForm (headless)', () => {
       expect(mockRegisterUserAction).toHaveBeenCalledWith({
         email: 'test@example.com',
         password: 'ValidPass123!',
+        confirmPassword: 'ValidPass123!',
         firstName: 'Test',
         lastName: 'User',
+        acceptTerms: true,
+        metadata: {
+          acceptedTerms: true,
+          userType: 'private'
+        }
       });
     });
   });
@@ -258,8 +271,11 @@ describe('RegistrationForm (headless)', () => {
     expect(mockRegisterUserAction).toHaveBeenCalledWith({
       email: 'fail@example.com',
       password: 'ValidPass123!',
+      confirmPassword: 'ValidPass123!',
       firstName: 'Test',
       lastName: 'User',
+      acceptTerms: true,
+      metadata: { acceptedTerms: true, userType: 'private' }
     });
   });
 
@@ -416,7 +432,11 @@ describe('RegistrationForm (headless)', () => {
     const passwordInput = screen.getByTestId('password-input');
     await user.type(passwordInput, 'Pass1'); // Too short
     await user.tab(); // Blur
-    expect(await screen.findByText(/password must be at least 8 characters/i)).toBeInTheDocument();
+    // Trigger validation via submit in case blur does not show the error
+    await user.click(screen.getByTestId('submit-button'));
+    await waitFor(() => {
+      expect(screen.getByTestId('password-error')).toHaveTextContent(/password must be at least 8 characters/i);
+    });
   });
 
   it.skip('toggles password visibility', async () => {
