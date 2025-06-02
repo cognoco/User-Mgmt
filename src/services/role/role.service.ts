@@ -37,8 +37,12 @@ import { MemoryCache } from '@/lib/cache';
 
 export class RoleService {
   private static permissionCache = new MemoryCache<string, Permission[]>({ ttl: 30_000 });
-
-  constructor(private supabase = getServiceSupabase()) {}
+  
+  constructor(
+    private supabase = getServiceSupabase(),
+    private maxHierarchyDepth = Infinity,
+  ) {}
+}
 
   async getAllRoles(filters?: { isSystemRole?: boolean }): Promise<Role[]> {
     let query = this.supabase.from('roles').select('*');
@@ -95,10 +99,36 @@ export class RoleService {
     return false;
   }
 
+  private async exceedsDepthLimit(parentId: string | null): Promise<boolean> {
+    if (!parentId || this.maxHierarchyDepth === Infinity) return false;
+    let depth = 1;
+    let current = parentId;
+    const visited = new Set<string>();
+    while (current) {
+      if (visited.has(current)) break;
+      visited.add(current);
+      if (depth >= this.maxHierarchyDepth) return true;
+      const { data, error } = await this.supabase
+        .from('roles')
+        .select('parent_role_id')
+        .eq('id', current)
+        .single();
+      if (error || !data) break;
+      current = (data as { parent_role_id: string | null }).parent_role_id;
+      depth += 1;
+    }
+    return false;
+  }
+
   async createRole(name: string, description = '', parentRoleId?: string | null): Promise<Role> {
     await this.ensureUniqueName(name);
-    if (parentRoleId && (await this.hasCircularDependency('', parentRoleId))) {
-      throw new Error('Circular role hierarchy');
+    if (parentRoleId) {
+      if (await this.hasCircularDependency('', parentRoleId)) {
+        throw new Error('Circular role hierarchy');
+      }
+      if (await this.exceedsDepthLimit(parentRoleId)) {
+        throw new Error('Role hierarchy depth limit exceeded');
+      }
     }
     const { data, error } = await this.supabase
       .from('roles')
@@ -113,8 +143,13 @@ export class RoleService {
     if (data.name) {
       await this.ensureUniqueName(data.name, id);
     }
-    if (data.parentRoleId && (await this.hasCircularDependency(id, data.parentRoleId))) {
-      throw new Error('Circular role hierarchy');
+    if (data.parentRoleId) {
+      if (await this.hasCircularDependency(id, data.parentRoleId)) {
+        throw new Error('Circular role hierarchy');
+      }
+      if (await this.exceedsDepthLimit(data.parentRoleId)) {
+        throw new Error('Role hierarchy depth limit exceeded');
+      }
     }
     const { data: updated, error } = await this.supabase
       .from('roles')
@@ -176,8 +211,13 @@ export class RoleService {
   }
 
   async setParentRole(roleId: string, parentRoleId: string | null): Promise<void> {
-    if (parentRoleId && (await this.hasCircularDependency(roleId, parentRoleId))) {
-      throw new Error('Circular role hierarchy');
+    if (parentRoleId) {
+      if (await this.hasCircularDependency(roleId, parentRoleId)) {
+        throw new Error('Circular role hierarchy');
+      }
+      if (await this.exceedsDepthLimit(parentRoleId)) {
+        throw new Error('Role hierarchy depth limit exceeded');
+      }
     }
     const { error } = await this.supabase
       .from('roles')

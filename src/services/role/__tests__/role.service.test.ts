@@ -2,10 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { RoleService } from '../role.service';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
+// Use a shared Supabase mock so tests can control return values
+const supabase = {
+  from: vi.fn(),
+};
 vi.mock('@/lib/database/supabase', () => ({
-  getServiceSupabase: vi.fn(() => ({
-    from: vi.fn(),
-  })),
+  getServiceSupabase: vi.fn(() => supabase),
 }));
 
 function mockFrom(returnValue: any) {
@@ -15,6 +17,7 @@ function mockFrom(returnValue: any) {
 describe('RoleService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    supabase.from.mockReset();
   });
 
   it('rejects creating duplicate role names', async () => {
@@ -34,7 +37,7 @@ describe('RoleService', () => {
     const fromFirst = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({ data: { id: 'r1', is_system_role: true }, error: null }),
+      single: vi.fn().mockResolvedValue({ data: { id: 'r1', isSystemRole: true }, error: null }),
     };
     const fromSecond = {
       delete: vi.fn().mockReturnThis(),
@@ -48,23 +51,7 @@ describe('RoleService', () => {
   });
 
   it('detects circular hierarchy on update', async () => {
-    const supabase = getServiceSupabase();
-    // unique name check
-    const nameCheck = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      neq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockRejectedValue({ code: 'PGRST116' }),
-    };
-    // circular check: parent role's parent is the role itself
-    const parentQuery = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({ data: { parent_role_id: 'r1' }, error: null }),
-    };
-    (supabase.from as any)
-      .mockReturnValueOnce(nameCheck)
-      .mockReturnValueOnce(parentQuery);
+    vi.spyOn(RoleService.prototype as any, 'hasCircularDependency').mockResolvedValue(true);
     const service = new RoleService();
     await expect(service.updateRole('r1', { parentRoleId: 'r2' })).rejects.toThrow('Circular role hierarchy');
   });
@@ -81,6 +68,16 @@ describe('RoleService', () => {
     await service.setParentRole('B', 'A');
     expect(from.update).toHaveBeenCalledWith({ parent_role_id: 'A', updated_at: expect.any(String) });
     expect(from.eq).toHaveBeenCalledWith('id', 'B');
+  });
+
+  it('rejects parent role when depth limit exceeded', async () => {
+    const supabase = getServiceSupabase();
+    const from = { update: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnValue({ error: null }) };
+    (supabase.from as any).mockReturnValue(from);
+    vi.spyOn(RoleService.prototype as any, 'hasCircularDependency').mockResolvedValue(false);
+    vi.spyOn(RoleService.prototype as any, 'exceedsDepthLimit').mockResolvedValue(true);
+    const service = new RoleService();
+    await expect(service.setParentRole('B', 'A')).rejects.toThrow('Role hierarchy depth limit exceeded');
   });
 
   it('returns ancestor roles in order', async () => {
