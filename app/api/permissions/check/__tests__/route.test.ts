@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET } from '../route';
+import { GET, POST } from '../route';
 import { withRouteAuth } from '@/middleware/auth';
 
 const mockPermissionService = {
   hasPermission: vi.fn(),
+  hasResourcePermission: vi.fn(),
 };
 vi.mock('@/services/permission/factory', () => ({
   getApiPermissionService: () => mockPermissionService,
@@ -30,8 +31,16 @@ describe('GET /api/permissions/check', () => {
     const res = await GET(req as any);
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.data.hasPermission).toBe(true);
+    expect(body.data.allowed).toBe(true);
     expect(mockPermissionService.hasPermission).not.toHaveBeenCalled();
+  });
+
+  it('checks resource permission', async () => {
+    mockPermissionService.hasResourcePermission.mockResolvedValue(true);
+    const req = new Request('http://localhost/api/permissions/check?permission=VIEW_PROJECTS&resource=project&resourceId=p1');
+    const res = await GET(req as any);
+    expect(res.status).toBe(200);
+    expect(mockPermissionService.hasResourcePermission).toHaveBeenCalledWith('user-1', 'VIEW_PROJECTS', 'project', 'p1');
   });
 
   it('returns 404 for invalid permission', async () => {
@@ -60,5 +69,20 @@ describe('GET /api/permissions/check', () => {
     expect(res.status).toBe(404);
     const body = await res.json();
     expect(body.error.code).toBe('not_found');
+  });
+});
+
+describe('POST /api/permissions/check', () => {
+  it('returns batch results', async () => {
+    mockPermissionService.hasPermission.mockResolvedValue(true);
+    const req = new Request('http://localhost/api/permissions/check', {
+      method: 'POST',
+      body: JSON.stringify({ checks: [{ permission: 'VIEW_PROJECTS' }] }),
+    });
+    const res = await POST(req as any);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.data.results[0].allowed).toBe(true);
+    expect(mockPermissionService.hasPermission).toHaveBeenCalledWith('user-1', 'VIEW_PROJECTS');
   });
 });
