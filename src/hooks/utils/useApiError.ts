@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { formatErrorMessage } from '@/lib/i18n/messages';
 
 interface ApiErrorShape {
   code?: string;
@@ -11,23 +13,15 @@ interface ApiErrorShape {
  */
 export function useApiError() {
   const [error, setError] = useState<string | null>(null);
+  const { i18n } = useTranslation();
 
   const handleError = (err: ApiErrorShape | Error) => {
     let message = 'An unexpected error occurred.';
 
     if ('code' in err && err.code) {
-      switch (err.code) {
-        case 'auth/unauthorized':
-          message = 'Please log in to continue.';
-          break;
-        case 'validation/error':
-          message = err.message;
-          break;
-        case 'server/internal_error':
-          message = 'Server error. Please try again later.';
-          break;
-        default:
-          message = err.message || message;
+      message = formatErrorMessage(err.code, {}, i18n.language as any);
+      if (message === `errors.${err.code}`) {
+        message = err.message || message;
       }
     } else if (err instanceof Error) {
       message = err.message;

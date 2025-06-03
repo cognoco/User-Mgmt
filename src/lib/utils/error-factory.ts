@@ -1,6 +1,8 @@
 // Application-wide error factory and utilities
 import { VALIDATION_ERROR_CODES, AUTH_ERROR_CODES, SERVER_ERROR_CODES, USER_ERROR_CODES } from '@/lib/api/common/error-codes';
 import type { ErrorCode } from '@/lib/api/common/error-codes';
+import type { LanguageCode } from '@/lib/i18n';
+import { formatErrorMessage } from '@/lib/i18n/messages';
 
 export interface ApplicationError extends Error {
   code: ErrorCode;
@@ -12,22 +14,11 @@ export interface ApplicationError extends Error {
 }
 
 /**
- * Map of localized messages by locale and error code.
- * Only English translations are provided currently but the structure
- * allows adding more locales easily.
+ * Lookup a localized message for the given error code and locale.
  */
-const LOCALIZED_MESSAGES: Record<string, Record<string, string>> = {
-  en: {
-    [AUTH_ERROR_CODES.UNAUTHORIZED]: 'Authentication required.',
-    [AUTH_ERROR_CODES.FORBIDDEN]: 'Access denied.',
-    [VALIDATION_ERROR_CODES.INVALID_REQUEST]: 'Validation failed.',
-    [USER_ERROR_CODES.NOT_FOUND]: 'Resource not found.',
-    [SERVER_ERROR_CODES.INTERNAL_ERROR]: 'Internal server error.',
-  },
-};
-
-function getLocalizedMessage(code: ErrorCode, locale: string): string | undefined {
-  return LOCALIZED_MESSAGES[locale]?.[code] || LOCALIZED_MESSAGES.en[code];
+function getLocalizedMessage(code: ErrorCode, locale: LanguageCode): string | undefined {
+  const msg = formatErrorMessage(code, {}, locale);
+  return msg === `errors.${code}` ? undefined : msg;
 }
 
 /**
@@ -60,7 +51,7 @@ export function createValidationError(
   fieldErrors: Record<string, string>,
   message?: string,
   cause?: unknown,
-  locale = 'en'
+  locale: LanguageCode = 'en'
 ) {
   let msg = message;
   if (!msg) {
@@ -85,7 +76,7 @@ export function createValidationError(
 export function createAuthenticationError(
   message: string,
   cause?: unknown,
-  locale = 'en'
+  locale: LanguageCode = 'en'
 ) {
   let msg = message;
   if (!msg) {
@@ -105,11 +96,13 @@ export function createNotFoundError(
   resourceType: string,
   resourceId: string,
   cause?: unknown,
-  locale = 'en'
+  locale: LanguageCode = 'en'
 ) {
   const code = USER_ERROR_CODES.NOT_FOUND;
-  const defaultMsg = `${resourceType} ${resourceId} not found`;
-  const msg = getLocalizedMessage(code, locale) || defaultMsg;
+  let msg = getLocalizedMessage(code, locale);
+  if (!msg) {
+    msg = `${resourceType} ${resourceId} not found`;
+  }
   return createError(code, msg, { resourceType, resourceId }, cause, 404);
 }
 
