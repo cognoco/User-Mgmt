@@ -16,11 +16,18 @@ import type { TwoFactorService } from '@/core/two-factor/interfaces';
 import type { SubscriptionService } from '@/core/subscription/interfaces';
 import type { ApiKeyService } from '@/core/api-keys/interfaces';
 import type { NotificationService } from '@/core/notification/interfaces';
+import type { IWebhookService } from '@/core/webhooks/interfaces';
+import type { SessionService } from '@/core/session/interfaces';
+import type { OrganizationService } from '@/core/organization/interfaces';
+import type { CsrfService } from '@/core/csrf/interfaces';
+import type { ConsentService } from '@/core/consent/interfaces';
+import type { AuditService } from '@/core/audit/interfaces';
+import type { AdminService } from '@/core/admin/interfaces';
 
 // Import additional service interfaces as they become available
 // TODO: Add imports for other service interfaces when they exist
 // import type { RoleService } from '@/core/role/interfaces';
-// import type { WebhookService } from '@/core/webhooks/interfaces';
+// import type { AddressService } from '@/core/address/interfaces';
 
 /**
  * Service container interface that holds all available services
@@ -36,9 +43,16 @@ export interface ServiceContainer {
   subscription?: SubscriptionService;
   apiKey?: ApiKeyService;
   notification?: NotificationService;
+  webhook?: IWebhookService;
+  session?: SessionService;
+  organization?: OrganizationService;
+  csrf?: CsrfService;
+  consent?: ConsentService;
+  audit?: AuditService;
+  admin?: AdminService;
   // TODO: Add other services as their interfaces become available
   // role?: RoleService;
-  // webhook?: WebhookService;
+  // address?: AddressService;
 }
 
 /**
@@ -95,9 +109,44 @@ export interface ServiceConfig {
    */
   notificationService?: NotificationService;
   
+  /**
+   * Custom webhook service implementation
+   */
+  webhookService?: IWebhookService;
+  
+  /**
+   * Custom session service implementation
+   */
+  sessionService?: SessionService;
+  
+  /**
+   * Custom organization service implementation
+   */
+  organizationService?: OrganizationService;
+  
+  /**
+   * Custom CSRF service implementation
+   */
+  csrfService?: CsrfService;
+  
+  /**
+   * Custom consent service implementation
+   */
+  consentService?: ConsentService;
+  
+  /**
+   * Custom audit service implementation
+   */
+  auditService?: AuditService;
+  
+  /**
+   * Custom admin service implementation
+   */
+  adminService?: AdminService;
+  
   // TODO: Add other service configurations as their interfaces become available
   // roleService?: RoleService;
-  // webhookService?: WebhookService;
+  // addressService?: AddressService;
   
   /**
    * Feature flags to enable/disable functionality
@@ -126,6 +175,11 @@ export interface FeatureFlags {
   subscription?: boolean;
   apiKeys?: boolean;
   notifications?: boolean;
+  sessions?: boolean;
+  organizations?: boolean;
+  csrf?: boolean;
+  consent?: boolean;
+  admin?: boolean;
   [key: string]: boolean | undefined;
 }
 

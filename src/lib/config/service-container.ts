@@ -21,6 +21,13 @@ import type { TwoFactorService } from '@/core/two-factor/interfaces';
 import type { SubscriptionService } from '@/core/subscription/interfaces';
 import type { ApiKeyService } from '@/core/api-keys/interfaces';
 import type { NotificationService } from '@/core/notification/interfaces';
+import type { IWebhookService } from '@/core/webhooks/interfaces';
+import type { SessionService } from '@/core/session/interfaces';
+import type { OrganizationService } from '@/core/organization/interfaces';
+import type { CsrfService } from '@/core/csrf/interfaces';
+import type { ConsentService } from '@/core/consent/interfaces';
+import type { AuditService } from '@/core/audit/interfaces';
+import type { AdminService } from '@/core/admin/interfaces';
 
 // Import existing service factories
 import { getApiAuthService } from '@/services/auth/factory';
@@ -33,10 +40,17 @@ import { getApiTwoFactorService } from '@/services/two-factor/factory';
 import { getApiSubscriptionService } from '@/services/subscription/factory';
 import { getApiKeyService } from '@/services/api-keys/factory';
 import { getApiNotificationService } from '@/services/notification/factory';
+import { getApiWebhookService } from '@/services/webhooks/factory';
+import { getApiSessionService } from '@/services/session/factory';
+import { getApiOrganizationService } from '@/services/organization/factory';
+import { getApiCsrfService } from '@/services/csrf/factory';
+import { getApiConsentService } from '@/services/consent/factory';
+import { getApiAuditService } from '@/services/audit/factory';
+import { getApiAdminService } from '@/services/admin/factory';
 
 // TODO: Import additional service factories as they become available
 // import { getApiRoleService } from '@/services/role/factory';
-// import { getApiWebhookService } from '@/services/webhooks/factory';
+// import { getApiAddressService } from '@/services/address/factory';
 
 /**
  * Global service configuration
@@ -141,6 +155,55 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
     serviceInstances.notification = getApiNotificationService();
   }
   
+  // Create webhook service if not cached
+  if (!serviceInstances.webhook && globalServiceConfig.webhookService) {
+    serviceInstances.webhook = globalServiceConfig.webhookService;
+  } else if (!serviceInstances.webhook && globalServiceConfig.featureFlags?.webhooks !== false) {
+    serviceInstances.webhook = getApiWebhookService();
+  }
+  
+  // Create session service if not cached
+  if (!serviceInstances.session && globalServiceConfig.sessionService) {
+    serviceInstances.session = globalServiceConfig.sessionService;
+  } else if (!serviceInstances.session && globalServiceConfig.featureFlags?.sessions !== false) {
+    serviceInstances.session = getApiSessionService();
+  }
+  
+  // Create organization service if not cached
+  if (!serviceInstances.organization && globalServiceConfig.organizationService) {
+    serviceInstances.organization = globalServiceConfig.organizationService;
+  } else if (!serviceInstances.organization && globalServiceConfig.featureFlags?.organizations !== false) {
+    serviceInstances.organization = getApiOrganizationService();
+  }
+  
+  // Create CSRF service if not cached
+  if (!serviceInstances.csrf && globalServiceConfig.csrfService) {
+    serviceInstances.csrf = globalServiceConfig.csrfService;
+  } else if (!serviceInstances.csrf && globalServiceConfig.featureFlags?.csrf !== false) {
+    serviceInstances.csrf = getApiCsrfService();
+  }
+  
+  // Create consent service if not cached
+  if (!serviceInstances.consent && globalServiceConfig.consentService) {
+    serviceInstances.consent = globalServiceConfig.consentService;
+  } else if (!serviceInstances.consent && globalServiceConfig.featureFlags?.consent !== false) {
+    serviceInstances.consent = getApiConsentService();
+  }
+  
+  // Create audit service if not cached
+  if (!serviceInstances.audit && globalServiceConfig.auditService) {
+    serviceInstances.audit = globalServiceConfig.auditService;
+  } else if (!serviceInstances.audit && globalServiceConfig.featureFlags?.audit !== false) {
+    serviceInstances.audit = getApiAuditService();
+  }
+  
+  // Create admin service if not cached
+  if (!serviceInstances.admin && globalServiceConfig.adminService) {
+    serviceInstances.admin = globalServiceConfig.adminService;
+  } else if (!serviceInstances.admin && globalServiceConfig.featureFlags?.admin !== false) {
+    serviceInstances.admin = getApiAdminService();
+  }
+  
   // TODO: Add other services as their factories become available
   
   // Return container with any provided overrides
@@ -155,6 +218,13 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
     subscription: overrides?.subscription || serviceInstances.subscription,
     apiKey: overrides?.apiKey || serviceInstances.apiKey,
     notification: overrides?.notification || serviceInstances.notification,
+    webhook: overrides?.webhook || serviceInstances.webhook,
+    session: overrides?.session || serviceInstances.session,
+    organization: overrides?.organization || serviceInstances.organization,
+    csrf: overrides?.csrf || serviceInstances.csrf,
+    consent: overrides?.consent || serviceInstances.consent,
+    audit: overrides?.audit || serviceInstances.audit,
+    admin: overrides?.admin || serviceInstances.admin,
   };
 }
 
@@ -226,6 +296,55 @@ export function getConfiguredApiKeyService(override?: ApiKeyService): ApiKeyServ
  */
 export function getConfiguredNotificationService(override?: NotificationService): NotificationService | undefined {
   return override || globalServiceConfig.notificationService || getApiNotificationService();
+}
+
+/**
+ * Get a specific service with fallback to global configuration
+ */
+export function getConfiguredWebhookService(override?: IWebhookService): IWebhookService | undefined {
+  return override || globalServiceConfig.webhookService || getApiWebhookService();
+}
+
+/**
+ * Get a specific service with fallback to global configuration
+ */
+export function getConfiguredSessionService(override?: SessionService): SessionService | undefined {
+  return override || globalServiceConfig.sessionService || getApiSessionService();
+}
+
+/**
+ * Get a specific service with fallback to global configuration
+ */
+export function getConfiguredOrganizationService(override?: OrganizationService): OrganizationService | undefined {
+  return override || globalServiceConfig.organizationService || getApiOrganizationService();
+}
+
+/**
+ * Get a specific service with fallback to global configuration
+ */
+export function getConfiguredCsrfService(override?: CsrfService): CsrfService | undefined {
+  return override || globalServiceConfig.csrfService || getApiCsrfService();
+}
+
+/**
+ * Get a specific service with fallback to global configuration
+ */
+export function getConfiguredConsentService(override?: ConsentService): ConsentService | undefined {
+  return override || globalServiceConfig.consentService || getApiConsentService();
+}
+
+/**
+ * Get a specific service with fallback to global configuration
+ */
+export function getConfiguredAuditService(override?: AuditService): AuditService | undefined {
+  return override || globalServiceConfig.auditService || getApiAuditService();
+}
+
+/**
+ * Get a specific service with fallback to global configuration
+ */
+export function getConfiguredAdminService(override?: AdminService): AdminService | undefined {
+  return override || globalServiceConfig.adminService || getApiAdminService();
 }
 
 /**
