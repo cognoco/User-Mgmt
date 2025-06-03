@@ -23,13 +23,14 @@ const CONFIRMATION_TEXT = 'DELETE';
 
 const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ open, onClose }) => {
   const [confirmText, setConfirmText] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
   const { deleteAccount, isLoading, error } = useDeleteAccount();
 
-  const isConfirmed = confirmText === CONFIRMATION_TEXT;
+  const isConfirmed = confirmText === CONFIRMATION_TEXT && mfaCode.length >= 6;
 
   const handleDeleteAccount = async () => {
     if (isConfirmed) {
-      await deleteAccount();
+      await deleteAccount({ mfaCode });
       if (!error) {
         onClose();
       }
@@ -57,11 +58,9 @@ const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ open, onClose
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="confirm-deletion">
-              Confirm deletion
-            </Label>
+            <Label htmlFor="confirm-deletion">Confirm deletion</Label>
             <p className="text-sm text-muted-foreground">
-              Please type &quot;DELETE&quot; to confirm you want to delete your account
+              Please type "DELETE" to confirm you want to delete your account
             </p>
             <Input
               id="confirm-deletion"
@@ -72,6 +71,23 @@ const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ open, onClose
               disabled={isLoading}
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="mfa-code">MFA Code</Label>
+            <p className="text-sm text-muted-foreground">
+              Enter the code from your authenticator app
+            </p>
+            <Input
+              id="mfa-code"
+              aria-label="MFA code"
+              value={mfaCode}
+              onChange={(e) => setMfaCode(e.target.value)}
+              placeholder="123456"
+              disabled={isLoading}
+            />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            You can <a className="underline" href="/api/gdpr/export">download your data</a> before deletion. Your account will be permanently removed after a 7 day cooling-off period.
+          </p>
         </div>
 
         <DialogFooter>
