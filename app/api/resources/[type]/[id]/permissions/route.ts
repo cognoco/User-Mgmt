@@ -3,10 +3,12 @@
 
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
+import { NextResponse, type NextRequest } from 'next/server';
 import { createPaginatedResponse } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
 import { withValidation } from '@/middleware/validation';
-import { createProtectedHandler } from '@/middleware/permissions';
+import { withRouteAuth } from '@/middleware/auth';
+import { checkPermission } from '@/lib/auth/permissionCheck';
 import { PermissionValues } from '@/core/permission/models';
 import { getApiPermissionService } from '@/services/permission/factory';
 
@@ -20,10 +22,24 @@ type Query = z.infer<typeof querySchema>;
 
 async function handleGet(
   _req: NextRequest,
+  userId: string,
   resourceType: string,
   resourceId: string,
   query: Query,
 ) {
+  const allowed = await checkPermission(
+    userId,
+    PermissionValues.MANAGE_ROLES,
+    resourceType,
+    resourceId,
+  );
+  const globalAllowed = await checkPermission(
+    userId,
+    PermissionValues.MANAGE_ROLES,
+  );
+  if (!allowed && !globalAllowed) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
   const service = getApiPermissionService();
   let permissions = await service.getPermissionsForResource(resourceType, resourceId);
   if (query.userId) {
@@ -48,17 +64,20 @@ async function handleGet(
   });
 }
 
-export const GET = createProtectedHandler(
-  (req, ctx) =>
+export const GET = (
+  req: NextRequest,
+  ctx: { params: { type: string; id: string } },
+) =>
+  withRouteAuth((r, auth) =>
     withErrorHandling(() => {
-      const url = new URL(req.url);
+      const url = new URL(r.url);
       const params = Object.fromEntries(url.searchParams.entries());
       return withValidation(
         querySchema,
-        (r, data) => handleGet(r, ctx.params.type, ctx.params.id, data),
-        req,
+        (r2, data) =>
+          handleGet(r2, auth.userId!, ctx.params.type, ctx.params.id, data),
+        r,
         params,
       );
-    }, req),
-  PermissionValues.MANAGE_ROLES,
-);
+    }, r),
+  req);

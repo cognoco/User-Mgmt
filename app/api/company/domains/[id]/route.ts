@@ -8,6 +8,8 @@ import {
   validationMiddleware,
 } from "@/middleware/createMiddlewareChain";
 import { z } from "zod";
+import { checkPermission } from "@/lib/auth/permissionCheck";
+import { PermissionValues } from "@/core/permission/models";
 
 // Validation schema for updating a domain
 const domainUpdateSchema = z.object({
@@ -71,7 +73,16 @@ async function handleDelete(
     }
 
     // Check access rights
-    if (domain.company_profiles.user_id !== auth.userId) {
+    const allowed =
+      domain.company_profiles.user_id === auth.userId ||
+      (await checkPermission(
+        auth.userId!,
+        PermissionValues.MANAGE_SETTINGS,
+        'company',
+        domain.company_profiles.id,
+      )) ||
+      (await checkPermission(auth.userId!, PermissionValues.MANAGE_SETTINGS));
+    if (!allowed) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -147,7 +158,16 @@ async function handlePatch(
       return NextResponse.json({ error: "Domain not found." }, { status: 404 });
     }
 
-    if (domain.company_profiles.user_id !== auth.userId) {
+    const allowed =
+      domain.company_profiles.user_id === auth.userId ||
+      (await checkPermission(
+        auth.userId!,
+        PermissionValues.MANAGE_SETTINGS,
+        'company',
+        domain.company_profiles.id,
+      )) ||
+      (await checkPermission(auth.userId!, PermissionValues.MANAGE_SETTINGS));
+    if (!allowed) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
