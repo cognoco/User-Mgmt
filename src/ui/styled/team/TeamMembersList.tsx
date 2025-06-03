@@ -28,7 +28,7 @@ import {
   ArrowUpDown,
   UserPlus,
 } from 'lucide-react';
-import { usePermission } from '@/hooks/permission/usePermissions';
+import { usePermission } from "@/hooks/usePermission";
 import { Skeleton } from '@/ui/primitives/skeleton';
 import { Progress } from '@/ui/primitives/progress';
 
