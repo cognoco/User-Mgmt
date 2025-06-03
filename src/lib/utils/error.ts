@@ -37,3 +37,11 @@ export function translateError(error: any, options: TranslateErrorOptions = {}):
   }
   return options.defaultMessage || 'An unexpected error occurred';
 }
+
+export function isNetworkError(error: any): boolean {
+  return (
+    error &&
+    !error.response &&
+    (error.code === 'NETWORK_ERROR' || /network/i.test(error.message || ''))
+  );
+}

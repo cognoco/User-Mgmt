@@ -39,6 +39,7 @@ import { DefaultSessionTracker, type SessionTracker } from './session-tracker';
 import { DefaultMFAHandler, type MFAHandler } from './mfa-handler';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { authConfig } from '@/lib/auth/config';
+import { withRetry, isNetworkError } from '@/lib/utils';
 
 /** Keys used for persisting auth data */
 const TOKEN_KEY = 'auth_token';
@@ -121,7 +122,10 @@ export class DefaultAuthService
     }
 
     try {
-      const result = await this.provider.login(credentials);
+      const result = await withRetry(
+        () => this.provider.login(credentials),
+        { retries: 1, isRetryable: isNetworkError },
+      );
       if (result.success) {
         this.user = result.user ?? null;
         this.persistToken(
@@ -172,7 +176,10 @@ export class DefaultAuthService
     }
 
     try {
-      const result = await this.provider.register(userData);
+      const result = await withRetry(
+        () => this.provider.register(userData),
+        { retries: 1, isRetryable: isNetworkError },
+      );
       if (result.success) {
         this.emit({
           type: 'user_registered',
@@ -230,7 +237,10 @@ export class DefaultAuthService
   async getCurrentUser(): Promise<User | null> {
     if (this.user) return this.user;
     try {
-      this.user = await this.provider.getCurrentUser();
+      this.user = await withRetry(
+        () => this.provider.getCurrentUser(),
+        { retries: 1, isRetryable: isNetworkError },
+      );
       return this.user;
     } catch (error) {
       const { error: err } = handleServiceError(error, {
