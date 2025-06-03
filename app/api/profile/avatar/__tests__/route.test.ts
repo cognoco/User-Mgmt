@@ -1,20 +1,26 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GET, POST, DELETE } from '../route';
-import { getApiUserService } from '@/services/user/factory';
-import { withRouteAuth } from '@/middleware/auth';
+import { configureServices, resetServiceContainer } from '@/lib/config/service-container';
+import type { UserService } from '@/core/user/interfaces';
+import type { AuthService } from '@/core/auth/interfaces';
 import createMockUserService from '@/tests/mocks/user.service.mock';
 import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
-vi.mock('@/services/user/factory', () => ({ getApiUserService: vi.fn() }));
-vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'user-1', role: 'user', permissions: [] })),
-}));
+vi.mock('@/services/user/factory', () => ({}));
+vi.mock('@/services/auth/factory', () => ({}));
 
-const service = createMockUserService();
+const userService = createMockUserService();
+const authService: Partial<AuthService> = {
+  getCurrentUser: vi.fn().mockResolvedValue({ id: 'user-1', email: 'u@test.com' }),
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (getApiUserService as unknown as vi.Mock).mockReturnValue(service);
+  resetServiceContainer();
+  configureServices({
+    userService: userService as UserService,
+    authService: authService as AuthService,
+  });
 });
 
 describe('/api/profile/avatar', () => {
@@ -31,7 +37,7 @@ describe('/api/profile/avatar', () => {
     (req as any).json = async () => ({ avatarId: 'avatar1' });
     const res = await POST(req);
     expect(res.status).toBe(200);
-    expect(service.updateUserProfile).toHaveBeenCalled();
+    expect(userService.updateUserProfile).toHaveBeenCalled();
   });
 
   it('uploads custom avatar', async () => {
@@ -40,13 +46,13 @@ describe('/api/profile/avatar', () => {
     (req as any).json = async () => ({ avatar: data });
     const res = await POST(req);
     expect(res.status).toBe(200);
-    expect(service.uploadProfilePicture).toHaveBeenCalled();
+    expect(userService.uploadProfilePicture).toHaveBeenCalled();
   });
 
   it('deletes avatar', async () => {
     const req = createAuthenticatedRequest('DELETE', 'http://localhost/api/profile/avatar');
     const res = await DELETE(req);
     expect(res.status).toBe(204);
-    expect(service.deleteProfilePicture).toHaveBeenCalled();
+    expect(userService.deleteProfilePicture).toHaveBeenCalled();
   });
 });
