@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createError, createValidationError, createAuthenticationError, createNotFoundError } from '../error-factory';
+import { createError, createValidationError, createAuthenticationError, createNotFoundError, enhanceError } from '../error-factory';
 import { VALIDATION_ERROR_CODES, AUTH_ERROR_CODES, USER_ERROR_CODES } from '@/lib/api/common/error-codes';
 
 describe('error factory', () => {
@@ -63,5 +63,37 @@ describe('error factory', () => {
   it('uses translation when locale available', () => {
     const err = createNotFoundError('item', '3', undefined, 'en');
     expect(err.message).toBe('Resource not found.');
+  });
+
+  it('sets timestamp and name properly', () => {
+    const before = Date.now();
+    const err = createError(AUTH_ERROR_CODES.FORBIDDEN, 'nope');
+    const after = Date.now();
+    expect(err.name).toBe('ApplicationError');
+    expect(Date.parse(err.timestamp)).toBeGreaterThanOrEqual(before);
+    expect(Date.parse(err.timestamp)).toBeLessThanOrEqual(after);
+  });
+
+  it('enhances existing Error instance', () => {
+    const base = new Error('base');
+    const enhanced = enhanceError(base);
+    expect(enhanced).toBe(base);
+  });
+
+  it('enhances string error to Error instance', () => {
+    const enhanced = enhanceError('boom') as Error;
+    expect(enhanced).toBeInstanceOf(Error);
+    expect(enhanced.message).toBe('boom');
+  });
+
+  it('enhances unknown error to generic Error', () => {
+    const enhanced = enhanceError({ data: 1 }) as Error;
+    expect(enhanced.message).toBe('Unknown error occurred');
+  });
+
+  it('allows switching locales', () => {
+    const en = createAuthenticationError(undefined as any, undefined, 'en');
+    const fr = createAuthenticationError(undefined as any, undefined, 'fr');
+    expect(fr.message).toBe(en.message);
   });
 });
