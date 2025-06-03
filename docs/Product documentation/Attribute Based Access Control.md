@@ -35,3 +35,21 @@ const allowed = evaluator.check('EDIT_PROJECT', { user, resource, environment })
 To add new rule types extend `AttributeCondition` and update the evaluator accordingly.
 
 Testing utilities live in `src/core/access-control/__tests__`.
+
+## Common Policy Types
+
+The access control system supports implementing several common policy strategies
+by defining appropriate rules:
+
+- **Separation of duties policies** – ensure users cannot be granted conflicting
+  permissions by creating mutually exclusive rules. For example, deny
+  `APPROVE_EXPENSES` if the user already has `SUBMIT_EXPENSES`.
+- **Minimum/maximum permission policies** – verify users have required baseline
+  permissions while restricting overly broad access. Rules can enforce that a
+  user must possess `VIEW_REPORTS` and must not exceed a certain role level.
+- **Resource-specific policies** – tie permissions to particular resources using
+  the `resource` attributes in a rule. This allows scenarios like granting
+  `EDIT_PROJECT` only when `resource.ownerId` matches the current user.
+- **Time-based policies** – automatically expire permissions by including
+  conditions on timestamps or dates in the rule evaluation. Example: allow
+  access only while `user.permissionExpiresAt` is in the future.
