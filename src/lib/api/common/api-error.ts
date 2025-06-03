@@ -9,7 +9,8 @@ import { ERROR_CODES, ErrorCode } from './error-codes';
 import { getErrorStatus, getErrorCategory, ErrorCategory } from '../error-handler';
 
 /**
- * API Error class for standardized error responses
+ * API Error class for standardized error responses returned from API routes.
+ * Use the helper functions in this module instead of instantiating directly.
  */
 export class ApiError extends Error {
   code: ErrorCode;
@@ -18,9 +19,13 @@ export class ApiError extends Error {
   details?: Record<string, any>;
 
   constructor(
+    /** error code that identifies the failure */
     code: ErrorCode,
+    /** human readable message */
     message: string,
+    /** optional HTTP status override */
     status?: number,
+    /** optional structured details */
     details?: Record<string, any>
   ) {
     super(message);
@@ -32,7 +37,7 @@ export class ApiError extends Error {
   }
 
   /**
-   * Convert the error to a response object
+   * Convert the error to a JSON response body compatible with the API spec.
    */
   toResponse() {
     return {
@@ -53,6 +58,9 @@ export class ApiError extends Error {
 /**
  * Create an unauthorized error
  */
+/**
+ * Helper for `401 Unauthorized` errors.
+ */
 export function createUnauthorizedError(message = 'Authentication required') {
   return new ApiError(
     ERROR_CODES.UNAUTHORIZED,
@@ -63,6 +71,9 @@ export function createUnauthorizedError(message = 'Authentication required') {
 
 /**
  * Create a forbidden error
+ */
+/**
+ * Helper for `403 Forbidden` errors.
  */
 export function createForbiddenError(message = 'Access denied') {
   return new ApiError(
@@ -75,6 +86,9 @@ export function createForbiddenError(message = 'Access denied') {
 /**
  * Create a validation error
  */
+/**
+ * Helper for validation failures.
+ */
 export function createValidationError(message: string, details?: Record<string, any>) {
   return new ApiError(
     ERROR_CODES.INVALID_REQUEST,
@@ -86,6 +100,9 @@ export function createValidationError(message: string, details?: Record<string, 
 
 /**
  * Create a not found error
+ */
+/**
+ * Helper for `404 Not Found` errors.
  */
 export function createNotFoundError(entity: string, id?: string) {
   const message = id
@@ -102,6 +119,9 @@ export function createNotFoundError(entity: string, id?: string) {
 /**
  * Create a server error
  */
+/**
+ * Helper for generic `500` server errors.
+ */
 export function createServerError(message = 'Internal server error') {
   return new ApiError(
     ERROR_CODES.INTERNAL_ERROR,
@@ -112,6 +132,9 @@ export function createServerError(message = 'Internal server error') {
 
 /**
  * Create a conflict error
+ */
+/**
+ * Helper for `409 Conflict` errors.
  */
 export function createConflictError(message: string) {
   return new ApiError(

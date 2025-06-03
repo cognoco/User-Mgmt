@@ -1,7 +1,20 @@
 import { ERROR_CODE_DESCRIPTIONS, ErrorCode, SERVER_ERROR } from './error-codes';
 
 /**
+ * Error utilities used by the core and service layers.
+ *
+ * The classes in this file implement a simple hierarchy where every error has
+ * a stable `code` and `httpStatus`.  Services should throw these errors so that
+ * API handlers and logging utilities can treat them uniformly.
+ */
+
+/**
  * Base application error used across the core layer.
+ *
+ * @example
+ * ```ts
+ * throw new ApplicationError(SERVER_ERROR.SERVER_001, 'Unexpected failure');
+ * ```
  */
 export class ApplicationError extends Error {
   code: ErrorCode;
@@ -10,9 +23,13 @@ export class ApplicationError extends Error {
   timestamp: string;
 
   constructor(
+    /** unique error code */
     code: ErrorCode,
+    /** human readable message */
     message: string,
+    /** HTTP status associated with this error */
     httpStatus = 500,
+    /** optional structured details */
     details?: Record<string, any>
   ) {
     super(message);
@@ -23,6 +40,9 @@ export class ApplicationError extends Error {
     this.timestamp = new Date().toISOString();
   }
 
+  /**
+   * Serialize the error for transport or logging.
+   */
   toJSON() {
     return {
       name: this.name,
@@ -34,6 +54,9 @@ export class ApplicationError extends Error {
     };
   }
 
+  /**
+   * Recreate an {@link ApplicationError} from serialized JSON.
+   */
   static fromJSON(json: string | ReturnType<ApplicationError['toJSON']>) {
     const obj = typeof json === 'string' ? (JSON.parse(json) as any) : json;
     const err = new ApplicationError(
@@ -47,6 +70,7 @@ export class ApplicationError extends Error {
   }
 }
 
+/** Error thrown when validation fails. */
 export class ValidationError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_001, message, 400, details);
@@ -54,6 +78,7 @@ export class ValidationError extends ApplicationError {
   }
 }
 
+/** Error thrown when authentication fails. */
 export class AuthenticationError extends ApplicationError {
   constructor(code: ErrorCode, message: string, details?: Record<string, any>) {
     super(code, message, 401, details);
@@ -61,6 +86,7 @@ export class AuthenticationError extends ApplicationError {
   }
 }
 
+/** Error thrown when the user lacks authorization to perform an action. */
 export class AuthorizationError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_004, message, 403, details);
@@ -68,6 +94,7 @@ export class AuthorizationError extends ApplicationError {
   }
 }
 
+/** Error thrown when a requested resource cannot be located. */
 export class ResourceNotFoundError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_001, message, 404, details);
@@ -75,6 +102,7 @@ export class ResourceNotFoundError extends ApplicationError {
   }
 }
 
+/** Error thrown when a resource conflict occurs. */
 export class ConflictError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_004, message, 409, details);
@@ -82,6 +110,7 @@ export class ConflictError extends ApplicationError {
   }
 }
 
+/** Error thrown when a client exceeds rate limits. */
 export class RateLimitError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_005, message, 429, details);
@@ -89,6 +118,7 @@ export class RateLimitError extends ApplicationError {
   }
 }
 
+/** Generic error for service failures. */
 export class ServiceError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_001, message, 500, details);
@@ -96,6 +126,7 @@ export class ServiceError extends ApplicationError {
   }
 }
 
+/** Error thrown when a database operation fails. */
 export class DatabaseError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_002, message, 500, details);
@@ -103,6 +134,7 @@ export class DatabaseError extends ApplicationError {
   }
 }
 
+/** Error thrown when an external service returns a failure. */
 export class ExternalServiceError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_003, message, 502, details);
@@ -152,6 +184,10 @@ export function isExternalServiceError(value: unknown): value is ExternalService
 }
 
 // Utility functions
+
+/**
+ * Convert an unknown error value to an {@link ApplicationError} instance.
+ */
 export function createErrorFromUnknown(error: unknown): ApplicationError {
   if (isApplicationError(error)) {
     return error;
@@ -162,10 +198,12 @@ export function createErrorFromUnknown(error: unknown): ApplicationError {
   return new ServiceError('Unknown error');
 }
 
+/** Serialize an {@link ApplicationError} to a JSON string. */
 export function serializeError(error: ApplicationError): string {
   return JSON.stringify(error.toJSON());
 }
 
+/** Deserialize an {@link ApplicationError} from JSON. */
 export function deserializeError(json: string): ApplicationError {
   return ApplicationError.fromJSON(json);
 }
@@ -175,6 +213,9 @@ export type DataProviderError = ApplicationError;
 export const isDataProviderError = isApplicationError;
 
 // createError function for service compatibility
+/**
+ * Helper to build a populated {@link ApplicationError}.
+ */
 export function createError(
   code: ErrorCode,
   message: string,

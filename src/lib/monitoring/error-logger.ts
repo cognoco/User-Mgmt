@@ -1,3 +1,4 @@
+/** Severity levels understood by the {@link ErrorLogger}. */
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'critical';
 
 export interface LogContext {
@@ -81,6 +82,7 @@ function defaultTransports(): LogTransport[] {
   return list;
 }
 
+/** Lightweight buffered logger used by error handlers. */
 export class ErrorLogger {
   private buffer: LogEntry[] = [];
   private transports: LogTransport[];
