@@ -8,6 +8,7 @@ import { Label } from '@/ui/primitives/label';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 import { Checkbox } from '@/ui/primitives/checkbox';
 import { useAuth } from '@/hooks/auth/useAuth';
+import { useLogin } from '@/hooks/auth/useLogin';
 
 import { useRouter } from 'next/navigation';
 import { MFAVerificationForm } from './MFAVerificationForm';
@@ -29,13 +30,19 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
   
   // React 19 compatibility - Use individual primitive selectors instead of object destructuring
   // This is more efficient and avoids infinite loop with getServerSnapshot in React 19
-  const { login, error: authError, success, authService } = useAuth();
-  const user = useAuth().user;
+  const { authService, user } = useAuth();
+  const {
+    login,
+    resendVerificationEmail,
+    error: authError,
+    successMessage: success,
+    mfaRequired,
+    tempAccessToken,
+    clearState,
+  } = useLogin();
   
   const [resendStatus, setResendStatus] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [showResendLink, setShowResendLink] = useState(false);
-  const [mfaRequired, setMfaRequired] = useState(false);
-  const [tempAccessToken, setTempAccessToken] = useState<string | null>(null);
   const [rateLimitInfo, setRateLimitInfo] = useState<{
     retryAfter?: number;
     remainingAttempts?: number;
@@ -51,19 +58,15 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
     clearAuthErrors('auth');
     setResendStatus(null);
     setShowResendLink(false);
-    setMfaRequired(false);
-    setTempAccessToken(null);
+    clearState();
     setRateLimitInfo(null);
     
     try {
       const result = await login(credentials);
 
       if (result.success) {
-        // Check if MFA is required
-        if (result.requiresMfa) {
-          setMfaRequired(true);
-          setTempAccessToken(result.token ?? null);
-        } else {
+        // If MFA is required the hook sets state accordingly
+        if (!result.requiresMfa) {
           router.push('/dashboard/overview');
         }
       } else {
@@ -115,16 +118,16 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
     }
     
     try {
-      const result = await authService.sendVerificationEmail(email);
+      const result = await resendVerificationEmail(email);
       if (result.success) {
-          setResendStatus({ message: 'Verification email sent successfully.', type: 'success' });
+        setResendStatus({ message: 'Verification email sent successfully.', type: 'success' });
       } else {
-          setResendStatus({ message: result.error ?? 'Failed to send verification email.', type: 'error' });
+        setResendStatus({ message: result.error ?? 'Failed to send verification email.', type: 'error' });
       }
     } catch (error) {
-      setResendStatus({ 
-        message: error instanceof Error ? error.message : 'Failed to send verification email.', 
-        type: 'error' 
+      setResendStatus({
+        message: error instanceof Error ? error.message : 'Failed to send verification email.',
+        type: 'error'
       });
     }
   };
@@ -146,8 +149,7 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
 
   // Cancel MFA verification and go back to password login
   const handleMfaCancel = () => {
-    setMfaRequired(false);
-    setTempAccessToken(null);
+    clearState();
   };
 
   const handleRateLimitComplete = () => {
