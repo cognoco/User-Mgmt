@@ -11,6 +11,7 @@ import {
   rateLimitMiddleware,
   validationMiddleware,
 } from "@/middleware/createMiddlewareChain";
+import { withSecurity } from "@/middleware/with-security";
 
 // Company Profile Schema
 const CompanyProfileSchema = z.object({
@@ -169,7 +170,9 @@ const postMiddleware = createMiddlewareChain([
   validationMiddleware(CompanyProfileSchema),
 ]);
 
-export const POST = postMiddleware(handlePost);
+export const POST = withSecurity((req: NextRequest) =>
+  postMiddleware((r, auth, data) => handlePost(r, auth, data))(req)
+);
 
 async function handleGet(_request: NextRequest, auth: RouteAuthContext) {
   try {
@@ -194,7 +197,9 @@ async function handleGet(_request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const GET = baseMiddleware(handleGet);
+export const GET = withSecurity((req: NextRequest) =>
+  baseMiddleware((r, auth) => handleGet(r, auth))(req)
+);
 
 async function handlePut(
   request: NextRequest,
@@ -312,7 +317,9 @@ const putMiddleware = createMiddlewareChain([
   validationMiddleware(CompanyProfileUpdateSchema),
 ]);
 
-export const PUT = putMiddleware(handlePut);
+export const PUT = withSecurity((req: NextRequest) =>
+  putMiddleware((r, auth, data) => handlePut(r, auth, data))(req)
+);
 
 async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
   // Get IP and User Agent early
@@ -447,4 +454,6 @@ async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const DELETE = baseMiddleware(handleDelete);
+export const DELETE = withSecurity((req: NextRequest) =>
+  baseMiddleware((r, auth) => handleDelete(r, auth))(req)
+);
