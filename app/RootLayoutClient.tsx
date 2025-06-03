@@ -1,16 +1,18 @@
 "use client";
 
-import React from "react";
-import { UserManagementClientBoundary } from "@/lib/auth/UserManagementClientBoundary";
-import { SkipLink } from "@/ui/styled/navigation/SkipLink";
-import { KeyboardShortcutsDialog } from "@/ui/styled/common/KeyboardShortcutsDialog";
-import dynamic from "next/dynamic";
-import { useGlobalError } from "@/lib/state/errorStore";
+import React, { useEffect } from 'react';
+import { UserManagementClientBoundary } from '@/lib/auth/UserManagementClientBoundary';
+import { SkipLink } from '@/ui/styled/navigation/SkipLink';
+import { KeyboardShortcutsDialog } from '@/ui/styled/common/KeyboardShortcutsDialog';
+import dynamic from 'next/dynamic';
+import { useGlobalError } from '@/lib/state/errorStore';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { initializeErrorSystem } from '@/lib/monitoring';
+
 const GlobalErrorDisplay = dynamic(
-  () => import("@/ui/styled/common/GlobalErrorDisplay"),
+  () => import('@/ui/styled/common/GlobalErrorDisplay'),
   { ssr: false },
 );
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 export default function RootLayoutClient({
   children,
@@ -22,6 +24,9 @@ export default function RootLayoutClient({
   useKeyboardShortcuts({
     "shift+?": () => setDialogOpen(true),
   });
+  useEffect(() => {
+    initializeErrorSystem();
+  }, []);
   return (
     <>
       <SkipLink />
