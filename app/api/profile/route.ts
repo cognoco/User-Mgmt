@@ -1,56 +1,36 @@
-import { type NextRequest } from 'next/server';
 import { z } from 'zod';
+import { NextRequest } from 'next/server';
 
-import { createSuccessResponse } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withAuthRequest } from '@/middleware/auth';
-import { withValidation } from '@/middleware/validation';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { getApiUserService } from '@/services/user/factory';
-import { profileSchema } from '@/types/database';
-import {
-  createUserNotFoundError,
-  createUserUpdateFailedError
-} from '@/lib/api/user/error-handler';
+import { createSuccessResponse } from '@/lib/api/common';
 
-const UpdateSchema = profileSchema
-  .omit({ id: true, userId: true, createdAt: true, updatedAt: true })
-  .partial();
+// Schema for profile updates
+const updateSchema = z.object({
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  bio: z.string().optional(),
+  location: z.string().optional(),
+});
 
-async function handleGet(_req: NextRequest, userId: string) {
-  const userService = getApiUserService();
-  const profile = await userService.getUserProfile(userId);
-  if (!profile) {
-    throw createUserNotFoundError(userId);
-  }
-  return createSuccessResponse(profile);
-}
+// GET handler
+export const GET = createApiHandler(
+  z.object({}),
+  async (_req, { userId }) => {
+    const userService = getApiUserService();
+    const profile = await userService.getUserProfile(userId);
+    return createSuccessResponse(profile);
+  },
+  { requireAuth: true }
+);
 
-async function handlePatch(
-  _req: NextRequest,
-  userId: string,
-  data: z.infer<typeof UpdateSchema>
-) {
-  const userService = getApiUserService();
-  const result = await userService.updateUserProfile(userId, data as any);
-  if (!result.success || !result.profile) {
-    throw createUserUpdateFailedError(result.error);
-  }
-  return createSuccessResponse(result.profile);
-}
-
-export async function GET(request: NextRequest) {
-  return withErrorHandling(
-    (req) => withAuthRequest(req, (r, ctx) => handleGet(r, ctx.userId)),
-    request
-  );
-}
-
-export async function PATCH(request: NextRequest) {
-  return withErrorHandling(
-    (req) =>
-      withAuthRequest(req, (r, ctx) =>
-        withValidation(UpdateSchema, (r2, data) => handlePatch(r2, ctx.userId, data), r)
-      ),
-    request
-  );
-}
+// PATCH handler
+export const PATCH = createApiHandler(
+  updateSchema,
+  async (_req, { userId }, data) => {
+    const userService = getApiUserService();
+    const result = await userService.updateUserProfile(userId, data);
+    return createSuccessResponse(result.profile);
+  },
+  { requireAuth: true }
+);
