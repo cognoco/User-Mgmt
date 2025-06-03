@@ -41,7 +41,7 @@ export async function validateAuthToken(req: NextRequest): Promise<TokenValidati
     return { success: true, user };
   } catch (err: any) {
     const error = new ApiError(
-      'server/internal_error',
+      'SERVER_GENERAL_001',
       err instanceof Error ? err.message : 'Token validation failed',
       500,
     );

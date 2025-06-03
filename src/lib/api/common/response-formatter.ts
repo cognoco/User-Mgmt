@@ -126,7 +126,7 @@ export function createErrorResponse(
   
   // Convert regular Error to ApiError
   const apiError = new ApiError(
-    'server/internal_error',
+    'SERVER_GENERAL_001',
     error.message || 'An unexpected error occurred',
     500
   );

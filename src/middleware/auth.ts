@@ -78,7 +78,7 @@ export function withAuth(
     } catch (err) {
       console.error('Auth middleware error:', err);
       const apiErr = new ApiError(
-        'server/internal_error',
+        'SERVER_GENERAL_001',
         err instanceof Error ? err.message : 'Server error during authentication',
         500
       );
@@ -166,7 +166,7 @@ export async function withRouteAuth(
     }
 
     const serverError = new ApiError(
-      'server/internal_error',
+      'SERVER_GENERAL_001',
       error instanceof Error ? error.message : 'An unexpected error occurred',
       500
     );

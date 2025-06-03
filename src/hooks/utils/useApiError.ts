@@ -17,13 +17,13 @@ export function useApiError() {
 
     if ('code' in err && err.code) {
       switch (err.code) {
-        case 'auth/unauthorized':
+        case 'AUTH_ACCESS_001':
           message = 'Please log in to continue.';
           break;
-        case 'validation/error':
+        case 'VALIDATION_REQUEST_001':
           message = err.message;
           break;
-        case 'server/internal_error':
+        case 'SERVER_GENERAL_001':
           message = 'Server error. Please try again later.';
           break;
         default:

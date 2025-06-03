@@ -16,7 +16,7 @@ interface ErrorContext {
 }
 
 export async function logApiError(error: ApiError | Error, context: ErrorContext) {
-  const apiError = error instanceof ApiError ? error : new ApiError('server/internal_error', error.message || 'Unknown error', 500);
+  const apiError = error instanceof ApiError ? error : new ApiError('SERVER_GENERAL_001', error.message || 'Unknown error', 500);
   const severity = getSeverity(apiError.status);
   try {
     await logUserAction({

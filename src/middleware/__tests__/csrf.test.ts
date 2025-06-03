@@ -93,7 +93,7 @@ describe('CSRF Middleware', () => {
 
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({
-        error: { code: 'auth/forbidden', message: 'Invalid CSRF token' }
+        error: { code: 'AUTH_ACCESS_002', message: 'Invalid CSRF token' }
       });
       expect(next).not.toHaveBeenCalled();
     });
@@ -110,7 +110,7 @@ describe('CSRF Middleware', () => {
 
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({
-        error: { code: 'auth/forbidden', message: 'Invalid CSRF token' }
+        error: { code: 'AUTH_ACCESS_002', message: 'Invalid CSRF token' }
       });
       expect(next).not.toHaveBeenCalled();
     });
