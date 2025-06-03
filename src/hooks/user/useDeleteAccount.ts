@@ -3,6 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/notification/useToastAdvanced';
 
+interface DeletionRequestPayload {
+  mfaCode: string;
+}
+
 /**
  * Hook for handling account deletion functionality
  * @returns Functions and state for account deletion process
@@ -14,29 +18,30 @@ export function useDeleteAccount() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const deleteAccount = async () => {
+  const deleteAccount = async (payload: DeletionRequestPayload) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      // This would typically be an API call to delete the account
-      // For example: await api.users.deleteCurrentUser();
-      
-      // Simulate API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Success path - show toast and navigate to homepage or login
-      toast({
-        title: t('settings.account.accountDeleted'),
-        description: t('settings.account.accountDeletedDescription'),
+      const res = await fetch('/api/gdpr/request-deletion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
-      
-      // Redirect to homepage or login page
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Request failed');
+      }
+
+      toast({
+        title: t('settings.account.deletionRequested'),
+        description: t('settings.account.deletionRequestedDescription'),
+      });
+
       router.push('/auth/login');
-      
     } catch (err) {
-      // Error handling
-      console.error('Failed to delete account:', err);
+      console.error('Failed to request account deletion:', err);
       setError(t('settings.account.deleteError'));
     } finally {
       setIsLoading(false);

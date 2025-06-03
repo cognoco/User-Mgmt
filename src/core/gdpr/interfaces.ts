@@ -4,7 +4,7 @@
  * Defines the operations related to data privacy such as exporting
  * a user's personal data and deleting a user's account.
  */
-import { UserDataExport, AccountDeletionResult } from "./models";
+import { UserDataExport, AccountDeletionResult, DeletionRequest } from "./models";
 
 /**
  * Service responsible for GDPR related user data operations.
@@ -25,4 +25,12 @@ export interface GdprService {
    * @returns Result of the deletion request
    */
   deleteUserData(userId: string): Promise<AccountDeletionResult>;
+
+  /**
+   * Create a deletion request with a cooling-off period.
+   */
+  requestAccountDeletion(
+    userId: string,
+    scheduledDeletionAt: string,
+  ): Promise<{ success: boolean; request?: DeletionRequest; error?: string }>;
 }

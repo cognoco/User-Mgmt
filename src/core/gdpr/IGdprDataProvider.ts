@@ -70,6 +70,7 @@ export interface IGdprDataProvider {
    */
   requestAccountDeletion(
     userId: string,
+    scheduledDeletionAt: string,
   ): Promise<{ success: boolean; request?: DeletionRequest; error?: string }>;
 
   /**

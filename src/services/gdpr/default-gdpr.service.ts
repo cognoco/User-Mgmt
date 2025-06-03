@@ -2,7 +2,7 @@
  * Default GDPR Service Implementation
  */
 import { GdprService } from '@/core/gdpr/interfaces';
-import { UserDataExport, AccountDeletionResult } from '@/core/gdpr/models';
+import { UserDataExport, AccountDeletionResult, DeletionRequest } from '@/core/gdpr/models';
 import type { GdprDataProvider } from '@/core/gdpr/IGdprDataProvider';
 
 export class DefaultGdprService implements GdprService {
@@ -14,5 +14,12 @@ export class DefaultGdprService implements GdprService {
 
   deleteAccount(userId: string): Promise<AccountDeletionResult> {
     return this.provider.deleteUserData(userId);
+  }
+
+  requestAccountDeletion(
+    userId: string,
+    scheduledDeletionAt: string,
+  ): Promise<{ success: boolean; request?: DeletionRequest; error?: string }> {
+    return this.provider.requestAccountDeletion(userId, scheduledDeletionAt);
   }
 }

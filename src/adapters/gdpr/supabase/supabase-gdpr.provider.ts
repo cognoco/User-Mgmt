@@ -139,13 +139,17 @@ export class SupabaseGdprProvider implements IGdprDataProvider {
   }
 
   /** @inheritdoc */
-  async requestAccountDeletion(userId: string): Promise<{ success: boolean; request?: DeletionRequest; error?: string }> {
+  async requestAccountDeletion(
+    userId: string,
+    scheduledDeletionAt: string,
+  ): Promise<{ success: boolean; request?: DeletionRequest; error?: string }> {
     const { data, error } = await this.supabase
       .from('deletion_requests')
       .insert({
         user_id: userId,
         status: 'pending',
         requested_at: new Date().toISOString(),
+        scheduled_deletion_at: scheduledDeletionAt,
       })
       .select()
       .single();
@@ -254,6 +258,7 @@ export class SupabaseGdprProvider implements IGdprDataProvider {
       status: record.status,
       requestedAt: record.requested_at,
       completedAt: record.completed_at ?? undefined,
+      scheduledDeletionAt: record.scheduled_deletion_at ?? undefined,
       message: record.message ?? undefined,
     };
   }

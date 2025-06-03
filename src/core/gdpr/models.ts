@@ -51,6 +51,8 @@ export interface DeletionRequest {
   requestedAt: string;
   /** When the request was completed */
   completedAt?: string;
+  /** When the account will be permanently deleted */
+  scheduledDeletionAt?: string;
   /** Optional message or error */
   message?: string;
 }
