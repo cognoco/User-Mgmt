@@ -4,6 +4,7 @@ import { securityHeaders } from '@/middleware/security-headers';
 import { auditLog } from '@/middleware/audit-log';
 import { cors } from '@/middleware/cors';
 import { csrf } from '@/middleware/csrf';
+import { correlationIdMiddleware } from '@/lib/monitoring';
 
 type NextFunction = () => Promise<void>;
 
@@ -144,3 +145,4 @@ export function withSecurity(
 }
 
 export { withErrorHandling } from './error-handling';
+export { correlationIdMiddleware };
