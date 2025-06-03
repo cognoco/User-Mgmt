@@ -5,17 +5,22 @@ import { AuthContext } from '@/lib/auth/types';
 import { createAuthMiddleware } from '@/lib/auth/unified-auth.middleware';
 import { ApiError, ERROR_CODES } from '@/lib/api/common';
 
-export const createApiHandler = <T extends z.ZodTypeAny>(
+export const createApiHandler = <
+  T extends z.ZodTypeAny,
+  S extends Record<string, any> = Record<string, never>
+>(
   schema: T,
   handler: (
-    req: NextRequest, 
-    context: AuthContext, 
-    data: z.infer<T>
+    req: NextRequest,
+    context: AuthContext,
+    data: z.infer<T>,
+    services: S
   ) => Promise<NextResponse> | NextResponse,
   options?: {
     requireAuth?: boolean;
     requiredPermissions?: string[];
     includeUser?: boolean;
+    services?: S;
   }
 ) => {
   return createAuthMiddleware(options)(
@@ -41,8 +46,11 @@ export const createApiHandler = <T extends z.ZodTypeAny>(
           );
         }
         
-        // Call handler with validated data
-        return handler(req, context, result.data);
+        // Resolve services from options or use empty object
+        const services = (options?.services ?? {}) as S;
+
+        // Call handler with validated data and injected services
+        return handler(req, context, result.data, services);
       } catch (error) {
         if (error instanceof ApiError) {
           return NextResponse.json(

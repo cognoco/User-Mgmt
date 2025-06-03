@@ -1,20 +1,20 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GET, PATCH } from '../route';
-import { getApiUserService } from '@/services/user/factory';
-import { withRouteAuth } from '@/middleware/auth';
+import { getConfiguredUserService } from '@/services/user';
+import { createAuthMiddleware } from '@/lib/auth/unified-auth.middleware';
 import createMockUserService from '@/tests/mocks/user.service.mock';
 import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
-vi.mock('@/services/user/factory', () => ({ getApiUserService: vi.fn() }));
-vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'user-1', role: 'user', permissions: [] })),
+vi.mock('@/services/user', () => ({ getConfiguredUserService: vi.fn() }));
+vi.mock('@/lib/auth/unified-auth.middleware', () => ({
+  createAuthMiddleware: vi.fn(() => (handler: any) => (req: any) => handler(req, { userId: 'user-1', permissions: [], authenticated: true })),
 }));
 
 const service = createMockUserService();
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (getApiUserService as unknown as vi.Mock).mockReturnValue(service);
+  (getConfiguredUserService as unknown as vi.Mock).mockReturnValue(service);
 });
 
 describe('/api/profile GET', () => {

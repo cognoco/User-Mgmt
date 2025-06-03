@@ -9,6 +9,9 @@ import { UserService } from '@/core/user/interfaces';
 import { DefaultUserService } from './default-user.service';
 export { RepositoryUserService } from './repository-user.service';
 export { ApiUserService, getApiUserService } from './api-user.service';
+import { AdapterRegistry } from '@/adapters/registry';
+import { UserManagementConfiguration } from '@/core/config';
+import type { IUserDataProvider } from '@/core/user/IUserDataProvider';
 import type { UserDataProvider } from '@/core/user/IUserDataProvider';
 
 /**
@@ -37,3 +40,23 @@ export function createUserService(config: UserServiceConfig): UserService {
 export default {
   createUserService
 };
+
+/**
+ * Retrieve the configured UserService instance.
+ *
+ * This helper checks the global UserManagementConfiguration for a registered
+ * `userService` implementation. If none is found, it falls back to creating a
+ * DefaultUserService using the adapter registry.
+ */
+export function getConfiguredUserService(): UserService {
+  const configured =
+    UserManagementConfiguration.getServiceProvider<UserService>('userService');
+  if (configured) {
+    return configured;
+  }
+
+  const provider = AdapterRegistry.getInstance().getAdapter<IUserDataProvider>(
+    'user'
+  );
+  return createUserService({ userDataProvider: provider });
+}
