@@ -1,0 +1,48 @@
+{
+  "auth": {
+    "unauthorized": "Authentication required.",
+    "forbidden": "Access denied.",
+    "invalid_credentials": "Invalid email or password.",
+    "email_not_verified": "Email not verified.",
+    "mfa_required": "Multi-factor authentication required.",
+    "account_locked": "Account locked.",
+    "password_expired": "Password expired.",
+    "session_expired": "Session expired."
+  },
+  "user": {
+    "not_found": "User {{id}} not found.",
+    "already_exists": "User already exists.",
+    "invalid_data": "Invalid user data.",
+    "update_failed": "Unable to update user.",
+    "delete_failed": "Unable to delete user."
+  },
+  "team": {
+    "not_found": "Team {{id}} not found.",
+    "already_exists": "Team already exists.",
+    "invalid_data": "Invalid team data.",
+    "update_failed": "Team update failed.",
+    "delete_failed": "Team deletion failed.",
+    "member_not_found": "Team member not found.",
+    "member_already_exists": "Team member already exists."
+  },
+  "permission": {
+    "not_found": "Permission {{key}} not found.",
+    "already_exists": "Permission already exists.",
+    "invalid_data": "Invalid permission data.",
+    "update_failed": "Permission update failed.",
+    "delete_failed": "Permission delete failed.",
+    "assignment_failed": "Permission assignment failed."
+  },
+  "validation": {
+    "error": "Validation failed.",
+    "missing_field": "{{field}} is required.",
+    "invalid_format": "Invalid format for {{field}}."
+  },
+  "server": {
+    "internal_error": "Internal server error.",
+    "service_unavailable": "Service is currently unavailable.",
+    "database_error": "Database error.",
+    "operation_failed": "Operation failed.",
+    "retrieval_failed": "Data retrieval failed."
+  }
+}

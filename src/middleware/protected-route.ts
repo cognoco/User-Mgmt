@@ -45,7 +45,7 @@ export function withProtectedRoute(
         error instanceof ApiError
           ? error
           : new ApiError(
-              'server/internal_error',
+              'SERVER_GENERAL_001',
               error instanceof Error ? error.message : 'An unexpected error occurred',
               500
             );

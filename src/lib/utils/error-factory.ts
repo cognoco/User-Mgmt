@@ -16,9 +16,50 @@ export interface ApplicationError extends Error {
 /**
  * Lookup a localized message for the given error code and locale.
  */
-function getLocalizedMessage(code: ErrorCode, locale: LanguageCode): string | undefined {
-  const msg = formatErrorMessage(code, {}, locale);
-  return msg === `errors.${code}` ? undefined : msg;
+/**
+ * Lookup a localized message for the given error code and locale.
+ */
+type MessageMap = Record<string, Record<string, string>>;
+const LOCALIZED_MESSAGES: MessageMap = {
+  en: {
+    [AUTH_ERROR_CODES.UNAUTHORIZED]: 'Authentication required.',
+    [AUTH_ERROR_CODES.FORBIDDEN]: 'Access denied.',
+    [VALIDATION_ERROR_CODES.INVALID_REQUEST]: 'Validation failed.',
+    [USER_ERROR_CODES.NOT_FOUND]: '{{resourceType}} {{resourceId}} not found.',
+    [SERVER_ERROR_CODES.INTERNAL_ERROR]: 'Internal server error.',
+  },
+};
+
+function formatTemplate(
+  template: string,
+  params?: Record<string, string | number>
+): string {
+  if (!params) return template;
+  return template.replace(/{{(\w+)}}/g, (_, key) => String(params[key] ?? ''));
+}
+
+function getLocalizedMessage(
+  code: ErrorCode, 
+  locale: string,
+  params?: Record<string, string | number>
+): string | undefined {
+  // Try first with formatErrorMessage function if available
+  if (typeof formatErrorMessage === 'function') {
+    const msg = formatErrorMessage(code, params || {}, locale);
+    if (msg !== `errors.${code}`) {
+      return msg;
+    }
+  }
+  
+  // Fall back to built-in messages
+  const base = locale.split('-')[0];
+  const template =
+    LOCALIZED_MESSAGES[locale]?.[code] ||
+    LOCALIZED_MESSAGES[base]?.[code] ||
+    LOCALIZED_MESSAGES.en[code];
+  
+  return template ? formatTemplate(template, params) : undefined;
+}
 }
 
 /**
@@ -29,7 +70,8 @@ export function createError(
   message: string,
   details?: Record<string, any>,
   cause?: unknown,
-  httpStatus?: number
+  httpStatus?: number,
+  locale = 'en'
 ): ApplicationError {
   const err = new Error(message) as ApplicationError;
   err.name = 'ApplicationError';
@@ -99,10 +141,8 @@ export function createNotFoundError(
   locale: LanguageCode = 'en'
 ) {
   const code = USER_ERROR_CODES.NOT_FOUND;
-  let msg = getLocalizedMessage(code, locale);
-  if (!msg) {
-    msg = `${resourceType} ${resourceId} not found`;
-  }
+const defaultMsg = `${resourceType} ${resourceId} not found`;
+  const msg = getLocalizedMessage(code, locale, { resourceType, resourceId }) || defaultMsg;
   return createError(code, msg, { resourceType, resourceId }, cause, 404);
 }
 

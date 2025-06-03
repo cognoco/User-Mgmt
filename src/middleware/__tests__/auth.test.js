@@ -95,7 +95,7 @@ describe('Auth Middleware', () => {
     expect(res._getStatusCode()).toBe(401);
     expect(JSON.parse(res._getData())).toEqual({
       error: {
-        code: 'auth/unauthorized',
+        code: 'AUTH_ACCESS_001',
         message: 'Authentication required',
         category: 'auth'
       }
@@ -132,7 +132,7 @@ describe('Auth Middleware', () => {
     expect(res._getStatusCode()).toBe(401);
     expect(JSON.parse(res._getData())).toEqual({
       error: {
-        code: 'auth/unauthorized',
+        code: 'AUTH_ACCESS_001',
         message: 'Invalid authentication token',
         category: 'auth'
       }
@@ -172,7 +172,7 @@ describe('Auth Middleware', () => {
     expect(res._getStatusCode()).toBe(500);
     expect(JSON.parse(res._getData())).toEqual({
       error: {
-        code: 'server/internal_error',
+        code: 'SERVER_GENERAL_001',
         message: 'Server error',
         category: 'server'
       }
@@ -246,7 +246,7 @@ describe('Auth Middleware', () => {
     expect(res._getStatusCode()).toBe(403);
     expect(JSON.parse(res._getData())).toEqual({
       error: {
-        code: 'auth/forbidden',
+        code: 'AUTH_ACCESS_002',
         message: 'Insufficient permissions',
         category: 'auth'
       }
