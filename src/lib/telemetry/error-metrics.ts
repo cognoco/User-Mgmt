@@ -97,6 +97,19 @@ export class ErrorMetrics {
     return this.timings.get(this.getDimensionKey(dim))?.firstSeen;
   }
 
+  getImpactScore(
+    dim: ErrorMetricDimensions,
+    weights: { countWeight?: number; durationWeight?: number; severityWeight?: Record<string, number> } = {},
+  ): number {
+    const count = this.getErrorCount(dim);
+    const duration = this.getImpactDuration(dim) || 0;
+    const severityScores = { low: 1, medium: 2, high: 3, critical: 4 };
+    const sw = weights.severityWeight?.[dim.severity] ?? severityScores[dim.severity] ?? 1;
+    const cw = weights.countWeight ?? 1;
+    const dw = weights.durationWeight ?? 0.001;
+    return (count * cw + duration * dw) * sw;
+  }
+
   aggregateBy(dim: Partial<ErrorMetricDimensions>, groupBy: keyof ErrorMetricDimensions): Map<string, number> {
     const map = new Map<string, number>();
     for (const [k, c] of this.counters) {
