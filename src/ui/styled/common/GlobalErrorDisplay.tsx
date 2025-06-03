@@ -1,6 +1,8 @@
 'use client';
 
 import { ApiErrorAlert } from './ApiErrorAlert';
+import { DevErrorDetailsPanel } from './DevErrorDetailsPanel';
+import { getClientConfig } from '@/core/config/runtime-config';
 import { useGlobalError, useErrorStore } from '@/lib/state/errorStore';
 
 export function GlobalErrorDisplay() {
@@ -16,13 +18,18 @@ export function GlobalErrorDisplay() {
     removeError(error.id);
   };
 
+  const showDetails = getClientConfig().env.showErrorDetails;
+
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-md w-full">
-      <ApiErrorAlert
-        message={error.message}
-        onRetry={error.onRetry ? handleRetry : undefined}
-      />
-    </div>
+    <>
+      <div className="fixed bottom-4 right-4 z-50 max-w-md w-full">
+        <ApiErrorAlert
+          message={error.message}
+          onRetry={error.onRetry ? handleRetry : undefined}
+        />
+      </div>
+      {showDetails && <DevErrorDetailsPanel error={error} />}
+    </>
   );
 }
 export default GlobalErrorDisplay;
