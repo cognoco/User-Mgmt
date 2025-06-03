@@ -42,6 +42,15 @@ export class MultiLevelCache<K extends string, V> {
     if (this.redis) await this.redis.delete(key);
   }
 
+  async deleteWhere(predicate: (key: K) => boolean): Promise<void> {
+    for (const key of this.memory.keys()) {
+      if (predicate(key)) {
+        this.memory.delete(key);
+        if (this.redis) await this.redis.delete(key);
+      }
+    }
+  }
+
   async getOrCreate(key: K, fetcher: () => Promise<V>, ttl = this.ttl): Promise<V> {
     const existing = await this.get(key);
     if (existing !== undefined) return existing;
