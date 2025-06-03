@@ -2,13 +2,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST } from '../route';
 import { getApiTeamService } from '@/services/team/factory';
-import { withRouteAuth } from '@/middleware/auth';
+import { createAuthMiddleware } from '@/lib/auth/unified-auth.middleware';
 
 vi.mock('@/services/team/factory', () => ({
   getApiTeamService: vi.fn()
 }));
-vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'u1', role: 'user' }))
+vi.mock('@/lib/auth/unified-auth.middleware', () => ({
+  createAuthMiddleware: vi.fn(() =>
+    (handler: any) => async (req: any) => handler(req, { userId: 'u1', permissions: [], authenticated: true })
+  )
 }));
 
 describe('team API', () => {

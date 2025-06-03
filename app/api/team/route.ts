@@ -1,47 +1,30 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getApiTeamService } from '@/services/team/factory';
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  routeAuthMiddleware,
-  validationMiddleware
-} from '@/middleware/createMiddlewareChain';
-import type { RouteAuthContext } from '@/middleware/auth';
+import { createApiHandler } from '@/lib/api/route-helpers';
+import { createSuccessResponse, createCreatedResponse } from '@/lib/api/common';
+import { mapTeamServiceError } from '@/lib/api/team/error-handler';
 
 const CreateTeamSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional()
 });
 
-async function handleGet(_req: NextRequest, auth: RouteAuthContext) {
-  const service = getApiTeamService();
-  const teams = await service.getUserTeams(auth.userId!);
-  return NextResponse.json({ teams });
-}
+export const GET = createApiHandler(
+  z.object({}),
+  async (_req, { userId }, _data, services) => {
+    const teams = await services.team.getUserTeams(userId!);
+    return createSuccessResponse({ teams });
+  },
+  { requireAuth: true }
+);
 
-async function handlePost(
-  _req: NextRequest,
-  auth: RouteAuthContext,
-  data: z.infer<typeof CreateTeamSchema>
-) {
-  const result = await getApiTeamService().createTeam(auth.userId!, data);
-  if (!result.success || !result.team) {
-    return NextResponse.json({ error: result.error || 'Failed to create team' }, { status: 400 });
-  }
-  return NextResponse.json({ team: result.team }, { status: 201 });
-}
-
-const getMiddleware = createMiddlewareChain([
-  errorHandlingMiddleware(),
-  routeAuthMiddleware()
-]);
-
-const postMiddleware = createMiddlewareChain([
-  errorHandlingMiddleware(),
-  routeAuthMiddleware(),
-  validationMiddleware(CreateTeamSchema)
-]);
-
-export const GET = getMiddleware(handleGet);
-export const POST = postMiddleware(handlePost);
+export const POST = createApiHandler(
+  CreateTeamSchema,
+  async (_req, { userId }, data, services) => {
+    const result = await services.team.createTeam(userId!, data);
+    if (!result.success || !result.team) {
+      throw mapTeamServiceError(new Error(result.error || 'Failed to create team'));
+    }
+    return createCreatedResponse(result.team);
+  },
+  { requireAuth: true }
+);

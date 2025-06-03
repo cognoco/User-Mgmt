@@ -14,10 +14,12 @@ import type {
 import type { AuthService } from '@/core/auth/interfaces';
 import type { UserService } from '@/core/user/interfaces';
 import type { PermissionService } from '@/core/permission/interfaces';
+import type { TeamService } from '@/core/team/interfaces';
 
 // Import existing service factories
 import { getApiAuthService } from '@/services/auth/factory';
 import { getApiUserService } from '@/services/user/factory';
+import { getApiTeamService } from '@/services/team/factory';
 
 /**
  * Global service configuration
@@ -67,6 +69,11 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
   if (!serviceInstances.user) {
     serviceInstances.user = globalServiceConfig.userService || getApiUserService();
   }
+
+  // Create team service if not cached
+  if (!serviceInstances.team) {
+    serviceInstances.team = globalServiceConfig.teamService || getApiTeamService();
+  }
   
   // Create permission service if not cached (optional)
   if (!serviceInstances.permission && globalServiceConfig.permissionService) {
@@ -77,6 +84,7 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
   return {
     auth: overrides?.auth || serviceInstances.auth!,
     user: overrides?.user || serviceInstances.user!,
+    team: overrides?.team || serviceInstances.team!,
     permission: overrides?.permission || serviceInstances.permission,
   };
 }
@@ -100,6 +108,13 @@ export function getConfiguredUserService(override?: UserService): UserService {
  */
 export function getConfiguredPermissionService(override?: PermissionService): PermissionService | undefined {
   return override || globalServiceConfig.permissionService;
+}
+
+/**
+ * Get a specific team service with fallback to global configuration
+ */
+export function getConfiguredTeamService(override?: TeamService): TeamService {
+  return override || globalServiceConfig.teamService || getApiTeamService();
 }
 
 /**

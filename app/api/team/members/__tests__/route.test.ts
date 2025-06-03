@@ -4,18 +4,15 @@ import { prisma } from '@/lib/database/prisma';
 import { GET, POST } from '../route';
 import { ERROR_CODES } from '@/lib/api/common';
 import { checkRateLimit } from '@/middleware/rate-limit';
-import { withRouteAuth } from '@/middleware/auth';
+import { createAuthMiddleware } from '@/lib/auth/unified-auth.middleware';
 
 // Mocks
 vi.mock('@/middleware/auth-adapter', () => ({}));
 
-vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn(async (handler: any, req: any) =>
-    handler(req, {
-      userId: 'user1',
-      role: 'user',
-      user: { id: 'user1', email: 'test@example.com' }
-    })
+vi.mock('@/lib/auth/unified-auth.middleware', () => ({
+  createAuthMiddleware: vi.fn(() =>
+    (handler: any) => async (req: any) =>
+      handler(req, { userId: 'user1', permissions: [], authenticated: true })
   )
 }));
 
@@ -108,10 +105,8 @@ describe('Team Members API', () => {
   });
 
   it('returns 401 when no session exists', async () => {
-    vi.mocked(withRouteAuth).mockResolvedValueOnce(
-      Promise.resolve(
-        NextResponse.json({ error: { code: ERROR_CODES.UNAUTHORIZED } }, { status: 401 })
-      )
+    vi.mocked(createAuthMiddleware).mockReturnValueOnce(async () =>
+      NextResponse.json({ error: { code: ERROR_CODES.UNAUTHORIZED } }, { status: 401 })
     );
 
     const request = new NextRequest('http://localhost:3000/api/team/members');

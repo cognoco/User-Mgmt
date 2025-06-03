@@ -9,6 +9,7 @@
 import type { AuthService } from '@/core/auth/interfaces';
 import type { UserService } from '@/core/user/interfaces';
 import type { PermissionService } from '@/core/permission/interfaces';
+import type { TeamService } from '@/core/team/interfaces';
 
 /**
  * Service container interface that holds all available services
@@ -16,6 +17,7 @@ import type { PermissionService } from '@/core/permission/interfaces';
 export interface ServiceContainer {
   auth: AuthService;
   user: UserService;
+  team: TeamService;
   permission?: PermissionService;
   // Add other services as needed
 }
@@ -33,11 +35,16 @@ export interface ServiceConfig {
    * Custom user service implementation  
    */
   userService?: UserService;
-  
+
   /**
    * Custom permission service implementation
    */
   permissionService?: PermissionService;
+
+  /**
+   * Custom team service implementation
+   */
+  teamService?: TeamService;
   
   /**
    * Feature flags to enable/disable functionality
