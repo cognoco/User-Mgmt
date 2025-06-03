@@ -58,12 +58,24 @@ export enum SERVER_ERROR {
   SERVER_005 = 'SERVER_005',
 }
 
+export enum SSO_ERROR {
+  /** Generic SSO failure */
+  SSO_001 = 'SSO_001',
+  /** Provider configuration error */
+  SSO_002 = 'SSO_002',
+  /** Federation or metadata issue */
+  SSO_003 = 'SSO_003',
+  /** Authentication stage failure */
+  SSO_004 = 'SSO_004',
+}
+
 export type ErrorCode =
   | AUTH_ERROR
   | USER_ERROR
   | TEAM_ERROR
   | SERVER_ERROR
-  | RELATIONSHIP_ERROR;
+  | RELATIONSHIP_ERROR
+  | SSO_ERROR;
 
 // Unified ERROR_CODES object for backward compatibility
 export const ERROR_CODES = {
@@ -97,6 +109,12 @@ export const ERROR_CODES = {
   EXTERNAL_SERVICE_ERROR: SERVER_ERROR.SERVER_003,
   CONFLICT_ERROR: SERVER_ERROR.SERVER_004,
   RATE_LIMIT_ERROR: SERVER_ERROR.SERVER_005,
+
+  // SSO codes
+  SSO_GENERIC_ERROR: SSO_ERROR.SSO_001,
+  SSO_CONFIGURATION_ERROR: SSO_ERROR.SSO_002,
+  SSO_FEDERATION_ERROR: SSO_ERROR.SSO_003,
+  SSO_AUTHENTICATION_ERROR: SSO_ERROR.SSO_004,
 } as const;
 
 // Optional descriptions for mapping codes to human readable text
@@ -122,5 +140,9 @@ export const ERROR_CODE_DESCRIPTIONS: Record<ErrorCode, string> = {
   [SERVER_ERROR.SERVER_003]: 'External service error',
   [SERVER_ERROR.SERVER_004]: 'Conflict',
   [SERVER_ERROR.SERVER_005]: 'Rate limit exceeded',
+  [SSO_ERROR.SSO_001]: 'SSO failure',
+  [SSO_ERROR.SSO_002]: 'SSO configuration error',
+  [SSO_ERROR.SSO_003]: 'SSO federation error',
+  [SSO_ERROR.SSO_004]: 'SSO authentication error',
 };
 
