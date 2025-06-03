@@ -4,14 +4,11 @@ import { withSecurity } from '@/middleware/with-security';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { getApiAuthService } from '@/services/auth/factory';
 import { LoginPayload } from '@/core/auth/models';
-import {
-  createSuccessResponse,
-  ApiError,
-  ERROR_CODES
-} from '@/lib/api/common';
+import { createSuccessResponse } from '@/lib/api/response/api-response';
+import { handleApiError } from '@/lib/api/middleware/error-handler.middleware';
+import { ApiError, ERROR_CODES } from '@/lib/api/common';
 import {
   createMiddlewareChain,
-  errorHandlingMiddleware,
   validationMiddleware,
   rateLimitMiddleware
 } from '@/middleware/createMiddlewareChain';
@@ -116,10 +113,9 @@ async function handleLogin(req: NextRequest, validatedData: z.infer<typeof Login
  */
 const middleware = createMiddlewareChain([
   rateLimitMiddleware({ windowMs: 15 * 60 * 1000, max: 30 }),
-  errorHandlingMiddleware(),
   validationMiddleware(LoginSchema)
 ]);
 
 export const POST = withSecurity((request: NextRequest) =>
-  middleware(handleLogin)(request)
+  withApiErrorHandling(middleware(handleLogin), request)
 );
