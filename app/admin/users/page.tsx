@@ -1,58 +1,33 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { UserSearch } from './UserSearch';
-import { SavedSearches } from './SavedSearches';
-import { ExportOptions } from './ExportOptions';
-import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
-import { RealtimeStatus } from '@/components/ui/RealtimeStatus';
-import { useAdminRealtimeChannel } from '@/hooks/admin/useAdminRealtimeChannel';
+import { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getSupabaseServerClient } from "@/lib/auth";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { hasPermission } from "@/lib/auth/hasPermission";
+import { PermissionValues } from "@/core/permission/models";
+import AdminUsersPageClient from "./ClientPage";
 
-export default function AdminUsersPage() {
-  const [currentSearchParams, setCurrentSearchParams] = useState<Record<string, any>>({});
-  const { isConnected, addUserChangeListener } = useAdminRealtimeChannel();
+export const metadata: Metadata = {
+  title: "User Management",
+  description: "Manage application users",
+};
 
-  const handleSearch = (params: Record<string, any>) => {
-    setCurrentSearchParams(params);
-  };
+export default async function AdminUsersPage(): Promise<JSX.Element> {
+  const supabase = getSupabaseServerClient();
+  const { data, error } = await supabase.auth.getUser();
+  const user: SupabaseUser | null = data.user;
 
-  const handleSelectSavedSearch = (params: Record<string, any>) => {
-    setCurrentSearchParams(params);
-  };
+  if (error || !user) {
+    redirect("/auth/login");
+  }
 
-  useEffect(() => {
-    const handleUserChange = () => {
-      if (currentSearchParams && Object.keys(currentSearchParams).length > 0) {
-        handleSearch(currentSearchParams);
-      }
-    };
-    const remove = addUserChangeListener(handleUserChange);
-    return () => remove();
-  }, [addUserChangeListener, handleSearch, currentSearchParams]);
-
-  return (
-    <div className="container py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
-          <RealtimeStatus isConnected={isConnected} />
-        </div>
-        <ExportOptions searchParams={currentSearchParams} />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="md:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Saved Searches</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <SavedSearches onSelectSearch={handleSelectSavedSearch} currentSearchParams={currentSearchParams} />
-            </CardContent>
-          </Card>
-        </div>
-        <div className="md:col-span-3">
-          <UserSearch initialSearchParams={currentSearchParams} onSearch={handleSearch} />
-        </div>
-      </div>
-    </div>
+  const canManageUsers = await hasPermission(
+    user.id,
+    PermissionValues.EDIT_USER_PROFILES,
   );
+
+  if (!canManageUsers) {
+    redirect("/dashboard/overview");
+  }
+
+  return <AdminUsersPageClient />;
 }
