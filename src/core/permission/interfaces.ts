@@ -67,7 +67,12 @@ export interface PermissionService {
    * @param roleData The data for the new role
    * @returns The created role with its permissions
    */
-  createRole(roleData: RoleCreationPayload): Promise<RoleWithPermissions>;
+  createRole(
+    roleData: RoleCreationPayload,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
+  ): Promise<RoleWithPermissions>;
   
   /**
    * Update an existing role
@@ -76,7 +81,13 @@ export interface PermissionService {
    * @param roleData The updated data for the role
    * @returns The updated role with its permissions
    */
-  updateRole(roleId: string, roleData: RoleUpdatePayload): Promise<RoleWithPermissions>;
+  updateRole(
+    roleId: string,
+    roleData: RoleUpdatePayload,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
+  ): Promise<RoleWithPermissions>;
   
   /**
    * Delete a role
@@ -84,7 +95,12 @@ export interface PermissionService {
    * @param roleId The ID of the role to delete
    * @returns A boolean indicating if the deletion was successful
    */
-  deleteRole(roleId: string): Promise<boolean>;
+  deleteRole(
+    roleId: string,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
+  ): Promise<boolean>;
   
   /**
    * Get all roles assigned to a user
@@ -169,6 +185,9 @@ export interface PermissionService {
     permission: Permission,
     resourceType: string,
     resourceId: string,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
   ): Promise<ResourcePermission>;
 
   /**
@@ -179,6 +198,9 @@ export interface PermissionService {
     permission: Permission,
     resourceType: string,
     resourceId: string,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
   ): Promise<boolean>;
 
   /**

@@ -28,7 +28,7 @@ describe('resource permission API', () => {
     });
     const res = await POST(req as any);
     expect(res.status).toBe(201);
-    expect(mockService.assignResourcePermission).toHaveBeenCalled();
+    expect(mockService.assignResourcePermission).toHaveBeenCalledWith('u1', 'VIEW_PROJECTS', 'project', 'p1', 'u1');
   });
 
   it('DELETE removes permission', async () => {
@@ -36,6 +36,6 @@ describe('resource permission API', () => {
     const req = new Request('http://test?userId=u1&permission=VIEW_PROJECTS&resourceType=project&resourceId=p1');
     const res = await DELETE(req as any);
     expect(res.status).toBe(204);
-    expect(mockService.removeResourcePermission).toHaveBeenCalledWith('u1', 'VIEW_PROJECTS', 'project', 'p1');
+    expect(mockService.removeResourcePermission).toHaveBeenCalledWith('u1', 'VIEW_PROJECTS', 'project', 'p1', 'u1');
   });
 });

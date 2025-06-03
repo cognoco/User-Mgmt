@@ -60,7 +60,6 @@ function getLocalizedMessage(
   
   return template ? formatTemplate(template, params) : undefined;
 }
-}
 
 /**
  * Create a basic ApplicationError instance.

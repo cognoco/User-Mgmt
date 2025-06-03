@@ -142,7 +142,7 @@ describe("DefaultPermissionService", () => {
     const perm = PermissionValues.VIEW_PROJECTS;
     await service.hasResourcePermission(USER_ID, perm, 'project', 'p1');
     expect(resolver.getEffectivePermissions).toHaveBeenCalledTimes(1);
-    await service.assignResourcePermission(USER_ID, perm, 'project', 'p1');
+    await service.assignResourcePermission(USER_ID, perm, 'project', 'p1', 'admin');
     const allowed = await service.hasResourcePermission(USER_ID, perm, 'project', 'p1');
     expect(resolver.getEffectivePermissions).toHaveBeenCalledTimes(2);
     expect(allowed).toBe(true);

@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET, POST } from '../route';
+import { withRouteAuth } from '@/middleware/auth';
+
+vi.mock('@/middleware/with-security', () => ({ withSecurity: (h: any) => h }));
+vi.mock('@/middleware/auth', () => ({
+  withRouteAuth: vi.fn((handler: any, req: any) => handler(req, { userId: 'u1' })),
+}));
 
 const mockService = {
   getAllRoles: vi.fn(),
@@ -36,6 +42,6 @@ describe('roles root API', () => {
     mockService.createRole.mockResolvedValue({ id: '1' });
     const res = await POST(req as any);
     expect(res.status).toBe(201);
-    expect(mockService.createRole).toHaveBeenCalled();
+    expect(mockService.createRole).toHaveBeenCalledWith({ name: 'r', permissions: [] }, 'u1');
   });
 });
