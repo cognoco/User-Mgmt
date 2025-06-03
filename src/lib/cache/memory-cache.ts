@@ -1,11 +1,17 @@
+import { errorLogger } from '@/lib/monitoring/error-logger';
+import { telemetry } from '@/lib/monitoring/error-system';
+
 export interface MemoryCacheEntry<V> {
   value: V;
   expires: number;
+  staleUntil: number;
 }
 
 export interface MemoryCacheOptions {
   ttl?: number; // milliseconds
   maxSize?: number; // maximum number of entries
+  staleTtl?: number; // how long stale values are served
+  errorThreshold?: number; // errors before invalidation
 }
 
 /**
@@ -17,16 +23,25 @@ export class MemoryCache<K, V> {
   private inProgress = new Map<K, Promise<V>>();
   private ttl: number;
   private maxSize: number;
+  private staleTtl: number;
+  private errorThreshold: number;
+  private errorCounts = new Map<K, number>();
 
   constructor(options: MemoryCacheOptions = {}) {
     this.ttl = options.ttl ?? 60_000; // default 60s
     this.maxSize = options.maxSize ?? 100;
+    this.staleTtl = options.staleTtl ?? 0;
+    this.errorThreshold = options.errorThreshold ?? 3;
   }
 
   get(key: K): V | undefined {
     const entry = this.cache.get(key);
     if (!entry) return undefined;
-    if (entry.expires < Date.now()) {
+    const now = Date.now();
+    if (entry.expires < now) {
+      if (entry.staleUntil > now) {
+        return entry.value;
+      }
       this.cache.delete(key);
       return undefined;
     }
@@ -34,7 +49,13 @@ export class MemoryCache<K, V> {
   }
 
   set(key: K, value: V, ttl: number = this.ttl): void {
-    this.cache.set(key, { value, expires: Date.now() + ttl });
+    const now = Date.now();
+    this.cache.set(key, {
+      value,
+      expires: now + ttl,
+      staleUntil: now + ttl + this.staleTtl,
+    });
+    this.errorCounts.delete(key);
     this.prune();
   }
 
@@ -55,21 +76,59 @@ export class MemoryCache<K, V> {
   }
 
   async getOrCreate(key: K, fetcher: () => Promise<V>, ttl: number = this.ttl): Promise<V> {
-    const cached = this.get(key);
-    if (cached !== undefined) return cached;
+    const now = Date.now();
+    const entry = this.cache.get(key);
+    if (entry) {
+      if (entry.expires > now) {
+        return entry.value;
+      }
+      if (entry.staleUntil > now) {
+        if (!this.inProgress.has(key)) {
+          const promise = fetcher()
+            .then(v => {
+              this.set(key, v, ttl);
+              this.inProgress.delete(key);
+              return v;
+            })
+            .catch(err => {
+              this.inProgress.delete(key);
+              const cnt = (this.errorCounts.get(key) || 0) + 1;
+              this.errorCounts.set(key, cnt);
+              errorLogger.error('Cache fetch error', { key: String(key), err });
+              telemetry.recordError({ type: 'CACHE_FETCH_ERROR', message: String(err) });
+              if (cnt >= this.errorThreshold) {
+                this.delete(key);
+              }
+              return entry.value;
+            });
+          this.inProgress.set(key, promise);
+        }
+        return entry.value;
+      }
+      this.cache.delete(key);
+    }
 
     if (this.inProgress.has(key)) {
       return this.inProgress.get(key)!;
     }
 
-    const promise = fetcher().then(result => {
-      this.set(key, result, ttl);
-      this.inProgress.delete(key);
-      return result;
-    }).catch(err => {
-      this.inProgress.delete(key);
-      throw err;
-    });
+    const promise = fetcher()
+      .then(result => {
+        this.set(key, result, ttl);
+        this.inProgress.delete(key);
+        return result;
+      })
+      .catch(err => {
+        this.inProgress.delete(key);
+        const cnt = (this.errorCounts.get(key) || 0) + 1;
+        this.errorCounts.set(key, cnt);
+        errorLogger.error('Cache fetch error', { key: String(key), err });
+        telemetry.recordError({ type: 'CACHE_FETCH_ERROR', message: String(err) });
+        if (cnt >= this.errorThreshold) {
+          this.delete(key);
+        }
+        throw err;
+      });
 
     this.inProgress.set(key, promise);
     return promise;

@@ -172,6 +172,34 @@ export class ExternalServiceError extends ApplicationError {
   }
 }
 
+export class RelationshipHierarchyError extends ApplicationError {
+  constructor(message: string, details?: Record<string, any>) {
+    super(RELATIONSHIP_ERROR.REL_001, message, 400, details);
+    this.name = "RelationshipHierarchyError";
+  }
+}
+
+export class EntityConsistencyError extends ApplicationError {
+  constructor(message: string, details?: Record<string, any>) {
+    super(RELATIONSHIP_ERROR.REL_002, message, 400, details);
+    this.name = "EntityConsistencyError";
+  }
+}
+
+export class RelationshipConstraintError extends ApplicationError {
+  constructor(message: string, details?: Record<string, any>) {
+    super(RELATIONSHIP_ERROR.REL_003, message, 409, details);
+    this.name = "RelationshipConstraintError";
+  }
+}
+
+export class PartialRelationshipError extends ApplicationError {
+  constructor(message: string, details?: Record<string, any>) {
+    super(RELATIONSHIP_ERROR.REL_004, message, 500, details);
+    this.name = "PartialRelationshipError";
+  }
+}
+
 // Type guards
 export function isApplicationError(value: unknown): value is ApplicationError {
   return value instanceof ApplicationError;
@@ -229,6 +257,31 @@ export function isInvalidRefreshTokenError(
   value: unknown,
 ): value is InvalidRefreshTokenError {
   return value instanceof InvalidRefreshTokenError;
+}
+
+export function isRelationshipHierarchyError(
+  value: unknown,
+): value is RelationshipHierarchyError {
+  return value instanceof RelationshipHierarchyError;
+}
+
+export function isEntityConsistencyError(
+  value: unknown,
+): value is EntityConsistencyError {
+  return value instanceof EntityConsistencyError;
+}
+
+export function isRelationshipConstraintError(
+  value: unknown,
+): value is RelationshipConstraintError {
+  return value instanceof RelationshipConstraintError;
+}
+
+export function isPartialRelationshipError(
+  value: unknown,
+): value is PartialRelationshipError {
+  return value instanceof PartialRelationshipError;
+}
 }
 
 // Utility functions

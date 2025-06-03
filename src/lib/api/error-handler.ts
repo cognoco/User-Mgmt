@@ -1,7 +1,13 @@
 /**
  * Maps API error codes to HTTP status codes and broad categories.
  */
-export type ErrorCategory = 'auth' | 'validation' | 'business' | 'permission' | 'server';
+export type ErrorCategory =
+  | 'auth'
+  | 'validation'
+  | 'business'
+  | 'permission'
+  | 'billing'
+  | 'server';
 
 import {
   ERROR_STATUS_MAP,
@@ -9,8 +15,10 @@ import {
   USER_ERROR_CODES,
   TEAM_ERROR_CODES,
   PERMISSION_ERROR_CODES,
+  RELATIONSHIP_ERROR_CODES,
   VALIDATION_ERROR_CODES,
   SERVER_ERROR_CODES,
+  BILLING_ERROR_CODES,
   type ErrorCode,
 } from './common/error-codes';
 
@@ -51,6 +59,12 @@ const CATEGORY_MAP: Record<ErrorCode, ErrorCategory> = {
   [PERMISSION_ERROR_CODES.DELETE_FAILED]: 'permission',
   [PERMISSION_ERROR_CODES.ASSIGNMENT_FAILED]: 'permission',
 
+  // Relationship
+  [RELATIONSHIP_ERROR_CODES.HIERARCHY_ERROR]: 'business',
+  [RELATIONSHIP_ERROR_CODES.INCONSISTENT_ENTITY]: 'business',
+  [RELATIONSHIP_ERROR_CODES.CONSTRAINT_VIOLATION]: 'business',
+  [RELATIONSHIP_ERROR_CODES.PARTIAL_OPERATION]: 'server',
+
   // Validation
   [VALIDATION_ERROR_CODES.INVALID_REQUEST]: 'validation',
   [VALIDATION_ERROR_CODES.MISSING_REQUIRED_FIELD]: 'validation',
@@ -62,6 +76,12 @@ const CATEGORY_MAP: Record<ErrorCode, ErrorCategory> = {
   [SERVER_ERROR_CODES.DATABASE_ERROR]: 'server',
   [SERVER_ERROR_CODES.OPERATION_FAILED]: 'server',
   [SERVER_ERROR_CODES.RETRIEVAL_FAILED]: 'server',
+
+  // Billing
+  [BILLING_ERROR_CODES.PAYMENT_FAILED]: 'billing',
+  [BILLING_ERROR_CODES.PROVIDER_ERROR]: 'billing',
+  [BILLING_ERROR_CODES.PERMISSION_DENIED]: 'billing',
+  [BILLING_ERROR_CODES.STATE_MISMATCH]: 'billing',
 };
 
 /**

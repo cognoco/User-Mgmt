@@ -29,6 +29,7 @@ import { permissionCacheService } from './permission-cache.service';
 import { RoleService } from '@/services/role';
 import { ResourcePermissionResolver } from '@/lib/services/resource-permission-resolver.service';
 import { logPermissionChange } from '@/lib/audit/permissionAuditLogger';
+import { PermissionPolicyService } from '@/lib/services/permission-policy.service';
 
 /**
  * Default implementation of the PermissionService interface
@@ -40,6 +41,7 @@ export class DefaultPermissionService
 
   private roleService: RoleService;
   private resourcePermissionResolver: ResourcePermissionResolver;
+  private policyService: PermissionPolicyService;
   /**
    * Constructor for DefaultPermissionService
    *
@@ -49,10 +51,12 @@ export class DefaultPermissionService
     private permissionDataProvider: PermissionDataProvider,
     roleService: RoleService = new RoleService(),
     resourceResolver: ResourcePermissionResolver = new ResourcePermissionResolver(),
+    policyService: PermissionPolicyService = new PermissionPolicyService(),
   ) {
     super();
     this.roleService = roleService;
     this.resourcePermissionResolver = resourceResolver;
+    this.policyService = policyService;
   }
 
   /**
@@ -350,6 +354,17 @@ export class DefaultPermissionService
         return existing;
       }
 
+      const role = await this.permissionDataProvider.getRoleById(roleId);
+      const violation = await this.policyService.checkRoleAssignment(
+        assignedBy,
+        userId,
+        role?.name || ''
+      );
+      if (violation) {
+        await this.policyService.reportViolations([violation]);
+        throw new Error(violation.reason);
+      }
+
       const userRole = await this.permissionDataProvider.assignRoleToUser(
         userId,
         roleId,
@@ -466,6 +481,15 @@ await logPermissionChange({
     permission: Permission,
   ): Promise<PermissionAssignment> {
     try {
+      const role = await this.permissionDataProvider.getRoleById(roleId);
+      const violation = await this.policyService.checkRolePermissionAssignment(
+        role?.name || '',
+        permission,
+      );
+      if (violation) {
+        await this.policyService.reportViolations([violation]);
+        throw new Error(violation.reason);
+      }
       const permissionAssignment =
         await this.permissionDataProvider.addPermissionToRole(
           roleId,
@@ -550,6 +574,15 @@ await logPermissionChange({
     reason?: string,
     ticket?: string,
   ): Promise<ResourcePermission> {
+    const violation = await this.policyService.checkResourcePermissionAssignment(
+      userId,
+      permission,
+      resourceType,
+    );
+    if (violation) {
+      await this.policyService.reportViolations([violation]);
+      throw new Error(violation.reason);
+    }
     const rp = await this.permissionDataProvider.assignResourcePermission(
       userId,
       permission,
