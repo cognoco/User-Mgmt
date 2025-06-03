@@ -28,10 +28,10 @@ async function handleGet(req: NextRequest) {
   return createSuccessResponse({ roles: paginated, page, limit, total: roles.length });
 }
 
-async function handlePost(_req: NextRequest, data: CreateRole) {
+async function handlePost(_req: NextRequest, userId: string | undefined, data: CreateRole) {
   const service = getApiPermissionService();
   try {
-    const role = await service.createRole(data);
+    const role = await service.createRole(data, userId);
     return createCreatedResponse({ role });
   } catch (e) {
     throw mapPermissionServiceError(e as Error);
@@ -44,11 +44,11 @@ export const GET = createProtectedHandler(
 );
 
 export const POST = createProtectedHandler(
-  (req) =>
+  (req, ctx) =>
     withSecurity(async (r) => {
       const body = await r.json();
       return withErrorHandling(
-        (r3) => withValidation(createSchema, (r2, data) => handlePost(r2, data), r3, body),
+        (r3) => withValidation(createSchema, (r2, data) => handlePost(r2, ctx?.userId, data), r3, body),
         r
       );
     })(req),

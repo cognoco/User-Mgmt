@@ -28,7 +28,7 @@ type AssignPayload = z.infer<typeof assignSchema>;
 
 const removeSchema = assignSchema;
 
-async function handlePost(_req: NextRequest, data: AssignPayload) {
+async function handlePost(_req: NextRequest, userId: string | undefined, data: AssignPayload) {
   const service = getApiPermissionService();
   try {
     const permission = await service.assignResourcePermission(
@@ -36,6 +36,7 @@ async function handlePost(_req: NextRequest, data: AssignPayload) {
       data.permission,
       data.resourceType,
       data.resourceId,
+      userId,
     );
     return createCreatedResponse({ permission });
   } catch (e) {
@@ -43,13 +44,14 @@ async function handlePost(_req: NextRequest, data: AssignPayload) {
   }
 }
 
-async function handleDelete(data: AssignPayload) {
+async function handleDelete(userId: string | undefined, data: AssignPayload) {
   const service = getApiPermissionService();
   const ok = await service.removeResourcePermission(
     data.userId,
     data.permission,
     data.resourceType,
     data.resourceId,
+    userId,
   );
   console.log(
     `[resource-permissions] removed ${data.permission} for ${data.userId} on ${data.resourceType}:${data.resourceId}`,
@@ -61,12 +63,12 @@ async function handleDelete(data: AssignPayload) {
 }
 
 export const POST = createProtectedHandler(
-  (req) =>
+  (req, ctx) =>
     withSecurity(async (r) => {
       const body = await r.json();
       return withErrorHandling(
         (r2) =>
-          withValidation(assignSchema, (_r, data) => handlePost(_r, data), r2, body),
+          withValidation(assignSchema, (_r, data) => handlePost(_r, ctx?.userId, data), r2, body),
         r,
       );
     })(req),
@@ -74,13 +76,13 @@ export const POST = createProtectedHandler(
 );
 
 export const DELETE = createProtectedHandler(
-  (req) =>
+  (req, ctx) =>
     withSecurity(async (r) => {
       const url = new URL(r.url);
       const params = Object.fromEntries(url.searchParams.entries());
       return withErrorHandling(
         (r2) =>
-          withValidation(removeSchema, (_req2, data) => handleDelete(data), r2, params),
+          withValidation(removeSchema, (_req2, data) => handleDelete(ctx?.userId, data), r2, params),
         r,
       );
     })(req),

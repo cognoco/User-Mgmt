@@ -26,29 +26,39 @@ async function handleGet(id: string) {
   return createSuccessResponse({ role });
 }
 
-async function handlePatch(_req: NextRequest, id: string, data: UpdateRole) {
+async function handlePatch(
+  _req: NextRequest,
+  userId: string | undefined,
+  id: string,
+  data: UpdateRole,
+) {
   const service = getApiPermissionService();
   try {
-    const role = await service.updateRole(id, data);
+    const role = await service.updateRole(id, data, userId);
     return createSuccessResponse({ role });
   } catch (e) {
     throw mapPermissionServiceError(e as Error);
   }
 }
 
-async function handlePut(_req: NextRequest, id: string, data: UpdateRole) {
+async function handlePut(
+  _req: NextRequest,
+  userId: string | undefined,
+  id: string,
+  data: UpdateRole,
+) {
   const service = getApiPermissionService();
   try {
-    const role = await service.updateRole(id, data);
+    const role = await service.updateRole(id, data, userId);
     return createSuccessResponse({ role });
   } catch (e) {
     throw mapPermissionServiceError(e as Error);
   }
 }
 
-async function handleDelete(id: string) {
+async function handleDelete(id: string, userId: string | undefined) {
   const service = getApiPermissionService();
-  const ok = await service.deleteRole(id);
+  const ok = await service.deleteRole(id, userId);
   if (!ok) {
     throw createRoleNotFoundError(id);
   }
@@ -65,7 +75,7 @@ export const PATCH = createProtectedHandler(
     withSecurity(async (r) => {
       const body = await r.json();
       return withErrorHandling(
-        (r3) => withValidation(updateSchema, (r2, data) => handlePatch(r2, ctx.params.roleId, data), r3, body),
+        (r3) => withValidation(updateSchema, (r2, data) => handlePatch(r2, ctx?.userId, ctx.params.roleId, data), r3, body),
         r
       );
     })(req),
@@ -77,7 +87,7 @@ export const PUT = createProtectedHandler(
     withSecurity(async (r) => {
       const body = await r.json();
       return withErrorHandling(
-        (r3) => withValidation(updateSchema, (r2, data) => handlePut(r2, ctx.params.roleId, data), r3, body),
+        (r3) => withValidation(updateSchema, (r2, data) => handlePut(r2, ctx?.userId, ctx.params.roleId, data), r3, body),
         r,
       );
     })(req),
@@ -86,6 +96,6 @@ export const PUT = createProtectedHandler(
 
 export const DELETE = createProtectedHandler(
   (req, ctx) =>
-    withSecurity((r) => withErrorHandling(() => handleDelete(ctx.params.roleId), r))(req),
+    withSecurity((r) => withErrorHandling(() => handleDelete(ctx.params.roleId, ctx?.userId), r))(req),
   PermissionValues.MANAGE_ROLES
 );

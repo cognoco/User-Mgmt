@@ -46,7 +46,12 @@ export class ApiPermissionService implements PermissionService {
     return data.data.role;
   }
 
-  async createRole(roleData: RoleCreationPayload): Promise<RoleWithPermissions> {
+  async createRole(
+    roleData: RoleCreationPayload,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
+  ): Promise<RoleWithPermissions> {
     const res = await fetch('/api/team/roles', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -58,7 +63,13 @@ export class ApiPermissionService implements PermissionService {
     return data.data.role ?? data.data;
   }
 
-  async updateRole(roleId: string, roleData: RoleUpdatePayload): Promise<RoleWithPermissions> {
+  async updateRole(
+    roleId: string,
+    roleData: RoleUpdatePayload,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
+  ): Promise<RoleWithPermissions> {
     const res = await fetch(`/api/team/roles/${roleId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -70,7 +81,12 @@ export class ApiPermissionService implements PermissionService {
     return data.data.role ?? data.data;
   }
 
-  async deleteRole(roleId: string): Promise<boolean> {
+  async deleteRole(
+    roleId: string,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
+  ): Promise<boolean> {
     const res = await fetch(`/api/team/roles/${roleId}`, { method: 'DELETE', credentials: 'include' });
     if (!res.ok) return false;
     return true;
@@ -143,6 +159,9 @@ export class ApiPermissionService implements PermissionService {
     permission: Permission,
     resourceType: string,
     resourceId: string,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
   ): Promise<ResourcePermission> {
     const res = await fetch('/api/permissions/resource', {
       method: 'POST',
@@ -160,6 +179,9 @@ export class ApiPermissionService implements PermissionService {
     permission: Permission,
     resourceType: string,
     resourceId: string,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
   ): Promise<boolean> {
     const url = `/api/permissions/resource?userId=${userId}&permission=${permission}&type=${resourceType}&id=${resourceId}`;
     const res = await fetch(url, { method: 'DELETE', credentials: 'include' });

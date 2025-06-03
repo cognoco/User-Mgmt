@@ -173,6 +173,9 @@ export class DefaultPermissionService
    */
   async createRole(
     roleData: RoleCreationPayload,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
   ): Promise<RoleWithPermissions> {
     try {
       const role = await this.permissionDataProvider.createRole(roleData);
@@ -182,6 +185,16 @@ export class DefaultPermissionService
         type: PermissionEventTypes.ROLE_CREATED,
         timestamp: new Date(),
         role,
+      });
+
+      await logPermissionChange({
+        action: 'ROLE_CREATED',
+        performedBy,
+        targetType: 'role',
+        targetId: role.id,
+        after: role,
+        reason,
+        ticket,
       });
 
       return role;
@@ -204,6 +217,9 @@ export class DefaultPermissionService
   async updateRole(
     roleId: string,
     roleData: RoleUpdatePayload,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
   ): Promise<RoleWithPermissions> {
     try {
       // Get the previous role for the event
@@ -226,6 +242,17 @@ export class DefaultPermissionService
         previousRole,
       });
 
+      await logPermissionChange({
+        action: 'ROLE_UPDATED',
+        performedBy,
+        targetType: 'role',
+        targetId: roleId,
+        before: previousRole,
+        after: role,
+        reason,
+        ticket,
+      });
+
       return role;
     } catch (error) {
       const errorMessage = translateError(error, {
@@ -242,8 +269,14 @@ export class DefaultPermissionService
    * @param roleId - The ID of the role to delete
    * @returns A boolean indicating if the deletion was successful
    */
-  async deleteRole(roleId: string): Promise<boolean> {
+  async deleteRole(
+    roleId: string,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
+  ): Promise<boolean> {
     try {
+      const role = await this.permissionDataProvider.getRoleById(roleId);
       await this.permissionDataProvider.deleteRole(roleId);
 
       // Emit role deleted event
@@ -251,6 +284,16 @@ export class DefaultPermissionService
         type: PermissionEventTypes.ROLE_DELETED,
         timestamp: new Date(),
         roleId,
+      });
+
+      await logPermissionChange({
+        action: 'ROLE_DELETED',
+        performedBy,
+        targetType: 'role',
+        targetId: roleId,
+        before: role ?? { id: roleId },
+        reason,
+        ticket,
       });
 
       return true;
@@ -503,6 +546,9 @@ await logPermissionChange({
     permission: Permission,
     resourceType: string,
     resourceId: string,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
   ): Promise<ResourcePermission> {
     const rp = await this.permissionDataProvider.assignResourcePermission(
       userId,
@@ -513,6 +559,16 @@ await logPermissionChange({
     permissionCacheService.resourcePermissions.delete(
       this.cacheKey(userId, permission, resourceType, resourceId),
     );
+
+    await logPermissionChange({
+      action: 'RESOURCE_PERMISSION_ASSIGNED',
+      performedBy,
+      targetType: resourceType,
+      targetId: resourceId,
+      after: { userId, permission },
+      reason,
+      ticket,
+    });
     return rp;
   }
 
@@ -521,6 +577,9 @@ await logPermissionChange({
     permission: Permission,
     resourceType: string,
     resourceId: string,
+    performedBy?: string,
+    reason?: string,
+    ticket?: string,
   ): Promise<boolean> {
     const ok = await this.permissionDataProvider.removeResourcePermission(
       userId,
@@ -531,6 +590,18 @@ await logPermissionChange({
     permissionCacheService.resourcePermissions.delete(
       this.cacheKey(userId, permission, resourceType, resourceId),
     );
+
+    if (ok) {
+      await logPermissionChange({
+        action: 'RESOURCE_PERMISSION_REMOVED',
+        performedBy,
+        targetType: resourceType,
+        targetId: resourceId,
+        before: { userId, permission },
+        reason,
+        ticket,
+      });
+    }
     return ok;
   }
 
