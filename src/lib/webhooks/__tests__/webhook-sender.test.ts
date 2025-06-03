@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { createWebhookSender } from '../webhook-sender';
+import { createWebhookSender, verifySignature, DeliveryErrorType } from '../webhook-sender';
 import type { IWebhookDataProvider } from '@/core/webhooks';
 import crypto from 'crypto';
 
@@ -15,11 +15,13 @@ vi.mock('crypto', () => {
     default: {
       createHmac: createHmacMock,
       randomBytes: vi.fn(() => Buffer.from('1234567890abcdef')),
-      randomUUID: vi.fn(() => 'uuid')
+      randomUUID: vi.fn(() => 'uuid'),
+      timingSafeEqual: vi.fn(() => false)
     },
     createHmac: createHmacMock,
     randomBytes: vi.fn(() => Buffer.from('1234567890abcdef')),
-    randomUUID: vi.fn(() => 'uuid')
+    randomUUID: vi.fn(() => 'uuid'),
+    timingSafeEqual: vi.fn(() => false)
   };
 });
 
@@ -121,5 +123,34 @@ describe('webhook sender', () => {
     expect(results[0].success).toBe(false);
     expect(results[0].statusCode).toBe(500);
     expect(provider.recordDelivery).toHaveBeenCalled();
+  });
+
+  it('retries on server error', async () => {
+    provider.listWebhooks.mockResolvedValueOnce([
+      { id: 'w1', url: 'https://a.com', secret: 's', events: ['e'], isActive: true }
+    ]);
+    provider.recordDelivery.mockResolvedValue(undefined);
+    (global.fetch as any)
+      .mockResolvedValueOnce({ ok: false, status: 500, text: async () => 'err' })
+      .mockResolvedValueOnce({ ok: true, status: 200, text: async () => 'ok' });
+
+    const results = await sendWebhookEvent('e', {}, 'user');
+    expect((global.fetch as any)).toHaveBeenCalledTimes(2);
+    expect(results[0].success).toBe(true);
+  });
+
+  it('returns invalid payload error', async () => {
+    provider.listWebhooks.mockResolvedValueOnce([
+      { id: 'w1', url: 'https://a.com', secret: 's', events: [''], isActive: true }
+    ]);
+
+    const results = await sendWebhookEvent('', {}, 'user');
+    expect(results[0].success).toBe(false);
+    expect(results[0].errorType).toBe(DeliveryErrorType.INVALID_PAYLOAD);
+  });
+
+  it('verifySignature throws on mismatch', () => {
+    const payload = JSON.stringify({ event: 'e', data: {} });
+    expect(() => verifySignature(payload, 's', 'bad')).toThrow('Invalid signature');
   });
 });
