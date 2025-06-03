@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { DefaultPermissionService } from "../../default-permission.service";
 import { PermissionValues } from "@/core/permission/models";
 import { MemoryCache } from '@/lib/cache';
-import { ResourcePermissionResolver } from '../../resource-permission-resolver';
+import { ResourcePermissionResolver } from '@/lib/services/resource-permission-resolver.service';
 
 const USER_ID = "u1";
 const ROLE_ID = "r1";

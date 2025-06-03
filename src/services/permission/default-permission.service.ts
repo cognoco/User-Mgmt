@@ -27,7 +27,7 @@ import { translateError } from "@/lib/utils/error";
 import { TypedEventEmitter } from "@/lib/utils/typed-event-emitter";
 import { MemoryCache } from '@/lib/cache';
 import { RoleService } from '@/services/role';
-import { ResourcePermissionResolver } from './resource-permission-resolver';
+import { ResourcePermissionResolver } from '@/lib/services/resource-permission-resolver.service';
 
 /**
  * Default implementation of the PermissionService interface
