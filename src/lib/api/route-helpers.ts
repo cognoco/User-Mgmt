@@ -4,22 +4,43 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AuthContext } from '@/lib/auth/types';
 import { createAuthMiddleware } from '@/lib/auth/unified-auth.middleware';
 import { ApiError, ERROR_CODES } from '@/lib/api/common';
+import type { AuthService } from '@/core/auth/interfaces';
+import type { UserService } from '@/core/user/interfaces';
+import { getApiAuthService } from '@/services/auth/factory';
+import { getApiUserService } from '@/services/user/factory';
+
+export interface ServiceContainer {
+  auth: AuthService;
+  user: UserService;
+  [key: string]: any;
+}
+
+export interface ApiHandlerOptions {
+  requireAuth?: boolean;
+  requiredPermissions?: string[];
+  includeUser?: boolean;
+  services?: Partial<ServiceContainer>;
+}
 
 export const createApiHandler = <T extends z.ZodTypeAny>(
   schema: T,
   handler: (
-    req: NextRequest, 
-    context: AuthContext, 
-    data: z.infer<T>
-  ) => Promise<NextResponse> | NextResponse,
-  options?: {
-    requireAuth?: boolean;
-    requiredPermissions?: string[];
-    includeUser?: boolean;
-  }
+    req: NextRequest,
+    context: AuthContext,
+) => Promise<Response>,
+  options: ApiHandlerOptions = {}
 ) => {
-  return createAuthMiddleware(options)(
+  return createAuthMiddleware({
+    authService: options.services?.auth,
+    requireAuth: options.requireAuth,
+    requiredPermissions: options.requiredPermissions,
+    includeUser: options.includeUser
+  })(
     async (req: NextRequest, context: AuthContext) => {
+      const services: ServiceContainer = {
+        auth: options.services?.auth ?? getApiAuthService(),
+        user: options.services?.user ?? getApiUserService()
+      };
       try {
         // Parse request body or query params based on method
         let data: any;
@@ -41,8 +62,8 @@ export const createApiHandler = <T extends z.ZodTypeAny>(
           );
         }
         
-        // Call handler with validated data
-        return handler(req, context, result.data);
+        // Call handler with validated data and services
+        return handler(req, context, result.data, services);
       } catch (error) {
         if (error instanceof ApiError) {
           return NextResponse.json(

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AuthContext } from './types';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiPermissionService } from '@/services/permission/factory';
+import type { AuthService } from '@/core/auth/interfaces';
 
 export type AuthHandler = (
   req: NextRequest,
@@ -13,10 +14,11 @@ export const createAuthMiddleware = (options?: {
   requireAuth?: boolean;
   requiredPermissions?: string[];
   includeUser?: boolean;
+  authService?: AuthService;
 }) => {
   return (handler: AuthHandler) => {
     return async (req: NextRequest) => {
-      const supabase = getServiceSupabase();
+      const supabase = options?.authService ? null : getServiceSupabase();
       const authHeader = req.headers.get('authorization');
       let token: string | null = null;
       
@@ -40,28 +42,36 @@ export const createAuthMiddleware = (options?: {
       
       if (token) {
         try {
-          const { data, error } = await supabase.auth.getUser(token);
-          
-          if (error || !data.user) {
-            throw error || new Error('User not found');
+          let user: any;
+          if (options?.authService && (options.authService as any).getSession) {
+            const session = await (options.authService as any).getSession(token);
+            user = session?.user;
+            if (!user) throw new Error('User not found');
+          } else if (supabase) {
+            const { data, error } = await supabase.auth.getUser(token);
+            if (error || !data.user) {
+              throw error || new Error('User not found');
+            }
+            user = data.user;
+          } else {
+            throw new Error('No auth service available');
           }
-          
-          const userId = data.user.id;
+
+          const userId = user.id;
           context = {
             userId,
             authenticated: true,
             permissions: []
           };
-          
-          // Include full user object if requested
+
           if (options?.includeUser) {
             context.user = {
               id: userId,
-              email: data.user.email || '',
-              role: data.user.app_metadata?.role || data.user.user_metadata?.role,
+              email: user.email || '',
+              role: (user as any).app_metadata?.role || (user as any).user_metadata?.role,
               metadata: {
-                ...data.user.app_metadata,
-                ...data.user.user_metadata
+                ...(user as any).app_metadata,
+                ...(user as any).user_metadata
               }
             };
           }
