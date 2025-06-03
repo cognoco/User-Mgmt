@@ -1,6 +1,6 @@
 {
   "auth": {
-    "unauthorized": "Authentication required.",
+    "unauthorized": "You need to log in to continue.",
     "forbidden": "Access denied.",
     "invalid_credentials": "Invalid email or password.",
     "email_not_verified": "Email not verified.",
@@ -39,10 +39,10 @@
     "invalid_format": "Invalid format for {{field}}."
   },
   "server": {
-    "internal_error": "Internal server error.",
-    "service_unavailable": "Service is currently unavailable.",
-    "database_error": "Database error.",
-    "operation_failed": "Operation failed.",
-    "retrieval_failed": "Data retrieval failed."
+    "internal_error": "Something went wrong on our end. Please try again later.",
+    "service_unavailable": "We're updating our service. Please retry in a moment.",
+    "database_error": "A database error occurred. Please try again later.",
+    "operation_failed": "We couldn't complete the operation.",
+    "retrieval_failed": "We couldn't load the requested data."
   }
 }

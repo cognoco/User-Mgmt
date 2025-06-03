@@ -39,4 +39,13 @@ describe('MemoryCache', () => {
     expect(v2).toBe(5);
     expect(fetcher).toHaveBeenCalledTimes(1);
   });
+
+  it('deleteWhere removes matching keys', () => {
+    const cache = new MemoryCache<string, number>({ ttl: 1000 });
+    cache.set('a:1', 1);
+    cache.set('b:1', 2);
+    cache.deleteWhere(k => k.startsWith('a'));
+    expect(cache.get('a:1')).toBeUndefined();
+    expect(cache.get('b:1')).toBe(2);
+  });
 });

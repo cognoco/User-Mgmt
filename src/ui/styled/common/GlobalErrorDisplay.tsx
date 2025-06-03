@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { ApiErrorAlert } from './ApiErrorAlert';
-import { useGlobalError, useErrorStore } from '@/lib/state/errorStore';
+import React, { Suspense } from "react";
+const ApiErrorAlert = React.lazy(() => import("./ApiErrorAlert"));
+import { useGlobalError, useErrorStore } from "@/lib/state/errorStore";
 
 export function GlobalErrorDisplay() {
   const error = useGlobalError();
-  const removeError = useErrorStore(state => state.removeError);
+  const removeError = useErrorStore((state) => state.removeError);
 
   if (!error) return null;
 
@@ -18,10 +19,12 @@ export function GlobalErrorDisplay() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 max-w-md w-full">
-      <ApiErrorAlert
-        message={error.message}
-        onRetry={error.onRetry ? handleRetry : undefined}
-      />
+      <Suspense fallback={null}>
+        <ApiErrorAlert
+          message={error.message}
+          onRetry={error.onRetry ? handleRetry : undefined}
+        />
+      </Suspense>
     </div>
   );
 }
