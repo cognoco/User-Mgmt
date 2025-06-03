@@ -1,11 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { DefaultPermissionService } from "../../default-permission.service";
-import { PermissionValues } from "@/core/permission/models";
-import { MemoryCache } from '@/lib/cache';
+import { PermissionValues, UserRole } from "@/core/permission/models";
+import { MemoryCache, MultiLevelCache, RedisCache } from '@/lib/cache';
+import { Redis } from '@upstash/redis';
+
+vi.mock('@upstash/redis', () => ({ Redis: vi.fn(() => ({ get: vi.fn(), set: vi.fn(), del: vi.fn() })) }));
 import { ResourcePermissionResolver } from '@/lib/services/resource-permission-resolver.service';
 
 const USER_ID = "u1";
 const ROLE_ID = "r1";
+
+process.env.SUPABASE_SERVICE_ROLE_KEY = 'test';
+process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost';
 
 describe("DefaultPermissionService", () => {
   let provider: any;
@@ -26,8 +32,17 @@ describe("DefaultPermissionService", () => {
     };
     resolver = { getEffectivePermissions: vi.fn().mockResolvedValue([]) } as ResourcePermissionResolver;
     service = new DefaultPermissionService(provider, { getEffectivePermissions: vi.fn() } as any, resolver);
-    (DefaultPermissionService as any).roleCache = new MemoryCache({ ttl: 30000 });
-    (DefaultPermissionService as any).resourceCache = new MemoryCache({ ttl: 30000 });
+    const redis = new Redis({ url: 'x', token: 'x' });
+    (DefaultPermissionService as any).roleCache = new MultiLevelCache(
+      new MemoryCache({ ttl: 30000 }),
+      new RedisCache<UserRole[]>(redis, { prefix: 'role:' }),
+      30000,
+    );
+    (DefaultPermissionService as any).resourceCache = new MultiLevelCache(
+      new MemoryCache({ ttl: 30000 }),
+      new RedisCache<boolean>(redis, { prefix: 'res:' }),
+      30000,
+    );
   });
 
   it("returns existing assignment if user already has role", async () => {
@@ -120,7 +135,12 @@ describe("DefaultPermissionService", () => {
     provider.getUserRoles.mockResolvedValue([{ roleId: ROLE_ID }]);
     const mockRoleService = { getEffectivePermissions: vi.fn().mockResolvedValue([PermissionValues.MANAGE_ROLES]) } as any;
     service = new DefaultPermissionService(provider, mockRoleService);
-    (DefaultPermissionService as any).userPermissionCache = new MemoryCache({ ttl: 30000 });
+    const redis = new Redis({ url: 'x', token: 'x' });
+    (DefaultPermissionService as any).userPermissionCache = new MultiLevelCache(
+      new MemoryCache({ ttl: 30000 }),
+      new RedisCache<boolean>(redis, { prefix: 'perm:' }),
+      30000,
+    );
 
     const allowed1 = await service.hasPermission(USER_ID, PermissionValues.MANAGE_ROLES);
     const allowed2 = await service.hasPermission(USER_ID, PermissionValues.MANAGE_ROLES);
