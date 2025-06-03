@@ -2,6 +2,8 @@
 
 This document outlines standard patterns for handling errors across the User Management module. Following these guidelines keeps the UX consistent and accessible.
 
+For architecture details and a list of all error codes, see **Error Handling Overview.md** and **Error Code Reference.md**.
+
 ## 1. Form Validation
 
 - **Inline validation** should occur as users type or blur a field.

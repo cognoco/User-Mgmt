@@ -1,3 +1,6 @@
+/**
+ * Maps API error codes to HTTP status codes and broad categories.
+ */
 export type ErrorCategory = 'auth' | 'validation' | 'business' | 'permission' | 'server';
 
 export interface ErrorMapEntry {
@@ -53,10 +56,16 @@ export const ERROR_MAP: Record<string, ErrorMapEntry> = {
   'server/retrieval_failed': { status: 500, category: 'server' },
 };
 
+/**
+ * Return the HTTP status for a given error code.
+ */
 export function getErrorStatus(code: string): number {
   return ERROR_MAP[code]?.status ?? 500;
 }
 
+/**
+ * Return the broad error category for a given code.
+ */
 export function getErrorCategory(code: string): ErrorCategory {
   return ERROR_MAP[code]?.category ?? 'server';
 }

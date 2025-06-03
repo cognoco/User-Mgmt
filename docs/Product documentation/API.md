@@ -225,17 +225,24 @@ interface ErrorResponse {
     code: string;
     message: string;
     details?: any;
+    /** optional categorisation such as `auth` or `validation` */
+    category?: string;
   }
 }
 ```
 
-Common error codes:
-- `auth/unauthorized`: User is not authenticated
-- `auth/forbidden`: User lacks required permissions
-- `validation/error`: Invalid request data
-- `not_found`: Requested resource not found
-- `rate_limited`: Too many requests
-- `server_error`: Internal server error
+### Common Error Codes
+
+| Code | Meaning | Retry Guidance |
+|------|---------|----------------|
+| `auth/unauthorized` | User is not authenticated | Authenticate and resend the request |
+| `auth/forbidden` | User lacks required permissions | Verify permissions or contact an administrator |
+| `validation/error` | Request body failed validation | Fix the input fields and retry immediately |
+| `not_found` | Requested resource does not exist | Ensure the id or path is correct |
+| `rate_limited` | Too many requests | Wait for the limit window to pass before retrying |
+| `server_error` | Internal server error | Retry later; if persistent, contact support |
+
+When handling errors on the client, check the `code` and surface a user friendly message using the mapping in `ERROR_CODE_DESCRIPTIONS`. All API clients should expect this structure and may implement automatic retries for server errors or rate limits.
 
 ## Authentication
 
