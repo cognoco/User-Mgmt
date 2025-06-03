@@ -1,31 +1,37 @@
-import { ReactNode } from 'react';
-import { redirect } from 'next/navigation';
-import { getSupabaseServerClient } from '@/lib/auth';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
-import { hasPermission } from '@/lib/auth/hasPermission';
-import Link from 'next/link';
-import { Button } from '@/ui/primitives/button';
-import { Users, List, Home, Settings, ShieldCheck } from 'lucide-react';
+import { ReactNode } from "react";
+import { redirect } from "next/navigation";
+import { getSupabaseServerClient } from "@/lib/auth";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { hasPermission } from "@/lib/auth/hasPermission";
+import { PermissionValues } from "@/core/permission/models";
+import Link from "next/link";
+import { Button } from "@/ui/primitives/button";
+import { Users, List, Home, Settings, ShieldCheck } from "lucide-react";
 
 interface AdminLayoutProps {
   children: ReactNode;
 }
 
-export default async function AdminLayout({ children }: AdminLayoutProps): Promise<JSX.Element> {
+export default async function AdminLayout({
+  children,
+}: AdminLayoutProps): Promise<JSX.Element> {
   // Create a Supabase client tied to the server session
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase.auth.getUser();
   const user: SupabaseUser | null = data.user;
 
   if (error || !user) {
-    redirect('/auth/login');
+    redirect("/auth/login");
   }
 
-  // Check if user has admin access
-  const isAdmin = await hasPermission(user.id, 'ADMIN_ACCESS');
-  
-  if (!isAdmin) {
-    redirect('/dashboard/overview');
+  // Check if user has necessary admin permissions
+  const [isAdmin, canAccessDashboard] = await Promise.all([
+    hasPermission(user.id, PermissionValues.ADMIN_ACCESS),
+    hasPermission(user.id, PermissionValues.ACCESS_ADMIN_DASHBOARD),
+  ]);
+
+  if (!isAdmin || !canAccessDashboard) {
+    redirect("/dashboard/overview");
   }
 
   return (
@@ -74,9 +80,9 @@ export default async function AdminLayout({ children }: AdminLayoutProps): Promi
           </Button>
         </nav>
       </aside>
-      
+
       {/* Main content */}
       <main className="flex-1">{children}</main>
     </div>
   );
-} 
+}
