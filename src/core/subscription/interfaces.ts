@@ -1,7 +1,7 @@
 /**
  * Subscription Service Interface
  */
-import type { SubscriptionPlan, UserSubscription } from "./models";
+import type { SubscriptionPlan, UserSubscription, SubscriptionUpsertPayload } from "./models";
 
 /**
  * Service managing user subscription plans.
@@ -64,4 +64,11 @@ export interface SubscriptionService {
     subscription?: UserSubscription;
     error?: string;
   }>;
+
+  /**
+   * Reconcile subscription state with external billing system.
+   */
+  reconcileSubscription(
+    data: SubscriptionUpsertPayload
+  ): Promise<UserSubscription>;
 }
