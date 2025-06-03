@@ -33,6 +33,7 @@ import {
 } from '@/lib/cache';
 import { RoleService } from '@/services/role';
 import { ResourcePermissionResolver } from '@/lib/services/resource-permission-resolver.service';
+import { logPermissionChange } from '@/lib/audit/permissionAuditLogger';
 
 /**
  * Default implementation of the PermissionService interface
@@ -349,6 +350,14 @@ export class DefaultPermissionService
         userRole,
       });
 
+      await logPermissionChange({
+        action: 'ROLE_ASSIGNED',
+        performedBy: assignedBy,
+        targetType: 'user',
+        targetId: userId,
+        after: userRole
+      });
+
       DefaultPermissionService.roleCache.delete(userId);
 
       return userRole;
@@ -385,6 +394,14 @@ export class DefaultPermissionService
         timestamp: new Date(),
         userId,
         roleId,
+      });
+
+      await logPermissionChange({
+        action: 'ROLE_REMOVED',
+        performedBy: undefined,
+        targetType: 'user',
+        targetId: userId,
+        before: { roleId }
       });
 
       DefaultPermissionService.roleCache.delete(userId);
@@ -450,6 +467,14 @@ export class DefaultPermissionService
         permission,
       });
 
+      await logPermissionChange({
+        action: 'PERMISSION_ADDED',
+        performedBy: undefined,
+        targetType: 'role',
+        targetId: roleId,
+        after: { permission }
+      });
+
       return permissionAssignment;
     } catch (error) {
       const errorMessage = translateError(error, {
@@ -483,6 +508,14 @@ export class DefaultPermissionService
         timestamp: new Date(),
         roleId,
         permission,
+      });
+
+      await logPermissionChange({
+        action: 'PERMISSION_REMOVED',
+        performedBy: undefined,
+        targetType: 'role',
+        targetId: roleId,
+        before: { permission }
       });
 
       return true;

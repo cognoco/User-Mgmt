@@ -3,8 +3,10 @@ import { DefaultPermissionService } from "../../default-permission.service";
 import { PermissionValues, UserRole } from "@/core/permission/models";
 import { MemoryCache, MultiLevelCache, RedisCache } from '@/lib/cache';
 import { Redis } from '@upstash/redis';
+import { logPermissionChange } from '@/lib/audit/permissionAuditLogger';
 
 vi.mock('@upstash/redis', () => ({ Redis: vi.fn(() => ({ get: vi.fn(), set: vi.fn(), del: vi.fn() })) }));
+vi.mock('@/lib/audit/permissionAuditLogger', () => ({ logPermissionChange: vi.fn() }));
 import { ResourcePermissionResolver } from '@/lib/services/resource-permission-resolver.service';
 
 const USER_ID = "u1";
@@ -31,6 +33,7 @@ describe("DefaultPermissionService", () => {
       getUsersWithResourcePermission: vi.fn(),
     };
     resolver = { getEffectivePermissions: vi.fn().mockResolvedValue([]) } as ResourcePermissionResolver;
+    vi.mocked(logPermissionChange).mockClear();
     service = new DefaultPermissionService(provider, { getEffectivePermissions: vi.fn() } as any, resolver);
     const redis = new Redis({ url: 'x', token: 'x' });
     (DefaultPermissionService as any).roleCache = new MultiLevelCache(
@@ -65,6 +68,9 @@ describe("DefaultPermissionService", () => {
       undefined,
     );
     expect(result).toBe(assigned);
+    expect(logPermissionChange).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'ROLE_ASSIGNED' })
+    );
   });
 
   it("removeRoleFromUser returns false if user lacks role", async () => {
@@ -72,6 +78,7 @@ describe("DefaultPermissionService", () => {
     const ok = await service.removeRoleFromUser(USER_ID, ROLE_ID);
     expect(ok).toBe(false);
     expect(provider.removeRoleFromUser).not.toHaveBeenCalled();
+    expect(logPermissionChange).not.toHaveBeenCalled();
   });
 
   it("removeRoleFromUser delegates to provider when role exists", async () => {
@@ -80,6 +87,9 @@ describe("DefaultPermissionService", () => {
     const ok = await service.removeRoleFromUser(USER_ID, ROLE_ID);
     expect(provider.removeRoleFromUser).toHaveBeenCalledWith(USER_ID, ROLE_ID);
     expect(ok).toBe(true);
+    expect(logPermissionChange).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'ROLE_REMOVED' })
+    );
   });
 
   it("roleHasPermission returns false for unknown role", async () => {
@@ -129,6 +139,34 @@ describe("DefaultPermissionService", () => {
     const allowed = await service.hasResourcePermission(USER_ID, perm, 'project', 'p1');
     expect(resolver.getEffectivePermissions).toHaveBeenCalledTimes(2);
     expect(allowed).toBe(true);
+  });
+
+  it("addPermissionToRole logs audit entry", async () => {
+    provider.addPermissionToRole = vi.fn().mockResolvedValue({ id: 'a1' });
+    await service.addPermissionToRole(ROLE_ID, PermissionValues.MANAGE_ROLES);
+    expect(provider.addPermissionToRole).toHaveBeenCalledWith(
+      ROLE_ID,
+      PermissionValues.MANAGE_ROLES,
+    );
+    expect(logPermissionChange).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'PERMISSION_ADDED' })
+    );
+  });
+
+  it("removePermissionFromRole logs audit entry", async () => {
+    provider.removePermissionFromRole = vi.fn().mockResolvedValue(true);
+    const ok = await service.removePermissionFromRole(
+      ROLE_ID,
+      PermissionValues.MANAGE_ROLES,
+    );
+    expect(ok).toBe(true);
+    expect(provider.removePermissionFromRole).toHaveBeenCalledWith(
+      ROLE_ID,
+      PermissionValues.MANAGE_ROLES,
+    );
+    expect(logPermissionChange).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'PERMISSION_REMOVED' })
+    );
   });
 
   it("hasPermission checks hierarchy and caches result", async () => {
