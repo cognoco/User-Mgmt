@@ -1,4 +1,8 @@
-import { ERROR_CODE_DESCRIPTIONS, ErrorCode, SERVER_ERROR } from './error-codes';
+import {
+  ERROR_CODE_DESCRIPTIONS,
+  ErrorCode,
+  SERVER_ERROR,
+} from "./error-codes";
 
 /**
  * Error utilities used by the core and service layers.
@@ -21,6 +25,7 @@ export class ApplicationError extends Error {
   details?: Record<string, any>;
   httpStatus: number;
   timestamp: string;
+  private cachedString?: string;
 
   constructor(
     /** unique error code */
@@ -30,10 +35,10 @@ export class ApplicationError extends Error {
     /** HTTP status associated with this error */
     httpStatus = 500,
     /** optional structured details */
-    details?: Record<string, any>
+    details?: Record<string, any>,
   ) {
     super(message);
-    this.name = 'ApplicationError';
+    this.name = "ApplicationError";
     this.code = code;
     this.details = details;
     this.httpStatus = httpStatus;
@@ -54,16 +59,24 @@ export class ApplicationError extends Error {
     };
   }
 
+  /** Cached JSON string representation */
+  toJSONString() {
+    if (!this.cachedString) {
+      this.cachedString = JSON.stringify(this.toJSON());
+    }
+    return this.cachedString;
+  }
+
   /**
    * Recreate an {@link ApplicationError} from serialized JSON.
    */
-  static fromJSON(json: string | ReturnType<ApplicationError['toJSON']>) {
-    const obj = typeof json === 'string' ? (JSON.parse(json) as any) : json;
+  static fromJSON(json: string | ReturnType<ApplicationError["toJSON"]>) {
+    const obj = typeof json === "string" ? (JSON.parse(json) as any) : json;
     const err = new ApplicationError(
       obj.code as ErrorCode,
       obj.message,
       obj.httpStatus,
-      obj.details
+      obj.details,
     );
     err.timestamp = obj.timestamp;
     return err;
@@ -74,7 +87,7 @@ export class ApplicationError extends Error {
 export class ValidationError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_001, message, 400, details);
-    this.name = 'ValidationError';
+    this.name = "ValidationError";
   }
 }
 
@@ -82,7 +95,7 @@ export class ValidationError extends ApplicationError {
 export class AuthenticationError extends ApplicationError {
   constructor(code: ErrorCode, message: string, details?: Record<string, any>) {
     super(code, message, 401, details);
-    this.name = 'AuthenticationError';
+    this.name = "AuthenticationError";
   }
 }
 
@@ -90,7 +103,7 @@ export class AuthenticationError extends ApplicationError {
 export class AuthorizationError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_004, message, 403, details);
-    this.name = 'AuthorizationError';
+    this.name = "AuthorizationError";
   }
 }
 
@@ -98,7 +111,7 @@ export class AuthorizationError extends ApplicationError {
 export class ResourceNotFoundError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_001, message, 404, details);
-    this.name = 'ResourceNotFoundError';
+    this.name = "ResourceNotFoundError";
   }
 }
 
@@ -106,7 +119,7 @@ export class ResourceNotFoundError extends ApplicationError {
 export class ConflictError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_004, message, 409, details);
-    this.name = 'ConflictError';
+    this.name = "ConflictError";
   }
 }
 
@@ -114,7 +127,7 @@ export class ConflictError extends ApplicationError {
 export class RateLimitError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_005, message, 429, details);
-    this.name = 'RateLimitError';
+    this.name = "RateLimitError";
   }
 }
 
@@ -122,7 +135,7 @@ export class RateLimitError extends ApplicationError {
 export class ServiceError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_001, message, 500, details);
-    this.name = 'ServiceError';
+    this.name = "ServiceError";
   }
 }
 
@@ -130,7 +143,7 @@ export class ServiceError extends ApplicationError {
 export class DatabaseError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_002, message, 500, details);
-    this.name = 'DatabaseError';
+    this.name = "DatabaseError";
   }
 }
 
@@ -138,7 +151,7 @@ export class DatabaseError extends ApplicationError {
 export class ExternalServiceError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(SERVER_ERROR.SERVER_003, message, 502, details);
-    this.name = 'ExternalServiceError';
+    this.name = "ExternalServiceError";
   }
 }
 
@@ -151,15 +164,21 @@ export function isValidationError(value: unknown): value is ValidationError {
   return value instanceof ValidationError;
 }
 
-export function isAuthenticationError(value: unknown): value is AuthenticationError {
+export function isAuthenticationError(
+  value: unknown,
+): value is AuthenticationError {
   return value instanceof AuthenticationError;
 }
 
-export function isAuthorizationError(value: unknown): value is AuthorizationError {
+export function isAuthorizationError(
+  value: unknown,
+): value is AuthorizationError {
   return value instanceof AuthorizationError;
 }
 
-export function isResourceNotFoundError(value: unknown): value is ResourceNotFoundError {
+export function isResourceNotFoundError(
+  value: unknown,
+): value is ResourceNotFoundError {
   return value instanceof ResourceNotFoundError;
 }
 
@@ -179,7 +198,9 @@ export function isDatabaseError(value: unknown): value is DatabaseError {
   return value instanceof DatabaseError;
 }
 
-export function isExternalServiceError(value: unknown): value is ExternalServiceError {
+export function isExternalServiceError(
+  value: unknown,
+): value is ExternalServiceError {
   return value instanceof ExternalServiceError;
 }
 
@@ -195,12 +216,12 @@ export function createErrorFromUnknown(error: unknown): ApplicationError {
   if (error instanceof Error) {
     return new ServiceError(error.message);
   }
-  return new ServiceError('Unknown error');
+  return new ServiceError("Unknown error");
 }
 
 /** Serialize an {@link ApplicationError} to a JSON string. */
 export function serializeError(error: ApplicationError): string {
-  return JSON.stringify(error.toJSON());
+  return error.toJSONString();
 }
 
 /** Deserialize an {@link ApplicationError} from JSON. */
@@ -221,7 +242,7 @@ export function createError(
   message: string,
   details?: Record<string, any>,
   cause?: unknown,
-  httpStatus?: number
+  httpStatus?: number,
 ): ApplicationError {
   const err = new ApplicationError(code, message, httpStatus || 500, details);
   if (cause instanceof Error && cause.stack) {
@@ -229,4 +250,3 @@ export function createError(
   }
   return err;
 }
-

@@ -12,6 +12,8 @@ export interface EnvironmentConfig {
   sessionCookieName: string;
   tokenExpiryDays: number;
   database: DatabaseConfig;
+  /** Show detailed error info in development */
+  showErrorDetails?: boolean;
 }
 
 const defaults: Pick<EnvironmentConfig, 'apiTimeout' | 'rateLimitWindowMs' | 'rateLimitMax' | 'sessionCookieName' | 'tokenExpiryDays'> = {
@@ -57,6 +59,10 @@ export function loadEnvironment(): EnvironmentConfig {
       password: process.env.DATABASE_PASSWORD,
       ssl: process.env.DATABASE_SSL === 'true',
     },
+    showErrorDetails:
+      process.env.SHOW_ERROR_DETAILS
+        ? process.env.SHOW_ERROR_DETAILS === 'true'
+        : process.env.NODE_ENV !== 'production',
   };
 }
 

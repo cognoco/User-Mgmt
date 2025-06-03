@@ -4,6 +4,8 @@ import { PermissionValues, UserRole } from "@/core/permission/models";
 import { MemoryCache, MultiLevelCache, RedisCache } from '@/lib/cache';
 import { Redis } from '@upstash/redis';
 import { logPermissionChange } from '@/lib/audit/permissionAuditLogger';
+import { permissionCacheService } from '../../permission-cache.service';
+
 
 vi.mock('@upstash/redis', () => ({ Redis: vi.fn(() => ({ get: vi.fn(), set: vi.fn(), del: vi.fn() })) }));
 vi.mock('@/lib/audit/permissionAuditLogger', () => ({ logPermissionChange: vi.fn() }));
@@ -36,14 +38,19 @@ describe("DefaultPermissionService", () => {
     vi.mocked(logPermissionChange).mockClear();
     service = new DefaultPermissionService(provider, { getEffectivePermissions: vi.fn() } as any, resolver);
     const redis = new Redis({ url: 'x', token: 'x' });
-    (DefaultPermissionService as any).roleCache = new MultiLevelCache(
+    permissionCacheService.userRoles = new MultiLevelCache(
       new MemoryCache({ ttl: 30000 }),
       new RedisCache<UserRole[]>(redis, { prefix: 'role:' }),
       30000,
     );
-    (DefaultPermissionService as any).resourceCache = new MultiLevelCache(
+    permissionCacheService.resourcePermissions = new MultiLevelCache(
       new MemoryCache({ ttl: 30000 }),
       new RedisCache<boolean>(redis, { prefix: 'res:' }),
+      30000,
+    );
+    permissionCacheService.userPermissions = new MultiLevelCache(
+      new MemoryCache({ ttl: 30000 }),
+      new RedisCache<boolean>(redis, { prefix: 'perm:' }),
       30000,
     );
   });
@@ -174,7 +181,7 @@ describe("DefaultPermissionService", () => {
     const mockRoleService = { getEffectivePermissions: vi.fn().mockResolvedValue([PermissionValues.MANAGE_ROLES]) } as any;
     service = new DefaultPermissionService(provider, mockRoleService);
     const redis = new Redis({ url: 'x', token: 'x' });
-    (DefaultPermissionService as any).userPermissionCache = new MultiLevelCache(
+    permissionCacheService.userPermissions = new MultiLevelCache(
       new MemoryCache({ ttl: 30000 }),
       new RedisCache<boolean>(redis, { prefix: 'perm:' }),
       30000,

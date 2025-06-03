@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ErrorLogger, ConsoleTransport, LogEntry } from '../error-logger';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { ErrorLogger, ConsoleTransport, LogEntry } from "../error-logger";
 
 class MemoryTransport implements ConsoleTransport {
   entries: LogEntry[] = [];
@@ -8,7 +8,7 @@ class MemoryTransport implements ConsoleTransport {
   }
 }
 
-describe('ErrorLogger', () => {
+describe("ErrorLogger", () => {
   let transport: MemoryTransport;
   let logger: ErrorLogger;
 
@@ -17,24 +17,35 @@ describe('ErrorLogger', () => {
     logger = new ErrorLogger([transport], 2);
   });
 
-  it('buffers and flushes logs', () => {
-    logger.info('a');
+  it("buffers and flushes logs", () => {
+    logger.info("a");
     expect(transport.entries.length).toBe(0);
-    logger.info('b');
+    logger.info("b");
     expect(transport.entries.length).toBe(2);
   });
 
-  it('sanitizes sensitive fields', () => {
-    logger.error('boom', { user: '1', password: 'secret', token: 't' });
+  it("sanitizes sensitive fields", () => {
+    logger.error("boom", { user: "1", password: "secret", token: "t" });
     logger.flush();
-    expect(transport.entries[0].context).toEqual({ user: '1', password: '[REDACTED]', token: '[REDACTED]' });
+    expect(transport.entries[0].context).toEqual({
+      user: "1",
+      password: "[REDACTED]",
+      token: "[REDACTED]",
+    });
   });
 
-  it('specialized methods set types', () => {
-    const err = new Error('oops');
-    logger.logServiceError(err, { service: 'svc' });
+  it("specialized methods set types", () => {
+    const err = new Error("oops");
+    logger.logServiceError(err, { service: "svc" });
     logger.flush();
-    expect(transport.entries[0].context.type).toBe('service');
-    expect(transport.entries[0].context.service).toBe('svc');
+    expect(transport.entries[0].context.type).toBe("service");
+    expect(transport.entries[0].context.service).toBe("svc");
+  });
+
+  it("applies sampling rates", () => {
+    logger = new ErrorLogger([transport], 1, { info: 0 });
+    logger.info("skip me");
+    logger.flush();
+    expect(transport.entries.length).toBe(0);
   });
 });
