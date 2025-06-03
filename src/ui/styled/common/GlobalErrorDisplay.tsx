@@ -1,35 +1,40 @@
-'use client';
+"use client";
 
-import { ApiErrorAlert } from './ApiErrorAlert';
+import React, { Suspense } from "react";
 import { DevErrorDetailsPanel } from './DevErrorDetailsPanel';
 import { getClientConfig } from '@/core/config/runtime-config';
-import { useGlobalError, useErrorStore } from '@/lib/state/errorStore';
+import { useGlobalError, useErrorStore } from "@/lib/state/errorStore";
+
+const ApiErrorAlert = React.lazy(() => import("./ApiErrorAlert"));
 
 export function GlobalErrorDisplay() {
   const error = useGlobalError();
-  const removeError = useErrorStore(state => state.removeError);
-
+  const removeError = useErrorStore((state) => state.removeError);
+  
   if (!error) return null;
-
+  
   const handleRetry = async () => {
     if (error.onRetry) {
       await error.onRetry();
     }
     removeError(error.id);
   };
-
+  
   const showDetails = getClientConfig().env.showErrorDetails;
-
+  
   return (
     <>
       <div className="fixed bottom-4 right-4 z-50 max-w-md w-full">
-        <ApiErrorAlert
-          message={error.message}
-          onRetry={error.onRetry ? handleRetry : undefined}
-        />
+        <Suspense fallback={null}>
+          <ApiErrorAlert
+            message={error.message}
+            onRetry={error.onRetry ? handleRetry : undefined}
+          />
+        </Suspense>
       </div>
       {showDetails && <DevErrorDetailsPanel error={error} />}
     </>
   );
 }
+
 export default GlobalErrorDisplay;

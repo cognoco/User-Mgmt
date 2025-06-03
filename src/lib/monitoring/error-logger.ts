@@ -1,5 +1,5 @@
 /** Severity levels understood by the {@link ErrorLogger}. */
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'critical';
+export type LogLevel = "debug" | "info" | "warn" | "error" | "critical";
 
 export interface LogContext {
   user?: string;
@@ -21,34 +21,35 @@ export interface LogTransport {
 
 function sanitizeContext(context: LogContext): LogContext {
   const clone: LogContext = { ...context };
-  if ('password' in clone) clone.password = '[REDACTED]';
-  if ('token' in clone) clone.token = '[REDACTED]';
-  if ('authorization' in clone) clone.authorization = '[REDACTED]';
+  if ("password" in clone) clone.password = "[REDACTED]";
+  if ("token" in clone) clone.token = "[REDACTED]";
+  if ("authorization" in clone) clone.authorization = "[REDACTED]";
   return clone;
 }
 
 export class ConsoleTransport implements LogTransport {
   log(entry: LogEntry) {
-    const method = entry.level === 'error' || entry.level === 'critical'
-      ? console.error
-      : entry.level === 'warn'
-        ? console.warn
-        : console.log;
+    const method =
+      entry.level === "error" || entry.level === "critical"
+        ? console.error
+        : entry.level === "warn"
+          ? console.warn
+          : console.log;
     method(`[${entry.level.toUpperCase()}] ${entry.message}`, entry.context);
   }
 }
 
-import fs from 'fs';
+import fs from "fs";
 
 export class FileTransport implements LogTransport {
-  constructor(private filePath: string = 'error.log') {}
+  constructor(private filePath: string = "error.log") {}
 
   log(entry: LogEntry) {
-    const line = JSON.stringify(entry) + '\n';
+    const line = JSON.stringify(entry) + "\n";
     try {
-      fs.appendFileSync(this.filePath, line, 'utf8');
+      fs.appendFileSync(this.filePath, line, "utf8");
     } catch (err) {
-      console.error('FileTransport failed', err);
+      console.error("FileTransport failed", err);
     }
   }
 }
@@ -62,7 +63,7 @@ export class ExternalTransport implements LogTransport {
     try {
       this.send(entry);
     } catch (err) {
-      console.error('ExternalTransport failed', err);
+      console.error("ExternalTransport failed", err);
     }
   }
 }
@@ -70,10 +71,10 @@ export class ExternalTransport implements LogTransport {
 function defaultTransports(): LogTransport[] {
   const list: LogTransport[] = [];
   const { NODE_ENV, MONITORING_SERVICE } = process.env;
-  if (NODE_ENV === 'development') {
+  if (NODE_ENV === "development") {
     list.push(new ConsoleTransport());
   }
-  if (NODE_ENV === 'production') {
+  if (NODE_ENV === "production") {
     list.push(new FileTransport());
   }
   if (MONITORING_SERVICE) {
@@ -87,13 +88,28 @@ export class ErrorLogger {
   private buffer: LogEntry[] = [];
   private transports: LogTransport[];
   private bufferSize: number;
+  private sampling: Record<LogLevel, number>;
 
-  constructor(transports: LogTransport[] = defaultTransports(), bufferSize = 5) {
+  constructor(
+    transports: LogTransport[] = defaultTransports(),
+    bufferSize = 5,
+    sampling: Partial<Record<LogLevel, number>> = {},
+  ) {
     this.transports = transports;
     this.bufferSize = bufferSize;
+    this.sampling = {
+      debug: 1,
+      info: 1,
+      warn: 1,
+      error: 1,
+      critical: 1,
+      ...sampling,
+    };
   }
 
   log(level: LogLevel, message: string, context: LogContext = {}) {
+    const rate = this.sampling[level] ?? 1;
+    if (rate < 1 && Math.random() > rate) return;
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       level,
@@ -115,26 +131,44 @@ export class ErrorLogger {
     }
   }
 
-  debug(msg: string, ctx?: LogContext) { this.log('debug', msg, ctx); }
-  info(msg: string, ctx?: LogContext) { this.log('info', msg, ctx); }
-  warn(msg: string, ctx?: LogContext) { this.log('warn', msg, ctx); }
-  error(msg: string, ctx?: LogContext) { this.log('error', msg, ctx); }
-  critical(msg: string, ctx?: LogContext) { this.log('critical', msg, ctx); }
+  debug(msg: string, ctx?: LogContext) {
+    this.log("debug", msg, ctx);
+  }
+  info(msg: string, ctx?: LogContext) {
+    this.log("info", msg, ctx);
+  }
+  warn(msg: string, ctx?: LogContext) {
+    this.log("warn", msg, ctx);
+  }
+  error(msg: string, ctx?: LogContext) {
+    this.log("error", msg, ctx);
+  }
+  critical(msg: string, ctx?: LogContext) {
+    this.log("critical", msg, ctx);
+  }
 
   logServiceError(error: Error, context: LogContext = {}) {
-    this.error(error.message, { ...context, stack: error.stack, type: 'service' });
+    this.error(error.message, {
+      ...context,
+      stack: error.stack,
+      type: "service",
+    });
   }
 
   logApiError(error: Error, context: LogContext = {}) {
-    this.warn(error.message, { ...context, stack: error.stack, type: 'api' });
+    this.warn(error.message, { ...context, stack: error.stack, type: "api" });
   }
 
   logClientError(error: Error, context: LogContext = {}) {
-    this.warn(error.message, { ...context, stack: error.stack, type: 'client' });
+    this.warn(error.message, {
+      ...context,
+      stack: error.stack,
+      type: "client",
+    });
   }
 
   logSecurityEvent(message: string, context: LogContext = {}) {
-    this.critical(message, { ...context, type: 'security' });
+    this.critical(message, { ...context, type: "security" });
   }
 }
 

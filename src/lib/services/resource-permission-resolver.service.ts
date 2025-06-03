@@ -1,5 +1,6 @@
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { createResourceRelationshipService } from '@/services/resource-relationship/factory';
+import { permissionCacheService } from '@/services/permission/permission-cache.service';
 
 export class ResourcePermissionResolver {
   private relationshipService;
@@ -14,31 +15,31 @@ export class ResourcePermissionResolver {
    * Get all ancestors for a resource (recursive parents)
    */
   async getResourceAncestors(resourceType: string, resourceId: string, maxDepth = 10): Promise<any[]> {
-    const ancestors = [];
-    let currentType = resourceType;
-    let currentId = resourceId;
-    let depth = 0;
+    const cacheKey = `${resourceType}:${resourceId}`;
+    return permissionCacheService.resourcePermissions.getOrCreate(cacheKey, async () => {
+      const ancestors = [] as any[];
+      let currentType = resourceType;
+      let currentId = resourceId;
+      let depth = 0;
 
-    // Follow the chain of parents up to maxDepth
-    while (depth < maxDepth) {
-      const parents = await this.relationshipService.getParentResources(currentType, currentId);
-      if (!parents || parents.length === 0) break;
+      while (depth < maxDepth) {
+        const parents = await this.relationshipService.getParentResources(currentType, currentId);
+        if (!parents || parents.length === 0) break;
 
-      // Add the parent to ancestors
-      const parent = parents[0]; // Taking first parent if multiple exist
-      ancestors.push({
-        type: parent.parent_type,
-        id: parent.parent_id,
-        relationshipType: parent.relationship_type
-      });
+        const parent = parents[0];
+        ancestors.push({
+          type: parent.parent_type,
+          id: parent.parent_id,
+          relationshipType: parent.relationship_type
+        });
 
-      // Move up to the next level
-      currentType = parent.parent_type;
-      currentId = parent.parent_id;
-      depth++;
-    }
+        currentType = parent.parent_type;
+        currentId = parent.parent_id;
+        depth++;
+      }
 
-    return ancestors;
+      return ancestors;
+    });
   }
 
   /**

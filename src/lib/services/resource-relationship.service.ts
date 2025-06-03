@@ -1,3 +1,5 @@
+import { permissionCacheService } from '@/services/permission/permission-cache.service';
+
 export class ResourceRelationshipService {
   constructor(private db: any) {}
 
@@ -9,7 +11,7 @@ export class ResourceRelationshipService {
     relationshipType: string;
     createdBy?: string;
   }) {
-    return this.db
+    const result = await this.db
       .from('resource_relationships')
       .insert({
         parent_type: relationship.parentType,
@@ -21,6 +23,8 @@ export class ResourceRelationshipService {
       })
       .select()
       .single();
+    await permissionCacheService.clearResource(relationship.childType, relationship.childId);
+    return result;
   }
 
   async getParentResources(resourceType: string, resourceId: string) {
@@ -49,7 +53,7 @@ export class ResourceRelationshipService {
     childType: string,
     childId: string
   ) {
-    return this.db
+    const result = await this.db
       .from('resource_relationships')
       .delete()
       .match({
@@ -58,5 +62,7 @@ export class ResourceRelationshipService {
         child_type: childType,
         child_id: childId
       });
+    await permissionCacheService.clearResource(childType, childId);
+    return result;
   }
 }
