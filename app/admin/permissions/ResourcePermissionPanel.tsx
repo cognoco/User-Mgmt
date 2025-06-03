@@ -5,6 +5,8 @@ import { Button } from '@/ui/primitives/button';
 import { Select } from '@/ui/primitives/select';
 import { UserManagementConfiguration } from '@/core/config';
 import type { PermissionService } from '@/core/permission/interfaces';
+import { usePermission } from '@/hooks/permission/usePermissions';
+import { PermissionValues } from '@/core/permission/models';
 
 interface ResourcePermission {
   userId: string;
@@ -12,6 +14,10 @@ interface ResourcePermission {
 }
 
 export default function ResourcePermissionPanel() {
+  const { hasPermission, isLoading } = usePermission({
+    required: PermissionValues.MANAGE_ROLES,
+  });
+
   const permissionService =
     UserManagementConfiguration.getServiceProvider<PermissionService>('permissionService');
 
@@ -45,8 +51,18 @@ export default function ResourcePermissionPanel() {
   };
 
   useEffect(() => {
-    fetchPermissions();
-  }, [resourceType, resourceId]);
+    if (hasPermission) {
+      fetchPermissions();
+    }
+  }, [resourceType, resourceId, hasPermission]);
+
+  if (isLoading) {
+    return <div className="animate-pulse">Loading permissions...</div>;
+  }
+
+  if (!hasPermission) {
+    return null;
+  }
 
   return (
     <div className="space-y-4">
