@@ -48,7 +48,7 @@ export const POST = createProtectedHandler(
     withSecurity(async (r) => {
       const body = await r.json();
       return withErrorHandling(
-        (r3) => withValidation(createSchema, (r2, data) => handlePost(r2, ctx?.userId, data), r3, body),
+        (r3) => withValidation(createSchema, (r2, data) => handlePost(r2, ctx.userId, data), r3, body),
         r
       );
     })(req),
