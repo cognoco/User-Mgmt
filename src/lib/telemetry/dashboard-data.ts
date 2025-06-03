@@ -27,6 +27,8 @@ export interface ErrorTrend {
 }
 
 import { Telemetry } from '@/lib/monitoring/telemetry';
+import { ErrorReporter } from './error-reporting';
+import type { ClusterSummary } from './error-clustering';
 
 /**
  * Aggregates telemetry metrics for dashboard usage.
@@ -119,5 +121,20 @@ export class ErrorDashboardData {
       m.affectedUsers.forEach((u: string) => userSet.add(u));
     }
     return { totalUsers: userSet.size, impactedBy };
+  }
+
+  /** Average resolution time for a specific error type. */
+  async getAverageResolutionTime(errorType: string): Promise<number | undefined> {
+    const m = this.telemetry.getMetrics(errorType) as any;
+    if (!m || m.resolutionTimes.length === 0) return undefined;
+    return (
+      m.resolutionTimes.reduce((a: number, b: number) => a + b, 0) /
+      m.resolutionTimes.length
+    );
+  }
+
+  /** Return clustered root causes for reported errors. */
+  async getRootCauseClusters(): Promise<ClusterSummary[]> {
+    return ErrorReporter.getClusters().map(c => ({ ...c }));
   }
 }

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Telemetry } from '@/lib/monitoring/telemetry';
 import { ErrorDashboardData, TimeRange } from '../dashboard-data';
+import { ErrorReporter } from '../error-reporting';
 
 describe('ErrorDashboardData', () => {
   let telemetry: Telemetry;
@@ -10,6 +11,7 @@ describe('ErrorDashboardData', () => {
     vi.useFakeTimers();
     telemetry = new Telemetry();
     service = new ErrorDashboardData(telemetry);
+    (ErrorReporter as any).instance = undefined;
   });
 
   function advanceAndRecord(type: string, userId?: string, segment?: string, action?: string) {
@@ -66,5 +68,23 @@ describe('ErrorDashboardData', () => {
     expect(dist.action.save).toBe(2);
     expect(dist.action.open).toBe(1);
     expect(dist.errorType.unknown).toBe(3);
+  });
+
+  it('reports average resolution time', async () => {
+    telemetry.recordError({ type: 'RES', message: 'fail' });
+    vi.advanceTimersByTime(500);
+    telemetry.resolveError('RES');
+    const avg = await service.getAverageResolutionTime('RES');
+    expect(avg).toBe(500);
+  });
+
+  it('provides root cause clusters', async () => {
+    const reporter = ErrorReporter.getInstance();
+    reporter.initialize();
+    reporter.captureError(new Error('Boom at 1'));
+    reporter.captureError(new Error('Boom at 2'));
+    const clusters = await service.getRootCauseClusters();
+    const c = clusters.find(cl => cl.id.includes('SERVER_001'))!;
+    expect(c.count).toBe(2);
   });
 });

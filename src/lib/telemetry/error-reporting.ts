@@ -8,6 +8,7 @@ export interface ErrorReporterOptions {
 import { v4 as uuidv4 } from 'uuid';
 import { ApplicationError, createErrorFromUnknown } from '@/core/common/errors';
 import { errorLogger } from '@/lib/monitoring/error-logger';
+import { ErrorClusterer } from './error-clustering';
 
 interface Breadcrumb {
   message: string;
@@ -27,6 +28,7 @@ type Integration = (payload: ErrorPayload) => void | Promise<void>;
 
 export class ErrorReporter {
   private static instance: ErrorReporter;
+  private static clusterer = new ErrorClusterer();
   private initialized = false;
   private options: ErrorReporterOptions;
   private breadcrumbs: Breadcrumb[] = [];
@@ -45,6 +47,10 @@ export class ErrorReporter {
       });
     }
     return ErrorReporter.instance;
+  }
+
+  public static getClusters() {
+    return this.clusterer.getClusters();
   }
 
   public initialize(): void {
@@ -103,6 +109,8 @@ export class ErrorReporter {
         console.error('Error reporting integration failed', e);
       }
     }
+
+    ErrorReporter.clusterer.addError(appError);
 
     return id;
   }
