@@ -1,0 +1,48 @@
+{
+  "auth": {
+    "unauthorized": "Authentification requise.",
+    "forbidden": "Accès refusé.",
+    "invalid_credentials": "Identifiants invalides.",
+    "email_not_verified": "Email non vérifié.",
+    "mfa_required": "Authentification multifacteur requise.",
+    "account_locked": "Compte verrouillé.",
+    "password_expired": "Mot de passe expiré.",
+    "session_expired": "Session expirée."
+  },
+  "user": {
+    "not_found": "Utilisateur {{id}} introuvable.",
+    "already_exists": "L'utilisateur existe déjà.",
+    "invalid_data": "Données utilisateur invalides.",
+    "update_failed": "Échec de la mise à jour de l'utilisateur.",
+    "delete_failed": "Échec de la suppression de l'utilisateur."
+  },
+  "team": {
+    "not_found": "Équipe {{id}} introuvable.",
+    "already_exists": "L'équipe existe déjà.",
+    "invalid_data": "Données d'équipe invalides.",
+    "update_failed": "Échec de la mise à jour de l'équipe.",
+    "delete_failed": "Échec de la suppression de l'équipe.",
+    "member_not_found": "Membre de l'équipe introuvable.",
+    "member_already_exists": "Le membre de l'équipe existe déjà."
+  },
+  "permission": {
+    "not_found": "Permission {{key}} introuvable.",
+    "already_exists": "La permission existe déjà.",
+    "invalid_data": "Données de permission invalides.",
+    "update_failed": "Échec de la mise à jour de la permission.",
+    "delete_failed": "Échec de la suppression de la permission.",
+    "assignment_failed": "Échec de l'attribution de la permission."
+  },
+  "validation": {
+    "error": "Échec de la validation.",
+    "missing_field": "Le champ {{field}} est requis.",
+    "invalid_format": "Format invalide pour {{field}}."
+  },
+  "server": {
+    "internal_error": "Erreur interne du serveur.",
+    "service_unavailable": "Service indisponible.",
+    "database_error": "Erreur de base de données.",
+    "operation_failed": "Échec de l'opération.",
+    "retrieval_failed": "Échec de la récupération des données."
+  }
+}

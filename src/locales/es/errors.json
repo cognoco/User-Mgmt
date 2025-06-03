@@ -1,0 +1,48 @@
+{
+  "auth": {
+    "unauthorized": "Autenticación requerida.",
+    "forbidden": "Acceso denegado.",
+    "invalid_credentials": "Credenciales inválidas.",
+    "email_not_verified": "Correo no verificado.",
+    "mfa_required": "Se requiere autenticación multifactor.",
+    "account_locked": "Cuenta bloqueada.",
+    "password_expired": "Contraseña expirada.",
+    "session_expired": "Sesión expirada."
+  },
+  "user": {
+    "not_found": "Usuario {{id}} no encontrado.",
+    "already_exists": "El usuario ya existe.",
+    "invalid_data": "Datos de usuario inválidos.",
+    "update_failed": "Error al actualizar usuario.",
+    "delete_failed": "Error al eliminar usuario."
+  },
+  "team": {
+    "not_found": "Equipo {{id}} no encontrado.",
+    "already_exists": "El equipo ya existe.",
+    "invalid_data": "Datos de equipo inválidos.",
+    "update_failed": "Error al actualizar equipo.",
+    "delete_failed": "Error al eliminar equipo.",
+    "member_not_found": "Miembro del equipo no encontrado.",
+    "member_already_exists": "El miembro del equipo ya existe."
+  },
+  "permission": {
+    "not_found": "Permiso {{key}} no encontrado.",
+    "already_exists": "El permiso ya existe.",
+    "invalid_data": "Datos de permiso inválidos.",
+    "update_failed": "Error al actualizar permiso.",
+    "delete_failed": "Error al eliminar permiso.",
+    "assignment_failed": "Error al asignar permiso."
+  },
+  "validation": {
+    "error": "Validación fallida.",
+    "missing_field": "El campo {{field}} es obligatorio.",
+    "invalid_format": "Formato inválido para {{field}}."
+  },
+  "server": {
+    "internal_error": "Error interno del servidor.",
+    "service_unavailable": "Servicio no disponible.",
+    "database_error": "Error de base de datos.",
+    "operation_failed": "La operación falló.",
+    "retrieval_failed": "Error al obtener datos."
+  }
+}
