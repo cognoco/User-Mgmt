@@ -28,7 +28,7 @@ const LoginSchema = z.object({
  * Login handler function that processes the actual login request
  * after validation has been performed
  */
-async function handleLogin(req: NextRequest, validatedData: z.infer<typeof LoginSchema>) {
+async function handleLogin(req: NextRequest, ctx: any, validatedData: z.infer<typeof LoginSchema>) {
   // Get IP and User Agent for logging
   const ipAddress = req.headers.get('x-forwarded-for') || 'unknown';
   const userAgent = req.headers.get('user-agent') || 'unknown';

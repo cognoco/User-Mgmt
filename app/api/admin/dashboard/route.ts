@@ -7,13 +7,13 @@ import {
   errorHandlingMiddleware,
   routeAuthMiddleware,
   rateLimitMiddleware,
-  type RouteAuthContext,
 } from '@/middleware/createMiddlewareChain';
+import { type RouteAuthContext } from '@/middleware/auth';
 
 async function handleGet(_req: NextRequest, auth: RouteAuthContext) {
   try {
     // Authentication middleware attaches the Supabase user when valid
-    if (!auth.user) {
+    if (!auth.user || !auth.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -109,8 +109,8 @@ async function handleGet(_req: NextRequest, auth: RouteAuthContext) {
       subscription: {
         plan: subscription?.plan ?? 'NO_PLAN',
         status: subscription?.status ?? 'INACTIVE',
-        trialEndsAt: subscription?.trialEndsAt,
-        currentPeriodEndsAt: subscription?.currentPeriodEndsAt
+        trialEndsAt: subscription?.trialEndsAt ?? null,
+        currentPeriodEndsAt: subscription?.currentPeriodEndsAt ?? null
       },
       recentActivity
     };

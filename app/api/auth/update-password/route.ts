@@ -33,9 +33,18 @@ const UpdatePasswordSchema = z.object({
 
 async function handleUpdatePassword(
   req: NextRequest,
-  data: z.infer<typeof UpdatePasswordSchema>,
+  ctx?: any,
+  data?: z.infer<typeof UpdatePasswordSchema>,
 ) {
-  const ipAddress = req.ip || req.headers.get("x-forwarded-for") || "unknown";
+  if (!data) {
+    throw new ApiError(
+      ERROR_CODES.INVALID_REQUEST,
+      'Invalid or missing request data',
+      400
+    );
+  }
+
+  const ipAddress = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
   const userAgent = req.headers.get("user-agent") || "unknown";
   let userIdForLogging: string | null = null;
 
@@ -43,7 +52,7 @@ async function handleUpdatePassword(
 
   try {
     if (data.token) {
-      const result = await authService.updatePasswordWithToken(data.token, data.password);
+      const result = (await authService.updatePasswordWithToken(data.token, data.password)) as any;
       userIdForLogging = result.user?.id || null;
       if (!result.success) {
         throw new ApiError(

@@ -12,7 +12,7 @@ import {
 
 const DisableSchema = z.object({ code: z.string().min(4) });
 
-async function handleDisable(req: NextRequest, data: z.infer<typeof DisableSchema>) {
+async function handleDisable(req: NextRequest, ctx: any, data: z.infer<typeof DisableSchema>) {
   const authService = getApiAuthService();
   const result = await authService.disableMFA(data.code);
   if (!result.success) {

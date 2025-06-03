@@ -1,19 +1,34 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { withAuthRateLimit } from '@/middleware/with-auth-rate-limit';
 import { withSecurity } from '@/middleware/with-security';
 import { getApiAuthService } from '@/services/auth/factory';
 import {
   createSuccessResponse,
-  withErrorHandling,
-  withValidation,
   ApiError,
   ERROR_CODES,
 } from '@/lib/api/common';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  validationMiddleware,
+  rateLimitMiddleware
+} from '@/middleware/createMiddlewareChain';
 
 const VerifySchema = z.object({ token: z.string().min(1) });
 
-async function handleVerify(req: NextRequest, data: z.infer<typeof VerifySchema>) {
+async function handleVerify(
+  req: NextRequest,
+  ctx?: any,
+  data?: z.infer<typeof VerifySchema>
+) {
+  if (!data) {
+    throw new ApiError(
+      ERROR_CODES.INVALID_REQUEST,
+      'Invalid or missing request data',
+      400
+    );
+  }
+
   const authService = getApiAuthService();
   const result = await authService.verifyPasswordResetToken(data.token);
   if (!result.valid) {
@@ -22,13 +37,12 @@ async function handleVerify(req: NextRequest, data: z.infer<typeof VerifySchema>
   return createSuccessResponse({ message: 'Token valid' });
 }
 
-async function handler(request: NextRequest) {
-  return withErrorHandling(
-    async (req) => withValidation(VerifySchema, handleVerify, req),
-    request,
-  );
-}
+const middleware = createMiddlewareChain([
+  rateLimitMiddleware({ windowMs: 15 * 60 * 1000, max: 10 }),
+  errorHandlingMiddleware(),
+  validationMiddleware(VerifySchema)
+]);
 
-export const POST = withSecurity(async (request: NextRequest) =>
-  withAuthRateLimit(request, handler),
+export const POST = withSecurity((request: NextRequest) =>
+  middleware(handleVerify)(request)
 );

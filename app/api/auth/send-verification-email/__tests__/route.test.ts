@@ -1,16 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { POST } from '../route';
 import { getApiAuthService } from '@/services/auth/factory';
-import { checkRateLimit } from '@/middleware/rate-limit';
-import { NextRequest } from 'next/server';
+import { createRateLimit } from '@/middleware/rate-limit';
+import { NextRequest, NextResponse } from 'next/server';
 import { ERROR_CODES } from '@/lib/api/common';
 
 vi.mock('@/services/auth/factory', () => ({
   getApiAuthService: vi.fn()
 }));
 vi.mock('@/middleware/rate-limit', () => ({
-  checkRateLimit: vi.fn()
+  createRateLimit: vi.fn(() => vi.fn((_req: any, h: any) => h(_req)))
 }));
+vi.mock('@/middleware/with-security', () => ({ withSecurity: (h: any) => h }));
 
 describe('POST /api/auth/send-verification-email', () => {
   const mockAuthService = {
@@ -26,17 +27,17 @@ describe('POST /api/auth/send-verification-email', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (getApiAuthService as unknown as vi.Mock).mockReturnValue(mockAuthService);
-    (checkRateLimit as unknown as vi.Mock).mockResolvedValue(false);
+    (getApiAuthService as unknown as Mock).mockReturnValue(mockAuthService);
     mockAuthService.sendVerificationEmail.mockResolvedValue({ success: true });
   });
 
   it('returns 429 when rate limited', async () => {
-    (checkRateLimit as unknown as vi.Mock).mockResolvedValue(true);
+    const mockCreateRateLimit = createRateLimit as unknown as Mock;
+    mockCreateRateLimit.mockImplementationOnce(() =>
+      async () => NextResponse.json({ error: { code: 'rate_limit_exceeded' } }, { status: 429 })
+    );
     const res = await POST(createRequest('test@example.com'));
-    const data = await res.json();
     expect(res.status).toBe(429);
-    expect(data.error.code).toBe(ERROR_CODES.INVALID_REQUEST);
   });
 
   it('validates request body', async () => {

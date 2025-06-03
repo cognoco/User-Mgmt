@@ -19,8 +19,17 @@ const VerifyEmailSchema = z.object({ token: z.string().min(1) });
 
 async function handleVerifyEmail(
   req: NextRequest,
-  data: z.infer<typeof VerifyEmailSchema>
+  ctx?: any,
+  data?: z.infer<typeof VerifyEmailSchema>
 ) {
+  if (!data) {
+    throw new ApiError(
+      ERROR_CODES.INVALID_REQUEST,
+      'Invalid or missing request data',
+      400
+    );
+  }
+
   const ipAddress = req.headers.get('x-forwarded-for') || 'unknown';
   const userAgent = req.headers.get('user-agent') || 'unknown';
   try {

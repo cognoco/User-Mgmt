@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
 import { POST } from '../route';
 import { getApiAuthService } from '@/services/auth/factory';
 import { createRateLimit } from '@/middleware/rate-limit';
@@ -13,7 +14,7 @@ vi.mock('@/middleware/with-security', () => ({
 
 describe('POST /api/auth/mfa/disable', () => {
   const mockAuthService = { disableMFA: vi.fn() };
-  const createRequest = (code?: string) => new Request('http://localhost/api/auth/mfa/disable', {
+  const createRequest = (code?: string) => new NextRequest('http://localhost/api/auth/mfa/disable', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: code ? JSON.stringify({ code }) : undefined
@@ -26,12 +27,12 @@ describe('POST /api/auth/mfa/disable', () => {
   });
 
   it('returns 400 when code missing', async () => {
-    const res = await POST(createRequest() as any);
+    const res = await POST(createRequest());
     expect(res.status).toBe(400);
   });
 
   it('returns success when MFA disabled', async () => {
-    const res = await POST(createRequest('123') as any);
+    const res = await POST(createRequest('1234'));
     expect(res.status).toBe(200);
   });
 });

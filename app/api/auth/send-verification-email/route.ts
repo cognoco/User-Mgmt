@@ -1,11 +1,14 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { checkRateLimit } from '@/middleware/rate-limit';
 import { getApiAuthService } from '@/services/auth/factory';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  validationMiddleware,
+  rateLimitMiddleware
+} from '@/middleware/createMiddlewareChain';
 
 // Zod schema for the request body
 const ResendEmailSchema = z.object({
@@ -14,17 +17,20 @@ const ResendEmailSchema = z.object({
 
 async function handleSendVerificationEmail(
   req: NextRequest,
-  validatedData: z.infer<typeof ResendEmailSchema>
+  ctx?: any,
+  validatedData?: z.infer<typeof ResendEmailSchema>
 ) {
+  if (!validatedData) {
+    throw new ApiError(
+      ERROR_CODES.INVALID_REQUEST,
+      'Invalid or missing request data',
+      400
+    );
+  }
+
   const ipAddress = req.headers.get('x-forwarded-for') || 'unknown';
   const userAgent = req.headers.get('user-agent') || 'unknown';
   const { email } = validatedData;
-
-  // Rate limiting
-  const isRateLimited = await checkRateLimit(req);
-  if (isRateLimited) {
-    throw new ApiError(ERROR_CODES.INVALID_REQUEST, 'Too many requests', 429);
-  }
 
   const authService = getApiAuthService();
   const result = await authService.sendVerificationEmail(email);
@@ -49,9 +55,11 @@ async function handleSendVerificationEmail(
   });
 }
 
-export async function POST(request: NextRequest) {
-  return withErrorHandling(
-    async (req) => withValidation(ResendEmailSchema, handleSendVerificationEmail, req),
-    request
-  );
-}
+const middleware = createMiddlewareChain([
+  rateLimitMiddleware({ windowMs: 15 * 60 * 1000, max: 5 }),
+  errorHandlingMiddleware(),
+  validationMiddleware(ResendEmailSchema)
+]);
+
+export const POST = (request: NextRequest) =>
+  middleware(handleSendVerificationEmail)(request);

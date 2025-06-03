@@ -28,7 +28,7 @@ export async function withErrorHandling(
     await logApiError(apiError, {
       ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
       userAgent: req.headers.get('user-agent') || 'unknown',
-      path: req.nextUrl.pathname,
+      path: req.nextUrl?.pathname || req.url || 'unknown',
     });
 
     const safeError =

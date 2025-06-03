@@ -4,7 +4,7 @@ import { withSecurity } from '@/middleware/with-security';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { associateUserWithCompanyByDomain } from '@/lib/auth/domainMatcher';
 import { getApiAuthService } from '@/services/auth/factory';
-import { RegistrationPayload } from '@/core/auth/models';
+import { User } from '@/core/auth/models';
 import {
   createSuccessResponse,
   createCreatedResponse,
@@ -18,6 +18,36 @@ import {
   rateLimitMiddleware
 } from '@/middleware/createMiddlewareChain';
 import { createUserAlreadyExistsError } from '@/lib/api/user/error-handler';
+
+// Extended interfaces for registration that include corporate fields
+interface ExtendedRegistrationPayload {
+  email: string;
+  password: string;
+  userType: 'private' | 'corporate';
+  firstName: string;
+  lastName: string;
+  acceptTerms: boolean;
+  companyName?: string;
+  companyWebsite?: string;
+  department?: string;
+  industry?: string;
+  companySize?: string;
+  position?: string;
+  metadata?: Record<string, any>;
+}
+
+// Extended AuthResult that includes user field
+interface ExtendedAuthResult {
+  success: boolean;
+  error?: string;
+  code?: 'EMAIL_NOT_VERIFIED' | 'INVALID_CREDENTIALS' | 'RATE_LIMIT_EXCEEDED' | 'MFA_REQUIRED';
+  requiresMfa?: boolean;
+  token?: string;
+  retryAfter?: number;
+  remainingAttempts?: number;
+  user?: User;
+  requiresEmailConfirmation?: boolean;
+}
 
 // Zod schema for registration data (matches original)
 const RegistrationSchema = z.discriminatedUnion('userType', [
@@ -68,7 +98,15 @@ const RegistrationSchema = z.discriminatedUnion('userType', [
  * Registration handler function that processes the actual registration request
  * after validation has been performed
  */
-async function handleRegistration(req: NextRequest, validatedData: z.infer<typeof RegistrationSchema>) {
+async function handleRegistration(req: NextRequest, ctx?: any, validatedData?: z.infer<typeof RegistrationSchema>) {
+  if (!validatedData) {
+    throw new ApiError(
+      ERROR_CODES.INVALID_REQUEST,
+      'Invalid or missing request data',
+      400
+    );
+  }
+
   // Get IP and User Agent for logging
   const ipAddress = req.headers.get('x-forwarded-for') || 
                    req.headers.get('x-real-ip') || 
@@ -79,27 +117,29 @@ async function handleRegistration(req: NextRequest, validatedData: z.infer<typeo
   // 1. Get AuthService and prepare registration payload
   const authService = getApiAuthService();
   
-  // Prepare registration payload for the AuthService
-  const registrationPayload: RegistrationPayload = {
+  // Prepare registration payload for the AuthService (base fields only)
+  const registrationPayload = {
     email: regData.email,
     password: regData.password,
-    userType: regData.userType,
     firstName: regData.userType === 'private' ? regData.firstName : (regData.firstName || ''),
     lastName: regData.userType === 'private' ? regData.lastName : (regData.lastName || ''),
-    acceptTerms: regData.acceptTerms,
-    // Add corporate-specific fields if applicable
-    ...(regData.userType === 'corporate' && {
-      companyName: regData.companyName,
-      companyWebsite: regData.companyWebsite || '',
-      department: regData.department || '',
-      industry: regData.industry || '',
-      companySize: regData.companySize || 'Other/Not Specified',
-      position: regData.position || ''
-    })
+    metadata: {
+      userType: regData.userType,
+      acceptTerms: regData.acceptTerms,
+      // Add corporate-specific fields if applicable
+      ...(regData.userType === 'corporate' && {
+        companyName: regData.companyName,
+        companyWebsite: regData.companyWebsite || '',
+        department: regData.department || '',
+        industry: regData.industry || '',
+        companySize: regData.companySize || 'Other/Not Specified',
+        position: regData.position || ''
+      })
+    }
   };
   
   // 3. Call the auth service to register the user
-  const authResult = await authService.register(registrationPayload);
+  const authResult = (await authService.register(registrationPayload)) as ExtendedAuthResult;
 
   // 4. Handle Registration Errors
   if (!authResult.success) {
