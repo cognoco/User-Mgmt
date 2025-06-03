@@ -87,6 +87,13 @@
     "loginAlerts": "Alertas de Inicio de Sesión",
     "loginAlerts.description": "Recibe notificaciones cuando alguien inicie sesión en tu cuenta",
     "privacy": "Privacidad",
-    "account": "Cuenta"
+  "account": "Cuenta"
+  },
+  "errors": {
+    "auth/unauthorized": "Se requiere autenticación.",
+    "auth/forbidden": "Acceso denegado.",
+    "validation/error": "La validación falló.",
+    "user/not_found": "Recurso no encontrado.",
+    "server/internal_error": "Error interno del servidor."
   }
-} 
+}

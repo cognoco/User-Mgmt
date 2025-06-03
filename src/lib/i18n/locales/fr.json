@@ -66,7 +66,14 @@
       "marketingEmails": "E-mails Marketing",
       "marketingEmailsDesc": "Recevez du contenu promotionnel et des offres spéciales",
       "profileVisibility": "Visibilité du Profil",
-      "showOnlineStatus": "Afficher le Statut en Ligne"
+  "showOnlineStatus": "Afficher le Statut en Ligne"
     }
+  },
+  "errors": {
+    "auth/unauthorized": "Authentification requise.",
+    "auth/forbidden": "Accès refusé.",
+    "validation/error": "Échec de la validation.",
+    "user/not_found": "Ressource introuvable.",
+    "server/internal_error": "Erreur interne du serveur."
   }
-} 
+}

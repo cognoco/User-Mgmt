@@ -152,6 +152,13 @@ const enTranslations = {
       "invalidDocument": "Invalid document format"
     }
   },
+  "errors": {
+    "auth/unauthorized": "Authentication required.",
+    "auth/forbidden": "Access denied.",
+    "validation/error": "Validation failed.",
+    "user/not_found": "Resource not found.",
+    "server/internal_error": "Internal server error."
+  },
   // ... (rest of the JSON pasted as a JS object)
 };
-export default enTranslations; 
+export default enTranslations;

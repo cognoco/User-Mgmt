@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { isRtlLanguage } from '@/lib/i18n/messages';
 import { Alert, AlertTitle, AlertDescription } from '@/ui/primitives/alert';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle as DialogHeading } from '@/ui/primitives/dialog';
 import { Button } from '@/ui/primitives/button';
@@ -40,6 +42,8 @@ export function ErrorDisplay({
   onOpenChange,
 }: ErrorDisplayProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const { i18n } = useTranslation();
+  const dir = isRtlLanguage(i18n.language) ? 'rtl' : undefined;
 
   useEffect(() => {
     if (style === 'toast') {
@@ -64,7 +68,7 @@ export function ErrorDisplay({
   if (style === 'modal') {
     return (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent ref={dialogRef} tabIndex={-1} aria-labelledby="error-title">
+        <DialogContent ref={dialogRef} tabIndex={-1} aria-labelledby="error-title" dir={dir}>
           <DialogHeader>
             <DialogHeading id="error-title">Error</DialogHeading>
           </DialogHeader>
@@ -82,7 +86,7 @@ export function ErrorDisplay({
   }
 
   return (
-    <Alert role="alert" className="flex flex-col gap-2" aria-live="assertive">
+    <Alert role="alert" className="flex flex-col gap-2" aria-live="assertive" dir={dir}>
       <AlertTitle>{message}</AlertTitle>
       {details && <AlertDescription>{details}</AlertDescription>}
       {onRetry && (
