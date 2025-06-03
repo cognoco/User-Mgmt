@@ -1,7 +1,15 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryCache } from '../memory-cache';
+import { errorLogger } from '@/lib/monitoring/error-logger';
+import { telemetry } from '@/lib/monitoring/error-system';
+
+vi.mock('@/lib/monitoring/error-logger', () => ({ errorLogger: { error: vi.fn() } }));
+vi.mock('@/lib/monitoring/error-system', () => ({ telemetry: { recordError: vi.fn() } }));
 
 describe('MemoryCache', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
   it('stores and retrieves values within ttl', () => {
     const cache = new MemoryCache<string, number>({ ttl: 1000 });
     cache.set('a', 1);
@@ -38,6 +46,37 @@ describe('MemoryCache', () => {
     expect(v1).toBe(5);
     expect(v2).toBe(5);
     expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns stale value while revalidating on error', async () => {
+    vi.useFakeTimers();
+    const cache = new MemoryCache<string, number>({ ttl: 100, staleTtl: 200 });
+    const fetcher = vi.fn()
+      .mockRejectedValueOnce(new Error('fail'))
+      .mockResolvedValueOnce(2);
+
+    cache.set('a', 1, 100);
+    vi.advanceTimersByTime(150); // entry is stale
+    const p1 = cache.getOrCreate('a', fetcher);
+    expect(cache.get('a')).toBe(1); // stale value returned immediately
+    await p1; // wait for background fetch
+    vi.advanceTimersByTime(10);
+    expect(errorLogger.error).toHaveBeenCalled();
+    expect(telemetry.recordError).toHaveBeenCalled();
+    // next attempt should return refreshed value
+    const val = await cache.getOrCreate('a', fetcher);
+    expect(val).toBe(2);
+    vi.useRealTimers();
+  });
+
+  it('invalidates after repeated errors', async () => {
+    const cache = new MemoryCache<string, number>({ ttl: 50, staleTtl: 50, errorThreshold: 2 });
+    const fetcher = vi.fn().mockRejectedValue(new Error('oops'));
+
+    cache.set('x', 1, 50);
+    await expect(cache.getOrCreate('x', fetcher)).resolves.toBe(1); // stale
+    await expect(cache.getOrCreate('x', fetcher)).resolves.toBe(1);
+    expect(cache.get('x')).toBeUndefined();
   });
 
   it('deleteWhere removes matching keys', () => {

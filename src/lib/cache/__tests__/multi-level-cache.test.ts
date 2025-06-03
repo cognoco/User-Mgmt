@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MemoryCache, MultiLevelCache, RedisCache } from '@/lib/cache';
+import * as sync from '@/lib/cache/cache-sync';
+
+vi.mock('@/lib/cache/cache-sync', () => ({
+  broadcastInvalidation: vi.fn(),
+  subscribeInvalidation: vi.fn(),
+}));
 import { Redis } from '@upstash/redis';
 
 vi.mock('@upstash/redis', () => ({ Redis: vi.fn(() => ({ get: vi.fn(), set: vi.fn(), del: vi.fn() })) }));
@@ -15,7 +21,8 @@ describe('MultiLevelCache', () => {
     redis.get.mockResolvedValue(null);
     redisCache = new RedisCache<number>(redis, { prefix: 'test:' });
     memory = new MemoryCache({ ttl: 1000 });
-    cache = new MultiLevelCache(memory, redisCache, 1000);
+    cache = new MultiLevelCache(memory, redisCache, 1000, 'chan');
+    vi.clearAllMocks();
   });
 
   it('returns value from redis when memory empty', async () => {
@@ -25,10 +32,15 @@ describe('MultiLevelCache', () => {
     expect(cache.metrics.hits).toBe(1);
   });
 
+  it('subscribes to invalidation channel', () => {
+    expect(sync.subscribeInvalidation).toHaveBeenCalledWith('chan', expect.any(Function));
+  });
+
   it('stores value in both caches', async () => {
     await cache.set('b', 2, 500);
     expect(memory.get('b')).toBe(2);
     expect(redis.set).toHaveBeenCalled();
+    expect(sync.broadcastInvalidation).toHaveBeenCalledWith('chan', 'b');
   });
 
   it('deletes value from both caches', async () => {
@@ -36,5 +48,13 @@ describe('MultiLevelCache', () => {
     await cache.delete('c');
     expect(memory.get('c')).toBeUndefined();
     expect(redis.del).toHaveBeenCalled();
+    expect(sync.broadcastInvalidation).toHaveBeenCalledWith('chan', 'c');
+  });
+
+  it('deleteWhere broadcasts for each key', async () => {
+    await cache.set('a:1', 1);
+    await cache.set('b:1', 2);
+    await cache.deleteWhere(k => k.startsWith('a'));
+    expect(sync.broadcastInvalidation).toHaveBeenCalledWith('chan', 'a:1');
   });
 });
