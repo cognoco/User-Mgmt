@@ -4,6 +4,7 @@ import RoleManagementPanel from './RoleManagementPanel';
 import UserRoleAssignmentPanel from './UserRoleAssignmentPanel';
 import ResourcePermissionPanel from './ResourcePermissionPanel';
 import AuditLogViewer from './AuditLogViewer';
+import PermissionAuditDashboard from './PermissionAuditDashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
 
 export const metadata: Metadata = {
@@ -32,7 +33,10 @@ export default function PermissionDashboardPage() {
           <ResourcePermissionPanel />
         </TabsContent>
         <TabsContent value="audit">
-          <AuditLogViewer />
+          <div className="space-y-6">
+            <AuditLogViewer />
+            <PermissionAuditDashboard />
+          </div>
         </TabsContent>
       </Tabs>
     </div>
