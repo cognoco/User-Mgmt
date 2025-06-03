@@ -9,6 +9,18 @@
 import type { AuthService } from '@/core/auth/interfaces';
 import type { UserService } from '@/core/user/interfaces';
 import type { PermissionService } from '@/core/permission/interfaces';
+import type { TeamService } from '@/core/team/interfaces';
+import type { SsoService } from '@/core/sso/interfaces';
+import type { GdprService } from '@/core/gdpr/interfaces';
+import type { TwoFactorService } from '@/core/two-factor/interfaces';
+import type { SubscriptionService } from '@/core/subscription/interfaces';
+import type { ApiKeyService } from '@/core/api-keys/interfaces';
+import type { NotificationService } from '@/core/notification/interfaces';
+
+// Import additional service interfaces as they become available
+// TODO: Add imports for other service interfaces when they exist
+// import type { RoleService } from '@/core/role/interfaces';
+// import type { WebhookService } from '@/core/webhooks/interfaces';
 
 /**
  * Service container interface that holds all available services
@@ -17,7 +29,16 @@ export interface ServiceContainer {
   auth: AuthService;
   user: UserService;
   permission?: PermissionService;
-  // Add other services as needed
+  team?: TeamService;
+  sso?: SsoService;
+  gdpr?: GdprService;
+  twoFactor?: TwoFactorService;
+  subscription?: SubscriptionService;
+  apiKey?: ApiKeyService;
+  notification?: NotificationService;
+  // TODO: Add other services as their interfaces become available
+  // role?: RoleService;
+  // webhook?: WebhookService;
 }
 
 /**
@@ -40,6 +61,45 @@ export interface ServiceConfig {
   permissionService?: PermissionService;
   
   /**
+   * Custom team service implementation
+   */
+  teamService?: TeamService;
+  
+  /**
+   * Custom SSO service implementation
+   */
+  ssoService?: SsoService;
+  
+  /**
+   * Custom GDPR service implementation
+   */
+  gdprService?: GdprService;
+  
+  /**
+   * Custom two-factor authentication service implementation
+   */
+  twoFactorService?: TwoFactorService;
+  
+  /**
+   * Custom subscription service implementation
+   */
+  subscriptionService?: SubscriptionService;
+  
+  /**
+   * Custom API key service implementation
+   */
+  apiKeyService?: ApiKeyService;
+  
+  /**
+   * Custom notification service implementation
+   */
+  notificationService?: NotificationService;
+  
+  // TODO: Add other service configurations as their interfaces become available
+  // roleService?: RoleService;
+  // webhookService?: WebhookService;
+  
+  /**
    * Feature flags to enable/disable functionality
    */
   featureFlags?: FeatureFlags;
@@ -59,6 +119,13 @@ export interface FeatureFlags {
   permissions?: boolean;
   audit?: boolean;
   webhooks?: boolean;
+  teams?: boolean;
+  sso?: boolean;
+  gdpr?: boolean;
+  twoFactor?: boolean;
+  subscription?: boolean;
+  apiKeys?: boolean;
+  notifications?: boolean;
   [key: string]: boolean | undefined;
 }
 
