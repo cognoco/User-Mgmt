@@ -1,5 +1,6 @@
 import { MemoryCache } from './memory-cache';
 import type { RedisCache } from './redis-cache';
+import { broadcastInvalidation, subscribeInvalidation } from './cache-sync';
 
 export interface MultiLevelCacheMetrics {
   hits: number;
@@ -12,7 +13,12 @@ export class MultiLevelCache<K extends string, V> {
     private memory: MemoryCache<K, V>,
     private redis?: RedisCache<V>,
     private ttl?: number,
-  ) {}
+    private syncChannel: string = 'cache:invalidate',
+  ) {
+    if (this.syncChannel && this.redis) {
+      subscribeInvalidation(this.syncChannel, k => this.memory.delete(k as K));
+    }
+  }
 
   async get(key: K): Promise<V | undefined> {
     const mem = this.memory.get(key);
@@ -35,11 +41,13 @@ export class MultiLevelCache<K extends string, V> {
   async set(key: K, value: V, ttl = this.ttl): Promise<void> {
     this.memory.set(key, value, ttl);
     if (this.redis) await this.redis.set(key, value, ttl);
+    if (this.syncChannel) await broadcastInvalidation(this.syncChannel, key);
   }
 
   async delete(key: K): Promise<void> {
     this.memory.delete(key);
     if (this.redis) await this.redis.delete(key);
+    if (this.syncChannel) await broadcastInvalidation(this.syncChannel, key);
   }
 
   async deleteWhere(predicate: (key: K) => boolean): Promise<void> {
@@ -47,6 +55,7 @@ export class MultiLevelCache<K extends string, V> {
       if (predicate(key)) {
         this.memory.delete(key);
         if (this.redis) await this.redis.delete(key);
+        if (this.syncChannel) await broadcastInvalidation(this.syncChannel, key);
       }
     }
   }
