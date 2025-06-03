@@ -5,6 +5,7 @@
  * This module provides error handling specific to permission management.
  */
 
+import { NextResponse } from 'next/server';
 import { ApiError, ERROR_CODES } from '../common';
 
 /**
@@ -66,6 +67,21 @@ export function createPermissionDeleteFailedError(message = 'Failed to delete pe
     message,
     500,
     details
+  );
+}
+
+/**
+ * Create a permission denied error
+ */
+export function createPermissionDeniedError(permission: string, resource?: string) {
+  const message = resource
+    ? `You don't have ${permission} permission for this ${resource}`
+    : `You don't have ${permission} permission`;
+
+  return new ApiError(
+    ERROR_CODES.FORBIDDEN,
+    message,
+    403
   );
 }
 
@@ -153,4 +169,24 @@ export function mapPermissionServiceError(error: Error): ApiError {
     'An unexpected permission management error occurred',
     500
   );
+}
+
+/**
+ * Handle permission errors consistently across the app
+ */
+export function handlePermissionError(error: any) {
+  if (error instanceof ApiError && error.code === ERROR_CODES.FORBIDDEN) {
+    console.warn(`Permission denied: ${error.message}`);
+    return NextResponse.json(
+      {
+        error: {
+          code: ERROR_CODES.FORBIDDEN,
+          message: error.message,
+        },
+      },
+      { status: 403 }
+    );
+  }
+
+  throw error;
 }
