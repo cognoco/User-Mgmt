@@ -171,6 +171,7 @@ export const API_ROUTES = {
   // Audit domain
   AUDIT: {
     USER_ACTIONS: '/api/audit/user-actions',
+    PERMISSION_EXPORT: '/api/audit/permission/export',
   },
 
   // Admin domain
