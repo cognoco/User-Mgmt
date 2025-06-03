@@ -8,6 +8,7 @@ import {
   rateLimitMiddleware,
   validationMiddleware,
 } from "@/middleware/createMiddlewareChain";
+import { withSecurity } from "@/middleware/with-security";
 import { z } from "zod";
 
 // Validation schema for adding a new domain
@@ -170,5 +171,10 @@ async function handlePost(
   }
 }
 
-export const GET = baseMiddleware(handleGet);
-export const POST = postMiddleware(handlePost);
+export const GET = withSecurity((req: NextRequest) =>
+  baseMiddleware((r, auth) => handleGet(r, auth))(req)
+);
+
+export const POST = withSecurity((req: NextRequest) =>
+  postMiddleware((r, auth, data) => handlePost(r, auth, data))(req)
+);

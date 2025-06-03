@@ -10,6 +10,7 @@ import {
   rateLimitMiddleware,
   validationMiddleware,
 } from "@/middleware/createMiddlewareChain";
+import { withSecurity } from "@/middleware/with-security";
 import {
   createCreatedResponse,
   createPaginatedResponse,
@@ -133,7 +134,7 @@ async function handlePost(
 }
 
 // --- GET Handler for fetching company documents ---
-async function handleGet(_request: NextRequest, auth: RouteAuthContext) {
+async function handleGet(request: NextRequest, auth: RouteAuthContext) {
   try {
     const supabaseService = getServiceSupabase();
     const userId = auth.userId!;
@@ -247,5 +248,10 @@ async function handleGet(_request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const POST = postMiddleware(handlePost);
-export const GET = baseMiddleware(handleGet);
+export const POST = withSecurity((req: NextRequest) =>
+  postMiddleware((r, auth, data) => handlePost(r, auth, data))(req)
+);
+
+export const GET = withSecurity((req: NextRequest) =>
+  baseMiddleware((r, auth) => handleGet(r, auth))(req)
+);
