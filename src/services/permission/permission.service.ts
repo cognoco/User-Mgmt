@@ -1,5 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import type { Permission, PermissionGroup, Role, ResourcePermission } from '@/types/rbac';
+import { createRoleHierarchyService } from '@/lib/services/roleHierarchy.service';
+
+const roleHierarchyService = createRoleHierarchyService();
 
 export class PermissionService {
   // Get all permissions
@@ -116,24 +119,29 @@ export class PermissionService {
   }
 
   // Check if user has a specific permission
-  async hasPermission(userId: string, permissionName: string, resourceType?: string, resourceId?: string): Promise<boolean> {
-    // Get user's roles
+  async hasPermission(
+    userId: string,
+    permissionName: string,
+    resourceType?: string,
+    resourceId?: string,
+  ): Promise<boolean> {
+    // Get user's roles from mapping table
     const { data: userRoles, error: roleError } = await supabase
-      .from('team_members')
-      .select('role')
+      .from('user_roles')
+      .select('role_id')
       .eq('user_id', userId);
-      
+
     if (roleError) throw roleError;
-      
+
     if (!userRoles || userRoles.length === 0) return false;
-    
+
     // Get permission ID
     const { data: permission, error: permError } = await supabase
       .from('permissions')
       .select('id')
       .eq('name', permissionName)
       .single();
-      
+
     if (permError) return false; // Permission doesn't exist
 
     // Check for direct resource permission
@@ -150,31 +158,17 @@ export class PermissionService {
       if (!resourceError && resourcePerm) return true;
     }
 
-    // Check for role-based permissions
-    const roleIds = await Promise.all(userRoles.map(async (userRole) => {
-      const { data: role, error } = await supabase
-        .from('roles')
-        .select('id')
-        .eq('name', userRole.role)
-        .single();
-        
-      if (error) return null;
-      return role.id;
-    }));
+    // Check permission via role hierarchy
+    for (const userRole of userRoles) {
+      const perms = await roleHierarchyService.getEffectivePermissions(
+        userRole.role_id,
+      );
+      if (perms.includes(permissionName)) {
+        return true;
+      }
+    }
 
-    // Filter out null values
-    const validRoleIds = roleIds.filter(id => id !== null);
-    
-    if (validRoleIds.length === 0) return false;
-
-    // Check for permission in any of the user's roles
-    const { data: hasRolePerm, error: rolePermError } = await supabase
-      .from('role_permissions')
-      .select('id')
-      .eq('permission_id', permission.id)
-      .in('role_id', validRoleIds);
-      
-    return !rolePermError && hasRolePerm && hasRolePerm.length > 0;
+    return false;
   }
 
   // Assign permission to a role
