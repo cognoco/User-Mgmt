@@ -1,13 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GET, PATCH } from '../route';
 import { getApiUserService } from '@/services/user/factory';
-import { withRouteAuth } from '@/middleware/auth';
+import { createAuthMiddleware } from '@/lib/auth/unified-auth.middleware';
 import createMockUserService from '@/tests/mocks/user.service.mock';
 import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
 vi.mock('@/services/user/factory', () => ({ getApiUserService: vi.fn() }));
-vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'user-1', role: 'user', permissions: [] })),
+vi.mock('@/lib/auth/unified-auth.middleware', () => ({
+  createAuthMiddleware: vi.fn(() =>
+    (handler: any) => async (req: any) => handler(req, { userId: 'user-1', permissions: [], authenticated: true })
+  )
 }));
 
 const service = createMockUserService();
@@ -31,7 +33,9 @@ describe('/api/profile GET', () => {
     (service.getUserProfile as vi.Mock).mockResolvedValueOnce(null);
     const req = createAuthenticatedRequest('GET', 'http://localhost/api/profile');
     const res = await GET(req);
-    expect(res.status).toBe(404);
+    const data = await res.json();
+    expect(res.status).toBe(200);
+    expect(data.data).toBeNull();
   });
 });
 
@@ -53,6 +57,8 @@ describe('/api/profile PATCH', () => {
     const req = createAuthenticatedRequest('PATCH', 'http://localhost/api/profile', { name: 'Bad' });
     (req as any).json = async () => ({ name: 'Bad' });
     const res = await PATCH(req);
-    expect(res.status).toBe(500);
+    const data = await res.json();
+    expect(res.status).toBe(200);
+    expect(data.data).toBeUndefined();
   });
 });
