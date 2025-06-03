@@ -3,6 +3,7 @@ import { getApiAuthService } from '@/services/auth/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
 import type { Permission } from '@/lib/rbac/roles';
 import { isPermission } from '@/lib/rbac/roles';
+import { checkPermission, checkAnyPermission, checkAllPermissions } from '@/lib/auth/permissionCheck';
 import { createAuthApiError } from './auth-errors';
 import { withRouteAuth, type RouteAuthContext, type RouteAuthOptions } from './auth';
 
@@ -28,6 +29,11 @@ function getPermissionCache(): Map<string, CacheEntry> {
 export interface PermissionCheckOptions {
   requiredPermission: string;
   resourceId?: string;
+}
+
+interface ProtectedHandlerOptions {
+  requireAny?: boolean;
+  includeUser?: boolean;
 }
 
 /**
@@ -125,20 +131,33 @@ export function withPermissionCheck(
  */
 export function createProtectedHandler(
   handler: (req: NextRequest, ctx?: RouteAuthContext) => Promise<NextResponse>,
-  permission: string,
-  _resourceIdExtractor?: (req: NextRequest) => string | undefined
+  requiredPermissions: Permission | Permission[],
+  options: ProtectedHandlerOptions = {}
 ) {
-  return (req: NextRequest) => {
-    const options: RouteAuthOptions = {};
-    if (isPermission(permission)) {
-      options.requiredPermissions = [permission as Permission];
-    } else {
-      console.warn(
-        `Invalid permission '${permission}' passed to createProtectedHandler`
-      );
-    }
+  const permissions = Array.isArray(requiredPermissions)
+    ? requiredPermissions
+    : [requiredPermissions];
 
-    return withRouteAuth((r, ctx) => handler(r, ctx), req, options);
+  return (req: NextRequest, ctx: any = {}) => {
+    return withRouteAuth(
+      async (r, auth) => {
+        if (!auth.userId) {
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const hasPermission = options.requireAny
+          ? await checkAnyPermission(auth.userId, permissions)
+          : await checkAllPermissions(auth.userId, permissions);
+
+        if (!hasPermission) {
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
+        return handler(r, ctx);
+      },
+      req,
+      { includeUser: options.includeUser }
+    );
   };
 }
 import { createErrorResponse } from '@/lib/api/common/response-formatter';
@@ -159,11 +178,10 @@ export async function withPermission(
         return createErrorResponse(err);
       }
 
-      const service = getApiPermissionService();
       let hasPermission = false;
 
       if (isPermission(permission)) {
-        hasPermission = await service.hasPermission(ctx.userId, permission as Permission);
+        hasPermission = await checkPermission(ctx.userId, permission as Permission);
       } else {
         console.warn(`Invalid permission '${permission}' passed to withPermission`);
       }
