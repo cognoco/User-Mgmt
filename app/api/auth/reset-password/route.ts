@@ -1,64 +1,53 @@
-import { type NextRequest } from "next/server";
 import { z } from "zod";
-import { withSecurity } from "@/middleware/with-security";
+import { createApiHandler } from "@/lib/api/route-helpers";
 import { logUserAction } from "@/lib/audit/auditLogger";
-import { getApiAuthService } from "@/services/auth/factory";
-import {
-  createSuccessResponse,
-} from "@/lib/api/common";
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  validationMiddleware,
-  rateLimitMiddleware,
-} from "@/middleware/createMiddlewareChain";
+import { createSuccessResponse } from "@/lib/api/common";
 
 // Zod schema for password reset request
 const ResetRequestSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
 });
 
-async function handlePasswordReset(
-  req: NextRequest,
-  data: z.infer<typeof ResetRequestSchema>,
-) {
-  const ipAddress = req.ip || req.headers.get("x-forwarded-for") || "unknown";
-  const userAgent = req.headers.get("user-agent") || "unknown";
+/**
+ * POST handler for password reset endpoint
+ */
+export const POST = createApiHandler(
+  ResetRequestSchema,
+  async (request, _authContext, data, services) => {
+    const ipAddress = request.ip || request.headers.get("x-forwarded-for") || "unknown";
+    const userAgent = request.headers.get("user-agent") || "unknown";
 
-  const { email } = data;
+    const { email } = data;
 
-  const authService = getApiAuthService();
-  const resetResult = await authService.resetPassword(email);
+    // Call auth service to initiate password reset
+    const resetResult = await services.auth.resetPassword(email);
 
-  await logUserAction({
-    action: "PASSWORD_RESET_REQUEST",
-    status: resetResult.success ? "INITIATED" : "FAILURE",
-    ipAddress,
-    userAgent,
-    targetResourceType: "auth",
-    targetResourceId: email,
-    details: { error: resetResult.error || null },
-  });
+    // Log the password reset attempt
+    await logUserAction({
+      action: "PASSWORD_RESET_REQUEST",
+      status: resetResult.success ? "INITIATED" : "FAILURE",
+      ipAddress,
+      userAgent,
+      targetResourceType: "auth",
+      targetResourceId: email,
+      details: { error: resetResult.error || null },
+    });
 
-  if (!resetResult.success) {
-    console.error(
-      "Password reset error (will still return generic success):",
-      resetResult.error,
-    );
+    if (!resetResult.success) {
+      console.error(
+        "Password reset error (will still return generic success):",
+        resetResult.error,
+      );
+    }
+
+    // Always return success message for security (don't reveal if email exists)
+    return createSuccessResponse({
+      message:
+        "If an account exists with this email, you will receive password reset instructions.",
+    });
+  },
+  { 
+    requireAuth: false, // Password reset doesn't require auth
+    rateLimit: { windowMs: 15 * 60 * 1000, max: 5 } // Strict rate limiting for password reset
   }
-
-  return createSuccessResponse({
-    message:
-      "If an account exists with this email, you will receive password reset instructions.",
-  });
-}
-
-const middleware = createMiddlewareChain([
-  rateLimitMiddleware({ windowMs: 15 * 60 * 1000, max: 30 }),
-  errorHandlingMiddleware(),
-  validationMiddleware(ResetRequestSchema),
-]);
-
-export const POST = withSecurity((request: NextRequest) =>
-  middleware(handlePasswordReset)(request),
 );

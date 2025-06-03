@@ -2,7 +2,7 @@ import { createError, ApplicationError } from '@/core/common/errors';
 import { enhanceError, createValidationError } from '@/lib/utils/error-factory';
 import { ERROR_CODES } from '@/core/common/error-codes';
 import { sanitizePII } from '@/lib/utils/pii';
-import compliance from '@/config/compliance.config';
+import compliance from '../../../config/compliance.config';
 import type { ZodSchema } from 'zod';
 
 export interface ErrorContext {

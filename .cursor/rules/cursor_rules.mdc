@@ -4,7 +4,8 @@ globs: .cursor/rules/*.mdc
 alwaysApply: true
 ---
 YOU HAVE ACCESS TO ALL FIES IN THE CODEBASE, don’t ask me to share code or check files and imports—do it yourself.I know nothing about coding and I trust your best judgment. You do not have to explain to me step by step and details. I only want to have the big picture and understand the process. DO NOT CHANGE OR CREATE AN .ENV FILE! YOU can access and read it. 
-ALWAYS READ: docs\Product documentation\Architecture Guidelines.md
+ALWAYS READ: docs\Product documentation\Architecture Guidelines.md.
+NEVER USE REAL API KEYS in any config file - always reference .env file. 
 
 
 - **Required Rule Structure:**

@@ -1,64 +1,151 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { NextRequest } from 'next/server';
 import { GET, PATCH } from '../route';
-import { getApiUserService } from '@/services/user/factory';
-import { createAuthMiddleware } from '@/lib/auth/unified-auth.middleware';
-import createMockUserService from '@/tests/mocks/user.service.mock';
-import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
+import { 
+  resetServiceContainer, 
+  configureServices 
+} from '@/lib/config/service-container';
+import type { UserService } from '@/core/user/interfaces';
+import type { AuthService } from '@/core/auth/interfaces';
+import { vi } from 'vitest';
 
-vi.mock('@/services/user/factory', () => ({ getApiUserService: vi.fn() }));
-vi.mock('@/lib/auth/unified-auth.middleware', () => ({
-  createAuthMiddleware: vi.fn(() =>
-    (handler: any) => async (req: any) => handler(req, { userId: 'user-1', permissions: [], authenticated: true })
-  )
+// Mock the service error handler to avoid compliance config issues
+vi.mock('@/services/common/service-error-handler', () => ({
+  logServiceError: vi.fn(),
+  handleServiceError: vi.fn(),
+  withErrorHandling: vi.fn((fn) => fn),
+  safeQuery: vi.fn(),
+  validateAndExecute: vi.fn(),
 }));
 
-const service = createMockUserService();
+// Mock services
+const mockUserService: Partial<UserService> = {
+  getUserProfile: vi.fn(),
+  updateUserProfile: vi.fn(),
+};
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  (getApiUserService as unknown as vi.Mock).mockReturnValue(service);
-});
+const mockAuthService: Partial<AuthService> = {
+  getCurrentUser: vi.fn(),
+  isAuthenticated: vi.fn(),
+};
 
-describe('/api/profile GET', () => {
-  it('returns user profile', async () => {
-    const req = createAuthenticatedRequest('GET', 'http://localhost/api/profile');
-    const res = await GET(req);
-    const data = await res.json();
-    expect(res.status).toBe(200);
-    expect(service.getUserProfile).toHaveBeenCalledWith('user-1');
-    expect(data.data.id).toBe('user-1');
-  });
-
-  it('returns 404 when profile missing', async () => {
-    (service.getUserProfile as vi.Mock).mockResolvedValueOnce(null);
-    const req = createAuthenticatedRequest('GET', 'http://localhost/api/profile');
-    const res = await GET(req);
-    const data = await res.json();
-    expect(res.status).toBe(200);
-    expect(data.data).toBeNull();
-  });
-});
-
-describe('/api/profile PATCH', () => {
-  it('updates user profile', async () => {
-    const req = createAuthenticatedRequest('PATCH', 'http://localhost/api/profile', { bio: 'Updated bio' });
-    (req as any).json = async () => ({ bio: 'Updated bio' });
-    const res = await PATCH(req);
-    const data = await res.json();
-    expect(res.status).toBe(200);
-    expect(service.updateUserProfile).toHaveBeenCalledWith('user-1', {
-      bio: 'Updated bio',
+describe('/api/profile', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetServiceContainer();
+    
+    // Configure mock services
+    configureServices({
+      userService: mockUserService as UserService,
+      authService: mockAuthService as AuthService,
     });
-    expect(data.data.bio).toBe('Updated bio');
   });
 
-  it('returns 500 when update fails', async () => {
-    (service.updateUserProfile as vi.Mock).mockResolvedValueOnce({ success: false, error: 'fail' });
-    const req = createAuthenticatedRequest('PATCH', 'http://localhost/api/profile', { name: 'Bad' });
-    (req as any).json = async () => ({ name: 'Bad' });
-    const res = await PATCH(req);
-    const data = await res.json();
-    expect(res.status).toBe(200);
-    expect(data.data).toBeUndefined();
+  describe('GET', () => {
+    it('should return user profile for authenticated user', async () => {
+      const mockProfile = {
+        id: '123',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+      };
+
+      // Mock authenticated user
+      (mockAuthService.getCurrentUser as any)?.mockResolvedValue({
+        id: '123',
+        email: 'john@example.com',
+      });
+      
+      (mockUserService.getUserProfile as any)?.mockResolvedValue(mockProfile);
+
+      const request = new NextRequest('http://localhost:3000/api/profile', {
+        headers: { authorization: 'Bearer valid-token' },
+      });
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(mockUserService.getUserProfile).toHaveBeenCalledWith('123');
+      expect(data.success).toBe(true);
+      expect(data.data).toEqual(mockProfile);
+    });
+
+    it('should return 401 for unauthenticated requests', async () => {
+      const request = new NextRequest('http://localhost:3000/api/profile');
+
+      const response = await GET(request);
+      
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe('PATCH', () => {
+    it('should update user profile for authenticated user', async () => {
+      const updateData = {
+        firstName: 'Jane',
+        lastName: 'Smith',
+      };
+
+      const mockResult = {
+        success: true,
+        profile: {
+          id: '123',
+          firstName: 'Jane',
+          lastName: 'Smith',
+          email: 'jane@example.com',
+        },
+      };
+
+      // Mock authenticated user
+      vi.mocked(mockAuthService.getCurrentUser).mockResolvedValue({
+        id: '123',
+        email: 'jane@example.com',
+      } as any);
+      
+      vi.mocked(mockUserService.updateUserProfile).mockResolvedValue(mockResult as any);
+
+      const request = new NextRequest('http://localhost:3000/api/profile', {
+        method: 'PATCH',
+        headers: { 
+          authorization: 'Bearer valid-token',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      const response = await PATCH(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(mockUserService.updateUserProfile).toHaveBeenCalledWith('123', updateData);
+      expect(data.success).toBe(true);
+      expect(data.data).toEqual(mockResult.profile);
+    });
+
+    it('should validate request data', async () => {
+      const invalidData = {
+        firstName: 123, // Should be string
+      };
+
+      // Mock authenticated user
+      vi.mocked(mockAuthService.getCurrentUser).mockResolvedValue({
+        id: '123',
+        email: 'jane@example.com',
+      } as any);
+
+      const request = new NextRequest('http://localhost:3000/api/profile', {
+        method: 'PATCH',
+        headers: { 
+          authorization: 'Bearer valid-token',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(invalidData),
+      });
+
+      const response = await PATCH(request);
+      
+      expect(response.status).toBe(400);
+      expect(mockUserService.updateUserProfile).not.toHaveBeenCalled();
+    });
   });
 });

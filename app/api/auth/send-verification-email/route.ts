@@ -1,65 +1,47 @@
-import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { getApiAuthService } from '@/services/auth/factory';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { logUserAction } from '@/lib/audit/auditLogger';
-import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  validationMiddleware,
-  rateLimitMiddleware
-} from '@/middleware/createMiddlewareChain';
+import { createSuccessResponse } from '@/lib/api/common';
 
 // Zod schema for the request body
 const ResendEmailSchema = z.object({
   email: z.string().email({ message: 'Invalid email address provided.' }),
 });
 
-async function handleSendVerificationEmail(
-  req: NextRequest,
-  ctx?: any,
-  validatedData?: z.infer<typeof ResendEmailSchema>
-) {
-  if (!validatedData) {
-    throw new ApiError(
-      ERROR_CODES.INVALID_REQUEST,
-      'Invalid or missing request data',
-      400
-    );
+/**
+ * POST handler for sending verification email endpoint
+ */
+export const POST = createApiHandler(
+  ResendEmailSchema,
+  async (request, _authContext, data, services) => {
+    const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    const { email } = data;
+
+    const result = await services.auth.sendVerificationEmail(email);
+
+    await logUserAction({
+      action: 'VERIFICATION_EMAIL_REQUEST',
+      status: result.success ? 'SUCCESS' : 'FAILURE',
+      ipAddress,
+      userAgent,
+      targetResourceType: 'auth',
+      targetResourceId: email,
+      details: { error: result.error || null }
+    });
+
+    if (!result.success) {
+      console.error('Verification email resend error:', result.error);
+    }
+
+    // Always return success message for security (don't reveal if email exists)
+    return createSuccessResponse({
+      message:
+        'If an account exists with this email, a verification email has been sent.'
+    });
+  },
+  { 
+    requireAuth: false, // Sending verification email doesn't require auth
+    rateLimit: { windowMs: 15 * 60 * 1000, max: 5 } // Very strict rate limiting
   }
-
-  const ipAddress = req.headers.get('x-forwarded-for') || 'unknown';
-  const userAgent = req.headers.get('user-agent') || 'unknown';
-  const { email } = validatedData;
-
-  const authService = getApiAuthService();
-  const result = await authService.sendVerificationEmail(email);
-
-  await logUserAction({
-    action: 'VERIFICATION_EMAIL_REQUEST',
-    status: result.success ? 'SUCCESS' : 'FAILURE',
-    ipAddress,
-    userAgent,
-    targetResourceType: 'auth',
-    targetResourceId: email,
-    details: { error: result.error || null }
-  });
-
-  if (!result.success) {
-    console.error('Verification email resend error:', result.error);
-  }
-
-  return createSuccessResponse({
-    message:
-      'If an account exists with this email, a verification email has been sent.'
-  });
-}
-
-const middleware = createMiddlewareChain([
-  rateLimitMiddleware({ windowMs: 15 * 60 * 1000, max: 5 }),
-  errorHandlingMiddleware(),
-  validationMiddleware(ResendEmailSchema)
-]);
-
-export const POST = (request: NextRequest) =>
-  middleware(handleSendVerificationEmail)(request);
+);

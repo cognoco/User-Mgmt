@@ -1,9 +1,7 @@
-import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { withSecurity } from '@/middleware/with-security';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { associateUserWithCompanyByDomain } from '@/lib/auth/domainMatcher';
-import { getApiAuthService } from '@/services/auth/factory';
 import { User } from '@/core/auth/models';
 import {
   createSuccessResponse,
@@ -11,12 +9,6 @@ import {
   ApiError,
   ERROR_CODES
 } from '@/lib/api/common';
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  validationMiddleware,
-  rateLimitMiddleware
-} from '@/middleware/createMiddlewareChain';
 import { createUserAlreadyExistsError } from '@/lib/api/user/error-handler';
 
 // Extended interfaces for registration that include corporate fields
@@ -49,7 +41,7 @@ interface ExtendedAuthResult {
   requiresEmailConfirmation?: boolean;
 }
 
-// Zod schema for registration data (matches original)
+// Zod schema for registration data
 const RegistrationSchema = z.discriminatedUnion('userType', [
   z.object({
     userType: z.literal('private'),
@@ -95,155 +87,120 @@ const RegistrationSchema = z.discriminatedUnion('userType', [
 ]);
 
 /**
- * Registration handler function that processes the actual registration request
- * after validation has been performed
+ * POST handler for registration endpoint
  */
-async function handleRegistration(req: NextRequest, ctx?: any, validatedData?: z.infer<typeof RegistrationSchema>) {
-  if (!validatedData) {
-    throw new ApiError(
-      ERROR_CODES.INVALID_REQUEST,
-      'Invalid or missing request data',
-      400
-    );
-  }
-
-  // Get IP and User Agent for logging
-  const ipAddress = req.headers.get('x-forwarded-for') || 
-                   req.headers.get('x-real-ip') || 
-                   'unknown';
-  const userAgent = req.headers.get('user-agent') || 'unknown';
-  const regData = validatedData;
-  
-  // 1. Get AuthService and prepare registration payload
-  const authService = getApiAuthService();
-  
-  // Prepare registration payload for the AuthService (base fields only)
-  const registrationPayload = {
-    email: regData.email,
-    password: regData.password,
-    firstName: regData.userType === 'private' ? regData.firstName : (regData.firstName || ''),
-    lastName: regData.userType === 'private' ? regData.lastName : (regData.lastName || ''),
-    metadata: {
-      userType: regData.userType,
-      acceptTerms: regData.acceptTerms,
-      // Add corporate-specific fields if applicable
-      ...(regData.userType === 'corporate' && {
-        companyName: regData.companyName,
-        companyWebsite: regData.companyWebsite || '',
-        department: regData.department || '',
-        industry: regData.industry || '',
-        companySize: regData.companySize || 'Other/Not Specified',
-        position: regData.position || ''
-      })
-    }
-  };
-  
-  // 3. Call the auth service to register the user
-  const authResult = (await authService.register(registrationPayload)) as ExtendedAuthResult;
-
-  // 4. Handle Registration Errors
-  if (!authResult.success) {
-    // Log the failed registration attempt
-    await logUserAction({
-      action: 'REGISTER_FAILURE',
-      status: 'FAILURE',
-      ipAddress,
-      userAgent,
-      targetResourceType: 'auth',
-      targetResourceId: regData.email,
-      details: { reason: authResult.error }
-    });
-
-    // Handle specific error cases
-    if (authResult.error?.includes('already exists')) {
-      throw createUserAlreadyExistsError(regData.email);
-    }
+export const POST = createApiHandler(
+  RegistrationSchema,
+  async (request, _authContext, regData, services) => {
+    // Get IP and User Agent for logging
+    const ipAddress = request.headers.get('x-forwarded-for') || 
+                     request.headers.get('x-real-ip') || 
+                     'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
     
-    // Generic registration failure
-    throw new ApiError(
-      ERROR_CODES.INVALID_REQUEST,
-      authResult.error || 'Registration failed',
-      400
-    );
-  }
-
-  // 5. Handle Success
-  if (!authResult.user) {
-    // Log the unexpected error
-    await logUserAction({
-      action: 'REGISTER_UNEXPECTED_ERROR',
-      status: 'FAILURE',
-      ipAddress,
-      userAgent,
-      targetResourceType: 'auth',
-      targetResourceId: regData.email,
-      details: { message: 'Registration successful but no user data returned' }
-    });
+    // Prepare registration payload for the AuthService
+    const registrationPayload = {
+      email: regData.email,
+      password: regData.password,
+      firstName: regData.userType === 'private' ? regData.firstName : (regData.firstName || ''),
+      lastName: regData.userType === 'private' ? regData.lastName : (regData.lastName || ''),
+      metadata: {
+        userType: regData.userType,
+        acceptTerms: regData.acceptTerms,
+        // Add corporate-specific fields if applicable
+        ...(regData.userType === 'corporate' && {
+          companyName: regData.companyName,
+          companyWebsite: regData.companyWebsite || '',
+          department: regData.department || '',
+          industry: regData.industry || '',
+          companySize: regData.companySize || 'Other/Not Specified',
+          position: regData.position || ''
+        })
+      }
+    };
     
-    console.error('Registration successful but no user data returned');
-    throw new ApiError(
-      ERROR_CODES.INTERNAL_ERROR,
-      'Registration failed unexpectedly',
-      500
-    );
-  }
+    // Call the auth service to register the user
+    const authResult = (await services.auth.register(registrationPayload)) as ExtendedAuthResult;
 
-  // Log successful registration
-  await logUserAction({
-    userId: authResult.user.id,
-    action: 'REGISTER_SUCCESS',
-    status: 'SUCCESS',
-    ipAddress,
-    userAgent,
-    targetResourceType: 'auth',
-    targetResourceId: authResult.user.id,
-    details: { email: authResult.user.email }
-  });
-
-  // 6. Handle domain-based company association for private users
-  let domainAssociationResult = null;
-  if (regData.userType === 'private') {
-    domainAssociationResult = await associateUserWithCompanyByDomain(
-      authResult.user.id,
-      authResult.user.email || ''
-    );
-    
-    if (domainAssociationResult.matched) {
-      // If a domain match was found, log the association
+    // Handle Registration Errors
+    if (!authResult.success) {
+      // Log the failed registration attempt
       await logUserAction({
-        userId: authResult.user.id,
-        action: 'COMPANY_DOMAIN_ASSOCIATION',
-        status: domainAssociationResult.success ? 'SUCCESS' : 'FAILURE',
+        action: 'REGISTER_FAILURE',
+        status: 'FAILURE',
         ipAddress,
         userAgent,
-        targetResourceType: 'company',
-        targetResourceId: domainAssociationResult.companyId || '',
-        details: { 
-          success: domainAssociationResult.success,
-          companyName: domainAssociationResult.companyName,
-          error: domainAssociationResult.error
-        }
+        targetResourceType: 'auth',
+        targetResourceId: regData.email,
+        details: { reason: authResult.error }
       });
+
+      // Handle specific error cases
+      if (authResult.error?.includes('already exists')) {
+        throw createUserAlreadyExistsError(regData.email);
+      }
+      
+      // Generic registration failure
+      throw new ApiError(
+        ERROR_CODES.INVALID_REQUEST,
+        authResult.error || 'Registration failed',
+        400
+      );
     }
+
+    // Handle Success
+    if (!authResult.user) {
+      // Log the unexpected error
+      await logUserAction({
+        action: 'REGISTER_UNEXPECTED_ERROR',
+        status: 'FAILURE',
+        ipAddress,
+        userAgent,
+        targetResourceType: 'auth',
+        targetResourceId: regData.email,
+        details: { message: 'Registration successful but no user data returned' }
+      });
+      
+      console.error('Registration successful but no user data returned');
+      throw new ApiError(
+        ERROR_CODES.INTERNAL_ERROR,
+        'Registration failed unexpectedly',
+        500
+      );
+    }
+
+    // Log successful registration
+    await logUserAction({
+      userId: authResult.user.id,
+      action: 'REGISTER_SUCCESS',
+      status: 'SUCCESS',
+      ipAddress,
+      userAgent,
+      targetResourceType: 'auth',
+      targetResourceId: authResult.user.id,
+      details: { email: authResult.user.email }
+    });
+
+    // Attempt to associate with company by domain (if applicable)
+    if (authResult.user.email) {
+      try {
+        await associateUserWithCompanyByDomain(authResult.user.id, authResult.user.email);
+      } catch (error) {
+        console.warn('Failed to associate user with company by domain:', error);
+        // Non-critical error, continue with registration success
+      }
+    }
+
+    console.log('Registration successful for:', regData.email);
+    
+    return createCreatedResponse({
+      user: authResult.user,
+      token: authResult.token,
+      requiresEmailConfirmation: authResult.requiresEmailConfirmation
+    });
+  },
+  { 
+    requireAuth: false, // Registration doesn't require auth
+    rateLimit: { windowMs: 15 * 60 * 1000, max: 10 } // Stricter rate limiting for registration
   }
-
-  // Return success message and user data (without session if verification is needed)
-  return createCreatedResponse({
-    message: 'Registration successful. Please check your email to verify your account.',
-    user: authResult.user,
-    companyAssociation: domainAssociationResult?.matched ? {
-      success: domainAssociationResult.success,
-      companyName: domainAssociationResult.companyName
-    } : null
-  });
-}
-
-const middleware = createMiddlewareChain([
-  rateLimitMiddleware({ windowMs: 15 * 60 * 1000, max: 30 }),
-  errorHandlingMiddleware(),
-  validationMiddleware(RegistrationSchema)
-]);
-
-export const POST = withSecurity((request: NextRequest) =>
-  middleware(handleRegistration)(request)
 );

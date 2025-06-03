@@ -1,19 +1,11 @@
-import { type NextRequest } from "next/server";
 import { z } from "zod";
-import { withSecurity } from "@/middleware/with-security";
+import { createApiHandler } from "@/lib/api/route-helpers";
 import { logUserAction } from "@/lib/audit/auditLogger";
-import { getApiAuthService } from "@/services/auth/factory";
 import {
   createSuccessResponse,
   ApiError,
   ERROR_CODES,
 } from "@/lib/api/common";
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  validationMiddleware,
-  rateLimitMiddleware,
-} from "@/middleware/createMiddlewareChain";
 
 // Zod schema for password update
 const UpdatePasswordSchema = z.object({
@@ -31,87 +23,74 @@ const UpdatePasswordSchema = z.object({
   token: z.string().optional(),
 });
 
-async function handleUpdatePassword(
-  req: NextRequest,
-  ctx?: any,
-  data?: z.infer<typeof UpdatePasswordSchema>,
-) {
-  if (!data) {
-    throw new ApiError(
-      ERROR_CODES.INVALID_REQUEST,
-      'Invalid or missing request data',
-      400
-    );
-  }
+/**
+ * POST handler for password update endpoint
+ */
+export const POST = createApiHandler(
+  UpdatePasswordSchema,
+  async (request, authContext, data, services) => {
+    const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    const userAgent = request.headers.get("user-agent") || "unknown";
+    let userIdForLogging: string | null = null;
 
-  const ipAddress = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
-  const userAgent = req.headers.get("user-agent") || "unknown";
-  let userIdForLogging: string | null = null;
-
-  const authService = getApiAuthService();
-
-  try {
-    if (data.token) {
-      const result = (await authService.updatePasswordWithToken(data.token, data.password)) as any;
-      userIdForLogging = result.user?.id || null;
-      if (!result.success) {
-        throw new ApiError(
-          ERROR_CODES.INVALID_REQUEST,
-          result.error || 'Failed to update password',
-          400
-        );
+    try {
+      if (data.token) {
+        // Token-based password update (password reset flow)
+        const result = (await services.auth.updatePasswordWithToken(data.token, data.password)) as any;
+        userIdForLogging = result.user?.id || null;
+        if (!result.success) {
+          throw new ApiError(
+            ERROR_CODES.INVALID_REQUEST,
+            result.error || 'Failed to update password',
+            400
+          );
+        }
+      } else {
+        // Authenticated password update (user changing their password)
+        if (!authContext.userId) {
+          await logUserAction({
+            action: "PASSWORD_UPDATE_UNAUTHORIZED",
+            status: "FAILURE",
+            ipAddress,
+            userAgent,
+            targetResourceType: "auth",
+            details: { reason: "No user session found" },
+          });
+          throw new ApiError(ERROR_CODES.UNAUTHORIZED, "Unauthorized", 401);
+        }
+        userIdForLogging = authContext.userId;
+        await services.auth.updatePassword("", data.password);
       }
-    } else {
-      const currentUser = await authService.getCurrentUser();
-      if (!currentUser) {
-        await logUserAction({
-          action: "PASSWORD_UPDATE_UNAUTHORIZED",
-          status: "FAILURE",
-          ipAddress,
-          userAgent,
-          targetResourceType: "auth",
-          details: { reason: "No user session found" },
-        });
-        throw new ApiError(ERROR_CODES.UNAUTHORIZED, "Unauthorized", 401);
-      }
-      userIdForLogging = currentUser.id;
-      await authService.updatePassword("", data.password);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update password";
+      await logUserAction({
+        userId: userIdForLogging,
+        action: "PASSWORD_UPDATE_FAILURE",
+        status: "FAILURE",
+        ipAddress,
+        userAgent,
+        targetResourceType: "auth",
+        targetResourceId: userIdForLogging,
+        details: { reason: errorMessage },
+      });
+      throw new ApiError(ERROR_CODES.INVALID_REQUEST, errorMessage, 400);
     }
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to update password";
+
     await logUserAction({
       userId: userIdForLogging,
-      action: "PASSWORD_UPDATE_FAILURE",
-      status: "FAILURE",
+      action: "PASSWORD_UPDATE_SUCCESS",
+      status: "SUCCESS",
       ipAddress,
       userAgent,
       targetResourceType: "auth",
       targetResourceId: userIdForLogging,
-      details: { reason: errorMessage },
     });
-    throw new ApiError(ERROR_CODES.INVALID_REQUEST, errorMessage, 400);
+
+    return createSuccessResponse({ message: "Password updated successfully" });
+  },
+  { 
+    requireAuth: false, // Password update can be both authenticated and token-based
+    rateLimit: { windowMs: 15 * 60 * 1000, max: 10 }
   }
-
-  await logUserAction({
-    userId: userIdForLogging,
-    action: "PASSWORD_UPDATE_SUCCESS",
-    status: "SUCCESS",
-    ipAddress,
-    userAgent,
-    targetResourceType: "auth",
-    targetResourceId: userIdForLogging,
-  });
-
-  return createSuccessResponse({ message: "Password updated successfully" });
-}
-
-const middleware = createMiddlewareChain([
-  rateLimitMiddleware({ windowMs: 15 * 60 * 1000, max: 30 }),
-  errorHandlingMiddleware(),
-  validationMiddleware(UpdatePasswordSchema),
-]);
-
-export const POST = withSecurity((request: NextRequest) =>
-  middleware(handleUpdatePassword)(request),
 );
