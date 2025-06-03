@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { LoginForm as HeadlessLoginForm } from '@/ui/headless/auth/LoginForm';
 import { LoginPayload } from '@/core/auth/models';
 import { WebAuthnLogin } from '@/ui/styled/auth/WebAuthnLogin';
+import { useSectionErrors, useErrorStore } from '@/lib/state/errorStore';
 
 interface LoginFormProps {
   // Reserved for future use
@@ -40,12 +41,14 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
     remainingAttempts?: number;
   } | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const authErrors = useSectionErrors('auth');
+  const addError = useErrorStore(state => state.addError);
+  const clearAuthErrors = useErrorStore(state => state.clearErrors);
 
   // Handle custom form submission with MFA and rate limit handling
   const handleCustomSubmit = async (credentials: LoginPayload) => {
     // Reset state
-    setFormError(null);
+    clearAuthErrors('auth');
     setResendStatus(null);
     setShowResendLink(false);
     setMfaRequired(false);
@@ -64,7 +67,13 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
           router.push('/dashboard/overview');
         }
       } else {
-        setFormError(result.error || 'Login failed');
+        addError({
+          message: result.error || 'Login failed',
+          type: result.code,
+          section: 'auth',
+          dismissAfter: 8000,
+          sync: true,
+        });
         
         if (result.code === 'EMAIL_NOT_VERIFIED') {
           setShowResendLink(true);
@@ -85,7 +94,13 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
           remainingAttempts: parseInt(error.response.headers['x-ratelimit-remaining'] || '0', 10)
         });
       }
-      setFormError(error instanceof Error ? error.message : 'Login failed');
+      addError({
+        message: error instanceof Error ? error.message : 'Login failed',
+        type: 'unexpected',
+        section: 'auth',
+        dismissAfter: 8000,
+        sync: true,
+      });
       if (process.env.NODE_ENV === 'development') { 
         console.error("Unexpected error during login submission:", error); 
       }
@@ -159,7 +174,7 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
     <ErrorBoundary fallback={DefaultErrorFallback}>
       <HeadlessLoginForm
         onSubmit={handleCustomSubmit}
-        error={formError || authError}
+        error={authErrors[0]?.message || authError}
         render={({ 
           handleSubmit, 
           emailValue, 
@@ -205,11 +220,11 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
               />
             )}
 
-            {(errors.form || formError) && (
+            {(errors.form || authErrors.length > 0) && (
               <Alert variant="destructive">
                 <AlertTitle>Login Failed</AlertTitle>
                 <AlertDescription>
-                  {errors.form || formError}
+                  {errors.form || authErrors[0]?.message}
                   {showResendLink && (
                     <button
                       type="button"

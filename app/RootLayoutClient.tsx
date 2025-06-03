@@ -4,6 +4,7 @@ import React from 'react';
 import { UserManagementClientBoundary } from '@/lib/auth/UserManagementClientBoundary';
 import { SkipLink } from '@/ui/styled/navigation/SkipLink';
 import { KeyboardShortcutsDialog } from '@/ui/styled/common/KeyboardShortcutsDialog';
+import { GlobalErrorDisplay } from '@/ui/styled/common/GlobalErrorDisplay';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 export default function RootLayoutClient({ children }: { children: React.ReactNode }) {
@@ -17,6 +18,7 @@ export default function RootLayoutClient({ children }: { children: React.ReactNo
       {/* AppInitializer removed: server-only initialization must not run in a client component */}
       <UserManagementClientBoundary>
         {children}
+        <GlobalErrorDisplay />
         <KeyboardShortcutsDialog
           shortcuts={[{ keys: ['Shift', '?'], description: 'Show this help' }]}
           open={dialogOpen}
