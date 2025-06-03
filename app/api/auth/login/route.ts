@@ -4,9 +4,8 @@ import { withSecurity } from '@/middleware/with-security';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { getApiAuthService } from '@/services/auth/factory';
 import { LoginPayload } from '@/core/auth/models';
-import { createSuccessResponse } from '@/lib/api/response/api-response';
-import { handleApiError } from '@/lib/api/middleware/error-handler.middleware';
-import { ApiError, ERROR_CODES } from '@/lib/api/common';
+import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
+import { withErrorHandling } from '@/middleware/error-handling';
 import {
   createMiddlewareChain,
   validationMiddleware,
@@ -117,5 +116,5 @@ const middleware = createMiddlewareChain([
 ]);
 
 export const POST = withSecurity((request: NextRequest) =>
-  withApiErrorHandling(middleware(handleLogin), request)
+  withErrorHandling(middleware(handleLogin), request)
 );
