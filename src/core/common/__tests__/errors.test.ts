@@ -9,6 +9,8 @@ import {
   RateLimitError,
   ServiceError,
   DatabaseError,
+  TokenRefreshError,
+  InvalidRefreshTokenError,
   isApplicationError,
   isValidationError,
   isAuthenticationError,
@@ -18,12 +20,14 @@ import {
   isRateLimitError,
   isServiceError,
   isDatabaseError,
+  isTokenRefreshError,
+  isInvalidRefreshTokenError,
   createErrorFromUnknown,
   serializeError,
   deserializeError,
   createError,
 } from "..";
-import { SERVER_ERROR } from "../error-codes";
+import { SERVER_ERROR, AUTH_ERROR } from "../error-codes";
 
 describe("ApplicationError hierarchy", () => {
   it("preserves inheritance and properties", () => {
@@ -72,8 +76,10 @@ describe("specific error subclasses", () => {
     const conflict = new ConflictError("c");
     const notFound = new ResourceNotFoundError("n");
     const db = new DatabaseError("d");
+    const refresh = new TokenRefreshError('r');
     expect(auth.httpStatus).toBe(401);
     expect(auth.name).toBe("AuthenticationError");
+    expect(refresh.code).toBe(AUTH_ERROR.AUTH_005);
     expect(conflict.httpStatus).toBe(409);
     expect(notFound.httpStatus).toBe(404);
     expect(db.httpStatus).toBe(500);
@@ -94,6 +100,10 @@ describe("specific error subclasses", () => {
     expect(isConflictError(new ConflictError("y"))).toBe(true);
     expect(isServiceError(new ServiceError("z"))).toBe(true);
     expect(isApplicationError(basic)).toBe(true);
+    expect(isTokenRefreshError(new TokenRefreshError('t'))).toBe(true);
+    expect(isInvalidRefreshTokenError(new InvalidRefreshTokenError('i'))).toBe(
+      true,
+    );
   });
 });
 

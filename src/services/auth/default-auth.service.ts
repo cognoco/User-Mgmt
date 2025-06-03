@@ -20,6 +20,12 @@ import { AuthEventType } from '@/core/auth/events';
 import { translateError } from '@/lib/utils/error';
 import { handleServiceError } from '@/services/common/service-error-handler';
 import { ERROR_CODES } from '@/core/common/error-codes';
+import {
+  InvalidRefreshTokenError,
+  TokenRefreshError,
+  isInvalidRefreshTokenError,
+  isTokenRefreshError,
+} from '@/core/common/errors';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
 import type {
   OAuthProvider,
@@ -454,7 +460,38 @@ export class DefaultAuthService
       }
       this.handleSessionTimeout();
       return false;
-    } catch {
+    } catch (error) {
+      if (isTokenRefreshError(error)) {
+        // silent retry once on transient failures
+        try {
+          const retry = await this.provider.refreshToken();
+          if (retry) {
+            this.sessionTracker.updateLastActivity();
+            this.persistToken(retry.accessToken, retry.expiresAt);
+            return true;
+          }
+        } catch {}
+        this.emit({
+          type: 'auth_state_recovery_failed',
+          timestamp: Date.now(),
+          reason: 'network',
+        });
+      } else if (isInvalidRefreshTokenError(error)) {
+        if (this.user?.id) {
+          await this.provider.invalidateSessions(this.user.id);
+        }
+        this.emit({
+          type: 'auth_state_recovery_failed',
+          timestamp: Date.now(),
+          reason: 'invalid_refresh',
+        });
+      } else {
+        this.emit({
+          type: 'auth_state_recovery_failed',
+          timestamp: Date.now(),
+          reason: 'unknown',
+        });
+      }
       this.handleSessionTimeout();
       return false;
     }

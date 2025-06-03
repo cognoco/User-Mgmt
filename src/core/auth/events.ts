@@ -185,6 +185,16 @@ export interface AuthenticationFailedEvent extends AuthEvent {
 }
 
 /**
+ * Event emitted when recovery of the authentication state fails
+ */
+export interface AuthStateRecoveryFailedEvent extends AuthEvent {
+  type: 'auth_state_recovery_failed';
+
+  /** Reason for the failure */
+  reason: 'invalid_refresh' | 'network' | 'unknown';
+}
+
+/**
  * Union type of all authentication events
  */
 export type AuthEventType = 
@@ -198,7 +208,8 @@ export type AuthEventType =
   | MFAEnabledEvent
   | MFADisabledEvent
   | AccountDeletedEvent
-  | AuthenticationFailedEvent;
+  | AuthenticationFailedEvent
+  | AuthStateRecoveryFailedEvent;
 
 /**
  * Authentication event listener type

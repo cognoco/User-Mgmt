@@ -10,6 +10,10 @@ export enum AUTH_ERROR {
   AUTH_003 = 'AUTH_003',
   /** Multi factor authentication required */
   AUTH_004 = 'AUTH_004',
+  /** Token refresh failed */
+  AUTH_005 = 'AUTH_005',
+  /** Refresh token invalid */
+  AUTH_006 = 'AUTH_006',
 }
 
 export enum USER_ERROR {
@@ -68,6 +72,8 @@ export const ERROR_CODES = {
   INVALID_CREDENTIALS: AUTH_ERROR.AUTH_002,
   SESSION_EXPIRED: AUTH_ERROR.AUTH_003,
   MFA_REQUIRED: AUTH_ERROR.AUTH_004,
+  TOKEN_REFRESH_FAILED: AUTH_ERROR.AUTH_005,
+  INVALID_REFRESH_TOKEN: AUTH_ERROR.AUTH_006,
   
   // User codes
   USER_NOT_FOUND: USER_ERROR.USER_001,
@@ -99,6 +105,8 @@ export const ERROR_CODE_DESCRIPTIONS: Record<ErrorCode, string> = {
   [AUTH_ERROR.AUTH_002]: 'Invalid credentials',
   [AUTH_ERROR.AUTH_003]: 'Session expired',
   [AUTH_ERROR.AUTH_004]: 'MFA required',
+  [AUTH_ERROR.AUTH_005]: 'Token refresh failed',
+  [AUTH_ERROR.AUTH_006]: 'Invalid refresh token',
   [USER_ERROR.USER_001]: 'User not found',
   [USER_ERROR.USER_002]: 'User already exists',
   [USER_ERROR.USER_003]: 'Invalid user data',

@@ -14,6 +14,10 @@ import {
   MFASetupResponse,
   MFAVerifyResponse
 } from '../../core/auth/models';
+import {
+  InvalidRefreshTokenError,
+  TokenRefreshError,
+} from '@/core/common/errors';
 import { saveRefreshToken, rotateRefreshToken } from '@/lib/auth/refresh-token-store';
 
 import type { AuthDataProvider } from './interfaces';
@@ -615,8 +619,16 @@ export class SupabaseAuthProvider implements AuthDataProvider {
       const oldToken = this.currentSession?.refresh_token ?? '';
       const userId = this.currentSession?.user?.id ?? '';
       const { data, error } = await this.supabase.auth.refreshSession();
-      if (error || !data.session) {
-        return null;
+      if (error) {
+        if (error.status === 401) {
+          this.logError('invalid refresh token', error);
+          throw new InvalidRefreshTokenError(error.message);
+        }
+        this.logError('token refresh failed', error);
+        throw new TokenRefreshError(error.message);
+      }
+      if (!data.session) {
+        throw new TokenRefreshError('No session returned');
       }
       this.currentSession = data.session;
       if (oldToken && data.session.refresh_token && userId) {
@@ -633,7 +645,10 @@ export class SupabaseAuthProvider implements AuthDataProvider {
       };
     } catch (error: any) {
       this.logError('refreshToken failed', error);
-      return null;
+      if (error instanceof InvalidRefreshTokenError || error instanceof TokenRefreshError) {
+        throw error;
+      }
+      throw new TokenRefreshError(error.message || 'Token refresh failed');
     }
   }
   
