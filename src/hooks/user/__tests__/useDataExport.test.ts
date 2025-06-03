@@ -10,6 +10,7 @@ vi.mock('@/lib/exports/export.service', () => ({
   createUserDataExport: vi.fn(),
   processUserDataExport: vi.fn(),
   checkUserExportStatus: vi.fn(),
+  resumeUserDataExport: vi.fn(),
   ExportStatus: { COMPLETED: 'completed', PENDING: 'pending' },
   ExportFormat: { JSON: 'json' }
 }));
@@ -69,5 +70,18 @@ describe('useDataExport', () => {
 
     expect(exportService.checkUserExportStatus).toHaveBeenLastCalledWith('e1');
     expect(result.current.status?.status).toBe(ExportStatus.COMPLETED);
+  });
+
+  it('resumeExport calls resumeUserDataExport', async () => {
+    (useAuth as unknown as vi.Mock).mockReturnValue({ user: { id: 'u1' } });
+    vi.mocked(exportService.resumeUserDataExport).mockResolvedValue();
+    vi.mocked(exportService.checkUserExportStatus).mockResolvedValue({
+      id: 'e1', status: ExportStatus.PENDING, isLargeDataset: true, message: '', format: ExportFormat.JSON
+    });
+    const { result } = renderHook(() => useDataExport());
+    await act(async () => {
+      await result.current.resumeExport('e1');
+    });
+    expect(exportService.resumeUserDataExport).toHaveBeenCalledWith('e1', 'u1');
   });
 });

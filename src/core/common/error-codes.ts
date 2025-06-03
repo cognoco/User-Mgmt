@@ -30,6 +30,17 @@ export enum TEAM_ERROR {
   TEAM_003 = 'TEAM_003',
 }
 
+export enum EXPORT_ERROR {
+  /** Export process failed */
+  EXPORT_001 = 'EXPORT_001',
+  /** Invalid export data generated */
+  EXPORT_002 = 'EXPORT_002',
+  /** Export progress record missing */
+  EXPORT_003 = 'EXPORT_003',
+  /** Resume operation failed */
+  EXPORT_004 = 'EXPORT_004',
+}
+
 export enum SERVER_ERROR {
   /** Generic server error */
   SERVER_001 = 'SERVER_001',
@@ -47,7 +58,8 @@ export type ErrorCode =
   | AUTH_ERROR
   | USER_ERROR
   | TEAM_ERROR
-  | SERVER_ERROR;
+  | SERVER_ERROR
+  | EXPORT_ERROR;
 
 // Unified ERROR_CODES object for backward compatibility
 export const ERROR_CODES = {
@@ -73,6 +85,12 @@ export const ERROR_CODES = {
   EXTERNAL_SERVICE_ERROR: SERVER_ERROR.SERVER_003,
   CONFLICT_ERROR: SERVER_ERROR.SERVER_004,
   RATE_LIMIT_ERROR: SERVER_ERROR.SERVER_005,
+
+  // Export codes
+  EXPORT_FAILED: EXPORT_ERROR.EXPORT_001,
+  EXPORT_INVALID_DATA: EXPORT_ERROR.EXPORT_002,
+  EXPORT_PROGRESS_NOT_FOUND: EXPORT_ERROR.EXPORT_003,
+  EXPORT_RESUME_FAILED: EXPORT_ERROR.EXPORT_004,
 } as const;
 
 // Optional descriptions for mapping codes to human readable text
@@ -92,5 +110,9 @@ export const ERROR_CODE_DESCRIPTIONS: Record<ErrorCode, string> = {
   [SERVER_ERROR.SERVER_003]: 'External service error',
   [SERVER_ERROR.SERVER_004]: 'Conflict',
   [SERVER_ERROR.SERVER_005]: 'Rate limit exceeded',
+  [EXPORT_ERROR.EXPORT_001]: 'Export failed',
+  [EXPORT_ERROR.EXPORT_002]: 'Invalid export data',
+  [EXPORT_ERROR.EXPORT_003]: 'Export progress not found',
+  [EXPORT_ERROR.EXPORT_004]: 'Failed to resume export',
 };
 

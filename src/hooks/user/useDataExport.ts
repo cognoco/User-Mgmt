@@ -4,7 +4,8 @@ import {
   isUserRateLimited,
   createUserDataExport,
   processUserDataExport,
-  checkUserExportStatus
+  checkUserExportStatus,
+  resumeUserDataExport
 } from '@/lib/exports/export.service';
 import type { ExportOptions, DataExportResponse } from '@/lib/exports/types';
 
@@ -72,7 +73,23 @@ export function useDataExport() {
     }
   }, [status, user]);
 
-  return { status, isLoading, error, requestExport, refreshStatus };
+  const resumeExport = useCallback(async (exportId: string) => {
+    if (!user?.id) return null;
+    setIsLoading(true);
+    try {
+      await resumeUserDataExport(exportId, user.id);
+      const res = await checkUserExportStatus(exportId);
+      setStatus(res);
+      return res;
+    } catch (err: any) {
+      setError(err.message || 'Failed to resume export');
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  return { status, isLoading, error, requestExport, refreshStatus, resumeExport };
 }
 
 export default useDataExport;

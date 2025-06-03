@@ -2,6 +2,7 @@ import {
   ERROR_CODE_DESCRIPTIONS,
   ErrorCode,
   SERVER_ERROR,
+  EXPORT_ERROR,
 } from "./error-codes";
 
 /**
@@ -155,6 +156,14 @@ export class ExternalServiceError extends ApplicationError {
   }
 }
 
+/** Error thrown when a data export operation fails. */
+export class DataExportError extends ApplicationError {
+  constructor(message: string, details?: Record<string, any>) {
+    super(EXPORT_ERROR.EXPORT_001, message, 500, details);
+    this.name = "DataExportError";
+  }
+}
+
 // Type guards
 export function isApplicationError(value: unknown): value is ApplicationError {
   return value instanceof ApplicationError;
@@ -202,6 +211,10 @@ export function isExternalServiceError(
   value: unknown,
 ): value is ExternalServiceError {
   return value instanceof ExternalServiceError;
+}
+
+export function isDataExportError(value: unknown): value is DataExportError {
+  return value instanceof DataExportError;
 }
 
 // Utility functions

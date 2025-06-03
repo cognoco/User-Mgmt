@@ -19,6 +19,11 @@ export enum DataExportStorageBucket {
   COMPANY_EXPORTS = 'company-exports'
 }
 
+export interface ExportProgress {
+  percentage: number;
+  step: string;
+}
+
 export interface ExportOptions {
   format: ExportFormat;
   isLargeDataset?: boolean;
@@ -40,6 +45,9 @@ export interface UserDataExport {
   fileSizeBytes?: number | null;
   isLargeDataset: boolean;
   notificationSent: boolean;
+  progress?: ExportProgress | null;
+  integrityHash?: string | null;
+  errorDetails?: string | null;
 }
 
 export interface CompanyDataExport {
@@ -58,6 +66,9 @@ export interface CompanyDataExport {
   fileSizeBytes?: number | null;
   isLargeDataset: boolean;
   notificationSent: boolean;
+  progress?: ExportProgress | null;
+  integrityHash?: string | null;
+  errorDetails?: string | null;
 }
 
 export interface DataExportResponse {
@@ -67,6 +78,7 @@ export interface DataExportResponse {
   message: string;
   downloadUrl?: string;
   format: ExportFormat;
+  progress?: number;
 }
 
 export interface UserExportData {

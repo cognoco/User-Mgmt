@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { sendEmail } from '@/lib/email/sendEmail';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import Papa from 'papaparse';
+import { createHash } from 'crypto';
 import {
   ExportFormat,
   ExportStatus,
@@ -26,6 +27,32 @@ const LARGE_DATASET_THRESHOLD = 5 * 1024 * 1024;
 
 // Rate limit - time between exports (minutes)
 const EXPORT_RATE_LIMIT_MINUTES = 15;
+
+async function updateCompanyExportProgress(
+  exportId: string,
+  percentage: number,
+  step: string,
+) {
+  await supabase
+    .from('company_data_exports')
+    .update({ progress: percentage, progress_step: step, updated_at: new Date().toISOString() })
+    .eq('id', exportId);
+}
+
+async function cleanupCompanyExportArtifacts(filePath?: string) {
+  if (!filePath) return;
+  await supabase.storage
+    .from(DataExportStorageBucket.COMPANY_EXPORTS)
+    .remove([filePath]);
+}
+
+export async function resumeCompanyDataExport(exportId: string, companyId: string, userId: string): Promise<void> {
+  await supabase
+    .from('company_data_exports')
+    .update({ status: ExportStatus.PENDING, error_message: null, error_details: null, progress: 0, progress_step: 'resume' })
+    .eq('id', exportId);
+  await processCompanyDataExport(exportId, companyId, userId);
+}
 
 /**
  * Check if the company has recently requested an export (rate limiting)
@@ -75,7 +102,9 @@ export async function createCompanyDataExport(
         status: ExportStatus.PENDING,
         download_token: uuidv4(),
         expires_at: expiresAt.toISOString(),
-        is_large_dataset: exportOptions.isLargeDataset
+        is_large_dataset: exportOptions.isLargeDataset,
+        progress: 0,
+        progress_step: 'init'
       })
       .select()
       .single();
@@ -97,7 +126,10 @@ export async function createCompanyDataExport(
       errorMessage: data.error_message,
       fileSizeBytes: data.file_size_bytes,
       isLargeDataset: data.is_large_dataset,
-      notificationSent: data.notification_sent
+      notificationSent: data.notification_sent,
+      progress: data.progress ? { percentage: data.progress, step: data.progress_step } : null,
+      integrityHash: data.integrity_hash,
+      errorDetails: data.error_details
     };
   } catch (error) {
     console.error('Error creating company data export:', error);
@@ -116,9 +148,10 @@ export async function processCompanyDataExport(
   companyId: string,
   userId: string
 ): Promise<void> {
+  let exportRecord: CompanyDataExport | null = null;
   try {
     // Get export record to determine format
-    const exportRecord = await getCompanyDataExportById(exportId);
+    exportRecord = await getCompanyDataExportById(exportId);
     if (!exportRecord) throw new Error('Export record not found');
     
     // Update status to processing
@@ -126,9 +159,13 @@ export async function processCompanyDataExport(
       .from('company_data_exports')
       .update({
         status: ExportStatus.PROCESSING,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        progress: 5,
+        progress_step: 'start'
       })
       .eq('id', exportId);
+
+    await updateCompanyExportProgress(exportId, 10, 'collect');
     
     // Get company data
     const companyData = await getCompanyExportData(companyId);
@@ -143,17 +180,17 @@ export async function processCompanyDataExport(
     let contentType: string;
     
     if (exportRecord.format === ExportFormat.CSV) {
-      // Flatten the data structure for CSV export
       const flatData = flattenCompanyDataForCsv(companyData);
       fileContent = Papa.unparse(flatData);
       fileExtension = '.csv';
       contentType = 'text/csv';
     } else {
-      // Default to JSON
       fileContent = dataString;
       fileExtension = '.json';
       contentType = 'application/json';
     }
+
+    await updateCompanyExportProgress(exportId, 40, 'format');
     
     // Generate unique filename
     const filename = `company_export_${companyId}_${new Date().toISOString().replace(/[:.]/g, '-')}${fileExtension}`;
@@ -168,6 +205,10 @@ export async function processCompanyDataExport(
       });
     
     if (uploadError) throw uploadError;
+
+    await updateCompanyExportProgress(exportId, 70, 'upload');
+
+    const integrityHash = createHash('sha256').update(fileContent).digest('hex');
     
     // Update export record
     await supabase
@@ -178,7 +219,10 @@ export async function processCompanyDataExport(
         completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         file_size_bytes: fileContent.length,
-        is_large_dataset: isLargeDataset
+        is_large_dataset: isLargeDataset,
+        integrity_hash: integrityHash,
+        progress: 100,
+        progress_step: 'complete'
       })
       .eq('id', exportId);
     
@@ -200,9 +244,13 @@ export async function processCompanyDataExport(
       .update({
         status: ExportStatus.FAILED,
         error_message: error instanceof Error ? error.message : 'Unknown error during export',
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        error_details: error instanceof Error ? error.stack : null,
+        progress_step: 'failed'
       })
       .eq('id', exportId);
+
+    await cleanupCompanyExportArtifacts(exportRecord?.filePath);
     
     // Log the failed export
     await logUserAction({
@@ -393,7 +441,10 @@ export async function getCompanyDataExportByToken(token: string): Promise<Compan
       errorMessage: data.error_message,
       fileSizeBytes: data.file_size_bytes,
       isLargeDataset: data.is_large_dataset,
-      notificationSent: data.notification_sent
+      notificationSent: data.notification_sent,
+      progress: data.progress ? { percentage: data.progress, step: data.progress_step } : null,
+      integrityHash: data.integrity_hash,
+      errorDetails: data.error_details
     };
   } catch (error) {
     console.error('Error getting company data export by token:', error);
@@ -551,6 +602,7 @@ export async function checkCompanyExportStatus(exportId: string): Promise<DataEx
     isLargeDataset: exportData.isLargeDataset,
     message,
     downloadUrl,
-    format: exportData.format
+    format: exportData.format,
+    progress: exportData.progress?.percentage
   };
-} 
+}

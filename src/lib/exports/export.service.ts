@@ -3,6 +3,7 @@ import { addHours } from 'date-fns';
 import { supabase } from '@/lib/supabase';
 import { sendEmail } from '@/lib/email/sendEmail';
 import { logUserAction } from '@/lib/audit/auditLogger';
+import { createHash } from 'crypto';
 import Papa from 'papaparse';
 import {
   ExportFormat,
@@ -26,6 +27,32 @@ const LARGE_DATASET_THRESHOLD = 5 * 1024 * 1024;
 
 // Rate limit - time between exports (minutes)
 const EXPORT_RATE_LIMIT_MINUTES = 15;
+
+async function updateUserExportProgress(
+  exportId: string,
+  percentage: number,
+  step: string,
+) {
+  await supabase
+    .from('user_data_exports')
+    .update({ progress: percentage, progress_step: step, updated_at: new Date().toISOString() })
+    .eq('id', exportId);
+}
+
+async function cleanupUserExportArtifacts(filePath?: string) {
+  if (!filePath) return;
+  await supabase.storage
+    .from(DataExportStorageBucket.USER_EXPORTS)
+    .remove([filePath]);
+}
+
+export async function resumeUserDataExport(exportId: string, userId: string): Promise<void> {
+  await supabase
+    .from('user_data_exports')
+    .update({ status: ExportStatus.PENDING, error_message: null, error_details: null, progress: 0, progress_step: 'resume' })
+    .eq('id', exportId);
+  await processUserDataExport(exportId, userId);
+}
 
 /**
  * Check if the user has recently requested an export (rate limiting)
@@ -72,7 +99,9 @@ export async function createUserDataExport(
         status: ExportStatus.PENDING,
         download_token: uuidv4(),
         expires_at: expiresAt.toISOString(),
-        is_large_dataset: exportOptions.isLargeDataset
+        is_large_dataset: exportOptions.isLargeDataset,
+        progress: 0,
+        progress_step: 'init'
       })
       .select()
       .single();
@@ -93,7 +122,10 @@ export async function createUserDataExport(
       errorMessage: data.error_message,
       fileSizeBytes: data.file_size_bytes,
       isLargeDataset: data.is_large_dataset,
-      notificationSent: data.notification_sent
+      notificationSent: data.notification_sent,
+      progress: data.progress ? { percentage: data.progress, step: data.progress_step } : null,
+      integrityHash: data.integrity_hash,
+      errorDetails: data.error_details
     };
   } catch (error) {
     console.error('Error creating user data export:', error);
@@ -107,23 +139,27 @@ export async function createUserDataExport(
  * @param userId User ID
  */
 export async function processUserDataExport(exportId: string, userId: string): Promise<void> {
+  let exportRecord: UserDataExport | null = null;
   try {
     // Get export record to determine format
-    const exportRecord = await getUserDataExportById(exportId);
+    exportRecord = await getUserDataExportById(exportId);
     if (!exportRecord) throw new Error('Export record not found');
-    
+
     // Update status to processing
     await supabase
       .from('user_data_exports')
       .update({
         status: ExportStatus.PROCESSING,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        progress: 5,
+        progress_step: 'start'
       })
       .eq('id', exportId);
-    
+
+    await updateUserExportProgress(exportId, 10, 'collect');
     // Get user data
     const userData = await getUserExportData(userId);
-    
+
     // Determine if this is a large dataset
     const dataString = JSON.stringify(userData);
     const isLargeDataset = dataString.length > LARGE_DATASET_THRESHOLD;
@@ -145,6 +181,8 @@ export async function processUserDataExport(exportId: string, userId: string): P
       fileExtension = '.json';
       contentType = 'application/json';
     }
+
+    await updateUserExportProgress(exportId, 40, 'format');
     
     // Generate unique filename
     const filename = `user_export_${userId}_${new Date().toISOString().replace(/[:.]/g, '-')}${fileExtension}`;
@@ -157,8 +195,12 @@ export async function processUserDataExport(exportId: string, userId: string): P
         contentType,
         upsert: true
       });
-    
+
     if (uploadError) throw uploadError;
+
+    await updateUserExportProgress(exportId, 70, 'upload');
+
+    const integrityHash = createHash('sha256').update(fileContent).digest('hex');
     
     // Update export record
     await supabase
@@ -169,7 +211,10 @@ export async function processUserDataExport(exportId: string, userId: string): P
         completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         file_size_bytes: fileContent.length,
-        is_large_dataset: isLargeDataset
+        is_large_dataset: isLargeDataset,
+        integrity_hash: integrityHash,
+        progress: 100,
+        progress_step: 'complete'
       })
       .eq('id', exportId);
     
@@ -184,17 +229,21 @@ export async function processUserDataExport(exportId: string, userId: string): P
     });
   } catch (error) {
     console.error('Error processing user data export:', error);
-    
+
     // Update export record with error
     await supabase
       .from('user_data_exports')
       .update({
         status: ExportStatus.FAILED,
         error_message: error instanceof Error ? error.message : 'Unknown error during export',
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        error_details: error instanceof Error ? error.stack : null,
+        progress_step: 'failed'
       })
       .eq('id', exportId);
-    
+
+    await cleanupUserExportArtifacts(exportRecord?.filePath);
+
     // Log the failed export
     await logUserAction({
       userId,
@@ -365,7 +414,10 @@ export async function getUserDataExportByToken(token: string): Promise<UserDataE
       errorMessage: data.error_message,
       fileSizeBytes: data.file_size_bytes,
       isLargeDataset: data.is_large_dataset,
-      notificationSent: data.notification_sent
+      notificationSent: data.notification_sent,
+      progress: data.progress ? { percentage: data.progress, step: data.progress_step } : null,
+      integrityHash: data.integrity_hash,
+      errorDetails: data.error_details
     };
   } catch (error) {
     console.error('Error getting user data export by token:', error);
@@ -503,6 +555,7 @@ export async function checkUserExportStatus(exportId: string): Promise<DataExpor
     isLargeDataset: exportData.isLargeDataset,
     message,
     downloadUrl,
-    format: exportData.format
+    format: exportData.format,
+    progress: exportData.progress?.percentage
   };
-} 
+}
