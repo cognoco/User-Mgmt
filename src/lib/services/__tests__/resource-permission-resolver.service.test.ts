@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ResourcePermissionResolver } from '../resource-permission-resolver';
+import { ResourcePermissionResolver } from '../resource-permission-resolver.service';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
 const supabase = { from: vi.fn() };
@@ -11,7 +11,8 @@ function permQuery(perms: string[]) {
   const obj: any = {};
   obj.select = vi.fn(() => obj);
   obj.eq = vi.fn(() => obj);
-  obj.then = (resolve: any) => Promise.resolve({ data: perms.map(p => ({ permission_name: p })), error: null }).then(resolve);
+  obj.then = (resolve: any) =>
+    Promise.resolve({ data: perms.map(p => ({ permission: p })), error: null }).then(resolve);
   return obj;
 }
 
@@ -39,7 +40,7 @@ describe('ResourcePermissionResolver', () => {
       .mockReturnValueOnce(relQuery(null));
     const resolver = new ResourcePermissionResolver();
     const ancestors = await resolver.getResourceAncestors('project', 'p1');
-    expect(ancestors).toEqual([{ resourceType: 'team', resourceId: 't1' }]);
+    expect(ancestors).toEqual([{ type: 'team', id: 't1', relationshipType: undefined }]);
   });
 
   it('combines permissions from ancestors', async () => {
