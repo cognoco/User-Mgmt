@@ -12,7 +12,11 @@ const ERROR_TRANSLATIONS: Record<string, string> = {
   RATE_LIMIT_EXCEEDED: 'Too many requests. Please try again later.',
   MFA_REQUIRED: 'Multi-factor authentication required.',
   TEAM_NOT_FOUND: 'Team not found.',
-  USER_NOT_FOUND: 'User not found.'
+  USER_NOT_FOUND: 'User not found.',
+  SSO_GENERIC_ERROR: 'Single sign-on failed.',
+  SSO_CONFIGURATION_ERROR: 'SSO configuration error.',
+  SSO_FEDERATION_ERROR: 'Federation with identity provider failed.',
+  SSO_AUTHENTICATION_ERROR: 'Authentication with identity provider failed.'
 };
 
 /**

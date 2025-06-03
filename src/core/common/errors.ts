@@ -282,7 +282,6 @@ export function isPartialRelationshipError(
 ): value is PartialRelationshipError {
   return value instanceof PartialRelationshipError;
 }
-}
 
 // Utility functions
 
