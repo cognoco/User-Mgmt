@@ -1,20 +1,26 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GET, PATCH } from '../route';
-import { getApiUserService } from '@/services/user/factory';
-import { withRouteAuth } from '@/middleware/auth';
+import { configureServices, resetServiceContainer } from '@/lib/config/service-container';
+import type { UserService } from '@/core/user/interfaces';
+import type { AuthService } from '@/core/auth/interfaces';
 import createMockUserService from '@/tests/mocks/user.service.mock';
 import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
-vi.mock('@/services/user/factory', () => ({ getApiUserService: vi.fn() }));
-vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'user-1', role: 'user', permissions: [] })),
-}));
+vi.mock('@/services/user/factory', () => ({}));
+vi.mock('@/services/auth/factory', () => ({}));
 
-const service = createMockUserService();
+const userService = createMockUserService();
+const authService: Partial<AuthService> = {
+  getCurrentUser: vi.fn().mockResolvedValue({ id: 'user-1', email: 'user@test.com' }),
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (getApiUserService as unknown as vi.Mock).mockReturnValue(service);
+  resetServiceContainer();
+  configureServices({
+    userService: userService as UserService,
+    authService: authService as AuthService,
+  });
 });
 
 describe('/api/settings GET', () => {
@@ -24,7 +30,7 @@ describe('/api/settings GET', () => {
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.data.notifications.email).toBe(true);
-    expect(service.getUserPreferences).toHaveBeenCalledWith('user-1');
+    expect(userService.getUserPreferences).toHaveBeenCalledWith('user-1');
   });
 });
 
@@ -35,7 +41,7 @@ describe('/api/settings PATCH', () => {
     const res = await PATCH(req);
     const body = await res.json();
     expect(res.status).toBe(200);
-    expect(service.updateUserPreferences).toHaveBeenCalledWith(
+    expect(userService.updateUserPreferences).toHaveBeenCalledWith(
       'user-1',
       expect.objectContaining({
         notifications: expect.objectContaining({ email: false }),
@@ -45,7 +51,7 @@ describe('/api/settings PATCH', () => {
   });
 
   it('returns 500 on failure', async () => {
-    (service.updateUserPreferences as vi.Mock).mockResolvedValueOnce({ success: false, error: 'fail' });
+    (userService.updateUserPreferences as vi.Mock).mockResolvedValueOnce({ success: false, error: 'fail' });
     const req = createAuthenticatedRequest('PATCH', 'http://localhost/api/settings', { notifications: { email: false } });
     (req as any).json = async () => ({ notifications: { email: false } });
     const res = await PATCH(req);
