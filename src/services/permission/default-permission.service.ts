@@ -25,7 +25,12 @@ import {
 import type { PermissionDataProvider } from "@/core/permission/IPermissionDataProvider";
 import { translateError } from "@/lib/utils/error";
 import { TypedEventEmitter } from "@/lib/utils/typed-event-emitter";
-import { MemoryCache } from '@/lib/cache';
+import {
+  MemoryCache,
+  MultiLevelCache,
+  RedisCache,
+  getRedisClient,
+} from '@/lib/cache';
 import { RoleService } from '@/services/role';
 import { ResourcePermissionResolver } from '@/lib/services/resource-permission-resolver.service';
 
@@ -36,9 +41,30 @@ export class DefaultPermissionService
   extends TypedEventEmitter<PermissionEvent>
   implements PermissionService
 {
-  private static roleCache = new MemoryCache<string, UserRole[]>({ ttl: 30_000 });
-  private static resourceCache = new MemoryCache<string, boolean>({ ttl: 30_000 });
-  private static userPermissionCache = new MemoryCache<string, boolean>({ ttl: 30_000 });
+  private static roleCache = new MultiLevelCache(
+    new MemoryCache<string, UserRole[]>({ ttl: 30_000 }),
+    (() => {
+      const r = getRedisClient();
+      return r ? new RedisCache<UserRole[]>(r, { prefix: 'role:' }) : undefined;
+    })(),
+    30_000,
+  );
+  private static resourceCache = new MultiLevelCache(
+    new MemoryCache<string, boolean>({ ttl: 30_000 }),
+    (() => {
+      const r = getRedisClient();
+      return r ? new RedisCache<boolean>(r, { prefix: 'res:' }) : undefined;
+    })(),
+    30_000,
+  );
+  private static userPermissionCache = new MultiLevelCache(
+    new MemoryCache<string, boolean>({ ttl: 30_000 }),
+    (() => {
+      const r = getRedisClient();
+      return r ? new RedisCache<boolean>(r, { prefix: 'perm:' }) : undefined;
+    })(),
+    30_000,
+  );
 
   private roleService: RoleService;
   private resourcePermissionResolver: ResourcePermissionResolver;
