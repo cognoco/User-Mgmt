@@ -30,6 +30,17 @@ export enum TEAM_ERROR {
   TEAM_003 = 'TEAM_003',
 }
 
+export enum RELATIONSHIP_ERROR {
+  /** Invalid hierarchy or cycle detected */
+  REL_001 = 'REL_001',
+  /** Entity inconsistency or missing */
+  REL_002 = 'REL_002',
+  /** Relationship constraint violated */
+  REL_003 = 'REL_003',
+  /** Operation partially completed */
+  REL_004 = 'REL_004',
+}
+
 export enum SERVER_ERROR {
   /** Generic server error */
   SERVER_001 = 'SERVER_001',
@@ -47,7 +58,8 @@ export type ErrorCode =
   | AUTH_ERROR
   | USER_ERROR
   | TEAM_ERROR
-  | SERVER_ERROR;
+  | SERVER_ERROR
+  | RELATIONSHIP_ERROR;
 
 // Unified ERROR_CODES object for backward compatibility
 export const ERROR_CODES = {
@@ -66,6 +78,12 @@ export const ERROR_CODES = {
   TEAM_NOT_FOUND: TEAM_ERROR.TEAM_001,
   MEMBER_ALREADY_EXISTS: TEAM_ERROR.TEAM_002,
   INVALID_TEAM_DATA: TEAM_ERROR.TEAM_003,
+
+  // Relationship codes
+  HIERARCHY_ERROR: RELATIONSHIP_ERROR.REL_001,
+  INCONSISTENT_ENTITY: RELATIONSHIP_ERROR.REL_002,
+  RELATIONSHIP_CONSTRAINT: RELATIONSHIP_ERROR.REL_003,
+  PARTIAL_OPERATION: RELATIONSHIP_ERROR.REL_004,
   
   // Server codes
   INTERNAL_ERROR: SERVER_ERROR.SERVER_001,
@@ -87,6 +105,10 @@ export const ERROR_CODE_DESCRIPTIONS: Record<ErrorCode, string> = {
   [TEAM_ERROR.TEAM_001]: 'Team not found',
   [TEAM_ERROR.TEAM_002]: 'Member already exists',
   [TEAM_ERROR.TEAM_003]: 'Invalid team data',
+  [RELATIONSHIP_ERROR.REL_001]: 'Invalid relationship hierarchy',
+  [RELATIONSHIP_ERROR.REL_002]: 'Entity mismatch',
+  [RELATIONSHIP_ERROR.REL_003]: 'Relationship constraint violation',
+  [RELATIONSHIP_ERROR.REL_004]: 'Partial operation failure',
   [SERVER_ERROR.SERVER_001]: 'Internal server error',
   [SERVER_ERROR.SERVER_002]: 'Database error',
   [SERVER_ERROR.SERVER_003]: 'External service error',
