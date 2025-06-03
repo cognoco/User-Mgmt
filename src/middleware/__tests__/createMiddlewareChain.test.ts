@@ -30,6 +30,7 @@ import {
   routeAuthMiddleware,
   validationMiddleware,
   rateLimitMiddleware,
+  standardApiMiddleware,
   createMiddlewareChainFromConfig,
   type RouteMiddleware,
 } from '../createMiddlewareChain';
@@ -149,6 +150,19 @@ describe('createMiddlewareChain', () => {
     expect(res.status).toBe(200);
     expect(withRouteAuth).toHaveBeenCalled();
     expect(withErrorHandling).toHaveBeenCalled();
+  });
+
+  it('exposes a standard auth middleware composition', async () => {
+    const chain = standardApiMiddleware({} as any);
+    const handler = vi.fn().mockResolvedValue(new NextResponse('ok'));
+    const res = await chain(handler)(req);
+
+    expect(res.status).toBe(200);
+    expect(createRateLimit).toHaveBeenCalled();
+    expect(withErrorHandling).toHaveBeenCalled();
+    expect(withRouteAuth).toHaveBeenCalled();
+    expect(withValidation).toHaveBeenCalled();
+    expect(handler).toHaveBeenCalled();
   });
 
   it('throws on invalid config', () => {

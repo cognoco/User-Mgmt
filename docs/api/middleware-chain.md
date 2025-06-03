@@ -15,6 +15,18 @@ The module exposes helpers that adapt existing utilities to the chain pattern:
 
 Import these helpers from the same file alongside `createMiddlewareChain`.
 
+### Standard Compositions
+
+Common middleware stacks are provided for convenience. The most frequently used
+is `standardApiMiddleware`, which applies rate limiting, error handling,
+authentication and validation in that order.
+
+```ts
+import { standardApiMiddleware } from '@/middleware/createMiddlewareChain';
+
+const middleware = standardApiMiddleware(mySchema);
+```
+
 ## Example
 
 ```ts
