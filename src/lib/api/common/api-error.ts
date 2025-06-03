@@ -143,3 +143,39 @@ export function createConflictError(message: string) {
     getErrorStatus(ERROR_CODES.ALREADY_EXISTS)
   );
 }
+
+/** Billing-related error helpers */
+export function createPaymentFailedError(message: string, details?: Record<string, any>) {
+  return new ApiError(
+    ERROR_CODES.PAYMENT_FAILED,
+    message,
+    getErrorStatus(ERROR_CODES.PAYMENT_FAILED),
+    details
+  );
+}
+
+export function createBillingProviderError(message: string, details?: Record<string, any>) {
+  return new ApiError(
+    ERROR_CODES.PROVIDER_ERROR,
+    message,
+    getErrorStatus(ERROR_CODES.PROVIDER_ERROR),
+    details
+  );
+}
+
+export function createBillingPermissionError(message = 'Billing permission denied') {
+  return new ApiError(
+    ERROR_CODES.PERMISSION_DENIED,
+    message,
+    getErrorStatus(ERROR_CODES.PERMISSION_DENIED)
+  );
+}
+
+export function createStateMismatchError(message: string, details?: Record<string, any>) {
+  return new ApiError(
+    ERROR_CODES.STATE_MISMATCH,
+    message,
+    getErrorStatus(ERROR_CODES.STATE_MISMATCH),
+    details
+  );
+}

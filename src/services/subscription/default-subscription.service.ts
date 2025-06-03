@@ -1,6 +1,10 @@
 import { SubscriptionService } from '@/core/subscription/interfaces';
 import type { ISubscriptionDataProvider } from '@/core/subscription';
-import type { SubscriptionPlan, UserSubscription } from '@/core/subscription/models';
+import type {
+  SubscriptionPlan,
+  UserSubscription,
+  SubscriptionUpsertPayload,
+} from '@/core/subscription/models';
 
 export class DefaultSubscriptionService implements SubscriptionService {
   constructor(private provider: ISubscriptionDataProvider) {}
@@ -23,5 +27,9 @@ export class DefaultSubscriptionService implements SubscriptionService {
 
   updateSubscription(subscriptionId: string, planId: string) {
     return this.provider.updateSubscription(subscriptionId, planId);
+  }
+
+  reconcileSubscription(data: SubscriptionUpsertPayload) {
+    return this.provider.upsertSubscription(data);
   }
 }
