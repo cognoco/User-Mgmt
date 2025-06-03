@@ -69,4 +69,12 @@ describe('Telemetry', () => {
     const high = telemetry.getHighestImpactErrors();
     expect(high[0]).toBe('B');
   });
+
+  it('collects error feedback', () => {
+    telemetry.recordFeedback('E1', true);
+    telemetry.recordFeedback('E1', false);
+    const m = telemetry.getMetrics('E1')!;
+    expect(m.feedbackTotal).toBe(2);
+    expect(m.feedbackHelpful).toBe(1);
+  });
 });

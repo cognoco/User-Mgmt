@@ -59,4 +59,14 @@ describe('ErrorMetrics', () => {
     const freq = metrics.getFrequency({ serviceName: 'svc2' }, 1000, 2000);
     expect(freq.reduce((a,b) => a+b, 0)).toBe(2);
   });
+
+  it('calculates impact score', () => {
+    metrics.incrementErrorCount(base);
+    metrics.incrementErrorCount(base);
+    metrics.resolveError(base);
+    vi.advanceTimersByTime(1000);
+    metrics.resolveError(base);
+    const score = metrics.getImpactScore(base, { durationWeight: 0.01 });
+    expect(score).toBeGreaterThan(0);
+  });
 });

@@ -36,6 +36,8 @@ interface ErrorMetrics {
   segmentImpact: Map<string, number>;
   actionCounts: Map<string, number>;
   events: number[];
+  feedbackHelpful: number;
+  feedbackTotal: number;
 }
 
 export type TelemetryEvent = { type: 'alert'; alert: TelemetryAlert };
@@ -76,6 +78,8 @@ export class Telemetry extends TypedEventEmitter<TelemetryEvent> {
         segmentImpact: new Map(),
         actionCounts: new Map(),
         events: [],
+        feedbackHelpful: 0,
+        feedbackTotal: 0,
       };
       this.metrics.set(event.type, m);
     }
@@ -115,6 +119,29 @@ export class Telemetry extends TypedEventEmitter<TelemetryEvent> {
     const now = Date.now();
     m.events = m.events.filter(t => now - t <= windowMs);
     return m.events.length / (windowMs / 1000);
+  }
+
+  recordFeedback(type: string, wasHelpful: boolean) {
+    let m = this.metrics.get(type);
+    if (!m) {
+      m = {
+        count: 0,
+        criticalCount: 0,
+        nonCriticalCount: 0,
+        firstSeen: Date.now(),
+        lastSeen: Date.now(),
+        resolutionTimes: [],
+        affectedUsers: new Set(),
+        segmentImpact: new Map(),
+        actionCounts: new Map(),
+        events: [],
+        feedbackHelpful: 0,
+        feedbackTotal: 0,
+      };
+      this.metrics.set(type, m);
+    }
+    m.feedbackTotal++;
+    if (wasHelpful) m.feedbackHelpful++;
   }
 
   getHighestImpactErrors(): string[] {
