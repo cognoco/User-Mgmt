@@ -7,18 +7,21 @@ import { isRtlLanguage } from '@/lib/i18n/messages';
 interface ApiErrorAlertProps {
   message: string | null;
   onRetry?: () => void;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
 }
 
 /**
  * Display user-friendly API error messages with optional retry.
  */
-export function ApiErrorAlert({ message, onRetry }: ApiErrorAlertProps) {
+export function ApiErrorAlert({ message, onRetry, severity = 'low' }: ApiErrorAlertProps) {
   const { i18n } = useTranslation();
   const dir = isRtlLanguage(i18n.language) ? 'rtl' : undefined;
   if (!message) return null;
 
+  const variant = severity === 'low' ? 'default' : 'destructive';
+
   return (
-    <Alert variant="destructive" role="alert" dir={dir}>
+    <Alert variant={variant} role="alert" dir={dir}>
       <AlertTitle>Something went wrong</AlertTitle>
       <AlertDescription className="flex items-center justify-between gap-2">
         <span>{message}</span>
