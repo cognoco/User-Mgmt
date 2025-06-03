@@ -47,7 +47,7 @@ export function createApiHandler<T = any>(config: ApiHandlerConfig<T>) {
       // Validate HTTP method
       if (!methods.includes(req.method as HttpMethod)) {
         res.setHeader('Allow', methods);
-        throw new ApiError('server/operation_failed', `Method ${req.method} Not Allowed`, 405);
+        throw new ApiError('SERVER_GENERAL_004', `Method ${req.method} Not Allowed`, 405);
       }
 
       // Authentication check
@@ -74,7 +74,7 @@ export function createApiHandler<T = any>(config: ApiHandlerConfig<T>) {
             req.method === 'GET' ? (req.query as any) : (req.body as any)
           );
         } catch (validationError: any) {
-          throw new ApiError('validation/error', 'Validation Error', 400, {
+          throw new ApiError('VALIDATION_REQUEST_001', 'Validation Error', 400, {
             errors: validationError.errors ?? validationError,
           });
         }

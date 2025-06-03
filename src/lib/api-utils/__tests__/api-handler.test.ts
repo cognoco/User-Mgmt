@@ -36,13 +36,13 @@ describe('createApiHandler', () => {
     const handler = createApiHandler({
       methods,
       async handler() {
-        throw new ApiError('auth/forbidden', 'forbidden', 403);
+        throw new ApiError('AUTH_ACCESS_002', 'forbidden', 403);
       },
     });
 
     const res = await run(handler);
     expect(res._getStatusCode()).toBe(403);
-    expect(res.getJsonData().error.code).toBe('auth/forbidden');
+    expect(res.getJsonData().error.code).toBe('AUTH_ACCESS_002');
   });
 
   it('handles unexpected error', async () => {
@@ -118,7 +118,7 @@ describe('createApiHandler', () => {
 
     const res = await run(handler, { method: 'POST', body: {} });
     expect(res._getStatusCode()).toBe(400);
-    expect(res.getJsonData().error.code).toBe('validation/error');
+    expect(res.getJsonData().error.code).toBe('VALIDATION_REQUEST_001');
   });
 
   it('validates query with schema on GET', async () => {
