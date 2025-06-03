@@ -2,6 +2,7 @@ import {
   ERROR_CODE_DESCRIPTIONS,
   ErrorCode,
   SERVER_ERROR,
+  AUTH_ERROR,
 } from "./error-codes";
 
 /**
@@ -96,6 +97,22 @@ export class AuthenticationError extends ApplicationError {
   constructor(code: ErrorCode, message: string, details?: Record<string, any>) {
     super(code, message, 401, details);
     this.name = "AuthenticationError";
+  }
+}
+
+/** Error thrown when automatic token refresh fails. */
+export class TokenRefreshError extends AuthenticationError {
+  constructor(message: string, details?: Record<string, any>) {
+    super(AUTH_ERROR.AUTH_005, message, details);
+    this.name = "TokenRefreshError";
+  }
+}
+
+/** Error thrown when the refresh token is invalid or revoked. */
+export class InvalidRefreshTokenError extends AuthenticationError {
+  constructor(message: string, details?: Record<string, any>) {
+    super(AUTH_ERROR.AUTH_006, message, details);
+    this.name = "InvalidRefreshTokenError";
   }
 }
 
@@ -202,6 +219,16 @@ export function isExternalServiceError(
   value: unknown,
 ): value is ExternalServiceError {
   return value instanceof ExternalServiceError;
+}
+
+export function isTokenRefreshError(value: unknown): value is TokenRefreshError {
+  return value instanceof TokenRefreshError;
+}
+
+export function isInvalidRefreshTokenError(
+  value: unknown,
+): value is InvalidRefreshTokenError {
+  return value instanceof InvalidRefreshTokenError;
 }
 
 // Utility functions

@@ -14,6 +14,8 @@ The tables below list all defined error codes grouped by domain. Each code maps 
 | auth/account_locked | Account locked | Too many failed attempts or admin action | Contact support | 403 |
 | auth/password_expired | Password expired | Password rotation policy | Reset password | 403 |
 | auth/session_expired | Session expired | Token lifetime exceeded | Log in again | 401 |
+| auth/token_refresh_failed | Token refresh failed | Network or server error | Retry later | 401 |
+| auth/invalid_refresh_token | Invalid refresh token | Token revoked or reused | Log in again | 401 |
 
 ## User Management Errors (`USER_XXX` / `user/*`)
 
