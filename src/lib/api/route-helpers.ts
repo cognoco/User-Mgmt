@@ -1,94 +1,151 @@
-// Create file: lib/api/route-helpers.ts
-import { z } from 'zod';
+/**
+ * API Route Helpers
+ * 
+ * This file provides utilities for creating consistent API routes with
+ * authentication, validation, and service injection following the
+ * architecture guidelines.
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
-import { AuthContext } from '@/lib/auth/types';
-import { createAuthMiddleware } from '@/lib/auth/unified-auth.middleware';
-import { ApiError, ERROR_CODES } from '@/lib/api/common';
-import type { AuthService } from '@/core/auth/interfaces';
-import type { UserService } from '@/core/user/interfaces';
-import { getApiAuthService } from '@/services/auth/factory';
-import { getApiUserService } from '@/services/user/factory';
+import { z } from 'zod';
+import type { 
+  AuthContext, 
+  ApiHandlerOptions, 
+  ServiceContainer 
+} from '@/core/config/interfaces';
+import { getServiceContainer } from '@/lib/config/service-container';
+import { createAuthMiddleware } from './auth-middleware';
+import { 
+  createSuccessResponse, 
+  createErrorResponse, 
+  ApiError, 
+  ERROR_CODES 
+} from './common';
 
-export interface ServiceContainer {
-  auth: AuthService;
-  user: UserService;
-  [key: string]: any;
-}
+/**
+ * API Handler function signature
+ */
+export type ApiHandler<T = any> = (
+  request: NextRequest,
+  context: AuthContext,
+  data: T,
+  services: ServiceContainer
+) => Promise<NextResponse>;
 
-export interface ApiHandlerOptions {
-  requireAuth?: boolean;
-  requiredPermissions?: string[];
-  includeUser?: boolean;
-  services?: Partial<ServiceContainer>;
-}
-
-export const createApiHandler = <T extends z.ZodTypeAny>(
-  schema: T,
-  handler: (
-    req: NextRequest,
-    context: AuthContext,
-) => Promise<Response>,
+/**
+ * Create an API handler with validation, authentication, and service injection
+ * 
+ * @param schema Zod schema for request validation
+ * @param handler The actual handler function
+ * @param options Configuration options for the handler
+ * @returns NextJS route handler
+ */
+export function createApiHandler<T>(
+  schema: z.ZodSchema<T>,
+  handler: ApiHandler<T>,
   options: ApiHandlerOptions = {}
-) => {
-  return createAuthMiddleware({
-    authService: options.services?.auth,
-    requireAuth: options.requireAuth,
-    requiredPermissions: options.requiredPermissions,
-    includeUser: options.includeUser
-  })(
-    async (req: NextRequest, context: AuthContext) => {
-      const services: ServiceContainer = {
-        auth: options.services?.auth ?? getApiAuthService(),
-        user: options.services?.user ?? getApiUserService()
-      };
+): (request: NextRequest) => Promise<NextResponse> {
+  return async (request: NextRequest): Promise<NextResponse> => {
+    try {
+      // 1. Get service container with any overrides
+      const services = getServiceContainer(options.services);
+      
+      // 2. Create authentication middleware
+      const authMiddleware = createAuthMiddleware({
+        authService: services.auth,
+        permissionService: services.permission,
+        requireAuth: options.requireAuth ?? false,
+        requiredPermissions: options.requiredPermissions,
+        includeUser: options.includeUser ?? false,
+        includePermissions: options.includePermissions ?? false,
+      });
+      
+      // 3. Run authentication middleware
+      const authContext = await authMiddleware(request);
+      
+      // 4. Validate request data
+      let validatedData: T;
       try {
-        // Parse request body or query params based on method
-        let data: any;
-        if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
-          data = await req.json();
-        } else {
-          const url = new URL(req.url);
-          data = Object.fromEntries(url.searchParams.entries());
-        }
+        const body = request.method === 'GET' 
+          ? Object.fromEntries(new URL(request.url).searchParams)
+          : await request.json().catch(() => ({}));
         
-        // Validate data
-        const result = schema.safeParse(data);
-        if (!result.success) {
-          throw new ApiError(
-            ERROR_CODES.VALIDATION_ERROR,
-            'Invalid request parameters',
-            400,
-            result.error.format()
-          );
-        }
-        
-        // Call handler with validated data and services
-        return handler(req, context, result.data, services);
+        validatedData = schema.parse(body);
       } catch (error) {
-        if (error instanceof ApiError) {
-          return NextResponse.json(
-            { 
-              error: {
-                message: error.message,
-                code: error.code,
-                details: error.details
-              }
-            }, 
-            { status: error.statusCode }
+        if (error instanceof z.ZodError) {
+          const errorMessages = error.errors.map(err => 
+            `${err.path.join('.')}: ${err.message}`
+          ).join(', ');
+          
+          return createErrorResponse(
+            ERROR_CODES.VALIDATION_ERROR,
+            `Validation failed: ${errorMessages}`,
+            400,
+            { errors: error.errors }
           );
         }
-        
-        console.error('Unexpected error:', error);
-        return NextResponse.json(
-          { 
-            error: {
-              message: 'An unexpected error occurred',
-              code: ERROR_CODES.INTERNAL_ERROR
-            }
-          },
-          { status: 500 }
+        throw error;
+      }
+      
+      // 5. Call the actual handler
+      return await handler(request, authContext, validatedData, services);
+      
+    } catch (error) {
+      // Handle known API errors
+      if (error instanceof ApiError) {
+        return createErrorResponse(
+          error.code,
+          error.message,
+          error.statusCode,
+          error.details
         );
       }
+      
+      // Handle unexpected errors
+      console.error('Unexpected API error:', error);
+      return createErrorResponse(
+        ERROR_CODES.INTERNAL_ERROR,
+        'Internal server error',
+        500
+      );
     }
-  );
-};
+  };
+}
+
+/**
+ * Create a simple authenticated GET handler
+ */
+export function createAuthenticatedGetHandler<T>(
+  schema: z.ZodSchema<T>,
+  handler: ApiHandler<T>,
+  options: Omit<ApiHandlerOptions, 'requireAuth'> = {}
+) {
+  return createApiHandler(schema, handler, {
+    ...options,
+    requireAuth: true,
+  });
+}
+
+/**
+ * Create a simple public handler (no authentication required)
+ */
+export function createPublicHandler<T>(
+  schema: z.ZodSchema<T>,
+  handler: ApiHandler<T>,
+  options: Omit<ApiHandlerOptions, 'requireAuth'> = {}
+) {
+  return createApiHandler(schema, handler, {
+    ...options,
+    requireAuth: false,
+  });
+}
+
+/**
+ * Utility to create empty schema for handlers that don't need request data
+ */
+export const emptySchema = z.object({});
+
+/**
+ * Type helper for handlers that don't need request data
+ */
+export type EmptyHandler = ApiHandler<Record<string, never>>;

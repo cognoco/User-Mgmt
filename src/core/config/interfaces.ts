@@ -1,38 +1,194 @@
 /**
+ * Core Configuration Interfaces
+ * 
+ * This file defines the interfaces for configuring the User Management Module.
+ * These interfaces allow host applications to override service implementations
+ * while maintaining type safety and architectural compliance.
+ */
+
+import type { AuthService } from '@/core/auth/interfaces';
+import type { UserService } from '@/core/user/interfaces';
+import type { PermissionService } from '@/core/permission/interfaces';
+
+/**
+ * Service container interface that holds all available services
+ */
+export interface ServiceContainer {
+  auth: AuthService;
+  user: UserService;
+  permission?: PermissionService;
+  // Add other services as needed
+}
+
+/**
+ * Configuration for individual service instances
+ */
+export interface ServiceConfig {
+  /**
+   * Custom auth service implementation
+   */
+  authService?: AuthService;
+  
+  /**
+   * Custom user service implementation  
+   */
+  userService?: UserService;
+  
+  /**
+   * Custom permission service implementation
+   */
+  permissionService?: PermissionService;
+  
+  /**
+   * Feature flags to enable/disable functionality
+   */
+  featureFlags?: FeatureFlags;
+  
+  /**
+   * API-specific configuration
+   */
+  apiConfig?: ApiConfiguration;
+}
+
+/**
+ * Feature flags for enabling/disabling functionality
+ */
+export interface FeatureFlags {
+  mfa?: boolean;
+  oauth?: boolean;
+  permissions?: boolean;
+  audit?: boolean;
+  webhooks?: boolean;
+  [key: string]: boolean | undefined;
+}
+
+/**
+ * API-specific configuration options
+ */
+export interface ApiConfiguration {
+  /**
+   * Whether to require authentication by default for API routes
+   */
+  requireAuthByDefault?: boolean;
+  
+  /**
+   * Default permissions required for API access
+   */
+  defaultPermissions?: string[];
+  
+  /**
+   * Rate limiting configuration
+   */
+  rateLimiting?: {
+    windowMs: number;
+    max: number;
+  };
+  
+  /**
+   * CORS configuration
+   */
+  cors?: {
+    origin: string | string[];
+    credentials: boolean;
+  };
+}
+
+/**
+ * Module configuration interface for host applications
+ */
+export interface UserManagementConfig {
+  /**
+   * Service implementations
+   */
+  services?: ServiceConfig;
+  
+  /**
+   * Feature flags
+   */
+  features?: FeatureFlags;
+  
+  /**
+   * API configuration
+   */
+  api?: ApiConfiguration;
+}
+
+/**
+ * Authentication context passed to API handlers
+ */
+export interface AuthContext {
+  /**
+   * Current user ID (if authenticated)
+   */
+  userId?: string;
+  
+  /**
+   * Current user object (if includeUser option is enabled)
+   */
+  user?: any;
+  
+  /**
+   * User permissions (if includePermissions option is enabled)
+   */
+  permissions?: string[];
+  
+  /**
+   * Whether the request is authenticated
+   */
+  isAuthenticated: boolean;
+  
+  /**
+   * Authentication token
+   */
+  token?: string;
+}
+
+/**
+ * Options for API handler creation
+ */
+export interface ApiHandlerOptions {
+  /**
+   * Whether authentication is required for this endpoint
+   */
+  requireAuth?: boolean;
+  
+  /**
+   * Specific permissions required to access this endpoint
+   */
+  requiredPermissions?: string[];
+  
+  /**
+   * Whether to include full user object in auth context
+   */
+  includeUser?: boolean;
+  
+  /**
+   * Whether to include user permissions in auth context
+   */
+  includePermissions?: boolean;
+  
+  /**
+   * Custom service implementations for this handler
+   */
+  services?: Partial<ServiceContainer>;
+  
+  /**
+   * Rate limiting override for this endpoint
+   */
+  rateLimit?: {
+    windowMs: number;
+    max: number;
+  };
+}
+
+/**
  * Core configuration interfaces for the User Management Module
  * This file defines the configuration interfaces that govern the module's behavior
  */
 
 /**
- * Feature flags for enabling/disabling specific functionality
+ * API-related configuration
  */
-export interface FeatureFlags {
-  // Authentication features
-  enableRegistration: boolean;
-  enablePasswordReset: boolean;
-  enableMFA: boolean;
-  enableSocialAuth: boolean;
-  enableSSOAuth: boolean;
-  
-  // User management features
-  enableProfileManagement: boolean;
-  enableAccountSettings: boolean;
-  
-  // Team management features
-  enableTeams: boolean;
-  enableTeamInvitations: boolean;
-  enableTeamRoles: boolean;
-  
-  // Permission features
-  enableRoleManagement: boolean;
-  enablePermissionManagement: boolean;
-  
-  // Notification features
-  enableEmailNotifications: boolean;
-  enableInAppNotifications: boolean;
-}
-
-/** API-related configuration */
 export interface ApiOptions {
   /** Base URL for backend API calls */
   baseUrl: string;
