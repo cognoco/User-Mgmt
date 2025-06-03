@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useErrorStore } from '../errorStore';
-import { act } from '@testing-library/react';
+import { useErrorStore, useHasErrorType } from '../errorStore';
+import { act, renderHook } from '@testing-library/react';
 
 vi.mock('@/lib/audit/error-logger', () => ({
   logApiError: vi.fn(),
@@ -63,5 +63,24 @@ describe('errorStore', () => {
     });
     expect((useErrorStore.getState().sectionQueues['auth'] || []).length).toBe(0);
     expect((useErrorStore.getState().sectionQueues['billing'] || []).length).toBe(1);
+  });
+
+  it('exposes type lookup and cleans up on unmount', () => {
+    const renderCounts = { current: 0 };
+    const { unmount } = renderHook(() => {
+      renderCounts.current += 1;
+      return useHasErrorType('SPECIAL');
+    });
+
+    act(() => {
+      useErrorStore.getState().addError({ message: 'x', type: 'SPECIAL', dismissAfter: 0 });
+    });
+    expect(renderCounts.current).toBe(2);
+    unmount();
+
+    act(() => {
+      useErrorStore.getState().addError({ message: 'y', type: 'SPECIAL', dismissAfter: 0 });
+    });
+    expect(renderCounts.current).toBe(2);
   });
 });
