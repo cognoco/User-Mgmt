@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import RootLayoutClient from './RootLayoutClient';
 import './globals.css';
-import { initializeErrorSystem } from '@/lib/monitoring';
+import { initializeErrorSystem, initializeMonitoringSystem } from '@/lib/monitoring';
 
 initializeErrorSystem();
+initializeMonitoringSystem();
 
 export const viewport: Viewport = {
   width: 'device-width',
