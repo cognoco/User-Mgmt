@@ -15,6 +15,45 @@ import {
   MFAVerifyResponse
 } from './models';
 import type { OAuthProvider, OAuthUserProfile, OAuthProviderConfig } from '@/types/oauth';
+import type { TwoFactorMethod } from '@/types/2fa';
+
+// Additional interfaces for MFA operations
+export interface MfaCheckParams {
+  accessToken: string;
+  preferredMethod?: TwoFactorMethod;
+}
+
+export interface MfaCheckResult {
+  success: boolean;
+  mfaRequired: boolean;
+  availableMethods?: TwoFactorMethod[];
+  selectedMethod?: TwoFactorMethod;
+  accessToken?: string;
+  user?: User;
+  error?: string;
+}
+
+export interface MfaVerifyParams {
+  code: string;
+  method: TwoFactorMethod;
+  accessToken: string;
+  rememberDevice: boolean;
+}
+
+export interface MfaVerifyResult {
+  success: boolean;
+  user?: User;
+  session?: {
+    access_token: string;
+    expires_at: string;
+  };
+  error?: string;
+}
+
+export interface MfaResendResult {
+  success: boolean;
+  error?: string;
+}
 
 /**
  * Core authentication service interface
@@ -129,9 +168,17 @@ export interface AuthService {
   /**
    * Delete the current user's account
    * 
-   * @param password Current password for verification (optional depending on implementation)
+   * @param passwordOrParams Either a password string or an object with userId and password
    */
-  deleteAccount(password?: string): Promise<void>;
+  deleteAccount(passwordOrParams?: string | { userId: string; password: string }): Promise<{ success: boolean; error?: string }>;
+
+  /**
+   * Get account details for a user
+   * 
+   * @param userId User ID to get account details for
+   * @returns User account details
+   */
+  getUserAccount(userId: string): Promise<any>;
   
   /**
    * Set up Multi-Factor Authentication for the current user
@@ -155,6 +202,38 @@ export interface AuthService {
    * @returns Authentication result with success status or error
    */
   disableMFA(code: string): Promise<AuthResult>;
+
+  /**
+   * Check MFA requirements for a user after initial login
+   * 
+   * @param params MFA check parameters including access token and preferred method
+   * @returns MFA check result with requirements and available methods
+   */
+  checkMfaRequirements(params: MfaCheckParams): Promise<MfaCheckResult>;
+
+  /**
+   * Verify MFA code during login flow
+   * 
+   * @param params MFA verification parameters including code, method, and access token
+   * @returns MFA verification result with user and session data
+   */
+  verifyMfaCode(params: MfaVerifyParams): Promise<MfaVerifyResult>;
+
+  /**
+   * Resend MFA verification code via email
+   * 
+   * @param accessToken Temporary access token from initial login
+   * @returns Result indicating success or failure of resend operation
+   */
+  resendMfaEmailCode(accessToken: string): Promise<MfaResendResult>;
+
+  /**
+   * Resend MFA verification code via SMS
+   * 
+   * @param accessToken Temporary access token from initial login
+   * @returns Result indicating success or failure of resend operation
+   */
+  resendMfaSmsCode(accessToken: string): Promise<MfaResendResult>;
 
   /**
    * Configure an OAuth provider.
@@ -198,7 +277,7 @@ export interface AuthService {
   /**
    * Subscribe to authentication state changes
    * 
-   * @param callback Function to call when authentication state changes
+   * @param callback Function to call when auth state changes
    * @returns Unsubscribe function
    */
   onAuthStateChanged(callback: (user: User | null) => void): () => void;
