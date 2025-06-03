@@ -27,5 +27,5 @@ it('returns validation error when invalid', async () => {
   const res = await withValidation(schema, handler, req as any);
   expect(res.status).toBe(400);
   const body = await res.json();
-  expect(body.error.code).toBe('validation/error');
+  expect(body.error.code).toBe('VALIDATION_REQUEST_001');
 });

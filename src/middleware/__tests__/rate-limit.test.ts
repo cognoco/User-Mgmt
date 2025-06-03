@@ -266,7 +266,7 @@ describe('Rate Limiting', () => {
       expect(res.status).toHaveBeenCalledWith(429);
       expect(res.json).toHaveBeenCalledWith({
         error: {
-          code: 'server/operation_failed',
+          code: 'SERVER_GENERAL_004',
           message: 'Too many requests, please try again later.'
         }
       });
