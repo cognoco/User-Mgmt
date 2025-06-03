@@ -34,16 +34,16 @@ if (envResult.parsed) {
 } else {
   console.log('WARNING: No variables parsed from .env file in global setup, using fallback...');
   
-  // If dotenv parsing fails, manually set the known Supabase variables
-  // This is a fallback for when dotenv has parsing issues
+  // If dotenv parsing fails, use fallback environment variables instead of
+  // hardcoding secrets in the repository
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://izziigqgdurqsoyvajvu.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_URL = process.env.PLAYWRIGHT_SUPABASE_URL || '';
   }
   if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6emlpZ3FnZHVycXNveXZhanZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE2MjYyODksImV4cCI6MjA1NzIwMjI4OX0.6njjAphh3g39kIi8jQJx8xsvelXP-zDrm-wP9-OJ1Fs';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.PLAYWRIGHT_SUPABASE_ANON_KEY || '';
   }
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    process.env.SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6emlpZ3FnZHVycXNveXZhanZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MTYyNjI4OSwiZXhwIjoyMDU3MjAyMjg5fQ.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6emlpZ3FnZHVycXNveXZhanZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MTYyNjI4OSwiZXhwIjoyMDU3MjAyMjg5fQ';
+    process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.PLAYWRIGHT_SUPABASE_SERVICE_ROLE_KEY || '';
   }
   
   console.log('Fallback environment variables in global setup:');
