@@ -122,4 +122,43 @@ describe('webhook sender', () => {
     expect(results[0].statusCode).toBe(500);
     expect(provider.recordDelivery).toHaveBeenCalled();
   });
+
+  it('retries on server error', async () => {
+    provider.listWebhooks.mockResolvedValueOnce([
+      { id: 'w1', url: 'https://a.com', secret: 's', events: ['e'], isActive: true }
+    ]);
+    provider.recordDelivery.mockResolvedValue(undefined);
+    (global.fetch as any)
+      .mockResolvedValueOnce({ ok: false, status: 500, text: async () => 'err' })
+      .mockResolvedValueOnce({ ok: false, status: 502, text: async () => 'bad' })
+      .mockResolvedValueOnce({ ok: true, status: 200, text: async () => 'ok' });
+
+    const results = await sendWebhookEvent('e', {}, 'user');
+    expect((global.fetch as any)).toHaveBeenCalledTimes(3);
+    expect(results[0].success).toBe(true);
+  });
+
+  it('does not retry on client error', async () => {
+    provider.listWebhooks.mockResolvedValueOnce([
+      { id: 'w1', url: 'https://a.com', secret: 's', events: ['e'], isActive: true }
+    ]);
+    provider.recordDelivery.mockResolvedValue(undefined);
+    (global.fetch as any).mockResolvedValue({ ok: false, status: 400, text: async () => 'bad' });
+    await sendWebhookEvent('e', {}, 'user');
+    expect((global.fetch as any)).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports invalid signature', async () => {
+    provider.listWebhooks.mockResolvedValueOnce([
+      { id: 'w1', url: 'https://a.com', secret: 's', events: ['e'], isActive: true }
+    ]);
+    provider.recordDelivery.mockResolvedValue(undefined);
+    (global.fetch as any).mockResolvedValue({ ok: false, status: 401, text: async () => 'unauth' });
+    const [result] = await sendWebhookEvent('e', {}, 'user');
+    expect(result.error).toBe('Invalid signature');
+  });
+
+  it('validates payload', async () => {
+    await expect(sendWebhookEvent('', {}, 'u')).rejects.toThrow();
+  });
 });

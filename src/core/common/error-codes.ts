@@ -30,6 +30,15 @@ export enum TEAM_ERROR {
   TEAM_003 = 'TEAM_003',
 }
 
+export enum WEBHOOK_ERROR {
+  /** Invalid webhook payload */
+  WEBHOOK_001 = 'WEBHOOK_001',
+  /** Signature validation failed */
+  WEBHOOK_002 = 'WEBHOOK_002',
+  /** Delivery failed after retries */
+  WEBHOOK_003 = 'WEBHOOK_003',
+}
+
 export enum SERVER_ERROR {
   /** Generic server error */
   SERVER_001 = 'SERVER_001',
@@ -47,7 +56,8 @@ export type ErrorCode =
   | AUTH_ERROR
   | USER_ERROR
   | TEAM_ERROR
-  | SERVER_ERROR;
+  | SERVER_ERROR
+  | WEBHOOK_ERROR;
 
 // Unified ERROR_CODES object for backward compatibility
 export const ERROR_CODES = {
@@ -73,6 +83,11 @@ export const ERROR_CODES = {
   EXTERNAL_SERVICE_ERROR: SERVER_ERROR.SERVER_003,
   CONFLICT_ERROR: SERVER_ERROR.SERVER_004,
   RATE_LIMIT_ERROR: SERVER_ERROR.SERVER_005,
+
+  // Webhook codes
+  WEBHOOK_INVALID_PAYLOAD: WEBHOOK_ERROR.WEBHOOK_001,
+  WEBHOOK_SIGNATURE_INVALID: WEBHOOK_ERROR.WEBHOOK_002,
+  WEBHOOK_DELIVERY_FAILED: WEBHOOK_ERROR.WEBHOOK_003,
 } as const;
 
 // Optional descriptions for mapping codes to human readable text
@@ -92,5 +107,8 @@ export const ERROR_CODE_DESCRIPTIONS: Record<ErrorCode, string> = {
   [SERVER_ERROR.SERVER_003]: 'External service error',
   [SERVER_ERROR.SERVER_004]: 'Conflict',
   [SERVER_ERROR.SERVER_005]: 'Rate limit exceeded',
+  [WEBHOOK_ERROR.WEBHOOK_001]: 'Invalid webhook payload',
+  [WEBHOOK_ERROR.WEBHOOK_002]: 'Invalid webhook signature',
+  [WEBHOOK_ERROR.WEBHOOK_003]: 'Webhook delivery failed',
 };
 
