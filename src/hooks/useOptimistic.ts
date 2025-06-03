@@ -13,19 +13,23 @@ export function useOptimistic<T>(initial: T) {
   const [data, setData] = useState(initial);
   const queue = useRef<OptimisticAction<T>[]>([]);
   const rollingBack = useRef(false);
+  const [isFlushing, setIsFlushing] = useState(false);
 
   const flushQueue = async () => {
     if (queue.current.length === 0 || rollingBack.current) return;
+    setIsFlushing(true);
     const action = queue.current[0];
     try {
       await action.apply(action.optimisticData);
       queue.current.shift();
-      flushQueue();
+      await flushQueue();
     } catch {
       rollingBack.current = true;
       setData(initial);
       queue.current = [];
       rollingBack.current = false;
+    } finally {
+      setIsFlushing(false);
     }
   };
 
@@ -49,5 +53,12 @@ export function useOptimistic<T>(initial: T) {
     }
   };
 
-  return { data, setData, run };
+  return {
+    data,
+    setData,
+    run,
+    queueLength: queue.current.length,
+    flushQueue,
+    isFlushing,
+  };
 }
