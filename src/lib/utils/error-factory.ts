@@ -16,18 +16,37 @@ export interface ApplicationError extends Error {
  * Only English translations are provided currently but the structure
  * allows adding more locales easily.
  */
-const LOCALIZED_MESSAGES: Record<string, Record<string, string>> = {
+type MessageMap = Record<string, Record<string, string>>;
+
+const LOCALIZED_MESSAGES: MessageMap = {
   en: {
     [AUTH_ERROR_CODES.UNAUTHORIZED]: 'Authentication required.',
     [AUTH_ERROR_CODES.FORBIDDEN]: 'Access denied.',
     [VALIDATION_ERROR_CODES.INVALID_REQUEST]: 'Validation failed.',
-    [USER_ERROR_CODES.NOT_FOUND]: 'Resource not found.',
+    [USER_ERROR_CODES.NOT_FOUND]: '{{resourceType}} {{resourceId}} not found.',
     [SERVER_ERROR_CODES.INTERNAL_ERROR]: 'Internal server error.',
   },
 };
 
-function getLocalizedMessage(code: ErrorCode, locale: string): string | undefined {
-  return LOCALIZED_MESSAGES[locale]?.[code] || LOCALIZED_MESSAGES.en[code];
+function formatTemplate(
+  template: string,
+  params?: Record<string, string | number>
+): string {
+  if (!params) return template;
+  return template.replace(/{{(\w+)}}/g, (_, key) => String(params[key] ?? ''));
+}
+
+function getLocalizedMessage(
+  code: ErrorCode,
+  locale: string,
+  params?: Record<string, string | number>
+): string | undefined {
+  const base = locale.split('-')[0];
+  const template =
+    LOCALIZED_MESSAGES[locale]?.[code] ||
+    LOCALIZED_MESSAGES[base]?.[code] ||
+    LOCALIZED_MESSAGES.en[code];
+  return template ? formatTemplate(template, params) : undefined;
 }
 
 /**
@@ -38,7 +57,8 @@ export function createError(
   message: string,
   details?: Record<string, any>,
   cause?: unknown,
-  httpStatus?: number
+  httpStatus?: number,
+  locale = 'en'
 ): ApplicationError {
   const err = new Error(message) as ApplicationError;
   err.name = 'ApplicationError';
@@ -109,7 +129,8 @@ export function createNotFoundError(
 ) {
   const code = USER_ERROR_CODES.NOT_FOUND;
   const defaultMsg = `${resourceType} ${resourceId} not found`;
-  const msg = getLocalizedMessage(code, locale) || defaultMsg;
+  const msg =
+    getLocalizedMessage(code, locale, { resourceType, resourceId }) || defaultMsg;
   return createError(code, msg, { resourceType, resourceId }, cause, 404);
 }
 

@@ -57,12 +57,12 @@ describe('error factory', () => {
 
   it('falls back to default locale', () => {
     const err = createNotFoundError('item', '2', undefined, 'zz');
-    expect(err.message).toBe('Resource not found.');
+    expect(err.message).toBe('item 2 not found.');
   });
 
   it('uses translation when locale available', () => {
     const err = createNotFoundError('item', '3', undefined, 'en');
-    expect(err.message).toBe('Resource not found.');
+    expect(err.message).toBe('item 3 not found.');
   });
 
   it('sets timestamp and name properly', () => {
