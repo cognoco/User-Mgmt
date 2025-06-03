@@ -121,3 +121,18 @@ export function createMiddlewareChainFromConfig(
 
   return createMiddlewareChain(mws);
 }
+
+/**
+ * Standard middleware composition for authenticated API routes.
+ * Applies rate limiting, error handling, authentication and
+ * optional request validation in that order.
+ */
+export const standardApiMiddleware = <T>(
+  schema: ZodSchema<T>
+): RouteMiddleware =>
+  createMiddlewareChain([
+    rateLimitMiddleware(),
+    errorHandlingMiddleware(),
+    routeAuthMiddleware(),
+    validationMiddleware(schema)
+  ]);
