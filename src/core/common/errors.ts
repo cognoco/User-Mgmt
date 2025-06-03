@@ -172,6 +172,14 @@ export class ExternalServiceError extends ApplicationError {
   }
 }
 
+/** Error thrown when a data export fails. */
+export class DataExportError extends ApplicationError {
+  constructor(code: ErrorCode, message: string, details?: Record<string, any>) {
+    super(code, message, 500, details);
+    this.name = "DataExportError";
+  }
+}
+
 export class RelationshipHierarchyError extends ApplicationError {
   constructor(message: string, details?: Record<string, any>) {
     super(RELATIONSHIP_ERROR.REL_001, message, 400, details);
@@ -247,6 +255,10 @@ export function isExternalServiceError(
   value: unknown,
 ): value is ExternalServiceError {
   return value instanceof ExternalServiceError;
+}
+
+export function isDataExportError(value: unknown): value is DataExportError {
+  return value instanceof DataExportError;
 }
 
 export function isTokenRefreshError(value: unknown): value is TokenRefreshError {

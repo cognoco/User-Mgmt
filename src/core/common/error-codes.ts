@@ -69,13 +69,23 @@ export enum SSO_ERROR {
   SSO_004 = 'SSO_004',
 }
 
+export enum EXPORT_ERROR {
+  /** Export generation failed */
+  EXPORT_001 = 'EXPORT_001',
+  /** Export integrity validation failed */
+  EXPORT_002 = 'EXPORT_002',
+  /** Export record not found */
+  EXPORT_003 = 'EXPORT_003',
+}
+
 export type ErrorCode =
   | AUTH_ERROR
   | USER_ERROR
   | TEAM_ERROR
   | SERVER_ERROR
   | RELATIONSHIP_ERROR
-  | SSO_ERROR;
+  | SSO_ERROR
+  | EXPORT_ERROR;
 
 // Unified ERROR_CODES object for backward compatibility
 export const ERROR_CODES = {
@@ -115,6 +125,9 @@ export const ERROR_CODES = {
   SSO_CONFIGURATION_ERROR: SSO_ERROR.SSO_002,
   SSO_FEDERATION_ERROR: SSO_ERROR.SSO_003,
   SSO_AUTHENTICATION_ERROR: SSO_ERROR.SSO_004,
+  EXPORT_FAILED: EXPORT_ERROR.EXPORT_001,
+  EXPORT_INTEGRITY_ERROR: EXPORT_ERROR.EXPORT_002,
+  EXPORT_NOT_FOUND: EXPORT_ERROR.EXPORT_003,
 } as const;
 
 // Optional descriptions for mapping codes to human readable text
@@ -144,5 +157,8 @@ export const ERROR_CODE_DESCRIPTIONS: Record<ErrorCode, string> = {
   [SSO_ERROR.SSO_002]: 'SSO configuration error',
   [SSO_ERROR.SSO_003]: 'SSO federation error',
   [SSO_ERROR.SSO_004]: 'SSO authentication error',
+  [EXPORT_ERROR.EXPORT_001]: 'Export generation failed',
+  [EXPORT_ERROR.EXPORT_002]: 'Export integrity validation failed',
+  [EXPORT_ERROR.EXPORT_003]: 'Export not found',
 };
 

@@ -116,3 +116,13 @@ describe("utility functions", () => {
     expect(other.message).toBe("Unknown error");
   });
 });
+
+describe('DataExportError', () => {
+  it('creates and identifies export errors', () => {
+    const err = new DataExportError(EXPORT_ERROR.EXPORT_001, 'fail', { step: 2 });
+    expect(err).toBeInstanceOf(ApplicationError);
+    expect(isDataExportError(err)).toBe(true);
+    expect(err.code).toBe(EXPORT_ERROR.EXPORT_001);
+    expect(err.details).toEqual({ step: 2 });
+  });
+});
