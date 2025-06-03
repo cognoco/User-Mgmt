@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { getApiAddressService } from '@/services/address/factory';
 import { addressSchema } from '@/core/address/validation';
 import {
@@ -6,9 +6,13 @@ import {
   createCreatedResponse,
   createValidationError,
 } from '@/lib/api/common';
-import { withRateLimit } from '@/middleware/rate-limit';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withAuthRequest } from '@/middleware/auth';
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  rateLimitMiddleware,
+  routeAuthMiddleware,
+  validationMiddleware,
+} from '@/middleware/createMiddlewareChain';
 import { withSecurity } from '@/middleware/with-security';
 
 async function handleGet(_req: NextRequest, userId: string) {
@@ -17,22 +21,32 @@ async function handleGet(_req: NextRequest, userId: string) {
   return createSuccessResponse({ addresses });
 }
 
-async function handlePost(req: NextRequest, userId: string) {
-  const data = await req.json();
+async function handlePost(_req: NextRequest, userId: string, data: any) {
   const parse = addressSchema.safeParse(data);
-  if (!parse.success) throw createValidationError('Invalid address data', parse.error.flatten());
+  if (!parse.success)
+    throw createValidationError('Invalid address data', parse.error.flatten());
   const service = getApiAddressService();
   const address = await service.createAddress({ ...parse.data, userId });
   return createCreatedResponse({ address });
 }
 
-// Combined approach with both rate limiting and proper authentication
-export const GET = (req: NextRequest) =>
-  withRateLimit(req, r => withSecurity(q =>
-    withAuthRequest(q, (s, ctx) => handleGet(s, ctx.userId))
-  )(r));
+const baseMiddleware = createMiddlewareChain([
+  rateLimitMiddleware(),
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+]);
 
-export const POST = (req: NextRequest) =>
-  withRateLimit(req, r => withSecurity(q =>
-    withAuthRequest(q, (s, ctx) => handlePost(s, ctx.userId))
-  )(r));
+const postMiddleware = createMiddlewareChain([
+  rateLimitMiddleware(),
+  errorHandlingMiddleware(),
+  routeAuthMiddleware(),
+  validationMiddleware(addressSchema),
+]);
+
+export const GET = withSecurity((req: NextRequest) =>
+  baseMiddleware((r, auth) => handleGet(r, auth.userId!))(req)
+);
+
+export const POST = withSecurity((req: NextRequest) =>
+  postMiddleware((r, auth, data) => handlePost(r, auth.userId!, data))(req)
+);
