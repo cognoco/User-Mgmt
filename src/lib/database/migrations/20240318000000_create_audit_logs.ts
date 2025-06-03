@@ -1,4 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
+import compliance from '@/config/compliance.config';
 
 export const up = async (client: SupabaseClient) => {
   await client.rpc('exec', {
@@ -34,7 +35,7 @@ export const up = async (client: SupabaseClient) => {
     AS $$
     BEGIN
       DELETE FROM audit_logs
-      WHERE timestamp < NOW() - INTERVAL '90 days';
+      WHERE timestamp < NOW() - INTERVAL '${compliance.auditLogRetentionDays} days';
     END;
     $$;
 

@@ -1,4 +1,6 @@
 import type { ApplicationError } from './error-factory';
+import { sanitizePII } from './pii';
+import compliance from '@/config/compliance.config';
 import { createError, createAuthenticationError, createNotFoundError } from './error-factory';
 import { SERVER_ERROR_CODES } from '@/lib/api/common/error-codes';
 import type { ErrorCode } from '@/lib/api/common/error-codes';
@@ -88,7 +90,7 @@ export function formatErrorForLogging(error: ApplicationError) {
     code: error.code,
     message: error.message,
     stack: error.stack,
-    details: error.details,
+    details: sanitizePII(error.details, compliance.piiFields),
     requestId: error.requestId,
     timestamp: error.timestamp,
   };

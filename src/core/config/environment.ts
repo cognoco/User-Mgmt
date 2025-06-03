@@ -14,6 +14,9 @@ export interface EnvironmentConfig {
   database: DatabaseConfig;
   /** Show detailed error info in development */
   showErrorDetails?: boolean;
+  auditLogRetentionDays: number;
+  retentionPersonalMonths: number;
+  retentionBusinessMonths: number;
 }
 
 const defaults: Pick<EnvironmentConfig, 'apiTimeout' | 'rateLimitWindowMs' | 'rateLimitMax' | 'sessionCookieName' | 'tokenExpiryDays'> = {
@@ -63,6 +66,9 @@ export function loadEnvironment(): EnvironmentConfig {
       process.env.SHOW_ERROR_DETAILS
         ? process.env.SHOW_ERROR_DETAILS === 'true'
         : process.env.NODE_ENV !== 'production',
+    auditLogRetentionDays: parseInt(process.env.AUDIT_LOG_RETENTION_DAYS || '90', 10),
+    retentionPersonalMonths: parseInt(process.env.RETENTION_PERSONAL_MONTHS || '24', 10),
+    retentionBusinessMonths: parseInt(process.env.RETENTION_BUSINESS_MONTHS || '36', 10),
   };
 }
 
