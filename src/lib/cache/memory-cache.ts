@@ -42,6 +42,18 @@ export class MemoryCache<K, V> {
     this.cache.delete(key);
   }
 
+  keys(): IterableIterator<K> {
+    return this.cache.keys();
+  }
+
+  deleteWhere(predicate: (key: K) => boolean): void {
+    for (const key of this.cache.keys()) {
+      if (predicate(key)) {
+        this.cache.delete(key);
+      }
+    }
+  }
+
   async getOrCreate(key: K, fetcher: () => Promise<V>, ttl: number = this.ttl): Promise<V> {
     const cached = this.get(key);
     if (cached !== undefined) return cached;
