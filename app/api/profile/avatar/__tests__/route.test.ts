@@ -1,13 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GET, POST, DELETE } from '../route';
 import { getApiUserService } from '@/services/user/factory';
-import { withRouteAuth } from '@/middleware/auth';
+import { createAuthMiddleware } from '@/lib/auth/unified-auth.middleware';
 import createMockUserService from '@/tests/mocks/user.service.mock';
 import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
 vi.mock('@/services/user/factory', () => ({ getApiUserService: vi.fn() }));
-vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'user-1', role: 'user', permissions: [] })),
+vi.mock('@/lib/auth/unified-auth.middleware', () => ({
+  createAuthMiddleware: vi.fn(() =>
+    (handler: any) => async (req: any) => handler(req, { userId: 'user-1', permissions: [], authenticated: true })
+  )
 }));
 
 const service = createMockUserService();

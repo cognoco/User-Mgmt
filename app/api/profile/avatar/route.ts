@@ -6,13 +6,11 @@ import {
   createSuccessResponse,
   createNoContentResponse,
 } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
-import { withRouteAuth } from '@/middleware/auth';
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import type { ServiceContainer } from '@/core/config/interfaces';
 
 import { createUserUpdateFailedError } from '@/lib/api/user/error-handler';
 
-import { getApiUserService } from '@/services/user/factory';
 
 // Schema for avatar upload request body (supports both custom uploads and predefined avatars)
 const AvatarUploadSchema = z.object({
@@ -45,11 +43,12 @@ async function handleGetAvatars() {
 }
 
 async function handleUploadAvatar(
-  req: NextRequest,
-  userId: string,
-  data: z.infer<typeof AvatarUploadSchema>
+  _req: NextRequest,
+  { userId }: { userId: string },
+  data: z.infer<typeof AvatarUploadSchema>,
+  services: ServiceContainer
 ) {
-  const userService = getApiUserService();
+  const userService = services.user;
   let avatarUrl: string | undefined;
 
   if (data.avatarId) {
@@ -104,8 +103,13 @@ async function handleUploadAvatar(
   });
 }
 
-async function handleDeleteAvatar(userId: string) {
-  const userService = getApiUserService();
+async function handleDeleteAvatar(
+  _req: NextRequest,
+  { userId }: { userId: string },
+  _data: unknown,
+  services: ServiceContainer
+) {
+  const userService = services.user;
   const result = await userService.deleteProfilePicture(userId);
   if (!result.success) {
     throw createUserUpdateFailedError(result.error);
@@ -113,21 +117,16 @@ async function handleDeleteAvatar(userId: string) {
   return createNoContentResponse();
 }
 
-export async function GET(request: NextRequest) {
-  return withErrorHandling(handleGetAvatars, request);
-}
+export const GET = createApiHandler(emptySchema, handleGetAvatars, {
+  requireAuth: false,
+});
 
-export async function POST(request: NextRequest) {
-  return withErrorHandling(
-    (req) =>
-      withRouteAuth((r, auth) => withValidation(AvatarUploadSchema, (r2, data) => handleUploadAvatar(r2, auth.userId!, data), r), req),
-    request
-  );
-}
+export const POST = createApiHandler(AvatarUploadSchema, async (req, ctx, data, services) =>
+  handleUploadAvatar(req, ctx, data, services), {
+  requireAuth: true,
+});
 
-export async function DELETE(request: NextRequest) {
-  return withErrorHandling(
-    (req) => withRouteAuth((r, auth) => handleDeleteAvatar(auth.userId!), req),
-    request
-  );
-}
+export const DELETE = createApiHandler(emptySchema, async (req, ctx, data, services) =>
+  handleDeleteAvatar(req, ctx, data, services), {
+  requireAuth: true,
+});

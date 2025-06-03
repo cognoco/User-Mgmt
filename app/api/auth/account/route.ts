@@ -1,16 +1,13 @@
 import { type NextRequest } from "next/server";
 import { z } from "zod";
-import { withSecurity } from '@/middleware/with-security';
-import { withAuthRateLimit } from "@/middleware/rate-limit";
-import { getApiAuthService } from "@/services/auth/factory";
 import { logUserAction } from "@/lib/audit/auditLogger";
 import {
   createSuccessResponse,
-  withErrorHandling,
-  withValidation,
   ApiError,
   ERROR_CODES,
 } from "@/lib/api/common";
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import type { ServiceContainer } from '@/core/config/interfaces';
 
 // Zod schema for account deletion request
 const DeleteAccountSchema = z.object({
@@ -21,17 +18,19 @@ const DeleteAccountSchema = z.object({
 
 async function handleDeleteAccount(
   req: NextRequest,
+  { userId }: { userId: string },
   data: z.infer<typeof DeleteAccountSchema>,
+  services: ServiceContainer
 ) {
   const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
   const userAgent = req.headers.get("user-agent") || "unknown";
 
-  let userId: string | undefined;
+  let currentUserId: string | undefined;
   let userEmail: string | undefined;
 
   try {
     // 1. Get AuthService
-    const authService = getApiAuthService();
+    const authService = services.auth;
 
     // 2. Get current user
     const user = await authService.getCurrentUser();
@@ -44,7 +43,7 @@ async function handleDeleteAccount(
       );
     }
 
-    userId = user.id;
+    currentUserId = user.id;
     userEmail = user.email;
 
     if (!userEmail) {
@@ -58,22 +57,22 @@ async function handleDeleteAccount(
     // 3. Parse and Validate Body
     const { password } = data;
 
-    console.log("Account deletion attempt initiated for user:", userId);
+    console.log("Account deletion attempt initiated for user:", currentUserId);
 
     // Log the account deletion attempt
     await logUserAction({
-      userId,
+      userId: currentUserId,
       action: "ACCOUNT_DELETION_INITIATED",
       status: "PENDING",
       ipAddress,
       userAgent,
       targetResourceType: "account",
-      targetResourceId: userId,
+      targetResourceId: currentUserId,
     });
 
     // 4. Delete account using the AuthService
     const result = await authService.deleteAccount({
-      userId,
+      userId: currentUserId,
       password,
     });
 
@@ -83,13 +82,13 @@ async function handleDeleteAccount(
 
       // Log the failed deletion
       await logUserAction({
-        userId,
+        userId: currentUserId,
         action: "ACCOUNT_DELETION_FAILED",
         status: "FAILURE",
         ipAddress,
         userAgent,
         targetResourceType: "account",
-        targetResourceId: userId,
+        targetResourceId: currentUserId,
         details: { error: result.error },
       });
 
@@ -116,29 +115,29 @@ async function handleDeleteAccount(
       ipAddress,
       userAgent,
       targetResourceType: "account",
-      targetResourceId: userId,
+      targetResourceId: currentUserId,
     });
 
-    console.log("Account deletion successful for user:", userId);
+    console.log("Account deletion successful for user:", currentUserId);
 
     // Return success
     // Client should handle redirecting or signing out locally
     return createSuccessResponse({ message: "Account successfully deleted." });
   } catch (error) {
     // Handle Unexpected Errors
-    console.error("Account deletion process error for user:", userId, error);
+    console.error("Account deletion process error for user:", currentUserId, error);
     const message =
       error instanceof Error ? error.message : "An unexpected error occurred";
 
     // Log the error
     await logUserAction({
-      userId,
+      userId: currentUserId,
       action: "ACCOUNT_DELETION_ERROR",
       status: "FAILURE",
       ipAddress,
       userAgent,
       targetResourceType: "account",
-      targetResourceId: userId,
+      targetResourceId: currentUserId,
       details: { error: message },
     });
 
@@ -151,50 +150,40 @@ async function handleDeleteAccount(
   }
 }
 
-// Apply rate limiting and security middleware
-async function deleteHandler(req: NextRequest) {
-  return withErrorHandling(
-    async (r) => withValidation(DeleteAccountSchema, handleDeleteAccount, r),
-    req,
-  );
-}
-
-export const DELETE = withSecurity(async (request: NextRequest) =>
-  withAuthRateLimit(request, deleteHandler),
+export const DELETE = createApiHandler(
+  DeleteAccountSchema,
+  handleDeleteAccount,
+  {
+    requireAuth: true,
+    rateLimit: { windowMs: 15 * 60 * 1000, max: 30 },
+  }
 );
 
 // GET handler to fetch account info
-async function handleGetAccount(req: NextRequest) {
-  const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
-  const userAgent = req.headers.get("user-agent") || "unknown";
+async function handleGetAccount(
+  req: NextRequest,
+  { userId }: { userId: string },
+  _data: unknown,
+  services: ServiceContainer
+) {
+  const ipAddress = req.headers.get('x-forwarded-for') || 'unknown';
+  const userAgent = req.headers.get('user-agent') || 'unknown';
 
   try {
-    // Get AuthService
-    const authService = getApiAuthService();
-
-    // Get current user
-    const user = await authService.getCurrentUser();
-
-    if (!user) {
-      throw new ApiError(
-        ERROR_CODES.UNAUTHORIZED,
-        "User not authenticated",
-        401,
-      );
-    }
+    const authService = services.auth;
 
     // Get user account details
-    const accountDetails = await authService.getUserAccount(user.id);
+    const accountDetails = await authService.getUserAccount(userId);
 
     // Log the account info request
     await logUserAction({
-      userId: user.id,
-      action: "ACCOUNT_INFO_REQUESTED",
-      status: "SUCCESS",
+      userId,
+      action: 'ACCOUNT_INFO_REQUESTED',
+      status: 'SUCCESS',
       ipAddress,
       userAgent,
-      targetResourceType: "account",
-      targetResourceId: user.id,
+      targetResourceType: 'account',
+      targetResourceId: userId,
     });
 
     return createSuccessResponse(accountDetails);
@@ -221,11 +210,11 @@ async function handleGetAccount(req: NextRequest) {
   }
 }
 
-// Apply rate limiting and security middleware for GET
-async function getHandler(req: NextRequest) {
-  return withErrorHandling(handleGetAccount, req);
-}
-
-export const GET = withSecurity(async (request: NextRequest) =>
-  withAuthRateLimit(request, getHandler),
+export const GET = createApiHandler(
+  emptySchema,
+  handleGetAccount,
+  {
+    requireAuth: true,
+    rateLimit: { windowMs: 15 * 60 * 1000, max: 30 },
+  }
 );
