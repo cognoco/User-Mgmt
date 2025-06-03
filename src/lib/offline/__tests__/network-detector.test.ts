@@ -47,9 +47,14 @@ describe('NetworkDetector', () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
+
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+    // reset fetch
+    // @ts-ignore
+    delete global.fetch;
+    delete (window.navigator as any).onLine;
   });
 
   it('emits state changes based on connectivity', async () => {
@@ -57,11 +62,9 @@ describe('NetworkDetector', () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true });
     global.fetch = fetchMock as any;
     vi.spyOn(Date, 'now').mockReturnValueOnce(0).mockReturnValueOnce(100);
-
     const detector = new NetworkDetector(1000);
     const handler = vi.fn();
     detector.onChange(handler);
-
     await (detector as any).updateState();
     expect(detector.getState()).toBe('strong');
     expect(detector.getLatency()).toBe(100);

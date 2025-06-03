@@ -28,7 +28,7 @@ export class NetworkDetector {
   private heartbeatId?: ReturnType<typeof setInterval>;
   private latency = 0;
   private state: ConnectivityState = detectNetworkStatus() ? 'strong' : 'offline';
-
+  
   constructor(private heartbeatInterval = 30000) {
     if (typeof window !== 'undefined') {
       window.addEventListener('online', this.handleOnline);
@@ -36,22 +36,22 @@ export class NetworkDetector {
       this.startHeartbeat();
     }
   }
-
+  
   private handleOnline = () => {
     this.updateState();
   };
-
+  
   private handleOffline = () => {
     this.changeState('offline');
   };
-
+  
   private changeState(state: ConnectivityState) {
     if (this.state !== state) {
       this.state = state;
       this.listeners.forEach(cb => cb(this.state));
     }
   }
-
+  
   private async updateState() {
     const start = Date.now();
     const ok = await verifyConnectivity();
@@ -63,28 +63,28 @@ export class NetworkDetector {
       this.changeState(quality);
     }
   }
-
+  
   startHeartbeat() {
     this.stopHeartbeat();
     this.heartbeatId = setInterval(() => this.updateState(), this.heartbeatInterval);
   }
-
+  
   stopHeartbeat() {
     if (this.heartbeatId) {
       clearInterval(this.heartbeatId);
       this.heartbeatId = undefined;
     }
   }
-
+  
   onChange(listener: ConnectivityListener) {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
   }
-
+  
   getState() {
     return this.state;
   }
-
+  
   getLatency() {
     return this.latency;
   }
