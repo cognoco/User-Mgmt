@@ -1,7 +1,7 @@
 // POST /api/resources/permissions - Assign permission to user for specific resource
 // DELETE /api/resources/permissions - Remove permission from user for specific resource
 
-import { type NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import {
   createCreatedResponse,
@@ -9,13 +9,14 @@ import {
 } from '@/lib/api/common';
 import { withErrorHandling } from '@/middleware/error-handling';
 import { withValidation } from '@/middleware/validation';
-import { createProtectedHandler } from '@/middleware/permissions';
+import { withRouteAuth } from '@/middleware/auth';
 import { withSecurity } from '@/middleware/with-security';
 import {
   PermissionValues,
   PermissionSchema,
 } from '@/core/permission/models';
 import { getApiPermissionService } from '@/services/permission/factory';
+import { checkPermission } from '@/lib/auth/permissionCheck';
 import { mapPermissionServiceError } from '@/lib/api/permission/error-handler';
 
 const assignSchema = z.object({
@@ -28,7 +29,21 @@ type AssignPayload = z.infer<typeof assignSchema>;
 
 const removeSchema = assignSchema;
 
-async function handlePost(_req: NextRequest, userId: string | undefined, data: AssignPayload) {
+async function handlePost(
+  _req: NextRequest,
+  userId: string,
+  data: AssignPayload,
+) {
+  const allowed =
+    (await checkPermission(
+      userId,
+      PermissionValues.MANAGE_ROLES,
+      data.resourceType,
+      data.resourceId,
+    )) || (await checkPermission(userId, PermissionValues.MANAGE_ROLES));
+  if (!allowed) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
   const service = getApiPermissionService();
   try {
     const permission = await service.assignResourcePermission(
@@ -44,7 +59,17 @@ async function handlePost(_req: NextRequest, userId: string | undefined, data: A
   }
 }
 
-async function handleDelete(userId: string | undefined, data: AssignPayload) {
+async function handleDelete(userId: string, data: AssignPayload) {
+  const allowed =
+    (await checkPermission(
+      userId,
+      PermissionValues.MANAGE_ROLES,
+      data.resourceType,
+      data.resourceId,
+    )) || (await checkPermission(userId, PermissionValues.MANAGE_ROLES));
+  if (!allowed) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
   const service = getApiPermissionService();
   const ok = await service.removeResourcePermission(
     data.userId,
@@ -62,29 +87,25 @@ async function handleDelete(userId: string | undefined, data: AssignPayload) {
   return createNoContentResponse();
 }
 
-export const POST = createProtectedHandler(
-  (req, ctx) =>
-    withSecurity(async (r) => {
-      const body = await r.json();
+export const POST = (req: NextRequest) =>
+  withRouteAuth((r, auth) =>
+    withSecurity(async (r2) => {
+      const body = await r2.json();
       return withErrorHandling(
-        (r2) =>
-          withValidation(assignSchema, (_r, data) => handlePost(_r, ctx?.userId, data), r2, body),
-        r,
+        (r3) => withValidation(assignSchema, (_r, data) => handlePost(_r, auth.userId!, data), r3, body),
+        r2,
       );
-    })(req),
-  PermissionValues.MANAGE_ROLES,
-);
+    })(r),
+  req);
 
-export const DELETE = createProtectedHandler(
-  (req, ctx) =>
-    withSecurity(async (r) => {
-      const url = new URL(r.url);
+export const DELETE = (req: NextRequest) =>
+  withRouteAuth((r, auth) =>
+    withSecurity(async (r2) => {
+      const url = new URL(r2.url);
       const params = Object.fromEntries(url.searchParams.entries());
       return withErrorHandling(
-        (r2) =>
-          withValidation(removeSchema, (_req2, data) => handleDelete(ctx?.userId, data), r2, params),
-        r,
+        (r3) => withValidation(removeSchema, (_r, data) => handleDelete(auth.userId!, data), r3, params),
+        r2,
       );
-    })(req),
-  PermissionValues.MANAGE_ROLES,
-);
+    })(r),
+  req);

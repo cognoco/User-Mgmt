@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DELETE, PATCH } from '../route';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
+import { checkPermission } from '@/lib/auth/permissionCheck';
 
 vi.mock('@/middleware/rate-limit', () => ({ checkRateLimit: vi.fn().mockResolvedValue(false) }));
 vi.mock('@/lib/database/supabase', () => {
@@ -16,6 +17,7 @@ vi.mock('@/lib/database/supabase', () => {
   return { getServiceSupabase: vi.fn(() => client) };
 });
 vi.mock("@/middleware/auth", () => ({ withRouteAuth: vi.fn((h: any, r: any) => h(r, { userId: "user-1" })) }));
+vi.mock('@/lib/auth/permissionCheck', () => ({ checkPermission: vi.fn() }));
 
 describe('Company Domain By ID API', () => {
   const id = 'domain-1';
@@ -35,6 +37,7 @@ describe('Company Domain By ID API', () => {
       data: { id, is_primary: false, company_profiles: { id: 'c', user_id: 'user-1' } },
       error: null
     });
+    (checkPermission as unknown as vi.Mock).mockResolvedValue(true);
   });
 
   it('deletes a domain successfully', async () => {
