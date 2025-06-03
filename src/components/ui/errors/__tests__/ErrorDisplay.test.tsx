@@ -2,7 +2,13 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { ErrorDisplay, NetworkErrorDisplay, ValidationErrorDisplay } from '../ErrorDisplay';
+import {
+  ErrorDisplay,
+  NetworkErrorDisplay,
+  ValidationErrorDisplay,
+  NotFoundErrorDisplay,
+  PermissionErrorDisplay,
+} from '../ErrorDisplay';
 import { toast } from '@/lib/hooks/use-toast';
 
 vi.mock('@/lib/hooks/use-toast', () => {
@@ -31,11 +37,23 @@ describe('ErrorDisplay', () => {
     expect(screen.getByText('Modal')).toBeInTheDocument();
   });
 
+  it('has accessible alert attributes', () => {
+    render(<ErrorDisplay message="Accessible" />);
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveAttribute('aria-live', 'assertive');
+  });
+
   it('specialized component uses defaults', () => {
     render(<NetworkErrorDisplay />);
     expect(toast).toHaveBeenCalledWith(expect.objectContaining({ title: expect.stringContaining('Network error') }));
 
     render(<ValidationErrorDisplay message="Form invalid" />);
     expect(screen.getByText('Form invalid')).toBeInTheDocument();
+
+    render(<NotFoundErrorDisplay />);
+    expect(screen.getByText(/requested resource/)).toBeInTheDocument();
+
+    render(<PermissionErrorDisplay />);
+    expect(screen.getByText(/permission to perform/)).toBeInTheDocument();
   });
 });
