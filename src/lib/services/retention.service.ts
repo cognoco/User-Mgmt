@@ -2,11 +2,13 @@ import { getServiceSupabase } from '../database/supabase';
 import { RetentionStatus, RetentionType } from '../database/schemas/retention';
 import { sendEmail } from '../email/sendEmail';
 import { addMonths, addDays, format, differenceInDays } from 'date-fns';
+import { getServerConfig } from '@/core/config/runtime-config';
 
 // Define inactivity thresholds (in months)
+const config = getServerConfig();
 const RETENTION_PERIODS = {
-  [RetentionType.PERSONAL]: 24, // 24 months inactivity for personal accounts
-  [RetentionType.BUSINESS]: 36, // 36 months inactivity for business accounts
+  [RetentionType.PERSONAL]: config.env.retentionPersonalMonths,
+  [RetentionType.BUSINESS]: config.env.retentionBusinessMonths,
 };
 
 // Define notification thresholds (in days before inactivity)

@@ -1,6 +1,8 @@
 import { createError, ApplicationError } from '@/core/common/errors';
 import { enhanceError, createValidationError } from '@/lib/utils/error-factory';
 import { ERROR_CODES } from '@/core/common/error-codes';
+import { sanitizePII } from '@/lib/utils/pii';
+import compliance from '@/config/compliance.config';
 import type { ZodSchema } from 'zod';
 
 export interface ErrorContext {
@@ -12,10 +14,9 @@ export interface ErrorContext {
 
 export function logServiceError(error: ApplicationError, context: ErrorContext) {
   const { service, method, ...rest } = context;
-  const safeDetails = error.details ? { ...error.details } : undefined;
-  if (safeDetails && 'password' in safeDetails) {
-    safeDetails.password = '***';
-  }
+  const safeDetails = error.details
+    ? sanitizePII({ ...error.details }, compliance.piiFields)
+    : undefined;
   const msg = `[${service}.${method}] ${error.message}`;
   if (error.httpStatus >= 500) {
     console.error(msg, { code: error.code, ...rest, details: safeDetails });

@@ -18,6 +18,9 @@ describe('runtime-config', () => {
     vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'service');
     vi.stubEnv('DATABASE_PROVIDER', 'supabase');
     vi.stubEnv('DATABASE_URL', 'supabase://test');
+    vi.stubEnv('AUDIT_LOG_RETENTION_DAYS', '90');
+    vi.stubEnv('RETENTION_PERSONAL_MONTHS', '24');
+    vi.stubEnv('RETENTION_BUSINESS_MONTHS', '36');
 
     const mod = await import('../runtime-config');
     const cfg = mod.initializeConfiguration();

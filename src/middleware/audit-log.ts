@@ -1,5 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@/lib/database/supabase';
+import { sanitizePII } from '@/lib/utils/pii';
+import compliance from '@/config/compliance.config';
 
 interface AuditLogOptions {
   excludePaths?: string[];
@@ -136,23 +138,7 @@ export function auditLog(options: AuditLogOptions = {}) {
 }
 
 function sanitizeData(data: any, sensitiveFields: string[]): any {
-  if (!data) return data;
-
-  if (Array.isArray(data)) {
-    return data.map(item => sanitizeData(item, sensitiveFields));
-  }
-
-  if (typeof data === 'object') {
-    const sanitized = { ...data };
-    for (const field of sensitiveFields) {
-      if (field in sanitized) {
-        sanitized[field] = '[REDACTED]';
-      }
-    }
-    return sanitized;
-  }
-
-  return data;
+  return sanitizePII(data, [...sensitiveFields, ...compliance.piiFields]);
 }
 
 async function saveAuditLog(logEntry: AuditLogEntry): Promise<void> {
