@@ -42,4 +42,14 @@ describe('ErrorReporter', () => {
     expect(ctx.requestId).toBe('r1');
     expect(ctx.breadcrumbs.length).toBe(1);
   });
+
+  it('clusters similar errors', () => {
+    const reporter = ErrorReporter.getInstance();
+    reporter.initialize();
+    reporter.captureError(new Error('Failed at step 1'));
+    reporter.captureError(new Error('Failed at step 2'));
+    const clusters = ErrorReporter.getClusters();
+    const cluster = clusters.find(c => c.id.includes('SERVER_001'))!;
+    expect(cluster.count).toBe(2);
+  });
 });
