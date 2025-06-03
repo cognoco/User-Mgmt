@@ -4,6 +4,13 @@ import {
   SERVER_ERROR,
   AUTH_ERROR,
 } from "./error-codes";
+import type { ErrorSeverity } from "./error-code-registry";
+
+function severityFromStatus(status: number): ErrorSeverity {
+  if (status >= 500) return "high";
+  if (status >= 400) return "medium";
+  return "low";
+}
 
 /**
  * Error utilities used by the core and service layers.
@@ -26,6 +33,8 @@ export class ApplicationError extends Error {
   details?: Record<string, any>;
   httpStatus: number;
   timestamp: string;
+  severity: ErrorSeverity;
+  expected: boolean;
   private cachedString?: string;
 
   constructor(
@@ -44,6 +53,8 @@ export class ApplicationError extends Error {
     this.details = details;
     this.httpStatus = httpStatus;
     this.timestamp = new Date().toISOString();
+    this.severity = severityFromStatus(httpStatus);
+    this.expected = httpStatus < 500;
   }
 
   /**
@@ -55,6 +66,8 @@ export class ApplicationError extends Error {
       code: this.code,
       message: this.message,
       httpStatus: this.httpStatus,
+      severity: this.severity,
+      expected: this.expected,
       timestamp: this.timestamp,
       ...(this.details && { details: this.details }),
     };
@@ -80,6 +93,8 @@ export class ApplicationError extends Error {
       obj.details,
     );
     err.timestamp = obj.timestamp;
+    err.severity = obj.severity as ErrorSeverity;
+    err.expected = Boolean(obj.expected);
     return err;
   }
 }

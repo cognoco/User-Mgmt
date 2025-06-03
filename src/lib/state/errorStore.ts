@@ -7,6 +7,7 @@ export interface ErrorEntry {
   type?: string;
   section?: string;
   timestamp: number;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
   dismissAfter?: number;
   onRetry?: () => Promise<void> | void;
   sync?: boolean;
@@ -28,7 +29,12 @@ export const useErrorStore = create<ErrorState>((set, get) => ({
 
   addError: (entry) => {
     const id = `${Date.now()}-${Math.random()}`;
-    const error: ErrorEntry = { ...entry, id, timestamp: Date.now() };
+    const error: ErrorEntry = {
+      severity: 'medium',
+      ...entry,
+      id,
+      timestamp: Date.now(),
+    };
     set(state => {
       if (error.section) {
         const list = state.sectionQueues[error.section] || [];

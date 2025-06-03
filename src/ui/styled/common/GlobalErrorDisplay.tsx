@@ -29,6 +29,7 @@ export function GlobalErrorDisplay() {
           <ApiErrorAlert
             message={error.message}
             onRetry={error.onRetry ? handleRetry : undefined}
+            severity={error.severity}
           />
         </Suspense>
       </div>
