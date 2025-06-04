@@ -1,28 +1,31 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET, POST } from '../route';
-import { withRouteAuth } from '@/middleware/auth';
+import { configureServices, resetServiceContainer } from '@/lib/config/service-container';
+import type { PermissionService } from '@/core/permission/interfaces';
+import type { AuthService } from '@/core/auth/interfaces';
+import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
-vi.mock('@/middleware/with-security', () => ({ withSecurity: (h: any) => h }));
-vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any, req: any) => handler(req, { userId: 'u1' })),
-}));
-
-const mockService = {
+const mockService: Partial<PermissionService> = {
   getAllRoles: vi.fn(),
   createRole: vi.fn(),
 };
-vi.mock('@/services/permission/factory', () => ({
-  getApiPermissionService: () => mockService,
-}));
+const mockAuth: Partial<AuthService> = {
+  getCurrentUser: vi.fn().mockResolvedValue({ id: 'u1' }),
+};
 
 beforeEach(() => {
-  vi.resetAllMocks();
+  vi.clearAllMocks();
+  resetServiceContainer();
+  configureServices({
+    permissionService: mockService as PermissionService,
+    authService: mockAuth as AuthService,
+  });
 });
 
 describe('roles root API', () => {
   it('GET returns roles', async () => {
     mockService.getAllRoles.mockResolvedValue([{ id: '1' }]);
-    const res = await GET(new Request('http://test'), {} as any);
+    const res = await GET(createAuthenticatedRequest('GET', 'http://test'));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.data.roles).toEqual([{ id: '1' }]);
@@ -30,15 +33,14 @@ describe('roles root API', () => {
 
   it('GET supports pagination', async () => {
     mockService.getAllRoles.mockResolvedValue([{ id: '1' }, { id: '2' }]);
-    const res = await GET(new Request('http://test?page=2&limit=1'), {} as any);
+    const res = await GET(createAuthenticatedRequest('GET', 'http://test?page=2&limit=1'));
     const body = await res.json();
     expect(body.data.page).toBe(2);
     expect(body.data.roles).toEqual([{ id: '2' }]);
   });
 
   it('POST creates role', async () => {
-    const req = new Request('http://test', { method: 'POST', body: JSON.stringify({ name: 'r', permissions: [] }) });
-    (req as any).json = async () => ({ name: 'r', permissions: [] });
+    const req = createAuthenticatedRequest('POST', 'http://test', { name: 'r', permissions: [] });
     mockService.createRole.mockResolvedValue({ id: '1' });
     const res = await POST(req as any);
     expect(res.status).toBe(201);

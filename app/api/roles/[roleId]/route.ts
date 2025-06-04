@@ -1,11 +1,7 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createSuccessResponse, createNoContentResponse } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
-import { createProtectedHandler } from '@/middleware/permissions';
-import { withSecurity } from '@/middleware/with-security';
-import { getApiPermissionService } from '@/services/permission/factory';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { mapPermissionServiceError, createRoleNotFoundError } from '@/lib/api/permission/error-handler';
 import { PermissionValues } from '@/core/permission/models';
 
@@ -17,9 +13,19 @@ const updateSchema = z.object({
 
 type UpdateRole = z.infer<typeof updateSchema>;
 
-async function handleGet(id: string) {
-  const service = getApiPermissionService();
-  const role = await service.getRoleById(id);
+function getRoleId(req: NextRequest): string {
+  const url = new URL(req.url);
+  return url.pathname.split('/')[3];
+}
+
+async function handleGet(
+  req: NextRequest,
+  _auth: any,
+  _data: unknown,
+  services: any,
+) {
+  const id = getRoleId(req);
+  const role = await services.permission.getRoleById(id);
   if (!role) {
     throw createRoleNotFoundError(id);
   }
@@ -27,14 +33,14 @@ async function handleGet(id: string) {
 }
 
 async function handlePatch(
-  _req: NextRequest,
-  userId: string | undefined,
-  id: string,
+  req: NextRequest,
+  auth: any,
   data: UpdateRole,
+  services: any,
 ) {
-  const service = getApiPermissionService();
+  const id = getRoleId(req);
   try {
-    const role = await service.updateRole(id, data, userId);
+    const role = await services.permission.updateRole(id, data, auth.userId);
     return createSuccessResponse({ role });
   } catch (e) {
     throw mapPermissionServiceError(e as Error);
@@ -42,60 +48,50 @@ async function handlePatch(
 }
 
 async function handlePut(
-  _req: NextRequest,
-  userId: string | undefined,
-  id: string,
+  req: NextRequest,
+  auth: any,
   data: UpdateRole,
+  services: any,
 ) {
-  const service = getApiPermissionService();
+  const id = getRoleId(req);
   try {
-    const role = await service.updateRole(id, data, userId);
+    const role = await services.permission.updateRole(id, data, auth.userId);
     return createSuccessResponse({ role });
   } catch (e) {
     throw mapPermissionServiceError(e as Error);
   }
 }
 
-async function handleDelete(id: string, userId: string | undefined) {
-  const service = getApiPermissionService();
-  const ok = await service.deleteRole(id, userId);
+async function handleDelete(
+  req: NextRequest,
+  auth: any,
+  _data: unknown,
+  services: any,
+) {
+  const id = getRoleId(req);
+  const ok = await services.permission.deleteRole(id, auth.userId);
   if (!ok) {
     throw createRoleNotFoundError(id);
   }
   return createNoContentResponse();
 }
 
-export const GET = createProtectedHandler(
-  (req, ctx) => withErrorHandling(() => handleGet(ctx.params.roleId), req),
-  PermissionValues.MANAGE_ROLES
-);
+export const GET = createApiHandler(z.object({}), handleGet, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});
 
-export const PATCH = createProtectedHandler(
-  (req, ctx) =>
-    withSecurity(async (r) => {
-      const body = await r.json();
-      return withErrorHandling(
-        (r3) => withValidation(updateSchema, (r2, data) => handlePatch(r2, ctx?.userId, ctx.params.roleId, data), r3, body),
-        r
-      );
-    })(req),
-  PermissionValues.MANAGE_ROLES
-);
+export const PATCH = createApiHandler(updateSchema, handlePatch, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});
 
-export const PUT = createProtectedHandler(
-  (req, ctx) =>
-    withSecurity(async (r) => {
-      const body = await r.json();
-      return withErrorHandling(
-        (r3) => withValidation(updateSchema, (r2, data) => handlePut(r2, ctx?.userId, ctx.params.roleId, data), r3, body),
-        r,
-      );
-    })(req),
-  PermissionValues.MANAGE_ROLES,
-);
+export const PUT = createApiHandler(updateSchema, handlePut, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});
 
-export const DELETE = createProtectedHandler(
-  (req, ctx) =>
-    withSecurity((r) => withErrorHandling(() => handleDelete(ctx.params.roleId, ctx?.userId), r))(req),
-  PermissionValues.MANAGE_ROLES
-);
+export const DELETE = createApiHandler(z.object({}), handleDelete, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});

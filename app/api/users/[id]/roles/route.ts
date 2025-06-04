@@ -1,11 +1,7 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createSuccessResponse, createCreatedResponse } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
-import { createProtectedHandler } from '@/middleware/permissions';
-import { withSecurity } from '@/middleware/with-security';
-import { getApiPermissionService } from '@/services/permission/factory';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { mapPermissionServiceError } from '@/lib/api/permission/error-handler';
 import { PermissionValues } from '@/core/permission/models';
 
@@ -19,24 +15,34 @@ const assignSchema = z.object({
 
 type AssignRole = z.infer<typeof assignSchema>;
 
-async function handleGet(userId: string) {
-  const service = getApiPermissionService();
-  const roles = await service.getUserRoles(userId);
+function getUserId(req: NextRequest): string {
+  const url = new URL(req.url);
+  return url.pathname.split('/')[3];
+}
+
+async function handleGet(
+  req: NextRequest,
+  _auth: any,
+  _data: unknown,
+  services: any,
+) {
+  const userId = getUserId(req);
+  const roles = await services.permission.getUserRoles(userId);
   return createSuccessResponse({ roles });
 }
 
 async function handlePost(
-  _req: NextRequest,
-  authUserId: string,
-  userId: string,
+  req: NextRequest,
+  auth: any,
   data: AssignRole,
+  services: any,
 ) {
-  const service = getApiPermissionService();
+  const userId = getUserId(req);
   try {
-    const role = await service.assignRoleToUser(
+    const role = await services.permission.assignRoleToUser(
       userId,
       data.roleId,
-      authUserId,
+      auth.userId,
       data.expiresAt ? new Date(data.expiresAt) : undefined,
     );
     return createCreatedResponse({ role });
@@ -45,20 +51,12 @@ async function handlePost(
   }
 }
 
-export const GET = createProtectedHandler(
-  (req, ctx) => withErrorHandling(() => handleGet(ctx.params.id), req),
-  PermissionValues.MANAGE_ROLES,
-);
+export const GET = createApiHandler(z.object({}), handleGet, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});
 
-export const POST = createProtectedHandler(
-  (req, ctx) =>
-    withSecurity(async (r) => {
-      const body = await r.json();
-      return withErrorHandling(
-        (r3) =>
-          withValidation(assignSchema, (r2, data) => handlePost(r2, ctx.userId!, ctx.params.id, data), r3, body),
-        r,
-      );
-    })(req),
-  PermissionValues.MANAGE_ROLES,
-);
+export const POST = createApiHandler(assignSchema, handlePost, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});
