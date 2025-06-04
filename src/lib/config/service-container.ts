@@ -368,6 +368,20 @@ export function getConfiguredAdminService(override?: AdminService): AdminService
 }
 
 /**
+ * Get a specific service with fallback to global configuration
+ */
+export function getConfiguredRoleService(override?: RoleService): RoleService | undefined {
+  return override || globalServiceConfig.roleService || getApiRoleService();
+}
+
+/**
+ * Get a specific service with fallback to global configuration
+ */
+export function getConfiguredAddressService(override?: CompanyAddressService): CompanyAddressService | undefined {
+  return override || globalServiceConfig.addressService || getApiAddressService();
+}
+
+/**
  * Reset all cached service instances
  * Useful for testing or when configuration changes
  */
