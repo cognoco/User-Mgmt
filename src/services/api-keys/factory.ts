@@ -6,10 +6,14 @@
  */
 
 import { ApiKeyService } from '@/core/api-key/interfaces';
-import { UserManagementConfiguration } from '@/core/config';
 import type { IApiKeyDataProvider } from '@/core/api-keys';
 import { AdapterRegistry } from '@/adapters/registry';
+import { getServiceContainer } from '@/lib/config/service-container';
 import { DefaultApiKeysService } from './default-api-keys.service';
+
+export interface ApiKeysServiceOptions {
+  reset?: boolean;
+}
 
 // Singleton instance for API routes
 let apiKeyServiceInstance: ApiKeyService | null = null;
@@ -19,15 +23,18 @@ let apiKeyServiceInstance: ApiKeyService | null = null;
  * 
  * @returns Configured ApiKeyService instance
  */
-export function getApiKeyService(): ApiKeyService {
-  if (!apiKeyServiceInstance) {
-    apiKeyServiceInstance =
-      UserManagementConfiguration.getServiceProvider('apiKeyService') as ApiKeyService | undefined;
+export function getApiKeyService(options: ApiKeysServiceOptions = {}): ApiKeyService {
+  if (options.reset) {
+    apiKeyServiceInstance = null;
+  }
 
-    if (!apiKeyServiceInstance) {
-      const provider = AdapterRegistry.getInstance().getAdapter<IApiKeyDataProvider>('apiKey');
-      apiKeyServiceInstance = new DefaultApiKeysService(provider);
-    }
+  if (!apiKeyServiceInstance) {
+    apiKeyServiceInstance = getServiceContainer().apiKey || null;
+  }
+
+  if (!apiKeyServiceInstance) {
+    const provider = AdapterRegistry.getInstance().getAdapter<IApiKeyDataProvider>('apiKey');
+    apiKeyServiceInstance = new DefaultApiKeysService(provider);
   }
 
   return apiKeyServiceInstance;
@@ -36,6 +43,6 @@ export function getApiKeyService(): ApiKeyService {
 /**
  * Temporary alias for backwards compatibility with older route imports.
  */
-export function getApiKeysService(): ApiKeyService {
-  return getApiKeyService();
+export function getApiKeysService(options: ApiKeysServiceOptions = {}): ApiKeyService {
+  return getApiKeyService(options);
 }
