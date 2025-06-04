@@ -29,7 +29,7 @@ import type { ConsentService } from '@/core/consent/interfaces';
 import type { AuditService } from '@/core/audit/interfaces';
 import type { AdminService } from '@/core/admin/interfaces';
 import type { RoleService } from '@/core/role/interfaces';
-import type { AddressService, CompanyAddressService } from '@/core/address/interfaces';
+import type { CompanyAddressService } from '@/core/address/interfaces';
 
 // Import existing service factories
 import { getApiAuthService } from '@/services/auth/factory';
@@ -37,10 +37,14 @@ import { getApiUserService } from '@/services/user/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { getApiTeamService } from '@/services/team/factory';
 import { getApiSsoService } from '@/services/sso/factory';
-import { getApiGdprService } from '@/services/gdpr/factory';
 import { getApiTwoFactorService } from '@/services/two-factor/factory';
 import { getApiSubscriptionService } from '@/services/subscription/factory';
-import { getApiKeyService } from '@/services/api-keys/factory';
+// ApiKey and GDPR services are constructed directly to avoid circular deps
+import type { IApiKeyDataProvider } from '@/core/api-keys';
+import type { IGdprDataProvider } from '@/core/gdpr';
+import { AdapterRegistry } from '@/adapters/registry';
+import { DefaultApiKeysService } from '@/services/api-keys/default-api-keys.service';
+import { DefaultGdprService } from '@/services/gdpr/default-gdpr.service';
 import { getApiNotificationService } from '@/services/notification/factory';
 import { getApiWebhookService } from '@/services/webhooks/factory';
 import { getApiSessionService } from '@/services/session/factory';
@@ -128,7 +132,8 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
   if (!serviceInstances.gdpr && globalServiceConfig.gdprService) {
     serviceInstances.gdpr = globalServiceConfig.gdprService;
   } else if (!serviceInstances.gdpr && globalServiceConfig.featureFlags?.gdpr !== false) {
-    serviceInstances.gdpr = getApiGdprService();
+    const provider = AdapterRegistry.getInstance().getAdapter<IGdprDataProvider>('gdpr');
+    serviceInstances.gdpr = new DefaultGdprService(provider);
   }
   
   // Create two-factor service if not cached
@@ -149,7 +154,8 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
   if (!serviceInstances.apiKey && globalServiceConfig.apiKeyService) {
     serviceInstances.apiKey = globalServiceConfig.apiKeyService;
   } else if (!serviceInstances.apiKey && globalServiceConfig.featureFlags?.apiKeys !== false) {
-    serviceInstances.apiKey = getApiKeyService();
+    const provider = AdapterRegistry.getInstance().getAdapter<IApiKeyDataProvider>('apiKey');
+    serviceInstances.apiKey = new DefaultApiKeysService(provider);
   }
   
   // Create notification service if not cached
@@ -287,7 +293,10 @@ export function getConfiguredSsoService(override?: SsoService): SsoService | und
  * Get a specific service with fallback to global configuration
  */
 export function getConfiguredGdprService(override?: GdprService): GdprService | undefined {
-  return override || globalServiceConfig.gdprService || getApiGdprService();
+  if (override) return override;
+  if (globalServiceConfig.gdprService) return globalServiceConfig.gdprService;
+  const provider = AdapterRegistry.getInstance().getAdapter<IGdprDataProvider>('gdpr');
+  return new DefaultGdprService(provider);
 }
 
 /**
@@ -308,7 +317,10 @@ export function getConfiguredSubscriptionService(override?: SubscriptionService)
  * Get a specific service with fallback to global configuration
  */
 export function getConfiguredApiKeyService(override?: ApiKeyService): ApiKeyService | undefined {
-  return override || globalServiceConfig.apiKeyService || getApiKeyService();
+  if (override) return override;
+  if (globalServiceConfig.apiKeyService) return globalServiceConfig.apiKeyService;
+  const provider = AdapterRegistry.getInstance().getAdapter<IApiKeyDataProvider>('apiKey');
+  return new DefaultApiKeysService(provider);
 }
 
 /**
