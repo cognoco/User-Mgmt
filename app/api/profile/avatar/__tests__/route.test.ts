@@ -1,20 +1,34 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GET, POST, DELETE } from '../route';
-import { getApiUserService } from '@/services/user/factory';
-import { withRouteAuth } from '@/middleware/auth';
+import {
+  configureServices,
+  resetServiceContainer,
+} from '@/lib/config/service-container';
+import type { UserService } from '@/core/user/interfaces';
+import type { AuthService } from '@/core/auth/interfaces';
 import createMockUserService from '@/tests/mocks/user.service.mock';
 import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
-vi.mock('@/services/user/factory', () => ({ getApiUserService: vi.fn() }));
-vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'user-1', role: 'user', permissions: [] })),
+// Mock the service error handler to avoid compliance config issues
+vi.mock('@/services/common/service-error-handler', () => ({
+  logServiceError: vi.fn(),
+  handleServiceError: vi.fn(),
+  withErrorHandling: vi.fn((fn) => fn),
+  safeQuery: vi.fn(),
+  validateAndExecute: vi.fn(),
 }));
 
-const service = createMockUserService();
+const service: UserService = createMockUserService();
+const authService: Partial<AuthService> = { getCurrentUser: vi.fn() };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (getApiUserService as unknown as vi.Mock).mockReturnValue(service);
+  resetServiceContainer();
+  (authService.getCurrentUser as any).mockResolvedValue({ id: 'user-1' });
+  configureServices({
+    userService: service,
+    authService: authService as AuthService,
+  });
 });
 
 describe('/api/profile/avatar', () => {
