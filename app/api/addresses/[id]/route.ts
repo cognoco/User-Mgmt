@@ -1,50 +1,46 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getApiAddressService } from '@/services/address/factory';
+import { type NextRequest } from 'next/server';
 import { addressSchema } from '@/core/address/validation';
 import {
   createSuccessResponse,
   createNoContentResponse,
-  createValidationError,
-  createUnauthorizedError,
 } from '@/lib/api/common';
-import { withRateLimit } from '@/middleware/rate-limit';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withRouteAuth } from '@/middleware/auth';
-import { withSecurity } from '@/middleware/with-security';
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
 
-async function handleGet(_req: NextRequest, id: string, userId: string): Promise<NextResponse> {
-  const service = getApiAddressService();
-  const address = await service.getAddress(id, userId);
-  return createSuccessResponse({ address });
+function extractAddressId(url: string): string {
+  const parts = new URL(url).pathname.split('/');
+  return parts[parts.length - 1] || '';
 }
 
-async function handlePut(req: NextRequest, id: string, userId: string): Promise<NextResponse> {
-  const data = await req.json();
-  const parse = addressSchema.partial().safeParse(data);
-  if (!parse.success) throw createValidationError('Invalid address data', parse.error.flatten());
-  const service = getApiAddressService();
-  const updated = await service.updateAddress(id, parse.data, userId);
-  return createSuccessResponse({ address: updated });
-}
+export const GET = createApiHandler(
+  emptySchema,
+  async (req: NextRequest, auth, _data, services) => {
+    const id = extractAddressId(req.url);
+    const address = await services.addressService.getAddress(id, auth.userId!);
+    return createSuccessResponse({ address });
+  },
+  { requireAuth: true }
+);
 
-async function handleDelete(_req: NextRequest, id: string, userId: string): Promise<NextResponse> {
-  const service = getApiAddressService();
-  await service.deleteAddress(id, userId);
-  return createNoContentResponse();
-}
+export const PUT = createApiHandler(
+  addressSchema.partial(),
+  async (req: NextRequest, auth, data, services) => {
+    const id = extractAddressId(req.url);
+    const updated = await services.addressService.updateAddress(
+      id,
+      data,
+      auth.userId!
+    );
+    return createSuccessResponse({ address: updated });
+  },
+  { requireAuth: true }
+);
 
-// Use both rate limiting and security middleware with proper auth
-export const GET = (req: NextRequest, { params }: { params: { id: string } }) =>
-  withRateLimit(req, r => withSecurity(q =>
-    withRouteAuth((s, ctx) => handleGet(s, params.id, ctx.userId!), q)
-  )(r));
-
-export const PUT = (req: NextRequest, { params }: { params: { id: string } }) =>
-  withRateLimit(req, r => withSecurity(q =>
-    withRouteAuth((s, ctx) => handlePut(s, params.id, ctx.userId!), q)
-  )(r));
-
-export const DELETE = (req: NextRequest, { params }: { params: { id: string } }) =>
-  withRateLimit(req, r => withSecurity(q =>
-    withRouteAuth((s, ctx) => handleDelete(s, params.id, ctx.userId!), q)
-  )(r));
+export const DELETE = createApiHandler(
+  emptySchema,
+  async (req: NextRequest, auth, _data, services) => {
+    const id = extractAddressId(req.url);
+    await services.addressService.deleteAddress(id, auth.userId!);
+    return createNoContentResponse();
+  },
+  { requireAuth: true }
+);
