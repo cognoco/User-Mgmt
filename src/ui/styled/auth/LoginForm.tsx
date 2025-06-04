@@ -7,162 +7,45 @@ import { Input } from '@/ui/primitives/input';
 import { Label } from '@/ui/primitives/label';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 import { Checkbox } from '@/ui/primitives/checkbox';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { useLogin } from '@/hooks/auth/useLogin';
-
-import { useRouter } from 'next/navigation';
-import { MFAVerificationForm } from './MFAVerificationForm';
+import useLoginFormLogic from '@/hooks/auth/useLoginFormLogic';
+import { ErrorBoundary, DefaultErrorFallback } from '@/ui/styled/common/ErrorBoundary';
 import { RateLimitFeedback } from '@/ui/styled/common/RateLimitFeedback';
 import { OAuthButtons } from './OAuthButtons';
-import { ErrorBoundary, DefaultErrorFallback } from '@/ui/styled/common/ErrorBoundary';
-import Link from 'next/link';
-import { LoginForm as HeadlessLoginForm } from '@/ui/headless/auth/LoginForm';
-import { LoginPayload } from '@/core/auth/models';
+import { MFAVerificationForm } from './MFAVerificationForm';
 import { WebAuthnLogin } from '@/ui/styled/auth/WebAuthnLogin';
-import { useSectionErrors, useErrorStore } from '@/lib/state/errorStore';
+import { LoginForm as HeadlessLoginForm } from '@/ui/headless/auth/LoginForm';
+import Link from 'next/link';
+import type { LoginPayload } from '@/core/auth/models';
 
 interface LoginFormProps {
-  // Reserved for future use
+  onSubmit?: (credentials: LoginPayload) => Promise<void>;
 }
 
-const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
-  const router = useRouter();
-  
-  // React 19 compatibility - Use individual primitive selectors instead of object destructuring
-  // This is more efficient and avoids infinite loop with getServerSnapshot in React 19
-  const { authService, user } = useAuth();
+const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
   const {
-    login,
-    resendVerificationEmail,
-    error: authError,
-    successMessage: success,
+    handleSubmit,
+    handleResendVerification,
+    handleMfaSuccess,
+    handleLoginSuccess,
+    handleMfaCancel,
+    handleRateLimitComplete,
+    resendStatus,
+    showResendLink,
+    rateLimitInfo,
     mfaRequired,
     tempAccessToken,
-    clearState,
-  } = useLogin();
-  
-  const [resendStatus, setResendStatus] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [showResendLink, setShowResendLink] = useState(false);
-  const [rateLimitInfo, setRateLimitInfo] = useState<{
-    retryAfter?: number;
-    remainingAttempts?: number;
-  } | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const authErrors = useSectionErrors('auth');
-  const addError = useErrorStore(state => state.addError);
-  const clearAuthErrors = useErrorStore(state => state.clearErrors);
+    authErrors,
+    authError,
+    success,
+  } = useLoginFormLogic();
 
-  // Handle custom form submission with MFA and rate limit handling
-  const handleCustomSubmit = async (credentials: LoginPayload) => {
-    // Reset state
-    clearAuthErrors('auth');
-    setResendStatus(null);
-    setShowResendLink(false);
-    clearState();
-    setRateLimitInfo(null);
-    
-    try {
-      const result = await login(credentials);
-
-      if (result.success) {
-        // If MFA is required the hook sets state accordingly
-        if (!result.requiresMfa) {
-          router.push('/dashboard/overview');
-        }
-      } else {
-        addError({
-          message: result.error || 'Login failed',
-          type: result.code,
-          section: 'auth',
-          dismissAfter: 8000,
-          sync: true,
-        });
-        
-        if (result.code === 'EMAIL_NOT_VERIFIED') {
-          setShowResendLink(true);
-        } else if (result.code === 'RATE_LIMIT_EXCEEDED') {
-          // Extract rate limit information from headers or response
-          setRateLimitInfo({
-            retryAfter: result.retryAfter,
-            remainingAttempts: result.remainingAttempts
-          });
-        }
-      }
-    } catch (error: any) {
-      // Check if the error is a rate limit error
-      if (error?.response?.status === 429) {
-        const retryAfter = parseInt(error.response.headers['retry-after'] || '900', 10) * 1000; // Convert to ms
-        setRateLimitInfo({
-          retryAfter,
-          remainingAttempts: parseInt(error.response.headers['x-ratelimit-remaining'] || '0', 10)
-        });
-      }
-      addError({
-        message: error instanceof Error ? error.message : 'Login failed',
-        type: 'unexpected',
-        section: 'auth',
-        dismissAfter: 8000,
-        sync: true,
-      });
-      if (process.env.NODE_ENV === 'development') { 
-        console.error("Unexpected error during login submission:", error); 
-      }
-    }
-  };
-
-  const handleResendVerification = async (email: string) => {
-    setResendStatus(null);
-    if (!email) {
-      setResendStatus({ message: 'Please enter your email address first.', type: 'error' });
-      return;
-    }
-    
-    try {
-      const result = await resendVerificationEmail(email);
-      if (result.success) {
-        setResendStatus({ message: 'Verification email sent successfully.', type: 'success' });
-      } else {
-        setResendStatus({ message: result.error ?? 'Failed to send verification email.', type: 'error' });
-      }
-    } catch (error) {
-      setResendStatus({
-        message: error instanceof Error ? error.message : 'Failed to send verification email.',
-        type: 'error'
-      });
-    }
-  };
-
-  const handleMfaSuccess = (user: any, token: string) => {
-    // Update auth state with authenticated user and token
-    authService.setSession?.(user, token);
-
-    // Redirect to dashboard
-    router.push('/dashboard/overview');
-  };
-
-  const handleLoginSuccess = (data: any) => {
-    if (data?.user && data?.token) {
-      authService.setSession?.(data.user, data.token);
-    }
-    router.push('/dashboard/overview');
-  };
-
-  // Cancel MFA verification and go back to password login
-  const handleMfaCancel = () => {
-    clearState();
-  };
-
-  const handleRateLimitComplete = () => {
-    setRateLimitInfo(null);
-  };
-
-  // If MFA is required, show the MFA verification form and WebAuthn option
   if (mfaRequired && tempAccessToken) {
     return (
       <>
-        {user?.mfaMethods?.includes('webauthn') && (
-          <WebAuthnLogin userId={user.id} onSuccess={handleLoginSuccess} />
-        )}
+        {/** WebAuthn option if available */}
+        <WebAuthnLogin userId={''} onSuccess={handleLoginSuccess} />
         <MFAVerificationForm
           accessToken={tempAccessToken}
           onSuccess={handleMfaSuccess}
@@ -175,21 +58,21 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
   return (
     <ErrorBoundary fallback={DefaultErrorFallback}>
       <HeadlessLoginForm
-        onSubmit={handleCustomSubmit}
+        onSubmit={onSubmit || handleSubmit}
         error={authErrors[0]?.message || authError}
-        render={({ 
-          handleSubmit, 
-          emailValue, 
-          setEmailValue, 
-          passwordValue, 
-          setPasswordValue, 
-          rememberMeValue, 
+        render={({
+          handleSubmit: formSubmit,
+          emailValue,
+          setEmailValue,
+          passwordValue,
+          setPasswordValue,
+          rememberMeValue,
           setRememberMeValue,
           isSubmitting,
           isValid,
           errors,
           touched,
-          handleBlur
+          handleBlur,
         }) => (
           <div className="w-full max-w-md mx-auto space-y-6">
             <div>
@@ -198,9 +81,9 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
                 Enter your email below to sign in to your account
               </p>
             </div>
-            
+
             <OAuthButtons />
-            
+
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
@@ -211,10 +94,10 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
                 </span>
               </div>
             </div>
-            
+
             {rateLimitInfo && (
               <RateLimitFeedback
-                windowMs={15 * 60 * 1000} // 15 minutes
+                windowMs={15 * 60 * 1000}
                 retryAfter={rateLimitInfo.retryAfter}
                 remainingAttempts={rateLimitInfo.remainingAttempts}
                 maxAttempts={100}
@@ -239,20 +122,23 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
                 </AlertDescription>
               </Alert>
             )}
-            
+
             {resendStatus && (
-              <Alert variant={resendStatus.type === 'success' ? 'default' : 'destructive'} role="alert">
+              <Alert
+                variant={resendStatus.type === 'success' ? 'default' : 'destructive'}
+                role="alert"
+              >
                 <AlertDescription>{resendStatus.message}</AlertDescription>
               </Alert>
             )}
-            
+
             {success && (
               <Alert>
                 <AlertDescription>{success}</AlertDescription>
               </Alert>
             )}
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
+
+            <form onSubmit={formSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -292,13 +178,9 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
                     size="icon"
                     className="absolute right-1 top-1 h-7 w-7"
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
                 {touched.password && errors.password && (
@@ -312,10 +194,7 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
                 <Checkbox
                   id="rememberMe"
                   checked={rememberMeValue}
-                  onCheckedChange={(checked) => {
-                    // Handle the checked value properly - it can be boolean, "indeterminate", or other values
-                    setRememberMeValue(checked === true);
-                  }}
+                  onCheckedChange={(checked) => setRememberMeValue(checked === true)}
                   aria-label="Remember me"
                 />
                 <Label
@@ -337,13 +216,10 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
                 {isSubmitting ? 'Logging in...' : 'Login'}
               </Button>
             </form>
-            
-              <div className="text-center text-sm">
-                Don&apos;t have an account?{' '}
-              <Link 
-                href="/auth/register" 
-                className="text-primary hover:underline"
-              >
+
+            <div className="text-center text-sm">
+              Don&apos;t have an account?{' '}
+              <Link href="/auth/register" className="text-primary hover:underline">
                 Sign up
               </Link>
             </div>
@@ -352,6 +228,7 @@ const LoginForm: React.FC<LoginFormProps> = (): React.JSX.Element => {
       />
     </ErrorBoundary>
   );
-}
+};
 
 export default LoginForm;
+export { LoginForm };
