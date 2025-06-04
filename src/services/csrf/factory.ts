@@ -10,8 +10,19 @@ import type { ICsrfDataProvider } from '@/core/csrf';
 import { DefaultCsrfService } from './default-csrf.service';
 import { AdapterRegistry } from '@/adapters/registry';
 import { UserManagementConfiguration } from '@/core/config';
+import {
+  getServiceContainer,
+  getServiceConfiguration
+} from '@/lib/config/service-container';
 
 // Singleton instance for API routes
+export interface ApiCsrfServiceOptions {
+  /** When true, forces creation of a new service instance */
+  reset?: boolean;
+}
+
+const GLOBAL_CACHE_KEY = '__UM_CSRF_SERVICE__';
+
 let csrfServiceInstance: CsrfService | null = null;
 
 /**
@@ -19,22 +30,61 @@ let csrfServiceInstance: CsrfService | null = null;
  * 
  * @returns Configured CsrfService instance
  */
-export function getApiCsrfService(): CsrfService {
-  if (!csrfServiceInstance) {
-    csrfServiceInstance =
-      UserManagementConfiguration.getServiceProvider('csrfService') as CsrfService | undefined;
-
-    if (!csrfServiceInstance) {
-      const csrfDataProvider = AdapterRegistry.getInstance().getAdapter<ICsrfDataProvider>('csrf');
-      csrfServiceInstance = new DefaultCsrfService(csrfDataProvider);
+export function getApiCsrfService(
+  options: ApiCsrfServiceOptions = {}
+): CsrfService {
+  if (options.reset) {
+    csrfServiceInstance = null;
+    if (typeof globalThis !== 'undefined') {
+      delete (globalThis as any)[GLOBAL_CACHE_KEY];
     }
   }
+
+  if (!csrfServiceInstance && typeof globalThis !== 'undefined') {
+    csrfServiceInstance = (globalThis as any)[GLOBAL_CACHE_KEY] as
+      | CsrfService
+      | null;
+  }
+
+  if (!csrfServiceInstance) {
+    const config = getServiceConfiguration();
+
+    if (config.csrfService) {
+      csrfServiceInstance = config.csrfService;
+    } else {
+      try {
+        csrfServiceInstance = getServiceContainer().csrf ?? null;
+      } catch {
+        // Service container not fully configured
+      }
+
+      if (!csrfServiceInstance) {
+        csrfServiceInstance =
+          UserManagementConfiguration.getServiceProvider(
+            'csrfService'
+          ) as CsrfService | null;
+
+        if (!csrfServiceInstance) {
+          const csrfDataProvider =
+            AdapterRegistry.getInstance().getAdapter<ICsrfDataProvider>('csrf');
+          csrfServiceInstance = new DefaultCsrfService(csrfDataProvider);
+        }
+      }
+    }
+
+    if (typeof globalThis !== 'undefined') {
+      (globalThis as any)[GLOBAL_CACHE_KEY] = csrfServiceInstance;
+    }
+  }
+
   return csrfServiceInstance;
 }
 
 /**
  * Temporary alias for backwards compatibility with older route imports.
  */
-export function getApiCSRFService(): CsrfService {
-  return getApiCsrfService();
+export function getApiCSRFService(
+  options: ApiCsrfServiceOptions = {}
+): CsrfService {
+  return getApiCsrfService(options);
 }
