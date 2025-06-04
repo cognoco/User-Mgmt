@@ -4,20 +4,13 @@ import { prisma } from '@/lib/database/prisma';
 import { GET, POST } from '../route';
 import { ERROR_CODES } from '@/lib/api/common';
 import { checkRateLimit } from '@/middleware/rate-limit';
-import { withRouteAuth } from '@/middleware/auth';
+import { configureServices, resetServiceContainer } from '@/lib/config/service-container';
+import type { TeamService } from '@/core/team/interfaces';
+import type { AuthService } from '@/core/auth/interfaces';
 
 // Mocks
 vi.mock('@/middleware/auth-adapter', () => ({}));
 
-vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn(async (handler: any, req: any) =>
-    handler(req, {
-      userId: 'user1',
-      role: 'user',
-      user: { id: 'user1', email: 'test@example.com' }
-    })
-  )
-}));
 
 vi.mock('@/services/auth/factory', () => ({}));
 
@@ -97,8 +90,21 @@ describe('Team Members API', () => {
     },
   };
 
+  const mockTeamService: Partial<TeamService> = {
+    addTeamMember: vi.fn(async () => ({ success: true, member: mockMembers[0] })),
+  };
+  const mockAuthService: Partial<AuthService> = {
+    getCurrentUser: vi.fn(),
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+    resetServiceContainer();
+    (mockAuthService.getCurrentUser as any).mockResolvedValue(mockSession.user);
+    configureServices({
+      teamService: mockTeamService as TeamService,
+      authService: mockAuthService as AuthService,
+    });
     vi.mocked(prisma.teamMember.findMany).mockResolvedValue(mockMembers as any);
     vi.mocked(prisma.teamMember.count).mockResolvedValue(1);
     vi.mocked(prisma.teamMember.findFirst).mockResolvedValue({ teamId: 'team1' } as any);
@@ -108,12 +114,6 @@ describe('Team Members API', () => {
   });
 
   it('returns 401 when no session exists', async () => {
-    vi.mocked(withRouteAuth).mockResolvedValueOnce(
-      Promise.resolve(
-        NextResponse.json({ error: { code: ERROR_CODES.UNAUTHORIZED } }, { status: 401 })
-      )
-    );
-
     const request = new NextRequest('http://localhost:3000/api/team/members');
     const response = await GET(request);
 
@@ -123,7 +123,7 @@ describe('Team Members API', () => {
   });
 
   it('returns team members with pagination', async () => {
-    const request = new NextRequest('http://localhost:3000/api/team/members');
+    const request = new NextRequest('http://localhost:3000/api/team/members', { headers: { authorization: 'Bearer token' } });
     const response = await GET(request);
     const data = await response.json();
 
@@ -148,7 +148,8 @@ describe('Team Members API', () => {
 
   it('handles search parameter', async () => {
     const request = new NextRequest(
-      'http://localhost:3000/api/team/members?search=test'
+      'http://localhost:3000/api/team/members?search=test',
+      { headers: { authorization: 'Bearer token' } }
     );
     await GET(request);
 
@@ -168,7 +169,8 @@ describe('Team Members API', () => {
 
   it('handles status filter', async () => {
     const request = new NextRequest(
-      'http://localhost:3000/api/team/members?status=active'
+      'http://localhost:3000/api/team/members?status=active',
+      { headers: { authorization: 'Bearer token' } }
     );
     await GET(request);
 
@@ -183,7 +185,8 @@ describe('Team Members API', () => {
 
   it('handles sorting', async () => {
     const request = new NextRequest(
-      'http://localhost:3000/api/team/members?sortBy=name&sortOrder=asc'
+      'http://localhost:3000/api/team/members?sortBy=name&sortOrder=asc',
+      { headers: { authorization: 'Bearer token' } }
     );
     await GET(request);
 
@@ -198,7 +201,8 @@ describe('Team Members API', () => {
 
   it('handles pagination parameters', async () => {
     const request = new NextRequest(
-      'http://localhost:3000/api/team/members?page=2&limit=5'
+      'http://localhost:3000/api/team/members?page=2&limit=5',
+      { headers: { authorization: 'Bearer token' } }
     );
     await GET(request);
 
@@ -212,7 +216,8 @@ describe('Team Members API', () => {
 
   it('validates query parameters', async () => {
     const request = new NextRequest(
-      'http://localhost:3000/api/team/members?limit=invalid'
+      'http://localhost:3000/api/team/members?limit=invalid',
+      { headers: { authorization: 'Bearer token' } }
     );
     const response = await GET(request);
 
@@ -226,7 +231,7 @@ describe('Team Members API', () => {
       new Error('Database error')
     );
 
-    const request = new NextRequest('http://localhost:3000/api/team/members');
+    const request = new NextRequest('http://localhost:3000/api/team/members', { headers: { authorization: 'Bearer token' } });
     const response = await GET(request);
 
     expect(response.status).toBe(500);
@@ -236,16 +241,16 @@ describe('Team Members API', () => {
 
   it('returns 429 when rate limited', async () => {
     vi.mocked(checkRateLimit).mockResolvedValueOnce(true);
-    const request = new NextRequest('http://localhost:3000/api/team/members');
+    const request = new NextRequest('http://localhost:3000/api/team/members', { headers: { authorization: 'Bearer token' } });
     const response = await GET(request);
     expect(response.status).toBe(429);
   });
 
   it('returns 400 when seat limit reached', async () => {
     (prisma.teamLicense.findUnique as any).mockResolvedValue({ usedSeats: 5, totalSeats: 5 });
-    const request = new Request('http://localhost:3000/api/team/members', {
+    const request = new NextRequest('http://localhost:3000/api/team/members', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', authorization: 'Bearer token' },
       body: JSON.stringify({ teamId: 'license-123', userId: 'user2', role: 'member' }),
     });
     const response = await POST(request);

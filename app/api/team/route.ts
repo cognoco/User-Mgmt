@@ -1,47 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getApiTeamService } from '@/services/team/factory';
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  routeAuthMiddleware,
-  validationMiddleware
-} from '@/middleware/createMiddlewareChain';
-import type { RouteAuthContext } from '@/middleware/auth';
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 
 const CreateTeamSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional()
 });
 
-async function handleGet(_req: NextRequest, auth: RouteAuthContext) {
-  const service = getApiTeamService();
-  const teams = await service.getUserTeams(auth.userId!);
-  return NextResponse.json({ teams });
-}
+export const GET = createApiHandler(
+  emptySchema,
+  async (_req, { userId }, _data, services) => {
+    if (!services.team) {
+      throw new ApiError(ERROR_CODES.NOT_IMPLEMENTED, 'Team service not available');
+    }
+    const teams = await services.team.getUserTeams(userId!);
+    return createSuccessResponse({ teams });
+  },
+  { requireAuth: true }
+);
 
-async function handlePost(
-  _req: NextRequest,
-  auth: RouteAuthContext,
-  data: z.infer<typeof CreateTeamSchema>
-) {
-  const result = await getApiTeamService().createTeam(auth.userId!, data);
-  if (!result.success || !result.team) {
-    return NextResponse.json({ error: result.error || 'Failed to create team' }, { status: 400 });
-  }
-  return NextResponse.json({ team: result.team }, { status: 201 });
-}
-
-const getMiddleware = createMiddlewareChain([
-  errorHandlingMiddleware(),
-  routeAuthMiddleware()
-]);
-
-const postMiddleware = createMiddlewareChain([
-  errorHandlingMiddleware(),
-  routeAuthMiddleware(),
-  validationMiddleware(CreateTeamSchema)
-]);
-
-export const GET = getMiddleware(handleGet);
-export const POST = postMiddleware(handlePost);
+export const POST = createApiHandler(
+  CreateTeamSchema,
+  async (_req, { userId }, data, services) => {
+    if (!services.team) {
+      throw new ApiError(ERROR_CODES.NOT_IMPLEMENTED, 'Team service not available');
+    }
+    const result = await services.team.createTeam(userId!, data);
+    if (!result.success || !result.team) {
+      throw new ApiError(ERROR_CODES.INVALID_REQUEST, result.error || 'Failed to create team', 400);
+    }
+    return createSuccessResponse(result.team, 201);
+  },
+  { requireAuth: true }
+);
