@@ -1,32 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { getServiceSupabase } from "@/lib/database/supabase";
-import { getApiCompanyService } from "@/services/company/factory";
 import { type RouteAuthContext } from "@/middleware/auth";
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  routeAuthMiddleware,
-  rateLimitMiddleware,
-} from "@/middleware/createMiddlewareChain";
+import { createApiHandler } from "@/lib/api/route-helpers";
+import { createSuccessResponse } from "@/lib/api/common";
 
-const middleware = createMiddlewareChain([
-  rateLimitMiddleware(),
-  errorHandlingMiddleware(),
-  routeAuthMiddleware(),
-]);
 
 // --- DELETE Handler for removing company documents ---
 async function handleDelete(
   _request: NextRequest,
   params: { documentId: string },
   auth: RouteAuthContext,
+  services: any
 ) {
   try {
     const supabaseService = getServiceSupabase();
     const userId = auth.userId!;
 
-    const companyService = getApiCompanyService();
-    const companyProfile = await companyService.getProfileByUserId(userId);
+    const companyProfile = await services.addressService.getProfileByUserId(userId);
 
     if (!companyProfile) {
       return NextResponse.json(
@@ -78,7 +69,7 @@ async function handleDelete(
       );
     }
 
-    return NextResponse.json({ success: true });
+    return createSuccessResponse({ success: true });
   } catch (error) {
     console.error(
       "Unexpected error in DELETE /api/company/documents/[documentId]:",
@@ -93,5 +84,10 @@ async function handleDelete(
 
 export const DELETE = (
   req: NextRequest,
-  ctx: { params: { documentId: string } },
-) => middleware((r, auth) => handleDelete(r, ctx.params, auth))(req);
+  ctx: { params: { documentId: string } }
+) =>
+  createApiHandler(
+    z.object({}),
+    (r, a, d, services) => handleDelete(r, ctx.params, a, services),
+    { requireAuth: true }
+  )(req);

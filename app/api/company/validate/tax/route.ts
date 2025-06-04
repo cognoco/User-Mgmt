@@ -1,10 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getServiceSupabase } from '@/lib/database/supabase';
-import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
-import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
-import { withErrorHandling } from '@/middleware/error-handling';
+import { createApiHandler } from '@/lib/api/route-helpers';
+import { createSuccessResponse } from '@/lib/api/common';
 
 const ValidationRequestSchema = z.object({
   taxId: z.string().min(1),
@@ -45,8 +44,12 @@ const countryValidators: Record<string, (taxId: string) => Promise<ValidationRes
   // Add more countries here as needed
 };
 
-async function handlePost(request: NextRequest, auth: RouteAuthContext) {
-  // 1. Rate Limiting
+async function handlePost(
+  request: NextRequest,
+  auth: { userId?: string },
+  data: ValidationRequest,
+  services: any
+) {
   const isRateLimited = await checkRateLimit(request);
   if (isRateLimited) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
@@ -55,26 +58,12 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
   try {
     const supabaseService = getServiceSupabase();
     const userId = auth.userId!;
-    const companyService = getApiCompanyService();
-    const companyProfile = await companyService.getProfileByUserId(userId);
+    const companyProfile = await services.addressService.getProfileByUserId(userId);
     if (!companyProfile) {
       return NextResponse.json({ error: 'Company profile not found' }, { status: 404 });
     }
 
-    // 3. Parse and Validate Body
-    let body: ValidationRequest;
-    try {
-      body = await request.json();
-    } catch (e) {
-      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
-    }
-
-    const parseResult = ValidationRequestSchema.safeParse(body);
-    if (!parseResult.success) {
-      return NextResponse.json({ error: 'Validation failed', details: parseResult.error.format() }, { status: 400 });
-    }
-    
-    const { taxId, countryCode } = parseResult.data;
+    const { taxId, countryCode } = data;
 
     const validator = countryValidators[countryCode.toUpperCase()];
     let validationResult: ValidationResult;
@@ -99,7 +88,7 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
       })
       .eq('user_id', userId);
 
-    return NextResponse.json({
+    return createSuccessResponse({
       status: validationResult.status,
       message: validationResult.message,
       details: validationResult.details,
@@ -111,5 +100,8 @@ async function handlePost(request: NextRequest, auth: RouteAuthContext) {
   }
 }
 
-export const POST = (req: NextRequest) =>
-  withErrorHandling((r) => withRouteAuth(handlePost, r), req);
+export const POST = createApiHandler(
+  ValidationRequestSchema,
+  (req, auth, data, services) => handlePost(req, auth, data, services),
+  { requireAuth: true }
+);

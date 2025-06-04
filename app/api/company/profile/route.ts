@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getServiceSupabase } from "@/lib/database/supabase";
-import { getApiCompanyService } from "@/services/company/factory";
+import { createApiHandler, emptySchema } from "@/lib/api/route-helpers";
+import { createSuccessResponse } from "@/lib/api/common";
 import { logUserAction } from "@/lib/audit/auditLogger";
 import { type RouteAuthContext } from "@/middleware/auth";
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  routeAuthMiddleware,
-  rateLimitMiddleware,
-  validationMiddleware,
-} from "@/middleware/createMiddlewareChain";
+
 import { withSecurity } from "@/middleware/with-security";
 
 // Company Profile Schema
@@ -61,11 +56,6 @@ const CompanyProfileUpdateSchema = z
 
 type CompanyProfileUpdateRequest = z.infer<typeof CompanyProfileUpdateSchema>;
 
-const baseMiddleware = createMiddlewareChain([
-  rateLimitMiddleware(),
-  errorHandlingMiddleware(),
-  routeAuthMiddleware(),
-]);
 
 async function handlePost(
   request: NextRequest,
@@ -81,8 +71,7 @@ async function handlePost(
     const userId = auth.userId!;
     userIdForLogging = userId;
 
-    const companyService = getApiCompanyService();
-    const existingProfile = await companyService.getProfileByUserId(userId);
+    const existingProfile = await services.addressService.getProfileByUserId(userId);
 
     if (existingProfile) {
       await logUserAction({
@@ -141,7 +130,7 @@ async function handlePost(
       details: { companyName: profile.name },
     });
 
-    return NextResponse.json(profile);
+    return createSuccessResponse(profile);
   } catch (error) {
     console.error("Unexpected error in POST /api/company/profile:", error);
     const message =
@@ -162,23 +151,23 @@ async function handlePost(
     );
   }
 }
-// Update middleware chain to include validation
-const postMiddleware = createMiddlewareChain([
-  rateLimitMiddleware(),
-  errorHandlingMiddleware(),
-  routeAuthMiddleware(),
-  validationMiddleware(CompanyProfileSchema),
-]);
-
 export const POST = withSecurity((req: NextRequest) =>
-  postMiddleware((r, auth, data) => handlePost(r, auth, data))(req)
+  createApiHandler(
+    CompanyProfileSchema,
+    (r, a, d, services) => handlePost(r, a, d, services),
+    { requireAuth: true }
+  )(req)
 );
 
-async function handleGet(_request: NextRequest, auth: RouteAuthContext) {
+async function handleGet(
+  _request: NextRequest,
+  auth: RouteAuthContext,
+  _data: unknown,
+  services: any
+) {
   try {
     const userId = auth.userId!;
-    const companyService = getApiCompanyService();
-    const profile = await companyService.getProfileByUserId(userId);
+    const profile = await services.addressService.getProfileByUserId(userId);
 
     if (!profile) {
       return NextResponse.json(
@@ -187,7 +176,7 @@ async function handleGet(_request: NextRequest, auth: RouteAuthContext) {
       );
     }
 
-    return NextResponse.json(profile);
+    return createSuccessResponse(profile);
   } catch (error) {
     console.error("Unexpected error in GET /api/company/profile:", error);
     return NextResponse.json(
@@ -198,7 +187,9 @@ async function handleGet(_request: NextRequest, auth: RouteAuthContext) {
 }
 
 export const GET = withSecurity((req: NextRequest) =>
-  baseMiddleware((r, auth) => handleGet(r, auth))(req)
+  createApiHandler(emptySchema, (r, a, d, services) => handleGet(r, a, d, services), {
+    requireAuth: true,
+  })(req)
 );
 
 async function handlePut(
@@ -217,8 +208,7 @@ async function handlePut(
     const userId = auth.userId!;
     userIdForLogging = userId;
 
-    const companyService = getApiCompanyService();
-    const existingProfile = await companyService.getProfileByUserId(userId);
+    const existingProfile = await services.addressService.getProfileByUserId(userId);
 
     if (!existingProfile) {
       // Log attempt to update non-existent profile
@@ -286,7 +276,7 @@ async function handlePut(
       details: { updatedFields: Object.keys(fieldsToUpdate) }, // Log which fields were updated
     });
 
-    return NextResponse.json(updatedProfile);
+    return createSuccessResponse(updatedProfile);
   } catch (error) {
     console.error("Unexpected error in PUT /api/company/profile:", error);
     const message =
@@ -309,19 +299,19 @@ async function handlePut(
   }
 }
 
-// Update middleware chain for PUT to include its specific validation schema
-const putMiddleware = createMiddlewareChain([
-  rateLimitMiddleware(),
-  errorHandlingMiddleware(),
-  routeAuthMiddleware(),
-  validationMiddleware(CompanyProfileUpdateSchema),
-]);
-
 export const PUT = withSecurity((req: NextRequest) =>
-  putMiddleware((r, auth, data) => handlePut(r, auth, data))(req)
+  createApiHandler(
+    CompanyProfileUpdateSchema,
+    (r, a, d, services) => handlePut(r, a, d, services),
+    { requireAuth: true }
+  )(req)
 );
 
-async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
+async function handleDelete(
+  request: NextRequest,
+  auth: RouteAuthContext,
+  services: any
+) {
   // Get IP and User Agent early
   const ipAddress = request.ip;
   const userAgent = request.headers.get("user-agent");
@@ -333,8 +323,7 @@ async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
     const userId = auth.userId!;
     userIdForLogging = userId;
 
-    const companyService = getApiCompanyService();
-    const profileToDelete = await companyService.getProfileByUserId(userId);
+    const profileToDelete = await services.addressService.getProfileByUserId(userId);
 
     if (!profileToDelete) {
       // Log attempt to delete non-existent profile
@@ -431,7 +420,7 @@ async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
       targetResourceId: companyProfileIdForLogging,
     });
 
-    return NextResponse.json({ success: true });
+    return createSuccessResponse({ success: true });
   } catch (error) {
     console.error("Unexpected error in DELETE /api/company/profile:", error);
     const message =
@@ -455,5 +444,7 @@ async function handleDelete(request: NextRequest, auth: RouteAuthContext) {
 }
 
 export const DELETE = withSecurity((req: NextRequest) =>
-  baseMiddleware((r, auth) => handleDelete(r, auth))(req)
+  createApiHandler(emptySchema, (r, a, d, services) => handleDelete(r, a, services), {
+    requireAuth: true,
+  })(req)
 );

@@ -1,18 +1,11 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { getServiceSupabase } from "@/lib/database/supabase";
-import { getApiCompanyService } from "@/services/company/factory";
 import { type RouteAuthContext } from "@/middleware/auth";
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  routeAuthMiddleware,
-  rateLimitMiddleware,
-  validationMiddleware,
-} from "@/middleware/createMiddlewareChain";
 import { withSecurity } from "@/middleware/with-security";
+import { createApiHandler } from "@/lib/api/route-helpers";
 import {
-  createCreatedResponse,
+  createSuccessResponse,
   createPaginatedResponse,
   createValidationError,
   createNotFoundError,
@@ -34,18 +27,6 @@ const DocumentUploadSchema = z.object({
 
 type DocumentUploadRequest = z.infer<typeof DocumentUploadSchema>;
 
-const baseMiddleware = createMiddlewareChain([
-  rateLimitMiddleware(),
-  errorHandlingMiddleware(),
-  routeAuthMiddleware(),
-]);
-
-const postMiddleware = createMiddlewareChain([
-  rateLimitMiddleware(),
-  errorHandlingMiddleware(),
-  routeAuthMiddleware(),
-  validationMiddleware(DocumentUploadSchema),
-]);
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB limit
 const ALLOWED_MIME_TYPES = [
@@ -66,8 +47,7 @@ async function handlePost(
     const supabaseService = getServiceSupabase();
     const userId = auth.userId!;
 
-    const companyService = getApiCompanyService();
-    const companyProfile = await companyService.getProfileByUserId(userId);
+    const companyProfile = await services.addressService.getProfileByUserId(userId);
 
     if (!companyProfile) {
       throw createNotFoundError("Company profile");
@@ -126,7 +106,7 @@ async function handlePost(
       throw createServerError("Failed to create document record");
     }
 
-    return createCreatedResponse(document);
+    return createSuccessResponse(document, 201);
   } catch (error) {
     console.error("Unexpected error in POST /api/company/documents:", error);
     throw createServerError("An internal server error occurred");
@@ -134,14 +114,18 @@ async function handlePost(
 }
 
 // --- GET Handler for fetching company documents ---
-async function handleGet(request: NextRequest, auth: RouteAuthContext) {
+async function handleGet(
+  request: NextRequest,
+  auth: RouteAuthContext,
+  _data: unknown,
+  services: any
+) {
   try {
     const supabaseService = getServiceSupabase();
     const userId = auth.userId!;
 
     // 3. Get Company Profile
-    const companyService = getApiCompanyService();
-    const companyProfile = await companyService.getProfileByUserId(userId);
+    const companyProfile = await services.addressService.getProfileByUserId(userId);
 
     if (!companyProfile) {
       throw createNotFoundError("Company profile");
@@ -249,9 +233,17 @@ async function handleGet(request: NextRequest, auth: RouteAuthContext) {
 }
 
 export const POST = withSecurity((req: NextRequest) =>
-  postMiddleware((r, auth, data) => handlePost(r, auth, data))(req)
+  createApiHandler(
+    DocumentUploadSchema,
+    (r, a, d, services) => handlePost(r, a, d, services),
+    { requireAuth: true }
+  )(req)
 );
 
 export const GET = withSecurity((req: NextRequest) =>
-  baseMiddleware((r, auth) => handleGet(r, auth))(req)
+  createApiHandler(
+    z.object({}),
+    (r, a, d, services) => handleGet(r as NextRequest, a, services),
+    { requireAuth: true }
+  )(req)
 );

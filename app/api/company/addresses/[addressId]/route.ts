@@ -1,46 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getServiceSupabase } from "@/lib/database/supabase";
-import { getApiCompanyService } from "@/services/company/factory";
 import { type RouteAuthContext } from "@/middleware/auth";
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  routeAuthMiddleware,
-  rateLimitMiddleware,
-  validationMiddleware,
-} from "@/middleware/createMiddlewareChain";
 import { addressUpdateSchema } from "@/core/address/models";
-import { createSupabaseAddressProvider } from "@/adapters/address/factory";
+import { createApiHandler } from "@/lib/api/route-helpers";
+import { createSuccessResponse } from "@/lib/api/common";
 
 // Use the shared address update schema from the core layer
 type AddressUpdateRequest = z.infer<typeof addressUpdateSchema>;
-
-const baseMiddleware = createMiddlewareChain([
-  rateLimitMiddleware(),
-  errorHandlingMiddleware(),
-  routeAuthMiddleware(),
-]);
-
-const putMiddleware = createMiddlewareChain([
-  rateLimitMiddleware(),
-  errorHandlingMiddleware(),
-  routeAuthMiddleware(),
-  validationMiddleware(addressUpdateSchema),
-]);
 
 async function handlePut(
   _request: NextRequest,
   params: { addressId: string },
   auth: RouteAuthContext,
   data: AddressUpdateRequest,
+  services: any
 ) {
   try {
-    const supabaseService = getServiceSupabase();
     const userId = auth.userId!;
-
-    const companyService = getApiCompanyService();
-    const companyProfile = await companyService.getProfileByUserId(userId);
+    const companyProfile = await services.addressService.getProfileByUserId(userId);
 
     if (!companyProfile) {
       return NextResponse.json(
@@ -49,12 +26,7 @@ async function handlePut(
       );
     }
 
-    const addressProvider = createSupabaseAddressProvider(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-      process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-    );
-
-    const result = await addressProvider.updateAddress(
+    const result = await services.addressService.updateAddress(
       companyProfile.id,
       params.addressId,
       data,
@@ -68,7 +40,7 @@ async function handlePut(
       );
     }
 
-    return NextResponse.json(result.address);
+    return createSuccessResponse(result.address);
   } catch (error) {
     console.error(
       "Unexpected error in PUT /api/company/addresses/[addressId]:",
@@ -85,13 +57,11 @@ async function handleDelete(
   _request: NextRequest,
   params: { addressId: string },
   auth: RouteAuthContext,
+  services: any
 ) {
   try {
-    const supabaseService = getServiceSupabase();
     const userId = auth.userId!;
-
-    const companyService = getApiCompanyService();
-    const companyProfile = await companyService.getProfileByUserId(userId);
+    const companyProfile = await services.addressService.getProfileByUserId(userId);
 
     if (!companyProfile) {
       return NextResponse.json(
@@ -100,12 +70,7 @@ async function handleDelete(
       );
     }
 
-    const addressProvider = createSupabaseAddressProvider(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-      process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-    );
-
-    const result = await addressProvider.deleteAddress(
+    const result = await services.addressService.deleteAddress(
       companyProfile.id,
       params.addressId,
     );
@@ -118,7 +83,7 @@ async function handleDelete(
       );
     }
 
-    return NextResponse.json({ success: true });
+    return createSuccessResponse({ success: true });
   } catch (error) {
     console.error(
       "Unexpected error in DELETE /api/company/addresses/[addressId]:",
@@ -132,9 +97,18 @@ async function handleDelete(
 }
 
 export const PUT = (req: NextRequest, ctx: { params: { addressId: string } }) =>
-  putMiddleware((r, auth, data) => handlePut(r, ctx.params, auth, data))(req);
+  createApiHandler(
+    addressUpdateSchema,
+    (r, auth, data, services) => handlePut(r, ctx.params, auth, data, services),
+    { requireAuth: true }
+  )(req);
 
 export const DELETE = (
   req: NextRequest,
-  ctx: { params: { addressId: string } },
-) => baseMiddleware((r, auth) => handleDelete(r, ctx.params, auth))(req);
+  ctx: { params: { addressId: string } }
+) =>
+  createApiHandler(
+    z.object({}),
+    (r, auth, d, services) => handleDelete(r, ctx.params, auth, services),
+    { requireAuth: true }
+  )(req);
