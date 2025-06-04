@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiWebhookService } from '@/services/webhooks/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { getCurrentUser } from '@/lib/auth/session';
@@ -36,23 +36,22 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get Supabase instance
-    const supabase = getServiceSupabase();
+    const service = getApiWebhookService();
+    const webhook = await service.getWebhook(user.id, webhookId);
 
-    // Fetch the webhook
-    const { data: webhook, error } = await supabase
-      .from('webhooks')
-      .select('id, name, url, events, is_active, created_at, updated_at')
-      .eq('id', webhookId)
-      .eq('user_id', user.id)
-      .single();
-
-    if (error || !webhook) {
-      console.error('Error fetching webhook or webhook not found:', error);
+    if (!webhook) {
       return NextResponse.json({ error: 'Webhook not found' }, { status: 404 });
     }
 
-    return NextResponse.json(webhook);
+    return NextResponse.json({
+      id: webhook.id,
+      name: webhook.name,
+      url: webhook.url,
+      events: webhook.events,
+      is_active: webhook.isActive,
+      created_at: webhook.createdAt,
+      updated_at: webhook.updatedAt,
+    });
   } catch (error) {
     console.error('Unexpected error in webhook GET:', error);
     return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
@@ -103,49 +102,22 @@ export async function PATCH(
 
     const { name, url, events, is_active, regenerate_secret } = parseResult.data;
 
-    // Get Supabase instance
-    const supabase = getServiceSupabase();
+    const service = getApiWebhookService();
 
-    // First verify that the webhook exists and belongs to the user
-    const { data: webhookData, error: fetchError } = await supabase
-      .from('webhooks')
-      .select('id, name, url')
-      .eq('id', webhookId)
-      .eq('user_id', user.id)
-      .single();
+    // Update the webhook via service
+    const { success, webhook, error: updateError } = await service.updateWebhook(
+      user.id,
+      webhookId,
+      {
+        name,
+        url,
+        events,
+        isActive: is_active,
+        regenerateSecret: regenerate_secret,
+      }
+    );
 
-    if (fetchError || !webhookData) {
-      console.error('Error fetching webhook or webhook not found:', fetchError);
-      return NextResponse.json({ error: 'Webhook not found' }, { status: 404 });
-    }
-
-    // Prepare update object
-    const updateData: Record<string, any> = {
-      updated_at: new Date().toISOString()
-    };
-
-    if (name !== undefined) updateData.name = name;
-    if (url !== undefined) updateData.url = url;
-    if (events !== undefined) updateData.events = events;
-    if (is_active !== undefined) updateData.is_active = is_active;
-    
-    // Generate new secret if requested
-    let newSecret: string | undefined;
-    if (regenerate_secret) {
-      newSecret = crypto.randomBytes(32).toString('hex');
-      updateData.secret = newSecret;
-    }
-
-    // Update the webhook
-    const { data, error: updateError } = await supabase
-      .from('webhooks')
-      .update(updateData)
-      .eq('id', webhookId)
-      .eq('user_id', user.id)
-      .select('id, name, url, events, is_active, created_at, updated_at')
-      .single();
-
-    if (updateError) {
+    if (!success || !webhook) {
       console.error('Error updating webhook:', updateError);
       return NextResponse.json({ error: 'Failed to update webhook' }, { status: 500 });
     }
@@ -159,20 +131,15 @@ export async function PATCH(
       userAgent,
       targetResourceType: 'webhook',
       targetResourceId: webhookId,
-      details: { 
-        name: data.name, 
-        url: data.url,
+      details: {
+        name: webhook.name,
+        url: webhook.url,
         secret_regenerated: regenerate_secret === true
       }
     });
 
     // Return the updated webhook (including the new secret if it was regenerated)
-    const response = {
-      ...data,
-      ...(newSecret ? { secret: newSecret } : {})
-    };
-
-    return NextResponse.json(response);
+    return NextResponse.json(webhook);
   } catch (error) {
     console.error('Unexpected error in webhook PATCH:', error);
     return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
@@ -204,30 +171,15 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get Supabase instance
-    const supabase = getServiceSupabase();
-
-    // First verify that the webhook exists and belongs to the user
-    const { data: webhookData, error: fetchError } = await supabase
-      .from('webhooks')
-      .select('id, name, url')
-      .eq('id', webhookId)
-      .eq('user_id', user.id)
-      .single();
-
-    if (fetchError || !webhookData) {
-      console.error('Error fetching webhook or webhook not found:', fetchError);
+    const service = getApiWebhookService();
+    const webhookData = await service.getWebhook(user.id, webhookId);
+    if (!webhookData) {
       return NextResponse.json({ error: 'Webhook not found' }, { status: 404 });
     }
 
-    // Delete the webhook
-    const { error: deleteError } = await supabase
-      .from('webhooks')
-      .delete()
-      .eq('id', webhookId)
-      .eq('user_id', user.id);
+    const { success, error: deleteError } = await service.deleteWebhook(user.id, webhookId);
 
-    if (deleteError) {
+    if (!success) {
       console.error('Error deleting webhook:', deleteError);
       return NextResponse.json({ error: 'Failed to delete webhook' }, { status: 500 });
     }
@@ -241,9 +193,9 @@ export async function DELETE(
       userAgent,
       targetResourceType: 'webhook',
       targetResourceId: webhookId,
-      details: { 
-        name: webhookData.name, 
-        url: webhookData.url 
+      details: {
+        name: webhookData.name,
+        url: webhookData.url
       }
     });
 

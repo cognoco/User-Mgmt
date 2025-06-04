@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiWebhookService } from '@/services/webhooks/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { getCurrentUser } from '@/lib/auth/session';
@@ -39,20 +39,8 @@ export async function GET(request: NextRequest) {
       throw createUnauthorizedError();
     }
 
-    // Get Supabase instance
-    const supabase = getServiceSupabase();
-
-    // Fetch webhooks for the user
-    const { data: webhooks, error } = await supabase
-      .from('webhooks')
-      .select('id, name, url, events, is_active, created_at, updated_at')
-      .eq('user_id', user.id);
-
-    if (error) {
-      console.error('Error fetching webhooks:', error);
-      throw createServerError('Failed to fetch webhooks');
-    }
-
+    const service = getApiWebhookService();
+    const webhooks = await service.getWebhooks(user.id);
     return createSuccessResponse({ webhooks });
   } catch (error) {
     console.error('Unexpected error in webhooks GET:', error);
@@ -98,27 +86,15 @@ export async function POST(request: NextRequest) {
 
     const { name, url, events, is_active } = parseResult.data;
 
-    // Generate a webhook secret
-    const secret = crypto.randomBytes(32).toString('hex');
+    const service = getApiWebhookService();
+    const { success, webhook, error } = await service.createWebhook(user.id, {
+      name,
+      url,
+      events,
+      isActive: is_active ?? true,
+    });
 
-    // Insert webhook into the database
-    const supabase = getServiceSupabase();
-    const { data, error } = await supabase
-      .from('webhooks')
-      .insert({
-        user_id: user.id,
-        name,
-        url,
-        events,
-        secret,
-        is_active: is_active ?? true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select('id, name, url, events, is_active, created_at')
-      .single();
-
-    if (error) {
+    if (!success || !webhook) {
       console.error('Error creating webhook:', error);
       throw createServerError('Failed to create webhook');
     }
@@ -131,15 +107,12 @@ export async function POST(request: NextRequest) {
       ipAddress,
       userAgent,
       targetResourceType: 'webhook',
-      targetResourceId: data.id,
-      details: { name: data.name, url: data.url }
+      targetResourceId: webhook.id,
+      details: { name: webhook.name, url: webhook.url }
     });
 
     // Return the webhook details (including the secret, which should only be shown once)
-    return createCreatedResponse({
-      ...data,
-      secret, // Include the secret in the response
-    });
+    return createCreatedResponse(webhook);
   } catch (error) {
     console.error('Unexpected error in webhooks POST:', error);
     throw createServerError('An internal server error occurred');
@@ -169,14 +142,9 @@ export async function DELETE(request: NextRequest) {
     throw createValidationError('Webhook id required');
   }
 
-  const supabase = getServiceSupabase();
-  const { error } = await supabase
-    .from('webhooks')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', user.id);
-
-  if (error) {
+  const service = getApiWebhookService();
+  const { success, error } = await service.deleteWebhook(user.id, id);
+  if (!success) {
     console.error('Error deleting webhook:', error);
     throw createServerError('Failed to delete webhook');
   }

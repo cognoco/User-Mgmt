@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import { authenticateApiKey } from '@/lib/api-keys/api-key-auth';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiUserService } from '@/services/user/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 
 // GET handler to retrieve user profile data
@@ -34,37 +34,35 @@ export async function GET(request: NextRequest) {
       
       // Use the user ID from the API key
       const userId = apiKeyResult.userId;
-      const supabase = getServiceSupabase();
-      
-      // Fetch user profile data
-      const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('first_name, last_name, avatar_url, bio')
-        .eq('id', userId)
-        .single();
-        
-      if (userError || !userData) {
-        console.error('Error fetching user profile:', userError);
+      const service = getApiUserService();
+      const userData = await service.getUserProfile(userId);
+
+      if (!userData) {
         return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
       }
-      
-      return NextResponse.json(userData);
+
+      return NextResponse.json({
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        avatar_url: userData.avatarUrl,
+        bio: userData.bio
+      });
     }
     
     // If we have a session user, return their profile
-    const supabase = getServiceSupabase();
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('first_name, last_name, avatar_url, bio')
-      .eq('id', sessionUser.id)
-      .single();
-      
-    if (profileError || !profileData) {
-      console.error('Error fetching user profile:', profileError);
+    const service = getApiUserService();
+    const profileData = await service.getUserProfile(sessionUser.id);
+
+    if (!profileData) {
       return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
     }
-    
-    return NextResponse.json(profileData);
+
+    return NextResponse.json({
+      first_name: profileData.firstName,
+      last_name: profileData.lastName,
+      avatar_url: profileData.avatarUrl,
+      bio: profileData.bio
+    });
   } catch (error) {
     console.error('Unexpected error in protected endpoint:', error);
     return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });

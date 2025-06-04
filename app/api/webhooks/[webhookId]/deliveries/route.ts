@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiWebhookService } from '@/services/webhooks/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { getCurrentUser } from '@/lib/auth/session';
 
@@ -34,35 +34,13 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get Supabase instance
-    const supabase = getServiceSupabase();
-
-    // First verify that the webhook exists and belongs to the user
-    const { data: webhook, error: webhookError } = await supabase
-      .from('webhooks')
-      .select('id')
-      .eq('id', webhookId)
-      .eq('user_id', user.id)
-      .single();
-
-    if (webhookError || !webhook) {
-      console.error('Error fetching webhook or webhook not found:', webhookError);
+    const service = getApiWebhookService();
+    const webhook = await service.getWebhook(user.id, webhookId);
+    if (!webhook) {
       return NextResponse.json({ error: 'Webhook not found' }, { status: 404 });
     }
 
-    // Fetch webhook deliveries
-    const { data: deliveries, error } = await supabase
-      .from('webhook_deliveries')
-      .select('id, event_type, payload, status_code, response, error, created_at')
-      .eq('webhook_id', webhookId)
-      .order('created_at', { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error('Error fetching webhook deliveries:', error);
-      return NextResponse.json({ error: 'Failed to fetch webhook deliveries' }, { status: 500 });
-    }
-
+    const deliveries = await service.getWebhookDeliveries(user.id, webhookId, limit);
     return NextResponse.json({ deliveries });
   } catch (error) {
     console.error('Unexpected error in webhook deliveries GET:', error);
