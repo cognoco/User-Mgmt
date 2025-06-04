@@ -1,16 +1,13 @@
 // GET /api/resources/[type]/[id]/permissions - List permissions for a resource
 // GET /api/resources/[type]/[id]/users - List users with permissions for a resource
 
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { NextResponse, type NextRequest } from 'next/server';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { createPaginatedResponse } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
-import { withRouteAuth } from '@/middleware/auth';
 import { checkPermission } from '@/lib/auth/permissionCheck';
 import { PermissionValues } from '@/core/permission/models';
-import { getApiPermissionService } from '@/services/permission/factory';
+import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 
 const querySchema = z.object({
   page: z.coerce.number().int().positive().default(1).optional(),
@@ -22,11 +19,13 @@ type Query = z.infer<typeof querySchema>;
 
 async function handleGet(
   _req: NextRequest,
-  userId: string,
+  auth: AuthContext,
+  query: Query,
+  services: ServiceContainer,
   resourceType: string,
   resourceId: string,
-  query: Query,
 ) {
+  const userId = auth.userId!;
   const allowed = await checkPermission(
     userId,
     PermissionValues.MANAGE_ROLES,
@@ -40,8 +39,7 @@ async function handleGet(
   if (!allowed && !globalAllowed) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
-  const service = getApiPermissionService();
-  let permissions = await service.getPermissionsForResource(resourceType, resourceId);
+  let permissions = await services.permission!.getPermissionsForResource(resourceType, resourceId);
   if (query.userId) {
     permissions = permissions.filter((p) => p.userId === query.userId);
   }
@@ -68,16 +66,9 @@ export const GET = (
   req: NextRequest,
   ctx: { params: { type: string; id: string } },
 ) =>
-  withRouteAuth((r, auth) =>
-    withErrorHandling(() => {
-      const url = new URL(r.url);
-      const params = Object.fromEntries(url.searchParams.entries());
-      return withValidation(
-        querySchema,
-        (r2, data) =>
-          handleGet(r2, auth.userId!, ctx.params.type, ctx.params.id, data),
-        r,
-        params,
-      );
-    }, r),
-  req);
+  createApiHandler(
+    querySchema,
+    (r, auth, data, services) =>
+      handleGet(r, auth, data, services, ctx.params.type, ctx.params.id),
+    { requireAuth: true },
+  )(req);

@@ -1,19 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from '../route';
-import { withRouteAuth } from '@/middleware/auth';
-import { getApiPermissionService } from '@/services/permission/factory';
+import { configureServices, resetServiceContainer } from '@/lib/config/service-container';
+import type { PermissionService } from '@/core/permission/interfaces';
+import type { AuthService } from '@/core/auth/interfaces';
+import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
-vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any, req: any) => handler(req, { userId: 'u1' })),
-}));
-vi.mock('@/middleware/with-security', () => ({ withSecurity: (h: any) => h }));
-vi.mock('@/services/permission/factory', () => ({ getApiPermissionService: vi.fn() }));
+vi.mock('@/services/permission/factory', () => ({}));
+vi.mock('@/services/auth/factory', () => ({}));
 
-const mockService = { getUserResourcePermissions: vi.fn() };
+const mockService: Partial<PermissionService> = { getUserResourcePermissions: vi.fn() };
+const mockAuth: Partial<AuthService> = { getCurrentUser: vi.fn().mockResolvedValue({ id: 'u1' }) };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (getApiPermissionService as unknown as vi.Mock).mockReturnValue(mockService);
+  resetServiceContainer();
+  configureServices({
+    permissionService: mockService as PermissionService,
+    authService: mockAuth as AuthService,
+  });
 });
 
 describe('user resource permissions API', () => {
@@ -23,7 +27,7 @@ describe('user resource permissions API', () => {
       { id: '1', userId: 'u1', permission: 'VIEW_PROJECTS', resourceType: 'project', resourceId: 'p1', createdAt: now },
       { id: '2', userId: 'u1', permission: 'VIEW_PROJECTS', resourceType: 'doc', resourceId: 'd1', createdAt: now },
     ]);
-    const req = new Request('http://test?resourceType=project');
+    const req = createAuthenticatedRequest('GET', 'http://test?resourceType=project');
     const res = await GET(req as any, { params: { id: 'u1' } } as any);
     expect(res.status).toBe(200);
     const data = await res.json();

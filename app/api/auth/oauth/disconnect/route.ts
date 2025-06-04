@@ -5,30 +5,22 @@ import { z } from 'zod';
 import { OAuthProvider } from '@/types/oauth';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { PermissionValues } from '@/core/permission/models';
-import { getApiPermissionService } from '@/services/permission/factory';
+import { createApiHandler } from '@/lib/api/route-helpers';
+import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 
 // Request schema
 const disconnectRequestSchema = z.object({
   provider: z.nativeEnum(OAuthProvider),
 });
 
-export async function POST(request: NextRequest) {
+async function handlePost(
+  request: NextRequest,
+  auth: AuthContext,
+  data: z.infer<typeof disconnectRequestSchema>,
+  services: ServiceContainer,
+) {
   try {
-    // Parse and validate request body
-    const body = await request.json();
-    const parsed = disconnectRequestSchema.safeParse(body);
-    if (!parsed.success) {
-      await logUserAction({
-        action: 'SSO_UNLINK',
-        status: 'FAILURE',
-        details: { error: parsed.error.message },
-      });
-      return NextResponse.json(
-        { error: parsed.error.message },
-        { status: 400 },
-      );
-    }
-    const { provider } = parsed.data;
+    const { provider } = data;
 
     // Initialize Supabase client
     const cookieStore = cookies();
@@ -68,8 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Permission check
-    const permissionService = getApiPermissionService();
-    const hasPermission = await permissionService.hasPermission(
+    const hasPermission = await services.permission!.hasPermission(
       user.id,
       PermissionValues.MANAGE_SETTINGS,
     );
@@ -176,4 +167,10 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
+
+export const POST = createApiHandler(
+  disconnectRequestSchema,
+  handlePost,
+  { requireAuth: true },
+);

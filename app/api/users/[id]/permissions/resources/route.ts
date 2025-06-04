@@ -1,11 +1,9 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createSuccessResponse } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
-import { createProtectedHandler } from '@/middleware/permissions';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { PermissionValues } from '@/core/permission/models';
-import { getApiPermissionService } from '@/services/permission/factory';
+import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 
 // GET /api/users/[id]/permissions/resources - Get resource permissions for a user
 
@@ -16,9 +14,14 @@ const querySchema = z.object({
 });
 type Query = z.infer<typeof querySchema>;
 
-async function handleGet(userId: string, query: Query) {
-  const service = getApiPermissionService();
-  let permissions = await service.getUserResourcePermissions(userId);
+async function handleGet(
+  _req: NextRequest,
+  _auth: AuthContext,
+  query: Query,
+  services: ServiceContainer,
+  userId: string,
+) {
+  let permissions = await services.permission!.getUserResourcePermissions(userId);
   if (query.resourceType) {
     permissions = permissions.filter((p) => p.resourceType === query.resourceType);
   }
@@ -33,12 +36,12 @@ async function handleGet(userId: string, query: Query) {
   return createSuccessResponse({ permissions });
 }
 
-export const GET = createProtectedHandler(
-  (req, ctx) =>
-    withErrorHandling(() => {
-      const url = new URL(req.url);
-      const params = Object.fromEntries(url.searchParams.entries());
-      return withValidation(querySchema, (_r, data) => handleGet(ctx.params.id, data), req, params);
-    }, req),
-  PermissionValues.MANAGE_ROLES,
-);
+export const GET = (
+  req: NextRequest,
+  ctx: { params: { id: string } },
+) =>
+  createApiHandler(
+    querySchema,
+    (r, auth, data, services) => handleGet(r, auth, data, services, ctx.params.id),
+    { requireAuth: true, requiredPermissions: [PermissionValues.MANAGE_ROLES] },
+  )(req);

@@ -1,31 +1,36 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
-import { getApiPermissionService } from '@/services/permission/factory';
+import { configureServices, resetServiceContainer } from '@/lib/config/service-container';
+import type { PermissionService } from '@/core/permission/interfaces';
+import type { AuthService } from '@/core/auth/interfaces';
+import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
-vi.mock('@/middleware/with-security', () => ({ withSecurity: (h: any) => h }));
-vi.mock('@/services/permission/factory', () => ({ getApiPermissionService: vi.fn() }));
-vi.mock('@/middleware/createMiddlewareChain', async () => {
-  const actual = await vi.importActual<any>('@/middleware/createMiddlewareChain');
-  return {
-    ...actual,
-    routeAuthMiddleware: vi.fn(() => (handler: any) => (req: any, _ctx?: any, data?: any) => handler(req, { userId: 'user-1' }, data)),
-  };
-});
+vi.mock('@/services/permission/factory', () => ({}));
+vi.mock('@/services/auth/factory', () => ({}));
 
-const mockService = { hasPermission: vi.fn() };
+const mockService: Partial<PermissionService> = {
+  hasPermission: vi.fn(),
+};
+const mockAuth: Partial<AuthService> = {
+  getCurrentUser: vi.fn().mockResolvedValue({ id: 'user-1' }),
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (getApiPermissionService as unknown as vi.Mock).mockReturnValue(mockService);
-  mockService.hasPermission.mockResolvedValue(true);
+  resetServiceContainer();
+  configureServices({
+    permissionService: mockService as PermissionService,
+    authService: mockAuth as AuthService,
+  });
+  vi.mocked(mockService.hasPermission).mockResolvedValue(true);
 });
 
 function createRequest(body: any) {
-  return new Request('http://localhost/api/auth/check-permission', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
+  return createAuthenticatedRequest(
+    'POST',
+    'http://localhost/api/auth/check-permission',
+    body,
+  );
 }
 
 describe('POST /api/auth/check-permission', () => {
