@@ -9,13 +9,22 @@ describe('getApiOrganizationService', () => {
     (AdapterRegistry as any).instance = null;
   });
 
-  it('returns new service instance using adapter from registry', () => {
+  it('creates service with adapter and caches instance', () => {
     const adapter = {} as any;
     AdapterRegistry.getInstance().registerAdapter('organization', adapter);
-    const svc1 = getApiOrganizationService();
+    const svc1 = getApiOrganizationService({ reset: true });
     const svc2 = getApiOrganizationService();
     expect(svc1).toBeInstanceOf(DefaultOrganizationService);
-    expect(svc2).toBeInstanceOf(DefaultOrganizationService);
-    expect(svc1).not.toBe(svc2);
+    expect(svc1).toBe(svc2);
+  });
+
+  it('allows resetting the cached instance', () => {
+    const adapter = {} as any;
+    AdapterRegistry.getInstance().registerAdapter('organization', adapter);
+    const first = getApiOrganizationService({ reset: true });
+    const second = getApiOrganizationService();
+    const third = getApiOrganizationService({ reset: true });
+    expect(first).toBe(second);
+    expect(third).not.toBe(first);
   });
 });

@@ -13,6 +13,7 @@ import { BrowserAuthStorage } from './auth-storage';
 import { AdapterRegistry } from '@/adapters/registry';
 import { createSupabaseAuthProvider } from '@/adapters/auth/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
+import { getServiceContainer, getServiceConfiguration } from '@/lib/config/service-container';
 
 /**
  * Options for {@link getApiAuthService}
@@ -77,16 +78,32 @@ export function getApiAuthService(options: ApiAuthServiceOptions = {}): AuthServ
     }
   }
 
-  if (!cachedService) {
-    if (typeof globalThis !== 'undefined') {
-      cachedService = (globalThis as any)[GLOBAL_CACHE_KEY] as AuthService | null;
-    }
+  if (!cachedService && typeof globalThis !== 'undefined') {
+    cachedService = (globalThis as any)[GLOBAL_CACHE_KEY] as AuthService | null;
   }
 
   if (!cachedService) {
-    const provider = options.provider ?? resolveProvider();
-    const storage = options.storage ?? new BrowserAuthStorage();
-    cachedService = new DefaultAuthService(provider, storage);
+    if (options.provider) {
+      const storage = options.storage ?? new BrowserAuthStorage();
+      cachedService = new DefaultAuthService(options.provider, storage);
+    } else {
+      const config = getServiceConfiguration();
+      if (config.authService) {
+        cachedService = config.authService;
+      } else {
+        try {
+          cachedService = getServiceContainer().auth;
+        } catch {
+          // ServiceContainer not fully configured
+        }
+
+        if (!cachedService) {
+          const provider = resolveProvider();
+          const storage = options.storage ?? new BrowserAuthStorage();
+          cachedService = new DefaultAuthService(provider, storage);
+        }
+      }
+    }
 
     // Store on the global object for thread safety in server environments
     if (typeof globalThis !== 'undefined') {

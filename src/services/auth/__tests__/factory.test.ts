@@ -2,12 +2,15 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AdapterRegistry } from '@/adapters/registry';
 import { DefaultAuthService } from '../default-auth.service';
 import { getApiAuthService } from '../factory';
+import { configureServices, resetServiceContainer } from '@/lib/config/service-container';
+import { MockAuthService } from './mocks/mock-auth-service';
 
 describe('getApiAuthService', () => {
   beforeEach(() => {
     vi.resetModules();
     (AdapterRegistry as any).instance = null;
     delete (globalThis as any).__UM_AUTH_SERVICE__;
+    resetServiceContainer();
   });
 
   it('creates service with adapter and caches instance', () => {
@@ -29,6 +32,13 @@ describe('getApiAuthService', () => {
     expect(() => getApiAuthService({ reset: true })).toThrow();
 
     vi.unstubAllEnvs();
+  });
+
+  it('uses service container override when provided', () => {
+    const override = new MockAuthService();
+    configureServices({ authService: override });
+    const service = getApiAuthService({ reset: true });
+    expect(service).toBe(override);
   });
 
   it('allows resetting the cached instance', () => {

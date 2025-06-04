@@ -6,10 +6,14 @@
  */
 
 import { GdprService } from '@/core/gdpr/interfaces';
-import { UserManagementConfiguration } from '@/core/config';
 import type { IGdprDataProvider } from '@/core/gdpr';
 import { AdapterRegistry } from '@/adapters/registry';
+import { getServiceContainer } from '@/lib/config/service-container';
 import { DefaultGdprService } from './default-gdpr.service';
+
+export interface GdprServiceOptions {
+  reset?: boolean;
+}
 
 // Singleton instance for API routes
 let gdprServiceInstance: GdprService | null = null;
@@ -19,13 +23,18 @@ let gdprServiceInstance: GdprService | null = null;
  * 
  * @returns Configured GdprService instance
  */
-export function getApiGdprService(): GdprService {
+export function getApiGdprService(options: GdprServiceOptions = {}): GdprService {
+  if (options.reset) {
+    gdprServiceInstance = null;
+  }
+
   if (!gdprServiceInstance) {
-    gdprServiceInstance = UserManagementConfiguration.getServiceProvider('gdprService') as GdprService | undefined;
-    if (!gdprServiceInstance) {
-      const gdprDataProvider = AdapterRegistry.getInstance().getAdapter<IGdprDataProvider>('gdpr');
-      gdprServiceInstance = new DefaultGdprService(gdprDataProvider);
-    }
+    gdprServiceInstance = getServiceContainer().gdpr || null;
+  }
+
+  if (!gdprServiceInstance) {
+    const gdprDataProvider = AdapterRegistry.getInstance().getAdapter<IGdprDataProvider>('gdpr');
+    gdprServiceInstance = new DefaultGdprService(gdprDataProvider);
   }
 
   return gdprServiceInstance;
@@ -34,6 +43,6 @@ export function getApiGdprService(): GdprService {
 /**
  * Temporary alias for backwards compatibility with older route imports.
  */
-export function getApiGDPRService(): GdprService {
-  return getApiGdprService();
+export function getApiGDPRService(options: GdprServiceOptions = {}): GdprService {
+  return getApiGdprService(options);
 }
