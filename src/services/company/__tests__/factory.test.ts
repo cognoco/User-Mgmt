@@ -16,13 +16,21 @@ describe('getApiCompanyService', () => {
   it('returns configured service if registered', () => {
     const svc = {} as any;
     UserManagementConfiguration.configureServiceProviders({ companyService: svc });
-    expect(getApiCompanyService()).toBe(svc);
+    expect(getApiCompanyService({ reset: true })).toBe(svc);
     expect(getApiCompanyService()).toBe(svc);
   });
 
   it('creates default service when not configured', () => {
-    const service = getApiCompanyService();
+    const service = getApiCompanyService({ reset: true });
     expect(service).toBeInstanceOf(DefaultCompanyService);
     expect(getApiCompanyService()).toBe(service);
+  });
+
+  it('allows resetting the cached instance', () => {
+    const first = getApiCompanyService({ reset: true });
+    const second = getApiCompanyService();
+    const third = getApiCompanyService({ reset: true });
+    expect(first).toBe(second);
+    expect(third).not.toBe(first);
   });
 });
