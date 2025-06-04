@@ -9,19 +9,42 @@ import { AdminService } from '@/core/admin/interfaces';
 import type { IAdminDataProvider } from '@/core/admin';
 import { AdapterRegistry } from '@/adapters/registry';
 import { DefaultAdminService } from './default-admin.service';
+import { getServiceContainer } from '@/lib/config/service-container';
 
 // Singleton instance for API routes
 let adminServiceInstance: AdminService | null = null;
+
+/**
+ * Options for {@link getApiAdminService}
+ */
+export interface ApiAdminServiceOptions {
+  /**
+   * When true, clears the cached instance. Useful for tests.
+   */
+  reset?: boolean;
+}
 
 /**
  * Get the configured admin service instance for API routes
  *
  * @returns Configured AdminService instance
  */
-export function getApiAdminService(): AdminService {
+export function getApiAdminService(
+  options: ApiAdminServiceOptions = {}
+): AdminService {
+  if (options.reset) {
+    adminServiceInstance = null;
+  }
+
   if (!adminServiceInstance) {
-    const provider = AdapterRegistry.getInstance().getAdapter<IAdminDataProvider>('admin');
-    adminServiceInstance = new DefaultAdminService(provider);
+    // Check ServiceContainer first (respects host app overrides)
+    adminServiceInstance = getServiceContainer().admin as AdminService | undefined || null;
+
+    // Fall back to adapter registry (current behavior)
+    if (!adminServiceInstance) {
+      const provider = AdapterRegistry.getInstance().getAdapter<IAdminDataProvider>('admin');
+      adminServiceInstance = new DefaultAdminService(provider);
+    }
   }
 
   return adminServiceInstance;
