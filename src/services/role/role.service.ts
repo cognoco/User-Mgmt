@@ -1,45 +1,17 @@
-export interface Role {
-  id: string;
-  name: string;
-  description?: string;
-  isSystemRole: boolean;
-  parentRoleId?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface RoleCreateData {
-  name: string;
-  description?: string;
-  parentRoleId?: string | null;
-  isSystemRole?: boolean;
-}
-
-export interface RoleUpdateData {
-  name?: string;
-  description?: string;
-  parentRoleId?: string | null;
-}
-
-export interface UserRoleAssignment {
-  id: string;
-  userId: string;
-  roleId: string;
-  assignedBy: string;
-  createdAt: string;
-  expiresAt?: string | null;
-  role?: Role;
-}
-
-export interface RoleHierarchyNode extends Role {
-  children: RoleHierarchyNode[];
-}
-
+import type {
+  Role,
+  RoleCreateData,
+  RoleUpdateData,
+  UserRoleAssignment,
+  RoleHierarchyNode,
+  RoleFilters,
+  RoleService as IRoleService
+} from '@/core/role/interfaces';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import type { Permission } from '@/types/rbac';
 import { MemoryCache } from '@/lib/cache';
 
-export class RoleService {
+export class RoleService implements IRoleService {
   private static permissionCache = new MemoryCache<string, Permission[]>({ ttl: 30_000 });
   
   constructor(
@@ -47,7 +19,7 @@ export class RoleService {
     private maxHierarchyDepth = Infinity,
   ) {}
 
-  async getAllRoles(filters?: { isSystemRole?: boolean }): Promise<Role[]> {
+  async getAllRoles(filters?: RoleFilters): Promise<Role[]> {
     let query = this.supabase.from('roles').select('*');
     if (filters?.isSystemRole !== undefined) {
       query = query.eq('is_system_role', filters.isSystemRole);
@@ -105,19 +77,19 @@ export class RoleService {
   private async exceedsDepthLimit(parentId: string | null): Promise<boolean> {
     if (!parentId || this.maxHierarchyDepth === Infinity) return false;
     let depth = 1;
-    let current = parentId;
+    let current: string | null = parentId;
     const visited = new Set<string>();
     while (current) {
       if (visited.has(current)) break;
       visited.add(current);
       if (depth >= this.maxHierarchyDepth) return true;
-      const { data, error } = await this.supabase
+      const { data, error }: { data: { parent_role_id: string | null } | null; error: any } = await this.supabase
         .from('roles')
         .select('parent_role_id')
         .eq('id', current)
         .single();
       if (error || !data) break;
-      current = (data as { parent_role_id: string | null }).parent_role_id;
+      current = data.parent_role_id;
       depth += 1;
     }
     return false;
@@ -239,7 +211,7 @@ export class RoleService {
     let current = await this.getRoleById(roleId);
     while (current?.parentRoleId) {
       const parentId = current.parentRoleId;
-      if (!parentId || visited.has(parentId)) break;
+      if (visited.has(parentId)) break;
       const parent = await this.getRoleById(parentId);
       if (!parent) break;
       visited.add(parentId);
@@ -273,7 +245,7 @@ export class RoleService {
       map.set(role.id, { ...(role as RoleHierarchyNode), children: [] });
     }
     const roots: RoleHierarchyNode[] = [];
-    for (const node of map.values()) {
+    for (const node of Array.from(map.values())) {
       if (node.parentRoleId) {
         const parent = map.get(node.parentRoleId);
         if (parent) {

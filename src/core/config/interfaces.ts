@@ -23,11 +23,11 @@ import type { CsrfService } from '@/core/csrf/interfaces';
 import type { ConsentService } from '@/core/consent/interfaces';
 import type { AuditService } from '@/core/audit/interfaces';
 import type { AdminService } from '@/core/admin/interfaces';
+import type { RoleService } from '@/core/role/interfaces';
+import type { AddressService, CompanyAddressService } from '@/core/address/interfaces';
 
 // Import additional service interfaces as they become available
 // TODO: Add imports for other service interfaces when they exist
-// import type { RoleService } from '@/core/role/interfaces';
-// import type { AddressService } from '@/core/address/interfaces';
 
 /**
  * Service container interface that holds all available services
@@ -51,8 +51,8 @@ export interface ServiceContainer {
   audit?: AuditService;
   admin?: AdminService;
   // TODO: Add other services as their interfaces become available
-  // role?: RoleService;
-  // address?: AddressService;
+  role?: RoleService;
+  address?: CompanyAddressService;
 }
 
 /**
@@ -144,9 +144,15 @@ export interface ServiceConfig {
    */
   adminService?: AdminService;
   
-  // TODO: Add other service configurations as their interfaces become available
-  // roleService?: RoleService;
-  // addressService?: AddressService;
+  /**
+   * Custom role service implementation
+   */
+  roleService?: RoleService;
+  
+  /**
+   * Custom address service implementation (for company addresses)
+   */
+  addressService?: CompanyAddressService;
   
   /**
    * Feature flags to enable/disable functionality

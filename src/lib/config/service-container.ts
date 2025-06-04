@@ -28,6 +28,8 @@ import type { CsrfService } from '@/core/csrf/interfaces';
 import type { ConsentService } from '@/core/consent/interfaces';
 import type { AuditService } from '@/core/audit/interfaces';
 import type { AdminService } from '@/core/admin/interfaces';
+import type { RoleService } from '@/core/role/interfaces';
+import type { AddressService, CompanyAddressService } from '@/core/address/interfaces';
 
 // Import existing service factories
 import { getApiAuthService } from '@/services/auth/factory';
@@ -47,6 +49,8 @@ import { getApiCsrfService } from '@/services/csrf/factory';
 import { getApiConsentService } from '@/services/consent/factory';
 import { getApiAuditService } from '@/services/audit/factory';
 import { getApiAdminService } from '@/services/admin/factory';
+import { getApiRoleService } from '@/services/role/factory';
+import { getApiAddressService } from '@/services/address/factory';
 
 // TODO: Import additional service factories as they become available
 // import { getApiRoleService } from '@/services/role/factory';
@@ -204,6 +208,20 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
     serviceInstances.admin = getApiAdminService();
   }
   
+  // Create role service if not cached
+  if (!serviceInstances.role && globalServiceConfig.roleService) {
+    serviceInstances.role = globalServiceConfig.roleService;
+  } else if (!serviceInstances.role && globalServiceConfig.featureFlags?.roles !== false) {
+    serviceInstances.role = getApiRoleService();
+  }
+  
+  // Create address service if not cached
+  if (!serviceInstances.address && globalServiceConfig.addressService) {
+    serviceInstances.address = globalServiceConfig.addressService;
+  } else if (!serviceInstances.address && globalServiceConfig.featureFlags?.addresses !== false) {
+    serviceInstances.address = getApiAddressService();
+  }
+  
   // TODO: Add other services as their factories become available
   
   // Return container with any provided overrides
@@ -225,6 +243,8 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
     consent: overrides?.consent || serviceInstances.consent,
     audit: overrides?.audit || serviceInstances.audit,
     admin: overrides?.admin || serviceInstances.admin,
+    role: overrides?.role || serviceInstances.role,
+    address: overrides?.address || serviceInstances.address,
   };
 }
 
