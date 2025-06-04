@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/database/supabase';
 import { z } from 'zod';
-import { sendEmail } from '@/lib/email/sendEmail';
 import { getCurrentUser } from '@/lib/auth/session';
+import { getApiNotificationService } from '@/services/notification/factory';
+import {
+  NotificationChannel,
+  NotificationCategory
+} from '@/core/notification/models';
 
 // Schema for incoming notification payloads
 const notificationSchema = z.object({
@@ -34,25 +37,21 @@ export async function GET(req: NextRequest) {
     const offset = (page - 1) * limit;
 
     // Query notifications table using standard pattern
-    const supabase = getServiceSupabase();
-    const { data, error, count } = await supabase
-      .from('notifications')
-      .select('*', { count: 'exact' })
-      .eq('userId', user.id)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+    const service = getApiNotificationService();
+    const batch = await service.getUserNotifications(user.id, {
+      page,
+      limit,
+      sortBy: 'createdAt',
+      sortDirection: 'desc'
+    });
 
-    if (error) {
-      return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
-    }
-
-    return NextResponse.json({ 
-      notifications: data, 
+    return NextResponse.json({
+      notifications: batch.notifications,
       pagination: {
-        total: count,
-        page,
-        limit,
-        pages: Math.ceil((count || 0) / limit)
+        total: batch.total,
+        page: batch.page,
+        limit: batch.limit,
+        pages: batch.totalPages
       }
     });
   } catch (error) {
@@ -87,80 +86,29 @@ export async function POST(req: NextRequest) {
 
     const notification = result.data;
     
-    // Store the notification in the database for tracking and in-app display
-    const supabase = getServiceSupabase();
-    const { data: insertData, error: insertError } = await supabase
-      .from('notifications')
-      .insert({
-        type: notification.type,
+    const service = getApiNotificationService();
+    const resultService = await service.sendNotification(
+      notification.userId || user.id,
+      {
+        channel: notification.type as NotificationChannel,
         title: notification.title,
         message: notification.message,
-        userId: notification.userId || user.id,
-        category: notification.category || 'system',
-        data: notification.data || {},
-        isRead: false,
-      })
-      .select('id')
-      .single();
+        category: notification.category as NotificationCategory | undefined,
+        data: notification.data
+      }
+    );
 
-    if (insertError) {
-      return NextResponse.json({ error: 'Failed to store notification' }, { status: 500 });
+    if (!resultService.success) {
+      return NextResponse.json(
+        { error: resultService.error || 'Notification delivery failed' },
+        { status: 500 }
+      );
     }
 
-    // Process the notification based on type
-    let deliveryResult = null;
-    
-    switch (notification.type) {
-      case 'email':
-        // Send email notification
-        deliveryResult = await processEmailNotification(notification);
-        break;
-        
-      case 'push':
-        // Send push notification
-        deliveryResult = await processPushNotification(notification);
-        break;
-        
-      case 'sms':
-        // Send SMS notification
-        deliveryResult = await processSMSNotification(notification);
-        break;
-        
-      case 'inApp':
-        // For in-app, just storing in the database is enough
-        deliveryResult = { success: true, id: insertData.id };
-        break;
-        
-      default:
-        deliveryResult = { success: false, error: 'Unsupported notification type' };
-    }
-
-    // Update notification status based on delivery result
-    if (deliveryResult && !deliveryResult.success) {
-      await supabase
-        .from('notifications')
-        .update({ 
-          status: 'failed',
-          errorDetails: deliveryResult.error
-        })
-        .eq('id', insertData.id);
-        
-      return NextResponse.json({ 
-        error: 'Notification delivery failed', 
-        details: deliveryResult.error 
-      }, { status: 500 });
-    }
-
-    // Mark as sent
-    await supabase
-      .from('notifications')
-      .update({ status: 'sent' })
-      .eq('id', insertData.id);
-
-    return NextResponse.json({ 
-      success: true, 
-      id: insertData.id,
-      message: 'Notification sent successfully' 
+    return NextResponse.json({
+      success: true,
+      id: resultService.notificationId,
+      message: 'Notification sent successfully'
     });
     
   } catch (error) {
@@ -171,71 +119,3 @@ export async function POST(req: NextRequest) {
     }, { status: 500 });
   }
 }
-
-// Process email notification
-async function processEmailNotification(notification: z.infer<typeof notificationSchema>) {
-  try {
-    if (!notification.userEmail) {
-      return { success: false, error: 'User email is required for email notifications' };
-    }
-
-    const emailResult = await sendEmail({
-      to: notification.userEmail,
-      subject: notification.title,
-      html: notification.message,
-    });
-
-    return { success: true, messageId: emailResult.messageId };
-  } catch (error) {
-    console.error('Email notification error:', error);
-    return { success: false, error: 'Failed to send email notification' };
-  }
-}
-
-// Process push notification
-async function processPushNotification(notification: z.infer<typeof notificationSchema>) {
-  try {
-    if (!notification.userId) {
-      return { success: false, error: 'User ID is required for push notifications' };
-    }
-
-    // Get user's push subscription
-    const supabase = getServiceSupabase();
-    const { data: subscriptions, error } = await supabase
-      .from('push_subscriptions')
-      .select('*')
-      .eq('userId', notification.userId);
-
-    if (error || !subscriptions || subscriptions.length === 0) {
-      return { success: false, error: 'No push subscriptions found for user' };
-    }
-
-    // In a real implementation, we would send the push notification to each subscription
-    // This would typically use web-push or a similar library
-    // For now, we'll simulate success
-    
-    return { success: true };
-  } catch (error) {
-    console.error('Push notification error:', error);
-    return { success: false, error: 'Failed to send push notification' };
-  }
-}
-
-// Process SMS notification
-async function processSMSNotification(notification: z.infer<typeof notificationSchema>) {
-  try {
-    // Check for required information
-    if (!notification.userId) {
-      return { success: false, error: 'User ID is required for SMS notifications' };
-    }
-
-    // In a real implementation, we would integrate with Twilio, AWS SNS, etc.
-    // For now, we'll simulate success
-    console.log('Simulating SMS notification:', notification.title);
-    
-    return { success: true };
-  } catch (error) {
-    console.error('SMS notification error:', error);
-    return { success: false, error: 'Failed to send SMS notification' };
-  }
-} 
