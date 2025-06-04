@@ -1,29 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { getServiceSupabase } from "@/lib/database/supabase";
-import { getApiCompanyService } from "@/services/company/factory";
 import { type RouteAuthContext } from "@/middleware/auth";
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  routeAuthMiddleware,
-  rateLimitMiddleware,
-} from "@/middleware/createMiddlewareChain";
+import { createApiHandler } from "@/lib/api/route-helpers";
+import { createSuccessResponse } from "@/lib/api/common";
 import { v4 as uuidv4 } from "uuid";
 
 const VERIFICATION_PREFIX = "user-management-verification=";
 
 const supabaseService = getServiceSupabase();
 
-const middleware = createMiddlewareChain([
-  rateLimitMiddleware(),
-  errorHandlingMiddleware(),
-  routeAuthMiddleware(),
-]);
 
 async function handlePost(
   _request: NextRequest,
   params: { id: string },
   auth: RouteAuthContext,
+  services: any
 ) {
   try {
     const userId = auth.userId!;
@@ -39,8 +31,7 @@ async function handlePost(
       return NextResponse.json({ error: "Domain not found." }, { status: 404 });
     }
 
-    const companyService = getApiCompanyService();
-    const profile = await companyService.getProfileByUserId(userId);
+    const profile = await services.addressService.getProfileByUserId(userId);
     if (!profile || profile.id !== domainRecord.company_id) {
       return NextResponse.json(
         { error: "You do not have permission to verify this domain." },
@@ -88,4 +79,8 @@ async function handlePost(
 }
 
 export const POST = (req: NextRequest, ctx: { params: { id: string } }) =>
-  middleware((r, auth) => handlePost(r, ctx.params, auth))(req);
+  createApiHandler(
+    z.object({}),
+    (r, a, d, services) => handlePost(r, ctx.params, a, services),
+    { requireAuth: true }
+  )(req);
