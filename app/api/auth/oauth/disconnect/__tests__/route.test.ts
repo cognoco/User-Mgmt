@@ -1,6 +1,10 @@
 import { POST } from '../route';
 import { OAuthProvider } from '@/types/oauth';
 import { describe, it, expect, vi, beforeEach, MockedFunction } from 'vitest';
+import { configureServices, resetServiceContainer } from '@/lib/config/service-container';
+import type { PermissionService } from '@/core/permission/interfaces';
+import type { AuthService } from '@/core/auth/interfaces';
+import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 // import { cookies } from 'next/headers'; // Mocked
 // import { createServerClient } from '@supabase/ssr'; // Mocked
 import { logUserAction } from '@/lib/audit/auditLogger'; // Mocked
@@ -38,12 +42,11 @@ vi.mock('@supabase/ssr', () => ({
 }));
 
 // 3. Mock Permission Service
-const mockPermissionService = {
+const mockPermissionService: Partial<PermissionService> = {
   hasPermission: vi.fn(),
 };
-vi.mock('@/services/permission/factory', () => ({
-  getApiPermissionService: () => mockPermissionService,
-}));
+vi.mock('@/services/permission/factory', () => ({}));
+vi.mock('@/services/auth/factory', () => ({}));
 
 // 4. Mock Audit Logger
 vi.mock('@/lib/audit/auditLogger', () => ({
@@ -70,17 +73,21 @@ describe('POST /api/auth/oauth/disconnect', () => {
     mockCookies.clear();
     // Assume user is logged in for most tests
     mockSupabaseAuth.getUser.mockResolvedValue({ data: { user: mockLoggedInUser }, error: null });
-    mockPermissionService.hasPermission.mockResolvedValue(true);
+    mockPermissionService.hasPermission!.mockResolvedValue(true);
+    resetServiceContainer();
+    configureServices({
+      permissionService: mockPermissionService as PermissionService,
+      authService: { getCurrentUser: vi.fn().mockResolvedValue({ id: loggedInUserId }) } as AuthService,
+    });
   });
 
   // Helper to create request
-  const createRequest = (body: object) => {
-    return new Request('http://localhost/api/auth/oauth/disconnect', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-  };
+  const createRequest = (body: object) =>
+    createAuthenticatedRequest(
+      'POST',
+      'http://localhost/api/auth/oauth/disconnect',
+      body,
+    );
 
   it('should return 401 if user is not authenticated', async () => {
     mockSupabaseAuth.getUser.mockResolvedValue({ data: { user: null }, error: { message: 'Unauthorized', status: 401 } });

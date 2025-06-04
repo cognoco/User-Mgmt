@@ -1,15 +1,8 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { withSecurity } from '@/middleware/with-security';
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  routeAuthMiddleware,
-  validationMiddleware
-} from '@/middleware/createMiddlewareChain';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { createSuccessResponse } from '@/lib/api/common';
-import { getApiPermissionService } from '@/services/permission/factory';
-import type { RouteAuthContext } from '@/middleware/auth';
+import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 
 const CheckRoleSchema = z.object({
   role: z.string().min(1),
@@ -18,23 +11,19 @@ const CheckRoleSchema = z.object({
 
 async function handleCheckRole(
   _req: NextRequest,
-  auth: RouteAuthContext,
-  data: z.infer<typeof CheckRoleSchema>
+  auth: AuthContext,
+  data: z.infer<typeof CheckRoleSchema>,
+  services: ServiceContainer,
 ) {
   if (!auth.userId) {
     return createSuccessResponse({ hasRole: false });
   }
-  const service = getApiPermissionService();
-  const hasRole = await service.hasRole(auth.userId, data.role as any);
+  const hasRole = await services.permission!.hasRole(auth.userId, data.role as any);
   return createSuccessResponse({ hasRole, effectiveRole: hasRole ? data.role : undefined });
 }
 
-const middleware = createMiddlewareChain([
-  errorHandlingMiddleware(),
-  routeAuthMiddleware(),
-  validationMiddleware(CheckRoleSchema)
-]);
-
-export const POST = withSecurity((req: NextRequest) =>
-  middleware((r, auth, data) => handleCheckRole(r, auth, data))(req)
+export const POST = createApiHandler(
+  CheckRoleSchema,
+  handleCheckRole,
+  { requireAuth: true },
 );

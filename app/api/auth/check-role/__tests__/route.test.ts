@@ -1,31 +1,30 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
-import { getApiPermissionService } from '@/services/permission/factory';
+import { configureServices, resetServiceContainer } from '@/lib/config/service-container';
+import type { PermissionService } from '@/core/permission/interfaces';
+import type { AuthService } from '@/core/auth/interfaces';
+import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
-vi.mock('@/middleware/with-security', () => ({ withSecurity: (h: any) => h }));
-vi.mock('@/services/permission/factory', () => ({ getApiPermissionService: vi.fn() }));
-vi.mock('@/middleware/createMiddlewareChain', async () => {
-  const actual = await vi.importActual<any>('@/middleware/createMiddlewareChain');
-  return {
-    ...actual,
-    routeAuthMiddleware: vi.fn(() => (handler: any) => (req: any, _ctx?: any, data?: any) => handler(req, { userId: 'u1' }, data)),
-  };
-});
+vi.mock('@/services/permission/factory', () => ({}));
+vi.mock('@/services/auth/factory', () => ({}));
 
-const mockService = { hasRole: vi.fn() };
+const mockService: Partial<PermissionService> = { hasRole: vi.fn() };
+const mockAuth: Partial<AuthService> = {
+  getCurrentUser: vi.fn().mockResolvedValue({ id: 'u1' }),
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (getApiPermissionService as unknown as vi.Mock).mockReturnValue(mockService);
-  mockService.hasRole.mockResolvedValue(true);
+  resetServiceContainer();
+  configureServices({
+    permissionService: mockService as PermissionService,
+    authService: mockAuth as AuthService,
+  });
+  vi.mocked(mockService.hasRole).mockResolvedValue(true);
 });
 
 function makeReq(body: any) {
-  return new Request('http://test/api/auth/check-role', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
+  return createAuthenticatedRequest('POST', 'http://test/api/auth/check-role', body);
 }
 
 describe('POST /api/auth/check-role', () => {

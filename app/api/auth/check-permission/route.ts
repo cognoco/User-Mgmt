@@ -1,16 +1,9 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { withSecurity } from '@/middleware/with-security';
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  routeAuthMiddleware,
-  validationMiddleware
-} from '@/middleware/createMiddlewareChain';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { createSuccessResponse } from '@/lib/api/common';
-import { getApiPermissionService } from '@/services/permission/factory';
 import { permissionCheckCache } from '@/lib/auth/permission-cache';
-import type { RouteAuthContext } from '@/middleware/auth';
+import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 
 const CheckPermissionSchema = z.object({
   permission: z.string().min(1),
@@ -20,8 +13,9 @@ const CheckPermissionSchema = z.object({
 
 async function handleCheckPermission(
   _req: NextRequest,
-  auth: RouteAuthContext,
-  data: z.infer<typeof CheckPermissionSchema>
+  auth: AuthContext,
+  data: z.infer<typeof CheckPermissionSchema>,
+  services: ServiceContainer,
 ) {
   if (!auth.userId) {
     return createSuccessResponse({ hasPermission: false });
@@ -30,20 +24,15 @@ async function handleCheckPermission(
   const key = `${auth.userId}:${data.permission}:${data.resourceType ?? ''}:${
     data.resourceId ?? ''}`;
 
-  const service = getApiPermissionService();
   const allowed = await permissionCheckCache.getOrCreate(key, () =>
-    service.hasPermission(auth.userId!, data.permission as any)
+    services.permission!.hasPermission(auth.userId!, data.permission as any)
   );
 
   return createSuccessResponse({ hasPermission: allowed });
 }
 
-const middleware = createMiddlewareChain([
-  errorHandlingMiddleware(),
-  routeAuthMiddleware(),
-  validationMiddleware(CheckPermissionSchema)
-]);
-
-export const POST = withSecurity((req: NextRequest) =>
-  middleware((r, auth, data) => handleCheckPermission(r, auth, data))(req)
+export const POST = createApiHandler(
+  CheckPermissionSchema,
+  handleCheckPermission,
+  { requireAuth: true },
 );
