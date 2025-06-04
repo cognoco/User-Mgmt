@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getApiSubscriptionService } from '@/services/subscription/factory';
+import { createApiHandler } from '@/lib/api/route-helpers';
+import { createSuccessResponse } from '@/lib/api/common';
 
 const bodySchema = z.object({
   subscriptionId: z.string(),
@@ -10,32 +11,20 @@ const bodySchema = z.object({
 /**
  * Cancel a user's subscription.
  */
-export async function POST(req: NextRequest) {
-  const userId = req.headers.get('x-user-id');
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export const POST = createApiHandler(
+  bodySchema,
+  async (req: NextRequest, authContext: any, data: z.infer<typeof bodySchema>, services: any) => {
+    const result = await services.subscription.cancelSubscription(
+      data.subscriptionId,
+      data.immediate
+    );
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    if (!result.success) {
+      return NextResponse.json({ error: result.error || 'Failed to cancel' }, { status: 400 });
+    }
+    return createSuccessResponse({ success: true });
+  },
+  {
+    requireAuth: true,
   }
-
-  const parse = bodySchema.safeParse(body);
-  if (!parse.success) {
-    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
-  }
-
-  const service = getApiSubscriptionService();
-  const result = await service.cancelSubscription(
-    parse.data.subscriptionId,
-    parse.data.immediate
-  );
-
-  if (!result.success) {
-    return NextResponse.json({ error: result.error || 'Failed to cancel' }, { status: 400 });
-  }
-  return NextResponse.json({ success: true });
-}
+);

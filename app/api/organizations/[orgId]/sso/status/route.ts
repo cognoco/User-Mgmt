@@ -1,54 +1,60 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getApiSsoService } from '@/services/sso/factory';
+import { NextRequest } from 'next/server';
+import { z } from 'zod';
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import { createSuccessResponse } from '@/lib/api/common';
+
+const putSchema = z.object({
+  providerId: z.string(),
+  active: z.boolean(),
+});
 
 // GET /api/organizations/[orgId]/sso/status
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { orgId: string } }
-) {
-  const { orgId } = params;
-  const service = getApiSsoService();
-  const providers = await service.getProviders(orgId);
-  if (!providers.length) {
-    return NextResponse.json({
-      status: 'unknown',
+export const GET = createApiHandler(
+  emptySchema,
+  async (request: NextRequest, authContext: any, data: any, services: any) => {
+    const url = new URL(request.url);
+    const orgId = url.pathname.split('/')[3]; // Extract orgId from /api/organizations/{orgId}/sso/status
+    const providers = await services.sso.getProviders(orgId);
+    if (!providers.length) {
+      return createSuccessResponse({
+        status: 'unknown',
+        lastSuccessfulLogin: null,
+        lastError: null,
+        totalSuccessfulLogins24h: 0,
+      });
+    }
+
+    return createSuccessResponse({
+      status: 'healthy',
       lastSuccessfulLogin: null,
       lastError: null,
       totalSuccessfulLogins24h: 0,
     });
+  },
+  {
+    requireAuth: true,
   }
-
-  return NextResponse.json({
-    status: 'healthy',
-    lastSuccessfulLogin: null,
-    lastError: null,
-    totalSuccessfulLogins24h: 0,
-  });
-}
+);
 
 // PUT /api/organizations/[orgId]/sso/status
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { orgId: string } }
-) {
-  const { orgId } = params;
-
-  try {
-    const body = await request.json();
-    if (body && typeof body.providerId === 'string' && typeof body.active === 'boolean') {
-      const service = getApiSsoService();
-      await service.setProviderActive(body.providerId, body.active);
-    }
-    const service = getApiSsoService();
-    const providers = await service.getProviders(orgId);
+export const PUT = createApiHandler(
+  putSchema,
+  async (request: NextRequest, authContext: any, data: z.infer<typeof putSchema>, services: any) => {
+    const url = new URL(request.url);
+    const orgId = url.pathname.split('/')[3]; // Extract orgId from /api/organizations/{orgId}/sso/status
+    
+    await services.sso.setProviderActive(data.providerId, data.active);
+    
+    const providers = await services.sso.getProviders(orgId);
     const status = providers.length ? 'healthy' : 'unknown';
-    return NextResponse.json({
+    return createSuccessResponse({
       status,
       lastSuccessfulLogin: null,
       lastError: null,
       totalSuccessfulLogins24h: 0,
     });
-  } catch (error) {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+  },
+  {
+    requireAuth: true,
   }
-}
+);

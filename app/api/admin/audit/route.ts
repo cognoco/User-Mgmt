@@ -1,10 +1,8 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { createSuccessResponse } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
-import { getApiAdminService } from '@/services/admin/factory';
-import { createProtectedHandler } from '@/middleware/permissions';
+import { PermissionValues } from '@/core/permission/models';
 
 const querySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
@@ -17,23 +15,14 @@ const querySchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 });
 
-type Query = z.infer<typeof querySchema>;
-
-async function handleAuditLogs(req: NextRequest, params: Query) {
-  const adminService = getApiAdminService();
-  const result = await adminService.getAuditLogs(params);
-  return createSuccessResponse({ logs: result.logs, pagination: result.pagination });
-}
-
-async function handler(req: NextRequest) {
-  return withErrorHandling(
-    async (r) => {
-      const url = new URL(r.url);
-      const query = Object.fromEntries(url.searchParams.entries());
-      return withValidation(querySchema, handleAuditLogs, r, query as any);
-    },
-    req
-  );
-}
-
-export const GET = createProtectedHandler(handler, 'admin.audit.view');
+export const GET = createApiHandler(
+  querySchema,
+  async (req: NextRequest, authContext: any, params: z.infer<typeof querySchema>, services: any) => {
+    const result = await services.admin.getAuditLogs(params);
+    return createSuccessResponse({ logs: result.logs, pagination: result.pagination });
+  },
+  {
+    requireAuth: true,
+    requiredPermissions: [PermissionValues.ADMIN_ACCESS], // Using generic admin permission for now
+  }
+);

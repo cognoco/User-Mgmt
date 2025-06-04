@@ -1,13 +1,10 @@
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
-import { createProtectedHandler } from '@/middleware/permissions';
-import { getApiAdminService } from '@/services/admin/factory';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { logUserAction } from '@/lib/audit/auditLogger';
 
-const exportSchema = z.object({
-  format: z.enum(['csv', 'json']).default('csv'),
+const exportQuerySchema = z.object({
+  format: z.enum(['csv', 'json']).optional(),
   query: z.string().optional(),
   status: z.enum(['active', 'inactive', 'suspended', 'all']).optional(),
   role: z.string().optional(),
@@ -18,46 +15,46 @@ const exportSchema = z.object({
   teamId: z.string().optional(),
 });
 
-async function handleExportUsers(req: NextRequest, params: z.infer<typeof exportSchema>) {
-  const { format, ...searchParams } = params;
-  const adminService = getApiAdminService();
-  const result = await adminService.searchUsers({ ...searchParams, limit: 10000, page: 1 });
-  await logUserAction({
-    action: 'USERS_EXPORT',
-    status: 'SUCCESS',
-    targetResourceType: 'user',
-    details: {
-      format,
-      userCount: result.users.length,
-      searchParams,
-    },
-  });
-  if (format === 'json') {
-    return new Response(JSON.stringify(result.users, null, 2), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Disposition': `attachment; filename="users-export-${new Date().toISOString().split('T')[0]}.json"`,
+export const GET = createApiHandler(
+  exportQuerySchema,
+  async (req: NextRequest, authContext: any, params: z.infer<typeof exportQuerySchema>, services: any) => {
+    const { format = 'csv', ...searchParams } = params;
+    const result = await services.admin.searchUsers({ ...searchParams, limit: 10000, page: 1 });
+    
+    await logUserAction({
+      action: 'USERS_EXPORT',
+      status: 'SUCCESS',
+      targetResourceType: 'user',
+      details: {
+        format,
+        userCount: result.users.length,
+        searchParams,
       },
     });
-  } else {
-    const headers = ['ID', 'First Name', 'Last Name', 'Email', 'Status', 'Role', 'Created At', 'Last Login At'];
-    const rows = result.users.map((u) => [u.id, u.firstName, u.lastName, u.email, u.status, u.role, u.createdAt, u.lastLoginAt || '']);
-    const csv = [headers.join(','), ...rows.map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))].join('\n');
-    return new Response(csv, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/csv',
-        'Content-Disposition': `attachment; filename="users-export-${new Date().toISOString().split('T')[0]}.csv"`,
-      },
-    });
+    
+    if (format === 'json') {
+      return new NextResponse(JSON.stringify(result.users, null, 2), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Disposition': `attachment; filename="users-export-${new Date().toISOString().split('T')[0]}.json"`,
+        },
+      });
+    } else {
+      const headers = ['ID', 'First Name', 'Last Name', 'Email', 'Status', 'Role', 'Created At', 'Last Login At'];
+      const rows = result.users.map((u: any) => [u.id, u.firstName, u.lastName, u.email, u.status, u.role, u.createdAt, u.lastLoginAt || '']);
+      const csv = [headers.join(','), ...rows.map((row: any[]) => row.map((c: any) => `"${String(c).replace(/"/g, '""')}"`).join(','))].join('\n');
+      return new NextResponse(csv, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/csv',
+          'Content-Disposition': `attachment; filename="users-export-${new Date().toISOString().split('T')[0]}.csv"`,
+        },
+      });
+    }
+  },
+  {
+    requireAuth: true,
+    requiredPermissions: ['admin.users.export'],
   }
-}
-
-async function handler(req: NextRequest) {
-  const url = new URL(req.url);
-  const query = Object.fromEntries(url.searchParams.entries());
-  return withValidation(exportSchema, handleExportUsers, req, query as any);
-}
-
-export const GET = createProtectedHandler((req) => withErrorHandling(() => handler(req), req), 'admin.users.export');
+);

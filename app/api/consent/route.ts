@@ -1,39 +1,36 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { getApiConsentService } from '@/services/consent/factory';
-import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
+import { z } from 'zod';
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import { createSuccessResponse } from '@/lib/api/common';
 
-async function handleGet(_req: NextRequest, auth: RouteAuthContext) {
-  const consentService = getApiConsentService();
-  const consent = await consentService.getUserConsent(auth.userId!);
-  if (!consent) {
-    return NextResponse.json({ error: 'Consent not found' }, { status: 404 });
+const consentSchema = z.object({
+  marketing: z.boolean(),
+});
+
+export const GET = createApiHandler(
+  emptySchema,
+  async (req: NextRequest, authContext: any, data: any, services: any) => {
+    const consent = await services.consent.getUserConsent(authContext.userId);
+    if (!consent) {
+      return NextResponse.json({ error: 'Consent not found' }, { status: 404 });
+    }
+    return createSuccessResponse(consent);
+  },
+  {
+    requireAuth: true,
   }
-  return NextResponse.json(consent);
-}
+);
 
-export const GET = (req: NextRequest) =>
-  withRouteAuth((r, auth) => handleGet(r, auth), req);
-
-async function handlePost(request: NextRequest, auth: RouteAuthContext) {
-
-  let body: any;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+export const POST = createApiHandler(
+  consentSchema,
+  async (request: NextRequest, authContext: any, data: z.infer<typeof consentSchema>, services: any) => {
+    const result = await services.consent.updateUserConsent(authContext.userId, { marketing: data.marketing });
+    if (!result.success || !result.consent) {
+      return NextResponse.json({ error: result.error || 'Failed to save consent' }, { status: 500 });
+    }
+    return createSuccessResponse(result.consent);
+  },
+  {
+    requireAuth: true,
   }
-
-  if (typeof body.marketing !== 'boolean') {
-    return NextResponse.json({ error: 'Missing marketing field' }, { status: 400 });
-  }
-
-  const consentService = getApiConsentService();
-  const result = await consentService.updateUserConsent(auth.userId!, { marketing: body.marketing });
-  if (!result.success || !result.consent) {
-    return NextResponse.json({ error: result.error || 'Failed to save consent' }, { status: 500 });
-  }
-  return NextResponse.json(result.consent);
-}
-
-export const POST = (req: NextRequest) =>
-  withRouteAuth((r, auth) => handlePost(r, auth), req);
+);

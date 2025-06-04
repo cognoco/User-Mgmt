@@ -1,40 +1,30 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/database/supabase';
-import { getApiGDPRService } from '@/services/gdpr/factory';
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
 
-export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-  }
-  const token = authHeader.split(' ')[1];
+export const GET = createApiHandler(
+  emptySchema,
+  async (request: NextRequest, authContext: any, data: any, services: any) => {
+    try {
+      const exportData = await services.gdpr.exportUserData(authContext.userId);
+      if (!exportData) {
+        return NextResponse.json({ error: 'Failed to generate data export.' }, { status: 500 });
+      }
 
-  const supabaseService = getServiceSupabase();
-  const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
+      const jsonData = JSON.stringify(exportData.data, null, 2);
 
-  if (userError || !user) {
-    return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-  }
-
-  const gdprService = getApiGDPRService();
-
-  try {
-    const exportData = await gdprService.exportUserData(user.id);
-    if (!exportData) {
+      return new NextResponse(jsonData, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Disposition': `attachment; filename="${exportData.filename}"`,
+        },
+      });
+    } catch (error) {
+      console.error(`Error during data export for user ${authContext.userId}:`, error);
       return NextResponse.json({ error: 'Failed to generate data export.' }, { status: 500 });
     }
-
-    const jsonData = JSON.stringify(exportData.data, null, 2);
-
-    return new NextResponse(jsonData, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Disposition': `attachment; filename="${exportData.filename}"`,
-      },
-    });
-  } catch (error) {
-    console.error(`Error during data export for user ${user.id}:`, error);
-    return NextResponse.json({ error: 'Failed to generate data export.' }, { status: 500 });
+  },
+  {
+    requireAuth: true,
   }
-}
+);

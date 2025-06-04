@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getApiSsoService } from '@/services/sso/factory';
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import { createSuccessResponse } from '@/lib/api/common';
 
 // Schema for SSO settings
 const ssoSettingsSchema = z.object({
@@ -8,55 +9,52 @@ const ssoSettingsSchema = z.object({
   idp_type: z.enum(['saml', 'oidc']).nullable(),
 });
 
-
 // GET /api/organizations/[orgId]/sso/settings
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { orgId: string } }
-) {
-  const { orgId } = params;
-  const path = request.nextUrl.pathname;
+export const GET = createApiHandler(
+  emptySchema,
+  async (request: NextRequest, authContext: any, data: any, services: any) => {
+    const url = new URL(request.url);
+    const orgId = url.pathname.split('/')[3]; // Extract orgId from /api/organizations/{orgId}/sso
+    const path = request.nextUrl.pathname;
 
-  const ssoService = getApiSsoService();
+    // Handle status endpoint
+    if (path.endsWith('/status')) {
+      const providers = await services.sso.getProviders(orgId);
+      if (!providers.length) {
+        return createSuccessResponse({
+          status: 'unknown',
+          lastSuccessfulLogin: null,
+          lastError: null,
+          totalSuccessfulLogins24h: 0,
+        });
+      }
 
-  // Handle status endpoint
-  if (path.endsWith('/status')) {
-    const providers = await ssoService.getProviders(orgId);
-    if (!providers.length) {
-      return NextResponse.json({
-        status: 'unknown',
+      return createSuccessResponse({
+        status: 'healthy',
         lastSuccessfulLogin: null,
         lastError: null,
         totalSuccessfulLogins24h: 0,
       });
     }
 
-    return NextResponse.json({
-      status: 'healthy',
-      lastSuccessfulLogin: null,
-      lastError: null,
-      totalSuccessfulLogins24h: 0,
-    });
-  }
-
-  // Handle settings endpoint
-  if (path.endsWith('/settings')) {
-    const providers = await ssoService.getProviders(orgId);
-    if (!providers.length) {
-      return NextResponse.json({ sso_enabled: false, idp_type: null });
+    // Handle settings endpoint
+    if (path.endsWith('/settings')) {
+      const providers = await services.sso.getProviders(orgId);
+      if (!providers.length) {
+        return createSuccessResponse({ sso_enabled: false, idp_type: null });
+      }
+      return createSuccessResponse({
+        sso_enabled: true,
+        idp_type: providers[0].providerType,
+      });
     }
-    return NextResponse.json({
-      sso_enabled: true,
-      idp_type: providers[0].providerType,
-    });
-  }
 
-  // Handle metadata endpoint
-  if (path.endsWith('/metadata')) {
-    return NextResponse.json({
-      url: `https://app.example.com/organizations/${orgId}/sso/metadata.xml`,
-      entity_id: `https://app.example.com/organizations/${orgId}`,
-      xml: `<?xml version="1.0"?>
+    // Handle metadata endpoint
+    if (path.endsWith('/metadata')) {
+      return createSuccessResponse({
+        url: `https://app.example.com/organizations/${orgId}/sso/metadata.xml`,
+        entity_id: `https://app.example.com/organizations/${orgId}`,
+        xml: `<?xml version="1.0"?>
 <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
                      validUntil="2024-12-31T23:59:59Z"
                      entityID="https://app.example.com/organizations/${orgId}">
@@ -76,47 +74,48 @@ export async function GET(
                                     index="0" isDefault="true"/>
     </md:SPSSODescriptor>
 </md:EntityDescriptor>`,
-    });
-  }
+      });
+    }
 
-  return NextResponse.json({ error: 'Not found' }, { status: 404 });
-}
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  },
+  {
+    requireAuth: true,
+  }
+);
 
 // PUT /api/organizations/[orgId]/sso/settings
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { orgId: string } }
-) {
-  const { orgId } = params;
-  const path = request.nextUrl.pathname;
+export const PUT = createApiHandler(
+  ssoSettingsSchema,
+  async (request: NextRequest, authContext: any, settings: z.infer<typeof ssoSettingsSchema>, services: any) => {
+    const url = new URL(request.url);
+    const orgId = url.pathname.split('/')[3]; // Extract orgId from /api/organizations/{orgId}/sso
+    const path = request.nextUrl.pathname;
 
-  if (path.endsWith('/settings')) {
-    try {
-      const body = await request.json();
-      const settings = ssoSettingsSchema.parse(body);
-      const service = getApiSsoService();
+    if (path.endsWith('/settings')) {
+      try {
+        if (settings.sso_enabled && settings.idp_type) {
+          await services.sso.upsertProvider({
+            organizationId: orgId,
+            providerType: settings.idp_type,
+            providerName: `default-${settings.idp_type}`,
+            config: {},
+          });
+          return createSuccessResponse(settings);
+        }
 
-      if (settings.sso_enabled && settings.idp_type) {
-        await service.upsertProvider({
-          organizationId: orgId,
-          providerType: settings.idp_type,
-          providerName: `default-${settings.idp_type}`,
-          config: {},
-        });
-        return NextResponse.json(settings);
+        const existing = await services.sso.getProviders(orgId);
+        await Promise.all(existing.map((p: any) => services.sso.deleteProvider(p.id)));
+
+        return createSuccessResponse({ sso_enabled: false, idp_type: null });
+      } catch (error) {
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
       }
-
-      const existing = await service.getProviders(orgId);
-      await Promise.all(existing.map(p => service.deleteProvider(p.id)));
-
-      return NextResponse.json({ sso_enabled: false, idp_type: null });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
-      }
-      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
-  }
 
-  return NextResponse.json({ error: 'Not found' }, { status: 404 });
-} 
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  },
+  {
+    requireAuth: true,
+  }
+); 

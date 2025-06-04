@@ -1,16 +1,9 @@
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
 import { createSuccessResponse, createNoContentResponse } from '@/lib/api/common';
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  routeAuthMiddleware,
-  validationMiddleware,
-  type RouteAuthContext,
-} from '@/middleware/createMiddlewareChain';
-import { getApiAdminService } from '@/services/admin/factory';
+import { PermissionValues } from '@/core/permission/models';
 import { createUserNotFoundError } from '@/lib/api/admin/error-handler';
-import { withSecurity } from '@/middleware/with-security';
 import { notifyUserChanges } from '@/lib/realtime/notifyUserChanges';
 
 const updateUserSchema = z.object({
@@ -20,85 +13,66 @@ const updateUserSchema = z.object({
   status: z.enum(['active', 'inactive', 'suspended']).optional(),
 });
 
-type UpdateUser = z.infer<typeof updateUserSchema>;
-
-async function handleGetUser(
-  req: NextRequest,
-  _auth: RouteAuthContext,
-  { params }: { params: { id: string } }
-) {
-  const adminService = getApiAdminService();
-  const user = await adminService.getUserById(params.id);
-  if (!user) {
-    throw createUserNotFoundError(params.id);
+function extractUserIdFromPath(pathname: string): string {
+  const pathParts = pathname.split('/');
+  const userId = pathParts[pathParts.length - 1];
+  if (!userId || userId === '') {
+    throw new Error('User ID is required');
   }
-  return createSuccessResponse({ user });
+  return userId;
 }
 
-async function handleUpdateUser(
-  req: NextRequest,
-  _auth: RouteAuthContext,
-  data: UpdateUser,
-  { params }: { params: { id: string } }
-) {
-  const adminService = getApiAdminService();
-  const existingUser = await adminService.getUserById(params.id);
-  if (!existingUser) {
-    throw createUserNotFoundError(params.id);
+export const GET = createApiHandler(
+  emptySchema,
+  async (req: NextRequest, authContext: any, data: any, services: any) => {
+    const userId = extractUserIdFromPath(req.url);
+    
+    const user = await services.admin.getUserById(userId);
+    if (!user) {
+      throw createUserNotFoundError(userId);
+    }
+    return createSuccessResponse({ user });
+  },
+  {
+    requireAuth: true,
+    requiredPermissions: [PermissionValues.ADMIN_ACCESS],
   }
-  const updated = await adminService.updateUser(params.id, data);
-  await notifyUserChanges('UPDATE', params.id, updated, existingUser);
-  return createSuccessResponse({ user: updated });
-}
+);
 
-async function handleDeleteUser(
-  req: NextRequest,
-  _auth: RouteAuthContext,
-  { params }: { params: { id: string } }
-) {
-  const adminService = getApiAdminService();
-  const existingUser = await adminService.getUserById(params.id);
-  if (!existingUser) {
-    throw createUserNotFoundError(params.id);
+export const PUT = createApiHandler(
+  updateUserSchema,
+  async (req: NextRequest, authContext: any, data: z.infer<typeof updateUserSchema>, services: any) => {
+    const userId = extractUserIdFromPath(req.url);
+    
+    const existingUser = await services.admin.getUserById(userId);
+    if (!existingUser) {
+      throw createUserNotFoundError(userId);
+    }
+    const updated = await services.admin.updateUser(userId, data);
+    await notifyUserChanges('UPDATE', userId, updated, existingUser);
+    return createSuccessResponse({ user: updated });
+  },
+  {
+    requireAuth: true,
+    requiredPermissions: [PermissionValues.ADMIN_ACCESS],
   }
-  await adminService.deleteUser(params.id);
-  await notifyUserChanges('DELETE', params.id, null, existingUser);
-  return createNoContentResponse();
-}
+);
 
-const getMiddleware = createMiddlewareChain([
-  errorHandlingMiddleware(),
-  routeAuthMiddleware({ requiredPermissions: ['admin.users.view'] }),
-]);
-
-export const GET = (
-  req: NextRequest,
-  ctx: { params: { id: string } }
-) => getMiddleware((r, auth) => handleGetUser(r, auth, ctx))(req);
-
-const putMiddleware = createMiddlewareChain([
-  errorHandlingMiddleware(),
-  routeAuthMiddleware({ requiredPermissions: ['admin.users.update'] }),
-  validationMiddleware(updateUserSchema),
-]);
-
-export const PUT = (
-  req: NextRequest,
-  ctx: { params: { id: string } }
-) =>
-  withSecurity((r) =>
-    putMiddleware(async (r2, auth, data) => handleUpdateUser(r2, auth, data, ctx))(r)
-  )(req);
-
-const deleteMiddleware = createMiddlewareChain([
-  errorHandlingMiddleware(),
-  routeAuthMiddleware({ requiredPermissions: ['admin.users.delete'] }),
-]);
-
-export const DELETE = (
-  req: NextRequest,
-  ctx: { params: { id: string } }
-) =>
-  withSecurity((r) =>
-    deleteMiddleware((r2, auth) => handleDeleteUser(r2, auth, ctx))(r)
-  )(req);
+export const DELETE = createApiHandler(
+  emptySchema,
+  async (req: NextRequest, authContext: any, data: any, services: any) => {
+    const userId = extractUserIdFromPath(req.url);
+    
+    const existingUser = await services.admin.getUserById(userId);
+    if (!existingUser) {
+      throw createUserNotFoundError(userId);
+    }
+    await services.admin.deleteUser(userId);
+    await notifyUserChanges('DELETE', userId, null, existingUser);
+    return createNoContentResponse();
+  },
+  {
+    requireAuth: true,
+    requiredPermissions: [PermissionValues.ADMIN_ACCESS],
+  }
+);
