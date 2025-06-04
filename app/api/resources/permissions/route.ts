@@ -7,15 +7,12 @@ import {
   createCreatedResponse,
   createNoContentResponse,
 } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
-import { withRouteAuth } from '@/middleware/auth';
-import { withSecurity } from '@/middleware/with-security';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import {
   PermissionValues,
   PermissionSchema,
 } from '@/core/permission/models';
-import { getApiPermissionService } from '@/services/permission/factory';
+
 import { checkPermission } from '@/lib/auth/permissionCheck';
 import { mapPermissionServiceError } from '@/lib/api/permission/error-handler';
 
@@ -33,6 +30,7 @@ async function handlePost(
   _req: NextRequest,
   userId: string,
   data: AssignPayload,
+  services: any,
 ) {
   const allowed =
     (await checkPermission(
@@ -44,9 +42,8 @@ async function handlePost(
   if (!allowed) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
-  const service = getApiPermissionService();
   try {
-    const permission = await service.assignResourcePermission(
+    const permission = await services.permission.assignResourcePermission(
       data.userId,
       data.permission,
       data.resourceType,
@@ -59,7 +56,11 @@ async function handlePost(
   }
 }
 
-async function handleDelete(userId: string, data: AssignPayload) {
+async function handleDelete(
+  userId: string,
+  data: AssignPayload,
+  services: any,
+) {
   const allowed =
     (await checkPermission(
       userId,
@@ -70,8 +71,7 @@ async function handleDelete(userId: string, data: AssignPayload) {
   if (!allowed) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
-  const service = getApiPermissionService();
-  const ok = await service.removeResourcePermission(
+  const ok = await services.permission.removeResourcePermission(
     data.userId,
     data.permission,
     data.resourceType,
@@ -87,25 +87,17 @@ async function handleDelete(userId: string, data: AssignPayload) {
   return createNoContentResponse();
 }
 
-export const POST = (req: NextRequest) =>
-  withRouteAuth((r, auth) =>
-    withSecurity(async (r2) => {
-      const body = await r2.json();
-      return withErrorHandling(
-        (r3) => withValidation(assignSchema, (_r, data) => handlePost(_r, auth.userId!, data), r3, body),
-        r2,
-      );
-    })(r),
-  req);
+export const POST = createApiHandler(assignSchema, async (req, auth, data, services) =>
+  handlePost(req, auth.userId!, data, services), {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});
 
-export const DELETE = (req: NextRequest) =>
-  withRouteAuth((r, auth) =>
-    withSecurity(async (r2) => {
-      const url = new URL(r2.url);
-      const params = Object.fromEntries(url.searchParams.entries());
-      return withErrorHandling(
-        (r3) => withValidation(removeSchema, (_r, data) => handleDelete(auth.userId!, data), r3, params),
-        r2,
-      );
-    })(r),
-  req);
+export const DELETE = createApiHandler(z.object({}), async (req, auth, _d, services) => {
+  const params = Object.fromEntries(new URL(req.url).searchParams.entries());
+  const data = removeSchema.parse(params);
+  return handleDelete(auth.userId!, data, services);
+}, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});

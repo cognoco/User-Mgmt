@@ -1,11 +1,10 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { createSuccessResponse, createCreatedResponse } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
-import { createProtectedHandler } from '@/middleware/permissions';
-import { withSecurity } from '@/middleware/with-security';
-import { getApiPermissionService } from '@/services/permission/factory';
+import {
+  createSuccessResponse,
+  createCreatedResponse,
+} from '@/lib/api/common';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { mapPermissionServiceError } from '@/lib/api/permission/error-handler';
 import { PermissionValues } from '@/core/permission/models';
 
@@ -17,40 +16,48 @@ const createSchema = z.object({
 
 type CreateRole = z.infer<typeof createSchema>;
 
-async function handleGet(req: NextRequest) {
-  const service = getApiPermissionService();
-  const roles = await service.getAllRoles();
-  const url = new URL(req.url);
-  const page = parseInt(url.searchParams.get('page') || '1', 10);
-  const limit = parseInt(url.searchParams.get('limit') || '20', 10);
-  const start = (page - 1) * limit;
-  const paginated = roles.slice(start, start + limit);
-  return createSuccessResponse({ roles: paginated, page, limit, total: roles.length });
+const querySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+async function handleGet(
+  _req: NextRequest,
+  _auth: any,
+  data: z.infer<typeof querySchema>,
+  services: any,
+) {
+  const roles = await services.permission.getAllRoles();
+  const start = (data.page - 1) * data.limit;
+  const paginated = roles.slice(start, start + data.limit);
+  return createSuccessResponse({
+    roles: paginated,
+    page: data.page,
+    limit: data.limit,
+    total: roles.length,
+  });
 }
 
-async function handlePost(_req: NextRequest, userId: string | undefined, data: CreateRole) {
-  const service = getApiPermissionService();
+async function handlePost(
+  _req: NextRequest,
+  auth: any,
+  data: CreateRole,
+  services: any,
+) {
   try {
-    const role = await service.createRole(data, userId);
+    const role = await services.permission.createRole(data, auth.userId);
     return createCreatedResponse({ role });
   } catch (e) {
     throw mapPermissionServiceError(e as Error);
   }
 }
 
-export const GET = createProtectedHandler(
-  (req) => withErrorHandling((r) => handleGet(r), req),
-  PermissionValues.MANAGE_ROLES
-);
+export const GET = createApiHandler(querySchema, handleGet, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});
 
-export const POST = createProtectedHandler(
-  (req, ctx) =>
-    withSecurity(async (r) => {
-      const body = await r.json();
-      return withErrorHandling(
-        (r3) => withValidation(createSchema, (r2, data) => handlePost(r2, ctx.userId, data), r3, body),
-        r
-      );
-    })(req),
-  PermissionValues.MANAGE_ROLES
-);
+export const POST = createApiHandler(createSchema, handlePost, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});

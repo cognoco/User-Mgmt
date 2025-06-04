@@ -1,11 +1,7 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createSuccessResponse, createNoContentResponse } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
-import { createProtectedHandler } from '@/middleware/permissions';
-import { withSecurity } from '@/middleware/with-security';
-import { getApiPermissionService } from '@/services/permission/factory';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { mapPermissionServiceError } from '@/lib/api/permission/error-handler';
 import { PermissionValues } from '@/core/permission/models';
 
@@ -15,57 +11,66 @@ const modifySchema = z.object({
 
 type Modify = z.infer<typeof modifySchema>;
 
-async function handleGet(roleId: string) {
-  const service = getApiPermissionService();
-  const permissions = await service.getRolePermissions(roleId);
+function getRoleId(req: NextRequest): string {
+  const url = new URL(req.url);
+  return url.pathname.split('/')[3];
+}
+
+async function handleGet(
+  req: NextRequest,
+  _auth: any,
+  _data: unknown,
+  services: any,
+) {
+  const roleId = getRoleId(req);
+  const permissions = await services.permission.getRolePermissions(roleId);
   return createSuccessResponse({ permissions });
 }
 
-async function handlePost(_req: NextRequest, roleId: string, data: Modify) {
-  const service = getApiPermissionService();
+async function handlePost(
+  req: NextRequest,
+  _auth: any,
+  data: Modify,
+  services: any,
+) {
+  const roleId = getRoleId(req);
   try {
-    const permission = await service.addPermissionToRole(roleId, data.permission);
+    const permission = await services.permission.addPermissionToRole(
+      roleId,
+      data.permission,
+    );
     return createSuccessResponse({ permission });
   } catch (e) {
     throw mapPermissionServiceError(e as Error);
   }
 }
 
-async function handleDelete(_req: NextRequest, roleId: string, data: Modify) {
-  const service = getApiPermissionService();
+async function handleDelete(
+  req: NextRequest,
+  _auth: any,
+  data: Modify,
+  services: any,
+) {
+  const roleId = getRoleId(req);
   try {
-    await service.removePermissionFromRole(roleId, data.permission);
+    await services.permission.removePermissionFromRole(roleId, data.permission);
     return createNoContentResponse();
   } catch (e) {
     throw mapPermissionServiceError(e as Error);
   }
 }
 
-export const GET = createProtectedHandler(
-  (req, ctx) => withErrorHandling(() => handleGet(ctx.params.roleId), req),
-  PermissionValues.MANAGE_ROLES,
-);
+export const GET = createApiHandler(z.object({}), handleGet, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});
 
-export const POST = createProtectedHandler(
-  (req, ctx) =>
-    withSecurity(async (r) => {
-      const body = await r.json();
-      return withErrorHandling(
-        (r3) => withValidation(modifySchema, (r2, data) => handlePost(r2, ctx.params.roleId, data), r3, body),
-        r,
-      );
-    })(req),
-  PermissionValues.MANAGE_ROLES,
-);
+export const POST = createApiHandler(modifySchema, handlePost, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});
 
-export const DELETE = createProtectedHandler(
-  (req, ctx) =>
-    withSecurity(async (r) => {
-      const body = await r.json();
-      return withErrorHandling(
-        (r3) => withValidation(modifySchema, (r2, data) => handleDelete(r2, ctx.params.roleId, data), r3, body),
-        r,
-      );
-    })(req),
-  PermissionValues.MANAGE_ROLES,
-);
+export const DELETE = createApiHandler(modifySchema, handleDelete, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});
