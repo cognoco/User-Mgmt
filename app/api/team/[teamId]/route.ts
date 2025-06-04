@@ -1,13 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getApiTeamService } from '@/services/team/factory';
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
 import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  routeAuthMiddleware,
-  validationMiddleware
-} from '@/middleware/createMiddlewareChain';
-import type { RouteAuthContext } from '@/middleware/auth';
+  createSuccessResponse,
+  ApiError,
+  ERROR_CODES
+} from '@/lib/api/common';
+import {
+  createTeamNotFoundError
+} from '@/lib/api/team/error-handler';
+import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 
 const UpdateTeamSchema = z.object({
   name: z.string().optional(),
@@ -15,61 +16,58 @@ const UpdateTeamSchema = z.object({
 });
 
 async function handleGet(
-  _req: NextRequest,
-  _auth: RouteAuthContext,
+  _req: Request,
+  _auth: AuthContext,
   _data: unknown,
-  { params }: { params: { teamId: string } }
+  services: ServiceContainer,
+  teamId: string
 ) {
-  const service = getApiTeamService();
-  const team = await service.getTeam(params.teamId);
+  const team = await services.team.getTeam(teamId);
   if (!team) {
-    return NextResponse.json({ error: 'Team not found' }, { status: 404 });
+    throw createTeamNotFoundError(teamId);
   }
-  return NextResponse.json({ team });
+  return createSuccessResponse({ team });
 }
 
 async function handlePatch(
-  _req: NextRequest,
-  _auth: RouteAuthContext,
+  _req: Request,
+  _auth: AuthContext,
   data: z.infer<typeof UpdateTeamSchema>,
-  { params }: { params: { teamId: string } }
+  services: ServiceContainer,
+  teamId: string
 ) {
-  const result = await getApiTeamService().updateTeam(params.teamId, data);
+  const result = await services.team.updateTeam(teamId, data);
   if (!result.success || !result.team) {
-    return NextResponse.json({ error: result.error || 'Failed to update team' }, { status: 400 });
+    throw new ApiError(ERROR_CODES.INVALID_REQUEST, result.error || 'Failed to update team', 400);
   }
-  return NextResponse.json({ team: result.team });
+  return createSuccessResponse({ team: result.team });
 }
 
 async function handleDelete(
-  _req: NextRequest,
-  _auth: RouteAuthContext,
+  _req: Request,
+  _auth: AuthContext,
   _data: unknown,
-  { params }: { params: { teamId: string } }
+  services: ServiceContainer,
+  teamId: string
 ) {
-  const result = await getApiTeamService().deleteTeam(params.teamId);
+  const result = await services.team.deleteTeam(teamId);
   if (!result.success) {
-    return NextResponse.json({ error: result.error || 'Failed to delete team' }, { status: 400 });
+    throw new ApiError(ERROR_CODES.INVALID_REQUEST, result.error || 'Failed to delete team', 400);
   }
-  return NextResponse.json({ success: true });
+  return createSuccessResponse({ success: true });
 }
 
-const baseMiddleware = createMiddlewareChain([
-  errorHandlingMiddleware(),
-  routeAuthMiddleware()
-]);
+export const GET = (
+  req: Request,
+  ctx: { params: { teamId: string } }
+) => createApiHandler(emptySchema, (r, a, d, s) => handleGet(r, a, d, s, ctx.params.teamId), { requireAuth: true })(req);
 
-const patchMiddleware = createMiddlewareChain([
-  errorHandlingMiddleware(),
-  routeAuthMiddleware(),
-  validationMiddleware(UpdateTeamSchema)
-]);
+export const PATCH = (
+  req: Request,
+  ctx: { params: { teamId: string } }
+) => createApiHandler(UpdateTeamSchema, (r, a, d, s) => handlePatch(r, a, d, s, ctx.params.teamId), { requireAuth: true })(req);
 
-export const GET = (req: NextRequest, ctx: { params: { teamId: string } }) =>
-  baseMiddleware((r, auth) => handleGet(r, auth, undefined, ctx))(req);
-
-export const PATCH = (req: NextRequest, ctx: { params: { teamId: string } }) =>
-  patchMiddleware((r, auth, data) => handlePatch(r, auth, data, ctx))(req);
-
-export const DELETE = (req: NextRequest, ctx: { params: { teamId: string } }) =>
-  baseMiddleware((r, auth) => handleDelete(r, auth, undefined, ctx))(req);
+export const DELETE = (
+  req: Request,
+  ctx: { params: { teamId: string } }
+) => createApiHandler(emptySchema, (r, a, d, s) => handleDelete(r, a, d, s, ctx.params.teamId), { requireAuth: true })(req);

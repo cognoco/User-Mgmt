@@ -1,15 +1,8 @@
-import { type NextRequest } from 'next/server';
 import { prisma } from '@/lib/database/prisma';
 import { z } from 'zod';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
-import { getApiTeamService } from '@/services/team/factory';
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  routeAuthMiddleware,
-  validationMiddleware
-} from '@/middleware/createMiddlewareChain';
-import type { RouteAuthContext } from '@/middleware/auth';
+import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 import { Permission } from '@/lib/rbac/roles';
 
 const querySchema = z.object({
@@ -28,20 +21,11 @@ const addMemberSchema = z.object({
 });
 
 async function handleTeamMembers(
-  req: NextRequest,
-  auth: RouteAuthContext,
-  data?: z.infer<typeof querySchema>
+  _req: Request,
+  auth: AuthContext,
+  data: z.infer<typeof querySchema>
 ) {
-  let params;
-  
-  if (data) {
-    // New approach: validated data is passed from middleware
-    params = data;
-  } else {
-    // Legacy approach: parse and validate query params manually
-    const query = Object.fromEntries(new URL(req.url).searchParams.entries());
-    params = querySchema.parse(query);
-  }
+  const params = data;
   
   const { page, limit, search, status, sortBy, sortOrder } = params;
   const skip = (page - 1) * limit;
@@ -154,9 +138,10 @@ async function handleTeamMembers(
 }
 
 async function handleAddMember(
-  _req: NextRequest,
-  auth: RouteAuthContext,
-  data: z.infer<typeof addMemberSchema>
+  _req: Request,
+  auth: AuthContext,
+  data: z.infer<typeof addMemberSchema>,
+  services: ServiceContainer
 ) {
   const license = await prisma.teamLicense.findUnique({
     where: { id: data.teamId },
@@ -170,24 +155,21 @@ async function handleAddMember(
       400,
     );
   }
-  const service = getApiTeamService();
-  const result = await service.addTeamMember(data.teamId, data.userId, data.role);
+  const result = await services.team.addTeamMember(data.teamId, data.userId, data.role);
   if (!result.success || !result.member) {
     throw new ApiError(ERROR_CODES.INVALID_REQUEST, result.error || 'Failed');
   }
   return createSuccessResponse(result.member, 201);
 }
 
-const getMiddleware = createMiddlewareChain([
-  errorHandlingMiddleware(),
-  routeAuthMiddleware({ requiredPermissions: [Permission.VIEW_TEAM_MEMBERS] })
-]);
+export const GET = createApiHandler(
+  querySchema,
+  handleTeamMembers,
+  { requireAuth: true, requiredPermissions: [Permission.VIEW_TEAM_MEMBERS] }
+);
 
-const postMiddleware = createMiddlewareChain([
-  errorHandlingMiddleware(),
-  routeAuthMiddleware({ requiredPermissions: [Permission.INVITE_TEAM_MEMBER] }),
-  validationMiddleware(addMemberSchema)
-]);
-
-export const GET = getMiddleware(handleTeamMembers);
-export const POST = postMiddleware(handleAddMember);
+export const POST = createApiHandler(
+  addMemberSchema,
+  handleAddMember,
+  { requireAuth: true, requiredPermissions: [Permission.INVITE_TEAM_MEMBER] }
+);
