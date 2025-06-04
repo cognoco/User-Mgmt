@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { middleware } from '@/middleware';
+import { getServiceSupabase } from '@/lib/database/supabase';
 import { z } from 'zod';
 import { sendEmail } from '@/lib/email/sendEmail';
+import { getCurrentUser } from '@/lib/auth/session';
 
 // Schema for incoming notification payloads
 const notificationSchema = z.object({
@@ -16,72 +16,79 @@ const notificationSchema = z.object({
 });
 
 // GET endpoint to retrieve notifications for the current user
-export const GET = middleware(['auth'], async (req: NextRequest) => {
-  const user = (req as any).user;
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export async function GET(req: NextRequest) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  const limit = req.nextUrl.searchParams.get('limit') ? 
-    parseInt(req.nextUrl.searchParams.get('limit') as string) : 
-    20;
-  
-  const page = req.nextUrl.searchParams.get('page') ? 
-    parseInt(req.nextUrl.searchParams.get('page') as string) : 
-    1;
+    const limit = req.nextUrl.searchParams.get('limit') ? 
+      parseInt(req.nextUrl.searchParams.get('limit') as string) : 
+      20;
+    
+    const page = req.nextUrl.searchParams.get('page') ? 
+      parseInt(req.nextUrl.searchParams.get('page') as string) : 
+      1;
 
-  const offset = (page - 1) * limit;
+    const offset = (page - 1) * limit;
 
-  // Query notifications table
-  const { data, error, count } = await supabase
-    .from('notifications')
-    .select('*', { count: 'exact' })
-    .eq('userId', user.id)
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1);
+    // Query notifications table using standard pattern
+    const supabase = getServiceSupabase();
+    const { data, error, count } = await supabase
+      .from('notifications')
+      .select('*', { count: 'exact' })
+      .eq('userId', user.id)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
-  if (error) {
+    if (error) {
+      return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
+    }
+
+    return NextResponse.json({ 
+      notifications: data, 
+      pagination: {
+        total: count,
+        page,
+        limit,
+        pages: Math.ceil((count || 0) / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
     return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
   }
-
-  return NextResponse.json({ 
-    notifications: data, 
-    pagination: {
-      total: count,
-      page,
-      limit,
-      pages: Math.ceil((count || 0) / limit)
-    }
-  });
-});
+}
 
 // POST endpoint to send a notification
-export const POST = middleware(['auth', 'cors', 'csrf', 'rateLimit'], async (req: NextRequest) => {
-  const user = (req as any).user;
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  let body;
+export async function POST(req: NextRequest) {
   try {
-    body = await req.json();
-  } catch (error) {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
-  }
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  // Validate the notification payload
-  const result = notificationSchema.safeParse(body);
-  if (!result.success) {
-    return NextResponse.json({ 
-      error: 'Invalid notification format', 
-      details: result.error.errors 
-    }, { status: 400 });
-  }
+    let body;
+    try {
+      body = await req.json();
+    } catch (error) {
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    }
 
-  const notification = result.data;
-  
-  try {
+    // Validate the notification payload
+    const result = notificationSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json({ 
+        error: 'Invalid notification format', 
+        details: result.error.errors 
+      }, { status: 400 });
+    }
+
+    const notification = result.data;
+    
     // Store the notification in the database for tracking and in-app display
+    const supabase = getServiceSupabase();
     const { data: insertData, error: insertError } = await supabase
       .from('notifications')
       .insert({
@@ -163,7 +170,7 @@ export const POST = middleware(['auth', 'cors', 'csrf', 'rateLimit'], async (req
       details: error instanceof Error ? error.message : String(error)
     }, { status: 500 });
   }
-});
+}
 
 // Process email notification
 async function processEmailNotification(notification: z.infer<typeof notificationSchema>) {
@@ -176,9 +183,6 @@ async function processEmailNotification(notification: z.infer<typeof notificatio
       to: notification.userEmail,
       subject: notification.title,
       html: notification.message,
-      options: {
-        category: notification.category
-      }
     });
 
     return { success: true, messageId: emailResult.messageId };
@@ -196,6 +200,7 @@ async function processPushNotification(notification: z.infer<typeof notification
     }
 
     // Get user's push subscription
+    const supabase = getServiceSupabase();
     const { data: subscriptions, error } = await supabase
       .from('push_subscriptions')
       .select('*')

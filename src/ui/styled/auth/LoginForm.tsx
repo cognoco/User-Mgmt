@@ -21,11 +21,22 @@ interface LoginFormProps {
   onSubmit?: (credentials: LoginPayload) => Promise<void>;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
+/**
+ * Styled Login Form Component
+ * 
+ * This is a fully styled, production-ready login form that uses the headless
+ * LoginForm component for behavior and the useLoginFormLogic hook for business logic.
+ * 
+ * ARCHITECTURE: This component is purely presentational and delegates all
+ * business logic to the hook and headless component. It should not contain
+ * any authentication calls or business logic.
+ */
+const LoginForm: React.FC<LoginFormProps> = ({ onSubmit: customOnSubmit }) => {
   const [showPassword, setShowPassword] = useState(false);
 
+  // Get all business logic from the hook
   const {
-    handleSubmit,
+    onSubmit: businessLogicOnSubmit,
     handleResendVerification,
     handleMfaSuccess,
     handleLoginSuccess,
@@ -39,16 +50,21 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
     authErrors,
     authError,
     success,
+    isLoading,
   } = useLoginFormLogic();
 
+  // Use custom onSubmit if provided, otherwise use business logic
+  const onSubmit = customOnSubmit || businessLogicOnSubmit;
+
+  // If MFA is required, show MFA forms instead of login form
   if (mfaRequired && tempAccessToken) {
     return (
       <>
         {/** WebAuthn option if available */}
-        <WebAuthnLogin userId={''} onSuccess={handleLoginSuccess} />
+        <WebAuthnLogin userId={''} onSuccess={() => handleLoginSuccess({})} />
         <MFAVerificationForm
           accessToken={tempAccessToken}
-          onSuccess={handleMfaSuccess}
+          onSuccess={(user: any, token: string) => handleMfaSuccess(user, token)}
           onCancel={handleMfaCancel}
         />
       </>
@@ -58,8 +74,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   return (
     <ErrorBoundary fallback={DefaultErrorFallback}>
       <HeadlessLoginForm
-        onSubmit={onSubmit || handleSubmit}
-        error={authErrors[0]?.message || authError}
+        onSubmit={onSubmit}
+        error={authErrors[0]?.message || authError || undefined}
+        isLoading={isLoading}
         render={({
           handleSubmit: formSubmit,
           emailValue,
@@ -197,32 +214,39 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                   onCheckedChange={(checked) => setRememberMeValue(checked === true)}
                   aria-label="Remember me"
                 />
-                <Label
-                  htmlFor="rememberMe"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
+                <Label htmlFor="rememberMe" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                   Remember me
                 </Label>
-                <span
-                  className="text-xs text-muted-foreground"
-                  title="Keep me logged in on this device for up to 30 days"
-                  aria-label="Remember me help"
-                >
-                  ?
-                </span>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isSubmitting || !isValid}>
-                {isSubmitting ? 'Logging in...' : 'Login'}
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={!isValid || isSubmitting}
+                aria-describedby={errors.form ? 'form-error' : undefined}
+              >
+                {isSubmitting ? 'Signing in...' : 'Sign In'}
               </Button>
-            </form>
 
-            <div className="text-center text-sm">
-              Don&apos;t have an account?{' '}
-              <Link href="/auth/register" className="text-primary hover:underline">
-                Sign up
-              </Link>
-            </div>
+              <div className="text-center text-sm">
+                <Link 
+                  href="/auth/reset-password" 
+                  className="text-primary hover:underline"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
+
+              <div className="text-center text-sm">
+                Don't have an account?{' '}
+                <Link 
+                  href="/auth/register" 
+                  className="text-primary hover:underline"
+                >
+                  Sign up
+                </Link>
+              </div>
+            </form>
           </div>
         )}
       />
@@ -231,4 +255,3 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
 };
 
 export default LoginForm;
-export { LoginForm };

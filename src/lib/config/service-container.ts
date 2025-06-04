@@ -30,6 +30,7 @@ import type { AuditService } from '@/core/audit/interfaces';
 import type { AdminService } from '@/core/admin/interfaces';
 import type { RoleService } from '@/core/role/interfaces';
 import type { CompanyAddressService } from '@/core/address/interfaces';
+import type { ResourceRelationshipService } from '@/core/resource-relationship/interfaces';
 
 // Import existing service factories
 import { getApiAuthService } from '@/services/auth/factory';
@@ -55,6 +56,7 @@ import { getApiAuditService } from '@/services/audit/factory';
 import { getApiAdminService } from '@/services/admin/factory';
 import { getApiRoleService } from '@/services/role/factory';
 import { getApiAddressService } from '@/services/address/factory';
+import { getApiResourceRelationshipService } from '@/services/resource-relationship/factory';
 
 // TODO: Import additional service factories as they become available
 // import { getApiRoleService } from '@/services/role/factory';
@@ -228,6 +230,13 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
     serviceInstances.address = getApiAddressService();
   }
   
+  // Create resource relationship service if not cached
+  if (!serviceInstances.resourceRelationship && globalServiceConfig.resourceRelationshipService) {
+    serviceInstances.resourceRelationship = globalServiceConfig.resourceRelationshipService;
+  } else if (!serviceInstances.resourceRelationship) {
+    serviceInstances.resourceRelationship = getApiResourceRelationshipService();
+  }
+  
   // TODO: Add other services as their factories become available
   
   // Return container with any provided overrides
@@ -251,6 +260,7 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
     admin: overrides?.admin || serviceInstances.admin,
     role: overrides?.role || serviceInstances.role,
     address: overrides?.address || serviceInstances.address,
+    resourceRelationship: overrides?.resourceRelationship || serviceInstances.resourceRelationship,
   };
 }
 
@@ -391,6 +401,13 @@ export function getConfiguredRoleService(override?: RoleService): RoleService | 
  */
 export function getConfiguredAddressService(override?: CompanyAddressService): CompanyAddressService | undefined {
   return override || globalServiceConfig.addressService || getApiAddressService();
+}
+
+/**
+ * Get a specific service with fallback to global configuration
+ */
+export function getConfiguredResourceRelationshipService(override?: ResourceRelationshipService): ResourceRelationshipService | undefined {
+  return override || globalServiceConfig.resourceRelationshipService || getApiResourceRelationshipService();
 }
 
 /**

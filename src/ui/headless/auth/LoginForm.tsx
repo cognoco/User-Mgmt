@@ -3,18 +3,22 @@
  * 
  * This component handles the behavior of a login form without any UI rendering.
  * It follows the headless UI pattern using render props to allow complete UI customization.
+ * 
+ * ARCHITECTURE: This component is purely for form behavior and validation.
+ * All business logic (authentication, error handling, navigation) should be 
+ * provided via the onSubmit prop from a higher-level component or hook.
  */
 
 import { useState, FormEvent, useEffect } from 'react';
-import { useAuth } from '@/hooks/auth/useAuth';
 import { LoginPayload, loginSchema } from '@/core/auth/models';
 import { z } from 'zod';
 
 export interface LoginFormProps {
   /**
    * Called when the form is submitted with valid data
+   * This should handle all business logic (authentication, navigation, error handling)
    */
-  onSubmit?: (credentials: LoginPayload) => Promise<void>;
+  onSubmit: (credentials: LoginPayload) => Promise<void>;
   
   /**
    * Initial email value
@@ -27,12 +31,12 @@ export interface LoginFormProps {
   showRememberMe?: boolean;
   
   /**
-   * Custom loading state (if not provided, internal state is used)
+   * External loading state (overrides internal state if provided)
    */
   isLoading?: boolean;
   
   /**
-   * Custom error message (if not provided, internal state is used)
+   * External error message (overrides internal state if provided)
    */
   error?: string;
   
@@ -76,9 +80,6 @@ export function LoginForm({
   onValidationChange,
   render
 }: LoginFormProps) {
-  // Get authentication hook
-  const { login, isLoading: authIsLoading, error: authError } = useAuth();
-  
   // Form state
   const [emailValue, setEmailValue] = useState(initialEmail);
   const [passwordValue, setPasswordValue] = useState('');
@@ -95,8 +96,7 @@ export function LoginForm({
   });
   
   // Use external state if provided, otherwise use internal state
-  const isLoading = externalIsLoading !== undefined ? externalIsLoading : authIsLoading || isSubmitting;
-  const formError = externalError !== undefined ? externalError : authError;
+  const isLoading = externalIsLoading !== undefined ? externalIsLoading : isSubmitting;
   
   // Validate form
   const validateForm = () => {
@@ -181,32 +181,13 @@ export function LoginForm({
       rememberMe: Boolean(rememberMeValue)
     };
     
-    // Debug logging to identify the validation issue
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Login credentials being sent:', {
-        email: typeof emailValue,
-        password: typeof passwordValue,
-        rememberMe: typeof rememberMeValue,
-        credentials
-      });
-    }
-    
-    // Submit form
+    // Submit form - delegate all business logic to the onSubmit prop
     setIsSubmitting(true);
     
     try {
-      if (onSubmit) {
-        // Use custom submit handler
-        await onSubmit(credentials);
-      } else {
-        // Use default auth hook
-        const result = await login(credentials);
-        
-        if (result.error) {
-          setErrors({ ...errors, form: result.error });
-        }
-      }
+      await onSubmit(credentials);
     } catch (error) {
+      // Only handle UI-related form errors here
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
       setErrors({ ...errors, form: errorMessage });
     } finally {
@@ -214,12 +195,12 @@ export function LoginForm({
     }
   };
   
-  // If there's a form error from the auth service, display it
+  // Display external error if provided
   useEffect(() => {
-    if (formError) {
-      setErrors({ ...errors, form: formError });
+    if (externalError) {
+      setErrors({ ...errors, form: externalError });
     }
-  }, [formError]);
+  }, [externalError, errors]);
   
   // Render the component using the render prop
   return render({
@@ -234,7 +215,7 @@ export function LoginForm({
     isValid,
     errors: {
       ...errors,
-      form: errors.form || formError
+      form: errors.form || externalError || undefined
     },
     touched,
     handleBlur

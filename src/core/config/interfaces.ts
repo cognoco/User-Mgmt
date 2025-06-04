@@ -25,6 +25,7 @@ import type { AuditService } from '@/core/audit/interfaces';
 import type { AdminService } from '@/core/admin/interfaces';
 import type { RoleService } from '@/core/role/interfaces';
 import type { AddressService, CompanyAddressService } from '@/core/address/interfaces';
+import type { ResourceRelationshipService } from '@/core/resource-relationship/interfaces';
 
 // Import additional service interfaces as they become available
 // TODO: Add imports for other service interfaces when they exist
@@ -53,6 +54,7 @@ export interface ServiceContainer {
   // TODO: Add other services as their interfaces become available
   role?: RoleService;
   address?: CompanyAddressService;
+  resourceRelationship?: ResourceRelationshipService;
 }
 
 /**
@@ -153,6 +155,11 @@ export interface ServiceConfig {
    * Custom address service implementation (for company addresses)
    */
   addressService?: CompanyAddressService;
+  
+  /**
+   * Custom resource relationship service implementation
+   */
+  resourceRelationshipService?: ResourceRelationshipService;
   
   /**
    * Feature flags to enable/disable functionality
