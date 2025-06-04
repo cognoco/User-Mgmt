@@ -1,27 +1,28 @@
 // GET /api/permissions - List all permissions with optional filtering
 // POST /api/permissions - Create a new permission (admin only)
 
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
 import { createSuccessResponse } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { createProtectedHandler } from '@/middleware/permissions';
-import { withSecurity } from '@/middleware/with-security';
 import { PermissionValues } from '@/core/permission/models';
-import { getApiPermissionService } from '@/services/permission/factory';
 
-async function handleGet() {
-  const permissionService = getApiPermissionService();
-  const permissions = await permissionService.getAllPermissions();
+async function handleGet(_req: NextRequest, _authContext: any, _data: any, services: any) {
+  const permissions = await services.permission.getAllPermissions();
   return createSuccessResponse({ permissions });
 }
 
-export const GET = createProtectedHandler(
-  (req) => withErrorHandling(() => handleGet(), req),
-  PermissionValues.MANAGE_ROLES,
-);
+export const GET = createApiHandler(emptySchema, handleGet, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});
 
-export const POST = createProtectedHandler(
-  (req) =>
-    withSecurity(async () => new Response('Not implemented', { status: 501 }))(req),
-  PermissionValues.MANAGE_ROLES,
+export const POST = createApiHandler(
+  emptySchema,
+  async (_req: NextRequest, _authContext: any, _data: any, _services: any) => {
+    return NextResponse.json({ error: 'Not implemented' }, { status: 501 });
+  },
+  {
+    requireAuth: true,
+    requiredPermissions: [PermissionValues.MANAGE_ROLES],
+  }
 );
