@@ -70,6 +70,10 @@ export interface UserProfile {
     size?: string;
     industry?: string;
     website?: string;
+    /**
+     * URL to the company's logo (optional)
+     */
+    logoUrl?: string;
     position?: string;
     department?: string;
     vatId?: string;
@@ -234,6 +238,10 @@ export interface ProfileUpdatePayload {
     size?: string;
     industry?: string;
     website?: string;
+    /**
+     * URL to the company's logo (optional)
+     */
+    logoUrl?: string;
     position?: string;
     department?: string;
     vatId?: string;
@@ -425,6 +433,11 @@ export const profileUpdateSchema = z.object({
     size: z.enum(['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+']).optional(),
     industry: z.string().optional(),
     website: z.string().url('Invalid website URL').optional().or(z.literal('')),
+    logoUrl: z
+      .string()
+      .url('Invalid logo URL')
+      .optional()
+      .or(z.literal('')),
     position: z.string().optional(),
     department: z.string().optional(),
     vatId: z.string().optional(),
