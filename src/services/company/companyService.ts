@@ -43,6 +43,11 @@ export interface CompanyService {
     options: { start: number; end: number; type?: string },
   ): Promise<{ documents: CompanyDocument[]; count: number | null }>;
   createSignedUrl(path: string, expiresIn: number): Promise<string | null>;
+  getDocument(
+    companyId: string,
+    documentId: string,
+  ): Promise<CompanyDocument | null>;
+  deleteDocument(companyId: string, documentId: string): Promise<void>;
 
   initiateDomainVerification(
     domainId: string,
@@ -307,6 +312,53 @@ export class DefaultCompanyService implements CompanyService {
       return null;
     }
     return data?.signedUrl ?? null;
+  }
+
+  async getDocument(
+    companyId: string,
+    documentId: string,
+  ): Promise<CompanyDocument | null> {
+    const { data, error } = await this.supabase
+      .from('company_documents')
+      .select('*')
+      .eq('id', documentId)
+      .eq('company_id', companyId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      console.error('Error fetching company document:', error);
+      throw new Error('Failed to fetch company document');
+    }
+
+    return data as CompanyDocument;
+  }
+
+  async deleteDocument(companyId: string, documentId: string): Promise<void> {
+    const document = await this.getDocument(companyId, documentId);
+    if (!document) {
+      throw new Error('Document not found');
+    }
+
+    const { error: storageError } = await this.supabase.storage
+      .from('company-documents')
+      .remove([document.file_path]);
+
+    if (storageError) {
+      console.error('Error deleting file from storage:', storageError);
+      throw new Error('Failed to delete file');
+    }
+
+    const { error } = await this.supabase
+      .from('company_documents')
+      .delete()
+      .eq('id', documentId)
+      .eq('company_id', companyId);
+
+    if (error) {
+      console.error('Error deleting document record:', error);
+      throw new Error('Failed to delete document record');
+    }
   }
 
   async initiateDomainVerification(
