@@ -15,6 +15,7 @@ import { GdprDataProvider } from '@/core/gdpr/IGdprDataProvider';
 import { IConsentDataProvider } from '@/core/consent/IConsentDataProvider';
 import { SessionDataProvider } from '@/core/session/ISessionDataProvider';
 import { SsoDataProvider } from '@/core/sso/ISsoDataProvider';
+import { OAuthDataProvider } from '@/core/oauth/IOAuthDataProvider';
 import { SubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataProvider';
 import { ApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
@@ -91,6 +92,11 @@ export interface AdapterFactory {
    * Create an SSO data provider
    */
   createSsoProvider(): SsoDataProvider;
+
+  /**
+   * Create an OAuth data provider
+   */
+  createOAuthProvider?(): OAuthDataProvider;
 
   /**
    * Create a subscription data provider

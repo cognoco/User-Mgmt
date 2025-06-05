@@ -33,6 +33,8 @@ import createSupabaseGdprProvider from './gdpr/factory';
 import createSupabaseConsentProvider from './consent/factory';
 import { createSupabaseSessionProvider } from './session/factory';
 import createSupabaseSsoProvider from './sso/supabase/factory';
+import { createSupabaseOAuthProvider } from './oauth/factory';
+import type { OAuthDataProvider } from './oauth';
 import createSupabaseSubscriptionProvider from './subscription/factory';
 import createSupabaseApiKeyProvider from './api-keys/supabase/factory';
 import { createSupabaseWebhookProvider } from './webhooks';
@@ -145,6 +147,13 @@ export class SupabaseAdapterFactory implements AdapterFactory {
    */
   createSsoProvider(): SsoDataProvider {
     return createSupabaseSsoProvider(this.options);
+  }
+
+  /**
+   * Create a Supabase OAuth provider
+   */
+  createOAuthProvider(): OAuthDataProvider {
+    return createSupabaseOAuthProvider(this.options);
   }
 
   /**
