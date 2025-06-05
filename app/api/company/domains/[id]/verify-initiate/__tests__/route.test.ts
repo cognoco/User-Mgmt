@@ -2,6 +2,7 @@ import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST } from '../route';
 import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiCompanyService } from '@/services/company/factory';
 
 // Mock dependencies
 vi.mock('@/middleware/rate-limit', () => ({
@@ -9,22 +10,14 @@ vi.mock('@/middleware/rate-limit', () => ({
 }));
 
 vi.mock('@/lib/database/supabase', () => {
-  // Mock Supabase client for service role
   const mockSupabaseClient = {
-    auth: {
-      getUser: vi.fn()
-    },
-    from: vi.fn().mockReturnThis(),
-    select: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    eq: vi.fn(),
-    single: vi.fn(),
+    auth: { getUser: vi.fn() },
   };
-
-  return {
-    getServiceSupabase: vi.fn().mockReturnValue(mockSupabaseClient),
-  };
+  return { getServiceSupabase: vi.fn().mockReturnValue(mockSupabaseClient) };
 });
+vi.mock('@/services/company/factory', () => ({
+  getApiCompanyService: vi.fn(),
+}));
 
 describe('Domain Verification Initiate API', () => {
   const mockUserId = 'user-123';
@@ -42,35 +35,16 @@ describe('Domain Verification Initiate API', () => {
   };
   
   let supabase: any;
+  const service: any = {
+    initiateDomainVerification: vi.fn(),
+  };
   
   beforeEach(() => {
     supabase = getServiceSupabase();
-    
-    // Reset all mocks
     vi.resetAllMocks();
-    
-    // Set up default responses
     supabase.auth.getUser.mockResolvedValue({ data: { user: mockUser }, error: null });
-    
-    // Mock Supabase responses
-    supabase.from.mockReturnThis();
-    supabase.select.mockReturnThis();
-    supabase.update.mockReturnThis();
-    supabase.eq.mockReturnThis();
-    
-    // Set up default domain response
-    supabase.single.mockResolvedValue({
-      data: mockDomainRecord,
-      error: null
-    });
-    
-    // Setup update response
-    supabase.update.mockImplementation(() => ({
-      eq: vi.fn().mockResolvedValue({
-        data: { updated: true },
-        error: null
-      })
-    }));
+    vi.mocked(getApiCompanyService).mockReturnValue(service);
+    service.initiateDomainVerification.mockResolvedValue({ domain: mockDomain, verificationToken: 'token' });
   });
   
   afterEach(() => {
@@ -90,11 +64,10 @@ describe('Domain Verification Initiate API', () => {
     expect(data.domain).toBe(mockDomain);
     expect(data.message).toContain('verification initiated');
     
-    // Verify Supabase calls
-    expect(supabase.from).toHaveBeenCalledWith('company_domains');
-    expect(supabase.select).toHaveBeenCalled();
-    expect(supabase.update).toHaveBeenCalled();
-    expect(supabase.eq).toHaveBeenCalledWith('id', mockDomainId);
+    expect(service.initiateDomainVerification).toHaveBeenCalledWith(
+      mockDomainId,
+      mockUserId,
+    );
   });
   
   test('returns 401 for unauthenticated requests', async () => {
@@ -113,11 +86,7 @@ describe('Domain Verification Initiate API', () => {
   });
   
   test('returns 404 if domain does not exist', async () => {
-    // Mock domain not found
-    supabase.single.mockResolvedValueOnce({
-      data: null,
-      error: { message: 'Domain not found' }
-    });
+    service.initiateDomainVerification.mockRejectedValueOnce(new Error('Domain not found'));
     
     const request = new NextRequest(
       new URL(`http://localhost/api/company/domains/${mockDomainId}/verify-initiate`)
@@ -131,16 +100,7 @@ describe('Domain Verification Initiate API', () => {
   });
   
   test('returns 403 if user does not have permission to verify the domain', async () => {
-    // Mock domain record from another company
-    supabase.single.mockImplementationOnce(() => {
-      return Promise.resolve({
-        data: {
-          ...mockDomainRecord,
-          user_id: 'different-user-id'
-        },
-        error: null
-      });
-    });
+    service.initiateDomainVerification.mockRejectedValueOnce(new Error('You do not have permission to verify this domain.'));
     
     const request = new NextRequest(
       new URL(`http://localhost/api/company/domains/${mockDomainId}/verify-initiate`)
@@ -154,13 +114,7 @@ describe('Domain Verification Initiate API', () => {
   });
   
   test('returns 500 when database update fails', async () => {
-    // Mock update failure
-    supabase.update.mockImplementationOnce(() => ({
-      eq: vi.fn().mockResolvedValue({
-        data: null,
-        error: { message: 'Database error' }
-      })
-    }));
+    service.initiateDomainVerification.mockRejectedValueOnce(new Error('Database error'));
     
     const request = new NextRequest(
       new URL(`http://localhost/api/company/domains/${mockDomainId}/verify-initiate`)
@@ -186,9 +140,6 @@ describe('Domain Verification Initiate API', () => {
     expect(data.verificationToken.length).toBeGreaterThan(10);
     expect(data.verificationToken).toMatch(/^verificat/);
     
-    // Verify the update contains the token
-    expect(supabase.update).toHaveBeenCalledWith(expect.objectContaining({
-      verification_token: data.verificationToken
-    }));
+    expect(service.initiateDomainVerification).toHaveBeenCalled();
   });
 }); 

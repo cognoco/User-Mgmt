@@ -1,5 +1,7 @@
 import { getServiceSupabase } from '@/lib/database/supabase';
 import type { CompanyProfile } from '@/types/company';
+import { v4 as uuidv4 } from 'uuid';
+import dns from 'dns/promises';
 
 import type {
   CompanyDomain,
@@ -41,6 +43,24 @@ export interface CompanyService {
     options: { start: number; end: number; type?: string },
   ): Promise<{ documents: CompanyDocument[]; count: number | null }>;
   createSignedUrl(path: string, expiresIn: number): Promise<string | null>;
+
+  initiateDomainVerification(
+    domainId: string,
+    userId: string,
+  ): Promise<{ domain: string; verificationToken: string }>;
+
+  checkDomainVerification(
+    domainId: string,
+    userId: string,
+  ): Promise<{ verified: boolean; message: string }>;
+
+  initiateProfileDomainVerification(
+    userId: string,
+  ): Promise<{ domainName: string; verificationToken: string }>;
+
+  checkProfileDomainVerification(
+    userId: string,
+  ): Promise<{ verified: boolean; message: string }>;
 }
 
 export class DefaultCompanyService implements CompanyService {
@@ -287,5 +307,240 @@ export class DefaultCompanyService implements CompanyService {
       return null;
     }
     return data?.signedUrl ?? null;
+  }
+
+  async initiateDomainVerification(
+    domainId: string,
+    userId: string,
+  ): Promise<{ domain: string; verificationToken: string }> {
+    const { data: domainRecord, error } = await this.supabase
+      .from('company_domains')
+      .select('*')
+      .eq('id', domainId)
+      .single();
+
+    if (error || !domainRecord) {
+      console.error(`Error fetching domain ${domainId}:`, error);
+      throw new Error('Domain not found.');
+    }
+
+    const profile = await this.getProfileByUserId(userId);
+    if (!profile || profile.id !== domainRecord.company_id) {
+      throw new Error('You do not have permission to verify this domain.');
+    }
+
+    const verificationToken = `user-management-verification=${uuidv4()}`;
+
+    const { error: updateError } = await this.supabase
+      .from('company_domains')
+      .update({
+        verification_token: verificationToken,
+        is_verified: false,
+        verification_date: null,
+        last_checked: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', domainRecord.id);
+
+    if (updateError) {
+      console.error(
+        `Error initiating verification for domain ${domainId}:`,
+        updateError,
+      );
+      throw new Error('Failed to update domain with verification token.');
+    }
+
+    return { domain: domainRecord.domain, verificationToken };
+  }
+
+  async checkDomainVerification(
+    domainId: string,
+    userId: string,
+  ): Promise<{ verified: boolean; message: string }> {
+    const { data: domainRecord, error } = await this.supabase
+      .from('company_domains')
+      .select('*')
+      .eq('id', domainId)
+      .single();
+
+    if (error || !domainRecord) {
+      console.error(`Error fetching domain ${domainId}:`, error);
+      throw new Error('Domain not found.');
+    }
+
+    const profile = await this.getProfileByUserId(userId);
+    if (!profile || profile.id !== domainRecord.company_id) {
+      throw new Error('You do not have permission to verify this domain.');
+    }
+
+    if (!domainRecord.verification_token) {
+      throw new Error('Domain verification has not been initiated.');
+    }
+
+    const { domain, verification_token } = domainRecord;
+    let isVerified = false;
+    let dnsCheckError: string | null = null;
+
+    try {
+      const dnsPromise = dns.resolveTxt(domain);
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('DNS lookup timeout')), 10000),
+      );
+      const records = await Promise.race([dnsPromise, timeoutPromise]);
+
+      for (const recordParts of records as string[][]) {
+        const recordValue = recordParts.join('');
+        if (recordValue === verification_token) {
+          isVerified = true;
+          break;
+        }
+      }
+    } catch (err: any) {
+      if (err.code === 'ENOTFOUND' || err.code === 'ENODATA') {
+        dnsCheckError = 'No TXT records found for the domain.';
+      } else if (err.message === 'DNS lookup timeout') {
+        dnsCheckError = 'DNS lookup timed out. Please try again later.';
+      } else {
+        dnsCheckError = 'An error occurred during DNS lookup.';
+      }
+    }
+
+    const { error: updateError } = await this.supabase
+      .from('company_domains')
+      .update({
+        is_verified: isVerified,
+        verification_date: isVerified ? new Date().toISOString() : null,
+        last_checked: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', domainRecord.id);
+
+    if (updateError) {
+      console.error(
+        `Error updating domain verification status for ${domain}:`,
+        updateError,
+      );
+      throw new Error('Failed to update domain verification status.');
+    }
+
+    if (isVerified) {
+      return { verified: true, message: 'Domain successfully verified.' };
+    }
+
+    return {
+      verified: false,
+      message: dnsCheckError || 'Verification token not found in TXT records.',
+    };
+  }
+
+  async initiateProfileDomainVerification(
+    userId: string,
+  ): Promise<{ domainName: string; verificationToken: string }> {
+    const { data: profile, error } = await this.supabase
+      .from('company_profiles')
+      .select('id, website')
+      .eq('user_id', userId)
+      .single();
+
+    if (error || !profile) {
+      console.error(`Error fetching company profile for user ${userId}:`, error);
+      throw new Error('Failed to fetch company profile.');
+    }
+
+    if (!profile.website) {
+      throw new Error('Company website URL is not set in the profile.');
+    }
+
+    const url = new URL(profile.website);
+    const domainName = url.hostname.replace(/^www\./, '');
+
+    const verificationToken = `user-management-verification=${uuidv4()}`;
+
+    const { error: updateError } = await this.supabase
+      .from('company_profiles')
+      .update({
+        domain_name: domainName,
+        domain_verification_token: verificationToken,
+        domain_verified: false,
+        domain_last_checked: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', profile.id);
+
+    if (updateError) {
+      console.error(
+        `Error updating company profile for domain verification (user ${userId}):`,
+        updateError,
+      );
+      throw new Error('Failed to update profile with verification token.');
+    }
+
+    return { domainName, verificationToken };
+  }
+
+  async checkProfileDomainVerification(
+    userId: string,
+  ): Promise<{ verified: boolean; message: string }> {
+    const { data: profile, error } = await this.supabase
+      .from('company_profiles')
+      .select('id, domain_name, domain_verification_token')
+      .eq('user_id', userId)
+      .single();
+
+    if (error || !profile) {
+      console.error(`Check Domain: Error fetching company profile for user ${userId}:`, error);
+      throw new Error('Failed to fetch company profile.');
+    }
+
+    if (!profile.domain_name || !profile.domain_verification_token) {
+      throw new Error('Domain verification has not been initiated for this company.');
+    }
+
+    const { domain_name, domain_verification_token } = profile as any;
+    let isVerified = false;
+    let dnsCheckError: string | null = null;
+
+    try {
+      const records = await dns.resolveTxt(domain_name);
+      for (const recordParts of records) {
+        const recordValue = recordParts.join('');
+        if (recordValue === domain_verification_token) {
+          isVerified = true;
+          break;
+        }
+      }
+    } catch (err: any) {
+      if (err.code === 'ENOTFOUND' || err.code === 'ENODATA') {
+        dnsCheckError = 'No TXT records found for the domain.';
+      } else {
+        dnsCheckError = 'An error occurred during DNS lookup.';
+      }
+    }
+
+    const { error: updateError } = await this.supabase
+      .from('company_profiles')
+      .update({
+        domain_verified: isVerified,
+        domain_last_checked: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', profile.id);
+
+    if (updateError) {
+      console.error(
+        `Check Domain: Error updating company profile for verification status (user ${userId}):`,
+        updateError,
+      );
+      throw new Error('Database update failed.');
+    }
+
+    if (isVerified) {
+      return { verified: true, message: 'Domain successfully verified.' };
+    }
+
+    return {
+      verified: false,
+      message: dnsCheckError || 'Verification token not found in TXT records.',
+    };
   }
 }

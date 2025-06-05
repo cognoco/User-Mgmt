@@ -2,6 +2,7 @@ import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST } from '../route';
 import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiCompanyService } from '@/services/company/factory';
 import dns from 'dns/promises';
 
 // Mock dependencies
@@ -10,22 +11,12 @@ vi.mock('@/middleware/rate-limit', () => ({
 }));
 
 vi.mock('@/lib/database/supabase', () => {
-  // Mock Supabase client for service role
-  const mockSupabaseClient = {
-    auth: {
-      getUser: vi.fn()
-    },
-    from: vi.fn().mockReturnThis(),
-    select: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    eq: vi.fn(),
-    single: vi.fn(),
-  };
-
-  return {
-    getServiceSupabase: vi.fn().mockReturnValue(mockSupabaseClient),
-  };
+  const mockSupabaseClient = { auth: { getUser: vi.fn() } };
+  return { getServiceSupabase: vi.fn().mockReturnValue(mockSupabaseClient) };
 });
+vi.mock('@/services/company/factory', () => ({
+  getApiCompanyService: vi.fn(),
+}));
 
 // Mock DNS lookup
 vi.mock('dns/promises', () => ({
@@ -52,35 +43,16 @@ describe('Domain Verification Check API', () => {
   };
   
   let supabase: any;
+  const service: any = { checkDomainVerification: vi.fn() };
   
   beforeEach(() => {
     supabase = getServiceSupabase();
-    
-    // Reset all mocks
     vi.resetAllMocks();
-    
-    // Set up default responses
     supabase.auth.getUser.mockResolvedValue({ data: { user: mockUser }, error: null });
-    
-    // Mock Supabase responses
-    supabase.from.mockReturnThis();
-    supabase.select.mockReturnThis();
-    supabase.update.mockReturnThis();
-    supabase.eq.mockReturnThis();
-    
-    // Set up default domain response
-    supabase.single.mockResolvedValue({
-      data: mockDomainRecord,
-      error: null
-    });
-    
-    // Setup update response
-    supabase.update.mockImplementation(() => ({
-      eq: vi.fn().mockResolvedValue({
-        data: { updated: true },
-        error: null
-      })
-    }));
+    vi.mocked(getApiCompanyService).mockReturnValue(service);
+    service.checkDomainVerification.mockResolvedValue({ verified: true, message: 'ok' });
+
+    (dns.resolveTxt as any).mockResolvedValue([[mockToken]]);
     
     // Mock DNS resolveTxt to return matching verification token
     (dns.resolveTxt as any).mockResolvedValue([[mockToken]]);
@@ -104,14 +76,7 @@ describe('Domain Verification Check API', () => {
     
     // Verify DNS lookup was called correctly
     expect(dns.resolveTxt).toHaveBeenCalledWith(mockDomain);
-    
-    // Verify Supabase calls
-    expect(supabase.from).toHaveBeenCalledWith('company_domains');
-    expect(supabase.update).toHaveBeenCalledWith(expect.objectContaining({
-      is_verified: true,
-      verification_date: expect.any(String),
-      last_checked: expect.any(String)
-    }));
+    expect(service.checkDomainVerification).toHaveBeenCalledWith(mockDomainId, mockUserId);
   });
   
   test('returns 401 for unauthenticated requests', async () => {
@@ -130,11 +95,7 @@ describe('Domain Verification Check API', () => {
   });
   
   test('returns 404 if domain does not exist', async () => {
-    // Mock domain not found
-    supabase.single.mockResolvedValueOnce({
-      data: null,
-      error: { message: 'Domain not found' }
-    });
+    service.checkDomainVerification.mockRejectedValueOnce(new Error('Domain not found'));
     
     const request = new NextRequest(
       new URL(`http://localhost/api/company/domains/${mockDomainId}/verify-check`)
@@ -148,14 +109,7 @@ describe('Domain Verification Check API', () => {
   });
   
   test('returns 400 if verification has not been initiated', async () => {
-    // Mock domain without verification token
-    supabase.single.mockResolvedValueOnce({
-      data: {
-        ...mockDomainRecord,
-        verification_token: null
-      },
-      error: null
-    });
+    service.checkDomainVerification.mockRejectedValueOnce(new Error('Domain verification has not been initiated.'));
     
     const request = new NextRequest(
       new URL(`http://localhost/api/company/domains/${mockDomainId}/verify-check`)
@@ -186,11 +140,7 @@ describe('Domain Verification Check API', () => {
     // Verify DNS lookup was called
     expect(dns.resolveTxt).toHaveBeenCalledWith(mockDomain);
     
-    // Verify domain is marked as not verified in the database
-    expect(supabase.update).toHaveBeenCalledWith(expect.objectContaining({
-      is_verified: false,
-      last_checked: expect.any(String)
-    }));
+    expect(service.checkDomainVerification).toHaveBeenCalledWith(mockDomainId, mockUserId);
   });
   
   test('handles DNS resolution errors correctly', async () => {
@@ -229,13 +179,7 @@ describe('Domain Verification Check API', () => {
   });
   
   test('returns 500 when database update fails', async () => {
-    // Mock update failure
-    supabase.update.mockImplementationOnce(() => ({
-      eq: vi.fn().mockResolvedValue({
-        data: null,
-        error: { message: 'Database error' }
-      })
-    }));
+    service.checkDomainVerification.mockRejectedValueOnce(new Error('Database error'));
     
     const request = new NextRequest(
       new URL(`http://localhost/api/company/domains/${mockDomainId}/verify-check`)
