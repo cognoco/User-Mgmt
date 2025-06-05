@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 import { logUserAction } from '@/lib/audit/auditLogger';
-import { getUserDataExportByToken } from '@/lib/exports/export.service';
-import { DataExportStorageBucket, ExportStatus } from '@/lib/exports/types';
+import { getUserDataExportByToken, getUserExportDownloadUrl } from '@/lib/exports/export.service';
+import { ExportStatus } from '@/lib/exports/types';
 
 /**
  * GET /api/profile/export/download?token={downloadToken}
@@ -37,18 +36,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Export file not found' }, { status: 404 });
     }
     
-    // Download the file from storage
-    const { data: fileData, error: downloadError } = await supabase.storage
-      .from(DataExportStorageBucket.USER_EXPORTS)
-      .download(exportRecord.filePath);
-    
-    if (downloadError || !fileData) {
-      console.error('Error downloading export file:', downloadError);
-      return NextResponse.json({ 
-        error: 'Failed to download file',
-        details: downloadError?.message || 'File not found'
-      }, { status: 500 });
+    const downloadUrl = getUserExportDownloadUrl(exportRecord.filePath);
+    const response = await fetch(downloadUrl);
+    if (!response.ok) {
+      return NextResponse.json({ error: 'Failed to download file' }, { status: 500 });
     }
+    const fileData = await response.arrayBuffer();
     
     // Determine content type based on format
     const contentType = exportRecord.format === 'csv' 

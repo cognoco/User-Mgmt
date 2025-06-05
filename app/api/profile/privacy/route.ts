@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 // import { z } from 'zod'; // Removed unused import
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiAuthService, getSessionFromToken } from '@/services/auth/factory';
+import { getApiUserService } from '@/services/user/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { profileSchema } from '@/types/database'; // Corrected import path
 import { logUserAction } from '@/lib/audit/auditLogger'; // Added audit logger import
@@ -31,8 +32,8 @@ export async function PATCH(request: NextRequest) {
     }
     const token = authHeader.split(' ')[1];
 
-    const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
+    const user = await getSessionFromToken(token);
+    const userError = user ? null : new Error('Invalid token');
 
     if (userError || !user) {
       // Log unauthorized attempt
@@ -65,20 +66,18 @@ export async function PATCH(request: NextRequest) {
     
     console.log(`Updating privacy settings for user ${user.id}:`, settingsToUpdate);
 
-    // 4. Update Profile Table
-    const { data, error: updateError } = await supabaseService
-      .from('profiles')
-      .update({ 
-          privacySettings: settingsToUpdate, // Update the entire privacySettings object
-          updatedAt: new Date().toISOString() // Update timestamp
-      })
-      .eq('userId', user.id) // Match based on userId column
-      .select('privacySettings') // Select back the updated settings
-      .single();
+    // 4. Update Profile via service layer
+    const userService = getApiUserService();
+    const result = await userService.updateUserProfile(
+      user.id,
+      { privacySettings: settingsToUpdate } as any
+    );
+    const data = result.profile ? { privacySettings: result.profile.privacySettings } : null;
+    const updateError = result.success ? null : new Error(result.error || 'update failed');
 
     // 5. Handle Errors
     if (updateError) {
-      console.error(`Supabase error updating privacy settings for user ${user.id}:`, updateError);
+      console.error(`Error updating privacy settings for user ${user.id}:`, updateError);
       
       // Log the failure
       await logUserAction({
@@ -89,16 +88,11 @@ export async function PATCH(request: NextRequest) {
           userAgent: userAgent,
           targetResourceType: 'user_profile_privacy',
           targetResourceId: userIdForLogging,
-          details: { 
-              reason: updateError.message, 
-              code: updateError.code
+          details: {
+              reason: updateError.message
           }
       });
 
-      // Handle specific errors like profile not found (e.g., PGRST116)
-      if (updateError.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Profile not found for update.' }, { status: 404 });
-      }
       return NextResponse.json({ error: 'Failed to update privacy settings.', details: updateError.message }, { status: 500 });
     }
     

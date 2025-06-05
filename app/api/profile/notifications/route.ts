@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { supabase } from '@/lib/supabase';
+import { getApiNotificationService } from '@/services/notification/factory';
 import { middleware } from '@/middleware';
 
 const notificationPrefsSchema = z.object({
@@ -15,17 +15,14 @@ export const GET = middleware(['cors', 'csrf', 'rateLimit'], async (req: NextReq
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { data, error } = await supabase
-    .from('user_preferences')
-    .select('notifications')
-    .eq('user_id', user.id)
-    .single();
-
-  if (error) {
+  const service = getApiNotificationService();
+  let preferences;
+  try {
+    preferences = await service.getUserPreferences(user.id);
+  } catch {
     return NextResponse.json({ error: 'Failed to fetch notification preferences' }, { status: 500 });
   }
-
-  return NextResponse.json({ notifications: data?.notifications || {} });
+  return NextResponse.json({ notifications: preferences });
 });
 
 export const PUT = middleware(['cors', 'csrf', 'rateLimit'], async (req: NextRequest) => {
@@ -46,16 +43,10 @@ export const PUT = middleware(['cors', 'csrf', 'rateLimit'], async (req: NextReq
     return NextResponse.json({ error: 'Invalid notification preferences', details: parse.error.errors }, { status: 400 });
   }
 
-  // Upsert user preferences (create if not exists)
-  const { error } = await supabase
-    .from('user_preferences')
-    .upsert({
-      user_id: user.id,
-      notifications: { ...parse.data },
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id' });
-
-  if (error) {
+  const service = getApiNotificationService();
+  try {
+    await service.updateUserPreferences(user.id, parse.data);
+  } catch {
     return NextResponse.json({ error: 'Failed to update notification preferences' }, { status: 500 });
   }
 
