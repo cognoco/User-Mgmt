@@ -14,6 +14,21 @@ export interface OAuthService {
     state?: string,
   ): Promise<OAuthCallbackResult>;
 
+  /**
+   * Link an additional OAuth provider to the currently authenticated user.
+   */
+  linkProvider(
+    provider: OAuthProvider,
+    code: string,
+  ): Promise<{
+    success: boolean;
+    error?: string;
+    status?: number;
+    user?: any;
+    linkedProviders?: string[];
+    collision?: boolean;
+  }>;
+
   disconnectProvider(
     provider: OAuthProvider,
   ): Promise<{ success: boolean; error?: string; status?: number }>;

@@ -10,6 +10,7 @@ import type {
 } from '@/core/two-factor/models';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { authenticator } from 'otplib';
+import * as qrcode from 'qrcode';
 import crypto from 'crypto';
 import { sendEmail } from '@/lib/email/sendEmail';
 import { sendSms } from '@/lib/sms/sendSms';
@@ -25,7 +26,7 @@ export class DefaultTwoFactorService implements TwoFactorService {
 
   async startSetup(payload: TwoFactorSetupPayload): Promise<TwoFactorSetupResponse> {
     const supabase = getServiceSupabase();
-    const { userId, method } = payload;
+    const { userId, method, phone, email } = payload;
 
     const { data: { user }, error } = await supabase.auth.admin.getUserById(userId);
     if (error || !user) {
@@ -33,14 +34,26 @@ export class DefaultTwoFactorService implements TwoFactorService {
     }
 
     switch (method) {
+      case 'totp': {
+        const secret = authenticator.generateSecret();
+        const { error: upd } = await supabase.auth.admin.updateUserById(userId, {
+          user_metadata: { tempTotpSecret: secret }
+        });
+        if (upd) return { success: false, error: upd.message };
+        const appName = 'User Management';
+        const accountName = user.email || user.id;
+        const otpAuthUrl = authenticator.keyuri(accountName, appName, secret);
+        const qrCode = await qrcode.toDataURL(otpAuthUrl);
+        return { success: true, secret, qrCode };
+      }
       case 'email': {
-        const email = user.user_metadata?.mfaEmail || user.email;
-        if (!email) return { success: false, error: 'Email address is required for Email MFA' };
+        const targetEmail = email || user.user_metadata?.mfaEmail || user.email;
+        if (!targetEmail) return { success: false, error: 'Email address is required for Email MFA' };
         const code = this.generateCode();
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
         try {
           await sendEmail({
-            to: email,
+            to: targetEmail,
             subject: 'Your MFA Verification Code',
             html: `<p>Your verification code is: <b>${code}</b></p>`
           });
@@ -48,23 +61,23 @@ export class DefaultTwoFactorService implements TwoFactorService {
           return { success: false, error: 'Failed to send verification email' };
         }
         const { error: upd } = await supabase.auth.admin.updateUserById(userId, {
-          user_metadata: { mfaEmail: email, mfaEmailCode: code, mfaEmailCodeExpiresAt: expiresAt }
+          user_metadata: { mfaEmail: targetEmail, mfaEmailCode: code, mfaEmailCodeExpiresAt: expiresAt }
         });
         if (upd) return { success: false, error: upd.message };
         return { success: true };
       }
       case 'sms': {
-        const phone = user.user_metadata?.mfaPhone;
-        if (!phone) return { success: false, error: 'Phone number is required for SMS MFA' };
+        const targetPhone = phone || user.user_metadata?.mfaPhone;
+        if (!targetPhone) return { success: false, error: 'Phone number is required for SMS MFA' };
         const code = this.generateCode();
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
         try {
-          await sendSms({ to: phone, message: `Your verification code is: ${code}` });
+          await sendSms({ to: targetPhone, message: `Your verification code is: ${code}` });
         } catch {
           return { success: false, error: 'Failed to send SMS verification code' };
         }
         const { error: upd } = await supabase.auth.admin.updateUserById(userId, {
-          user_metadata: { mfaPhone: phone, mfaSmsCode: code, mfaSmsCodeExpiresAt: expiresAt }
+          user_metadata: { mfaPhone: targetPhone, mfaSmsCode: code, mfaSmsCodeExpiresAt: expiresAt }
         });
         if (upd) return { success: false, error: upd.message };
         return { success: true };

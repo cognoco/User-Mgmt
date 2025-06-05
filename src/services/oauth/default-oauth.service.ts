@@ -250,6 +250,131 @@ export class DefaultOAuthService implements OAuthService {
     };
   }
 
+  async linkProvider(
+    provider: OAuthProvider,
+    code: string,
+  ): Promise<{
+    success: boolean;
+    error?: string;
+    status?: number;
+    user?: any;
+    linkedProviders?: string[];
+    collision?: boolean;
+  }> {
+    try {
+      const supabase = this.createSupabase();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+      if (authError || !user) {
+        return { success: false, error: "Authentication required", status: 401 };
+      }
+
+      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+      if (exchangeError) {
+        return { success: false, error: exchangeError.message, status: 400 };
+      }
+
+      const { data: providerUserData, error: providerUserError } = await supabase.auth.getUser();
+      if (providerUserError || !providerUserData?.user) {
+        return {
+          success: false,
+          error: providerUserError?.message || "Failed to fetch provider user data",
+          status: 400,
+        };
+      }
+
+      const providerAccountId = providerUserData.user.app_metadata?.provider_id;
+      const email = providerUserData.user.email;
+      if (!providerAccountId && !email) {
+        return {
+          success: false,
+          error: "Provider did not return a unique identifier (email or provider user ID).",
+          status: 400,
+        };
+      }
+
+      const { data: existingAccount } = await supabase
+        .from("account")
+        .select("id, user_id")
+        .eq("provider", provider.toLowerCase())
+        .eq("provider_account_id", providerAccountId)
+        .maybeSingle();
+      if (existingAccount) {
+        return {
+          success: false,
+          error: "This provider is already linked to an account.",
+          status: 409,
+        };
+      }
+
+      let emailCollision: { id: string; user_id: string } | null = null;
+      if (email) {
+        const { data } = await supabase
+          .from("account")
+          .select("id, user_id")
+          .eq("provider_email", email)
+          .maybeSingle();
+        emailCollision = data;
+      }
+
+      if (emailCollision && emailCollision.user_id !== user.id) {
+        return {
+          success: false,
+          error:
+            "An account with this email already exists. Please use another provider or contact support.",
+          status: 409,
+          collision: true,
+        };
+      }
+
+      const { error: insertError } = await supabase.from("account").insert({
+        user_id: user.id,
+        provider: provider.toLowerCase(),
+        provider_account_id: providerAccountId || "",
+        provider_email: email || "",
+      });
+      if (insertError) {
+        return { success: false, error: insertError.message, status: 400 };
+      }
+
+      await sendProviderLinkedNotification(user.id, provider);
+      try {
+        await logUserAction({
+          userId: user.id,
+          action: "SSO_LINK",
+          status: "SUCCESS",
+          details: { provider },
+        });
+      } catch {
+        // ignore logging errors
+      }
+
+      const { data: linkedAccounts } = await supabase
+        .from("account")
+        .select("provider")
+        .eq("user_id", user.id);
+
+      return {
+        success: true,
+        user,
+        linkedProviders: linkedAccounts?.map((a: { provider: string }) => a.provider) ?? [],
+      };
+    } catch (error: any) {
+      try {
+        await logUserAction({
+          action: "SSO_LINK",
+          status: "FAILURE",
+          details: { error: error.message || "Failed to link provider." },
+        });
+      } catch {
+        /* noop */
+      }
+      return { success: false, error: error.message || "Failed to link provider.", status: 400 };
+    }
+  }
+
   async disconnectProvider(
     provider: OAuthProvider,
   ): Promise<{ success: boolean; error?: string; status?: number }> {
