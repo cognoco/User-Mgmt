@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getProfileVerificationStatus, requestProfileVerification } from '@/lib/profile/verificationService';
 import { getUserFromRequest } from '@/lib/auth/utils';
-import { createClient } from '@/lib/supabase';
+import { getApiProfileVerificationService } from '@/services/profile-verification/factory';
 
 // Toggle document upload feature
 const DOCUMENT_UPLOAD_ENABLED = true; // Set to false to disable document upload
@@ -11,7 +10,8 @@ export async function GET(req: NextRequest) {
   const user = await getUserFromRequest(req);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
-    const status = await getProfileVerificationStatus(user.id);
+    const service = getApiProfileVerificationService();
+    const status = await service.getStatus(user.id);
     return NextResponse.json({ status });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch verification status' }, { status: 500 });
@@ -23,27 +23,16 @@ export async function POST(req: NextRequest) {
   const user = await getUserFromRequest(req);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
-    let documentUrl: string | undefined = undefined;
+    const service = getApiProfileVerificationService();
+    let file: File | undefined;
     if (DOCUMENT_UPLOAD_ENABLED && req.headers.get('content-type')?.includes('multipart/form-data')) {
-      // Parse multipart form for file upload
       const formData = await req.formData();
-      const file = formData.get('document') as File | null;
-      if (file) {
-        // Upload to Supabase Storage
-        const supabase = createClient();
-        const fileExt = file.name.split('.').pop();
-        const filePath = `profile-verification/${user.id}/${Date.now()}.${fileExt}`;
-        const { error } = await supabase.storage.from('profile-verification').upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true,
-        });
-        if (error) {
-          return NextResponse.json({ error: 'Failed to upload document' }, { status: 500 });
-        }
-        documentUrl = supabase.storage.from('profile-verification').getPublicUrl(filePath).publicUrl;
+      const uploaded = formData.get('document');
+      if (uploaded instanceof File) {
+        file = uploaded;
       }
     }
-    const result = await requestProfileVerification(user.id, documentUrl);
+    const result = await service.requestVerification(user.id, file);
     return NextResponse.json({ success: true, result });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to request verification' }, { status: 500 });
