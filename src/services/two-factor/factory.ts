@@ -7,8 +7,7 @@
 
 import { TwoFactorService } from '@/core/two-factor/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
-import type { ITwoFactorDataProvider } from '@/core/two-factor';
-import { AdapterRegistry } from '@/adapters/registry';
+import { DefaultTwoFactorService } from './default-two-factor.service';
 import {
   getServiceContainer,
   getServiceConfiguration
@@ -59,15 +58,9 @@ export function getApiTwoFactorService(
 
       if (!twoFactorServiceInstance) {
         twoFactorServiceInstance =
-          UserManagementConfiguration.getServiceProvider(
+          (UserManagementConfiguration.getServiceProvider(
             'twoFactorService'
-          ) as TwoFactorService | null;
-
-        if (!twoFactorServiceInstance) {
-          throw new Error(
-            'Two-factor service not registered in UserManagementConfiguration'
-          );
-        }
+          ) as TwoFactorService | null) || new DefaultTwoFactorService();
       }
     }
 
