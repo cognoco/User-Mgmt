@@ -1,21 +1,20 @@
-import { NextRequest } from 'next/server';
-import { z } from 'zod';
-import { getServiceSupabase } from '@/lib/database/supabase';
-import { createResourceRelationshipService } from '@/services/resource-relationship/factory';
+import { NextRequest } from "next/server";
+import { z } from "zod";
+import { getApiResourceRelationshipService } from "@/services/resource-relationship/factory";
 import {
   createMiddlewareChain,
   errorHandlingMiddleware,
   routeAuthMiddleware,
   validationMiddleware,
-} from '@/middleware/createMiddlewareChain';
-import { createSuccessResponse, createCreatedResponse } from '@/lib/api/common';
+} from "@/middleware/createMiddlewareChain";
+import { createSuccessResponse, createCreatedResponse } from "@/lib/api/common";
 
 const relationshipSchema = z.object({
   parentType: z.string().min(1),
   parentId: z.string().min(1),
   childType: z.string().min(1),
   childId: z.string().min(1),
-  relationshipType: z.string().min(1).default('contains'),
+  relationshipType: z.string().min(1).default("contains"),
 });
 
 const middleware = createMiddlewareChain([
@@ -26,19 +25,19 @@ const middleware = createMiddlewareChain([
 
 async function handleGet(req: NextRequest) {
   const url = new URL(req.url);
-  const parentType = url.searchParams.get('parentType');
-  const parentId = url.searchParams.get('parentId');
-  const childType = url.searchParams.get('childType');
-  const childId = url.searchParams.get('childId');
+  const parentType = url.searchParams.get("parentType");
+  const parentId = url.searchParams.get("parentId");
+  const childType = url.searchParams.get("childType");
+  const childId = url.searchParams.get("childId");
 
   if (!((parentType && parentId) || (childType && childId))) {
     return Response.json(
-      { error: 'Must provide either parent or child resource identifiers' },
-      { status: 400 }
+      { error: "Must provide either parent or child resource identifiers" },
+      { status: 400 },
     );
   }
 
-  const service = createResourceRelationshipService(getServiceSupabase());
+  const service = getApiResourceRelationshipService();
 
   if (parentType && parentId) {
     const children = await service.getChildResources(parentType, parentId);
@@ -52,9 +51,9 @@ async function handleGet(req: NextRequest) {
 async function handlePost(
   req: NextRequest,
   auth: any,
-  data: z.infer<typeof relationshipSchema>
+  data: z.infer<typeof relationshipSchema>,
 ) {
-  const service = createResourceRelationshipService(getServiceSupabase());
+  const service = getApiResourceRelationshipService();
   const relationship = await service.createRelationship({
     ...data,
     createdBy: auth.userId,

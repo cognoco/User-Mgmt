@@ -3,10 +3,9 @@ import { withErrorHandling } from "@/middleware/error-handling";
 import { withRouteAuth } from "@/middleware/auth";
 import { createSuccessResponse } from "@/lib/api/common";
 import { ResourcePermissionResolver } from "@/services/permission/resource-permission-resolver";
-import { getServiceSupabase } from "@/lib/database/supabase";
 
 async function handleGet(type: string, id: string) {
-  const resolver = new ResourcePermissionResolver(getServiceSupabase());
+  const resolver = new ResourcePermissionResolver();
   const ancestors = await resolver.getResourceAncestors(type, id);
   return createSuccessResponse({ ancestors });
 }
