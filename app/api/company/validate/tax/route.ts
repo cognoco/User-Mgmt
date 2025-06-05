@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { createApiHandler } from '@/lib/api/route-helpers';
 import { createSuccessResponse } from '@/lib/api/common';
@@ -56,7 +56,6 @@ async function handlePost(
   }
 
   try {
-    const supabaseService = getServiceSupabase();
     const userId = auth.userId!;
     const companyProfile = await services.addressService.getProfileByUserId(userId);
     if (!companyProfile) {
@@ -78,15 +77,12 @@ async function handlePost(
       };
     }
 
-    // Update company_profiles
-    await supabaseService
-      .from('company_profiles')
-      .update({
-        tax_id_verified: validationResult.isValid,
-        tax_id_last_checked: new Date().toISOString(),
-        tax_id_validation_details: validationResult.details,
-      })
-      .eq('user_id', userId);
+    const companyService = getApiCompanyService();
+    await companyService.updateProfile(companyProfile.id, {
+      tax_id_verified: validationResult.isValid,
+      tax_id_last_checked: new Date().toISOString(),
+      tax_id_validation_details: validationResult.details,
+    });
 
     return createSuccessResponse({
       status: validationResult.status,

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getApiCompanyService } from '@/services/company/factory';
+import { getApiPermissionService } from '@/services/permission/factory';
+import { getCompanyExportData } from '@/lib/exports/company-export.service';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import {
   createMiddlewareChain,
@@ -10,47 +12,6 @@ import {
 } from '@/middleware/createMiddlewareChain';
 import { withSecurity } from '@/middleware/with-security';
 
-// Helper to fetch all relevant company data for export
-async function getCompanyExportData(companyId: string) {
-  // Fetch company profile
-  const { data: company, error: companyError } = await supabase
-    .from('companies')
-    .select('*')
-    .eq('id', companyId)
-    .single();
-
-  // Fetch team members (excluding sensitive fields)
-  const { data: members, error: membersError } = await supabase
-    .from('team_members')
-    .select('id, user_id, email, role, status, created_at')
-    .eq('company_id', companyId);
-
-  // Fetch roles (if applicable)
-  const { data: roles, error: rolesError } = await supabase
-    .from('roles')
-    .select('*')
-    .eq('company_id', companyId);
-
-  // Fetch company activity logs (optional, can be filtered)
-  const { data: activityLogs, error: logError } = await supabase
-    .from('company_activity_log')
-    .select('*')
-    .eq('company_id', companyId)
-    .order('created_at', { ascending: false });
-
-  // Collect errors
-  const errors = [companyError, membersError, rolesError, logError].filter(Boolean);
-  if (errors.length > 0) {
-    return { error: errors.map(e => e?.message ?? String(e)).join('; ') };
-  }
-
-  return {
-    company,
-    members,
-    roles,
-    activityLogs,
-  };
-}
 
 async function handleGet(req: NextRequest, auth: RouteAuthContext) {
   const user = auth.user;
@@ -62,13 +23,9 @@ async function handleGet(req: NextRequest, auth: RouteAuthContext) {
   }
 
   // Fetch user's company and check admin role
-  const { data: companyMember, error: memberError } = await supabase
-    .from('team_members')
-    .select('company_id, role')
-    .eq('user_id', user.id)
-    .single();
-
-  if (memberError || !companyMember) {
+  const companyService = getApiCompanyService();
+  const companyProfile = await companyService.getProfileByUserId(user.id);
+  if (!companyProfile) {
     // Log failed export attempt
     await logUserAction({
       userId: user?.id,
@@ -78,14 +35,16 @@ async function handleGet(req: NextRequest, auth: RouteAuthContext) {
       userAgent: req.headers.get('user-agent'),
       targetResourceType: 'company',
       targetResourceId: undefined,
-      details: { error: memberError?.message || 'Not a company member or error fetching membership.' }
+      details: { error: 'Not a company member or error fetching membership.' }
     });
     return new NextResponse(JSON.stringify({ error: 'Not a company member or error fetching membership.' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
     });
   }
-  if (companyMember.role !== 'admin') {
+  const permissionService = getApiPermissionService();
+  const isAdmin = await permissionService.hasRole(user.id, 'admin');
+  if (!isAdmin) {
     // Log forbidden export attempt
     await logUserAction({
       userId: user.id,
@@ -94,7 +53,7 @@ async function handleGet(req: NextRequest, auth: RouteAuthContext) {
       ipAddress: req.ip,
       userAgent: req.headers.get('user-agent'),
       targetResourceType: 'company',
-      targetResourceId: companyMember.company_id,
+      targetResourceId: companyProfile.id,
       details: { error: 'Forbidden: Admin access required.' }
     });
     return new NextResponse(JSON.stringify({ error: 'Forbidden: Admin access required.' }), {
@@ -103,7 +62,7 @@ async function handleGet(req: NextRequest, auth: RouteAuthContext) {
     });
   }
 
-  const exportData = await getCompanyExportData(companyMember.company_id);
+  const exportData = await getCompanyExportData(companyProfile.id);
   if ('error' in exportData) {
     // Log failed export
     await logUserAction({
@@ -113,7 +72,7 @@ async function handleGet(req: NextRequest, auth: RouteAuthContext) {
       ipAddress: req.ip,
       userAgent: req.headers.get('user-agent'),
       targetResourceType: 'company',
-      targetResourceId: companyMember.company_id,
+      targetResourceId: companyProfile.id,
       details: { error: exportData.error }
     });
     return new NextResponse(JSON.stringify({ error: 'Failed to export company data', details: exportData.error }), {
@@ -122,7 +81,7 @@ async function handleGet(req: NextRequest, auth: RouteAuthContext) {
     });
   }
 
-  const filename = `Company_Data_Export_${companyMember.company_id}_${new Date().toISOString().slice(0,10)}.json`;
+  const filename = `Company_Data_Export_${companyProfile.id}_${new Date().toISOString().slice(0,10)}.json`;
   const json = JSON.stringify(exportData, null, 2);
 
   // Log successful export
@@ -133,7 +92,7 @@ async function handleGet(req: NextRequest, auth: RouteAuthContext) {
     ipAddress: req.ip,
     userAgent: req.headers.get('user-agent'),
     targetResourceType: 'company',
-    targetResourceId: companyMember.company_id,
+    targetResourceId: companyProfile.id,
     details: { filename }
   });
 
