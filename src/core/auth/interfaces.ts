@@ -268,6 +268,13 @@ export interface AuthService {
    * @returns True if token was refreshed successfully, false otherwise
    */
   refreshToken(): Promise<boolean>;
+
+  /**
+   * Get the expiration timestamp of the current auth token.
+   *
+   * @returns Expiration time in milliseconds, or `null` if no active session.
+   */
+  getTokenExpiry(): number | null;
   
   /**
    * Handle session timeout by logging out the user

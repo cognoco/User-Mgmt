@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
-import { getCurrentSession } from '@/lib/auth/session';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { createSuccessResponse } from '@/lib/api/common';
 
@@ -16,14 +15,10 @@ export const POST = createApiHandler(
     const userAgent = request.headers.get('user-agent') || 'unknown';
     
     const success = await services.auth.refreshToken();
-    let session = null;
-    
+    let expiresAt: number | null = null;
+
     if (success) {
-      try {
-        session = await getCurrentSession();
-      } catch {
-        session = null;
-      }
+      expiresAt = services.auth.getTokenExpiry();
       const key = ipAddress;
       delete failedRefreshAttempts[key];
     }
@@ -60,9 +55,9 @@ export const POST = createApiHandler(
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    return createSuccessResponse({ success: true, expiresAt: session?.expiresAt });
+    return createSuccessResponse({ success: true, expiresAt });
   },
-  { 
+  {
     requireAuth: false, // Token refresh doesn't require active auth
     rateLimit: { windowMs: 15 * 60 * 1000, max: 30 }
   }

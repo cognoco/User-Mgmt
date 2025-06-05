@@ -12,13 +12,14 @@ vi.mock('@/middleware/with-security', () => ({
 }));
 
 describe('POST /api/auth/refresh-token', () => {
-  const mockAuthService = { refreshToken: vi.fn() };
+  const mockAuthService = { refreshToken: vi.fn(), getTokenExpiry: vi.fn() };
   const createRequest = () => new Request('http://localhost/api/auth/refresh-token', { method: 'POST' });
 
   beforeEach(() => {
     vi.clearAllMocks();
     (getApiAuthService as unknown as vi.Mock).mockReturnValue(mockAuthService);
     mockAuthService.refreshToken.mockResolvedValue(true);
+    mockAuthService.getTokenExpiry.mockReturnValue(123);
   });
 
   it('returns success when token is refreshed', async () => {
@@ -26,6 +27,7 @@ describe('POST /api/auth/refresh-token', () => {
     const data = await res.json();
     expect(res.status).toBe(200);
     expect(data.data.success).toBe(true);
+    expect(data.data.expiresAt).toBe(123);
     expect(mockAuthService.refreshToken).toHaveBeenCalled();
   });
 

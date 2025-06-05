@@ -25,6 +25,7 @@ export class MockAuthService implements AuthService {
     successMessage: null,
     mfaEnabled: false
   };
+  private expiry: number | null = null;
 
   // Mock implementations with Vitest spies
   login = vi.fn().mockImplementation(async (credentials: LoginPayload): Promise<AuthResult> => {
@@ -141,13 +142,17 @@ export class MockAuthService implements AuthService {
       refreshToken: string;
       expiresAt: number;
     } | null> => {
-      return {
+      const result = {
         accessToken: 'mock-access',
         refreshToken: 'mock-refresh',
         expiresAt: Date.now() + 60_000,
       };
+      this.expiry = result.expiresAt;
+      return result;
     },
   );
+
+  getTokenExpiry = vi.fn().mockImplementation(() => this.expiry);
 
   handleSessionTimeout = vi.fn().mockImplementation((): void => {
     this.logout();
