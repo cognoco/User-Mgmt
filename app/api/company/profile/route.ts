@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getServiceSupabase } from "@/lib/database/supabase";
+import { getApiCompanyService } from "@/services/company/factory";
 import { createApiHandler, emptySchema } from "@/lib/api/route-helpers";
 import { createSuccessResponse } from "@/lib/api/common";
 import { logUserAction } from "@/lib/audit/auditLogger";
@@ -67,11 +67,11 @@ async function handlePost(
   let userIdForLogging: string | null = null;
 
   try {
-    const supabaseService = getServiceSupabase();
+    const companyService = getApiCompanyService();
     const userId = auth.userId!;
     userIdForLogging = userId;
 
-    const existingProfile = await services.addressService.getProfileByUserId(userId);
+    const existingProfile = await companyService.getProfileByUserId(userId);
 
     if (existingProfile) {
       await logUserAction({
@@ -90,19 +90,10 @@ async function handlePost(
       );
     }
 
-    const { data: profile, error: createError } = await supabaseService
-      .from("company_profiles")
-      .insert({
-        ...data,
-        user_id: userId,
-        status: "pending",
-        verified: false,
-      })
-      .select()
-      .single();
+    const profile = await companyService.createProfile(userId, data!);
 
-    if (createError) {
-      console.error("Error creating company profile:", createError);
+    if (!profile) {
+      console.error("Error creating company profile");
       await logUserAction({
         userId: userIdForLogging,
         action: "COMPANY_PROFILE_CREATE_FAILURE",
@@ -111,7 +102,7 @@ async function handlePost(
         userAgent,
         targetResourceType: "company_profile",
         targetResourceId: userIdForLogging,
-        details: { reason: createError.message, code: createError.code },
+        details: { reason: "unknown" },
       });
       return NextResponse.json(
         { error: "Failed to create company profile" },
@@ -154,7 +145,7 @@ async function handlePost(
 export const POST = withSecurity((req: NextRequest) =>
   createApiHandler(
     CompanyProfileSchema,
-    (r, a, d, services) => handlePost(r, a, d, services),
+    (r, a, d) => handlePost(r, a, d),
     { requireAuth: true }
   )(req)
 );
@@ -163,11 +154,10 @@ async function handleGet(
   _request: NextRequest,
   auth: RouteAuthContext,
   _data: unknown,
-  services: any
 ) {
   try {
     const userId = auth.userId!;
-    const profile = await services.addressService.getProfileByUserId(userId);
+    const profile = await getApiCompanyService().getProfileByUserId(userId);
 
     if (!profile) {
       return NextResponse.json(
@@ -187,7 +177,7 @@ async function handleGet(
 }
 
 export const GET = withSecurity((req: NextRequest) =>
-  createApiHandler(emptySchema, (r, a, d, services) => handleGet(r, a, d, services), {
+  createApiHandler(emptySchema, (r, a, d) => handleGet(r, a, d), {
     requireAuth: true,
   })(req)
 );
@@ -204,11 +194,11 @@ async function handlePut(
   let companyProfileIdForLogging: string | null = null;
 
   try {
-    const supabaseService = getServiceSupabase();
+    const companyService = getApiCompanyService();
     const userId = auth.userId!;
     userIdForLogging = userId;
 
-    const existingProfile = await services.addressService.getProfileByUserId(userId);
+    const existingProfile = await companyService.getProfileByUserId(userId);
 
     if (!existingProfile) {
       // Log attempt to update non-existent profile
@@ -231,19 +221,13 @@ async function handlePut(
 
     // 4. Update Profile
     const fieldsToUpdate = data;
-    const { data: updatedProfile, error: updateError } = await supabaseService
-      .from("company_profiles")
-      .update({
-        ...fieldsToUpdate,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", companyProfileIdForLogging) // Use the fetched ID
-      .select()
-      .single();
+    const updatedProfile = await companyService.updateProfile(
+      companyProfileIdForLogging,
+      fieldsToUpdate,
+    );
 
-    if (updateError) {
-      console.error("Error updating company profile:", updateError);
-      // Log update failure
+    if (!updatedProfile) {
+      console.error("Error updating company profile");
       await logUserAction({
         userId: userIdForLogging,
         action: "COMPANY_PROFILE_UPDATE_FAILURE",
@@ -252,11 +236,7 @@ async function handlePut(
         userAgent: userAgent,
         targetResourceType: "company_profile",
         targetResourceId: companyProfileIdForLogging,
-        details: {
-          reason: updateError.message,
-          code: updateError.code,
-          attemptedFields: Object.keys(fieldsToUpdate), // Log which fields were attempted
-        },
+        details: { attemptedFields: Object.keys(fieldsToUpdate) },
       });
       return NextResponse.json(
         { error: "Failed to update company profile" },
@@ -302,7 +282,7 @@ async function handlePut(
 export const PUT = withSecurity((req: NextRequest) =>
   createApiHandler(
     CompanyProfileUpdateSchema,
-    (r, a, d, services) => handlePut(r, a, d, services),
+    (r, a, d) => handlePut(r, a, d),
     { requireAuth: true }
   )(req)
 );
@@ -310,7 +290,6 @@ export const PUT = withSecurity((req: NextRequest) =>
 async function handleDelete(
   request: NextRequest,
   auth: RouteAuthContext,
-  services: any
 ) {
   // Get IP and User Agent early
   const ipAddress = request.ip;
@@ -319,11 +298,11 @@ async function handleDelete(
   let companyProfileIdForLogging: string | null = null;
 
   try {
-    const supabaseService = getServiceSupabase();
+    const companyService = getApiCompanyService();
     const userId = auth.userId!;
     userIdForLogging = userId;
 
-    const profileToDelete = await services.addressService.getProfileByUserId(userId);
+    const profileToDelete = await companyService.getProfileByUserId(userId);
 
     if (!profileToDelete) {
       // Log attempt to delete non-existent profile
@@ -344,51 +323,15 @@ async function handleDelete(
     }
     companyProfileIdForLogging = profileToDelete.id;
 
-    // Optional: Delete related data (e.g., documents, addresses) - requires careful handling
-    // Example: Deleting associated documents from Storage
-    // Fetch document paths first
-    const { data: documents /*, error: documentsError */ } =
-      await supabaseService // Commented out unused error variable
-        .from("company_documents")
-        .select("storage_path")
-        .eq("company_id", companyProfileIdForLogging);
-
-    if (documents && documents.length > 0) {
-      const filePaths = documents
-        .map((doc) => doc.storage_path)
-        .filter((path) => path);
-      if (filePaths.length > 0) {
-        // Delete from Storage
-        const { error: storageError } = await supabaseService.storage
-          .from("company-documents") // Replace with your actual bucket name
-          .remove(filePaths);
-        if (storageError) {
-          console.error("Error deleting documents from storage:", storageError);
-          // Decide if this is a fatal error or just log and continue
-        }
-        // Delete from DB table
-        const { error: dbDeleteError } = await supabaseService
-          .from("company_documents")
-          .delete()
-          .eq("company_id", companyProfileIdForLogging);
-        if (dbDeleteError) {
-          console.error(
-            "Error deleting document records from DB:",
-            dbDeleteError,
-          );
-          // Decide if this is a fatal error or just log and continue
-        }
-      }
-    }
-
-    // 4. Delete the Company Profile
-    const { error: deleteError } = await supabaseService
-      .from("company_profiles")
-      .delete()
-      .eq("id", companyProfileIdForLogging);
+    const deleteError = await companyService
+      .deleteProfile(companyProfileIdForLogging)
+      .then(() => null)
+      .catch((e) => {
+        console.error("Error deleting company profile:", e);
+        return e;
+      });
 
     if (deleteError) {
-      console.error("Error deleting company profile:", deleteError);
       // Log deletion failure
       await logUserAction({
         userId: userIdForLogging,
@@ -444,7 +387,7 @@ async function handleDelete(
 }
 
 export const DELETE = withSecurity((req: NextRequest) =>
-  createApiHandler(emptySchema, (r, a, d, services) => handleDelete(r, a, services), {
+  createApiHandler(emptySchema, (r, a, d) => handleDelete(r, a), {
     requireAuth: true,
   })(req)
 );

@@ -1,38 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextResponse } from 'next/server';
 import { POST, GET } from '../route';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiCompanyService } from '@/services/company/factory';
 import { withRouteAuth } from '@/middleware/auth';
 import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
-// Mock Supabase client
-vi.mock('@/lib/database/supabase', () => ({
-  getServiceSupabase: vi.fn(() => ({
-    auth: {
-      getUser: vi.fn()
-    },
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: vi.fn(),
-          maybeSingle: vi.fn()
-        }))
-      })),
-      insert: vi.fn(() => ({
-        select: vi.fn(() => ({
-          single: vi.fn()
-        }))
-      })),
-      update: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: vi.fn()
-        }))
-      })),
-      delete: vi.fn(() => ({
-        eq: vi.fn()
-      }))
-    }))
-  }))
+vi.mock('@/services/company/factory', () => ({
+  getApiCompanyService: vi.fn(),
 }));
 
 // Mock rate limiter
@@ -70,12 +44,8 @@ describe('Company Profile API', () => {
 
   describe('POST /api/company/profile', () => {
     it('should create a new company profile', async () => {
-      const supabase = getServiceSupabase();
-      (supabase.auth.getUser as any).mockResolvedValue({ data: { user: mockUser }, error: null });
-      (supabase.from('company_profiles').select().eq('user_id', mockUser.id).single as any)
-        .mockResolvedValue({ data: null, error: null });
-      (supabase.from('company_profiles').insert().select().single as any)
-        .mockResolvedValue({ data: mockProfile, error: null });
+      const service = { createProfile: vi.fn().mockResolvedValue(mockProfile), getProfileByUserId: vi.fn().mockResolvedValue(null) } as any;
+      vi.mocked(getApiCompanyService).mockReturnValue(service);
 
       const request = createAuthenticatedRequest('POST', 'http://localhost/api/company/profile', {
         name: mockProfile.name,
@@ -90,6 +60,7 @@ describe('Company Profile API', () => {
 
       expect(response.status).toBe(200);
       expect(data).toEqual(mockProfile);
+      expect(service.createProfile).toHaveBeenCalled();
     });
 
     it('should return 401 if not authenticated', async () => {
@@ -106,10 +77,8 @@ describe('Company Profile API', () => {
 
   describe('GET /api/company/profile', () => {
     it('should return the company profile', async () => {
-      const supabase = getServiceSupabase();
-      (supabase.auth.getUser as any).mockResolvedValue({ data: { user: mockUser }, error: null });
-      (supabase.from('company_profiles').select('*').eq('user_id', mockUser.id).single as any)
-        .mockResolvedValue({ data: mockProfile, error: null });
+      const service = { getProfileByUserId: vi.fn().mockResolvedValue(mockProfile) } as any;
+      vi.mocked(getApiCompanyService).mockReturnValue(service);
 
       const request = createAuthenticatedRequest('GET', 'http://localhost/api/company/profile');
 
@@ -118,16 +87,12 @@ describe('Company Profile API', () => {
 
       expect(response.status).toBe(200);
       expect(data).toEqual(mockProfile);
+      expect(service.getProfileByUserId).toHaveBeenCalled();
     });
 
     it('should return 404 if profile not found', async () => {
-      const supabase = getServiceSupabase();
-      (supabase.auth.getUser as any).mockResolvedValue({ data: { user: mockUser }, error: null });
-      (supabase.from('company_profiles').select('*').eq('user_id', mockUser.id).single as any)
-        .mockResolvedValue({ 
-          data: null, 
-          error: { code: 'PGRST116' } 
-        });
+      const service = { getProfileByUserId: vi.fn().mockResolvedValue(null) } as any;
+      vi.mocked(getApiCompanyService).mockReturnValue(service);
 
       const request = createAuthenticatedRequest('GET', 'http://localhost/api/company/profile');
 

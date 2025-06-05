@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServiceSupabase } from "@/lib/database/supabase";
+import { getApiCompanyService } from "@/services/company/factory";
 import {
   createMiddlewareChain,
   errorHandlingMiddleware,
@@ -32,14 +32,11 @@ const patchMiddleware = createMiddlewareChain([
 ]);
 
 async function canAccessDomain(userId: string, domainId: string) {
-  const supabase = getServiceSupabase();
-  const { data, error } = await supabase
-    .from("company_domains")
-    .select("company_profiles!inner(user_id)")
-    .eq("id", domainId)
-    .single();
-  if (error || !data) return false;
-  return data.company_profiles.user_id === userId;
+  const service = getApiCompanyService();
+  const domain = await service.getDomainById(domainId);
+  if (!domain) return false;
+  const profile = await service.getProfileByUserId(userId);
+  return profile?.id === domain.company_id;
 }
 
 // DELETE /api/company/domains/[id] - Delete a domain
@@ -58,28 +55,23 @@ async function handleDelete(
       );
     }
 
-    const supabaseService = getServiceSupabase();
+    const companyService = getApiCompanyService();
 
-    // 4. Get the domain details to check permissions and primary status
-    const { data: domain, error: domainError } = await supabaseService
-      .from("company_domains")
-      .select("*, company_profiles!inner(user_id)")
-      .eq("id", domainId)
-      .single();
+    const domain = await companyService.getDomainById(domainId);
 
-    if (domainError) {
-      console.error(`Error fetching domain ${domainId}:`, domainError);
+    if (!domain) {
+      console.error(`Error fetching domain ${domainId}`);
       return NextResponse.json({ error: "Domain not found." }, { status: 404 });
     }
 
     // Check access rights
     const allowed =
-      domain.company_profiles.user_id === auth.userId ||
+      domain.company_id === (await getApiCompanyService().getProfileByUserId(auth.userId!))?.id ||
       (await checkPermission(
         auth.userId!,
         PermissionValues.MANAGE_SETTINGS,
         'company',
-        domain.company_profiles.id,
+        domain.company_id,
       )) ||
       (await checkPermission(auth.userId!, PermissionValues.MANAGE_SETTINGS));
     if (!allowed) {
@@ -98,18 +90,7 @@ async function handleDelete(
     }
 
     // 6. Delete the domain
-    const { error: deleteError } = await supabaseService
-      .from("company_domains")
-      .delete()
-      .eq("id", domainId);
-
-    if (deleteError) {
-      console.error(`Error deleting domain ${domainId}:`, deleteError);
-      return NextResponse.json(
-        { error: "Failed to delete domain." },
-        { status: 500 },
-      );
-    }
+    await companyService.deleteDomain(domainId);
 
     // 8. Return success
     return NextResponse.json({ message: "Domain deleted successfully." });
@@ -142,16 +123,11 @@ async function handlePatch(
       );
     }
 
-    const supabaseService = getServiceSupabase();
+    const companyService = getApiCompanyService();
 
     const { is_primary } = data;
 
-    // 5. Get the domain details to check permissions
-    const { data: domain, error: domainError } = await supabaseService
-      .from("company_domains")
-      .select("*, company_profiles!inner(id, user_id)")
-      .eq("id", domainId)
-      .single();
+    const domain = await companyService.getDomainById(domainId);
 
     if (domainError) {
       console.error(`Error fetching domain ${domainId}:`, domainError);
@@ -172,45 +148,10 @@ async function handlePatch(
     }
 
     // 6. Special handling for setting a domain as primary
-    if (is_primary) {
-      // First, clear primary status from all domains of this company
-      const { error: updateError } = await supabaseService
-        .from("company_domains")
-        .update({ is_primary: false })
-        .eq("company_id", domain.company_profiles.id);
+    const updatedDomain = await companyService.updateDomain(domainId, {
+      is_primary: is_primary ?? domain.is_primary,
+    });
 
-      if (updateError) {
-        console.error(
-          `Error updating domain primary status for company ${domain.company_profiles.id}:`,
-          updateError,
-        );
-        return NextResponse.json(
-          { error: "Failed to update primary domain." },
-          { status: 500 },
-        );
-      }
-    }
-
-    // 8. Update the domain
-    const { data: updatedDomain, error: patchError } = await supabaseService
-      .from("company_domains")
-      .update({
-        is_primary: is_primary ?? domain.is_primary,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", domainId)
-      .select("*")
-      .single();
-
-    if (patchError) {
-      console.error(`Error updating domain ${domainId}:`, patchError);
-      return NextResponse.json(
-        { error: "Failed to update domain." },
-        { status: 500 },
-      );
-    }
-
-    // 9. Return the updated domain
     return NextResponse.json(updatedDomain);
   } catch (error) {
     console.error(
