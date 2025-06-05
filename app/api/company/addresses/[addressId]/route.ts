@@ -4,6 +4,8 @@ import { type RouteAuthContext } from "@/middleware/auth";
 import { addressUpdateSchema } from "@/core/address/models";
 import { createApiHandler } from "@/lib/api/route-helpers";
 import { createSuccessResponse } from "@/lib/api/common";
+import { getApiAddressService } from "@/services/address/factory";
+import { getApiCompanyService } from "@/services/company/factory";
 
 // Use the shared address update schema from the core layer
 type AddressUpdateRequest = z.infer<typeof addressUpdateSchema>;
@@ -13,11 +15,12 @@ async function handlePut(
   params: { addressId: string },
   auth: RouteAuthContext,
   data: AddressUpdateRequest,
-  services: any
 ) {
   try {
     const userId = auth.userId!;
-    const companyProfile = await services.addressService.getProfileByUserId(userId);
+    const companyService = getApiCompanyService();
+    const addressService = getApiAddressService();
+    const companyProfile = await companyService.getProfileByUserId(userId);
 
     if (!companyProfile) {
       return NextResponse.json(
@@ -26,7 +29,7 @@ async function handlePut(
       );
     }
 
-    const result = await services.addressService.updateAddress(
+    const result = await addressService.updateAddress(
       companyProfile.id,
       params.addressId,
       data,
@@ -57,11 +60,12 @@ async function handleDelete(
   _request: NextRequest,
   params: { addressId: string },
   auth: RouteAuthContext,
-  services: any
 ) {
   try {
     const userId = auth.userId!;
-    const companyProfile = await services.addressService.getProfileByUserId(userId);
+    const companyService = getApiCompanyService();
+    const addressService = getApiAddressService();
+    const companyProfile = await companyService.getProfileByUserId(userId);
 
     if (!companyProfile) {
       return NextResponse.json(
@@ -70,7 +74,7 @@ async function handleDelete(
       );
     }
 
-    const result = await services.addressService.deleteAddress(
+    const result = await addressService.deleteAddress(
       companyProfile.id,
       params.addressId,
     );
@@ -99,7 +103,7 @@ async function handleDelete(
 export const PUT = (req: NextRequest, ctx: { params: { addressId: string } }) =>
   createApiHandler(
     addressUpdateSchema,
-    (r, auth, data, services) => handlePut(r, ctx.params, auth, data, services),
+    (r, auth, data) => handlePut(r, ctx.params, auth, data),
     { requireAuth: true }
   )(req);
 
@@ -109,6 +113,6 @@ export const DELETE = (
 ) =>
   createApiHandler(
     z.object({}),
-    (r, auth, d, services) => handleDelete(r, ctx.params, auth, services),
+    (r, auth, d) => handleDelete(r, ctx.params, auth),
     { requireAuth: true }
   )(req);
