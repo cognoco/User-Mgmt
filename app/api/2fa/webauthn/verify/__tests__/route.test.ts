@@ -1,12 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
-import { generateAuthentication, verifyAuthentication } from '@/lib/webauthn/webauthn.service';
+import { getApiTwoFactorService } from '@/services/two-factor/factory';
 import { logUserAction } from '@/lib/audit/auditLogger';
 
-vi.mock('@/lib/webauthn/webauthn.service', () => ({
-  generateAuthentication: vi.fn(),
-  verifyAuthentication: vi.fn()
-}));
+vi.mock('@/services/two-factor/factory', () => ({ getApiTwoFactorService: vi.fn() }));
 vi.mock('@/middleware/with-security', () => ({ withSecurity: (h: any) => h }));
 vi.mock('@/middleware/createMiddlewareChain', async () => {
   const actual = await vi.importActual<any>('@/middleware/createMiddlewareChain');
@@ -30,21 +27,27 @@ const createRequest = (body: any) =>
   });
 
 describe('WebAuthn verify API', () => {
+  const mockService = {
+    startWebAuthnRegistration: vi.fn(),
+    verifyWebAuthnRegistration: vi.fn()
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+    (getApiTwoFactorService as unknown as vi.Mock).mockReturnValue(mockService);
   });
 
   it('returns authentication options', async () => {
-    vi.mocked(generateAuthentication).mockResolvedValue({ challenge: 'c' } as any);
+    mockService.startWebAuthnRegistration.mockResolvedValue({ success: true, challenge: 'c' } as any);
     const res = await POST(createRequest({ phase: 'options', userId: 'u1' }) as any);
     const data = await res.json();
     expect(res.status).toBe(200);
     expect(data.challenge).toBe('c');
-    expect(generateAuthentication).toHaveBeenCalledWith('u1');
+    expect(mockService.startWebAuthnRegistration).toHaveBeenCalledWith('u1');
   });
 
   it('verifies authentication', async () => {
-    vi.mocked(verifyAuthentication).mockResolvedValue({ verified: true } as any);
+    mockService.verifyWebAuthnRegistration.mockResolvedValue({ success: true } as any);
     const res = await POST(
       createRequest({ phase: 'verification', userId: 'u1', credential: 'cred' }) as any
     );
@@ -52,6 +55,6 @@ describe('WebAuthn verify API', () => {
     expect(res.status).toBe(200);
     expect(data.verified).toBe(true);
     expect(data.user.id).toBe('u1');
-    expect(verifyAuthentication).toHaveBeenCalledWith('u1', 'cred');
+    expect(mockService.verifyWebAuthnRegistration).toHaveBeenCalledWith({ userId: 'u1', method: 'webauthn', code: 'cred' });
   });
 });

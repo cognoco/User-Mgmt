@@ -1,95 +1,74 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { generateAuthentication, verifyAuthentication } from '@/lib/webauthn/webauthn.service';
-import { logUserAction } from '@/lib/audit/auditLogger';
-import { withSecurity } from '@/middleware/with-security';
-import {
-  createMiddlewareChain,
-  errorHandlingMiddleware,
-  validationMiddleware
-} from '@/middleware/createMiddlewareChain';
 import { z } from 'zod';
+import { withSecurity } from '@/middleware/with-security';
+import { createApiHandler } from '@/lib/api/route-helpers';
+import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
+import { logUserAction } from '@/lib/audit/auditLogger';
 
-// Schema for verification request
-const verifyRequestSchema = z.object({
+const RequestSchema = z.object({
   phase: z.enum(['options', 'verification']),
   credential: z.any().optional(),
-  userId: z.string(),
+  userId: z.string()
 });
 
-async function handleVerify(
-  request: NextRequest,
-  _auth: any,
-  data: z.infer<typeof verifyRequestSchema>
-) {
-  const ipAddress = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
-  const userAgent = request.headers.get('user-agent') || 'unknown';
-  const userId = data.userId;
+const handler = createApiHandler(
+  RequestSchema,
+  async (req, _auth, data, services) => {
+    const ipAddress = req.headers.get('x-forwarded-for') || 'unknown';
+    const userAgent = req.headers.get('user-agent') || 'unknown';
+    const userId = data.userId;
 
-  try {
-    if (data.phase === 'options') {
-      const options = await generateAuthentication(userId);
-
-      await logUserAction({
-        action: 'WEBAUTHN_VERIFICATION_INITIATED',
-        status: 'INITIATED',
-        ipAddress,
-        userAgent,
-        targetResourceType: 'auth_method',
-        targetResourceId: userId
-      });
-
-      return NextResponse.json(options);
-    } else {
-      // Verify authentication
-      if (!data.credential) {
-        return NextResponse.json({ error: 'Missing credential' }, { status: 400 });
-      }
-
-      const verification = await verifyAuthentication(userId, data.credential);
-
-      if (verification.verified) {
+    try {
+      if (data.phase === 'options') {
+        const options = await services.twoFactor!.startWebAuthnRegistration(userId);
+        if (!options.success) {
+          throw new ApiError(ERROR_CODES.INVALID_REQUEST, options.error || 'Failed to start authentication', 400);
+        }
         await logUserAction({
-          action: 'WEBAUTHN_VERIFICATION_COMPLETED',
-          status: 'SUCCESS',
+          action: 'WEBAUTHN_VERIFICATION_INITIATED',
+          status: 'INITIATED',
           ipAddress,
           userAgent,
           targetResourceType: 'auth_method',
           targetResourceId: userId
         });
-
-        return NextResponse.json({
-          verified: true,
-          user: { id: userId }
-        });
-      } else {
-        throw new Error('Verification failed');
+        return createSuccessResponse(options);
       }
+
+      if (!data.credential) {
+        throw new ApiError(ERROR_CODES.INVALID_REQUEST, 'Missing credential', 400);
+      }
+
+      const verification = await services.twoFactor!.verifyWebAuthnRegistration({
+        userId,
+        method: 'webauthn',
+        code: data.credential
+      });
+      if (!verification.success) {
+        throw new ApiError(ERROR_CODES.INVALID_REQUEST, verification.error || 'Verification failed', 400);
+      }
+      await logUserAction({
+        action: 'WEBAUTHN_VERIFICATION_COMPLETED',
+        status: 'SUCCESS',
+        ipAddress,
+        userAgent,
+        targetResourceType: 'auth_method',
+        targetResourceId: userId
+      });
+      return createSuccessResponse({ verified: true, user: { id: userId } });
+    } catch (e: any) {
+      await logUserAction({
+        action: 'WEBAUTHN_VERIFICATION_FAILED',
+        status: 'FAILURE',
+        ipAddress,
+        userAgent,
+        targetResourceType: 'auth_method',
+        targetResourceId: userId,
+        details: { error: e instanceof Error ? e.message : String(e) }
+      });
+      throw e;
     }
-  } catch (error) {
-    console.error('WebAuthn verification error:', error);
+  },
+  { requireAuth: false }
+);
 
-    await logUserAction({
-      action: 'WEBAUTHN_VERIFICATION_FAILED',
-      status: 'FAILURE',
-      ipAddress,
-      userAgent,
-      targetResourceType: 'auth_method',
-      targetResourceId: userId,
-      details: { error: error instanceof Error ? error.message : String(error) }
-    });
-
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'An unexpected error occurred' },
-      { status: 400 }
-    );
-  }
-}
-
-const middleware = createMiddlewareChain([
-  errorHandlingMiddleware(),
-  validationMiddleware(verifyRequestSchema)
-]);
-
-// Note: Not using auth middleware because this can be called during login
-export const POST = withSecurity((request: NextRequest) =>
-  middleware(handleVerify)(request));
+export const POST = withSecurity(handler);
