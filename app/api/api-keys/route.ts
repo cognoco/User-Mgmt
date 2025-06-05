@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { getCurrentUser } from '@/lib/auth/session';
-import { createSupabaseApiKeyProvider } from '@/adapters/api-keys/factory';
+import { getApiKeyService } from '@/services/api-keys/factory';
 
 // Zod schema for API key creation
 const CreateApiKeySchema = z.object({
@@ -27,12 +27,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const provider = createSupabaseApiKeyProvider({
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
-    });
-
-    const keys = await provider.listKeys(user.id);
+    const service = getApiKeyService();
+    const keys = await service.listApiKeys(user.id);
 
     return NextResponse.json({ keys });
   } catch (error) {
@@ -79,12 +75,12 @@ export async function POST(request: NextRequest) {
 
     const { name, scopes, expiresAt } = parseResult.data;
 
-    const provider = createSupabaseApiKeyProvider({
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
+    const service = getApiKeyService();
+    const result = await service.createApiKey(user.id, {
+      name,
+      scopes,
+      expiresAt,
     });
-
-    const result = await provider.createKey(user.id, { name, scopes, expiresAt });
 
     if (!result.success || !result.key) {
       console.error('Error creating API key:', result.error);

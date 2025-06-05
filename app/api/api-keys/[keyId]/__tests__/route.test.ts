@@ -14,13 +14,13 @@ vi.mock('@/lib/auth/session', () => ({
   })
 }));
 
-const providerMock = {
-  listKeys: vi.fn(),
-  createKey: vi.fn(),
-  revokeKey: vi.fn()
+const serviceMock = {
+  listApiKeys: vi.fn(),
+  createApiKey: vi.fn(),
+  revokeApiKey: vi.fn(),
 };
-vi.mock('@/adapters/api-keys/factory', () => ({
-  createSupabaseApiKeyProvider: vi.fn(() => providerMock)
+vi.mock('@/services/api-keys/factory', () => ({
+  getApiKeyService: vi.fn(() => serviceMock),
 }));
 
 vi.mock('@/lib/audit/auditLogger', () => ({
@@ -47,7 +47,7 @@ function createMockRequest(method: string) {
 
 describe('API Key Delete API', () => {
   beforeEach(() => {
-    providerMock.revokeKey.mockReset();
+    serviceMock.revokeApiKey.mockReset();
   });
 
   afterEach(() => {
@@ -64,7 +64,7 @@ describe('API Key Delete API', () => {
         scopes: ['read_profile']
       };
 
-      providerMock.revokeKey.mockResolvedValue({ success: true, key: mockKeyData });
+      serviceMock.revokeApiKey.mockResolvedValue({ success: true, key: mockKeyData });
 
       const req = createMockRequest('DELETE');
       const params = { keyId: 'test-key-id' };
@@ -74,7 +74,7 @@ describe('API Key Delete API', () => {
       expect(response.status).toBe(200);
       expect(responseBody).toHaveProperty('message', 'API key revoked successfully');
       
-      expect(providerMock.revokeKey).toHaveBeenCalledWith('test-user-id', 'test-key-id');
+      expect(serviceMock.revokeApiKey).toHaveBeenCalledWith('test-user-id', 'test-key-id');
       
       // Verify audit log was created
       expect(logUserAction).toHaveBeenCalledWith(expect.objectContaining({
@@ -99,7 +99,7 @@ describe('API Key Delete API', () => {
     });
 
     it('should return 404 if API key is not found', async () => {
-      providerMock.revokeKey.mockResolvedValue({ success: false, error: 'API key not found' });
+      serviceMock.revokeApiKey.mockResolvedValue({ success: false, error: 'API key not found' });
 
       const req = createMockRequest('DELETE');
       const params = { keyId: 'non-existent-key' };

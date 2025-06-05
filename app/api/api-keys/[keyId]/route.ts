@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { getCurrentUser } from '@/lib/auth/session';
-import { createSupabaseApiKeyProvider } from '@/adapters/api-keys/factory';
+import { getApiKeyService } from '@/services/api-keys/factory';
 
 // DELETE handler to revoke an API key
 export async function DELETE(
@@ -29,12 +29,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const provider = createSupabaseApiKeyProvider({
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
-    });
-
-    const revokeResult = await provider.revokeKey(user.id, keyId);
+    const service = getApiKeyService();
+    const revokeResult = await service.revokeApiKey(user.id, keyId);
 
     if (!revokeResult.success) {
       console.error('Error revoking API key:', revokeResult.error);

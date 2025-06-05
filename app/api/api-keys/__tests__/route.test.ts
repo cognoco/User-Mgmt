@@ -14,13 +14,13 @@ vi.mock('@/lib/auth/session', () => ({
   })
 }));
 
-const providerMock = {
-  listKeys: vi.fn(),
-  createKey: vi.fn(),
-  revokeKey: vi.fn()
+const serviceMock = {
+  listApiKeys: vi.fn(),
+  createApiKey: vi.fn(),
+  revokeApiKey: vi.fn(),
 };
-vi.mock('@/adapters/api-keys/factory', () => ({
-  createSupabaseApiKeyProvider: vi.fn(() => providerMock)
+vi.mock('@/services/api-keys/factory', () => ({
+  getApiKeyService: vi.fn(() => serviceMock),
 }));
 
 vi.mock('@/lib/audit/auditLogger', () => ({
@@ -48,9 +48,9 @@ function createMockRequest(method: string, body?: any) {
 
 describe('API Keys API', () => {
   beforeEach(() => {
-    providerMock.listKeys.mockReset();
-    providerMock.createKey.mockReset();
-    providerMock.revokeKey.mockReset();
+    serviceMock.listApiKeys.mockReset();
+    serviceMock.createApiKey.mockReset();
+    serviceMock.revokeApiKey.mockReset();
   });
 
   afterEach(() => {
@@ -79,7 +79,7 @@ describe('API Keys API', () => {
         }
       ];
 
-      providerMock.listKeys.mockResolvedValue(mockApiKeys);
+      serviceMock.listApiKeys.mockResolvedValue(mockApiKeys);
 
       const req = createMockRequest('GET');
       const response = await GET(req);
@@ -89,7 +89,7 @@ describe('API Keys API', () => {
       expect(responseBody).toHaveProperty('keys');
       expect(Array.isArray(responseBody.keys)).toBe(true);
       
-      expect(providerMock.listKeys).toHaveBeenCalledWith('test-user-id');
+      expect(serviceMock.listApiKeys).toHaveBeenCalledWith('test-user-id');
     });
 
     it('should return 401 if user is not authenticated', async () => {
@@ -120,7 +120,7 @@ describe('API Keys API', () => {
         error: null
       };
 
-      providerMock.createKey.mockResolvedValue({
+      serviceMock.createApiKey.mockResolvedValue({
         success: true,
         key: mockInsertResponse.data,
         plaintext: 'test_generatedkey123'
@@ -140,7 +140,7 @@ describe('API Keys API', () => {
       expect(responseBody).toHaveProperty('scopes');
       expect(responseBody).toHaveProperty('key', 'test_generatedkey123');
       
-      expect(providerMock.createKey).toHaveBeenCalledWith('test-user-id', {
+      expect(serviceMock.createApiKey).toHaveBeenCalledWith('test-user-id', {
         name: 'My API Key',
         scopes: ['read_profile'],
         expiresAt: undefined
