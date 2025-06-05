@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
-import { createServerClient } from '@supabase/ssr';
+import { getApiAuthService } from '@/services/auth/factory';
 import { OAuthProvider, oauthProviderConfigSchema } from '@/types/oauth';
 
 // Request schema
@@ -116,41 +116,11 @@ export async function POST(request: Request) {
       path: '/',
     });
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options });
-          },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: '', ...options });
-          },
-        },
-      }
-    );
+    const authService = getApiAuthService();
+    authService.configureOAuthProvider(config);
+    const url = authService.getOAuthAuthorizationUrl(provider, state);
 
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: provider,
-      options: {
-        redirectTo: config.redirectUri,
-        scopes: config.scope,
-        state,
-      },
-    });
-
-    if (error || !data?.url) {
-      return NextResponse.json(
-        { error: error?.message || 'Failed to initiate OAuth flow.' },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json({ url: data.url, state });
+    return NextResponse.json({ url, state });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Failed to initiate OAuth flow.' }, { status: 400 });
   }
