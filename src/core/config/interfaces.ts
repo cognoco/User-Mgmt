@@ -54,6 +54,7 @@ export interface ServiceContainer {
   // TODO: Add other services as their interfaces become available
   role?: RoleService;
   address?: CompanyAddressService;
+  companyNotification?: import("@/core/company-notification/interfaces").CompanyNotificationService;
   resourceRelationship?: ResourceRelationshipService;
 }
 
@@ -155,7 +156,8 @@ export interface ServiceConfig {
    * Custom address service implementation (for company addresses)
    */
   addressService?: CompanyAddressService;
-  
+  companyNotificationService?: import("@/core/company-notification/interfaces").CompanyNotificationService;
+
   /**
    * Custom resource relationship service implementation
    */
