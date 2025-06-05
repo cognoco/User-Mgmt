@@ -13,6 +13,11 @@ import {
   VisibilityLevel
 } from '../../../../core/user/models';
 import { UserType } from '../../../../types/user-type';
+import type {
+  FileUploadOptions,
+  FileUploadResult,
+  FileDeleteResult
+} from '../../../../core/storage/interfaces';
 
 /**
  * Mock implementation of the UserService interface for testing
@@ -145,8 +150,24 @@ export class MockUserService implements UserService {
 
     this.mockProfiles[userId].profilePictureUrl = undefined;
     this.notifyProfileChange(this.mockProfiles[userId]);
-    
+
     return { success: true };
+  });
+
+  uploadCompanyLogo = vi.fn().mockImplementation(async (
+    _userId: string,
+    _companyId: string,
+    _fileBuffer: ArrayBuffer,
+    _options?: FileUploadOptions
+  ): Promise<FileUploadResult> => {
+    return { success: false, error: 'Not implemented' };
+  });
+
+  deleteCompanyLogo = vi.fn().mockImplementation(async (
+    _userId: string,
+    _companyId: string
+  ): Promise<FileDeleteResult> => {
+    return { success: false, error: 'Not implemented' };
   });
 
   updateProfileVisibility = vi.fn().mockImplementation(async (userId: string, visibility: ProfileVisibility): Promise<{ success: boolean; visibility?: ProfileVisibility; error?: string }> => {
