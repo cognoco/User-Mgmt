@@ -31,6 +31,7 @@ import type { AdminService } from '@/core/admin/interfaces';
 import type { RoleService } from '@/core/role/interfaces';
 import type { CompanyAddressService } from '@/core/address/interfaces';
 import type { ResourceRelationshipService } from '@/core/resource-relationship/interfaces';
+import type { OAuthService } from '@/core/oauth/interfaces';
 
 // Import existing service factories
 import { getApiAuthService } from '@/services/auth/factory';
@@ -58,6 +59,7 @@ import { getApiRoleService } from '@/services/role/factory';
 import { getApiAddressService } from '@/services/address/factory';
 import { getApiResourceRelationshipService } from '@/services/resource-relationship/factory';
 import { getApiCompanyNotificationService } from '@/services/company-notification/factory';
+import { getApiOAuthService } from '@/services/oauth/factory';
 
 // TODO: Import additional service factories as they become available
 // import { getApiRoleService } from '@/services/role/factory';
@@ -231,6 +233,13 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
     serviceInstances.address = getApiAddressService();
   }
 
+  // Create OAuth service if not cached
+  if (!serviceInstances.oauth && globalServiceConfig.oauthService) {
+    serviceInstances.oauth = globalServiceConfig.oauthService;
+  } else if (!serviceInstances.oauth && globalServiceConfig.featureFlags?.oauth !== false) {
+    serviceInstances.oauth = getApiOAuthService();
+  }
+
   // Create company notification service if not cached
   if (!serviceInstances.companyNotification && globalServiceConfig.companyNotificationService) {
     serviceInstances.companyNotification = globalServiceConfig.companyNotificationService;
@@ -268,6 +277,7 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
     admin: overrides?.admin || serviceInstances.admin,
     role: overrides?.role || serviceInstances.role,
     address: overrides?.address || serviceInstances.address,
+    oauth: overrides?.oauth || serviceInstances.oauth,
     companyNotification: overrides?.companyNotification || serviceInstances.companyNotification,
     resourceRelationship: overrides?.resourceRelationship || serviceInstances.resourceRelationship,
   };
@@ -410,6 +420,13 @@ export function getConfiguredRoleService(override?: RoleService): RoleService | 
  */
 export function getConfiguredAddressService(override?: CompanyAddressService): CompanyAddressService | undefined {
   return override || globalServiceConfig.addressService || getApiAddressService();
+}
+
+/**
+ * Get a specific service with fallback to global configuration
+ */
+export function getConfiguredOAuthService(override?: OAuthService): OAuthService | undefined {
+  return override || globalServiceConfig.oauthService || getApiOAuthService();
 }
 
 /**
