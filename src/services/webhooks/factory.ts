@@ -10,17 +10,15 @@ import type { IWebhookDataProvider } from '@/core/webhooks';
 import { AdapterRegistry } from '@/adapters/registry';
 import { WebhookService } from './WebhookService';
 import { UserManagementConfiguration } from '@/core/config';
-import {
-  getServiceContainer,
-  getServiceConfiguration,
-} from '@/lib/config/service-container';
+import { getServiceContainer } from '@/lib/config/service-container';
 
-// Singleton instance for API routes
+/** Options for {@link getApiWebhookService}. */
 export interface ApiWebhookServiceOptions {
-  /** When true, clears the cached instance. Useful for tests */
+  /** When true, clears any cached instance (useful for testing). */
   reset?: boolean;
 }
 
+// Singleton instance for API routes
 let webhookServiceInstance: IWebhookService | null = null;
 let constructing = false;
 
@@ -30,8 +28,8 @@ let constructing = false;
  * @returns Configured IWebhookService instance
  */
 export function getApiWebhookService(
-  options: ApiWebhookServiceOptions = {},
-): IWebhookService | undefined {
+  options: ApiWebhookServiceOptions = {}
+): IWebhookService {
   if (options.reset) {
     webhookServiceInstance = null;
   }
@@ -49,18 +47,12 @@ export function getApiWebhookService(
   }
 
   if (!webhookServiceInstance) {
-    const config = getServiceConfiguration();
-    if (config.featureFlags?.webhooks === false) {
-      return undefined;
-    }
-
-    webhookServiceInstance =
-      config.webhookService ||
-      (UserManagementConfiguration.getServiceProvider('webhookService') as IWebhookService | undefined);
-
-    if (!webhookServiceInstance) {
-      const webhookDataProvider =
-        AdapterRegistry.getInstance().getAdapter<IWebhookDataProvider>('webhook');
+    const configuredService = UserManagementConfiguration.getServiceProvider('webhookService') as IWebhookService | undefined;
+    
+    if (configuredService) {
+      webhookServiceInstance = configuredService;
+    } else {
+      const webhookDataProvider = AdapterRegistry.getInstance().getAdapter<IWebhookDataProvider>('webhook');
       webhookServiceInstance = new WebhookService(webhookDataProvider);
     }
   }

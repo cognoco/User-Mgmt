@@ -10,17 +10,15 @@ import { UserManagementConfiguration } from '@/core/config';
 import type { IAuditDataProvider } from '@/core/audit';
 import { AdapterRegistry } from '@/adapters/registry';
 import { DefaultAuditService } from './default-audit.service';
-import {
-  getServiceContainer,
-  getServiceConfiguration,
-} from '@/lib/config/service-container';
+import { getServiceContainer } from '@/lib/config/service-container';
 
-// Singleton instance for API routes
+/** Options for {@link getApiAuditService}. */
 export interface ApiAuditServiceOptions {
-  /** When true, clears the cached instance. Useful for tests */
+  /** When true, clears any cached instance (useful for testing). */
   reset?: boolean;
 }
 
+// Singleton instance for API routes
 let auditServiceInstance: AuditService | null = null;
 let constructing = false;
 
@@ -30,8 +28,8 @@ let constructing = false;
  * @returns Configured AuditService instance
  */
 export function getApiAuditService(
-  options: ApiAuditServiceOptions = {},
-): AuditService | undefined {
+  options: ApiAuditServiceOptions = {}
+): AuditService {
   if (options.reset) {
     auditServiceInstance = null;
   }
@@ -49,16 +47,11 @@ export function getApiAuditService(
   }
 
   if (!auditServiceInstance) {
-    const config = getServiceConfiguration();
-    if (config.featureFlags?.audit === false) {
-      return undefined;
-    }
-
-    auditServiceInstance =
-      config.auditService ||
-      (UserManagementConfiguration.getServiceProvider('auditService') as AuditService | undefined);
-
-    if (!auditServiceInstance) {
+    const configuredService = UserManagementConfiguration.getServiceProvider('auditService') as AuditService | undefined;
+    
+    if (configuredService) {
+      auditServiceInstance = configuredService;
+    } else {
       const provider = AdapterRegistry.getInstance().getAdapter<IAuditDataProvider>('audit');
       auditServiceInstance = new DefaultAuditService(provider);
     }

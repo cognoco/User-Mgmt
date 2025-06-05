@@ -11,17 +11,15 @@ import { DefaultNotificationService } from './default-notification.service';
 import { DefaultNotificationHandler } from './default-notification.handler';
 import { AdapterRegistry } from '@/adapters/registry';
 import { UserManagementConfiguration } from '@/core/config';
-import {
-  getServiceContainer,
-  getServiceConfiguration,
-} from '@/lib/config/service-container';
+import { getServiceContainer } from '@/lib/config/service-container';
 
-// Singleton instance for API routes
+/** Options for {@link getApiNotificationService}. */
 export interface ApiNotificationServiceOptions {
-  /** When true, clears the cached instance. Useful for tests */
+  /** When true, clears any cached instance (useful for testing). */
   reset?: boolean;
 }
 
+// Singleton instance for API routes
 let notificationServiceInstance: NotificationService | null = null;
 let constructing = false;
 
@@ -31,8 +29,8 @@ let constructing = false;
  * @returns Configured NotificationService instance
  */
 export function getApiNotificationService(
-  options: ApiNotificationServiceOptions = {},
-): NotificationService | undefined {
+  options: ApiNotificationServiceOptions = {}
+): NotificationService {
   if (options.reset) {
     notificationServiceInstance = null;
   }
@@ -50,27 +48,16 @@ export function getApiNotificationService(
   }
 
   if (!notificationServiceInstance) {
-    const config = getServiceConfiguration();
-    if (config.featureFlags?.notifications === false) {
-      return undefined;
-    }
-
-    notificationServiceInstance =
-      config.notificationService ||
-      (UserManagementConfiguration.getServiceProvider(
-        'notificationService',
-      ) as NotificationService | undefined);
-
-    if (!notificationServiceInstance) {
-      const notificationDataProvider =
-        AdapterRegistry.getInstance().getAdapter<INotificationDataProvider>('notification');
+    const configuredService = UserManagementConfiguration.getServiceProvider('notificationService') as NotificationService | undefined;
+    
+    if (configuredService) {
+      notificationServiceInstance = configuredService;
+    } else {
+      const notificationDataProvider = AdapterRegistry.getInstance().getAdapter<INotificationDataProvider>('notification');
       const handler = new DefaultNotificationHandler();
-      notificationServiceInstance = new DefaultNotificationService(
-        notificationDataProvider,
-        handler,
-      );
+      notificationServiceInstance = new DefaultNotificationService(notificationDataProvider, handler);
     }
   }
 
-  return notificationServiceInstance;
+  return notificationServiceInstance!;
 }

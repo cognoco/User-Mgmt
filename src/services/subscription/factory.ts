@@ -10,17 +10,15 @@ import { UserManagementConfiguration } from '@/core/config';
 import type { ISubscriptionDataProvider } from '@/core/subscription';
 import { AdapterRegistry } from '@/adapters/registry';
 import { DefaultSubscriptionService } from './default-subscription.service';
-import {
-  getServiceContainer,
-  getServiceConfiguration,
-} from '@/lib/config/service-container';
+import { getServiceContainer } from '@/lib/config/service-container';
 
-// Singleton instance for API routes
+/** Options for {@link getApiSubscriptionService}. */
 export interface ApiSubscriptionServiceOptions {
-  /** When true, clears the cached instance. Useful for tests */
+  /** When true, clears any cached instance (useful for testing). */
   reset?: boolean;
 }
 
+// Singleton instance for API routes
 let subscriptionServiceInstance: SubscriptionService | null = null;
 let constructing = false;
 
@@ -30,8 +28,8 @@ let constructing = false;
  * @returns Configured SubscriptionService instance
  */
 export function getApiSubscriptionService(
-  options: ApiSubscriptionServiceOptions = {},
-): SubscriptionService | undefined {
+  options: ApiSubscriptionServiceOptions = {}
+): SubscriptionService {
   if (options.reset) {
     subscriptionServiceInstance = null;
   }
@@ -49,20 +47,12 @@ export function getApiSubscriptionService(
   }
 
   if (!subscriptionServiceInstance) {
-    const config = getServiceConfiguration();
-    if (config.featureFlags?.subscription === false) {
-      return undefined;
-    }
-
-    subscriptionServiceInstance =
-      config.subscriptionService ||
-      (UserManagementConfiguration.getServiceProvider(
-        'subscriptionService',
-      ) as SubscriptionService | undefined);
-
-    if (!subscriptionServiceInstance) {
-      const provider =
-        AdapterRegistry.getInstance().getAdapter<ISubscriptionDataProvider>('subscription');
+    const configuredService = UserManagementConfiguration.getServiceProvider('subscriptionService') as SubscriptionService | undefined;
+    
+    if (configuredService) {
+      subscriptionServiceInstance = configuredService;
+    } else {
+      const provider = AdapterRegistry.getInstance().getAdapter<ISubscriptionDataProvider>('subscription');
       subscriptionServiceInstance = new DefaultSubscriptionService(provider);
     }
   }

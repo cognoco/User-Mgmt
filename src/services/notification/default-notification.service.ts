@@ -13,12 +13,12 @@ import {
   NotificationDeliveryStatus,
   NotificationCategory,
 } from '@/core/notification/models';
-import type { NotificationDataProvider } from '@/core/notification/INotificationDataProvider';
+import type { INotificationDataProvider } from '@/core/notification/INotificationDataProvider';
 
 export class DefaultNotificationService implements NotificationService {
   private eventHandlers: Array<(event: any) => void> = [];
 
-  constructor(private provider: NotificationDataProvider, private handler: NotificationHandler) {}
+  constructor(private provider: INotificationDataProvider, private handler: NotificationHandler) {}
 
   private emitEvent(event: any): void {
     this.eventHandlers.forEach(cb => cb(event));
@@ -97,7 +97,7 @@ export class DefaultNotificationService implements NotificationService {
       type: 'bulk_notification_sent',
       timestamp: Date.now(),
       userCount: userIds.length,
-      successCount: result.results.filter(r => !r.error).length,
+      successCount: result.results.filter((r: { error?: string }) => !r.error).length,
       payload,
     });
     return result;
@@ -143,10 +143,10 @@ export class DefaultNotificationService implements NotificationService {
     return this.provider.getUserPreferences(userId);
   }
 
-  async updateUserPreferences(userId: string, preferences: Partial<NotificationPreferences>) {
+  async updateUserPreferences(userId: string, preferences: Partial<NotificationPreferences>): Promise<NotificationPreferences> {
     const updated = await this.provider.updateUserPreferences(userId, preferences);
     this.emitEvent({ type: 'notification_preferences_updated', userId, preferences: updated, timestamp: Date.now() });
-    return { success: true, preferences: updated };
+    return updated;
   }
 
   async getUserNotifications(userId: string, filter?: NotificationFilter): Promise<NotificationBatch> {
