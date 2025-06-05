@@ -3,6 +3,8 @@ import { type RouteAuthContext } from "@/middleware/auth";
 import { addressCreateSchema } from "@/core/address/models";
 import { createApiHandler } from "@/lib/api/route-helpers";
 import { createSuccessResponse } from "@/lib/api/common";
+import { getApiAddressService } from "@/services/address/factory";
+import { getApiCompanyService } from "@/services/company/factory";
 
 import { z } from "zod";
 type AddressRequest = z.infer<typeof addressCreateSchema>;
@@ -11,11 +13,12 @@ async function handlePost(
   _request: NextRequest,
   auth: RouteAuthContext,
   data: AddressRequest,
-  services: any
 ) {
   try {
     const userId = auth.userId!;
-    const companyProfile = await services.addressService.getProfileByUserId(userId);
+    const companyService = getApiCompanyService();
+    const addressService = getApiAddressService();
+    const companyProfile = await companyService.getProfileByUserId(userId);
     if (!companyProfile) {
       return NextResponse.json(
         { error: 'Company profile not found' },
@@ -23,7 +26,7 @@ async function handlePost(
       );
     }
 
-    const result = await services.addressService.createAddress(
+    const result = await addressService.createAddress(
       companyProfile.id,
       data,
     );
@@ -50,11 +53,12 @@ async function handleGet(
   _request: NextRequest,
   auth: RouteAuthContext,
   _data: unknown,
-  services: any
 ) {
   try {
     const userId = auth.userId!;
-    const companyProfile = await services.addressService.getProfileByUserId(userId);
+    const companyService = getApiCompanyService();
+    const addressService = getApiAddressService();
+    const companyProfile = await companyService.getProfileByUserId(userId);
 
     if (!companyProfile) {
       return NextResponse.json(
@@ -63,7 +67,7 @@ async function handleGet(
       );
     }
 
-    const addresses = await services.addressService.getAddresses(companyProfile.id);
+    const addresses = await addressService.getAddresses(companyProfile.id);
 
     return createSuccessResponse(addresses);
   } catch (error) {
@@ -77,12 +81,12 @@ async function handleGet(
 
 export const POST = createApiHandler(
   addressCreateSchema,
-  (req, auth, data, services) => handlePost(req, auth, data, services),
+  (req, auth, data) => handlePost(req, auth, data),
   { requireAuth: true }
 );
 
 export const GET = createApiHandler(
   z.object({}),
-  (req, auth, data, services) => handleGet(req, auth, data, services),
+  (req, auth, data) => handleGet(req, auth, data),
   { requireAuth: true }
 );

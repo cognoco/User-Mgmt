@@ -1,32 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { NextRequest } from 'next/server';
 import { POST, GET } from '../route';
-import { getServiceSupabase } from '@/lib/database/supabase';
-import { createSupabaseAddressProvider } from '@/adapters/address/factory';
+import { getApiAddressService } from '@/services/address/factory';
+import { getApiCompanyService } from '@/services/company/factory';
+import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
 
-// Mock Supabase client
-vi.mock('@/lib/database/supabase', () => ({
-  getServiceSupabase: vi.fn(() => ({
-    auth: { getUser: vi.fn() },
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: vi.fn(),
-          order: vi.fn((column: string, { ascending }: { ascending: boolean }) => ({ ascending }))
-        }))
-      }))
-    }))
-  }))
-}));
-
-// Mock address provider factory
-vi.mock('@/adapters/address/factory', () => ({
-  createSupabaseAddressProvider: vi.fn(() => ({
-    createAddress: vi.fn(),
-    getAddresses: vi.fn(),
-    updateAddress: vi.fn(),
-    deleteAddress: vi.fn()
-  }))
+// Mock service factories
+vi.mock('@/services/address/factory', () => ({ getApiAddressService: vi.fn() }));
+vi.mock('@/services/company/factory', () => ({ getApiCompanyService: vi.fn() }));
+vi.mock('@/middleware/auth', () => ({
+  withRouteAuth: vi.fn((handler: any, req: any) => handler(req, { userId: 'test-user-id' })),
 }));
 
 // Mock rate limiter
@@ -66,29 +48,21 @@ describe('Company Addresses API', () => {
 
   describe('POST /api/company/addresses', () => {
     it('should create a new company address', async () => {
-      const supabase = getServiceSupabase();
-      const provider = { createAddress: vi.fn(), getAddresses: vi.fn(), updateAddress: vi.fn(), deleteAddress: vi.fn() };
-      (createSupabaseAddressProvider as any).mockReturnValue(provider);
-      (supabase.auth.getUser as any).mockResolvedValue({ data: { user: mockUser }, error: null });
-      (supabase.from('company_profiles').select('id').eq('user_id', mockUser.id).single as any)
-        .mockResolvedValue({ data: mockCompanyProfile, error: null });
-      (provider.createAddress as any).mockResolvedValue({ success: true, address: mockAddress });
+      const addressService = { createAddress: vi.fn() } as any;
+      const companyService = { getProfileByUserId: vi.fn() } as any;
+      vi.mocked(getApiAddressService).mockReturnValue(addressService);
+      vi.mocked(getApiCompanyService).mockReturnValue(companyService);
+      companyService.getProfileByUserId.mockResolvedValue(mockCompanyProfile);
+      addressService.createAddress.mockResolvedValue({ success: true, address: mockAddress });
 
-      const request = new NextRequest('http://localhost/api/company/addresses', {
-        method: 'POST',
-        headers: {
-          'authorization': 'Bearer test-token',
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          type: mockAddress.type,
-          street_line1: mockAddress.street_line1,
-          city: mockAddress.city,
-          state: mockAddress.state,
-          postal_code: mockAddress.postal_code,
-          country: mockAddress.country,
-          is_primary: mockAddress.is_primary
-        })
+      const request = createAuthenticatedRequest('POST', 'http://localhost/api/company/addresses', {
+        type: mockAddress.type,
+        street_line1: mockAddress.street_line1,
+        city: mockAddress.city,
+        state: mockAddress.state,
+        postal_code: mockAddress.postal_code,
+        country: mockAddress.country,
+        is_primary: mockAddress.is_primary,
       });
 
       const response = await POST(request);
@@ -99,38 +73,28 @@ describe('Company Addresses API', () => {
     });
 
     it('should return 401 if not authenticated', async () => {
-      const request = new NextRequest('http://localhost/api/company/addresses', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json'
-        }
-      });
+      const request = createAuthenticatedRequest('POST', 'http://localhost/api/company/addresses', {
+        type: mockAddress.type,
+      }, null);
 
       const response = await POST(request);
       expect(response.status).toBe(401);
     });
 
     it('should return 404 if company profile not found', async () => {
-      const supabase = getServiceSupabase();
-      (supabase.auth.getUser as any).mockResolvedValue({ data: { user: mockUser }, error: null });
-      (supabase.from('company_profiles').select('id').eq('user_id', mockUser.id).single as any)
-        .mockResolvedValue({ data: null, error: { code: 'PGRST116' } });
+      const addressService = { createAddress: vi.fn() } as any;
+      const companyService = { getProfileByUserId: vi.fn().mockResolvedValue(null) } as any;
+      vi.mocked(getApiAddressService).mockReturnValue(addressService);
+      vi.mocked(getApiCompanyService).mockReturnValue(companyService);
 
-      const request = new NextRequest('http://localhost/api/company/addresses', {
-        method: 'POST',
-        headers: {
-          'authorization': 'Bearer test-token',
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          type: mockAddress.type,
-          street_line1: mockAddress.street_line1,
-          city: mockAddress.city,
-          state: mockAddress.state,
-          postal_code: mockAddress.postal_code,
-          country: mockAddress.country,
-          is_primary: mockAddress.is_primary
-        })
+      const request = createAuthenticatedRequest('POST', 'http://localhost/api/company/addresses', {
+        type: mockAddress.type,
+        street_line1: mockAddress.street_line1,
+        city: mockAddress.city,
+        state: mockAddress.state,
+        postal_code: mockAddress.postal_code,
+        country: mockAddress.country,
+        is_primary: mockAddress.is_primary,
       });
 
       const response = await POST(request);
@@ -140,20 +104,14 @@ describe('Company Addresses API', () => {
 
   describe('GET /api/company/addresses', () => {
     it('should return company addresses', async () => {
-      const supabase = getServiceSupabase();
-      const provider = { createAddress: vi.fn(), getAddresses: vi.fn(), updateAddress: vi.fn(), deleteAddress: vi.fn() };
-      (createSupabaseAddressProvider as any).mockReturnValue(provider);
-      (supabase.auth.getUser as any).mockResolvedValue({ data: { user: mockUser }, error: null });
-      (supabase.from('company_profiles').select('id').eq('user_id', mockUser.id).single as any)
-        .mockResolvedValue({ data: mockCompanyProfile, error: null });
-      (provider.getAddresses as any).mockResolvedValue([mockAddress]);
+      const addressService = { getAddresses: vi.fn() } as any;
+      const companyService = { getProfileByUserId: vi.fn() } as any;
+      vi.mocked(getApiAddressService).mockReturnValue(addressService);
+      vi.mocked(getApiCompanyService).mockReturnValue(companyService);
+      companyService.getProfileByUserId.mockResolvedValue(mockCompanyProfile);
+      addressService.getAddresses.mockResolvedValue([mockAddress]);
 
-      const request = new NextRequest('http://localhost/api/company/addresses', {
-        method: 'GET',
-        headers: {
-          'authorization': 'Bearer test-token'
-        }
-      });
+      const request = createAuthenticatedRequest('GET', 'http://localhost/api/company/addresses');
 
       const response = await GET(request);
       const data = await response.json();
@@ -163,9 +121,7 @@ describe('Company Addresses API', () => {
     });
 
     it('should return 401 if not authenticated', async () => {
-      const request = new NextRequest('http://localhost/api/company/addresses', {
-        method: 'GET'
-      });
+      const request = createAuthenticatedRequest('GET', 'http://localhost/api/company/addresses', undefined, null);
 
       const response = await GET(request);
       expect(response.status).toBe(401);
