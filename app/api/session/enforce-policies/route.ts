@@ -1,133 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { getSessionTimeout, getMaxSessionsPerUser } from '@/lib/security/security-policy.service';
-import { createSessionProvider } from '@/adapters/session/factory';
+import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
+import { enforceSessionPolicies } from '@/services/session/enforce-session-policies.service';
 
-/**
- * API route to enforce session policies
- * This can be called by:
- * 1. A scheduled cron job every few minutes
- * 2. Frontend client-side code when user is active
- */
 export async function POST(req: NextRequest) {
   const res = NextResponse.next();
-  
-  // Create session provider using service role credentials
-  const sessionProvider = createSessionProvider({
-    type: 'supabase',
-    options: {
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-    }
-  });
-  
-  // Create user client (cookies)
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get: (name) => req.cookies.get(name)?.value,
-        set: (name, value, options) => {
-          res.cookies.set({ name, value, ...options });
-        },
-        remove: (name, options) => {
-          res.cookies.set({ name, value: '', ...options });
-        },
-      },
-    }
-  );
+  const result = await enforceSessionPolicies(req, res);
 
-  try {
-    // Get current user
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (error || !user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    // Get organization ID 
-    const orgId = user.user_metadata?.current_organization_id;
-    if (!orgId) {
-      return NextResponse.json({ message: 'No organization policy to enforce' });
-    }
-
-    // 1. Enforce session timeout
-    const timeoutMinutes = await getSessionTimeout(orgId);
-    
-    if (timeoutMinutes > 0) {
-      // Get all sessions for this user
-      const sessions = await sessionProvider.listUserSessions(user.id);
-      
-      if (sessions && sessions.length > 0) {
-        const currentTime = Date.now();
-        const timeoutMs = timeoutMinutes * 60 * 1000;
-        
-        for (const session of sessions) {
-          // Skip if no last activity recorded
-          if (!session.user_metadata?.last_activity) continue;
-          
-          const lastActivity = new Date(session.user_metadata.last_activity).getTime();
-          if (currentTime - lastActivity > timeoutMs) {
-            // This session has exceeded the timeout
-            await sessionProvider.deleteUserSession(user.id, session.id);
-          }
-        }
-      }
-    }
-    
-    // 2. Enforce max sessions
-    const maxSessions = await getMaxSessionsPerUser(orgId);
-    
-    if (maxSessions > 0) {
-      // Get all sessions for this user
-      const sessions = await sessionProvider.listUserSessions(user.id);
-      
-      if (sessions && sessions.length > maxSessions) {
-        // Sort sessions by last activity (oldest first)
-        const sortedSessions = [...sessions].sort((a, b) => {
-          const aActivity = a.user_metadata?.last_activity 
-            ? new Date(a.user_metadata.last_activity).getTime()
-            : new Date(a.created_at).getTime();
-          
-          const bActivity = b.user_metadata?.last_activity
-            ? new Date(b.user_metadata.last_activity).getTime()
-            : new Date(b.created_at).getTime();
-          
-          return aActivity - bActivity;
-        });
-        
-        // Get current session ID
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        const currentSessionId = currentSession?.id;
-        
-        // Remove oldest sessions (excluding current session) to stay within limit
-        const sessionsToRemove = sortedSessions.length - maxSessions;
-        let removedCount = 0;
-        
-        for (const session of sortedSessions) {
-          if (removedCount >= sessionsToRemove) break;
-          
-          if (session.id !== currentSessionId) {
-            await sessionProvider.deleteUserSession(user.id, session.id);
-            removedCount++;
-          }
-        }
-      }
-    }
-    
-    // Update last activity timestamp for current session
-    await supabase.auth.updateUser({
-      data: { last_activity: new Date().toISOString() }
-    });
-
-    return NextResponse.json({ 
-      success: true,
-      message: 'Session policies enforced'
-    });
-  } catch (error) {
-    console.error('Error enforcing session policies:', error);
-    return NextResponse.json({ 
-      error: 'Failed to enforce session policies'
-    }, { status: 500 });
+  if (!result.success) {
+    const status = result.error === 'Not authenticated' ? 401 : 500;
+    throw new ApiError(
+      status === 401 ? ERROR_CODES.UNAUTHORIZED : ERROR_CODES.INTERNAL_ERROR,
+      result.error || 'Failed to enforce session policies',
+      status
+    );
   }
-} 
+
+  const response = createSuccessResponse({ message: result.message || 'Session policies enforced' });
+  res.cookies.getAll().forEach(cookie => {
+    response.cookies.set(cookie);
+  });
+  return response;
+}

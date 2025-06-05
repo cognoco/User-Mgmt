@@ -158,7 +158,39 @@ export class DefaultTwoFactorService implements TwoFactorService {
   }
 
   async disable(_userId: string, _method: TwoFactorMethodType, _code?: string): Promise<TwoFactorDisableResponse> {
-    return { success: false, error: 'Not implemented' };
+    const userId = _userId;
+    const method = _method;
+    const supabase = getServiceSupabase();
+
+    const { data: { user }, error } = await supabase.auth.admin.getUserById(userId);
+    if (error || !user) {
+      return { success: false, error: 'User not found' };
+    }
+
+    if (method !== 'totp') {
+      return { success: false, error: `Unsupported MFA method: ${method}` };
+    }
+
+    if (user.user_metadata?.totpEnabled !== true) {
+      return { success: false, error: 'MFA is not enabled' };
+    }
+
+    const { error: upd } = await supabase.auth.admin.updateUserById(userId, {
+      user_metadata: {
+        totpSecret: null,
+        totpEnabled: false,
+        totpVerified: false,
+        mfaMethods: [],
+        backupCodes: null,
+        backupCodesGeneratedAt: null,
+      }
+    });
+
+    if (upd) {
+      return { success: false, error: upd.message };
+    }
+
+    return { success: true };
   }
 
   async getUserMethods(_userId: string) { return []; }
