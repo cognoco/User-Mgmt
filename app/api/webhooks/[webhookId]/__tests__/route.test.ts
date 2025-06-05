@@ -14,15 +14,13 @@ vi.mock('@/lib/auth/session', () => ({
   })
 }));
 
-vi.mock('@/lib/database/supabase', () => ({
-  getServiceSupabase: vi.fn().mockReturnValue({
-    from: vi.fn().mockReturnThis(),
-    select: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    single: vi.fn()
-  })
+const serviceMock = {
+  getWebhook: vi.fn(),
+  updateWebhook: vi.fn(),
+  deleteWebhook: vi.fn(),
+};
+vi.mock('@/services/webhooks/factory', () => ({
+  getApiWebhookService: vi.fn(() => serviceMock),
 }));
 
 vi.mock('@/lib/audit/auditLogger', () => ({
@@ -37,7 +35,6 @@ vi.mock('crypto', () => ({
 
 // Import the mocked modules directly
 import { getCurrentUser } from '@/lib/auth/session';
-import { getServiceSupabase } from '@/lib/database/supabase';
 import { logUserAction } from '@/lib/audit/auditLogger';
 
 // Helper to create a mock request
@@ -56,22 +53,13 @@ function createMockRequest(method: string, body?: any) {
 }
 
 describe('Webhook ID-specific API', () => {
-  let supabaseMock: any;
   const webhookId = 'test-webhook-id';
   const params = { webhookId };
 
   beforeEach(() => {
-    supabaseMock = {
-      from: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-      delete: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      single: vi.fn()
-    };
-    
-    // Set up the mocked implementations
-    (getServiceSupabase as any).mockReturnValue(supabaseMock);
+    serviceMock.getWebhook.mockReset();
+    serviceMock.updateWebhook.mockReset();
+    serviceMock.deleteWebhook.mockReset();
   });
 
   afterEach(() => {
@@ -91,9 +79,7 @@ describe('Webhook ID-specific API', () => {
         updated_at: '2023-01-01T00:00:00Z'
       };
 
-      supabaseMock.select.mockReturnThis();
-      supabaseMock.eq.mockReturnThis();
-      supabaseMock.single.mockResolvedValue({ data: mockWebhook, error: null });
+      serviceMock.getWebhook.mockResolvedValue(mockWebhook);
 
       const req = createMockRequest('GET');
       const response = await GET(req, { params });
@@ -102,11 +88,7 @@ describe('Webhook ID-specific API', () => {
       expect(response.status).toBe(200);
       expect(responseBody).toEqual(mockWebhook);
       
-      // Verify that we called the database with the right parameters
-      expect(supabaseMock.from).toHaveBeenCalledWith('webhooks');
-      expect(supabaseMock.select).toHaveBeenCalled();
-      expect(supabaseMock.eq).toHaveBeenCalledWith('id', webhookId);
-      expect(supabaseMock.eq).toHaveBeenCalledWith('user_id', 'test-user-id');
+      expect(serviceMock.getWebhook).toHaveBeenCalledWith('test-user-id', webhookId);
     });
 
     it('should return 401 if user is not authenticated', async () => {
@@ -122,10 +104,7 @@ describe('Webhook ID-specific API', () => {
     });
 
     it('should return 404 if webhook is not found', async () => {
-      // Mock the database response for webhook not found
-      supabaseMock.select.mockReturnThis();
-      supabaseMock.eq.mockReturnThis();
-      supabaseMock.single.mockResolvedValue({ data: null, error: { message: 'Webhook not found' } });
+      serviceMock.getWebhook.mockResolvedValue(null);
 
       const req = createMockRequest('GET');
       const response = await GET(req, { params });
@@ -155,15 +134,7 @@ describe('Webhook ID-specific API', () => {
         updated_at: '2023-01-02T00:00:00Z'
       };
 
-      // Mock fetch response
-      supabaseMock.select.mockReturnThis();
-      supabaseMock.eq.mockReturnThis();
-      supabaseMock.single.mockResolvedValueOnce({ data: mockWebhookData, error: null });
-
-      // Mock update response
-      supabaseMock.update.mockReturnThis();
-      supabaseMock.eq.mockReturnThis();
-      supabaseMock.single.mockResolvedValueOnce({ data: mockUpdatedWebhook, error: null });
+      serviceMock.updateWebhook.mockResolvedValue({ success: true, webhook: mockUpdatedWebhook });
 
       const req = createMockRequest('PATCH', {
         name: 'Updated Webhook',
@@ -178,12 +149,13 @@ describe('Webhook ID-specific API', () => {
       expect(responseBody).toHaveProperty('name', 'Updated Webhook');
       expect(responseBody).toHaveProperty('url', 'https://example.com/updated');
       
-      // Verify database was called correctly
-      expect(supabaseMock.from).toHaveBeenCalledWith('webhooks');
-      expect(supabaseMock.select).toHaveBeenCalled();
-      expect(supabaseMock.eq).toHaveBeenCalledWith('id', webhookId);
-      expect(supabaseMock.eq).toHaveBeenCalledWith('user_id', 'test-user-id');
-      expect(supabaseMock.update).toHaveBeenCalled();
+      expect(serviceMock.updateWebhook).toHaveBeenCalledWith('test-user-id', webhookId, {
+        name: 'Updated Webhook',
+        url: 'https://example.com/updated',
+        events: undefined,
+        isActive: undefined,
+        regenerateSecret: undefined,
+      });
       
       // Verify audit log was created
       expect(logUserAction).toHaveBeenCalledWith(expect.objectContaining({
@@ -212,15 +184,7 @@ describe('Webhook ID-specific API', () => {
         updated_at: '2023-01-02T00:00:00Z'
       };
 
-      // Mock fetch response
-      supabaseMock.select.mockReturnThis();
-      supabaseMock.eq.mockReturnThis();
-      supabaseMock.single.mockResolvedValueOnce({ data: mockWebhookData, error: null });
-
-      // Mock update response
-      supabaseMock.update.mockReturnThis();
-      supabaseMock.eq.mockReturnThis();
-      supabaseMock.single.mockResolvedValueOnce({ data: mockUpdatedWebhook, error: null });
+      serviceMock.updateWebhook.mockResolvedValue({ success: true, webhook: { ...mockUpdatedWebhook, secret: 'new-test-secret' } });
 
       const req = createMockRequest('PATCH', {
         regenerate_secret: true
@@ -232,10 +196,13 @@ describe('Webhook ID-specific API', () => {
       expect(response.status).toBe(200);
       expect(responseBody).toHaveProperty('secret', 'new-test-secret');
       
-      // Verify that secret was included in the update
-      expect(supabaseMock.update).toHaveBeenCalledWith(expect.objectContaining({
-        secret: 'new-test-secret'
-      }));
+      expect(serviceMock.updateWebhook).toHaveBeenCalledWith('test-user-id', webhookId, {
+        name: undefined,
+        url: undefined,
+        events: undefined,
+        isActive: undefined,
+        regenerateSecret: true,
+      });
       
       // Verify audit log was created with secret regeneration
       expect(logUserAction).toHaveBeenCalledWith(expect.objectContaining({
@@ -269,14 +236,8 @@ describe('Webhook ID-specific API', () => {
         url: 'https://example.com/webhook'
       };
 
-      // Mock fetch response
-      supabaseMock.select.mockReturnThis();
-      supabaseMock.eq.mockReturnThis();
-      supabaseMock.single.mockResolvedValueOnce({ data: mockWebhookData, error: null });
-
-      // Mock delete response
-      supabaseMock.delete.mockReturnThis();
-      supabaseMock.eq.mockReturnValue({ error: null });
+      serviceMock.getWebhook.mockResolvedValue(mockWebhookData);
+      serviceMock.deleteWebhook.mockResolvedValue({ success: true });
 
       const req = createMockRequest('DELETE');
       const response = await DELETE(req, { params });
@@ -285,12 +246,8 @@ describe('Webhook ID-specific API', () => {
       expect(response.status).toBe(200);
       expect(responseBody).toHaveProperty('message', 'Webhook deleted successfully');
       
-      // Verify database was called correctly
-      expect(supabaseMock.from).toHaveBeenCalledWith('webhooks');
-      expect(supabaseMock.select).toHaveBeenCalled();
-      expect(supabaseMock.delete).toHaveBeenCalled();
-      expect(supabaseMock.eq).toHaveBeenCalledWith('id', webhookId);
-      expect(supabaseMock.eq).toHaveBeenCalledWith('user_id', 'test-user-id');
+      expect(serviceMock.getWebhook).toHaveBeenCalledWith('test-user-id', webhookId);
+      expect(serviceMock.deleteWebhook).toHaveBeenCalledWith('test-user-id', webhookId);
       
       // Verify audit log was created
       expect(logUserAction).toHaveBeenCalledWith(expect.objectContaining({
@@ -302,10 +259,7 @@ describe('Webhook ID-specific API', () => {
     });
 
     it('should return 404 if webhook is not found', async () => {
-      // Mock the database response for webhook not found
-      supabaseMock.select.mockReturnThis();
-      supabaseMock.eq.mockReturnThis();
-      supabaseMock.single.mockResolvedValue({ data: null, error: { message: 'Webhook not found' } });
+      serviceMock.getWebhook.mockResolvedValue(null);
 
       const req = createMockRequest('DELETE');
       const response = await DELETE(req, { params });
