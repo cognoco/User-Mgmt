@@ -3,6 +3,8 @@ export type TwoFactorMethodType = 'totp' | 'sms' | 'email' | 'webauthn';
 export interface TwoFactorSetupPayload {
   userId: string;
   method: TwoFactorMethodType;
+  phone?: string;
+  email?: string;
 }
 
 export interface TwoFactorSetupResponse {

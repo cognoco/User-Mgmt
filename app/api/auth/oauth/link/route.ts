@@ -1,157 +1,37 @@
-import { NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { OAuthProvider } from '@/types/oauth';
-import { logUserAction } from '@/lib/audit/auditLogger';
-import { sendProviderLinkedNotification } from '@/lib/notifications/sendProviderLinkedNotification';
+import { withErrorHandling } from '@/middleware/error-handling';
+import { withValidation } from '@/middleware/validation';
+import { getApiOAuthService } from '@/services/oauth/factory';
 
-// Request schema
 const linkRequestSchema = z.object({
   provider: z.nativeEnum(OAuthProvider),
   code: z.string(),
 });
 
-export async function POST(request: Request) {
-  try {
-    // Parse and validate request body
-    const body = await request.json();
-    const { provider, code } = linkRequestSchema.parse(body);
-
-    // Initialize Supabase client
-    const cookieStore = cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(name: string, value: string, options: any) {
-            cookieStore.set({ name, value, ...options });
-          },
-          remove(name: string, options: any) {
-            cookieStore.set({ name, value: '', ...options });
-          },
-        },
-      }
+async function handleLink(
+  _req: NextRequest,
+  data: z.infer<typeof linkRequestSchema>,
+) {
+  const service = getApiOAuthService();
+  const result = await service.linkProvider(data.provider, data.code);
+  if (!result.success) {
+    return NextResponse.json(
+      { error: result.error },
+      { status: result.status ?? 400 },
     );
-
-    // Authenticate user (must be logged in to link a provider)
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    // Exchange code for provider tokens/session
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-
-    // Fetch provider user info
-    const { data: providerUserData, error: providerUserError } = await supabase.auth.getUser();
-    if (providerUserError || !providerUserData?.user) {
-      return NextResponse.json({ error: providerUserError?.message || 'Failed to fetch provider user data' }, { status: 400 });
-    }
-    const providerAccountId = providerUserData.user.app_metadata?.provider_id;
-    const email = providerUserData.user.email;
-    if (!providerAccountId && !email) {
-      return NextResponse.json({ error: 'Provider did not return a unique identifier (email or provider user ID).' }, { status: 400 });
-    }
-
-    // Check for existing linked provider using Supabase
-    const { data: existingAccount } = await supabase
-      .from('account')
-      .select('id, user_id')
-      .eq('provider', provider.toLowerCase())
-      .eq('provider_account_id', providerAccountId)
-      .maybeSingle();
-    if (existingAccount) {
-      return NextResponse.json(
-        { error: 'This provider is already linked to an account.' },
-        { status: 409 }
-      );
-    }
-
-    // Check for email collision
-    let emailCollision: { id: string; user_id: string } | null = null;
-    if (email) {
-      const { data } = await supabase
-        .from('account')
-        .select('id, user_id')
-        .eq('provider_email', email)
-        .maybeSingle();
-      emailCollision = data;
-    }
-    if (emailCollision && emailCollision.user_id !== user.id) {
-      return NextResponse.json(
-        {
-          error:
-            'An account with this email already exists. Please use another provider or contact support.',
-          collision: true,
-        },
-        { status: 409 }
-      );
-    }
-
-    // Create new account record
-    const { error: insertError } = await supabase.from('account').insert({
-      user_id: user.id,
-      provider: provider.toLowerCase(),
-      provider_account_id: providerAccountId || '',
-      provider_email: email || '',
-    });
-    if (insertError) {
-      throw insertError;
-    }
-
-    // Notify user about newly linked provider
-    await sendProviderLinkedNotification(user.id, provider);
-
-    // Audit log: SSO link success
-    try {
-      await logUserAction({
-        userId: user.id,
-        action: 'SSO_LINK',
-        status: 'SUCCESS',
-        details: { provider },
-      });
-    } catch (logError) {
-      console.error('Failed to log SSO_LINK success:', logError);
-    }
-
-    // Return updated provider list and user info
-    const { data: linkedAccounts, error: listError } = await supabase
-      .from('account')
-      .select('provider')
-      .eq('user_id', user.id);
-
-    if (listError) {
-      console.error('Failed to fetch linked providers:', listError);
-    }
-
-    return NextResponse.json({
-      success: true,
-      linkedProviders: linkedAccounts?.map((a: { provider: string }) => a.provider) ?? [],
-      user,
-    });
-  } catch (error: any) {
-    // Audit log: SSO link failure
-    try {
-      await logUserAction({
-        action: 'SSO_LINK',
-        status: 'FAILURE',
-        details: { error: error.message || 'Failed to link provider.' },
-      });
-    } catch (logError) {
-      // Log but do not block the response
-      console.error('Failed to log SSO_LINK failure:', logError);
-    }
-    return NextResponse.json({ error: error.message || 'Failed to link provider.' }, { status: 400 });
   }
-} 
+  return NextResponse.json({
+    success: true,
+    linkedProviders: result.linkedProviders ?? [],
+    user: result.user,
+  });
+}
+
+export async function POST(request: NextRequest) {
+  return withErrorHandling(
+    async (req) => withValidation(linkRequestSchema, handleLink, req),
+    request,
+  );
+}
