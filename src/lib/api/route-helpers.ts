@@ -78,10 +78,12 @@ export function createApiHandler<T>(
           ).join(', ');
           
           return createErrorResponse(
-            ERROR_CODES.VALIDATION_ERROR,
-            `Validation failed: ${errorMessages}`,
-            400,
-            { errors: error.errors }
+            new ApiError(
+              ERROR_CODES.INVALID_REQUEST,
+              `Validation failed: ${errorMessages}`,
+              400,
+              { errors: error.errors }
+            )
           );
         }
         throw error;
@@ -93,20 +95,17 @@ export function createApiHandler<T>(
     } catch (error) {
       // Handle known API errors
       if (error instanceof ApiError) {
-        return createErrorResponse(
-          error.code,
-          error.message,
-          error.statusCode,
-          error.details
-        );
+        return createErrorResponse(error);
       }
       
       // Handle unexpected errors
       console.error('Unexpected API error:', error);
       return createErrorResponse(
-        ERROR_CODES.INTERNAL_ERROR,
-        'Internal server error',
-        500
+        new ApiError(
+          ERROR_CODES.INTERNAL_ERROR,
+          'Internal server error',
+          500
+        )
       );
     }
   };

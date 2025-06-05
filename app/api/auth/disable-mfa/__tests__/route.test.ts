@@ -1,9 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { POST } from '../route';
-import { getApiAuthService } from '@/services/auth/factory';
 
-vi.mock('@/services/auth/factory', () => ({ getApiAuthService: vi.fn() }));
+// Mock the service container to avoid circular dependencies
+vi.mock('@/lib/config/service-container', () => ({
+  getServiceContainer: vi.fn()
+}));
+
 vi.mock('@/middleware/with-auth-rate-limit', () => ({
   withAuthRateLimit: vi.fn((_req, handler) => handler(_req))
 }));
@@ -12,16 +15,42 @@ vi.mock('@/middleware/with-security', () => ({
 }));
 
 describe('POST /api/auth/disable-mfa', () => {
-  const mockAuthService = { disableMFA: vi.fn() };
+  const mockAuthService = { 
+    disableMFA: vi.fn(),
+    getCurrentUser: vi.fn().mockResolvedValue({ id: 'user123', email: 'test@example.com' })
+  };
+  
+  const mockServices = {
+    auth: mockAuthService,
+    user: { getUserById: vi.fn() },
+    permission: { checkPermission: vi.fn() },
+    session: { createSession: vi.fn() },
+    team: { createTeam: vi.fn() },
+    subscription: { getSubscription: vi.fn() },
+    apiKey: { createApiKey: vi.fn() }
+  };
+  
   const createRequest = (code?: string) => new NextRequest('http://localhost/api/auth/disable-mfa', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: code ? JSON.stringify({ code }) : undefined
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer test-token' // Add auth header for authenticated requests
+    },
+    body: code ? JSON.stringify({ code }) : JSON.stringify({}) // Always provide valid JSON
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
-    (getApiAuthService as unknown as vi.Mock).mockReturnValue(mockAuthService);
+    
+    // Set required environment variables for Supabase
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role-key';
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost:54321';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
+    
+    // Mock the service container to return our mock services
+    const { getServiceContainer } = await import('@/lib/config/service-container');
+    (getServiceContainer as any).mockReturnValue(mockServices);
+    
     mockAuthService.disableMFA.mockResolvedValue({ success: true });
   });
 

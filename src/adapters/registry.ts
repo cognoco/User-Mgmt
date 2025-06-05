@@ -113,11 +113,11 @@ export interface AdapterFactory {
   createApiKeyProvider(): ApiKeyDataProvider;
 
   /**
-
    * Create a company notification data provider
    */
   createCompanyNotificationProvider?(): ICompanyNotificationDataProvider;
 
+  /**
    * Create a data export provider
    */
   createDataExportProvider?(): IDataExportDataProvider;

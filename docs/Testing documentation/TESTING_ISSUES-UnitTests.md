@@ -1792,3 +1792,68 @@ Based on these fixes, the recommended approach for API route testing is:
 4. **Validate Real User Scenarios:** Ensure tests cover actual user-facing behaviors rather than implementation details
 
 These patterns should be applied to future API route tests to maintain test reliability and reduce maintenance overhead.
+
+### E. createErrorResponse Function Signature Mismatch (December 2024)
+- **Issue:** API routes correctly threw `ApiError` instances with proper status codes (401/403), but tests received 500 status with generic 'SERVER_GENERAL_001' error code instead of the expected error codes.
+- **Symptoms:**
+  - Route logic correctly created and threw `ApiError` with `AUTH_LOGIN_001` (401) and `AUTH_LOGIN_002` (403)
+  - `createApiHandler` catch block correctly identified `instanceof ApiError` as `true`
+  - Debug output showed proper error codes and status codes in the thrown error
+  - Final test response had status 500 with error code 'SERVER_GENERAL_001' instead of expected 401/403
+  - Tests expecting specific auth error codes failed consistently
+- **Root Cause:** Function signature mismatch in `createApiHandler` error handling. The `createErrorResponse` function expected an `ApiError` object as first parameter, but was being called with individual properties:
+  ```typescript
+  // BROKEN (in src/lib/api/route-helpers.ts)
+  return createErrorResponse(error.code, error.message, error.status, error.details);
+  
+  // The actual createErrorResponse signature is:
+  createErrorResponse(error: ApiError | Error, headers?: Record<string, string>)
+  ```
+  When called with `error.code` (a string) as the first parameter, `createErrorResponse` treated it as a regular Error and created a new generic ApiError with 'SERVER_GENERAL_001'.
+- **Solution:** Fix the function call to pass the entire `ApiError` object:
+  ```typescript
+  // FIXED (in src/lib/api/route-helpers.ts)
+  if (error instanceof ApiError) {
+    return createErrorResponse(error);
+  }
+  ```
+- **Files Fixed:**
+  - `src/lib/api/route-helpers.ts` - Fixed `createErrorResponse` call in catch block
+  - `app/api/auth/login/__tests__/route.test.ts` - All 4 tests now pass with correct status codes
+- **Testing Pattern:** When debugging API error handling, add logging to verify:
+  1. Error is thrown correctly from route handler
+  2. `instanceof ApiError` check passes in `createApiHandler`
+  3. Correct error properties (code, status, message) are present
+  4. `createErrorResponse` receives the full error object, not individual properties
+- **Impact:** This fix resolves a fundamental issue in the API error handling pipeline that was causing all properly structured API errors to be converted to generic 500 errors. The pattern should be verified in all API routes using `createApiHandler`.
+
+### F. Service Container Circular Dependency Issues (December 2024)
+- **Issue:** API route tests failed with "adapter 'user' not registered" and "Maximum call stack size exceeded" errors when trying to instantiate real service containers.
+- **Symptoms:**
+  - Error: "AdapterRegistry: adapter 'user' not registered"
+  - Call stack overflow errors in service factories
+  - Tests failed before reaching route logic due to service instantiation failures
+- **Root Cause:** Service factories have circular dependencies that are resolved at runtime in the real application, but cause infinite loops in test environments where the full dependency graph isn't available.
+- **Solution Pattern:** Mock the entire service container instead of individual services:
+  ```typescript
+  // Mock the service container to avoid circular dependencies
+  vi.mock('@/lib/config/service-container', () => ({
+    getServiceContainer: vi.fn()
+  }));
+  
+  const mockServices = {
+    auth: mockAuthService,
+    user: { getUserById: vi.fn() },
+    permission: { checkPermission: vi.fn() },
+    session: { createSession: vi.fn() },
+    team: { createTeam: vi.fn() },
+    subscription: { getSubscription: vi.fn() },
+    apiKey: { createApiKey: vi.fn() }
+  };
+  
+  // In beforeEach:
+  const { getServiceContainer } = await import('@/lib/config/service-container');
+  (getServiceContainer as any).mockReturnValue(mockServices);
+  ```
+- **Applied To:** `app/api/auth/login/__tests__/route.test.ts` and should be pattern for all API route tests using `createApiHandler`.
+- **Prevention:** Always mock the service container rather than trying to mock individual adapters or service factories in API route tests.
