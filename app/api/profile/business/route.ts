@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getSessionFromToken } from '@/services/auth/factory';
+import { getApiProfileService } from '@/services/profile/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { profileSchema } from '@/types/database'; // Corrected import path
 
@@ -19,32 +20,20 @@ export async function GET(request: NextRequest) {
     }
     const token = authHeader.split(' ')[1];
 
-    const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
+    const user = await getSessionFromToken(token);
 
-    if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    // 3. Fetch Profile from profiles table
-    const { data: profileData, error: profileError } = await supabaseService
-      .from('profiles')
-      .select('*') // Select all profile fields for now
-      .eq('userId', user.id)
-      .single();
+    const service = getApiProfileService();
+    const profileData = await service.getProfileByUserId(user.id);
 
-    // 4. Handle Profile Fetch Errors
-    if (profileError) {
-      console.error(`Error fetching profile for user ${user.id}:`, profileError);
-      if (profileError.code === 'PGRST116') { // Code for no rows found
-         return NextResponse.json({ error: 'Profile not found.' }, { status: 404 });
-      }
-      return NextResponse.json({ error: 'Failed to fetch profile.', details: profileError.message }, { status: 500 });
-    }
-    
     if (!profileData) {
-        return NextResponse.json({ error: 'Profile not found.' }, { status: 404 });
+      return NextResponse.json({ error: 'Profile not found.' }, { status: 404 });
     }
+
+    // 4. Handle missing profile
 
     // 5. Check User Type & Return Data
     // Validate fetched data against schema to ensure type safety
@@ -103,23 +92,17 @@ export async function PATCH(request: NextRequest) {
     }
     const token = authHeader.split(' ')[1];
 
-    const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
+    const user = await getSessionFromToken(token);
 
-    if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    // 3. Fetch existing profile to check userType and permissions (basic check for now)
-    const { data: existingProfile, error: fetchError } = await supabaseService
-        .from('profiles')
-        .select('userId, userType, isAdmin, vatId, companyName, verificationStatus') // Add isAdmin, vatId, companyName, verificationStatus
-        .eq('userId', user.id)
-        .single();
+    const service = getApiProfileService();
+    const existingProfile = await service.getProfileByUserId(user.id);
 
-    if (fetchError || !existingProfile) {
-        console.error(`Error fetching profile for permission check user ${user.id}:`, fetchError);
-        return NextResponse.json({ error: 'Profile not found or error checking permissions.' }, { status: fetchError?.code === 'PGRST116' ? 404 : 500 });
+    if (!existingProfile) {
+        return NextResponse.json({ error: 'Profile not found or error checking permissions.' }, { status: 404 });
     }
 
     // Basic Permission Check: Ensure user is a corporate type and isAdmin
@@ -156,26 +139,13 @@ export async function PATCH(request: NextRequest) {
 
     console.log(`Updating business profile for user ${user.id}:`, profileUpdates);
 
-    // 5. Update Profile Table
-    const { data: updatedData, error: updateError } = await supabaseService
-      .from('profiles')
-      .update({ 
-          ...profileUpdates,
-          ...verificationStatusUpdate,
-          updatedAt: new Date().toISOString() // Update timestamp
-      })
-      .eq('userId', user.id) // Match based on userId
-      .select('*') // Select all fields of the updated profile
-      .single();
-
-    // 6. Handle Errors
-    if (updateError) {
-      console.error(`Supabase error updating business profile for user ${user.id}:`, updateError);
-      return NextResponse.json({ error: 'Failed to update business profile.', details: updateError.message }, { status: 500 });
-    }
-    
+    // 5. Update Profile via service
+    const updatedData = await service.updateProfileByUserId(user.id, {
+      ...profileUpdates,
+      ...verificationStatusUpdate,
+    });
     if (!updatedData) {
-        return NextResponse.json({ error: 'Profile not found after update or update failed silently.' }, { status: 404 });
+        return NextResponse.json({ error: 'Profile not found after update.' }, { status: 404 });
     }
 
     // 7. Handle Success

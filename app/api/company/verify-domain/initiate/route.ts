@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getSessionFromToken } from '@/services/auth/factory';
 import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { URL } from 'url'; // Use Node.js URL parser
@@ -19,11 +19,9 @@ export async function POST(request: NextRequest) {
     }
     const token = authHeader.split(' ')[1];
 
-    const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
-
-    if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
+    const user = await getSessionFromToken(token);
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const companyService = getApiCompanyService();
