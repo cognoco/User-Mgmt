@@ -31,14 +31,6 @@ const patchMiddleware = createMiddlewareChain([
   validationMiddleware(domainUpdateSchema),
 ]);
 
-async function canAccessDomain(userId: string, domainId: string) {
-  const service = getApiCompanyService();
-  const domain = await service.getDomainById(domainId);
-  if (!domain) return false;
-  const profile = await service.getProfileByUserId(userId);
-  return profile?.id === domain.company_id;
-}
-
 // DELETE /api/company/domains/[id] - Delete a domain
 async function handleDelete(
   _request: NextRequest,
@@ -123,26 +115,27 @@ async function handlePatch(
       );
     }
 
-    const companyService = getApiCompanyService();
+  const companyService = getApiCompanyService();
 
-    const { is_primary } = data;
+  const { is_primary } = data;
 
-    const domain = await companyService.getDomainById(domainId);
+  const domain = await companyService.getDomainById(domainId);
 
-    if (domainError) {
-      console.error(`Error fetching domain ${domainId}:`, domainError);
-      return NextResponse.json({ error: "Domain not found." }, { status: 404 });
-    }
+  if (!domain) {
+    console.error(`Error fetching domain ${domainId}`);
+    return NextResponse.json({ error: "Domain not found." }, { status: 404 });
+  }
 
-    const allowed =
-      domain.company_profiles.user_id === auth.userId ||
-      (await checkPermission(
-        auth.userId!,
-        PermissionValues.MANAGE_SETTINGS,
-        'company',
-        domain.company_profiles.id,
-      )) ||
-      (await checkPermission(auth.userId!, PermissionValues.MANAGE_SETTINGS));
+  const profile = await companyService.getProfileByUserId(auth.userId!);
+  const allowed =
+    domain.company_id === profile?.id ||
+    (await checkPermission(
+      auth.userId!,
+      PermissionValues.MANAGE_SETTINGS,
+      'company',
+      domain.company_id,
+    )) ||
+    (await checkPermission(auth.userId!, PermissionValues.MANAGE_SETTINGS));
     if (!allowed) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
