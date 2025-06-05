@@ -22,6 +22,7 @@ export * from './subscription';
 export * from './organization';
 export * from './admin';
 export * from './csrf';
+export * from './data-export';
 export * from './webhooks';
 export * from './database';
 
