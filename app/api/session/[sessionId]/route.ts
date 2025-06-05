@@ -1,21 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromRequest } from '@/lib/auth/utils';
-import { createSessionProvider } from '@/adapters/session/factory';
+import { getApiSessionService } from '@/services/session/factory';
 
 // DELETE /api/session/:sessionId - Revoke a specific session for the current user
 export async function DELETE(req: NextRequest, { params }: { params: { sessionId: string } }) {
   const user = await getUserFromRequest(req);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { sessionId } = params;
-  const provider = createSessionProvider({
-    type: 'supabase',
-    options: {
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-    }
-  });
+  const service = getApiSessionService();
   try {
-    await provider.deleteUserSession(user.id, sessionId);
+    await service!.revokeUserSession(user.id, sessionId);
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to revoke session' }, { status: 500 });
