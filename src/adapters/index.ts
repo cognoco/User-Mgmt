@@ -23,6 +23,7 @@ export * from './organization';
 export * from './admin';
 export * from './csrf';
 export * from './webhooks';
+export * from './saved-search';
 export * from './database';
 
 
