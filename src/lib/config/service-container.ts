@@ -57,6 +57,7 @@ import { getApiAdminService } from '@/services/admin/factory';
 import { getApiRoleService } from '@/services/role/factory';
 import { getApiAddressService } from '@/services/address/factory';
 import { getApiResourceRelationshipService } from '@/services/resource-relationship/factory';
+import { getApiCompanyNotificationService } from '@/services/company-notification/factory';
 
 // TODO: Import additional service factories as they become available
 // import { getApiRoleService } from '@/services/role/factory';
@@ -229,6 +230,13 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
   } else if (!serviceInstances.address && globalServiceConfig.featureFlags?.addresses !== false) {
     serviceInstances.address = getApiAddressService();
   }
+
+  // Create company notification service if not cached
+  if (!serviceInstances.companyNotification && globalServiceConfig.companyNotificationService) {
+    serviceInstances.companyNotification = globalServiceConfig.companyNotificationService;
+  } else if (!serviceInstances.companyNotification) {
+    serviceInstances.companyNotification = getApiCompanyNotificationService();
+  }
   
   // Create resource relationship service if not cached
   if (!serviceInstances.resourceRelationship && globalServiceConfig.resourceRelationshipService) {
@@ -260,6 +268,7 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
     admin: overrides?.admin || serviceInstances.admin,
     role: overrides?.role || serviceInstances.role,
     address: overrides?.address || serviceInstances.address,
+    companyNotification: overrides?.companyNotification || serviceInstances.companyNotification,
     resourceRelationship: overrides?.resourceRelationship || serviceInstances.resourceRelationship,
   };
 }
@@ -401,6 +410,13 @@ export function getConfiguredRoleService(override?: RoleService): RoleService | 
  */
 export function getConfiguredAddressService(override?: CompanyAddressService): CompanyAddressService | undefined {
   return override || globalServiceConfig.addressService || getApiAddressService();
+}
+
+/**
+ * Get a specific service with fallback to global configuration
+ */
+export function getConfiguredCompanyNotificationService(override?: import("@/core/company-notification/interfaces").CompanyNotificationService): import("@/core/company-notification/interfaces").CompanyNotificationService {
+  return override || globalServiceConfig.companyNotificationService || getApiCompanyNotificationService();
 }
 
 /**
