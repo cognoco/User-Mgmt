@@ -22,8 +22,10 @@ import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import { ISavedSearchDataProvider } from '@/core/saved-search/ISavedSearchDataProvider';
 import type { ITwoFactorDataProvider } from '@/core/two-factor/ITwoFactorDataProvider';
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
+import { ICompanyNotificationDataProvider } from '@/core/company-notification/ICompanyNotificationDataProvider';
 import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
 import { IDataExportDataProvider } from '@/core/data-export/IDataExportDataProvider';
+
 
 
 
@@ -111,9 +113,15 @@ export interface AdapterFactory {
   createApiKeyProvider(): ApiKeyDataProvider;
 
   /**
+
+   * Create a company notification data provider
+   */
+  createCompanyNotificationProvider?(): ICompanyNotificationDataProvider;
+
    * Create a data export provider
    */
   createDataExportProvider?(): IDataExportDataProvider;
+
 
   /**
    * Create a webhook data provider

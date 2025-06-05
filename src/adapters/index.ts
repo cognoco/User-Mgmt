@@ -19,6 +19,7 @@ export * from './session';
 export * from './two-factor';
 export * from './oauth';
 export * from './subscription';
+export * from './company-notification';
 export * from './organization';
 export * from './admin';
 export * from './csrf';
