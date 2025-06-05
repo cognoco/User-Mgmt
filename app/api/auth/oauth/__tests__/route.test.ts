@@ -3,6 +3,7 @@ let POST: (req: Request) => Promise<Response>;
 // import { NextResponse } from 'next/server';
 import { OAuthProvider } from "@/types/oauth";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { getApiAuthService } from "@/services/auth/factory";
 
 // --- Mocks ---
 
@@ -44,12 +45,13 @@ vi.mock("next/headers", () => ({
   }),
 }));
 
-// Mock Supabase client
-const mockSignInWithOAuth = vi.fn();
-const mockSupabaseClient = { auth: { signInWithOAuth: mockSignInWithOAuth } };
-vi.mock("@supabase/ssr", () => ({
-  createServerClient: vi.fn(() => mockSupabaseClient),
-}));
+
+// Mock Auth service
+vi.mock("@/services/auth/factory");
+const mockService = {
+  configureOAuthProvider: vi.fn(),
+  getOAuthAuthorizationUrl: vi.fn(),
+};
 
 // Mock crypto for deterministic state generation
 const mockStateValue = "deterministic-state-value-1234567890";
@@ -98,14 +100,14 @@ describe("POST /api/auth/oauth", () => {
     process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI =
       "http://localhost:3000/api/auth/oauth/callback";
 
+    (getApiAuthService as vi.Mock).mockReturnValue(mockService);
+    mockService.getOAuthAuthorizationUrl.mockReturnValue(
+      "https://example.com/auth",
+    );
     POST = (await import("../route")).POST;
   });
 
   it("should return authorization URL and state for a valid provider (Google)", async () => {
-    mockSignInWithOAuth.mockResolvedValue({
-      data: { url: "https://example.com/auth" },
-      error: null,
-    });
     const requestBody = JSON.stringify({ provider: OAuthProvider.GOOGLE });
     const request = new Request("http://localhost/api/auth/oauth", {
       method: "POST",
@@ -117,18 +119,14 @@ describe("POST /api/auth/oauth", () => {
     const responseBody = await response.json();
 
     expect(response.status).toBe(200);
-    expect(responseBody).toHaveProperty("url", "https://example.com/auth");
-    expect(responseBody).toHaveProperty("state");
+    expect(responseBody).toEqual({ url: "https://example.com/auth", state: expect.any(String) });
     const returnedState = responseBody.state;
 
-    expect(mockSignInWithOAuth).toHaveBeenCalledWith({
-      provider: OAuthProvider.GOOGLE,
-      options: {
-        redirectTo: "http://localhost:3000/api/auth/oauth/callback",
-        scopes: "profile email",
-        state: returnedState,
-      },
-    });
+    expect(mockService.configureOAuthProvider).toHaveBeenCalled();
+    expect(mockService.getOAuthAuthorizationUrl).toHaveBeenCalledWith(
+      OAuthProvider.GOOGLE,
+      returnedState,
+    );
 
     // Check cookie
     expect(mockCookies.has(`oauth_state_${OAuthProvider.GOOGLE}`)).toBe(true);
@@ -157,7 +155,7 @@ describe("POST /api/auth/oauth", () => {
     expect(response.status).toBe(400);
     expect(responseBody).toHaveProperty("error");
     expect(responseBody.error).toContain("provider"); // Zod error message
-    expect(mockSignInWithOAuth).not.toHaveBeenCalled();
+    expect(mockService.configureOAuthProvider).not.toHaveBeenCalled();
   });
 
   it("should return 400 if provider is invalid", async () => {
@@ -174,7 +172,7 @@ describe("POST /api/auth/oauth", () => {
     expect(response.status).toBe(400);
     expect(responseBody).toHaveProperty("error");
     expect(responseBody.error).toContain("provider"); // Zod error message
-    expect(mockSignInWithOAuth).not.toHaveBeenCalled();
+    expect(mockService.configureOAuthProvider).not.toHaveBeenCalled();
   });
 
   it("should return 400 if provider is not enabled (e.g., Facebook)", async () => {
@@ -193,7 +191,7 @@ describe("POST /api/auth/oauth", () => {
       "error",
       "Provider not supported or not enabled.",
     );
-    expect(mockSignInWithOAuth).not.toHaveBeenCalled();
+    expect(mockService.configureOAuthProvider).not.toHaveBeenCalled();
   });
 
   it("should handle JSON parsing errors", async () => {
@@ -211,7 +209,7 @@ describe("POST /api/auth/oauth", () => {
     expect(responseBody).toHaveProperty("error");
     // Error message might vary depending on the runtime
     expect(responseBody.error).toMatch(/unexpected token|invalid json/i); // More flexible check
-    expect(mockSignInWithOAuth).not.toHaveBeenCalled();
+    expect(mockService.configureOAuthProvider).not.toHaveBeenCalled();
   });
 
   // Note: Testing disallowed methods (GET, PUT, etc.) is typically handled
