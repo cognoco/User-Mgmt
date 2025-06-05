@@ -1,9 +1,18 @@
-import { SupabaseClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { IResourceRelationshipDataProvider } from '@/core/resource-relationship/IResourceRelationshipDataProvider';
 import type { ResourceRelationship, CreateRelationshipPayload } from '@/core/resource-relationship/models';
 
+/**
+ * Supabase implementation of {@link IResourceRelationshipDataProvider}.
+ * Handles hierarchical resource relationships stored in the
+ * `resource_relationships` table.
+ */
 export class SupabaseResourceRelationshipProvider implements IResourceRelationshipDataProvider {
-  constructor(private supabase: SupabaseClient) {}
+  private supabase: SupabaseClient;
+
+  constructor(supabaseUrl: string, supabaseKey: string) {
+    this.supabase = createClient(supabaseUrl, supabaseKey);
+  }
 
   private map(row: any): ResourceRelationship {
     return {
@@ -25,9 +34,11 @@ export class SupabaseResourceRelationshipProvider implements IResourceRelationsh
         child_type: payload.childType,
         child_id: payload.childId,
         relationship_type: payload.relationshipType,
+        created_by: payload.createdBy,
       })
       .select('*')
       .single();
+
     if (error || !data) {
       throw new Error(error?.message || 'failed to create relationship');
     }
@@ -41,7 +52,7 @@ export class SupabaseResourceRelationshipProvider implements IResourceRelationsh
       .eq('parent_type', parentType)
       .eq('parent_id', parentId);
     if (error || !data) return [];
-    return data.map((r: any) => this.map(r));
+    return data.map(r => this.map(r));
   }
 
   async getParentRelationships(childType: string, childId: string): Promise<ResourceRelationship[]> {
@@ -51,10 +62,15 @@ export class SupabaseResourceRelationshipProvider implements IResourceRelationsh
       .eq('child_type', childType)
       .eq('child_id', childId);
     if (error || !data) return [];
-    return data.map((r: any) => this.map(r));
+    return data.map(r => this.map(r));
   }
 
-  async removeRelationship(parentType: string, parentId: string, childType: string, childId: string): Promise<boolean> {
+  async removeRelationship(
+    parentType: string,
+    parentId: string,
+    childType: string,
+    childId: string,
+  ): Promise<boolean> {
     const { error } = await this.supabase
       .from('resource_relationships')
       .delete()
