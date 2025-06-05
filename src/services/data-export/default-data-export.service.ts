@@ -7,6 +7,7 @@ import {
   getUserDataExportById,
   getUserDataExportByToken,
   getUserExportDownloadUrl,
+  isUserRateLimited,
 } from '@/lib/exports/export.service';
 import type {
   ExportOptions,
@@ -45,5 +46,9 @@ export class DefaultDataExportService implements DataExportService {
 
   getUserExportDownloadUrl(filePath: string): string {
     return getUserExportDownloadUrl(filePath);
+  }
+
+  isUserRateLimited(userId: string): Promise<boolean> {
+    return isUserRateLimited(userId);
   }
 }

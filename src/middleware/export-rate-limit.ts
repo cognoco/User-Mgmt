@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isUserRateLimited } from '@/lib/exports/export.service';
+import { getApiDataExportService } from '@/services/data-export';
 import { isCompanyRateLimited } from '@/lib/exports/company-export.service';
 
 /**
@@ -8,7 +8,8 @@ import { isCompanyRateLimited } from '@/lib/exports/company-export.service';
  * @returns Boolean indicating if user is rate limited
  */
 export async function checkUserExportRateLimit(userId: string): Promise<boolean> {
-  return isUserRateLimited(userId);
+  const service = getApiDataExportService();
+  return service.isUserRateLimited(userId);
 }
 
 /**
