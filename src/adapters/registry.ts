@@ -22,6 +22,7 @@ import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import type { ITwoFactorDataProvider } from '@/core/two-factor/ITwoFactorDataProvider';
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
 import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
+import { IDataExportDataProvider } from '@/core/data-export/IDataExportDataProvider';
 
 
 
@@ -107,6 +108,11 @@ export interface AdapterFactory {
    * Create an API key data provider
    */
   createApiKeyProvider(): ApiKeyDataProvider;
+
+  /**
+   * Create a data export provider
+   */
+  createDataExportProvider?(): IDataExportDataProvider;
 
   /**
    * Create a webhook data provider
