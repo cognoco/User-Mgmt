@@ -56,6 +56,7 @@ export interface ServiceContainer {
   address?: CompanyAddressService;
   companyNotification?: import("@/core/company-notification/interfaces").CompanyNotificationService;
   resourceRelationship?: ResourceRelationshipService;
+  oauth?: import('@/core/oauth/interfaces').OAuthService;
 }
 
 /**
@@ -151,11 +152,12 @@ export interface ServiceConfig {
    * Custom role service implementation
    */
   roleService?: RoleService;
-  
+
   /**
    * Custom address service implementation (for company addresses)
    */
   addressService?: CompanyAddressService;
+  oauthService?: import('@/core/oauth/interfaces').OAuthService;
   companyNotificationService?: import("@/core/company-notification/interfaces").CompanyNotificationService;
 
   /**
