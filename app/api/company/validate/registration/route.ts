@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getServiceSupabase } from '@/lib/database/supabase';
+import { getApiCompanyService } from '@/services/company/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { createApiHandler } from '@/lib/api/route-helpers';
 import { createSuccessResponse } from '@/lib/api/common';
@@ -62,9 +62,9 @@ async function handlePost(
   }
 
   try {
-    const supabaseService = getServiceSupabase();
+    const companyService = getApiCompanyService();
     const userId = auth.userId!;
-    const companyProfile = await services.addressService.getProfileByUserId(userId);
+    const companyProfile = await companyService.getProfileByUserId(userId);
     if (!companyProfile) {
       return NextResponse.json({ error: 'Company profile not found' }, { status: 404 });
     }
@@ -84,15 +84,12 @@ async function handlePost(
       };
     }
 
-    // Update company_profiles
-    await supabaseService
-      .from('company_profiles')
-      .update({
-        registration_number_verified: validationResult.isValid,
-        registration_number_last_checked: new Date().toISOString(),
-        registration_number_validation_details: validationResult.details,
-      })
-      .eq('user_id', userId);
+    // Update company profile using service layer
+    await companyService.updateProfile(companyProfile.id, {
+      registration_number_verified: validationResult.isValid,
+      registration_number_last_checked: new Date().toISOString(),
+      registration_number_validation_details: validationResult.details,
+    } as any);
 
     return createSuccessResponse({
       status: validationResult.status,
