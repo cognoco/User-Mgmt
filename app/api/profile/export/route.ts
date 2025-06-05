@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { supabase } from '@/lib/supabase';
 import { middleware } from '@/middleware';
 import { withExportRateLimit } from '@/middleware/export-rate-limit';
 import {
@@ -11,7 +10,8 @@ import {
   createUserDataExport,
   processUserDataExport,
   getUserExportData,
-  checkUserExportStatus
+  checkUserExportStatus,
+  getUserDataExportById
 } from '@/lib/exports/export.service';
 import { logUserAction } from '@/lib/audit/auditLogger';
 
@@ -180,32 +180,3 @@ async function handleImmediateExport(req: NextRequest) {
   }
 }
 
-/**
- * Helper to get user export by ID
- */
-async function getUserDataExportById(exportId: string) {
-  const { data, error } = await supabase
-    .from('user_data_exports')
-    .select('*')
-    .eq('id', exportId)
-    .single();
-  
-  if (error || !data) return null;
-  
-  return {
-    id: data.id,
-    userId: data.user_id,
-    format: data.format,
-    status: data.status,
-    filePath: data.file_path,
-    downloadToken: data.download_token,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
-    completedAt: data.completed_at,
-    expiresAt: data.expires_at,
-    errorMessage: data.error_message,
-    fileSizeBytes: data.file_size_bytes,
-    isLargeDataset: data.is_large_dataset,
-    notificationSent: data.notification_sent
-  };
-}
