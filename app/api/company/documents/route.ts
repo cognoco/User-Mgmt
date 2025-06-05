@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { getServiceSupabase } from "@/lib/database/supabase";
+import { getApiCompanyService } from "@/services/company/factory";
 import { type RouteAuthContext } from "@/middleware/auth";
 import { withSecurity } from "@/middleware/with-security";
 import { createApiHandler } from "@/lib/api/route-helpers";
@@ -44,10 +44,10 @@ async function handlePost(
   data: DocumentUploadRequest,
 ) {
   try {
-    const supabaseService = getServiceSupabase();
+    const companyService = getApiCompanyService();
     const userId = auth.userId!;
 
-    const companyProfile = await services.addressService.getProfileByUserId(userId);
+    const companyProfile = await companyService.getProfileByUserId(userId);
 
     if (!companyProfile) {
       throw createNotFoundError("Company profile");
@@ -68,43 +68,13 @@ async function handlePost(
     const fileBuffer = Buffer.from(file.base64.split(",")[1], "base64");
     const filePath = `companies/${companyProfile.id}/documents/${Date.now()}-${file.name}`;
 
-    const { error: uploadError } = await supabaseService.storage
-      .from("company-documents")
-      .upload(filePath, fileBuffer, {
-        contentType: file.type,
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error("File upload error:", uploadError);
-      throw createServerError("Failed to upload file");
-    }
-
-    // 7. Create Document Record
-    const { data: document, error: documentError } = await supabaseService
-      .from("company_documents")
-      .insert({
-        company_id: companyProfile.id,
-        type,
-        filename: file.name,
-        file_path: filePath,
-        mime_type: file.type,
-        size_bytes: file.size,
-        uploaded_by: userId,
-        status: "pending",
-      })
-      .select()
-      .single();
-
-    if (documentError) {
-      // Cleanup uploaded file if record creation fails
-      await supabaseService.storage
-        .from("company-documents")
-        .remove([filePath]);
-
-      console.error("Document record creation error:", documentError);
-      throw createServerError("Failed to create document record");
-    }
+    const document = await companyService.uploadDocument(companyProfile.id, filePath, {
+      type,
+      filename: file.name,
+      mimeType: file.type,
+      size: file.size,
+      uploadedBy: userId,
+    });
 
     return createSuccessResponse(document, 201);
   } catch (error) {
@@ -118,14 +88,12 @@ async function handleGet(
   request: NextRequest,
   auth: RouteAuthContext,
   _data: unknown,
-  services: any
 ) {
   try {
-    const supabaseService = getServiceSupabase();
+    const companyService = getApiCompanyService();
     const userId = auth.userId!;
 
-    // 3. Get Company Profile
-    const companyProfile = await services.addressService.getProfileByUserId(userId);
+    const companyProfile = await companyService.getProfileByUserId(userId);
 
     if (!companyProfile) {
       throw createNotFoundError("Company profile");
@@ -142,70 +110,15 @@ async function handleGet(
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit - 1;
 
-    let query = supabaseService
-      .from("company_documents")
-      .select("*", { count: "exact" })
-      .eq("company_id", companyProfile.id)
-      .order("created_at", { ascending: false });
-
-    if (type) {
-      query = query.eq("type", type);
-    }
-
-    const {
-      data: documents,
-      error: documentsError,
-      count,
-    } = await Promise.race([
-      query.range(startIndex, endIndex),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Database query timeout")), 5000),
-      ),
-    ]);
-
-    if (documentsError) {
-      console.error("Error fetching documents:", documentsError);
-      throw createServerError("Failed to fetch documents");
-    }
+    const { documents, count } = await companyService.listDocuments(companyProfile.id, {
+      start: startIndex,
+      end: endIndex,
+      type,
+    });
 
     const generateSignedUrl = async (doc: any) => {
-      try {
-        const { data, error: signedUrlError } = await Promise.race([
-          supabaseService.storage
-            .from("company-documents")
-            .createSignedUrl(doc.file_path, 3600),
-          new Promise<never>((_, reject) =>
-            setTimeout(
-              () => reject(new Error("Storage operation timeout")),
-              3000,
-            ),
-          ),
-        ]);
-
-        if (signedUrlError || !data) {
-          console.error("Error getting signed URL:", signedUrlError);
-          return {
-            ...doc,
-            signedUrl: null,
-            error: signedUrlError?.message || "Failed to generate URL",
-          };
-        }
-
-        return {
-          ...doc,
-          signedUrl: data.signedUrl,
-        };
-      } catch (error) {
-        console.error(
-          `Error generating signed URL for ${doc.file_path}:`,
-          error,
-        );
-        return {
-          ...doc,
-          signedUrl: null,
-          error: error instanceof Error ? error.message : "Unknown error",
-        };
-      }
+      const url = await companyService.createSignedUrl(doc.file_path, 3600);
+      return { ...doc, signedUrl: url };
     };
 
     const documentsWithUrls = [] as any[];
@@ -235,7 +148,7 @@ async function handleGet(
 export const POST = withSecurity((req: NextRequest) =>
   createApiHandler(
     DocumentUploadSchema,
-    (r, a, d, services) => handlePost(r, a, d, services),
+    (r, a, d) => handlePost(r, a, d),
     { requireAuth: true }
   )(req)
 );
@@ -243,7 +156,7 @@ export const POST = withSecurity((req: NextRequest) =>
 export const GET = withSecurity((req: NextRequest) =>
   createApiHandler(
     z.object({}),
-    (r, a, d, services) => handleGet(r as NextRequest, a, services),
+    (r, a, d) => handleGet(r as NextRequest, a, d),
     { requireAuth: true }
   )(req)
 );

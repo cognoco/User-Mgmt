@@ -44,3 +44,35 @@ describe('DefaultCompanyService.getProfileByUserId', () => {
     await expect(service.getProfileByUserId('u1')).rejects.toThrow('Failed to fetch company profile');
   });
 });
+
+describe('DefaultCompanyService profile operations', () => {
+  it('creates profile', async () => {
+    const supabase = getServiceSupabase();
+    (supabase.from('company_profiles').insert as any).mockReturnValue({
+      select: vi.fn(() => ({ single: vi.fn().mockResolvedValue({ data: { id: 'c1' }, error: null }) }))
+    });
+    const service = new DefaultCompanyService();
+    const result = await service.createProfile('u1', { name: 'C', legal_name: 'C', industry: 'Tech', size_range: '1-10', founded_year: 2020 });
+    expect(result).toEqual({ id: 'c1' });
+  });
+
+  it('lists domains', async () => {
+    const supabase = getServiceSupabase();
+    (supabase.from('company_domains').select as any).mockReturnValue({
+      eq: vi.fn(() => ({ order: vi.fn(() => ({ order: vi.fn().mockResolvedValue({ data: [], error: null }) })) }))
+    });
+    const service = new DefaultCompanyService();
+    const result = await service.listDomains('comp1');
+    expect(Array.isArray(result)).toBe(true);
+  });
+
+  it('gets domain by id', async () => {
+    const supabase = getServiceSupabase();
+    (supabase.from('company_domains').select as any).mockReturnValue({
+      eq: vi.fn(() => ({ single: vi.fn().mockResolvedValue({ data: { id: 'd1' }, error: null }) }))
+    });
+    const service = new DefaultCompanyService();
+    const result = await service.getDomainById('d1');
+    expect(result).toEqual({ id: 'd1' });
+  });
+});
