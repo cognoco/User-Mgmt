@@ -6,9 +6,9 @@
  * the contract that any implementation must fulfill.
  */
 
-import { 
-  UserProfile, 
-  ProfileUpdatePayload, 
+import {
+  UserProfile,
+  ProfileUpdatePayload,
   UserPreferences,
   PreferencesUpdatePayload,
   UserProfileResult,
@@ -16,6 +16,11 @@ import {
   UserSearchResult,
   ProfileVisibility
 } from './models';
+import type {
+  FileUploadOptions,
+  FileUploadResult,
+  FileDeleteResult
+} from '@/core/storage/interfaces';
 
 /**
  * Core user management service interface
@@ -79,6 +84,34 @@ export interface UserService {
    * @returns Result object with success status or error
    */
   deleteProfilePicture(userId: string): Promise<{ success: boolean; error?: string }>;
+
+  /**
+   * Upload a company logo for a corporate profile
+   *
+   * @param userId ID of the user performing the upload
+   * @param companyId ID of the company the logo belongs to
+   * @param fileBuffer Raw file contents
+   * @param options Optional upload configuration
+   * @returns Result object with upload details including the public URL
+   */
+  uploadCompanyLogo(
+    userId: string,
+    companyId: string,
+    fileBuffer: ArrayBuffer,
+    options?: FileUploadOptions
+  ): Promise<FileUploadResult>;
+
+  /**
+   * Delete the logo for a company profile
+   *
+   * @param userId ID of the user performing the delete
+   * @param companyId ID of the company whose logo should be deleted
+   * @returns Result object describing the delete outcome
+   */
+  deleteCompanyLogo(
+    userId: string,
+    companyId: string
+  ): Promise<FileDeleteResult>;
   
   /**
    * Update a user's profile visibility settings

@@ -9,9 +9,9 @@ import {
   UserService
 } from '@/core/user/interfaces';
 import type { UserDataProvider } from '@/core/user/IUserDataProvider';
-import { 
-  UserProfile, 
-  ProfileUpdatePayload, 
+import {
+  UserProfile,
+  ProfileUpdatePayload,
   UserPreferences,
   PreferencesUpdatePayload,
   UserProfileResult,
@@ -19,6 +19,11 @@ import {
   UserSearchResult,
   ProfileVisibility
 } from '@/core/user/models';
+import type {
+  FileUploadOptions,
+  FileUploadResult,
+  FileDeleteResult
+} from '@/core/storage/interfaces';
 import { UserEventType } from '@/core/user/events';
 import { TypedEventEmitter } from '@/lib/utils/typed-event-emitter';
 import { MemoryCache, getFromBrowser, setInBrowser, removeFromBrowser } from '@/lib/cache';
@@ -189,6 +194,22 @@ export class DefaultUserService
       });
     }
     return result;
+  }
+
+  async uploadCompanyLogo(
+    _userId: string,
+    _companyId: string,
+    _fileBuffer: ArrayBuffer,
+    _options?: FileUploadOptions
+  ): Promise<FileUploadResult> {
+    throw new Error('Method not implemented.');
+  }
+
+  async deleteCompanyLogo(
+    _userId: string,
+    _companyId: string
+  ): Promise<FileDeleteResult> {
+    throw new Error('Method not implemented.');
   }
 
   /**

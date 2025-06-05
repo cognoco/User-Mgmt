@@ -9,6 +9,11 @@ import {
   UserSearchResult,
   ProfileVisibility
 } from '@/core/user/models';
+import type {
+  FileUploadOptions,
+  FileUploadResult,
+  FileDeleteResult
+} from '@/core/storage/interfaces';
 
 /**
  * API-based implementation of {@link UserService} for client-side usage.
@@ -131,6 +136,22 @@ export class ApiUserService implements UserService {
     if (res.status === 204) return { success: true };
     const data = await res.json();
     return { success: res.ok, error: data.error };
+  }
+
+  async uploadCompanyLogo(
+    _userId: string,
+    _companyId: string,
+    _fileBuffer: ArrayBuffer,
+    _options?: FileUploadOptions
+  ): Promise<FileUploadResult> {
+    throw new Error('Method not implemented.');
+  }
+
+  async deleteCompanyLogo(
+    _userId: string,
+    _companyId: string
+  ): Promise<FileDeleteResult> {
+    throw new Error('Method not implemented.');
   }
 
   /**
