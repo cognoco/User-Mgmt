@@ -166,6 +166,34 @@ export class DefaultTwoFactorService implements TwoFactorService {
     return { success: true, codes };
   }
 
+  async verifyBackupCode(userId: string, code: string): Promise<TwoFactorVerifyResponse> {
+    const supabase = getServiceSupabase();
+    const { data: { user }, error } = await supabase.auth.admin.getUserById(userId);
+    if (error || !user) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    const storedCodes: string[] = user.user_metadata?.backupCodes || [];
+    if (!storedCodes.length) {
+      return { success: false, error: 'No backup codes found. Please generate new codes.' };
+    }
+
+    const codeHash = this.hashCode(code.replace(/-/g, '').toUpperCase());
+    const storedHashes = storedCodes.map(c => this.hashCode(c.replace(/-/g, '').toUpperCase()));
+    const matchIdx = storedHashes.findIndex(h => h === codeHash);
+    if (matchIdx === -1) {
+      return { success: false, error: 'Invalid backup code.' };
+    }
+
+    const updatedCodes = [...storedCodes];
+    updatedCodes.splice(matchIdx, 1);
+    const { error: updateError } = await supabase.auth.admin.updateUserById(userId, { user_metadata: { backupCodes: updatedCodes } });
+    if (updateError) {
+      return { success: false, error: updateError.message };
+    }
+    return { success: true };
+  }
+
   private generateBackupCodes(count = 10, length = 8): string[] {
     const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const codes: string[] = [];
@@ -178,6 +206,10 @@ export class DefaultTwoFactorService implements TwoFactorService {
       codes.push(`${code.slice(0,4)}-${code.slice(4)}`);
     }
     return codes;
+  }
+
+  private hashCode(code: string): string {
+    return crypto.createHash('sha256').update(code).digest('hex');
   }
 
   async startWebAuthnRegistration(userId: string): Promise<TwoFactorSetupResponse> {
