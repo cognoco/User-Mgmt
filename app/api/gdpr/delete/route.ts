@@ -12,11 +12,6 @@ export const POST = createApiHandler(
 
     // 2. Password Confirmation (Recommended for real implementation)
     // In a real app, you'd likely require the user to re-enter their password here.
-    // const { password } = await request.json();
-    // const { error: signInError } = await supabaseService.auth.signInWithPassword({ email: user.email, password });
-    // if (signInError) {
-    //   return NextResponse.json({ error: 'Invalid password' }, { status: 403 });
-    // }
 
     try {
       const result = await services.gdpr.deleteAccount(authContext.userId);
