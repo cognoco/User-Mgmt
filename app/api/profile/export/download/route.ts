@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logUserAction } from '@/lib/audit/auditLogger';
-import { getUserDataExportByToken, getUserExportDownloadUrl } from '@/lib/exports/export.service';
+import { getApiDataExportService } from '@/services/data-export';
 import { ExportStatus } from '@/lib/exports/types';
 
 /**
@@ -11,13 +11,15 @@ export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const token = url.searchParams.get('token');
+
+    const service = getApiDataExportService();
     
     if (!token) {
       return NextResponse.json({ error: 'Missing download token' }, { status: 400 });
     }
     
     // Get the export record using the token
-    const exportRecord = await getUserDataExportByToken(token);
+    const exportRecord = await service.getUserDataExportByToken(token);
     
     if (!exportRecord) {
       return NextResponse.json({ 
@@ -36,7 +38,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Export file not found' }, { status: 404 });
     }
     
-    const downloadUrl = getUserExportDownloadUrl(exportRecord.filePath);
+    const downloadUrl = service.getUserExportDownloadUrl(exportRecord.filePath);
     const response = await fetch(downloadUrl);
     if (!response.ok) {
       return NextResponse.json({ error: 'Failed to download file' }, { status: 500 });

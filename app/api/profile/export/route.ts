@@ -6,13 +6,7 @@ import {
   ExportFormat,
   ExportStatus
 } from '@/lib/exports/types';
-import {
-  createUserDataExport,
-  processUserDataExport,
-  getUserExportData,
-  checkUserExportStatus,
-  getUserDataExportById
-} from '@/lib/exports/export.service';
+import { getApiDataExportService } from '@/services/data-export';
 import { logUserAction } from '@/lib/audit/auditLogger';
 
 // Request schema for export options
@@ -31,6 +25,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const service = getApiDataExportService();
+
   const url = new URL(req.url);
   const exportId = url.searchParams.get('id');
 
@@ -40,11 +36,11 @@ export async function GET(req: NextRequest) {
   }
 
   // Check export status
-  const statusResponse = await checkUserExportStatus(exportId);
+  const statusResponse = await service.checkUserExportStatus(exportId);
   
   // Ensure the user can only access their own exports
   if (statusResponse.status !== ExportStatus.FAILED) {
-    const userExport = await getUserDataExportById(exportId);
+    const userExport = await service.getUserDataExportById(exportId);
     if (!userExport || userExport.userId !== user.id) {
       return NextResponse.json({ error: 'Export not found' }, { status: 404 });
     }
@@ -91,7 +87,8 @@ export const POST = middleware(['cors', 'csrf'], async (req: NextRequest) => {
         });
         
         // Create export record
-        const exportRecord = await createUserDataExport(user.id);
+        const service = getApiDataExportService();
+        const exportRecord = await service.createUserDataExport(user.id);
         
         if (!exportRecord) {
           return NextResponse.json({ error: 'Failed to create export request' }, { status: 500 });
@@ -101,7 +98,7 @@ export const POST = middleware(['cors', 'csrf'], async (req: NextRequest) => {
         // For large datasets, process asynchronously (background job will handle it)
         if (!exportRecord.isLargeDataset) {
           // Start processing in the background without awaiting
-          processUserDataExport(exportRecord.id, user.id).catch(error => {
+          service.processUserDataExport(exportRecord.id, user.id).catch(error => {
             console.error('Background export processing error:', error);
           });
         }
@@ -133,9 +130,10 @@ export const POST = middleware(['cors', 'csrf'], async (req: NextRequest) => {
  */
 async function handleImmediateExport(req: NextRequest) {
   const user = (req as any).user;
+  const service = getApiDataExportService();
   
   try {
-    const exportData = await getUserExportData(user.id);
+    const exportData = await service.getUserExportData(user.id);
     if (!exportData) {
       return NextResponse.json({ error: 'Failed to export data' }, { status: 500 });
     }
