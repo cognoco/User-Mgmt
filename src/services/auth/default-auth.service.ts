@@ -50,6 +50,7 @@ export class DefaultAuthService
   implements AuthService {
   private user: User | null = null;
   private token: string | null = null;
+  private tokenExpiry: number | null = null;
 
   private readonly sessionTracker: SessionTracker;
   private readonly mfaHandler: MFAHandler;
@@ -77,6 +78,7 @@ export class DefaultAuthService
     const storedToken = this.storage.getItem(TOKEN_KEY);
     if (storedToken) {
       this.token = storedToken;
+      this.tokenExpiry = Date.now() + authConfig.tokenExpiryDays * 24 * 60 * 60 * 1000;
       this.sessionTracker.initializeSessionCheck();
       this.sessionTracker.initializeTokenRefresh(
         Date.now() + authConfig.tokenExpiryDays * 24 * 60 * 60 * 1000,
@@ -86,6 +88,7 @@ export class DefaultAuthService
 
   private persistToken(token: string | null, expiresAt?: number): void {
     this.token = token;
+    this.tokenExpiry = expiresAt ?? null;
     if (token) {
       this.storage.setItem(TOKEN_KEY, token);
       this.sessionTracker.updateLastActivity();
@@ -95,6 +98,7 @@ export class DefaultAuthService
     } else {
       this.storage.removeItem(TOKEN_KEY);
       this.storage.removeItem(LAST_ACTIVITY_KEY);
+      this.tokenExpiry = null;
     }
   }
 
@@ -505,6 +509,10 @@ export class DefaultAuthService
       this.handleSessionTimeout();
       return false;
     }
+  }
+
+  getTokenExpiry(): number | null {
+    return this.tokenExpiry;
   }
 
   handleSessionTimeout(): void {
