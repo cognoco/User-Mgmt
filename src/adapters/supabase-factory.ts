@@ -20,6 +20,7 @@ import { ApiKeyDataProvider } from './api-keys/interfaces';
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
 import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
+import type { ITwoFactorDataProvider } from '@/core/two-factor/ITwoFactorDataProvider';
 
 
 // Import domain-specific factories
@@ -36,6 +37,7 @@ import createSupabaseSubscriptionProvider from './subscription/factory';
 import createSupabaseApiKeyProvider from './api-keys/supabase/factory';
 import { createSupabaseWebhookProvider } from './webhooks';
 import createSupabaseAdminProvider from './admin/supabase/factory';
+import createSupabaseTwoFactorProvider from './two-factor/factory';
 
 
 /**
@@ -129,6 +131,13 @@ export class SupabaseAdapterFactory implements AdapterFactory {
    */
   createSessionProvider(): SessionDataProvider {
     return createSupabaseSessionProvider(this.options);
+  }
+
+  /**
+   * Create a Supabase two-factor provider
+   */
+  createTwoFactorProvider(): ITwoFactorDataProvider {
+    return createSupabaseTwoFactorProvider(this.options);
   }
 
   /**

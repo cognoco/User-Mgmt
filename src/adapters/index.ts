@@ -16,6 +16,7 @@ export * from './notification';
 export * from './gdpr';
 export * from './consent';
 export * from './session';
+export * from './two-factor';
 export * from './subscription';
 export * from './organization';
 export * from './admin';
