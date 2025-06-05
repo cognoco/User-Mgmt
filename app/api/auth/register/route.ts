@@ -1,7 +1,5 @@
 import { z } from 'zod';
 import { createApiHandler } from '@/lib/api/route-helpers';
-import { logUserAction } from '@/lib/audit/auditLogger';
-import { associateUserWithCompanyByDomain } from '@/lib/auth/domainMatcher';
 import { User } from '@/core/auth/models';
 import {
   createSuccessResponse,
@@ -26,19 +24,6 @@ interface ExtendedRegistrationPayload {
   companySize?: string;
   position?: string;
   metadata?: Record<string, any>;
-}
-
-// Extended AuthResult that includes user field
-interface ExtendedAuthResult {
-  success: boolean;
-  error?: string;
-  code?: 'EMAIL_NOT_VERIFIED' | 'INVALID_CREDENTIALS' | 'RATE_LIMIT_EXCEEDED' | 'MFA_REQUIRED';
-  requiresMfa?: boolean;
-  token?: string;
-  retryAfter?: number;
-  remainingAttempts?: number;
-  user?: User;
-  requiresEmailConfirmation?: boolean;
 }
 
 // Zod schema for registration data
@@ -92,11 +77,13 @@ const RegistrationSchema = z.discriminatedUnion('userType', [
 export const POST = createApiHandler(
   RegistrationSchema,
   async (request, _authContext, regData, services) => {
-    // Get IP and User Agent for logging
-    const ipAddress = request.headers.get('x-forwarded-for') || 
-                     request.headers.get('x-real-ip') || 
-                     'unknown';
-    const userAgent = request.headers.get('user-agent') || 'unknown';
+    // Extract request context for the service
+    const context = {
+      ipAddress: request.headers.get('x-forwarded-for') || 
+                 request.headers.get('x-real-ip') || 
+                 'unknown',
+      userAgent: request.headers.get('user-agent') || 'unknown',
+    };
     
     // Prepare registration payload for the AuthService
     const registrationPayload = {
@@ -119,23 +106,14 @@ export const POST = createApiHandler(
       }
     };
     
-    // Call the auth service to register the user
-    const authResult = (await services.auth.register(registrationPayload)) as ExtendedAuthResult;
+    // Call the auth service with context - all business logic is now in the service
+    const authResult = await services.auth.register(registrationPayload, context);
 
-    // Handle Registration Errors
+    // Handle Registration Errors - service now handles audit logging and company association
     if (!authResult.success) {
-      // Log the failed registration attempt
-      await logUserAction({
-        action: 'REGISTER_FAILURE',
-        status: 'FAILURE',
-        ipAddress,
-        userAgent,
-        targetResourceType: 'auth',
-        targetResourceId: regData.email,
-        details: { reason: authResult.error }
-      });
-
-      // Handle specific error cases
+      console.error('Registration error:', authResult.error);
+      
+      // Handle specific error cases based on service classification
       if (authResult.error?.includes('already exists')) {
         throw createUserAlreadyExistsError(regData.email);
       }
@@ -148,47 +126,14 @@ export const POST = createApiHandler(
       );
     }
 
-    // Handle Success
+    // Handle Success - service now includes all necessary data
     if (!authResult.user) {
-      // Log the unexpected error
-      await logUserAction({
-        action: 'REGISTER_UNEXPECTED_ERROR',
-        status: 'FAILURE',
-        ipAddress,
-        userAgent,
-        targetResourceType: 'auth',
-        targetResourceId: regData.email,
-        details: { message: 'Registration successful but no user data returned' }
-      });
-      
       console.error('Registration successful but no user data returned');
       throw new ApiError(
         ERROR_CODES.INTERNAL_ERROR,
         'Registration failed unexpectedly',
         500
       );
-    }
-
-    // Log successful registration
-    await logUserAction({
-      userId: authResult.user.id,
-      action: 'REGISTER_SUCCESS',
-      status: 'SUCCESS',
-      ipAddress,
-      userAgent,
-      targetResourceType: 'auth',
-      targetResourceId: authResult.user.id,
-      details: { email: authResult.user.email }
-    });
-
-    // Attempt to associate with company by domain (if applicable)
-    if (authResult.user.email) {
-      try {
-        await associateUserWithCompanyByDomain(authResult.user.id, authResult.user.email);
-      } catch (error) {
-        console.warn('Failed to associate user with company by domain:', error);
-        // Non-critical error, continue with registration success
-      }
     }
 
     console.log('Registration successful for:', regData.email);

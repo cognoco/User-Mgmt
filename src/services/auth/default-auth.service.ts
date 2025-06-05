@@ -4,7 +4,7 @@
  * Provides business logic around the {@link AuthDataProvider} while exposing
  * the {@link AuthService} interface used throughout the application.
  */
-import { AuthService } from '@/core/auth/interfaces';
+import { AuthService, RequestContext } from '@/core/auth/interfaces';
 import type { AuthDataProvider } from '@/adapters/auth/interfaces';
 import {
   AuthResult,
@@ -39,7 +39,9 @@ import { DefaultSessionTracker, type SessionTracker } from './session-tracker';
 import { DefaultMFAHandler, type MFAHandler } from './mfa-handler';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { authConfig } from '@/lib/auth/config';
-import { withRetry, isNetworkError } from '@/lib/utils';
+import { withRetry } from '@/lib/utils/retry';
+import { isNetworkError } from '@/lib/utils/error';
+import { associateUserWithCompanyByDomain } from '@/lib/auth/domainMatcher';
 
 /** Keys used for persisting auth data */
 const TOKEN_KEY = 'auth_token';
@@ -117,11 +119,18 @@ export class DefaultAuthService
     }
   }
 
-  async login(credentials: LoginPayload): Promise<AuthResult> {
+  async login(credentials: LoginPayload): Promise<AuthResult>;
+  async login(credentials: LoginPayload, context?: RequestContext): Promise<AuthResult> {
     const parsed = loginSchema.safeParse(credentials);
     if (!parsed.success) {
       const message = parsed.error.errors[0]?.message || 'Invalid credentials';
-      await this.logAction({ action: 'LOGIN', status: 'FAILURE', details: { error: message } });
+      await this.logAction({ 
+        action: 'LOGIN', 
+        status: 'FAILURE', 
+        details: { error: message },
+        ipAddress: context?.ipAddress,
+        userAgent: context?.userAgent
+      });
       return { success: false, error: message };
     }
 
@@ -130,36 +139,68 @@ export class DefaultAuthService
         () => this.provider.login(credentials),
         { retries: 1, isRetryable: isNetworkError },
       );
+      
       if (result.success) {
         this.user = result.user ?? null;
         this.persistToken(
           result.token ?? null,
           Date.now() + authConfig.tokenExpiryDays * 24 * 60 * 60 * 1000,
         );
+        
+        // Set expiration time in result
+        result.expiresAt = Date.now() + authConfig.tokenExpiryDays * 24 * 60 * 60 * 1000;
+        
         this.emit({
           type: 'user_logged_in',
           timestamp: Date.now(),
           user: this.user!,
           remembered: credentials.rememberMe ?? false,
         });
+        
         await this.logAction({
           userId: this.user?.id,
           action: 'LOGIN',
           status: 'SUCCESS',
           targetResourceType: 'user',
           targetResourceId: this.user?.id,
+          ipAddress: context?.ipAddress,
+          userAgent: context?.userAgent
         });
+        
+        // Check if user has MFA enabled and include in result
+        if (this.user) {
+          result.requiresMfa = this.user.mfaEnabled ?? false;
+        }
       } else {
         this.user = null;
         this.persistToken(null);
-        await this.logAction({ action: 'LOGIN', status: 'FAILURE', details: { error: result.error } });
+        await this.logAction({ 
+          action: 'LOGIN', 
+          status: 'FAILURE', 
+          details: { error: result.error },
+          ipAddress: context?.ipAddress,
+          userAgent: context?.userAgent
+        });
+        
+        // Handle specific error types for better API response classification
+        if (result.error?.includes('Invalid login credentials')) {
+          result.code = 'INVALID_CREDENTIALS';
+        } else if (result.error?.includes('Email not confirmed')) {
+          result.code = 'EMAIL_NOT_VERIFIED';
+        }
       }
       return result;
     } catch (error) {
       const message = translateError(error, { defaultMessage: 'Login failed' });
       this.user = null;
       this.persistToken(null);
-      await this.logAction({ action: 'LOGIN', status: 'FAILURE', details: { error: message } });
+      await this.logAction({ 
+        action: 'LOGIN', 
+        status: 'FAILURE', 
+        details: { error: message },
+        ipAddress: context?.ipAddress,
+        userAgent: context?.userAgent
+      });
       this.emit({
         type: 'authentication_failed',
         timestamp: Date.now(),
@@ -167,15 +208,35 @@ export class DefaultAuthService
         reason: 'other',
         error: message,
       });
+      
+      // Handle rate limiting errors
+      if ((error as any)?.response?.status === 429) {
+        const retryAfter = parseInt((error as any).response.headers['retry-after'] || '900', 10) * 1000;
+        return { 
+          success: false, 
+          error: message, 
+          code: 'RATE_LIMIT_EXCEEDED',
+          retryAfter,
+          remainingAttempts: parseInt((error as any).response.headers['x-ratelimit-remaining'] || '0', 10)
+        };
+      }
+      
       return { success: false, error: message };
     }
   }
 
-  async register(userData: RegistrationPayload): Promise<AuthResult> {
+  async register(userData: RegistrationPayload): Promise<AuthResult>;
+  async register(userData: RegistrationPayload, context?: RequestContext): Promise<AuthResult> {
     const parsed = registerSchema.safeParse(userData);
     if (!parsed.success) {
       const message = parsed.error.errors[0]?.message || 'Invalid data';
-      await this.logAction({ action: 'REGISTER', status: 'FAILURE', details: { error: message } });
+      await this.logAction({ 
+        action: 'REGISTER', 
+        status: 'FAILURE', 
+        details: { error: message },
+        ipAddress: context?.ipAddress,
+        userAgent: context?.userAgent
+      });
       return { success: false, error: message };
     }
 
@@ -184,6 +245,7 @@ export class DefaultAuthService
         () => this.provider.register(userData),
         { retries: 1, isRetryable: isNetworkError },
       );
+      
       if (result.success) {
         this.emit({
           type: 'user_registered',
@@ -191,25 +253,61 @@ export class DefaultAuthService
           user: result.user!,
           requiresEmailVerification: result.code === 'EMAIL_NOT_VERIFIED',
         });
+        
         await this.logAction({
           userId: result.user?.id,
           action: 'REGISTER',
           status: 'SUCCESS',
           targetResourceType: 'user',
           targetResourceId: result.user?.id,
+          ipAddress: context?.ipAddress,
+          userAgent: context?.userAgent
         });
+        
+        // Handle company domain association if user was created successfully
+        if (result.user?.email) {
+          try {
+            await associateUserWithCompanyByDomain(result.user.id, result.user.email);
+          } catch (error) {
+            console.warn('Failed to associate user with company by domain:', error);
+            // Non-critical error, continue with registration success
+          }
+        }
+        
+        // Handle specific error types for better API response classification
+        if (result.code === 'EMAIL_NOT_VERIFIED') {
+          result.requiresEmailConfirmation = true;
+        }
       } else {
-        await this.logAction({ action: 'REGISTER', status: 'FAILURE', details: { error: result.error } });
+        await this.logAction({ 
+          action: 'REGISTER', 
+          status: 'FAILURE', 
+          details: { error: result.error },
+          ipAddress: context?.ipAddress,
+          userAgent: context?.userAgent
+        });
+        
+        // Handle specific error types for better API response classification
+        if (result.error?.includes('already exists')) {
+          // This allows API routes to handle this specific error type
+        }
       }
       return result;
     } catch (error) {
       const message = translateError(error, { defaultMessage: 'Registration failed' });
-      await this.logAction({ action: 'REGISTER', status: 'FAILURE', details: { error: message } });
+      await this.logAction({ 
+        action: 'REGISTER', 
+        status: 'FAILURE', 
+        details: { error: message },
+        ipAddress: context?.ipAddress,
+        userAgent: context?.userAgent
+      });
       return { success: false, error: message };
     }
   }
 
-  async logout(): Promise<void> {
+  async logout(): Promise<void>;
+  async logout(context?: RequestContext): Promise<void> {
     const currentUser = this.user;
     try {
       await this.provider.logout();
@@ -235,6 +333,8 @@ export class DefaultAuthService
       status: 'SUCCESS',
       targetResourceType: 'user',
       targetResourceId: currentUser?.id,
+      ipAddress: context?.ipAddress,
+      userAgent: context?.userAgent
     });
   }
 
@@ -399,22 +499,22 @@ export class DefaultAuthService
     }
   }
 
-  async verifyMFA(code: string): Promise<MFAVerifyResponse> {
-    try {
-      const res = await this.mfaHandler.verifyMFA(code);
-      if (res.success) {
-        if (res.token)
-          this.persistToken(
-            res.token,
-            Date.now() + authConfig.tokenExpiryDays * 24 * 60 * 60 * 1000,
-          );
-        this.emit({ type: 'mfa_enabled', timestamp: Date.now(), userId: this.user?.id ?? '' });
-      }
-      return res;
-    } catch (error) {
-      const message = translateError(error, { defaultMessage: 'MFA verification failed' });
-      return { success: false, error: message };
-    }
+  async verifyMFA(code: string): Promise<MFAVerifyResponse>;
+  async verifyMFA(code: string, context?: RequestContext): Promise<MFAVerifyResponse> {
+    const result = await this.mfaHandler.verifyMFA(code);
+    
+    // Log the MFA verification attempt
+    await this.logAction({
+      userId: this.user?.id,
+      action: 'MFA_VERIFY',
+      status: result.success ? 'SUCCESS' : 'FAILURE',
+      targetResourceType: 'auth',
+      targetResourceId: this.user?.id,
+      ipAddress: context?.ipAddress,
+      userAgent: context?.userAgent
+    });
+    
+    return result;
   }
 
   async disableMFA(code: string): Promise<AuthResult> {

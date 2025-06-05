@@ -17,6 +17,29 @@ import {
 import type { OAuthProvider, OAuthUserProfile, OAuthProviderConfig } from '@/types/oauth';
 import type { TwoFactorMethod } from '@/types/2fa';
 
+// Request context for API operations
+export interface RequestContext {
+  /**
+   * IP address of the requesting client
+   */
+  ipAddress?: string;
+  
+  /**
+   * User agent string from the request
+   */
+  userAgent?: string;
+  
+  /**
+   * Additional headers or metadata
+   */
+  metadata?: Record<string, string>;
+  
+  /**
+   * Callback URL for redirects
+   */
+  callbackUrl?: string;
+}
+
 // Additional interfaces for MFA operations
 export interface MfaCheckParams {
   accessToken: string;
@@ -78,6 +101,15 @@ export interface AuthService {
   login(credentials: LoginPayload): Promise<AuthResult>;
   
   /**
+   * Authenticate a user with email and password (with request context)
+   * 
+   * @param credentials Login credentials including email, password and remember me option
+   * @param context Request context for logging and audit purposes
+   * @returns Authentication result with success status and user data or error
+   */
+  login(credentials: LoginPayload, context: RequestContext): Promise<AuthResult>;
+  
+  /**
    * Register a new user
    * 
    * @param userData Registration data including email, password, name, etc.
@@ -86,9 +118,25 @@ export interface AuthService {
   register(userData: RegistrationPayload): Promise<AuthResult>;
   
   /**
+   * Register a new user (with request context)
+   * 
+   * @param userData Registration data including email, password, name, etc.
+   * @param context Request context for logging and audit purposes
+   * @returns Authentication result with success status and user data or error
+   */
+  register(userData: RegistrationPayload, context: RequestContext): Promise<AuthResult>;
+  
+  /**
    * Log out the current user
    */
   logout(): Promise<void>;
+  
+  /**
+   * Log out the current user (with request context)
+   * 
+   * @param context Request context for logging and audit purposes
+   */
+  logout(context: RequestContext): Promise<void>;
   
   /**
    * Get the currently authenticated user
@@ -194,6 +242,15 @@ export interface AuthService {
    * @returns MFA verification response with success status and token
    */
   verifyMFA(code: string): Promise<MFAVerifyResponse>;
+  
+  /**
+   * Verify a Multi-Factor Authentication code (with request context)
+   * 
+   * @param code MFA code from authenticator app
+   * @param context Request context for logging and audit purposes
+   * @returns MFA verification response with success status and token
+   */
+  verifyMFA(code: string, context: RequestContext): Promise<MFAVerifyResponse>;
   
   /**
    * Disable Multi-Factor Authentication for the current user

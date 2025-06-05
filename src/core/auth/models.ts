@@ -155,6 +155,21 @@ export interface AuthResult {
    * Number of attempts remaining (for rate limiting)
    */
   remainingAttempts?: number;
+  
+  /**
+   * User object if authentication was successful
+   */
+  user?: User;
+  
+  /**
+   * Token expiration timestamp
+   */
+  expiresAt?: number;
+  
+  /**
+   * Whether email confirmation is required
+   */
+  requiresEmailConfirmation?: boolean;
 }
 
 /**

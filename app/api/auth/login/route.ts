@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { createApiHandler } from '@/lib/api/route-helpers';
-import { logUserAction } from '@/lib/audit/auditLogger';
 import { LoginPayload } from '@/core/auth/models';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { createInvalidCredentialsError, createEmailNotVerifiedError } from '@/lib/api/auth/error-handler';
@@ -18,42 +17,40 @@ const LoginSchema = z.object({
 export const POST = createApiHandler(
   LoginSchema,
   async (request, _authContext, data, services) => {
-    // Get IP and User Agent for logging
-    const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
-    const userAgent = request.headers.get('user-agent') || 'unknown';
-    const { email, password, rememberMe } = data;
+    // Extract request context for the service
+    const context = {
+      ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+      userAgent: request.headers.get('user-agent') || 'unknown',
+    };
     
     // Prepare login payload
     const loginPayload: LoginPayload = {
-      email,
-      password,
-      rememberMe: rememberMe || false
+      email: data.email,
+      password: data.password,
+      rememberMe: data.rememberMe || false
     };
     
-    // Call auth service to login
-    const authResult = await services.auth.login(loginPayload);
+    // Call auth service with context - all business logic is now in the service
+    const authResult = await services.auth.login(loginPayload, context);
 
-    // Handle Login Errors
+    // Handle Login Errors - service now handles audit logging and error classification
     if (!authResult.success) {
       console.error('Login error:', authResult.error);
       
-      // Log the failed login attempt
-      await logUserAction({
-        action: 'LOGIN_FAILURE',
-        status: 'FAILURE',
-        ipAddress,
-        userAgent,
-        targetResourceType: 'auth',
-        targetResourceId: email,
-        details: { reason: authResult.error }
-      });
-
-      // Handle specific error cases
-      if (authResult.error?.includes('Invalid login credentials')) {
+      // Handle specific error cases based on service classification
+      if (authResult.code === 'INVALID_CREDENTIALS') {
         throw createInvalidCredentialsError();
       } 
-      if (authResult.error?.includes('Email not confirmed')) {
+      if (authResult.code === 'EMAIL_NOT_VERIFIED') {
         throw createEmailNotVerifiedError();
+      }
+      if (authResult.code === 'RATE_LIMIT_EXCEEDED') {
+        throw new ApiError(
+          ERROR_CODES.INTERNAL_ERROR,
+          authResult.error || 'Rate limit exceeded',
+          429,
+          { retryAfter: authResult.retryAfter, remainingAttempts: authResult.remainingAttempts }
+        );
       }
       
       // Generic authentication failure
@@ -64,7 +61,7 @@ export const POST = createApiHandler(
       );
     }
 
-    // Handle Success
+    // Handle Success - service now includes all necessary data
     if (!authResult.user) {
       console.error('Login successful but no user returned');
       throw new ApiError(
@@ -74,28 +71,12 @@ export const POST = createApiHandler(
       );
     }
 
-    // Check if user has MFA enabled
-    const hasMfaEnabled = authResult.user.mfaEnabled;
-    
-    // Log successful login
-    await logUserAction({
-      userId: authResult.user.id,
-      action: 'LOGIN_SUCCESS',
-      status: 'SUCCESS',
-      ipAddress,
-      userAgent,
-      targetResourceType: 'auth',
-      targetResourceId: authResult.user.id,
-      details: { requiresMfa: hasMfaEnabled }
-    });
-
-    // Include MFA status in response
-    console.log('Login successful for:', email, rememberMe ? '(with extended session)' : '');
+    console.log('Login successful for:', data.email, data.rememberMe ? '(with extended session)' : '');
     
     return createSuccessResponse({
       user: authResult.user,
       token: authResult.token,
-      requiresMfa: hasMfaEnabled,
+      requiresMfa: authResult.requiresMfa,
       expiresAt: authResult.expiresAt
     });
   },

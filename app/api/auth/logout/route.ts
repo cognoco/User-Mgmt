@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createApiHandler, emptySchema } from "@/lib/api/route-helpers";
-import { logUserAction } from "@/lib/audit/auditLogger";
 import { createSuccessResponse } from "@/lib/api/common";
 
 /**
@@ -9,24 +8,16 @@ import { createSuccessResponse } from "@/lib/api/common";
 export const POST = createApiHandler(
   emptySchema,
   async (request, authContext, _data, services) => {
-    const ipAddress = request.headers.get("x-forwarded-for") || "unknown";
-    const userAgent = request.headers.get("user-agent") || "unknown";
-    const userId = authContext.userId;
+    // Extract request context for the service
+    const context = {
+      ipAddress: request.headers.get("x-forwarded-for") || "unknown",
+      userAgent: request.headers.get("user-agent") || "unknown",
+    };
 
-    await services.auth.logout();
+    // Call auth service with context - all business logic including audit logging is now in the service
+    await services.auth.logout(context);
+    
     const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
-
-    if (userId) {
-      await logUserAction({
-        userId,
-        action: "LOGOUT_SUCCESS",
-        status: "SUCCESS",
-        ipAddress,
-        userAgent,
-        targetResourceType: "auth",
-        targetResourceId: userId,
-      });
-    }
 
     console.log("Logout successful");
     const headers = {

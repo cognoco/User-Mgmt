@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { createApiHandler } from '@/lib/api/route-helpers';
-import { logUserAction } from '@/lib/audit/auditLogger';
 import {
   createSuccessResponse,
   ApiError,
@@ -15,20 +14,14 @@ const VerifyMfaSchema = z.object({ code: z.string().min(4) });
 export const POST = createApiHandler(
   VerifyMfaSchema,
   async (request, authContext, data, services) => {
-    const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
-    const userAgent = request.headers.get('user-agent') || 'unknown';
+    // Extract request context for the service
+    const context = {
+      ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+      userAgent: request.headers.get('user-agent') || 'unknown',
+    };
     
-    const result = await services.auth.verifyMFA(data.code);
-
-    await logUserAction({
-      userId: authContext.userId,
-      action: 'MFA_VERIFY',
-      status: result.success ? 'SUCCESS' : 'FAILURE',
-      ipAddress,
-      userAgent,
-      targetResourceType: 'auth',
-      targetResourceId: authContext.userId
-    });
+    // Call auth service with context - all business logic including audit logging is now in the service
+    const result = await services.auth.verifyMFA(data.code, context);
 
     if (!result.success) {
       throw new ApiError(
