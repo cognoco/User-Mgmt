@@ -15,4 +15,10 @@ export interface DataExportService {
   getUserDataExportByToken(token: string): Promise<import('@/lib/exports/types').UserDataExport | null>;
 
   getUserExportDownloadUrl(filePath: string): string;
+
+  /**
+   * Check if the user has recently requested an export
+   * to enforce rate limiting.
+   */
+  isUserRateLimited(userId: string): Promise<boolean>;
 }
