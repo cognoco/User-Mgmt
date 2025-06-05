@@ -18,6 +18,7 @@ import { SsoDataProvider } from '@/core/sso/ISsoDataProvider';
 import { SubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataProvider';
 import { ApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
+import type { ITwoFactorDataProvider } from '@/core/two-factor/ITwoFactorDataProvider';
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
 import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
 
@@ -80,6 +81,11 @@ export interface AdapterFactory {
    * Create a session data provider
    */
   createSessionProvider(): SessionDataProvider;
+
+  /**
+   * Create a two-factor authentication data provider
+   */
+  createTwoFactorProvider?(): ITwoFactorDataProvider;
 
   /**
    * Create an SSO data provider
