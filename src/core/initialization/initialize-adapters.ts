@@ -31,6 +31,8 @@ import {
 import { createAuditProvider } from '@/adapters/audit/factory';
 import { createNotificationProvider } from '@/adapters/notification/factory';
 import { createCsrfProvider } from '@/adapters/csrf/factory';
+import { createResourceRelationshipProvider } from '@/adapters/resource-relationship/factory';
+import { DefaultResourceRelationshipService } from '@/services/resource-relationship/default-resource-relationship.service';
 import { UserManagementConfiguration } from '@/core/config';
 import { AdapterRegistry } from '@/adapters/registry';
 import { isServer } from '../platform';
@@ -108,6 +110,7 @@ export function initializeAdapters(
     const auditAdapter = createAuditProvider(config);
     const csrfAdapter = createCsrfProvider(config);
     const notificationAdapter = createNotificationProvider(config);
+    const resourceRelationshipAdapter = createResourceRelationshipProvider(config);
 
     const registry = AdapterRegistry.getInstance();
     registry.registerAdapter('auth', authAdapter);
@@ -127,6 +130,7 @@ export function initializeAdapters(
     registry.registerAdapter('csrf', csrfAdapter);
     registry.registerAdapter('notification', notificationAdapter);
     registry.registerAdapter('sso', ssoAdapter);
+    registry.registerAdapter('resourceRelationship', resourceRelationshipAdapter);
     
     // Create service instances with the adapters
     const storage = new BrowserAuthStorage();
@@ -146,6 +150,7 @@ export function initializeAdapters(
     const csrfService = new DefaultCsrfService(csrfAdapter);
     const notificationService = new DefaultNotificationService(notificationAdapter, new DefaultNotificationHandler());
     const ssoService = new DefaultSsoService(ssoAdapter);
+    const resourceRelationshipService = new DefaultResourceRelationshipService(resourceRelationshipAdapter);
     const adminService = adminAdapter ? new DefaultAdminService(adminAdapter) : undefined;
     
     return {
@@ -164,6 +169,7 @@ export function initializeAdapters(
       auditService,
       csrfService,
       notificationService,
+      resourceRelationshipService,
       ssoService,
       adminService,
       adapters: {
@@ -183,7 +189,8 @@ export function initializeAdapters(
         csrfAdapter,
         notificationAdapter,
         ssoAdapter,
-        adminAdapter
+        adminAdapter,
+        resourceRelationshipAdapter
       }
       };
   } catch (error) {
@@ -219,6 +226,7 @@ export function initializeUserManagement(config = {}, options = {}) {
       auditService: services.auditService,
       csrfService: services.csrfService,
       notificationService: services.notificationService,
+      resourceRelationshipService: services.resourceRelationshipService,
       ssoService: services.ssoService,
       adminService: services.adminService,
       ...options.serviceProviders
