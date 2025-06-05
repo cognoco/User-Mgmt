@@ -27,6 +27,8 @@
 ALWAYS MUST READ: 
 docs\Product documentation\Architecture Guidelines.md
 docs\Product documentation\Architecture Rules References.md
+
+Please do not run tests after you are finished with the coding unless you are specifically asked to. If you are asked to run tests, continue reading: 
  
   ### Testing Rules
 Do not reduce the test scope for existing test or simplify the tests so that they no longer mirror the real implemenation.  The tests are there to find bugs, not to pass by all means! 
