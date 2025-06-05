@@ -21,7 +21,7 @@ import { ApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import type { ITwoFactorDataProvider } from '@/core/two-factor/ITwoFactorDataProvider';
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
-import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
+import { ICompanyNotificationDataProvider } from '@/core/company-notification/ICompanyNotificationDataProvider';
 
 
 
@@ -107,6 +107,11 @@ export interface AdapterFactory {
    * Create an API key data provider
    */
   createApiKeyProvider(): ApiKeyDataProvider;
+
+  /**
+   * Create a company notification data provider
+   */
+  createCompanyNotificationProvider?(): ICompanyNotificationDataProvider;
 
   /**
    * Create a webhook data provider

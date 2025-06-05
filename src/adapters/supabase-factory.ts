@@ -36,7 +36,7 @@ import createSupabaseSsoProvider from './sso/supabase/factory';
 import { createSupabaseOAuthProvider } from './oauth/factory';
 import type { OAuthDataProvider } from './oauth';
 import createSupabaseSubscriptionProvider from './subscription/factory';
-import createSupabaseApiKeyProvider from './api-keys/supabase/factory';
+import createSupabaseCompanyNotificationProvider from './company-notification/factory';
 import { createSupabaseWebhookProvider } from './webhooks';
 import createSupabaseAdminProvider from './admin/supabase/factory';
 import createSupabaseTwoFactorProvider from './two-factor/factory';
@@ -162,12 +162,18 @@ export class SupabaseAdapterFactory implements AdapterFactory {
   createSubscriptionProvider(): SubscriptionDataProvider {
     return createSupabaseSubscriptionProvider(this.options);
   }
-
   /**
    * Create a Supabase API key provider
    */
   createApiKeyProvider(): ApiKeyDataProvider {
     return createSupabaseApiKeyProvider(this.options);
+  }
+
+  /**
+   * Create a Supabase company notification provider
+   */
+  createCompanyNotificationProvider(): ICompanyNotificationDataProvider {
+    return createSupabaseCompanyNotificationProvider(this.options);
   }
 
   /**
