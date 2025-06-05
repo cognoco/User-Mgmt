@@ -21,6 +21,7 @@ import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
 import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
 import type { ITwoFactorDataProvider } from '@/core/two-factor/ITwoFactorDataProvider';
+import { ISavedSearchDataProvider } from '@/core/saved-search/ISavedSearchDataProvider';
 
 
 // Import domain-specific factories
@@ -40,8 +41,10 @@ import createSupabaseApiKeyProvider from './api-keys/supabase/factory';
 import { createSupabaseWebhookProvider } from './webhooks';
 import createSupabaseAdminProvider from './admin/supabase/factory';
 import createSupabaseTwoFactorProvider from './two-factor/factory';
+import { createSupabaseSavedSearchProvider } from './saved-search/factory';
 import { createSupabaseDataExportProvider } from './data-export/factory';
 import type { IDataExportDataProvider } from '@/core/data-export/IDataExportDataProvider';
+
 
 
 /**
@@ -173,10 +176,17 @@ export class SupabaseAdapterFactory implements AdapterFactory {
   }
 
   /**
+
+   * Create a Supabase saved search provider
+   */
+  createSavedSearchProvider(): ISavedSearchDataProvider {
+    return createSupabaseSavedSearchProvider(this.options);
+
    * Create a Supabase data export provider
    */
   createDataExportProvider(): IDataExportDataProvider {
     return createSupabaseDataExportProvider(this.options);
+
   }
 
   /**

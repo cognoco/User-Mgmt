@@ -19,6 +19,7 @@ import { OAuthDataProvider } from '@/core/oauth/IOAuthDataProvider';
 import { SubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataProvider';
 import { ApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
+import { ISavedSearchDataProvider } from '@/core/saved-search/ISavedSearchDataProvider';
 import type { ITwoFactorDataProvider } from '@/core/two-factor/ITwoFactorDataProvider';
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
 import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
@@ -118,6 +119,11 @@ export interface AdapterFactory {
    * Create a webhook data provider
    */
   createWebhookProvider?(): IWebhookDataProvider;
+
+  /**
+   * Create a saved search data provider
+   */
+  createSavedSearchProvider?(): ISavedSearchDataProvider;
 }
 
 /**
