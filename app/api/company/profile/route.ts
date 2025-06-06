@@ -5,8 +5,10 @@ import { createApiHandler, emptySchema } from "@/lib/api/route-helpers";
 import { createSuccessResponse } from "@/lib/api/common";
 import { logUserAction } from "@/lib/audit/auditLogger";
 import { type RouteAuthContext } from "@/middleware/auth";
-
 import { withSecurity } from "@/middleware/with-security";
+import { checkRateLimit } from "@/middleware/rate-limit";
+import { PermissionValues } from "@/types/rbac";
+import { companyProfileUpdateSchema } from "@/lib/schemas/profile.schema";
 
 // Company Profile Schema
 const CompanyProfileSchema = z.object({
@@ -29,32 +31,7 @@ const CompanyProfileSchema = z.object({
 });
 
 type CompanyProfileRequest = z.infer<typeof CompanyProfileSchema>;
-
-// Company Profile Update Schema - more permissive than creation schema
-const CompanyProfileUpdateSchema = z
-  .object({
-    name: z.string().min(2).max(100).optional(),
-    legal_name: z.string().min(2).max(100).optional(),
-    registration_number: z.string().optional(),
-    tax_id: z.string().optional(),
-    website: z.string().url().optional(),
-    industry: z.string().min(2).max(50).optional(),
-    size_range: z
-      .enum(["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"])
-      .optional(),
-    founded_year: z
-      .number()
-      .int()
-      .min(1800)
-      .max(new Date().getFullYear())
-      .optional(),
-    description: z.string().max(1000).optional(),
-  })
-  .refine((data) => Object.keys(data).length > 0, {
-    message: "At least one field must be provided for update",
-  });
-
-type CompanyProfileUpdateRequest = z.infer<typeof CompanyProfileUpdateSchema>;
+type CompanyProfileUpdateRequest = z.infer<typeof companyProfileUpdateSchema>;
 
 
 async function handlePost(
@@ -64,6 +41,9 @@ async function handlePost(
 ) {
   const ipAddress = request.ip;
   const userAgent = request.headers.get("user-agent");
+  if (await checkRateLimit(request)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
   let userIdForLogging: string | null = null;
 
   try {
@@ -146,29 +126,61 @@ export const POST = withSecurity((req: NextRequest) =>
   createApiHandler(
     CompanyProfileSchema,
     (r, a, d) => handlePost(r, a, d),
-    { requireAuth: true }
+    { requireAuth: true, requiredPermissions: [PermissionValues.EDIT_USER_PROFILES] }
   )(req)
 );
 
 async function handleGet(
-  _request: NextRequest,
+  request: NextRequest,
   auth: RouteAuthContext,
   _data: unknown,
 ) {
+  const ipAddress = request.ip;
+  const userAgent = request.headers.get("user-agent");
+  if (await checkRateLimit(request)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
   try {
     const userId = auth.userId!;
     const profile = await getApiCompanyService().getProfileByUserId(userId);
 
     if (!profile) {
+      await logUserAction({
+        userId,
+        action: "COMPANY_PROFILE_GET_NOT_FOUND",
+        status: "FAILURE",
+        ipAddress,
+        userAgent,
+        targetResourceType: "company_profile",
+        targetResourceId: userId,
+      });
       return NextResponse.json(
         { error: "Company profile not found" },
         { status: 404 },
       );
     }
-
+    await logUserAction({
+      userId,
+      action: "COMPANY_PROFILE_GET_SUCCESS",
+      status: "SUCCESS",
+      ipAddress,
+      userAgent,
+      targetResourceType: "company_profile",
+      targetResourceId: userId,
+    });
     return createSuccessResponse(profile);
   } catch (error) {
     console.error("Unexpected error in GET /api/company/profile:", error);
+    await logUserAction({
+      userId: auth.userId!,
+      action: "COMPANY_PROFILE_GET_ERROR",
+      status: "FAILURE",
+      ipAddress,
+      userAgent,
+      targetResourceType: "company_profile",
+      targetResourceId: auth.userId!,
+      details: { error: (error as Error).message },
+    });
     return NextResponse.json(
       { error: "An internal server error occurred" },
       { status: 500 },
@@ -179,6 +191,7 @@ async function handleGet(
 export const GET = withSecurity((req: NextRequest) =>
   createApiHandler(emptySchema, (r, a, d) => handleGet(r, a, d), {
     requireAuth: true,
+    requiredPermissions: [PermissionValues.EDIT_USER_PROFILES],
   })(req)
 );
 
@@ -190,6 +203,9 @@ async function handlePut(
   // Get IP and User Agent early
   const ipAddress = request.ip;
   const userAgent = request.headers.get("user-agent");
+  if (await checkRateLimit(request)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
   let userIdForLogging: string | null = null;
   let companyProfileIdForLogging: string | null = null;
 
@@ -281,9 +297,9 @@ async function handlePut(
 
 export const PUT = withSecurity((req: NextRequest) =>
   createApiHandler(
-    CompanyProfileUpdateSchema,
+    companyProfileUpdateSchema,
     (r, a, d) => handlePut(r, a, d),
-    { requireAuth: true }
+    { requireAuth: true, requiredPermissions: [PermissionValues.EDIT_USER_PROFILES] }
   )(req)
 );
 
@@ -294,6 +310,9 @@ async function handleDelete(
   // Get IP and User Agent early
   const ipAddress = request.ip;
   const userAgent = request.headers.get("user-agent");
+  if (await checkRateLimit(request)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
   let userIdForLogging: string | null = null;
   let companyProfileIdForLogging: string | null = null;
 
@@ -389,5 +408,6 @@ async function handleDelete(
 export const DELETE = withSecurity((req: NextRequest) =>
   createApiHandler(emptySchema, (r, a, d) => handleDelete(r, a), {
     requireAuth: true,
+    requiredPermissions: [PermissionValues.EDIT_USER_PROFILES],
   })(req)
 );
