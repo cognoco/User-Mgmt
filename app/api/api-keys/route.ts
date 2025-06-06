@@ -1,113 +1,43 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { checkRateLimit } from '@/middleware/rate-limit';
-import { logUserAction } from '@/lib/audit/auditLogger';
-import { getCurrentUser } from '@/lib/auth/session';
-import { getApiKeyService } from '@/services/api-keys/factory';
+import { type NextRequest } from 'next/server'
+import { z } from 'zod'
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers'
+import { createSuccessResponse, createCreatedResponse, createServerError, ApiError, ERROR_CODES } from '@/lib/api/common'
+import { checkRateLimit } from '@/middleware/rate-limit'
+import { logUserAction } from '@/lib/audit/auditLogger'
+import { apiKeyCreateSchema } from '@/core/api-keys/models'
+import { getServiceContainer } from '@/lib/config/service-container'
 
-// Zod schema for API key creation
-const CreateApiKeySchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }).max(100),
-  scopes: z.array(z.string()),
-  expiresAt: z.string().datetime().optional()
-});
-
-// GET handler to list API keys for the current user
-export async function GET(request: NextRequest) {
-  // Rate limiting
-  const isRateLimited = await checkRateLimit(request);
-  if (isRateLimited) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+const createSchema = apiKeyCreateSchema
+const createHandler = async (req: NextRequest, ctx: any, data: z.infer<typeof createSchema>) => {
+  if (await checkRateLimit(req)) {
+    throw new ApiError(ERROR_CODES.OPERATION_FAILED, 'Too many requests', 429)
   }
-
-  try {
-    // Get current user
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const service = getApiKeyService();
-    const keys = await service.listApiKeys(user.id);
-
-    return NextResponse.json({ keys });
-  } catch (error) {
-    console.error('Unexpected error in API keys GET:', error);
-    return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
+  const service = getServiceContainer().apiKey!
+  const result = await service.createApiKey(ctx.userId!, data)
+  if (!result.success || !result.key) {
+    throw createServerError(result.error || 'Failed to create API key')
   }
+  await logUserAction({
+    userId: ctx.userId,
+    action: 'API_KEY_CREATED',
+    status: 'SUCCESS',
+    ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
+    userAgent: req.headers.get('user-agent') || 'unknown',
+    targetResourceType: 'api_key',
+    targetResourceId: result.key.id,
+    details: { name: result.key.name, prefix: result.key.prefix },
+  })
+  return createCreatedResponse({ ...result.key, key: result.plaintext })
 }
 
-// POST handler to create a new API key
-export async function POST(request: NextRequest) {
-  // Get IP and User Agent
-  const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
-  const userAgent = request.headers.get('user-agent') || 'unknown';
-
-  // Rate limiting
-  const isRateLimited = await checkRateLimit(request);
-  if (isRateLimited) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+const listHandler = async (req: NextRequest, ctx: any) => {
+  if (await checkRateLimit(req)) {
+    throw new ApiError(ERROR_CODES.OPERATION_FAILED, 'Too many requests', 429)
   }
+  const service = getServiceContainer().apiKey!
+  const keys = await service.listApiKeys(ctx.userId!)
+  return createSuccessResponse({ keys })
+}
 
-  try {
-    // Get current user
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Parse and validate request body
-    let body;
-    try {
-      body = await request.json();
-    } catch (e) {
-      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
-    }
-
-    const parseResult = CreateApiKeySchema.safeParse(body);
-    if (!parseResult.success) {
-      const errors = parseResult.error.errors.map(err => ({
-        field: err.path.join('.'),
-        message: err.message,
-      }));
-      return NextResponse.json({ error: 'Validation failed', details: errors }, { status: 400 });
-    }
-
-    const { name, scopes, expiresAt } = parseResult.data;
-
-    const service = getApiKeyService();
-    const result = await service.createApiKey(user.id, {
-      name,
-      scopes,
-      expiresAt,
-    });
-
-    if (!result.success || !result.key) {
-      console.error('Error creating API key:', result.error);
-      return NextResponse.json({ error: 'Failed to create API key' }, { status: 500 });
-    }
-    const data = result.key;
-    const key = result.plaintext;
-
-    // Log the action
-    await logUserAction({
-      userId: user.id,
-      action: 'API_KEY_CREATED',
-      status: 'SUCCESS',
-      ipAddress,
-      userAgent,
-      targetResourceType: 'api_key',
-      targetResourceId: data.id,
-      details: { name: data.name, prefix: data.prefix }
-    });
-
-    // Return the API key details (including the actual key which should only be shown once)
-    return NextResponse.json({
-      ...data,
-      key // Include the plaintext key in the response (only time it will be available)
-    });
-  } catch (error) {
-    console.error('Unexpected error in API keys POST:', error);
-    return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
-  }
-} 
+export const GET = createApiHandler(emptySchema, listHandler, { requireAuth: true })
+export const POST = createApiHandler(createSchema, createHandler, { requireAuth: true })
