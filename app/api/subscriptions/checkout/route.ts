@@ -5,7 +5,11 @@ import {
   createSuccessResponse,
   createValidationError,
   createServerError,
+  ApiError,
+  ERROR_CODES,
 } from '@/lib/api/common';
+import { checkRateLimit } from '@/middleware/rate-limit';
+import { logUserAction } from '@/lib/audit/auditLogger';
 
 const bodySchema = z.object({ plan: z.string() });
 
@@ -13,6 +17,11 @@ const bodySchema = z.object({ plan: z.string() });
  * Create a Stripe checkout session for a subscription plan.
  */
 export async function POST(req: NextRequest) {
+  const isRateLimited = await checkRateLimit(req);
+  if (isRateLimited) {
+    throw new ApiError(ERROR_CODES.INVALID_REQUEST, 'Too many requests', 429);
+  }
+
   let body: unknown;
   try {
     body = await req.json();
@@ -31,8 +40,21 @@ export async function POST(req: NextRequest) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing/success`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/billing/cancel`,
     });
+    await logUserAction({
+      action: 'SUBSCRIPTION_CHECKOUT_CREATED',
+      status: 'SUCCESS',
+      ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
+      userAgent: req.headers.get('user-agent') || 'unknown',
+    });
     return createSuccessResponse({ url: session.url });
   } catch (err: any) {
+    await logUserAction({
+      action: 'SUBSCRIPTION_CHECKOUT_CREATED',
+      status: 'FAILURE',
+      ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
+      userAgent: req.headers.get('user-agent') || 'unknown',
+      details: { error: err.message },
+    });
     throw createServerError(err.message);
   }
 }

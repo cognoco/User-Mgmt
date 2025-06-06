@@ -1,10 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
 import { getApiSubscriptionService } from '@/services/subscription/factory';
+import { checkRateLimit } from '@/middleware/rate-limit';
+import { logUserAction } from '@/lib/audit/auditLogger';
 
 vi.mock('@/services/subscription/factory', () => ({
   getApiSubscriptionService: vi.fn(),
 }));
+vi.mock('@/middleware/rate-limit', () => ({ checkRateLimit: vi.fn().mockResolvedValue(false) }));
+vi.mock('@/lib/audit/auditLogger', () => ({ logUserAction: vi.fn() }));
 
 describe('subscriptions cancel API', () => {
   const service = {
