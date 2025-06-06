@@ -58,11 +58,11 @@ describe('Domain Verification Initiate API', () => {
     
     const response = await POST(request, { params: { id: mockDomainId } });
     expect(response.status).toBe(200);
-    
+
     const data = await response.json();
-    expect(data).toHaveProperty('verificationToken');
-    expect(data.domain).toBe(mockDomain);
-    expect(data.message).toContain('verification initiated');
+    expect(data.data.verificationToken).toBeDefined();
+    expect(data.data.domain).toBe(mockDomain);
+    expect(data.data.message).toContain('verification initiated');
     
     expect(service.initiateDomainVerification).toHaveBeenCalledWith(
       mockDomainId,
@@ -96,7 +96,7 @@ describe('Domain Verification Initiate API', () => {
     expect(response.status).toBe(404);
     
     const data = await response.json();
-    expect(data.error).toContain('not found');
+    expect(data.error.message).toContain('not found');
   });
   
   test('returns 403 if user does not have permission to verify the domain', async () => {
@@ -110,7 +110,7 @@ describe('Domain Verification Initiate API', () => {
     expect(response.status).toBe(403);
     
     const data = await response.json();
-    expect(data.error).toContain('permission');
+    expect(data.error.message).toContain('permission');
   });
   
   test('returns 500 when database update fails', async () => {
@@ -134,11 +134,11 @@ describe('Domain Verification Initiate API', () => {
     
     const response = await POST(request, { params: { id: mockDomainId } });
     const data = await response.json();
-    
+
     // Token should be a string and match expected pattern
-    expect(typeof data.verificationToken).toBe('string');
-    expect(data.verificationToken.length).toBeGreaterThan(10);
-    expect(data.verificationToken).toMatch(/^verificat/);
+    expect(typeof data.data.verificationToken).toBe('string');
+    expect(data.data.verificationToken.length).toBeGreaterThan(10);
+    expect(data.data.verificationToken).toMatch(/^verificat/);
     
     expect(service.initiateDomainVerification).toHaveBeenCalled();
   });

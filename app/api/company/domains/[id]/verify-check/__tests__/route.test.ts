@@ -69,10 +69,10 @@ describe('Domain Verification Check API', () => {
     
     const response = await POST(request, { params: { id: mockDomainId } });
     expect(response.status).toBe(200);
-    
+
     const data = await response.json();
-    expect(data.verified).toBe(true);
-    expect(data.message).toContain('verified');
+    expect(data.data.verified).toBe(true);
+    expect(data.data.message).toContain('verified');
     
     // Verify DNS lookup was called correctly
     expect(dns.resolveTxt).toHaveBeenCalledWith(mockDomain);
@@ -105,7 +105,7 @@ describe('Domain Verification Check API', () => {
     expect(response.status).toBe(404);
     
     const data = await response.json();
-    expect(data.error).toContain('not found');
+    expect(data.error.message).toContain('not found');
   });
   
   test('returns 400 if verification has not been initiated', async () => {
@@ -119,7 +119,7 @@ describe('Domain Verification Check API', () => {
     expect(response.status).toBe(400);
     
     const data = await response.json();
-    expect(data.error).toContain('not been initiated');
+    expect(data.error.message).toContain('not been initiated');
   });
   
   test('returns unverified status when token is not found in DNS records', async () => {
@@ -134,12 +134,12 @@ describe('Domain Verification Check API', () => {
     expect(response.status).toBe(400);
     
     const data = await response.json();
-    expect(data.verified).toBe(false);
-    expect(data.message).toContain('not found');
-    
+    expect(data.data.verified).toBe(false);
+    expect(data.data.message).toContain('not found');
+
     // Verify DNS lookup was called
     expect(dns.resolveTxt).toHaveBeenCalledWith(mockDomain);
-    
+
     expect(service.checkDomainVerification).toHaveBeenCalledWith(mockDomainId, mockUserId);
   });
   
@@ -155,8 +155,8 @@ describe('Domain Verification Check API', () => {
     expect(response.status).toBe(400);
     
     const data = await response.json();
-    expect(data.verified).toBe(false);
-    expect(data.message).toContain('No TXT records found');
+    expect(data.data.verified).toBe(false);
+    expect(data.data.message).toContain('No TXT records found');
     
     // Verify DNS lookup was called
     expect(dns.resolveTxt).toHaveBeenCalledWith(mockDomain);
@@ -174,8 +174,8 @@ describe('Domain Verification Check API', () => {
     expect(response.status).toBe(400);
     
     const data = await response.json();
-    expect(data.verified).toBe(false);
-    expect(data.message).toContain('error occurred');
+    expect(data.data.verified).toBe(false);
+    expect(data.data.message).toContain('error occurred');
   });
   
   test('returns 500 when database update fails', async () => {

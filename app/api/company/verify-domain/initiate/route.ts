@@ -1,40 +1,52 @@
-import { type NextRequest, NextResponse } from 'next/server';
-import { getSessionFromToken } from '@/services/auth/factory';
-import { getApiCompanyService } from '@/services/company/factory';
+import { NextRequest } from 'next/server';
+import { z } from 'zod';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { checkRateLimit } from '@/middleware/rate-limit';
-import { URL } from 'url'; // Use Node.js URL parser
+import { getApiCompanyService } from '@/services/company/factory';
+import { logUserAction } from '@/lib/audit/auditLogger';
+import { ApiError, ERROR_CODES, createSuccessResponse } from '@/lib/api/common';
 
-export async function POST(request: NextRequest) {
-  // 1. Rate Limiting
-  const isRateLimited = await checkRateLimit(request);
-  if (isRateLimited) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+async function handlePost(request: NextRequest, _data: unknown, auth: { userId?: string }) {
+  if (await checkRateLimit(request, { windowMs: 15 * 60 * 1000, max: 10 })) {
+    throw new ApiError(ERROR_CODES.OPERATION_FAILED, 'Too many requests', 429);
   }
+
+  const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
+  const userAgent = request.headers.get('user-agent') || 'unknown';
 
   try {
-    // 2. Authentication & Get User
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-    const token = authHeader.split(' ')[1];
+    const service = getApiCompanyService();
+    const result = await service.initiateProfileDomainVerification(auth.userId!);
 
-    const user = await getSessionFromToken(token);
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const companyService = getApiCompanyService();
-    const result = await companyService.initiateProfileDomainVerification(user.id);
-
-    return NextResponse.json({
-        domainName: result.domainName,
-        verificationToken: result.verificationToken,
-        message: "Verification initiated. Please add the provided token as a TXT record to your domain's DNS settings."
+    await logUserAction({
+      userId: auth.userId,
+      action: 'PROFILE_DOMAIN_VERIFICATION_INITIATED',
+      status: 'SUCCESS',
+      ipAddress,
+      userAgent,
+      targetResourceType: 'company',
+      targetResourceId: result.domainName,
     });
 
-  } catch (error) {
-    console.error('Unexpected error in POST /api/company/verify-domain/initiate:', error);
-    return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
+    return createSuccessResponse({
+      domainName: result.domainName,
+      verificationToken: result.verificationToken,
+      message: "Verification initiated. Please add the provided token as a TXT record to your domain's DNS settings."
+    });
+  } catch (error: any) {
+    await logUserAction({
+      userId: auth.userId,
+      action: 'PROFILE_DOMAIN_VERIFICATION_INITIATED',
+      status: 'FAILURE',
+      ipAddress,
+      userAgent,
+      targetResourceType: 'company',
+      details: { error: error?.message }
+    });
+
+    const msg = error?.message || 'Domain verification failed';
+    throw new ApiError(ERROR_CODES.INTERNAL_ERROR, msg, 500);
   }
-} 
+}
+
+export const POST = createApiHandler(z.object({}), handlePost, { requireAuth: true });
