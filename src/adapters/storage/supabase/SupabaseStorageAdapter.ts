@@ -70,6 +70,20 @@ export class SupabaseStorageAdapter implements StorageAdapter {
       return '';
     }
   }
+
+  async list(prefix = ''): Promise<string[]> {
+    try {
+      const { data, error } = await this.supabase.storage
+        .from(this.bucket)
+        .list(prefix);
+      if (error || !data) {
+        return [];
+      }
+      return data.map((f) => `${prefix}${prefix && !prefix.endsWith('/') ? '/' : ''}${f.name}`);
+    } catch {
+      return [];
+    }
+  }
 }
 
 export default SupabaseStorageAdapter;

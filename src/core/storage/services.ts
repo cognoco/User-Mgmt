@@ -47,4 +47,9 @@ export interface FileStorageService {
    * @returns Public URL string or `null` when not available
    */
   getFileUrl(bucketName: string, filePath: string): Promise<string | null>;
+
+  /**
+   * List files within a bucket under an optional prefix.
+   */
+  listFiles(bucketName: string, prefix?: string): Promise<string[]>;
 }

@@ -69,4 +69,11 @@ export interface StorageAdapter {
    * @returns Publicly accessible URL
    */
   getPublicUrl(path: string): string;
+
+  /**
+   * List files within a given prefix/path.
+   *
+   * @param prefix Optional prefix to filter files by
+   */
+  list(prefix?: string): Promise<string[]>;
 }
