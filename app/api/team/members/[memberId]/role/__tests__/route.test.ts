@@ -39,6 +39,7 @@ describe('PATCH /api/team/members/[memberId]/role', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    (prisma.teamMember.findUnique as any).mockResolvedValue(mockTeamMember);
     (prisma.teamMember.findFirst as any).mockResolvedValue(mockAdminMember);
     (prisma.teamMember.update as any).mockResolvedValue({
       ...mockTeamMember,
@@ -145,6 +146,27 @@ describe('PATCH /api/team/members/[memberId]/role', () => {
 
     expect(response.status).toBe(400);
     expect(data.error).toContain('Invalid request parameters');
+  });
+
+  it('returns 403 when updating member from another team', async () => {
+    (prisma.teamMember.findUnique as any).mockResolvedValue({
+      ...mockTeamMember,
+      teamId: 'team-other'
+    });
+    (prisma.teamMember.findFirst as any).mockResolvedValue(null);
+
+    const request = new Request(
+      'http://localhost:3000/api/team/members/member-1/role',
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'viewer' })
+      }
+    );
+
+    const params = { memberId: 'member-1' };
+    const response = await PATCH(request, { params });
+    expect(response.status).toBe(403);
   });
 
   it('returns 404 when member is not found', async () => {

@@ -13,14 +13,24 @@ const updateRoleSchema = z.object({
   role: z.enum(['admin', 'member', 'viewer']),
 });
 
+const paramSchema = z.object({ memberId: z.string().uuid() });
+
 async function handlePatch(
   _req: NextRequest,
   auth: RouteAuthContext,
   data: z.infer<typeof updateRoleSchema>,
   memberId: string
 ) {
+  const targetMember = await prisma.teamMember.findUnique({
+    where: { id: memberId },
+  });
+
+  if (!targetMember) {
+    throw createTeamMemberNotFoundError();
+  }
+
   const currentUserMember = await prisma.teamMember.findFirst({
-    where: { userId: auth.userId!, role: 'admin' },
+    where: { userId: auth.userId!, teamId: targetMember.teamId, role: 'admin' },
   });
   if (!currentUserMember) {
     await logUserAction({
@@ -65,9 +75,10 @@ async function handler(
   req: NextRequest,
   context: { params: { memberId: string } }
 ) {
+  const params = paramSchema.parse(context.params);
   return withRouteAuth(
     (r, auth) =>
-      withValidation(updateRoleSchema, (r2, data) => handlePatch(r2, auth, data, context.params.memberId), r),
+      withValidation(updateRoleSchema, (r2, data) => handlePatch(r2, auth, data, params.memberId), r),
     req
   );
 }

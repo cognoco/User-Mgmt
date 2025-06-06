@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { NextResponse } from 'next/server';
 import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
 import {
   createSuccessResponse,
@@ -14,6 +15,8 @@ const UpdateTeamSchema = z.object({
   name: z.string().optional(),
   description: z.string().optional()
 });
+
+const ParamSchema = z.object({ teamId: z.string().min(1, 'Invalid team id') });
 
 async function handleGet(
   _req: Request,
@@ -60,14 +63,41 @@ async function handleDelete(
 export const GET = (
   req: Request,
   ctx: { params: { teamId: string } }
-) => createApiHandler(emptySchema, (r, a, d, s) => handleGet(r, a, d, s, ctx.params.teamId), { requireAuth: true })(req);
+) => {
+  const parsed = ParamSchema.safeParse(ctx.params);
+  if (!parsed.success) {
+    return NextResponse.json(
+      new ApiError(ERROR_CODES.INVALID_REQUEST, parsed.error.message, 400).toResponse(),
+      { status: 400 }
+    );
+  }
+  return createApiHandler(emptySchema, (r, a, d, s) => handleGet(r, a, d, s, parsed.data.teamId), { requireAuth: true })(req);
+};
 
 export const PATCH = (
   req: Request,
   ctx: { params: { teamId: string } }
-) => createApiHandler(UpdateTeamSchema, (r, a, d, s) => handlePatch(r, a, d, s, ctx.params.teamId), { requireAuth: true })(req);
+) => {
+  const parsed = ParamSchema.safeParse(ctx.params);
+  if (!parsed.success) {
+    return NextResponse.json(
+      new ApiError(ERROR_CODES.INVALID_REQUEST, parsed.error.message, 400).toResponse(),
+      { status: 400 }
+    );
+  }
+  return createApiHandler(UpdateTeamSchema, (r, a, d, s) => handlePatch(r, a, d, s, parsed.data.teamId), { requireAuth: true })(req);
+};
 
 export const DELETE = (
   req: Request,
   ctx: { params: { teamId: string } }
-) => createApiHandler(emptySchema, (r, a, d, s) => handleDelete(r, a, d, s, ctx.params.teamId), { requireAuth: true })(req);
+) => {
+  const parsed = ParamSchema.safeParse(ctx.params);
+  if (!parsed.success) {
+    return NextResponse.json(
+      new ApiError(ERROR_CODES.INVALID_REQUEST, parsed.error.message, 400).toResponse(),
+      { status: 400 }
+    );
+  }
+  return createApiHandler(emptySchema, (r, a, d, s) => handleDelete(r, a, d, s, parsed.data.teamId), { requireAuth: true })(req);
+};

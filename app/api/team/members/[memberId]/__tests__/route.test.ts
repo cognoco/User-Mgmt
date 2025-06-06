@@ -18,6 +18,7 @@ vi.mock('@/lib/database/prisma');
 describe('DELETE /api/team/members/[memberId]', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    (prisma.teamMember.findFirst as any).mockResolvedValue({ id: 'current', teamId: 'team-123' });
   });
 
   it('should successfully remove a team member', async () => {
@@ -145,6 +146,24 @@ describe('DELETE /api/team/members/[memberId]', () => {
     expect(response.status).toBe(400);
     const data = await response.json();
     expect(data.error).toBe('Invalid member ID format');
+  });
+
+  it('should return 403 when removing member from another team', async () => {
+    vi.mocked(prisma.teamMember.findUnique).mockResolvedValue({
+      id: 'member-1',
+      userId: 'user-x',
+      role: 'MEMBER',
+      teamId: 'team-other',
+      team: { members: [] }
+    } as any);
+    vi.mocked(prisma.teamMember.findFirst).mockResolvedValue(null as any);
+
+    const response = await DELETE(
+      new Request('http://localhost'),
+      { params: { memberId: 'member-1' } }
+    );
+
+    expect(response.status).toBe(403);
   });
 
   it('should return 500 when database operation fails', async () => {
