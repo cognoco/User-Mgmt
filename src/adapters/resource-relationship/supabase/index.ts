@@ -1,0 +1,1 @@
+export * from './supabase-resource-relationship.provider';

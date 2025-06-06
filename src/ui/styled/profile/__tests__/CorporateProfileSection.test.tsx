@@ -7,7 +7,8 @@ import * as UserManagementProvider from '@/lib/auth/UserManagementProvider';
 
 import { CorporateProfileSection } from '../CorporateProfileSection';
 import { UserType, Company } from '@/types/user-type';
-import { UserManagementContextValue, Platform } from '@/types/user-management';
+import type { UserManagementContextValue } from '@/lib/auth/UserManagementProvider';
+import { Platform } from '@/types/platform';
 
 const mockOnUpdate = vi.fn();
 

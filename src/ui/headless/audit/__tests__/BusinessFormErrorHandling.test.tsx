@@ -1,8 +1,8 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BusinessRegistrationForm } from '@/ui/styled/auth/BusinessRegistrationForm';
-import { CompanyEditForm } from '@/ui/styled/company/CompanyEditForm';
+import { RegistrationForm } from '@/ui/styled/auth/RegistrationForm';
+import { CompanyProfileForm } from '@/ui/styled/company/CompanyProfileForm';
 
 // Mock form submission handlers
 const mockSubmit = vi.fn();
@@ -19,7 +19,7 @@ describe('Business Form Error Handling', () => {
       
       // Render with mock handlers
       render(
-        <BusinessRegistrationForm 
+        <RegistrationForm 
           onSubmit={mockSubmit} 
           onError={mockOnError} 
           serverError={{
@@ -46,7 +46,7 @@ describe('Business Form Error Handling', () => {
       
       // Render with mock handlers
       render(
-        <BusinessRegistrationForm 
+        <RegistrationForm 
           onSubmit={mockSubmit} 
           onError={mockOnError}
           serverError={{
@@ -71,7 +71,7 @@ describe('Business Form Error Handling', () => {
     test('validates and provides feedback for weak passwords', async () => {
       const user = userEvent.setup();
       
-      render(<BusinessRegistrationForm onSubmit={mockSubmit} onError={mockOnError} />);
+      render(<RegistrationForm onSubmit={mockSubmit} onError={mockOnError} />);
       
       // Fill in a weak password
       const passwordField = screen.getByLabelText(/password/i);
@@ -91,7 +91,7 @@ describe('Business Form Error Handling', () => {
     test('validates matching passwords', async () => {
       const user = userEvent.setup();
       
-      render(<BusinessRegistrationForm onSubmit={mockSubmit} onError={mockOnError} />);
+      render(<RegistrationForm onSubmit={mockSubmit} onError={mockOnError} />);
       
       // Fill in non-matching passwords
       await user.type(screen.getByLabelText(/password/i), 'Password123!');
@@ -115,7 +115,7 @@ describe('Business Form Error Handling', () => {
     test('validates company website URL format', async () => {
       const user = userEvent.setup();
       
-      render(<BusinessRegistrationForm onSubmit={mockSubmit} onError={mockOnError} />);
+      render(<RegistrationForm onSubmit={mockSubmit} onError={mockOnError} />);
       
       // Fill in company website with invalid URL
       const websiteField = screen.getByLabelText(/company website/i);
@@ -150,7 +150,7 @@ describe('Business Form Error Handling', () => {
       
       // Render with company data and suggestion handler
       render(
-        <CompanyEditForm 
+        <CompanyProfileForm 
           companyData={{
             id: 'company-123',
             name: '',
@@ -187,7 +187,7 @@ describe('Business Form Error Handling', () => {
       
       // Render with verified company data
       render(
-        <CompanyEditForm 
+        <CompanyProfileForm 
           companyData={{
             id: 'company-123',
             name: 'Verified Company',
@@ -220,7 +220,7 @@ describe('Business Form Error Handling', () => {
       const user = userEvent.setup();
       
       render(
-        <CompanyEditForm 
+        <CompanyProfileForm 
           companyData={{
             id: 'company-123',
             name: 'Test Company',
@@ -272,7 +272,7 @@ describe('Business Form Error Handling', () => {
       });
       
       render(
-        <CompanyEditForm 
+        <CompanyProfileForm 
           companyData={{
             id: 'company-123',
             name: 'Test Company',

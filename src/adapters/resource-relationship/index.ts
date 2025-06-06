@@ -1,3 +1,3 @@
-export * from '@/core/resource-relationship/IResourceRelationshipDataProvider';
+export type { IResourceRelationshipDataProvider } from '@/core/resource-relationship/IResourceRelationshipDataProvider';
 export * from './factory';
-export * from './supabase/supabase-resource-relationship.provider';
+export * from './supabase';

@@ -1,5 +1,5 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders } from '../_shared/cors.ts'
+import { createClient } from '@supabase/supabase-js';
+import { corsHeaders, createJsonResponse, createErrorResponse } from '../_shared/cors.ts';
 
 console.log('Hello from cleanup-unverified-users Function!')
 
@@ -81,10 +81,7 @@ Deno.serve(async (req) => {
     console.log(`Found a total of ${usersToDelete.length} users to delete.`);
 
     if (usersToDelete.length === 0) {
-      return new Response(JSON.stringify({ message: 'No users needed cleanup.' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      })
+      return createJsonResponse({ message: 'No users needed cleanup.' });
     }
 
     // Delete the identified users
@@ -108,19 +105,13 @@ Deno.serve(async (req) => {
         console.warn(`Failed to delete ${failedDeletions.length} users.`);
     }
 
-    return new Response(JSON.stringify({ 
-        message: `Cleanup complete. Deleted ${deletedCount} users.`,
-        failures: failedDeletions 
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
+    return createJsonResponse({ 
+      message: `Cleanup complete. Deleted ${deletedCount} users.`,
+      failures: failedDeletions 
+    });
   } catch (error) {
-    console.error('Error during cleanup:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    })
+    console.error('Error during cleanup:', error);
+    return createErrorResponse(error.message || 'Unknown error occurred');
   }
 })
 

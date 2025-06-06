@@ -5,18 +5,18 @@
  * It uses the headless component for behavior and adds UI rendering with Shadcn UI components.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { RoleManager as HeadlessRoleManager, RoleManagerProps } from '../../headless/permission/RoleManager';
-import { Input } from '@/ui/primitives/input';
-import { Button } from '@/ui/primitives/button';
-import { Label } from '@/ui/primitives/label';
-import { Textarea } from '@/ui/primitives/textarea';
-import { Alert, AlertDescription } from '@/ui/primitives/alert';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
-import { Table, TableBody, TableCell, TableRow } from '@/ui/primitives/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/primitives/dialog';
-import { Checkbox } from '@/ui/primitives/checkbox';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ExclamationTriangleIcon, CheckCircledIcon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 
 export interface StyledRoleManagerProps extends Omit<RoleManagerProps, 'render'> {
@@ -48,35 +48,52 @@ export function RoleManager({
   className,
   ...headlessProps
 }: StyledRoleManagerProps) {
+  // Local state for confirmation dialog
+  const [confirmationState, setConfirmationState] = useState<{
+    roleId: string | null;
+    roleName: string;
+    isOpen: boolean;
+  }>({
+    roleId: null,
+    roleName: '',
+    isOpen: false
+  });
+
   return (
     <HeadlessRoleManager
       {...headlessProps}
       render={({
-        roles,
-        permissions,
-        permissionCategories,
-        selectedRole,
-        setSelectedRole,
-        roleForm,
-        updateRoleForm,
+        // Role form state and handlers
         handleCreateRole,
         handleUpdateRole,
+        handleDeleteRole,
+        nameValue,
+        setNameValue,
+        descriptionValue,
+        setDescriptionValue,
+        isSystemRoleValue,
+        setIsSystemRoleValue,
+        isSubmitting,
+        isValid,
+        formErrors,
+        touched,
+        handleBlur,
+        resetForm,
+        // Role list state and handlers
+        roles,
+        currentRole,
+        setCurrentRole,
+        refreshRoles,
+        // Permission management
+        permissions,
+        assignPermissionToRole,
+        removePermissionFromRole,
+        // General state
         isLoading,
         error,
-        isSuccess,
         successMessage,
-        confirmationState,
-        setConfirmationState,
-        handleConfirmDelete,
-        cancelConfirmation,
         isEditMode,
-        setIsEditMode,
-        resetRoleForm,
-        togglePermission,
-        selectAllPermissionsInCategory,
-        unselectAllPermissionsInCategory,
-        isPermissionSelected,
-        getPermissionsCountByCategory
+        setIsEditMode
       }) => (
         <Card className={className}>
           <CardHeader>
@@ -84,11 +101,11 @@ export function RoleManager({
             <CardDescription>{description}</CardDescription>
           </CardHeader>
           <CardContent>
-            {isSuccess && (
+            {successMessage && (
               <Alert className="mb-6 bg-green-50 border-green-200">
                 <CheckCircledIcon className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-800">
-                  {successMessage || 'Operation completed successfully'}
+                  {successMessage}
                 </AlertDescription>
               </Alert>
             )}
@@ -99,256 +116,228 @@ export function RoleManager({
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Roles List Panel */}
-              <div className="md:col-span-1 space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium">Roles</h3>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => {
-                      resetRoleForm();
-                      setIsEditMode(false);
-                      setSelectedRole(null);
-                    }}
-                    disabled={isLoading}
-                  >
-                    <PlusIcon className="h-4 w-4 mr-1" /> New Role
-                  </Button>
-                </div>
-                
-                <div className="border rounded-md overflow-hidden">
-                  <div className="max-h-[400px] overflow-y-auto">
-                    <Table>
-                      <TableBody>
-                        {roles.map((role) => (
-                          <TableRow 
-                            key={role.id}
-                            className={selectedRole?.id === role.id ? 'bg-slate-100' : ''}
-                          >
-                            <TableCell 
-                              className="cursor-pointer"
-                              onClick={() => {
-                                setSelectedRole(role);
-                                updateRoleForm('name', role.name);
-                                updateRoleForm('description', role.description);
-                                updateRoleForm('permissions', role.permissions);
-                                setIsEditMode(true);
-                              }}
-                            >
-                              <div>
-                                <p className="font-medium">{role.name}</p>
-                                <p className="text-sm text-gray-500 truncate max-w-[200px]">
-                                  {role.description}
-                                </p>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {!role.isSystem && (
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      disabled={isLoading}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setConfirmationState({ 
-                                          roleId: role.id, 
-                                          roleName: role.name,
-                                          isOpen: true 
-                                        });
-                                      }}
-                                    >
-                                      <TrashIcon className="h-4 w-4 text-red-500" />
-                                    </Button>
-                                  </DialogTrigger>
-                                  {confirmationState.isOpen && confirmationState.roleId === role.id && (
-                                    <DialogContent>
-                                      <DialogHeader>
-                                        <DialogTitle>Delete Role</DialogTitle>
 
-                                        <DialogDescription>
-                                          Are you sure you want to delete the &quot;{confirmationState.roleName}&quot; role? This action cannot be undone and may affect users with this role.
-                                        </DialogDescription>
-
-                                      </DialogHeader>
-                                      <DialogFooter className="flex space-x-2 justify-end">
-                                        <Button
-                                          variant="outline"
-                                          onClick={cancelConfirmation}
-                                        >
-                                          Cancel
-                                        </Button>
-                                        <Button
-                                          variant="destructive"
-                                          onClick={() => handleConfirmDelete(role.id)}
-                                        >
-                                          Delete Role
-                                        </Button>
-                                      </DialogFooter>
-                                    </DialogContent>
-                                  )}
-                                </Dialog>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        
-                        {roles.length === 0 && (
-                          <TableRow>
-                            <TableCell colSpan={2} className="text-center py-6 text-gray-500">
-                              No roles defined
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-              </div>
+            <Tabs defaultValue="roles" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="roles">Roles</TabsTrigger>
+                <TabsTrigger value="form">
+                  {isEditMode ? 'Edit Role' : 'Create Role'}
+                </TabsTrigger>
+              </TabsList>
               
-              {/* Role Editor Panel */}
-              <div className="md:col-span-2 space-y-6">
-                <h3 className="text-lg font-medium">
-                  {isEditMode ? `Edit Role: ${selectedRole?.name}` : 'Create New Role'}
-                </h3>
-                
-                <div className="space-y-4">
+              <TabsContent value="roles" className="space-y-4">
+                <div className="grid gap-4">
+                  {roles.map((role) => (
+                    <Card key={role.id} className="cursor-pointer hover:bg-gray-50">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div 
+                            className="flex-1"
+                            onClick={() => setCurrentRole(role)}
+                          >
+                            <h4 className="font-medium">{role.name}</h4>
+                            <p className="text-sm text-gray-500">{role.description}</p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {role.permissions?.length || 0} permissions
+                            </p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentRole(role)}
+                            >
+                              Edit
+                            </Button>
+                            {!role.isSystemRole && (
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={isLoading}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setConfirmationState({ 
+                                        roleId: role.id, 
+                                        roleName: role.name,
+                                        isOpen: true 
+                                      });
+                                    }}
+                                  >
+                                    <TrashIcon className="h-4 w-4 text-red-500" />
+                                  </Button>
+                                </DialogTrigger>
+                                {confirmationState.isOpen && confirmationState.roleId === role.id && (
+                                  <DialogContent>
+                                    <DialogHeader>
+                                      <DialogTitle>Delete Role</DialogTitle>
+                                      <DialogDescription>
+                                        Are you sure you want to delete the "{confirmationState.roleName}" role? 
+                                        This action cannot be undone and may affect users with this role.
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter className="flex space-x-2 justify-end">
+                                      <Button
+                                        variant="outline"
+                                        onClick={() => setConfirmationState({ roleId: null, roleName: '', isOpen: false })}
+                                      >
+                                        Cancel
+                                      </Button>
+                                      <Button
+                                        variant="destructive"
+                                        onClick={async () => {
+                                          await handleDeleteRole(role.id);
+                                          setConfirmationState({ roleId: null, roleName: '', isOpen: false });
+                                        }}
+                                      >
+                                        Delete Role
+                                      </Button>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                )}
+                              </Dialog>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="form" className="space-y-4">
+                <form onSubmit={isEditMode ? handleUpdateRole : handleCreateRole} className="space-y-4">
+                  {formErrors.form && (
+                    <Alert variant="destructive">
+                      <ExclamationTriangleIcon className="h-4 w-4" />
+                      <AlertDescription>{formErrors.form}</AlertDescription>
+                    </Alert>
+                  )}
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="roleName">Role Name</Label>
+                    <Label htmlFor="role-name">Role Name</Label>
                     <Input
-                      id="roleName"
-                      value={roleForm.name}
-                      onChange={(e) => updateRoleForm('name', e.target.value)}
-                      disabled={isLoading || (isEditMode && selectedRole?.isSystem)}
-                      placeholder="e.g., Admin, Editor, Viewer"
+                      id="role-name"
+                      value={nameValue}
+                      onChange={(e) => setNameValue(e.target.value)}
+                      onBlur={() => handleBlur('name')}
+                      placeholder="Enter role name"
+                      disabled={isLoading}
                     />
+                    {touched.name && formErrors.name && (
+                      <p className="text-sm text-red-600">{formErrors.name}</p>
+                    )}
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="roleDescription">Description</Label>
+                    <Label htmlFor="role-description">Description</Label>
                     <Textarea
-                      id="roleDescription"
-                      value={roleForm.description}
-                      onChange={(e) => updateRoleForm('description', e.target.value)}
-                      disabled={isLoading || (isEditMode && selectedRole?.isSystem)}
-                      placeholder="Describe the purpose and responsibilities of this role"
-                      rows={3}
+                      id="role-description"
+                      value={descriptionValue}
+                      onChange={(e) => setDescriptionValue(e.target.value)}
+                      onBlur={() => handleBlur('description')}
+                      placeholder="Enter role description"
+                      disabled={isLoading}
                     />
+                    {touched.description && formErrors.description && (
+                      <p className="text-sm text-red-600">{formErrors.description}</p>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="is-system-role"
+                      checked={isSystemRoleValue}
+                      onCheckedChange={(checked) => setIsSystemRoleValue(checked as boolean)}
+                      disabled={isLoading || isEditMode}
+                    />
+                    <Label htmlFor="is-system-role">System Role (cannot be deleted)</Label>
                   </div>
                   
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <Label>Permissions</Label>
-                      {selectedRole?.isSystem && (
-                        <p className="text-sm text-amber-600">
-                          System roles have fixed permissions
-                        </p>
-                      )}
-                    </div>
-                    
-                    <Tabs defaultValue={permissionCategories[0]?.id || "all"} className="w-full">
-                      <TabsList className="flex flex-wrap">
-                        {permissionCategories.map((category) => (
-                          <TabsTrigger key={category.id} value={category.id}>
-                            {category.name} ({getPermissionsCountByCategory(category.id)})
-                          </TabsTrigger>
-                        ))}
-                      </TabsList>
-                      
-                      {permissionCategories.map((category) => (
-                        <TabsContent key={category.id} value={category.id} className="space-y-4 pt-4">
-                          <div className="flex justify-between items-center">
-                            <p className="text-sm font-medium">{category.description}</p>
-                            <div className="flex space-x-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => selectAllPermissionsInCategory(category.id)}
-                                disabled={isLoading || (isEditMode && selectedRole?.isSystem)}
+                    <Label>Permissions</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-96 overflow-y-auto">
+                      {permissions.map((permission) => {
+                        const isSelected = currentRole?.permissions?.includes(permission) || false;
+                        return (
+                          <div key={permission} className="flex items-start space-x-2 p-2 border rounded-md">
+                            <Checkbox
+                              id={`permission-${permission}`}
+                              checked={isSelected}
+                              onCheckedChange={async (checked) => {
+                                if (!currentRole) return;
+                                if (checked) {
+                                  await assignPermissionToRole(currentRole.id, permission);
+                                } else {
+                                  await removePermissionFromRole(currentRole.id, permission);
+                                }
+                              }}
+                              disabled={isLoading || isSystemRoleValue}
+                            />
+                            <div className="space-y-1">
+                              <Label
+                                htmlFor={`permission-${permission}`}
+                                className="font-medium text-sm"
                               >
-                                Select All
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => unselectAllPermissionsInCategory(category.id)}
-                                disabled={isLoading || (isEditMode && selectedRole?.isSystem)}
-                              >
-                                Deselect All
-                              </Button>
+                                {permission.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
+                              </Label>
                             </div>
                           </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {permissions
-                              .filter(p => p.category === category.id)
-                              .map((permission) => (
-                                <div key={permission.id} className="flex items-start space-x-2 p-2 border rounded-md">
-                                  <Checkbox
-                                    id={`permission-${permission.id}`}
-                                    checked={isPermissionSelected(permission.id)}
-                                    onCheckedChange={() => togglePermission(permission.id)}
-                                    disabled={isLoading || (isEditMode && selectedRole?.isSystem)}
-                                  />
-                                  <div className="space-y-1">
-                                    <Label
-                                      htmlFor={`permission-${permission.id}`}
-                                      className="font-medium"
-                                    >
-                                      {permission.name}
-                                    </Label>
-                                    <p className="text-xs text-gray-500">
-                                      {permission.description}
-                                    </p>
-                                  </div>
-                                </div>
-                              ))}
-                          </div>
-                        </TabsContent>
-                      ))}
-                    </Tabs>
+                        );
+                      })}
+                    </div>
                   </div>
                   
                   <div className="flex justify-end space-x-2 pt-4">
                     {isEditMode ? (
                       <>
                         <Button
+                          type="button"
                           variant="outline"
                           onClick={() => {
-                            resetRoleForm();
-                            setIsEditMode(false);
-                            setSelectedRole(null);
+                            resetForm();
+                            setCurrentRole(null);
                           }}
                           disabled={isLoading}
                         >
                           Cancel
                         </Button>
                         <Button
-                          onClick={() => handleUpdateRole(selectedRole?.id)}
-                          disabled={isLoading || !roleForm.name || (selectedRole?.isSystem)}
+                          type="submit"
+                          disabled={isLoading || !isValid || isSystemRoleValue}
                         >
                           {isLoading ? 'Saving...' : 'Update Role'}
                         </Button>
                       </>
                     ) : (
-                      <Button
-                        onClick={handleCreateRole}
-                        disabled={isLoading || !roleForm.name}
-                      >
-                        {isLoading ? 'Creating...' : 'Create Role'}
-                      </Button>
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={resetForm}
+                          disabled={isLoading}
+                        >
+                          Reset
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={isLoading || !isValid}
+                        >
+                          {isLoading ? 'Creating...' : 'Create Role'}
+                        </Button>
+                      </>
                     )}
                   </div>
-                </div>
-              </div>
-            </div>
+                </form>
+              </TabsContent>
+            </Tabs>
           </CardContent>
-          
-          {footer && <CardFooter>{footer}</CardFooter>}
+          {footer && (
+            <CardFooter>
+              {footer}
+            </CardFooter>
+          )}
         </Card>
       )}
     />

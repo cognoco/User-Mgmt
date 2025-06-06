@@ -574,7 +574,7 @@ export function setTableMockData(tableName: string, mockData: any) {
   How to use this mock in tests:
   
   1. Global usage (handled in vitest.setup.ts):
-     The mock is automatically applied to imports from '@/lib/database/supabase'
+     The mock is automatically applied to imports from '../../../lib/database/supabase'
   
   2. Test-specific overrides:
      ```

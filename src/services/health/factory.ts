@@ -1,9 +1,9 @@
 import { IHealthService } from '../../core/health/interfaces';
 import { DefaultHealthService } from './default-health.service';
-import { getAdapter } from '../../adapters';
+import { AdapterRegistry } from '../../adapters/registry';
 
 export function createHealthService(): IHealthService {
-  const adapter = getAdapter('health');
+  const adapter = AdapterRegistry.getInstance().getAdapter('health');
   return new DefaultHealthService(adapter);
 }
 

@@ -7,7 +7,7 @@ import {
 import type {
   RegistrationCredentialJSON,
   AuthenticationCredentialJSON,
-} from '@simplewebauthn/typescript-types';
+} from '@simplewebauthn/types';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
 const rpName = 'User Management System';

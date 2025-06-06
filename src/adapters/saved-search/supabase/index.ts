@@ -1,0 +1,1 @@
+export * from './supabase-saved-search.provider';

@@ -26,9 +26,6 @@ import { useUserStore } from '@/lib/stores/user.store';
 
 describe('ActivityLog', () => {
   beforeEach(() => {
-    if (useAuth.setState) {
-      useAuth.setState({ user: stableUser, isLoading: false, error: null });
-    }
     useUserStore.setState({ isLoading: false, error: null });
     fetchLogsMock.mockResolvedValue({
       logs: [
@@ -48,9 +45,6 @@ describe('ActivityLog', () => {
 
   afterEach(() => {
     vi.resetAllMocks();
-    if (useAuth.setState) {
-      useAuth.setState({ user: stableUser, isLoading: false, error: null });
-    }
   });
 
   it('renders activity log entries', async () => {

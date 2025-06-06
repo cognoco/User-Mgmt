@@ -2,7 +2,10 @@
 
 import { AdapterRegistry, AdapterFactory } from '../registry';
 import { SupabaseAdapterFactory, createSupabaseAdapterFactory } from '../supabase-factory';
-import { AuthDataProvider, UserDataProvider, TeamDataProvider, PermissionDataProvider } from '../interfaces';
+import { AuthService as AuthDataProvider } from '@/core/auth/interfaces';
+import { IUserDataProvider as UserDataProvider } from '@/core/user/IUserDataProvider';
+import { ITeamDataProvider as TeamDataProvider } from '@/core/team/ITeamDataProvider';
+import { IPermissionDataProvider as PermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
 
 // Mock the environment variables
 const originalEnv = process.env;

@@ -15,13 +15,13 @@ import {
   RoleCreationPayload,
   RoleUpdatePayload,
   ResourcePermission
-} from '../../core/permission/models';
+} from '@/core/permission/models';
 import type { IPermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
 import {
   PermissionEvent,
   PermissionEventHandler,
   PermissionEventTypes,
-} from '../../core/permission/events';
+} from '@/core/permission/events';
 
 /**
  * Supabase implementation of the PermissionDataProvider interface

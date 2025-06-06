@@ -4,7 +4,7 @@
  * Exposes subscription tier information with no UI.
  */
 import { useSubscriptionStore } from '@/lib/stores/subscription.store';
-import { SubscriptionTier } from '@/lib/types/subscription';
+import { SubscriptionTier } from '@/types/subscription';
 
 export interface SubscriptionBadgeProps {
   children: (props: { tier: SubscriptionTier; trialDays: number | null; isSubscribed: boolean }) => React.ReactNode;

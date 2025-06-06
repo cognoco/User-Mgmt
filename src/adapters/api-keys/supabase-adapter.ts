@@ -9,7 +9,7 @@ import {
   ApiKeyCreateResult,
   ApiKeyQuery,
   ApiKeyListResult
-} from '../../core/api-keys/models';
+} from '@/core/api-keys/models';
 import type { IApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
 import { generateApiKey } from '../../lib/api-keys/api-key-utils';
 

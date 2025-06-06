@@ -8,7 +8,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '../ui/card';
+} from '../../../components/ui/card';
 import {
   Table,
   TableBody,
@@ -16,8 +16,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../ui/table';
-import { Button } from '../ui/button';
+} from '../../../components/ui/table';
+import { Button } from '../../../components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -26,11 +26,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../ui/dialog';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Progress } from '../ui/progress';
-import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+} from '../../../components/ui/dialog';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { Progress } from '../../../components/ui/progress';
+import { Alert, AlertDescription, AlertTitle } from '../../../components/ui/alert';
 import { Users, AlertCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { TeamInviteDialog } from './TeamInviteDialog';

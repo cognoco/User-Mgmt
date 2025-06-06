@@ -5,7 +5,7 @@
  */
 import { useEffect, useState } from 'react';
 import { useSubscriptionStore } from '@/lib/stores/subscription.store';
-import { SubscriptionPeriod } from '@/lib/types/subscription';
+import { SubscriptionPeriod } from '@/types/subscription';
 
 export interface SubscriptionPlansProps {
   periods?: SubscriptionPeriod[];

@@ -1,6 +1,6 @@
 import type { ApplicationError } from './error-factory';
 import { sanitizePII } from './pii';
-import compliance from '@/config/compliance.config';
+import compliance from '../../../config/compliance.config';
 import { createError, createAuthenticationError, createNotFoundError } from './error-factory';
 import { SERVER_ERROR_CODES } from '@/lib/api/common/error-codes';
 import type { ErrorCode } from '@/lib/api/common/error-codes';

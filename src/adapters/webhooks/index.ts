@@ -4,6 +4,6 @@
  * Exposes webhook-related types and factory functions.
  */
 
-export * from '@/core/webhooks/IWebhookDataProvider';
+export type { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 export * from './factory';
-export * from './supabase/supabase-webhook.provider';
+export * from './supabase';

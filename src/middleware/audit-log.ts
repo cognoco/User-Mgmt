@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@/lib/database/supabase';
 import { sanitizePII } from '@/lib/utils/pii';
-import compliance from '@/config/compliance.config';
+import compliance from '../../config/compliance.config';
 
 interface AuditLogOptions {
   excludePaths?: string[];

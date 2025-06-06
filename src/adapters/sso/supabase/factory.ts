@@ -2,7 +2,7 @@
  * Supabase SSO Adapter Factory
  */
 
-import { SsoDataProvider } from '../interfaces';
+import { ISsoDataProvider as SsoDataProvider } from '../../../core/sso/ISsoDataProvider';
 import { SupabaseSsoProvider } from './supabase-adapter';
 
 export function createSupabaseSsoProvider(options: {

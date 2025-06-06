@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { SecuritySettings as HeadlessSecuritySettings } from '@/ui/headless/profile/SecuritySettings';
-import { Button } from '../ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Switch } from '../ui/switch';
+import { Button } from '../../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Switch } from '../../../components/ui/switch';
 import { Shield, Smartphone, Mail } from 'lucide-react';
 import {
   Dialog,
@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
+} from '../../../components/ui/dialog';
 
 export function SecuritySettings() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);

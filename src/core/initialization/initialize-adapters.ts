@@ -8,10 +8,10 @@
 import { createAdapterFactory, validateAdapterConfig } from '@/core/config/adapter-config';
 import { DefaultAuthService } from '@/services/auth/default-auth.service';
 import { BrowserAuthStorage } from '@/services/auth/auth-storage';
-import { DefaultUserService } from '@/services/user/default-user-service';
-import { DefaultTeamService } from '@/services/team/default-team-service';
+import { DefaultUserService } from '@/services/user/default-user.service';
+import { DefaultTeamService } from '@/services/team/default-team.service';
 import { DefaultOrganizationService } from '@/services/organization/default-organization.service';
-import { DefaultPermissionService } from '@/services/permission/default-permission-service';
+import { DefaultPermissionService } from '@/services/permission/default-permission.service';
 import { DefaultGdprService } from '@/services/gdpr/default-gdpr.service';
 import { DefaultSsoService } from '@/services/sso/default-sso.service';
 import { DefaultConsentService } from '@/services/consent/default-consent.service';

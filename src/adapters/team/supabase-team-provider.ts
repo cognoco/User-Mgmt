@@ -19,7 +19,7 @@ import {
   TeamInvitationResult,
   TeamSearchParams,
   TeamSearchResult
-} from '../../core/team/models';
+} from '@/core/team/models';
 
 import type { ITeamDataProvider } from '@/core/team/ITeamDataProvider';
 

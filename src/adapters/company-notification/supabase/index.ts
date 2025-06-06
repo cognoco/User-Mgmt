@@ -1,0 +1,1 @@
+export * from './supabase-company-notification.provider';

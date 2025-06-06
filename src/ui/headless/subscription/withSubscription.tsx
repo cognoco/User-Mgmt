@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { useSubscriptionStore } from '@/lib/stores/subscription.store';
-import { SubscriptionTier } from '@/lib/types/subscription';
+import { SubscriptionTier } from '@/types/subscription';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 
 export interface WithSubscriptionProps {

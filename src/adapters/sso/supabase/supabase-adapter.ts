@@ -13,7 +13,7 @@ import {
   SsoProviderListResult,
   SsoProviderResult,
   SsoProviderBatchResult,
-} from '../../core/sso/models';
+} from '../../../core/sso/models';
 import type { ISsoDataProvider } from '@/core/sso/ISsoDataProvider';
 
 

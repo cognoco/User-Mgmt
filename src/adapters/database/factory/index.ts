@@ -2,7 +2,7 @@ export { createSupabaseDatabaseProvider } from './supabase-factory';
 export { createPrismaDatabaseProvider } from './prisma-factory';
 export { createMockDatabaseProvider } from './mock-factory';
 
-import type { DatabaseConfig, DatabaseProvider } from '@/lib/database/types';
+import type { DatabaseConfig, DatabaseProvider } from '../../../lib/database/types';
 
 /**
  * Get a database provider instance by name.

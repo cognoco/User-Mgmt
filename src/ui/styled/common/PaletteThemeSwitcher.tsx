@@ -1,7 +1,7 @@
 import React from 'react';
-import { usePalette, PaletteKey } from '../ui/PaletteProvider';
-import { useTheme } from '../ui/theme-provider';
-import { palettes } from '../../lib/constants/themeConstants';
+import { usePalette, PaletteKey } from '../../../components/ui/PaletteProvider';
+import { useTheme } from '../../../components/ui/theme-provider';
+import { palettes } from '../../../lib/constants/themeConstants';
 
 export const paletteLabels: Record<PaletteKey, string> = {
   earthTones: 'Earth Tones',

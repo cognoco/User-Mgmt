@@ -92,6 +92,7 @@ export interface RoleEntity {
   id: string;
   name: string;
   description: string;
+  isSystemRole?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -131,8 +132,9 @@ export interface PermissionAssignment {
  */
 export interface RoleCreationPayload {
   name: string;
-  description: string;
-  permissions: Permission[];
+  description?: string;
+  isSystemRole?: boolean;
+  permissions?: Permission[];
 }
 
 /**
@@ -141,6 +143,7 @@ export interface RoleCreationPayload {
 export interface RoleUpdatePayload {
   name?: string;
   description?: string;
+  isSystemRole?: boolean;
   permissions?: Permission[];
 }
 

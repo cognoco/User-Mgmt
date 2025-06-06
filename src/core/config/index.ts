@@ -130,6 +130,11 @@ export function getServiceProvider<T>(providerName: string): T | undefined {
 // Export the interfaces and default values
 export * from './interfaces';
 export * from './config-context';
+export * from './adapter-config';
+export * from './client-config';
+export * from './environment';
+export * from './runtime-config';
+export * from './AppInitializer';
 
 // Export a singleton instance for convenience
 export const UserManagementConfiguration = {

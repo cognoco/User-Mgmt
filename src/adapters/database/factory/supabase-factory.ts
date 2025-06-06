@@ -5,8 +5,8 @@
  *   to Supabase. Additional options are passed through to the provider.
  * @returns Instance of {@link SupabaseProvider} implementing {@link DatabaseProvider}.
  */
-import { SupabaseProvider } from '@/lib/database/providers/supabase';
-import type { DatabaseConfig, DatabaseProvider } from '@/lib/database/types';
+import { SupabaseProvider } from '../../../lib/database/providers/supabase';
+import type { DatabaseConfig, DatabaseProvider } from '../../../lib/database/types';
 
 export function createSupabaseDatabaseProvider(options: DatabaseConfig): DatabaseProvider {
   return new SupabaseProvider({ ...options, provider: 'supabase' });

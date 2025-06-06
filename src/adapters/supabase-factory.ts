@@ -8,15 +8,15 @@
 
 import { AdapterFactory, AdapterFactoryOptions } from './registry';
 import { AuthDataProvider } from './auth/interfaces';
-import { UserDataProvider } from '@/core/user/IUserDataProvider';
-import { TeamDataProvider } from './team/interfaces';
-import { PermissionDataProvider } from './permission/interfaces';
-import { GdprDataProvider } from './gdpr/interfaces';
-import { IConsentDataProvider } from './consent/IConsentDataProvider';
-import { SessionDataProvider } from './session/interfaces';
-import { SsoDataProvider } from './sso/interfaces';
-import { SubscriptionDataProvider } from './subscription/interfaces';
-import { ApiKeyDataProvider } from './api-keys/interfaces';
+import { IUserDataProvider as UserDataProvider } from '@/core/user/IUserDataProvider';
+import { ITeamDataProvider as TeamDataProvider } from '@/core/team/ITeamDataProvider';
+import { IPermissionDataProvider as PermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
+import { IGdprDataProvider as GdprDataProvider } from '@/core/gdpr/IGdprDataProvider';
+import { IConsentDataProvider } from '@/core/consent/IConsentDataProvider';
+import { ISessionDataProvider as SessionDataProvider } from '@/core/session/ISessionDataProvider';
+import { ISsoDataProvider as SsoDataProvider } from '@/core/sso/ISsoDataProvider';
+import { ISubscriptionDataProvider as SubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataProvider';
+import { IApiKeyDataProvider as ApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
 import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
@@ -26,24 +26,26 @@ import { ISavedSearchDataProvider } from '@/core/saved-search/ISavedSearchDataPr
 
 // Import domain-specific factories
 import { createSupabaseAuthProvider } from './auth/factory';
-import createSupabaseUserProvider from './user/supabase/factory';
-import createSupabaseTeamProvider from './team/supabase/factory';
+import { createSupabaseUserProvider } from './user/factory';
+import { createSupabaseTeamProvider } from './team/factory';
 import { createSupabaseOrganizationProvider } from './organization/factory';
-import createSupabasePermissionProvider from './permission/supabase/factory';
-import createSupabaseGdprProvider from './gdpr/factory';
-import createSupabaseConsentProvider from './consent/factory';
+import { createSupabasePermissionProvider } from './permission/factory';
+import { createSupabaseGdprProvider } from './gdpr/factory';
+import { createSupabaseConsentProvider } from './consent/factory';
 import { createSupabaseSessionProvider } from './session/factory';
-import createSupabaseSsoProvider from './sso/supabase/factory';
+import { createSupabaseSsoProvider } from './sso/factory';
 import { createSupabaseOAuthProvider } from './oauth/factory';
 import type { OAuthDataProvider } from './oauth';
-import createSupabaseSubscriptionProvider from './subscription/factory';
-import createSupabaseCompanyNotificationProvider from './company-notification/factory';
+import { createSupabaseSubscriptionProvider } from './subscription/factory';
+import { createSupabaseCompanyNotificationProvider } from './company-notification/factory';
 import { createSupabaseWebhookProvider } from './webhooks';
-import createSupabaseAdminProvider from './admin/supabase/factory';
-import createSupabaseTwoFactorProvider from './two-factor/factory';
+import { createSupabaseAdminProvider } from './admin/factory';
+import { createSupabaseTwoFactorProvider } from './two-factor/factory';
 import { createSupabaseSavedSearchProvider } from './saved-search/factory';
 import { createSupabaseDataExportProvider } from './data-export/factory';
 import type { IDataExportDataProvider } from '@/core/data-export/IDataExportDataProvider';
+import { createSupabaseApiKeyProvider } from './api-keys/factory';
+import type { ICompanyNotificationDataProvider } from '@/core/company-notification/ICompanyNotificationDataProvider';
 
 
 

@@ -171,7 +171,8 @@ export * from './health';
 #### Step 2.5.1: Analyze Import Resolution Patterns
 ```bash
 # Identify the most common import errors
-npx tsc --noEmit 2>&1 | grep "Cannot find module" | head -20
+npx tsc --noEmit 2>&1 | Select-String "Cannot find module" | Select-Object -ExpandProperty Line
+npx tsc --noEmit 2>&1 | Select-String "property" | Select-Object -ExpandProperty Line        
 
 # Check @/ path resolution issues
 grep -r "import.*@/" src/ | head -20

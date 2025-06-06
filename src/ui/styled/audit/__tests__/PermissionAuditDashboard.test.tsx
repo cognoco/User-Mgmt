@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { TestWrapper } from '../../../../tests/utils/test-wrapper';
-import PermissionAuditDashboard from '../../PermissionAuditDashboard';
+import { PermissionAuditDashboard } from '../PermissionAuditDashboard';
 
 const mockLogs = [
   {

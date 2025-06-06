@@ -5,7 +5,7 @@
 //        vi.mock('@/lib/stores/auth.store', () => ({ useAuth: vi.fn(() => mockStore) }));
 
 import { vi } from 'vitest';
-import type { AuthState, AuthResult, MFASetupResponse, MFAVerifyResponse } from '../../types/auth';
+import type { AuthState, AuthResult, MFASetupResponse, MFAVerifyResponse } from '@/types/auth';
 
 const promiseTrue = vi.fn(async () => ({
   accessToken: 'mock-access',

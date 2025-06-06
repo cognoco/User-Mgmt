@@ -5,7 +5,7 @@
 //        vi.mock('@/lib/stores/session.store', () => ({ useSessionStore: vi.fn(() => mockStore) }));
 
 import { vi } from 'vitest';
-import type { SessionInfo } from '../../lib/stores/session.store';
+import type { SessionInfo } from '@/lib/stores/session.store';
 
 // Default initial state matching the real store
 const defaultState = {

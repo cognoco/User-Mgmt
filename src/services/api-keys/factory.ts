@@ -5,7 +5,7 @@
  * It ensures consistent configuration and dependency injection across all API endpoints.
  */
 
-import { ApiKeyService } from '@/core/api-key/interfaces';
+import { ApiKeyService } from '@/core/api-keys/interfaces';
 import type { IApiKeyDataProvider } from '@/core/api-keys';
 import { AdapterRegistry } from '@/adapters/registry';
 import { getServiceContainer } from '@/lib/config/service-container';

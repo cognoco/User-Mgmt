@@ -1,3 +1,3 @@
-export * from '@/core/company-notification/ICompanyNotificationDataProvider';
+export type { ICompanyNotificationDataProvider } from '@/core/company-notification/ICompanyNotificationDataProvider';
 export * from './factory';
-export * from './supabase/supabase-company-notification.provider';
+export * from './supabase';

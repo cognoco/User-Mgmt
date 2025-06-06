@@ -4,7 +4,7 @@
  * @param options Optional configuration to seed the mock provider.
  * @returns A minimal {@link DatabaseProvider} implementation.
  */
-import type { DatabaseProvider, DatabaseConfig } from '@/lib/database/types';
+import type { DatabaseProvider, DatabaseConfig } from '../../../lib/database/types';
 
 class MockDatabaseProvider implements DatabaseProvider {
   // Simplified in-memory store for demonstration

@@ -2,7 +2,7 @@ import { type NextRequest } from "next/server";
 import { withErrorHandling } from "@/middleware/error-handling";
 import { withRouteAuth } from "@/middleware/auth";
 import { createSuccessResponse } from "@/lib/api/common";
-import { ResourcePermissionResolver } from "@/services/permission/resource-permission-resolver";
+import { ResourcePermissionResolver } from "@/lib/services/resource-permission-resolver.service";
 
 async function handleGet(type: string, id: string) {
   const resolver = new ResourcePermissionResolver();

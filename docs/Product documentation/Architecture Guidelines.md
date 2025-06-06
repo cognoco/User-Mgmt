@@ -12,11 +12,13 @@ This document provides clear, unambiguous guidelines for developing the User Man
 - Business logic MUST reside ONLY in dedicated service or core classes/functions
 - UI components MUST be limited to display, user interaction, and calling service methods
 - Data transformation, validation, and processing MUST happen in services, not UI components
+- All imports must me in this form:   @/core/, @/lib/, @/tests/ etc
 
 **❌ FORBIDDEN:**
 - UI components MUST NOT contain API calls
 - UI components MUST NOT implement validation logic
 - UI components MUST NOT directly manipulate data stores or state
+ -Imports like MUST NOT BE CREATED./../core/ , ../../../lib/ , ../../../tests/  etc
 
 #### 1.2 Layered Architecture
 

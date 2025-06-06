@@ -4,6 +4,7 @@
  * This file exports all permission adapter related types and functions.
  */
 
-export * from '@/core/permission/IPermissionDataProvider';
+export type { IPermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
 export * from './factory';
 export * from './supabase-permission-provider';
+export * from './supabase';

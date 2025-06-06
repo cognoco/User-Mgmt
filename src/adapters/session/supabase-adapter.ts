@@ -12,7 +12,7 @@ import {
   SessionOperationResult,
   SessionDeletionResult,
   SessionBatchResult,
-} from '../../core/session/models';
+} from '@/core/session/models';
 import type { ISessionDataProvider } from '@/core/session/ISessionDataProvider';
 export class SupabaseSessionProvider implements ISessionDataProvider {
   private supabase: SupabaseClient;

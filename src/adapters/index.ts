@@ -6,27 +6,31 @@
  */
 
 export * from './registry';
-export * from './auth';
-export * from './user';
-export * from './team';
-export * from './permission';
-export * from './sso';
-export * from './api-keys';
-export * from './notification';
-export * from './gdpr';
-export * from './consent';
-export * from './session';
-export * from './two-factor';
-export * from './oauth';
-export * from './subscription';
-export * from './company-notification';
-export * from './organization';
+export * from './address';
 export * from './admin';
+export * from './api-keys';
+export * from './audit';
+export * from './auth';
+export * from './company-notification';
+export * from './consent';
 export * from './csrf';
 export * from './data-export';
-export * from './webhooks';
-export * from './saved-search';
 export * from './database';
+export * from './gdpr';
+export * from './notification';
+export * from './oauth';
+export * from './organization';
+export * from './permission';
+export * from './resource-relationship';
+export * from './saved-search';
+export * from './session';
+export * from './sso';
+export * from './storage';
+export * from './subscription';
+export * from './team';
+export * from './two-factor';
+export * from './user';
+export * from './webhooks';
 
 
 // Import and register the Supabase adapter factory by default

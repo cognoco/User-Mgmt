@@ -1,3 +1,3 @@
-export * from '@/core/subscription/ISubscriptionDataProvider';
+export type { ISubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataProvider';
 export * from './factory';
-export * from './supabase/supabase-subscription.provider';
+export * from './supabase';
