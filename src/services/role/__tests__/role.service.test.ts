@@ -182,5 +182,4 @@ it('caches effective permission results', async () => {
   expect(from.in).toHaveBeenCalledTimes(1);
   expect(first).toEqual(second);
 });
-  });
 });

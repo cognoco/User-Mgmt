@@ -21,12 +21,16 @@
   - Remove or update references to the old `/project` directory, as all code now resides in the root.
   - **When creating any new file (not just for testing), strictly follow the conventions in `docs/File structure guidelines.md`.**
 
+
 - **Tech Stack:**  
   Use only the established stack (Next.js, TypeScript, React, Supabase, Zustand, Tailwind CSS, Shadcn UI, Vitest, React Testing Library, User Event, MSW, JSDOM, Testing Library Jest DOM). Ask before introducing new technologies.
 
 ALWAYS MUST READ: 
 docs\Product documentation\Architecture Guidelines.md
 docs\Product documentation\Architecture Rules References.md
+docs\Project documentation\thorough-review-of-codebase.md
+docs\Project documentation\GAP_ANALYSIS.md
+docs\Project documentation\Tasks\IMPLEMENTATION_PLAN.md
 
 Please do not run tests after you are finished with the coding unless you are specifically asked to. If you are asked to run tests, continue reading: 
  

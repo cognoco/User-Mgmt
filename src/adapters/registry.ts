@@ -25,6 +25,11 @@ import { IOrganizationDataProvider } from '@/core/organization/IOrganizationData
 import { ICompanyNotificationDataProvider } from '@/core/company-notification/ICompanyNotificationDataProvider';
 import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
 import { IDataExportDataProvider } from '@/core/data-export/IDataExportDataProvider';
+import { 
+  DatabaseProvider, 
+  DatabaseConfig 
+} from '../core/database/interfaces';
+import { BaseRepository } from '../core/database/interfaces/base.interface';
 
 
 

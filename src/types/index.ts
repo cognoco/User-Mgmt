@@ -1,3 +1,6 @@
+/// <reference types="react" />
+/// <reference types="react-dom" />
+
 export interface BaseProps {
   className?: string;
   children?: React.ReactNode;

@@ -195,7 +195,6 @@ createSavedSearchProvider(): ISavedSearchDataProvider {
 createDataExportProvider(): IDataExportDataProvider {
   return createSupabaseDataExportProvider(this.options);
 }
-  }
 
   /**
    * Create a Supabase webhook provider
