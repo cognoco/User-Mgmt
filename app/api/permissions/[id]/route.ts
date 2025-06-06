@@ -1,24 +1,36 @@
-// GET /api/permissions/[id] - Get permission details
-// PUT /api/permissions/[id] - Update permission
-// DELETE /api/permissions/[id] - Delete permission
+import { NextRequest, NextResponse } from 'next/server';
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import { createSuccessResponse } from '@/lib/api/common';
+import { PermissionValues, Permission } from '@/core/permission/models';
+import { permissionCategoryMap } from '@/lib/rbac/permission-categories';
+import { isPermission } from '@/lib/rbac/roles';
 
-import { createProtectedHandler } from '@/middleware/permissions';
-import { withSecurity } from '@/middleware/with-security';
-import { PermissionValues } from '@/core/permission/models';
+function getPermissionId(req: NextRequest): string {
+  const parts = req.nextUrl.pathname.split('/');
+  return parts[3] || '';
+}
 
-export const GET = createProtectedHandler(
-  async () => new Response('Not implemented', { status: 501 }),
-  PermissionValues.MANAGE_ROLES,
-);
+const handleGet = async (req: NextRequest) => {
+  const id = getPermissionId(req);
+  if (!isPermission(id)) {
+    return NextResponse.json({ error: 'Not Found' }, { status: 404 });
+  }
+  const category = permissionCategoryMap[id as Permission];
+  return createSuccessResponse({ id, category });
+};
 
-export const PUT = createProtectedHandler(
-  (req) =>
-    withSecurity(async () => new Response('Not implemented', { status: 501 }))(req),
-  PermissionValues.MANAGE_ROLES,
-);
+export const GET = createApiHandler(emptySchema, handleGet, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+  rateLimit: { windowMs: 15 * 60 * 1000, max: 50 },
+});
 
-export const DELETE = createProtectedHandler(
-  (req) =>
-    withSecurity(async () => new Response('Not implemented', { status: 501 }))(req),
-  PermissionValues.MANAGE_ROLES,
-);
+const methodNotAllowed = createApiHandler(emptySchema, async () => {
+  return NextResponse.json({ error: 'Method Not Allowed' }, { status: 405 });
+}, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+});
+
+export const PUT = methodNotAllowed;
+export const DELETE = methodNotAllowed;

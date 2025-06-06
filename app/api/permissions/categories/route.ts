@@ -1,9 +1,16 @@
-// GET /api/permissions/categories - List all permission categories
-
-import { createProtectedHandler } from '@/middleware/permissions';
+import { NextRequest } from 'next/server';
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import { createSuccessResponse } from '@/lib/api/common';
 import { PermissionValues } from '@/core/permission/models';
+import { listPermissionCategories } from '@/lib/rbac/permission-categories';
 
-export const GET = createProtectedHandler(
-  async () => new Response('Not implemented', { status: 501 }),
-  PermissionValues.MANAGE_ROLES,
-);
+async function handleGet(_req: NextRequest) {
+  const categories = listPermissionCategories();
+  return createSuccessResponse({ categories });
+}
+
+export const GET = createApiHandler(emptySchema, handleGet, {
+  requireAuth: true,
+  requiredPermissions: [PermissionValues.MANAGE_ROLES],
+  rateLimit: { windowMs: 15 * 60 * 1000, max: 50 },
+});
