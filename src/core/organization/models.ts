@@ -57,3 +57,25 @@ export interface OrganizationResult {
   /** Error message when {@link success} is `false` */
   error?: string;
 }
+
+/**
+ * Organization member entity linking a user to an organization.
+ */
+export interface OrganizationMember {
+  /** Organization identifier */
+  organizationId: string;
+  /** User identifier */
+  userId: string;
+  /** Role of the user within the organization */
+  role: string;
+}
+
+/** Result type for organization membership operations */
+export interface OrganizationMemberResult {
+  /** Whether the operation succeeded */
+  success: boolean;
+  /** Created or updated member */
+  member?: OrganizationMember;
+  /** Error message when {@link success} is `false` */
+  error?: string;
+}
