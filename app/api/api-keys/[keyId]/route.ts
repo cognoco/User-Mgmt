@@ -1,62 +1,31 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { checkRateLimit } from '@/middleware/rate-limit';
-import { logUserAction } from '@/lib/audit/auditLogger';
-import { getCurrentUser } from '@/lib/auth/session';
-import { getApiKeyService } from '@/services/api-keys/factory';
+import { type NextRequest } from 'next/server'
+import { createApiHandler, emptySchema } from '@/lib/api/route-helpers'
+import { createSuccessResponse, createServerError, ApiError, ERROR_CODES } from '@/lib/api/common'
+import { checkRateLimit } from '@/middleware/rate-limit'
+import { logUserAction } from '@/lib/audit/auditLogger'
+import { getServiceContainer } from '@/lib/config/service-container'
 
-// DELETE handler to revoke an API key
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { keyId: string } }
-) {
-  // Get IP and User Agent
-  const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
-  const userAgent = request.headers.get('user-agent') || 'unknown';
-
-  // Rate limiting
-  const isRateLimited = await checkRateLimit(request);
-  if (isRateLimited) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+const handler = async (req: NextRequest, ctx: any, _data: unknown, params: { keyId: string }) => {
+  if (await checkRateLimit(req)) {
+    throw new ApiError(ERROR_CODES.OPERATION_FAILED, 'Too many requests', 429)
   }
-
-  try {
-    // Extract key ID from URL
-    const { keyId } = params;
-
-    // Get current user
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const service = getApiKeyService();
-    const revokeResult = await service.revokeApiKey(user.id, keyId);
-
-    if (!revokeResult.success) {
-      console.error('Error revoking API key:', revokeResult.error);
-      return NextResponse.json({ error: revokeResult.error || 'Failed to revoke API key' }, { status: 500 });
-    }
-
-    const keyData = revokeResult.key;
-
-    // Log the action
-    await logUserAction({
-      userId: user.id,
-      action: 'API_KEY_REVOKED',
-      status: 'SUCCESS',
-      ipAddress,
-      userAgent,
-      targetResourceType: 'api_key',
-      targetResourceId: keyId,
-      details: { 
-        name: keyData.name, 
-        prefix: keyData.prefix 
-      }
-    });
-
-    return NextResponse.json({ message: 'API key revoked successfully' });
-  } catch (error) {
-    console.error('Unexpected error in API key DELETE:', error);
-    return NextResponse.json({ error: 'An internal server error occurred' }, { status: 500 });
+  const service = getServiceContainer().apiKey!
+  const result = await service.revokeApiKey(ctx.userId!, params.keyId)
+  if (!result.success || !result.key) {
+    throw createServerError(result.error || 'Failed to revoke API key')
   }
-} 
+  await logUserAction({
+    userId: ctx.userId,
+    action: 'API_KEY_REVOKED',
+    status: 'SUCCESS',
+    ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
+    userAgent: req.headers.get('user-agent') || 'unknown',
+    targetResourceType: 'api_key',
+    targetResourceId: params.keyId,
+    details: { name: result.key.name, prefix: result.key.prefix },
+  })
+  return createSuccessResponse({ message: 'API key revoked successfully' })
+}
+
+export const DELETE = (req: NextRequest, ctx: { params: { keyId: string } }) =>
+  createApiHandler(emptySchema, (r, auth, data) => handler(r, auth, data, ctx.params), { requireAuth: true })(req)

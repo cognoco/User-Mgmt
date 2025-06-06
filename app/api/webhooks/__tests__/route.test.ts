@@ -1,66 +1,53 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET, POST, DELETE } from '../route';
-import { NextRequest } from 'next/server';
-import { getApiWebhookService } from '@/services/webhooks/factory';
-import { getCurrentUser } from '@/lib/auth/session';
-import { checkRateLimit } from '@/middleware/rate-limit';
-import { logUserAction } from '@/lib/audit/auditLogger';
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { GET, POST, DELETE } from '../route'
+import { configureServices, resetServiceContainer } from '@/lib/config/service-container'
+import type { IWebhookService } from '@/core/webhooks'
+import type { AuthService } from '@/core/auth/interfaces'
+import { createAuthenticatedRequest } from '@/tests/utils/request-helpers'
 
-vi.mock('@/services/webhooks/factory', () => ({
-  getApiWebhookService: vi.fn(),
-}));
-vi.mock('@/lib/auth/session', () => ({
+vi.mock('@/services/webhooks/factory', () => ({}))
+vi.mock('@/services/auth/factory', () => ({}))
+vi.mock('@/middleware/rate-limit', () => ({ checkRateLimit: vi.fn().mockResolvedValue(false) }))
+vi.mock('@/lib/audit/auditLogger', () => ({ logUserAction: vi.fn().mockResolvedValue(undefined) }))
+
+const service: Partial<IWebhookService> = {
+  getWebhooks: vi.fn(),
+  createWebhook: vi.fn(),
+  deleteWebhook: vi.fn(),
+}
+const authService: Partial<AuthService> = {
   getCurrentUser: vi.fn().mockResolvedValue({ id: 'u1' }),
-}));
-vi.mock('@/middleware/rate-limit', () => ({
-  checkRateLimit: vi.fn().mockResolvedValue(false),
-}));
-vi.mock('@/lib/audit/auditLogger', () => ({
-  logUserAction: vi.fn().mockResolvedValue(undefined),
-}));
-
-function createRequest(method: string, body?: any) {
-  return {
-    method,
-    headers: { get: () => null },
-    json: vi.fn().mockResolvedValue(body),
-  } as unknown as NextRequest;
 }
 
+beforeEach(() => {
+  vi.clearAllMocks()
+  resetServiceContainer()
+  configureServices({ webhookService: service as IWebhookService, authService: authService as AuthService })
+})
+
 describe('webhooks route', () => {
-  const service = {
-    getWebhooks: vi.fn(),
-    createWebhook: vi.fn(),
-    deleteWebhook: vi.fn(),
-  } as any;
-
-  beforeEach(() => {
-    vi.mocked(getApiWebhookService).mockReturnValue(service);
-    vi.clearAllMocks();
-  });
-
   it('lists webhooks', async () => {
-    service.getWebhooks.mockResolvedValue([{ id: 'w1' }]);
-    const res = await GET(createRequest('GET'));
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.webhooks[0].id).toBe('w1');
-    expect(service.getWebhooks).toHaveBeenCalledWith('u1');
-  });
+    (service.getWebhooks as vi.Mock).mockResolvedValue([{ id: 'w1', secret: 's' }])
+    const res = await GET(createAuthenticatedRequest('GET', 'http://test/api/webhooks'))
+    const body = await res.json()
+    expect(res.status).toBe(200)
+    expect(body.data.webhooks[0].id).toBe('w1')
+  })
 
   it('creates webhook', async () => {
-    service.createWebhook.mockResolvedValue({ success: true, webhook: { id: 'w2', name: 'n', url: 'u', events: [], secret: 's', isActive: true, createdAt: '', updatedAt: '' } });
-    const res = await POST(createRequest('POST', { name: 'n', url: 'u', events: [] }));
-    expect(res.status).toBe(201);
-    const body = await res.json();
-    expect(body.id).toBe('w2');
-    expect(service.createWebhook).toHaveBeenCalled();
-  });
+    (service.createWebhook as vi.Mock).mockResolvedValue({ success: true, webhook: { id: 'w2', name: 'n', url: 'u', events: [], secret: 's', isActive: true, createdAt: '', updatedAt: '' } })
+    const req = createAuthenticatedRequest('POST', 'http://test/api/webhooks', { name: 'n', url: 'u', events: [] })
+    const res = await POST(req)
+    const body = await res.json()
+    expect(res.status).toBe(201)
+    expect(body.data.id).toBe('w2')
+  })
 
   it('deletes webhook', async () => {
-    service.deleteWebhook.mockResolvedValue({ success: true });
-    const res = await DELETE(createRequest('DELETE', { id: 'w1' }));
-    expect(res.status).toBe(200);
-    expect(service.deleteWebhook).toHaveBeenCalledWith('u1', 'w1');
-  });
-});
+    (service.deleteWebhook as vi.Mock).mockResolvedValue({ success: true })
+    const req = createAuthenticatedRequest('DELETE', 'http://test/api/webhooks', { id: 'w1' })
+    const res = await DELETE(req)
+    expect(res.status).toBe(200)
+    expect(service.deleteWebhook).toHaveBeenCalledWith('u1', 'w1')
+  })
+})

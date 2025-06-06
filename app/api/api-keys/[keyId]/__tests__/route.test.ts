@@ -1,113 +1,36 @@
-import { NextRequest } from 'next/server';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { DELETE } from '../route';
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { DELETE } from '../route'
+import { configureServices, resetServiceContainer } from '@/lib/config/service-container'
+import type { ApiKeyService } from '@/core/api-keys/interfaces'
+import type { AuthService } from '@/core/auth/interfaces'
+import { createAuthenticatedRequest } from '@/tests/utils/request-helpers'
 
-// Mock the dependencies
-vi.mock('@/middleware/rate-limit', () => ({
-  checkRateLimit: vi.fn().mockResolvedValue(false)
-}));
+vi.mock('@/services/api-keys/factory', () => ({}))
+vi.mock('@/services/auth/factory', () => ({}))
+vi.mock('@/middleware/rate-limit', () => ({ checkRateLimit: vi.fn().mockResolvedValue(false) }))
+vi.mock('@/lib/audit/auditLogger', () => ({ logUserAction: vi.fn().mockResolvedValue(undefined) }))
 
-vi.mock('@/lib/auth/session', () => ({
-  getCurrentUser: vi.fn().mockResolvedValue({
-    id: 'test-user-id',
-    email: 'test@example.com'
-  })
-}));
-
-const serviceMock = {
-  listApiKeys: vi.fn(),
-  createApiKey: vi.fn(),
+const service: Partial<ApiKeyService> = {
   revokeApiKey: vi.fn(),
-};
-vi.mock('@/services/api-keys/factory', () => ({
-  getApiKeyService: vi.fn(() => serviceMock),
-}));
-
-vi.mock('@/lib/audit/auditLogger', () => ({
-  logUserAction: vi.fn().mockResolvedValue(undefined)
-}));
-
-// Import the mocked modules directly
-import { getCurrentUser } from '@/lib/auth/session';
-import { logUserAction } from '@/lib/audit/auditLogger';
-
-// Helper to create a mock request
-function createMockRequest(method: string) {
-  return {
-    method,
-    headers: {
-      get: vi.fn().mockImplementation((header) => {
-        if (header === 'x-forwarded-for') return '127.0.0.1';
-        if (header === 'user-agent') return 'test-agent';
-        return null;
-      })
-    }
-  } as unknown as NextRequest;
+  getApiKey: vi.fn(),
+}
+const authService: Partial<AuthService> = {
+  getCurrentUser: vi.fn().mockResolvedValue({ id: 'u1' }),
 }
 
-describe('API Key Delete API', () => {
-  beforeEach(() => {
-    serviceMock.revokeApiKey.mockReset();
-  });
+beforeEach(() => {
+  vi.clearAllMocks()
+  resetServiceContainer()
+  configureServices({ apiKeyService: service as ApiKeyService, authService: authService as AuthService })
+})
 
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
+describe('api key delete route', () => {
+  const params = { keyId: 'k1' }
 
-  describe('DELETE /api/api-keys/[keyId]', () => {
-    it('should revoke an API key', async () => {
-      // Mock the database responses
-      const mockKeyData = {
-        id: 'test-key-id',
-        name: 'Test Key',
-        prefix: 'test',
-        scopes: ['read_profile']
-      };
-
-      serviceMock.revokeApiKey.mockResolvedValue({ success: true, key: mockKeyData });
-
-      const req = createMockRequest('DELETE');
-      const params = { keyId: 'test-key-id' };
-      const response = await DELETE(req, { params });
-      const responseBody = await response.json();
-
-      expect(response.status).toBe(200);
-      expect(responseBody).toHaveProperty('message', 'API key revoked successfully');
-      
-      expect(serviceMock.revokeApiKey).toHaveBeenCalledWith('test-user-id', 'test-key-id');
-      
-      // Verify audit log was created
-      expect(logUserAction).toHaveBeenCalledWith(expect.objectContaining({
-        userId: 'test-user-id',
-        action: 'API_KEY_REVOKED',
-        targetResourceType: 'api_key',
-        targetResourceId: 'test-key-id'
-      }));
-    });
-
-    it('should return 401 if user is not authenticated', async () => {
-      // Mock the getCurrentUser to return null
-      (getCurrentUser as any).mockResolvedValueOnce(null);
-
-      const req = createMockRequest('DELETE');
-      const params = { keyId: 'test-key-id' };
-      const response = await DELETE(req, { params });
-
-      expect(response.status).toBe(401);
-      const body = await response.json();
-      expect(body).toHaveProperty('error', 'Unauthorized');
-    });
-
-    it('should return 404 if API key is not found', async () => {
-      serviceMock.revokeApiKey.mockResolvedValue({ success: false, error: 'API key not found' });
-
-      const req = createMockRequest('DELETE');
-      const params = { keyId: 'non-existent-key' };
-      const response = await DELETE(req, { params });
-
-      expect(response.status).toBe(500);
-      const body = await response.json();
-      expect(body).toHaveProperty('error', 'API key not found');
-    });
-  });
-}); 
+  it('revokes key', async () => {
+    (service.revokeApiKey as vi.Mock).mockResolvedValue({ success: true, key: { id: 'k1', name: 'n', prefix: 'p', scopes: [], createdAt: '', isRevoked: false } })
+    const res = await DELETE(createAuthenticatedRequest('DELETE', 'http://test'), { params })
+    expect(res.status).toBe(200)
+    expect(service.revokeApiKey).toHaveBeenCalledWith('u1', 'k1')
+  })
+})

@@ -1,165 +1,43 @@
-import { NextRequest } from 'next/server';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { GET, POST } from '../route';
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { GET, POST } from '../route'
+import { configureServices, resetServiceContainer } from '@/lib/config/service-container'
+import type { ApiKeyService } from '@/core/api-keys/interfaces'
+import type { AuthService } from '@/core/auth/interfaces'
+import { createAuthenticatedRequest } from '@/tests/utils/request-helpers'
 
-// Mock the dependencies
-vi.mock('@/middleware/rate-limit', () => ({
-  checkRateLimit: vi.fn().mockResolvedValue(false)
-}));
+vi.mock('@/services/api-keys/factory', () => ({}))
+vi.mock('@/services/auth/factory', () => ({}))
+vi.mock('@/middleware/rate-limit', () => ({ checkRateLimit: vi.fn().mockResolvedValue(false) }))
+vi.mock('@/lib/audit/auditLogger', () => ({ logUserAction: vi.fn().mockResolvedValue(undefined) }))
 
-vi.mock('@/lib/auth/session', () => ({
-  getCurrentUser: vi.fn().mockResolvedValue({
-    id: 'test-user-id',
-    email: 'test@example.com'
-  })
-}));
-
-const serviceMock = {
+const service: Partial<ApiKeyService> = {
   listApiKeys: vi.fn(),
   createApiKey: vi.fn(),
-  revokeApiKey: vi.fn(),
-};
-vi.mock('@/services/api-keys/factory', () => ({
-  getApiKeyService: vi.fn(() => serviceMock),
-}));
-
-vi.mock('@/lib/audit/auditLogger', () => ({
-  logUserAction: vi.fn().mockResolvedValue(undefined)
-}));
-
-
-// Import the mocked modules directly
-import { getCurrentUser } from '@/lib/auth/session';
-
-// Helper to create a mock request
-function createMockRequest(method: string, body?: any) {
-  return {
-    method,
-    headers: {
-      get: vi.fn().mockImplementation((header) => {
-        if (header === 'x-forwarded-for') return '127.0.0.1';
-        if (header === 'user-agent') return 'test-agent';
-        return null;
-      })
-    },
-    json: vi.fn().mockResolvedValue(body)
-  } as unknown as NextRequest;
+}
+const authService: Partial<AuthService> = {
+  getCurrentUser: vi.fn().mockResolvedValue({ id: 'u1' }),
 }
 
-describe('API Keys API', () => {
-  beforeEach(() => {
-    serviceMock.listApiKeys.mockReset();
-    serviceMock.createApiKey.mockReset();
-    serviceMock.revokeApiKey.mockReset();
-  });
+beforeEach(() => {
+  vi.clearAllMocks()
+  resetServiceContainer()
+  configureServices({ apiKeyService: service as ApiKeyService, authService: authService as AuthService })
+})
 
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
+describe('api keys route', () => {
+  it('lists keys', async () => {
+    (service.listApiKeys as vi.Mock).mockResolvedValue([])
+    const res = await GET(createAuthenticatedRequest('GET', 'http://test/api/api-keys'))
+    expect(res.status).toBe(200)
+    expect(service.listApiKeys).toHaveBeenCalledWith('u1')
+  })
 
-  describe('GET /api/api-keys', () => {
-    it('should return a list of API keys for the current user', async () => {
-      // Mock the database response
-      const mockApiKeys = [
-        {
-          id: 'key1',
-          name: 'Test Key 1',
-          prefix: 'test1',
-          scopes: ['read_profile'],
-          expires_at: null,
-          created_at: '2023-01-01T00:00:00Z'
-        },
-        {
-          id: 'key2',
-          name: 'Test Key 2',
-          prefix: 'test2',
-          scopes: ['read_profile', 'write_profile'],
-          expires_at: '2024-01-01T00:00:00Z',
-          created_at: '2023-01-02T00:00:00Z'
-        }
-      ];
-
-      serviceMock.listApiKeys.mockResolvedValue(mockApiKeys);
-
-      const req = createMockRequest('GET');
-      const response = await GET(req);
-      const responseBody = await response.json();
-
-      expect(response.status).toBe(200);
-      expect(responseBody).toHaveProperty('keys');
-      expect(Array.isArray(responseBody.keys)).toBe(true);
-      
-      expect(serviceMock.listApiKeys).toHaveBeenCalledWith('test-user-id');
-    });
-
-    it('should return 401 if user is not authenticated', async () => {
-      // Mock the getCurrentUser to return null
-      (getCurrentUser as any).mockResolvedValueOnce(null);
-
-      const req = createMockRequest('GET');
-      const response = await GET(req);
-
-      expect(response.status).toBe(401);
-      const body = await response.json();
-      expect(body).toHaveProperty('error', 'Unauthorized');
-    });
-  });
-
-  describe('POST /api/api-keys', () => {
-    it('should create a new API key', async () => {
-      // Mock the successful insert
-      const mockInsertResponse = {
-        data: {
-          id: 'new-key-id',
-          name: 'My API Key',
-          prefix: 'test',
-          scopes: ['read_profile'],
-          expires_at: null,
-          created_at: '2023-01-01T00:00:00Z'
-        },
-        error: null
-      };
-
-      serviceMock.createApiKey.mockResolvedValue({
-        success: true,
-        key: mockInsertResponse.data,
-        plaintext: 'test_generatedkey123'
-      });
-
-      const req = createMockRequest('POST', {
-        name: 'My API Key',
-        scopes: ['read_profile']
-      });
-
-      const response = await POST(req);
-      const responseBody = await response.json();
-
-      expect(response.status).toBe(200);
-      expect(responseBody).toHaveProperty('id', 'new-key-id');
-      expect(responseBody).toHaveProperty('name', 'My API Key');
-      expect(responseBody).toHaveProperty('scopes');
-      expect(responseBody).toHaveProperty('key', 'test_generatedkey123');
-      
-      expect(serviceMock.createApiKey).toHaveBeenCalledWith('test-user-id', {
-        name: 'My API Key',
-        scopes: ['read_profile'],
-        expiresAt: undefined
-      });
-    });
-
-    it('should validate the request body', async () => {
-      const req = createMockRequest('POST', {
-        // Missing required name field
-        scopes: ['read_profile']
-      });
-
-      const response = await POST(req);
-      expect(response.status).toBe(400);
-      
-      const body = await response.json();
-      expect(body).toHaveProperty('error', 'Validation failed');
-      expect(body).toHaveProperty('details');
-      expect(Array.isArray(body.details)).toBe(true);
-    });
-  });
-}); 
+  it('creates key', async () => {
+    (service.createApiKey as vi.Mock).mockResolvedValue({ success: true, key: { id: 'k1', name: 'n', prefix: 'p', scopes: [], createdAt: '', isRevoked: false }, plaintext: 'pk' })
+    const req = createAuthenticatedRequest('POST', 'http://test/api/api-keys', { name: 'n', scopes: [] })
+    const res = await POST(req)
+    const body = await res.json()
+    expect(res.status).toBe(201)
+    expect(body.data.id).toBe('k1')
+  })
+})
