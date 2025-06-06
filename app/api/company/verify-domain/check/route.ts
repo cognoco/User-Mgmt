@@ -1,41 +1,50 @@
-import { type NextRequest, NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/database/supabase';
-import { getApiCompanyService } from '@/services/company/factory';
+import { NextRequest } from 'next/server';
+import { z } from 'zod';
+import { createApiHandler } from '@/lib/api/route-helpers';
 import { checkRateLimit } from '@/middleware/rate-limit';
+import { getApiCompanyService } from '@/services/company/factory';
+import { logUserAction } from '@/lib/audit/auditLogger';
+import { ApiError, ERROR_CODES, createSuccessResponse } from '@/lib/api/common';
 
-export async function POST(request: NextRequest) {
-  // 1. Rate Limiting
-  const isRateLimited = await checkRateLimit(request);
-  if (isRateLimited) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+async function handlePost(request: NextRequest, _data: unknown, auth: { userId?: string }) {
+  if (await checkRateLimit(request, { windowMs: 15 * 60 * 1000, max: 10 })) {
+    throw new ApiError(ERROR_CODES.OPERATION_FAILED, 'Too many requests', 429);
   }
+
+  const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
+  const userAgent = request.headers.get('user-agent') || 'unknown';
 
   try {
-    // 2. Authentication & Get User
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    const service = getApiCompanyService();
+    const result = await service.checkProfileDomainVerification(auth.userId!);
+
+    await logUserAction({
+      userId: auth.userId,
+      action: 'PROFILE_DOMAIN_VERIFICATION_CHECK',
+      status: result.verified ? 'SUCCESS' : 'FAILURE',
+      ipAddress,
+      userAgent,
+      targetResourceType: 'company',
+    });
+
+    return createSuccessResponse({ verified: result.verified, message: result.message }, result.verified ? 200 : 400);
+  } catch (error: any) {
+    await logUserAction({
+      userId: auth.userId,
+      action: 'PROFILE_DOMAIN_VERIFICATION_CHECK_FAILED',
+      status: 'FAILURE',
+      ipAddress,
+      userAgent,
+      targetResourceType: 'company',
+      details: { error: error?.message }
+    });
+
+    const msg = error?.message || 'Verification failed';
+    if (/initiated/i.test(msg)) {
+      throw new ApiError(ERROR_CODES.INVALID_REQUEST, msg, 400);
     }
-    const token = authHeader.split(' ')[1];
-
-    const supabaseService = getServiceSupabase();
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token);
-
-    if (userError || !user) {
-      return NextResponse.json({ error: userError?.message || 'Invalid token' }, { status: 401 });
-    }
-
-    const companyService = getApiCompanyService();
-    const result = await companyService.checkProfileDomainVerification(user.id);
-
-    if (result.verified) {
-        return NextResponse.json({ verified: true, message: result.message });
-    }
-
-    return NextResponse.json({ verified: false, message: result.message }, { status: 400 });
-
-  } catch (error) {
-    console.error('Unexpected error in POST /api/company/verify-domain/check:', error);
-    return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
+    throw new ApiError(ERROR_CODES.INTERNAL_ERROR, msg, 500);
   }
-} 
+}
+
+export const POST = createApiHandler(z.object({}), handlePost, { requireAuth: true });
