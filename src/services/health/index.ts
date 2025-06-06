@@ -12,3 +12,5 @@ export function createHealthMonitoringService(config: HealthServiceConfig = {}):
 }
 
 export { DefaultHealthMonitoringService } from './default-health.service';
+export { DefaultSystemHealthService } from './system-health.service';
+export { getHealthService } from './factory';
