@@ -1,4 +1,4 @@
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 
 import { prisma } from '@/lib/database/prisma';
@@ -30,6 +30,19 @@ async function handleDelete(
   if (!teamMember) {
     throw createTeamMemberNotFoundError();
   }
+
+  const currentMembership = await prisma.teamMember.findFirst({
+    where: { teamId: teamMember.teamId, userId: auth.userId! },
+  });
+
+  if (!currentMembership) {
+    throw new ApiError(
+      ERROR_CODES.FORBIDDEN,
+      'Cannot modify members of another team',
+      403
+    );
+  }
+
 
   if (teamMember.userId === auth.userId) {
     throw new ApiError(

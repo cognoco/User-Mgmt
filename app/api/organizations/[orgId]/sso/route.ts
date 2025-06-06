@@ -10,11 +10,13 @@ const ssoSettingsSchema = z.object({
 });
 
 // GET /api/organizations/[orgId]/sso/settings
-export const GET = createApiHandler(
+export const GET = (
+  req: NextRequest,
+  ctx: { params: { orgId: string } }
+) => createApiHandler(
   emptySchema,
   async (request: NextRequest, authContext: any, data: any, services: any) => {
-    const url = new URL(request.url);
-    const orgId = url.pathname.split('/')[3]; // Extract orgId from /api/organizations/{orgId}/sso
+    const orgId = ctx.params.orgId;
     const path = request.nextUrl.pathname;
 
     // Handle status endpoint
@@ -85,11 +87,13 @@ export const GET = createApiHandler(
 );
 
 // PUT /api/organizations/[orgId]/sso/settings
-export const PUT = createApiHandler(
+export const PUT = (
+  req: NextRequest,
+  ctx: { params: { orgId: string } }
+) => createApiHandler(
   ssoSettingsSchema,
   async (request: NextRequest, authContext: any, settings: z.infer<typeof ssoSettingsSchema>, services: any) => {
-    const url = new URL(request.url);
-    const orgId = url.pathname.split('/')[3]; // Extract orgId from /api/organizations/{orgId}/sso
+    const orgId = ctx.params.orgId;
     const path = request.nextUrl.pathname;
 
     if (path.endsWith('/settings')) {
