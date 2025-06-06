@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getSessionFromToken } from '@/services/auth/factory';
 import { getApiProfileService } from '@/services/profile/factory';
+import { getApiPermissionService } from '@/services/permission/factory';
 import { checkRateLimit } from '@/middleware/rate-limit';
 import { profileSchema } from '@/types/database'; // Corrected import path
 
@@ -105,10 +106,18 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json({ error: 'Profile not found or error checking permissions.' }, { status: 404 });
     }
 
-    // Basic Permission Check: Ensure user is a corporate type and isAdmin
-    // TODO: Replace with proper RBAC check in Phase 6 (e.g., check if user is admin of the company)
-    if (existingProfile.userType !== 'corporate' || !existingProfile.isAdmin) {
-        return NextResponse.json({ error: 'Permission denied. Only company admins can update business profiles.' }, { status: 403 });
+    // Permission check using RBAC service
+    const permissionService = getApiPermissionService();
+    const hasPermission = await permissionService.checkUserPermission(
+      user.id,
+      'profile.business.update'
+    );
+
+    if (!hasPermission) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions' },
+        { status: 403 }
+      );
     }
 
     // 4. Parse and Validate Body
@@ -138,6 +147,19 @@ export async function PATCH(request: NextRequest) {
     }
 
     console.log(`Updating business profile for user ${user.id}:`, profileUpdates);
+
+    // Add version check for concurrent updates
+    const currentProfile = await service.getProfileByUserId(user.id);
+    const requestVersion = (body as any).version;
+    if (
+      requestVersion !== undefined &&
+      (currentProfile as any)?.version !== requestVersion
+    ) {
+      return NextResponse.json(
+        { error: 'Profile was modified by another user' },
+        { status: 409 }
+      );
+    }
 
     // 5. Update Profile via service
     const updatedData = await service.updateProfileByUserId(user.id, {

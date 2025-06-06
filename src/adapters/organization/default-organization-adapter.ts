@@ -3,7 +3,9 @@ import type {
   Organization,
   OrganizationCreatePayload,
   OrganizationUpdatePayload,
-  OrganizationResult
+  OrganizationResult,
+  OrganizationMember,
+  OrganizationMemberResult
 } from '@/core/organization/models';
 
 export class DefaultOrganizationAdapter implements IOrganizationDataProvider {
@@ -30,6 +32,14 @@ export class DefaultOrganizationAdapter implements IOrganizationDataProvider {
   }
 
   async deleteOrganization(_id: string): Promise<{ success: boolean; error?: string }> {
+    return { success: false, error: 'Not implemented' };
+  }
+
+  async getMembers(_orgId: string): Promise<OrganizationMember[]> {
+    return [];
+  }
+
+  async addMember(_orgId: string, _userId: string, _role: string): Promise<OrganizationMemberResult> {
     return { success: false, error: 'Not implemented' };
   }
 }

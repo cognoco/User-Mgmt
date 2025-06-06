@@ -7,6 +7,7 @@ function createAdapterMock(): StorageAdapter {
     upload: vi.fn(),
     delete: vi.fn(),
     getPublicUrl: vi.fn(),
+    list: vi.fn(),
   };
 }
 
@@ -54,5 +55,14 @@ describe('DefaultFileStorageService', () => {
     const res = await service.getFileUrl('b', 'p');
     expect(adapter.getPublicUrl).toHaveBeenCalledWith('p');
     expect(res).toBe('url');
+  });
+
+  it('delegates listFiles to adapter', async () => {
+    const adapter = createAdapterMock();
+    (adapter.list as any).mockResolvedValue(['f1']);
+    const service = new DefaultFileStorageService(adapter);
+    const res = await service.listFiles('b', 'prefix');
+    expect(adapter.list).toHaveBeenCalledWith('prefix');
+    expect(res).toEqual(['f1']);
   });
 });

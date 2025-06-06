@@ -2,7 +2,9 @@ import type {
   Organization,
   OrganizationCreatePayload,
   OrganizationUpdatePayload,
-  OrganizationResult
+  OrganizationResult,
+  OrganizationMember,
+  OrganizationMemberResult
 } from './models';
 
 export interface IOrganizationDataProvider {
@@ -11,4 +13,14 @@ export interface IOrganizationDataProvider {
   getUserOrganizations(userId: string): Promise<Organization[]>;
   updateOrganization(id: string, data: OrganizationUpdatePayload): Promise<OrganizationResult>;
   deleteOrganization(id: string): Promise<{ success: boolean; error?: string }>;
+
+  /**
+   * Get members of an organization.
+   */
+  getMembers(orgId: string): Promise<OrganizationMember[]>;
+
+  /**
+   * Add a member to an organization.
+   */
+  addMember(orgId: string, userId: string, role: string): Promise<OrganizationMemberResult>;
 }

@@ -4,7 +4,9 @@ import type {
   Organization,
   OrganizationCreatePayload,
   OrganizationUpdatePayload,
-  OrganizationResult
+  OrganizationResult,
+  OrganizationMember,
+  OrganizationMemberResult
 } from '@/core/organization/models';
 
 export class DefaultOrganizationService implements OrganizationService {
@@ -28,5 +30,13 @@ export class DefaultOrganizationService implements OrganizationService {
 
   deleteOrganization(id: string): Promise<{ success: boolean; error?: string }> {
     return this.provider.deleteOrganization(id);
+  }
+
+  getOrganizationMembers(orgId: string): Promise<OrganizationMember[]> {
+    return this.provider.getMembers(orgId);
+  }
+
+  addOrganizationMember(orgId: string, userId: string, role: string): Promise<OrganizationMemberResult> {
+    return this.provider.addMember(orgId, userId, role);
   }
 }
