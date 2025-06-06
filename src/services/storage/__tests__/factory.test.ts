@@ -1,20 +1,32 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getStorageService } from '../factory';
-import { SupabaseStorageAdapter } from '@/adapters/storage/supabase/SupabaseStorageAdapter';
+import { createStorageService, getStorageService } from '../factory';
+import { DefaultFileStorageService } from '../DefaultFileStorageService';
+import { getAdapter } from '../../adapters';
 
-vi.mock('@/adapters/storage/supabase/SupabaseStorageAdapter');
+vi.mock('../../adapters', () => ({
+  getAdapter: vi.fn(() => ({})),
+}));
 
-const MockAdapter = SupabaseStorageAdapter as unknown as vi.Mock;
+const MockGetAdapter = getAdapter as unknown as vi.Mock;
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
+describe('createStorageService', () => {
+  it('creates service using storage adapter', () => {
+    const adapter = {} as any;
+    MockGetAdapter.mockReturnValue(adapter);
+    const service = createStorageService();
+    expect(service).toBeInstanceOf(DefaultFileStorageService);
+    expect(MockGetAdapter).toHaveBeenCalledWith('storage');
+  });
+});
+
 describe('getStorageService', () => {
-  it('creates and caches service instance', () => {
-    const service1 = getStorageService({ bucket: 'b', reset: true });
-    const service2 = getStorageService();
-    expect(MockAdapter).toHaveBeenCalledWith('b');
-    expect(service1).toBe(service2);
+  it('returns a new service instance', () => {
+    const svc = getStorageService();
+    expect(svc).toBeInstanceOf(DefaultFileStorageService);
+    expect(MockGetAdapter).toHaveBeenCalledWith('storage');
   });
 });
