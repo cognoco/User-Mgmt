@@ -39,7 +39,7 @@ const disableMFA = vi.fn(async (userId: string) => {
   });
 });
 
-vi.mock('@/lib/prisma');
+vi.mock('@/lib/database/prisma');
 
 describe('Multi-Factor Authentication', () => {
   beforeEach(() => {
