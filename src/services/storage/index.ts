@@ -1,2 +1,2 @@
-export { DefaultFileStorageService } from './DefaultFileStorageService';
-export { getStorageService } from './factory';
+export * from './factory';
+export * from './DefaultFileStorageService';

@@ -1,24 +1,12 @@
-import type { FileStorageService } from '@/core/storage/services';
+import type { IStorageService } from '../../core/storage/interfaces';
 import { DefaultFileStorageService } from './DefaultFileStorageService';
-import { SupabaseStorageAdapter } from '@/adapters/storage/supabase/SupabaseStorageAdapter';
+import { getAdapter } from '../../adapters';
 
-export interface StorageServiceOptions {
-  bucket?: string;
-  reset?: boolean;
+export function createStorageService(): IStorageService {
+  const adapter = getAdapter('storage');
+  return new DefaultFileStorageService(adapter);
 }
 
-let cachedService: FileStorageService | null = null;
-
-export function getStorageService(options: StorageServiceOptions = {}): FileStorageService {
-  if (options.reset) {
-    cachedService = null;
-  }
-
-  if (!cachedService) {
-    const bucket = options.bucket || 'files';
-    const adapter = new SupabaseStorageAdapter(bucket);
-    cachedService = new DefaultFileStorageService(adapter);
-  }
-
-  return cachedService;
+export function getStorageService(): IStorageService {
+  return createStorageService();
 }
