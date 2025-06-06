@@ -8,7 +8,7 @@
 
 import { AdapterFactory, AdapterFactoryOptions } from './registry';
 import { AuthDataProvider } from './auth/interfaces';
-import { UserDataProvider } from './user/interfaces';
+import { UserDataProvider } from '@/core/user/IUserDataProvider';
 import { TeamDataProvider } from './team/interfaces';
 import { PermissionDataProvider } from './permission/interfaces';
 import { GdprDataProvider } from './gdpr/interfaces';
