@@ -8,6 +8,8 @@
  * for environment-specific functionality.
  */
 
+export * from "./interfaces";
+
 /**
  * Server-side storage implementation for SSR
  */
