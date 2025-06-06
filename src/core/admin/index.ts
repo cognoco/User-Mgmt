@@ -6,3 +6,4 @@
 
 export * from './interfaces';
 export * from './IAdminDataProvider';
+export type { IAdminDataProvider } from './IAdminDataProvider';

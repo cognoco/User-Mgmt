@@ -81,14 +81,49 @@ export enum TeamVisibility {
  */
 export interface TeamMember {
   /**
+   * Unique identifier for the team member record
+   */
+  id: string;
+
+  /**
    * ID of the team
    */
   teamId: string;
   
   /**
    * ID of the user
-   */
+  */
   userId: string;
+
+  /**
+   * Full display name of the user
+   */
+  name?: string;
+
+  /**
+   * Email address of the user
+   */
+  email?: string;
+
+  /**
+   * URL of the user's avatar image (optional)
+   */
+  avatarUrl?: string | null;
+
+  /**
+   * Whether this member entry represents the current user
+   */
+  isCurrentUser?: boolean;
+
+  /**
+   * Whether the current user can remove this member
+   */
+  canRemove?: boolean;
+
+  /**
+   * Whether the current user can update this member's role
+   */
+  canUpdateRole?: boolean;
   
   /**
    * Role of the user in the team
