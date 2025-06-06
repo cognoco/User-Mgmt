@@ -46,10 +46,17 @@ export class MockTeamService implements TeamService {
     
     // Add owner as a member
     const ownerMember: TeamMember = {
+      id: `member-${Date.now()}`,
       teamId,
       userId: ownerId,
       role: 'owner',
-      joinedAt: new Date().toISOString()
+      joinedAt: new Date().toISOString(),
+      name: '',
+      email: '',
+      avatarUrl: null,
+      isCurrentUser: false,
+      canRemove: true,
+      canUpdateRole: true
     };
     
     this.mockTeamMembers[teamId] = [ownerMember];
@@ -138,10 +145,17 @@ export class MockTeamService implements TeamService {
     }
     
     const member: TeamMember = {
+      id: `member-${Date.now()}`,
       teamId,
       userId,
       role,
-      joinedAt: new Date().toISOString()
+      joinedAt: new Date().toISOString(),
+      name: '',
+      email: '',
+      avatarUrl: null,
+      isCurrentUser: false,
+      canRemove: true,
+      canUpdateRole: true
     };
     
     this.mockTeamMembers[teamId] = [...existingMembers, member];
@@ -479,10 +493,17 @@ export class MockTeamService implements TeamService {
     // Ensure team has members
     if (!this.mockTeamMembers[team.id]) {
       this.mockTeamMembers[team.id] = [{
+        id: `member-${Date.now()}`,
         teamId: team.id,
         userId: team.ownerId,
         role: 'owner',
-        joinedAt: team.createdAt || new Date().toISOString()
+        joinedAt: team.createdAt || new Date().toISOString(),
+        name: '',
+        email: '',
+        avatarUrl: null,
+        isCurrentUser: false,
+        canRemove: true,
+        canUpdateRole: true
       }];
     }
     
