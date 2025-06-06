@@ -17,7 +17,7 @@ vi.mock('@/middleware/auth', () => ({
 
 vi.mock('@/middleware/auth-adapter', () => ({}));
 
-vi.mock('@/lib/prisma', () => ({
+vi.mock('@/lib/database/prisma', () => ({
   prisma: {
     teamMember: {
       create: vi.fn(),

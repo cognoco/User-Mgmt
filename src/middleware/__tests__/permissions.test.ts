@@ -4,13 +4,12 @@ import { withPermissionCheck } from '../permissions';
 import { getApiAuthService } from '@/services/auth/factory';
 import { Permission } from '@/lib/rbac/roles';
 import { getApiPermissionService } from '@/services/permission/factory';
-import prisma from '@/lib/prisma'; // Assuming prisma is used for user/team data
+import { prisma } from '@/lib/database/prisma'; // Prisma client for user/team data
 
 vi.mock('@/services/auth/factory');
 vi.mock('@/services/permission/factory');
-vi.mock('@/lib/prisma', () => ({
-  __esModule: true,
-  default: {
+vi.mock('@/lib/database/prisma', () => ({
+  prisma: {
     user: {
       findUnique: vi.fn(),
     },

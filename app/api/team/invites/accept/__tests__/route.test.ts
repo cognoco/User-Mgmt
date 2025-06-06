@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/database/prisma';
 import { withRouteAuth } from '@/middleware/auth';
 import { NextResponse } from 'next/server';
 import { ERROR_CODES } from '@/lib/api/common';
@@ -16,7 +16,7 @@ vi.mock('@/middleware/auth', () => ({
 
 vi.mock('@/middleware/auth-adapter', () => ({}));
 
-vi.mock('@/lib/prisma', () => ({
+vi.mock('@/lib/database/prisma', () => ({
   prisma: {
     teamMember: {
       findUnique: vi.fn(),

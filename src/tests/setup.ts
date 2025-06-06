@@ -20,7 +20,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 // Mock Prisma client - using modern Vitest 3.x mocking style
-vi.mock('@/lib/prisma', () => ({
+vi.mock('@/lib/database/prisma', () => ({
   prisma: {
     domain: {
       findMany: vi.fn(),
