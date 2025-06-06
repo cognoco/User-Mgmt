@@ -139,6 +139,19 @@ export async function PATCH(request: NextRequest) {
 
     console.log(`Updating business profile for user ${user.id}:`, profileUpdates);
 
+    // Add version check for concurrent updates
+    const currentProfile = await service.getProfileByUserId(user.id);
+    const requestVersion = (body as any).version;
+    if (
+      requestVersion !== undefined &&
+      (currentProfile as any)?.version !== requestVersion
+    ) {
+      return NextResponse.json(
+        { error: 'Profile was modified by another user' },
+        { status: 409 }
+      );
+    }
+
     // 5. Update Profile via service
     const updatedData = await service.updateProfileByUserId(user.id, {
       ...profileUpdates,
