@@ -2,7 +2,9 @@ import type {
   Organization,
   OrganizationCreatePayload,
   OrganizationUpdatePayload,
-  OrganizationResult
+  OrganizationResult,
+  OrganizationMember,
+  OrganizationMemberResult
 } from './models';
 
 /**
@@ -52,12 +54,14 @@ export interface OrganizationService {
    * @returns Object describing whether deletion succeeded
    */
   deleteOrganization(id: string): Promise<{ success: boolean; error?: string }>;
-}
 
-export interface OrganizationService {
-  createOrganization(ownerId: string, data: OrganizationCreatePayload): Promise<OrganizationResult>;
-  getOrganization(id: string): Promise<Organization | null>;
-  getUserOrganizations(userId: string): Promise<Organization[]>;
-  updateOrganization(id: string, data: OrganizationUpdatePayload): Promise<OrganizationResult>;
-  deleteOrganization(id: string): Promise<{ success: boolean; error?: string }>;
+  /**
+   * List all members of the organization.
+   */
+  getOrganizationMembers(orgId: string): Promise<OrganizationMember[]>;
+
+  /**
+   * Add a user to the organization.
+   */
+  addOrganizationMember(orgId: string, userId: string, role: string): Promise<OrganizationMemberResult>;
 }

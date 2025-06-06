@@ -4,7 +4,9 @@ import type {
   Organization,
   OrganizationCreatePayload,
   OrganizationUpdatePayload,
-  OrganizationResult
+  OrganizationResult,
+  OrganizationMember,
+  OrganizationMemberResult
 } from '@/core/organization/models';
 
 export class SupabaseOrganizationProvider implements IOrganizationDataProvider {
@@ -71,5 +73,37 @@ export class SupabaseOrganizationProvider implements IOrganizationDataProvider {
     const { error } = await this.supabase.from('organizations').delete().eq('id', id);
     if (error) return { success: false, error: error.message };
     return { success: true };
+  }
+
+  async getMembers(orgId: string): Promise<OrganizationMember[]> {
+    const { data, error } = await this.supabase
+      .from('organization_members')
+      .select('*')
+      .eq('organization_id', orgId);
+    if (error || !data) return [];
+    return data.map((r: any) => ({
+      organizationId: r.organization_id,
+      userId: r.user_id,
+      role: r.role,
+    }));
+  }
+
+  async addMember(orgId: string, userId: string, role: string): Promise<OrganizationMemberResult> {
+    const { data, error } = await this.supabase
+      .from('organization_members')
+      .insert({ organization_id: orgId, user_id: userId, role })
+      .select()
+      .single();
+    if (error || !data) {
+      return { success: false, error: error?.message || 'Failed to add member' };
+    }
+    return {
+      success: true,
+      member: {
+        organizationId: data.organization_id,
+        userId: data.user_id,
+        role: data.role,
+      },
+    };
   }
 }
