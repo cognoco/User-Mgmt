@@ -3,7 +3,7 @@ let POST: (req: Request) => Promise<Response>;
 // import { NextResponse } from 'next/server';
 import { OAuthProvider } from "@/types/oauth";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getApiAuthService } from "@/services/auth/factory";
+import { getServiceContainer } from '@/lib/config/service-container';
 
 // --- Mocks ---
 
@@ -46,12 +46,15 @@ vi.mock("next/headers", () => ({
 }));
 
 
-// Mock Auth service
-vi.mock("@/services/auth/factory");
+// Mock service container
+vi.mock('@/lib/config/service-container', () => ({
+  getServiceContainer: vi.fn()
+}));
 const mockService = {
   configureOAuthProvider: vi.fn(),
-  getOAuthAuthorizationUrl: vi.fn(),
+  getOAuthAuthorizationUrl: vi.fn()
 };
+const mockServices = { auth: mockService };
 
 // Mock crypto for deterministic state generation
 const mockStateValue = "deterministic-state-value-1234567890";
@@ -100,9 +103,9 @@ describe("POST /api/auth/oauth", () => {
     process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI =
       "http://localhost:3000/api/auth/oauth/callback";
 
-    (getApiAuthService as vi.Mock).mockReturnValue(mockService);
+    (getServiceContainer as vi.Mock).mockReturnValue(mockServices);
     mockService.getOAuthAuthorizationUrl.mockReturnValue(
-      "https://example.com/auth",
+      'https://example.com/auth'
     );
     POST = (await import("../route")).POST;
   });

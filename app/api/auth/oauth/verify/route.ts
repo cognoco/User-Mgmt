@@ -1,32 +1,69 @@
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { OAuthProvider } from "@/types/oauth";
-import { getApiOAuthService } from "@/services/oauth/factory";
+import { z } from 'zod';
+import { OAuthProvider } from '@/types/oauth';
+import { createApiHandler } from '@/lib/api/route-helpers';
+import {
+  createSuccessResponse,
+  ApiError,
+  ERROR_CODES
+} from '@/lib/api/common';
+import { logUserAction } from '@/lib/audit/auditLogger';
 
 const verifySchema = z.object({
   providerId: z.nativeEnum(OAuthProvider),
   email: z.string().email(),
 });
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { providerId, email } = verifySchema.parse(body);
+export const POST = createApiHandler(
+  verifySchema,
+  async (request, _authContext, data, services) => {
+    const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
 
-    const service = getApiOAuthService();
-    const result = await service.verifyProviderEmail(providerId, email);
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: result.status ?? 400 },
+    try {
+      const result = await services.oauth.verifyProviderEmail(
+        data.providerId,
+        data.email
+      );
+
+      await logUserAction({
+        action: 'OAUTH_VERIFY',
+        status: result.success ? 'SUCCESS' : 'FAILURE',
+        ipAddress,
+        userAgent,
+        targetResourceType: 'oauth',
+        targetResourceId: data.providerId,
+        details: { email: data.email, error: result.success ? null : result.error }
+      });
+
+      if (!result.success) {
+        throw new ApiError(
+          ERROR_CODES.INVALID_REQUEST,
+          result.error || 'Verification failed',
+          result.status ?? 400
+        );
+      }
+
+      return createSuccessResponse({ success: true });
+    } catch (error: any) {
+      await logUserAction({
+        action: 'OAUTH_VERIFY',
+        status: 'FAILURE',
+        ipAddress,
+        userAgent,
+        targetResourceType: 'oauth',
+        targetResourceId: data.providerId,
+        details: { error: error instanceof Error ? error.message : String(error) }
+      });
+
+      throw new ApiError(
+        ERROR_CODES.INTERNAL_ERROR,
+        error instanceof Error ? error.message : 'Failed to verify provider',
+        400
       );
     }
-
-    return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || "Failed to verify provider" },
-      { status: 400 },
-    );
+  },
+  {
+    requireAuth: true,
+    rateLimit: { windowMs: 15 * 60 * 1000, max: 10 }
   }
-}
+);

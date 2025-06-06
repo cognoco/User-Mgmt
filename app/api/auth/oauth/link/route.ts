@@ -1,37 +1,52 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { OAuthProvider } from '@/types/oauth';
-import { withErrorHandling } from '@/middleware/error-handling';
-import { withValidation } from '@/middleware/validation';
-import { getApiOAuthService } from '@/services/oauth/factory';
+import { createApiHandler } from '@/lib/api/route-helpers';
+import {
+  createSuccessResponse,
+  ApiError,
+  ERROR_CODES
+} from '@/lib/api/common';
+import { logUserAction } from '@/lib/audit/auditLogger';
 
 const linkRequestSchema = z.object({
   provider: z.nativeEnum(OAuthProvider),
   code: z.string(),
 });
 
-async function handleLink(
-  _req: NextRequest,
-  data: z.infer<typeof linkRequestSchema>,
-) {
-  const service = getApiOAuthService();
-  const result = await service.linkProvider(data.provider, data.code);
-  if (!result.success) {
-    return NextResponse.json(
-      { error: result.error },
-      { status: result.status ?? 400 },
-    );
-  }
-  return NextResponse.json({
-    success: true,
-    linkedProviders: result.linkedProviders ?? [],
-    user: result.user,
-  });
-}
+export const POST = createApiHandler(
+  linkRequestSchema,
+  async (request, _authContext, data, services) => {
+    const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
 
-export async function POST(request: NextRequest) {
-  return withErrorHandling(
-    async (req) => withValidation(linkRequestSchema, handleLink, req),
-    request,
-  );
-}
+    const result = await services.oauth.linkProvider(data.provider, data.code);
+
+    await logUserAction({
+      action: 'OAUTH_LINK',
+      status: result.success ? 'SUCCESS' : 'FAILURE',
+      ipAddress,
+      userAgent,
+      targetResourceType: 'oauth',
+      targetResourceId: data.provider,
+      details: { error: result.success ? null : result.error }
+    });
+
+    if (!result.success) {
+      throw new ApiError(
+        ERROR_CODES.INVALID_REQUEST,
+        result.error || 'Failed to link provider',
+        result.status ?? 400
+      );
+    }
+
+    return createSuccessResponse({
+      success: true,
+      linkedProviders: result.linkedProviders ?? [],
+      user: result.user
+    });
+  },
+  {
+    requireAuth: true,
+    rateLimit: { windowMs: 15 * 60 * 1000, max: 10 }
+  }
+);
