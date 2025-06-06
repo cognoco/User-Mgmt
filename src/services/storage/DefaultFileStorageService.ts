@@ -61,6 +61,20 @@ export class DefaultFileStorageService implements FileStorageService {
       return null;
     }
   }
+
+  /**
+   * List files from the configured storage provider.
+   */
+  async listFiles(
+    _bucketName: string,
+    prefix = ''
+  ): Promise<string[]> {
+    try {
+      return await this.storageAdapter.list(prefix);
+    } catch {
+      return [];
+    }
+  }
 }
 
 export default DefaultFileStorageService;
