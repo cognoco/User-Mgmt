@@ -1,9 +1,11 @@
 import { POST } from '../route';
 import { OAuthProvider } from '@/types/oauth';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getApiOAuthService } from '@/services/oauth/factory';
+import { getServiceContainer } from '@/lib/config/service-container';
 
-vi.mock('@/services/oauth/factory');
+vi.mock('@/lib/config/service-container', () => ({
+  getServiceContainer: vi.fn()
+}));
 
 const mockService = {
   linkProvider: vi.fn(),
@@ -19,7 +21,7 @@ const createRequest = (body: object) =>
 describe('POST /api/auth/oauth/link', () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    (getApiOAuthService as vi.Mock).mockReturnValue(mockService);
+    (getServiceContainer as vi.Mock).mockReturnValue({ oauth: mockService });
   });
 
   it('returns error when service fails', async () => {

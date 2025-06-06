@@ -1,7 +1,7 @@
 import { POST } from '../route';
 import { OAuthProvider } from '@/types/oauth';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getApiOAuthService } from '@/services/oauth/factory';
+import { getServiceContainer } from '@/lib/config/service-container';
 
 // Mock cookies
 const mockCookies = new Map<string, any>();
@@ -21,7 +21,9 @@ vi.mock('next/headers', () => ({
   }),
 }));
 
-vi.mock('@/services/oauth/factory');
+vi.mock('@/lib/config/service-container', () => ({
+  getServiceContainer: vi.fn()
+}));
 const mockService = {
   verifyProviderEmail: vi.fn(),
 };
@@ -39,7 +41,7 @@ describe('oauth verify route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCookies.clear();
-    (getApiOAuthService as vi.Mock).mockReturnValue(mockService);
+    (getServiceContainer as vi.Mock).mockReturnValue({ oauth: mockService });
     mockService.verifyProviderEmail.mockResolvedValue({ success: true });
   });
 

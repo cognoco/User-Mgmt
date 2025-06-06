@@ -1,8 +1,13 @@
-import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
-import { getApiAuthService } from '@/services/auth/factory';
 import { OAuthProvider, oauthProviderConfigSchema } from '@/types/oauth';
+import { createApiHandler } from '@/lib/api/route-helpers';
+import {
+  createSuccessResponse,
+  ApiError,
+  ERROR_CODES
+} from '@/lib/api/common';
+import { logUserAction } from '@/lib/audit/auditLogger';
 
 // Request schema
 const initiationRequestSchema = z.object({
@@ -89,39 +94,73 @@ const redirectAllowList: Record<OAuthProvider, string[]> = {
   [OAuthProvider.LINKEDIN]: [],
 };
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const { provider } = initiationRequestSchema.parse(body);
+export const POST = createApiHandler(
+  initiationRequestSchema,
+  async (request, _authContext, data, services) => {
+    const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
 
-    const config = providerConfigs[provider];
+    const config = providerConfigs[data.provider];
     if (!config || !config.enabled) {
-      return NextResponse.json({ error: 'Provider not supported or not enabled.' }, { status: 400 });
+      await logUserAction({
+        action: 'OAUTH_INIT',
+        status: 'FAILURE',
+        ipAddress,
+        userAgent,
+        targetResourceType: 'oauth',
+        details: { provider: data.provider, error: 'not_enabled' }
+      });
+      throw new ApiError(
+        ERROR_CODES.INVALID_REQUEST,
+        'Provider not supported or not enabled.',
+        400
+      );
     }
 
-    if (!redirectAllowList[provider].includes(config.redirectUri)) {
-      return NextResponse.json({ error: 'Redirect URI not allowed' }, { status: 400 });
+    if (!redirectAllowList[data.provider].includes(config.redirectUri)) {
+      await logUserAction({
+        action: 'OAUTH_INIT',
+        status: 'FAILURE',
+        ipAddress,
+        userAgent,
+        targetResourceType: 'oauth',
+        details: { provider: data.provider, error: 'redirect_not_allowed' }
+      });
+      throw new ApiError(
+        ERROR_CODES.INVALID_REQUEST,
+        'Redirect URI not allowed',
+        400
+      );
     }
 
-    // Generate state for CSRF protection
     const state = generateState();
     const cookieStore = cookies();
     cookieStore.set({
-      name: `oauth_state_${provider}`,
+      name: `oauth_state_${data.provider}`,
       value: state,
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
-      maxAge: 600, // 10 minutes
-      path: '/',
+      maxAge: 600,
+      path: '/'
     });
 
-    const authService = getApiAuthService();
-    authService.configureOAuthProvider(config);
-    const url = authService.getOAuthAuthorizationUrl(provider, state);
+    services.auth.configureOAuthProvider(config);
+    const url = services.auth.getOAuthAuthorizationUrl(data.provider, state);
 
-    return NextResponse.json({ url, state });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Failed to initiate OAuth flow.' }, { status: 400 });
+    await logUserAction({
+      action: 'OAUTH_INIT',
+      status: 'SUCCESS',
+      ipAddress,
+      userAgent,
+      targetResourceType: 'oauth',
+      details: { provider: data.provider }
+    });
+
+    return createSuccessResponse({ url, state });
+  },
+  {
+    requireAuth: false,
+    rateLimit: { windowMs: 15 * 60 * 1000, max: 30 }
   }
-}
+);
