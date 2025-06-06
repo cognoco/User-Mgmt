@@ -9,7 +9,7 @@ import {
 } from '../roleService';
 import { TeamRole } from '@prisma/client';
 
-vi.mock('@/lib/prisma', () => ({
+vi.mock('@/lib/database/prisma', () => ({
   prisma: {
     rolePermission: {
       findMany: vi.fn(),
