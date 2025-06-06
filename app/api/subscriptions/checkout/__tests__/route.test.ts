@@ -1,10 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../route';
 import { createCheckoutSession } from '@/lib/payments/stripe';
+import { checkRateLimit } from '@/middleware/rate-limit';
+import { logUserAction } from '@/lib/audit/auditLogger';
 
 vi.mock('@/lib/payments/stripe', () => ({
   createCheckoutSession: vi.fn(),
 }));
+vi.mock('@/middleware/rate-limit', () => ({ checkRateLimit: vi.fn().mockResolvedValue(false) }));
+vi.mock('@/lib/audit/auditLogger', () => ({ logUserAction: vi.fn() }));
 
 describe('subscriptions checkout API', () => {
   beforeEach(() => {
