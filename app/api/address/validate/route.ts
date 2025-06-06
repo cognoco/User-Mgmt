@@ -121,7 +121,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // 7. Process Response and Determine Status
     let isValid = false;
     let message = 'Validation check completed.';
-    let suggestions = null; // Placeholder for potential future suggestion parsing
+    let suggestions = null as unknown; // Will hold parsed address suggestions if available
 
     if (fetchError) {
         isValid = false;
@@ -136,8 +136,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         } else if (verdict.hasUnconfirmedComponents || verdict.hasInferredComponents) {
             isValid = false; // Consider it invalid if components are unsure/added
             message = 'Address is ambiguous or requires corrections.';
-            // TODO: Parse suggestions from googleResponseData.result.address if needed
-            suggestions = googleResponseData.result.address; // Pass raw suggestions for now
+            // Parse suggestions from the response if address components are provided
+            const components =
+                (googleResponseData.result as any)?.address?.addressComponents ??
+                (googleResponseData.result as any)?.geocode?.address_components;
+            if (Array.isArray(components)) {
+                suggestions = components.map((component: any) => ({
+                    type: component.componentType || component.types?.[0],
+                    long_name: component.componentName?.text ?? component.long_name,
+                    short_name: component.componentName?.shortText ?? component.short_name
+                }));
+            } else {
+                suggestions = googleResponseData.result.address;
+            }
         } else {
             isValid = false;
             message = 'Address validation inconclusive or incomplete.';
