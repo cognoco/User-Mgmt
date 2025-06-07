@@ -4,7 +4,7 @@ import '@/lib/i18n';
 import { useTranslation } from 'react-i18next';
 import { ProfileCompletion } from '@/ui/styled/registration/ProfileCompletion';
 
-export default function ProfileCompletionPage(): JSX.Element {
+export default function ProfileCompletionPage() {
   const { t } = useTranslation();
 
   return (

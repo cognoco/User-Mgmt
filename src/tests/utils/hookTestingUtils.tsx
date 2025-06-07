@@ -1,20 +1,22 @@
 // __tests__/utils/hook-testing-utils.js
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, RenderHookOptions, RenderHookResult } from '@testing-library/react';
 import React from 'react';
+import { vi, expect } from 'vitest';
 
 /**
  * Creates a wrapper component with provided context providers
- * @param {Object} providers - Object with provider components and their props
+ * @param {Array} providers - Array of [Provider, props] tuples
  * @returns {Function} Wrapper component for renderHook
  */
-export function createWrapper(providers = {}) {
-  return ({ children }) => {
-    // Wrap children in each provider
-    return Object.entries(providers).reduce((wrapped, [Provider, props]) => {
+export type ProviderEntry<P = any> = [React.ComponentType<P>, P];
+
+export function createWrapper(providers: ProviderEntry[] = []): React.FC<{ children: React.ReactNode }> {
+  return ({ children }: { children: React.ReactNode }): React.ReactElement => {
+    return providers.reduce<React.ReactElement>((wrapped, [Provider, props]) => {
       const ProviderComponent = Provider;
       return <ProviderComponent {...props}>{wrapped}</ProviderComponent>;
-    }, children);
+    }, <>{children}</>);
   };
 }
 
@@ -24,12 +26,20 @@ export function createWrapper(providers = {}) {
  * @param {Object} options - Options for renderHook
  * @returns {Object} Enhanced result object
  */
-export function renderCustomHook(hook, options = {}) {
-  const {
-    providers = {},
-    initialProps,
-    ...renderOptions
-  } = options;
+export interface RenderCustomHookOptions<Props>
+  extends Omit<RenderHookOptions<Props>, 'wrapper'> {
+  providers?: ProviderEntry[];
+}
+
+export function renderCustomHook<Result, Props>(
+  hook: (props: Props) => Result,
+  options: RenderCustomHookOptions<Props> = {}
+): {
+  act: (action: (state: Result) => Promise<void> | void) => Promise<void>;
+  updateProps: (props: Props) => void;
+  getState: () => Result;
+} & RenderHookResult<Result, Props> {
+  const { providers = [], initialProps, ...renderOptions } = options;
 
   // Create wrapper with providers
   const wrapper = createWrapper(providers);
@@ -38,7 +48,7 @@ export function renderCustomHook(hook, options = {}) {
   const result = renderHook(hook, {
     wrapper,
     initialProps,
-    ...renderOptions
+    ...renderOptions,
   });
   
   return {
@@ -48,7 +58,7 @@ export function renderCustomHook(hook, options = {}) {
      * @param {Function} action - Function that updates hook state
      * @returns {Promise<void>}
      */
-    act: async (action) => {
+    act: async (action: (state: Result) => Promise<void> | void) => {
       await act(async () => {
         await action(result.result.current);
       });
@@ -58,7 +68,7 @@ export function renderCustomHook(hook, options = {}) {
      * Updates hook props
      * @param {Object} props - New props
      */
-    updateProps: (props) => {
+    updateProps: (props: Props) => {
       result.rerender(props);
     },
     
@@ -66,8 +76,8 @@ export function renderCustomHook(hook, options = {}) {
      * Gets current hook state
      * @returns {any} Current hook state
      */
-    getState: () => result.result.current
-  };
+    getState: () => result.result.current,
+  } as const;
 }
 
 /**
@@ -77,7 +87,11 @@ export function renderCustomHook(hook, options = {}) {
  * @param {Function} assertion - Function to check final state
  * @returns {Promise<void>}
  */
-export async function testHookState(hook, action, assertion) {
+export async function testHookState<Result>(
+  hook: () => Result,
+  action: (state: Result) => Promise<void> | void,
+  assertion: (state: Result) => void,
+): Promise<void> {
   const { result } = renderHook(() => hook());
   
   await act(async () => {
@@ -94,7 +108,11 @@ export async function testHookState(hook, action, assertion) {
  * @param {Function} mockCleanup - Mock function to track cleanup
  * @returns {Object} Test results
  */
-export function testHookCleanup(hook, deps = [], mockCleanup = vi.fn()) {
+export function testHookCleanup<Props, Result>(
+  hook: (props: Props) => Result,
+  deps: Props[] = [],
+  mockCleanup: () => void = vi.fn(),
+) {
   // React 19 compatible approach to testing cleanup
   const mockFunction = vi.fn();
   
@@ -134,9 +152,9 @@ export function testHookCleanup(hook, deps = [], mockCleanup = vi.fn()) {
  * @param {any} initialValue - Initial state value
  * @returns {Array} Mock useState hook
  */
-export function createMockState(initialValue) {
+export function createMockState<T>(initialValue: T): [T, (value: React.SetStateAction<T>) => void] {
   let state = initialValue;
-  const setState = vi.fn().mockImplementation((newValue) => {
+  const setState = vi.fn().mockImplementation((newValue: React.SetStateAction<T>) => {
     if (typeof newValue === 'function') {
       state = newValue(state);
     } else {
@@ -152,7 +170,7 @@ export function createMockState(initialValue) {
  * @param {any} contextValue - Value to return from useContext
  * @returns {Function} Mock useContext hook
  */
-export function createMockContext(contextValue) {
+export function createMockContext<T>(contextValue: T) {
   return vi.fn().mockReturnValue(contextValue);
 }
 
@@ -161,6 +179,6 @@ export function createMockContext(contextValue) {
  * @param {any} initialValue - Initial ref value
  * @returns {Object} Mock ref object
  */
-export function createMockRef(initialValue) {
-  return { current: initialValue };
+export function createMockRef<T>(initialValue: T): React.MutableRefObject<T> {
+  return { current: initialValue } as React.MutableRefObject<T>;
 }
