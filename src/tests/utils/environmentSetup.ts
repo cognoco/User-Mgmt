@@ -1,4 +1,5 @@
 // __tests__/utils/environment-setup.js
+import { vi } from 'vitest';
 
 /**
  * Sets up the testing environment before running tests
@@ -16,7 +17,7 @@ export function setupTestEnvironment() {
 
   // Set up browser-like environment for tests
   if (typeof window === 'undefined') {
-    global.window = {};
+    global.window = {} as unknown as Window & typeof globalThis;
   }
 
   if (typeof localStorage === 'undefined') {
@@ -24,8 +25,10 @@ export function setupTestEnvironment() {
       getItem: vi.fn(),
       setItem: vi.fn(),
       removeItem: vi.fn(),
-      clear: vi.fn()
-    };
+      clear: vi.fn(),
+      key: vi.fn(),
+      length: 0
+    } as unknown as Storage;
   }
 
   if (typeof sessionStorage === 'undefined') {
@@ -33,8 +36,10 @@ export function setupTestEnvironment() {
       getItem: vi.fn(),
       setItem: vi.fn(),
       removeItem: vi.fn(),
-      clear: vi.fn()
-    };
+      clear: vi.fn(),
+      key: vi.fn(),
+      length: 0
+    } as unknown as Storage;
   }
 
   if (typeof document === 'undefined') {
@@ -44,9 +49,9 @@ export function setupTestEnvironment() {
       querySelector: vi.fn(),
       querySelectorAll: vi.fn(),
       documentElement: {
-        style: {}
+        style: {} as unknown as CSSStyleDeclaration
       }
-    };
+    } as unknown as Document;
   }
 
   // Set up mock APIs
@@ -68,8 +73,8 @@ export function setupTestEnvironment() {
     process.env = originalEnv;
 
     // Clean up mocks
-    if (global.fetch && typeof global.fetch.mockReset === 'function') {
-      global.fetch.mockReset();
+    if (global.fetch && typeof (global.fetch as any).mockReset === 'function') {
+      (global.fetch as vi.Mock).mockReset();
     }
   };
 }
@@ -89,7 +94,13 @@ export function createMockConsole() {
   };
 
   // Store captured console output
-  const captured = {
+  const captured: {
+    logs: any[][];
+    warnings: any[][];
+    errors: any[][];
+    infos: any[][];
+    debugs: any[][];
+  } = {
     logs: [],
     warnings: [],
     errors: [],
@@ -131,11 +142,11 @@ export function createMockConsole() {
       captured.infos = [];
       captured.debugs = [];
 
-      console.log.mockClear();
-      console.warn.mockClear();
-      console.error.mockClear();
-      console.info.mockClear();
-      console.debug.mockClear();
+      (console.log as unknown as vi.Mock).mockClear();
+      (console.warn as unknown as vi.Mock).mockClear();
+      (console.error as unknown as vi.Mock).mockClear();
+      (console.info as unknown as vi.Mock).mockClear();
+      (console.debug as unknown as vi.Mock).mockClear();
     },
 
     // Restore original console methods
@@ -154,7 +165,10 @@ export function createMockConsole() {
  * @param {Object} options - Options for mock timers
  * @returns {Function} Cleanup function
  */
-export function setupMockTimers(options = {}) {
+export function setupMockTimers(options: {
+  advanceTimers?: boolean;
+  now?: Date;
+} = {}) {
   const {
     advanceTimers = false,
     now = new Date('2023-01-01T00:00:00Z')
@@ -162,8 +176,7 @@ export function setupMockTimers(options = {}) {
 
   // Use fake timers
   vi.useFakeTimers({
-    now: now.getTime(),
-    doNotFake: ['nextTick', 'setImmediate', 'clearImmediate']
+    now: now.getTime()
   });
 
   // Advance timers if requested

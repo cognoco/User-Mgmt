@@ -5,7 +5,7 @@
  * It uses the headless component for behavior and adds UI rendering with Shadcn UI components.
  */
 
-import React from 'react';
+import React, { type FormEvent } from 'react';
 import { MFASetup as HeadlessMFASetup, MFASetupProps } from '@/ui/headless/auth/MFASetup';
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
@@ -37,6 +37,26 @@ export interface StyledMFASetupProps extends Omit<MFASetupProps, 'render'> {
   className?: string;
 }
 
+interface MFASetupRenderProps {
+  handleSubmit: (e: FormEvent<Element>) => void;
+  verificationCode: string;
+  setVerificationCode: (value: string) => void;
+  selectedMethod: string;
+  setSelectedMethod: (method: string) => void;
+  availableMethods: Array<{ id: string; name: string; description: string }>;
+  qrCodeUrl?: string;
+  secretKey?: string;
+  isSubmitting: boolean;
+  isSuccess: boolean;
+  errors: {
+    verificationCode?: string;
+    form?: string;
+  };
+  backupCodes: string[];
+  handleBackupCodeDownload: () => void;
+  handleBackupCodeCopy: () => void;
+}
+
 export function MFASetup({
   title = 'Set Up Two-Factor Authentication',
   description = 'Add an extra layer of security to your account',
@@ -47,22 +67,24 @@ export function MFASetup({
   return (
     <HeadlessMFASetup
       {...headlessProps}
-      render={({
-        handleSubmit,
-        verificationCode,
-        setVerificationCode,
-        selectedMethod,
-        setSelectedMethod,
-        availableMethods,
-        qrCodeUrl,
-        secretKey,
-        isSubmitting,
-        isSuccess,
-        errors,
-        backupCodes,
-        handleBackupCodeDownload,
-        handleBackupCodeCopy
-      }) => (
+      render={(props) => {
+        const {
+          handleSubmit,
+          verificationCode,
+          setVerificationCode,
+          selectedMethod,
+          setSelectedMethod,
+          availableMethods,
+          qrCodeUrl,
+          secretKey,
+          isSubmitting,
+          isSuccess,
+          errors,
+          backupCodes,
+          handleBackupCodeDownload,
+          handleBackupCodeCopy
+        } = props as unknown as MFASetupRenderProps;
+        return (
         <Card className={className}>
           <CardHeader>
             <CardTitle>{title}</CardTitle>
@@ -122,7 +144,7 @@ export function MFASetup({
                     onValueChange={setSelectedMethod}
                     className="space-y-2"
                   >
-                    {availableMethods.map((method) => (
+                    {availableMethods.map((method: { id: string; name: string; description: string }) => (
                       <div key={method.id} className="flex items-center space-x-2">
                         <RadioGroupItem value={method.id} id={method.id} />
                         <Label htmlFor={method.id} className="font-normal">
@@ -228,7 +250,8 @@ export function MFASetup({
           
           {footer && <CardFooter>{footer}</CardFooter>}
         </Card>
-      )}
+      );
+    }}
     />
   );
 }

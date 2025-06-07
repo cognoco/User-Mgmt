@@ -14,7 +14,7 @@ import type { SsoService } from '@/core/sso/interfaces';
 import type { GdprService } from '@/core/gdpr/interfaces';
 import type { TwoFactorService } from '@/core/twoFactor/interfaces';
 import type { SubscriptionService } from '@/core/subscription/interfaces';
-import type { ApiKeyService } from '@/core/apiKeys/interfaces';
+import type { ApiKeyService } from '@/core/api-keys/interfaces';
 import type { NotificationService } from '@/core/notification/interfaces';
 import type { IWebhookService } from '@/core/webhooks/interfaces';
 import type { SessionService } from '@/core/session/interfaces';

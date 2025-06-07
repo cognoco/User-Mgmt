@@ -17,7 +17,7 @@ import { DefaultSsoService } from '@/services/sso/defaultSso.service';
 import { DefaultConsentService } from '@/services/consent/defaultConsent.service';
 import { DefaultSessionService } from '@/services/session/defaultSession.service';
 import { DefaultSubscriptionService } from '@/services/subscription/defaultSubscription.service';
-import { DefaultApiKeysService } from '@/services/apiKeys/defaultApiKeys.service';
+import { DefaultApiKeysService } from '@/services/api-keys/defaultApiKeys.service';
 import { WebhookService } from '@/services/webhooks/WebhookService';
 import { DefaultAddressService } from '@/services/address/defaultAddress.service';
 import { DefaultNotificationService } from '@/services/notification/defaultNotification.service';

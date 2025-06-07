@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { UserManagementConfiguration } from '@/core/config';
-import type { ApiKeyService } from '@/core/apiKeys/interfaces';
-import type { ApiKey } from '@/core/apiKeys/types';
+import type { ApiKeyService } from '@/core/api-keys/interfaces';
+import type { ApiKey } from '@/core/api-keys/types';
 
 export function useApiKeys() {
   const apiKeyService =

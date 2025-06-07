@@ -32,10 +32,8 @@ export interface ProfileFormProps {
  * Follows the render props pattern to allow for custom UI implementation
  */
 export default function ProfileForm({ children }: ProfileFormProps) {
-  const profile = useProfileStore(state => state.profile);
-  const isProfileLoading = useProfileStore(state => state.isLoading);
-  const fetchProfile = useProfileStore(state => state.fetchProfile);
-  const updateProfile = useProfileStore(state => state.updateProfile);
+  const profileStore = useProfileStore();
+  const { profile, isLoading: isProfileLoading, fetchProfile, updateProfile } = profileStore;
   
   const userEmail = useAuth().user?.email;
   
@@ -97,15 +95,15 @@ export default function ProfileForm({ children }: ProfileFormProps) {
   const onSubmit = useCallback(async (data: ProfileFormData) => {
     try {
       await updateProfile(data);
-      if (!useProfileStore.getState().error) { 
+      if (!profileStore.error) {
         setIsEditing(false);
       }
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') { 
+      if (process.env.NODE_ENV === 'development') {
         console.error("Error updating profile:", error);
       }
     }
-  }, [updateProfile]);
+  }, [updateProfile, profileStore.error]);
 
   const handlePrivacyChange = useCallback(async (checked: boolean) => {
     setIsPrivacyLoading(true);
