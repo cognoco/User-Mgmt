@@ -3,13 +3,15 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
+import { AuthChangeEvent, Session, User as AuthUser, Subscription } from '@supabase/supabase-js';
 import { supabase } from '@/lib/database/supabase';
 
 /**
  * Creates a mock user event setup
  * @returns {Object} Configured user event instance
  */
-export function createUserEvent() {
+export function createUserEvent(): ReturnType<typeof userEvent.setup> {
   return userEvent.setup();
 }
 
@@ -18,23 +20,13 @@ export function createUserEvent() {
  * @param {Object} user - User object to return (null for unauthenticated)
  * @param {boolean} loading - Whether auth should appear to be loading
  */
-export function mockAuthState(user = null, loading = false) {
+export function mockAuthState(user: AuthUser | null = null, _loading = false) {
   // Mock getUser
-  if (user) {
-    supabase.auth.getUser.mockResolvedValue({
-      data: { user },
-      error: null
-    });
-  } else {
-    supabase.auth.getUser.mockResolvedValue({
-      data: { user: null },
-      error: null
-    });
-  }
+  vi.spyOn(supabase.auth, 'getUser').mockResolvedValue({ data: { user }, error: null });
 
   // Set up auth state change mock to allow triggering auth state changes in tests
-  const listeners = [];
-  supabase.auth.onAuthStateChange.mockImplementation((callback) => {
+  const listeners: Array<(event: AuthChangeEvent, session: Session | null) => void> = [];
+  vi.spyOn(supabase.auth, 'onAuthStateChange').mockImplementation((callback: (event: AuthChangeEvent, session: Session | null) => void) => {
     listeners.push(callback);
     return {
       data: {
@@ -45,15 +37,15 @@ export function mockAuthState(user = null, loading = false) {
               listeners.splice(index, 1);
             }
           })
-        }
+        } as Subscription
       }
     };
   });
 
   // Return function to trigger auth state changes
   return {
-    triggerAuthChange: (event, session) => {
-      listeners.forEach(callback => callback(event, session));
+    triggerAuthChange: (event: AuthChangeEvent, session: Session | null) => {
+      listeners.forEach((callback) => callback(event, session));
     }
   };
 }
@@ -64,7 +56,15 @@ export function mockAuthState(user = null, loading = false) {
  * @param {Object} options - Additional render options
  * @returns {Object} Object containing standard render results plus custom additions
  */
-export function renderWithProviders(ui, options = {}) {
+export interface RenderOptionsWithAuth {
+  route?: string;
+  authUser?: AuthUser | null;
+}
+
+export function renderWithProviders(
+  ui: React.ReactElement,
+  options: RenderOptionsWithAuth & Parameters<typeof render>[1] = {}
+) {
   const {
     route = '/',
     authUser = null,
@@ -75,8 +75,8 @@ export function renderWithProviders(ui, options = {}) {
   const authControls = mockAuthState(authUser);
 
   // Create a wrapper with any providers needed
-  const Wrapper = ({ children }) => {
-    return children;
+  const Wrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
+    return children as React.ReactElement;
   };
 
   // Render with wrapper
@@ -89,7 +89,10 @@ export function renderWithProviders(ui, options = {}) {
   return {
     ...result,
     user: createUserEvent(),
-    rerender: (ui, options = {}) => renderWithProviders(ui, { ...options, container: result.container }),
+    rerender: (
+      ui: React.ReactElement,
+      options: RenderOptionsWithAuth & Parameters<typeof render>[1] = {}
+    ) => renderWithProviders(ui, { ...options, container: result.container }),
     ...authControls
   };
 }
@@ -98,7 +101,7 @@ export function renderWithProviders(ui, options = {}) {
  * Waits for loading state to finish
  * @returns {Promise<void>}
  */
-export async function waitForLoadingToFinish() {
+export async function waitForLoadingToFinish(): Promise<void> {
   return waitFor(
     () => {
       const loaders = [
@@ -121,11 +124,11 @@ export async function waitForLoadingToFinish() {
  * @param {Object} profile - Profile data to return
  * @param {Object|null} error - Optional error to return
  */
-export function mockProfileFetch(userId, profile, error = null) {
+export function mockProfileFetch(userId: string, profile: unknown, error: unknown = null): void {
   const mockResponse = { data: profile, error };
   
   // Set up the chain of mocks
-  supabase.from.mockImplementation((table) => {
+  vi.spyOn(supabase, 'from').mockImplementation((table: string) => {
     if (table === 'profiles') {
       return {
         select: vi.fn().mockReturnThis(),
@@ -150,7 +153,11 @@ export function mockProfileFetch(userId, profile, error = null) {
  * @param {number} size - File size in bytes
  * @returns {File} Mock file object
  */
-export function createMockFile(name = 'test.jpg', type = 'image/jpeg', size = 1024) {
+export function createMockFile(
+  name: string = 'test.jpg',
+  type: string = 'image/jpeg',
+  size: number = 1024
+): File {
   const file = new File(['test file content'], name, { type });
   
   // Mock file size and lastModified
@@ -169,7 +176,7 @@ export function createMockFile(name = 'test.jpg', type = 'image/jpeg', size = 10
  * @param {string} labelText - Text of the label
  * @returns {HTMLElement} Form element
  */
-export function getFormElementByLabel(labelText) {
+export function getFormElementByLabel(labelText: string): HTMLElement {
   return screen.getByLabelText(new RegExp(labelText, 'i'));
 }
 
@@ -178,7 +185,10 @@ export function getFormElementByLabel(labelText) {
  * @param {Object} formData - Object with label text as keys and values to enter
  * @param {Object} userEventInstance - User event instance
  */
-export async function fillForm(formData, userEventInstance) {
+export async function fillForm(
+  formData: Record<string, string>,
+  userEventInstance: ReturnType<typeof userEvent.setup>
+) {
   for (const [label, value] of Object.entries(formData)) {
     const element = getFormElementByLabel(label);
     await userEventInstance.clear(element);
