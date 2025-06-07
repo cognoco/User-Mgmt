@@ -20,7 +20,8 @@
       "Bash(npm test:*)",
       "Bash(npx vitest run:*)",
       "Bash(git add:*)",
-      "Bash(timeout 30 git add .)"
+      "Bash(timeout 30 git add .)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }
