@@ -1,13 +1,17 @@
 /**
  * Utility to debug auth middleware issues
  */
-const { withAuth } = require('@/middleware/auth');
-const { supabase } = require('@/lib/supabase');
+import { withAuth } from '@/middleware/auth';
+import { supabase } from '@/lib/supabase';
 
 /**
  * Logs detailed information about auth behavior
  */
-function debugAuth(token, options = {}) {
+export interface DebugAuthOptions {
+  requireAdmin?: boolean;
+}
+
+export function debugAuth(token: string, options: DebugAuthOptions = {}) {
   console.log('=== Auth Debugging ===');
   console.log('Token:', token);
   console.log('Options:', options);
@@ -40,4 +44,4 @@ function debugAuth(token, options = {}) {
   console.log('=====================');
 }
 
-module.exports = { debugAuth };
+export default debugAuth;
