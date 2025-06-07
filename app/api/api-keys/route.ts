@@ -4,7 +4,7 @@ import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'
 import { createSuccessResponse, createCreatedResponse, createServerError, ApiError, ERROR_CODES } from '@/lib/api/common'
 import { checkRateLimit } from '@/middleware/rateLimit'
 import { logUserAction } from '@/lib/audit/auditLogger'
-import { apiKeyCreateSchema } from '@/core/apiKeys/models'
+import { apiKeyCreateSchema } from '@/core/api-keys/models'
 import { getServiceContainer } from '@/lib/config/serviceContainer'
 
 const createSchema = apiKeyCreateSchema

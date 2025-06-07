@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Button } from '@/ui/primitives/button';
 import { Badge } from '@/ui/primitives/badge';
-import { ApiKeyDetail as HeadlessApiKeyDetail } from '@/ui/headless/apiKeys/ApiKeyDetail';
-import type { ApiKey } from '@/core/apiKeys/types';
+import { ApiKeyDetail as HeadlessApiKeyDetail } from '@/ui/headless/api-keys/ApiKeyDetail';
+import type { ApiKey } from '@/core/api-keys/types';
 
 export function ApiKeyDetail({ apiKey }: { apiKey: ApiKey }) {
   return (

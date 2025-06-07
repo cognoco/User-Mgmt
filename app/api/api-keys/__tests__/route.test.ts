@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { GET, POST } from '@app/api/api-keys/route'
 import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer'
-import type { ApiKeyService } from '@/core/apiKeys/interfaces'
+import type { ApiKeyService } from '@/core/api-keys/interfaces'
 import type { AuthService } from '@/core/auth/interfaces'
 import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'
 
