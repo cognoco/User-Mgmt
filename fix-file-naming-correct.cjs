@@ -106,9 +106,9 @@ function updateImportsInFile(filePath, fileMapping, rootDir) {
     
     if (importPath.startsWith('@/')) {
       // Handle absolute imports with @/ alias
-      // @/ maps to src/ directory according to the architecture guidelines
+      // @/ maps to project root directory according to the architecture guidelines
       const relativePath = importPath.substring(2); // Remove '@/'
-      resolvedImportPath = path.resolve(rootDir, 'src', relativePath);
+      resolvedImportPath = path.resolve(rootDir, relativePath);
     } else {
       // Handle relative imports
       try {
@@ -139,8 +139,8 @@ function updateImportsInFile(filePath, fileMapping, rootDir) {
         if (importPath.startsWith('@/')) {
           // For @/ imports, maintain the absolute import style
           const newPathWithoutExt = newPath.replace(/\.(ts|tsx|js|jsx)$/, '');
-          const srcRelativePath = path.relative(path.join(rootDir, 'src'), newPathWithoutExt);
-          newImportPath = `@/${srcRelativePath}`;
+          const rootRelativePath = path.relative(rootDir, newPathWithoutExt);
+          newImportPath = `@/${rootRelativePath}`;
         } else {
           // For relative imports, maintain the relative import style
           const newPathWithoutExt = newPath.replace(/\.(ts|tsx|js|jsx)$/, '');
