@@ -1,15 +1,23 @@
 // __tests__/utils/integration-testing-utils.js
 
+import type { ReactElement } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
 import { supabase } from '@/lib/database/supabase';
+
+interface IntegrationTestOptions {
+  initialRoute?: string;
+  authUser?: unknown;
+  mockData?: Record<string, unknown>;
+}
 
 /**
  * Creates a testing environment for integration tests
  * @param {Object} options - Options for the test environment
  * @returns {Object} Test environment
  */
-export function setupIntegrationTest(options = {}) {
+export function setupIntegrationTest(options: IntegrationTestOptions = {}) {
   const {
     initialRoute = '/',
     authUser = null,
@@ -18,12 +26,12 @@ export function setupIntegrationTest(options = {}) {
   
   // Set up authentication mocks
   if (authUser) {
-    supabase.auth.getUser.mockResolvedValue({
+    vi.spyOn(supabase.auth, 'getUser').mockResolvedValue({
       data: { user: authUser },
       error: null
     });
   } else {
-    supabase.auth.getUser.mockResolvedValue({
+    vi.spyOn(supabase.auth, 'getUser').mockResolvedValue({
       data: { user: null },
       error: null
     });
@@ -43,7 +51,10 @@ export function setupIntegrationTest(options = {}) {
      * @param {Object} renderOptions - Additional render options
      * @returns {Object} Render result
      */
-    renderComponent: (ui, renderOptions = {}) => {
+    renderComponent: (
+      ui: ReactElement,
+      renderOptions: Parameters<typeof render>[1] = {}
+    ) => {
       const result = render(ui, renderOptions);
       return {
         ...result,
@@ -62,7 +73,9 @@ export function setupIntegrationTest(options = {}) {
       };
     },
     // Add function to simulate user actions in sequence
-    simulateUserFlow: async (actions) => {
+    simulateUserFlow: async (
+      actions: Array<(user: ReturnType<typeof userEvent.setup>) => Promise<void>>
+    ) => {
       for (const action of actions) {
         await action(user);
       }
@@ -74,10 +87,10 @@ export function setupIntegrationTest(options = {}) {
  * Sets up data mocks for database tables
  * @param {Object} mockData - Object with table names as keys and mock data as values
  */
-function setupDataMocks(mockData) {
+function setupDataMocks(mockData: Record<string, unknown>) {
   for (const [table, data] of Object.entries(mockData)) {
     // Set up mock for this table
-    supabase.from.mockImplementation((requestedTable) => {
+    vi.spyOn(supabase, 'from').mockImplementation((requestedTable: string) => {
       if (requestedTable === table) {
         return createTableMock(data);
       }
@@ -92,7 +105,7 @@ function setupDataMocks(mockData) {
  * @param {Array|Object} data - Data to return for the table
  * @returns {Object} Mock table object
  */
-function createTableMock(data) {
+function createTableMock(data: any[] | Record<string, unknown>) {
   // Handle both array and single object data
   const mockData = Array.isArray(data) ? data : [data];
   
@@ -110,7 +123,7 @@ function createTableMock(data) {
       error: null 
     }),
     // Add filtering capability for integration tests
-    filter: (field, operator, value) => {
+    filter: (field: string, operator: string, value: unknown) => {
       // Filter the data based on criteria
       const filteredData = mockData.filter(item => {
         if (operator === 'eq') return item[field] === value;
@@ -123,11 +136,13 @@ function createTableMock(data) {
       return {
         ...createTableMock(filteredData),
         data: filteredData,
-        then: (callback) => Promise.resolve(callback({ data: filteredData, error: null }))
+        then: (callback: (result: { data: unknown[]; error: null }) => unknown) =>
+          Promise.resolve(callback({ data: filteredData, error: null }))
       };
     },
     // Allow chaining with promises for async/await
-    then: (callback) => Promise.resolve(callback({ data: mockData, error: null }))
+    then: (callback: (result: { data: unknown[]; error: null }) => unknown) =>
+      Promise.resolve(callback({ data: mockData, error: null }))
   };
 }
 
@@ -137,7 +152,10 @@ function createTableMock(data) {
  * @param {Object} options - Test options including initial setup
  * @returns {Promise<Object>} Test results
  */
-export async function testUserFlow(steps, options = {}) {
+export async function testUserFlow(
+  steps: Array<(env: any) => Promise<Record<string, unknown> | void>>,
+  options: IntegrationTestOptions = {}
+) {
   const testEnv = setupIntegrationTest(options);
   const results = {};
   
@@ -165,8 +183,11 @@ export async function testUserFlow(steps, options = {}) {
  * @param {Function} action - Step function
  * @returns {Function} Configured step function
  */
-export function createFlowStep(name, action) {
-  const step = async (testEnv) => {
+export function createFlowStep(
+  name: string,
+  action: (env: any) => Promise<any>
+) {
+  const step = async (testEnv: any) => {
     console.log(`Running step: ${name}`);
     return action(testEnv);
   };
@@ -180,7 +201,12 @@ export function createFlowStep(name, action) {
  * @param {Object} options - Options for form submission
  * @returns {Function} Form submission step
  */
-export function submitForm(options) {
+export function submitForm(options: {
+  formTestId?: string;
+  fields?: Record<string, string>;
+  submitButtonText?: string;
+  waitForResponse?: boolean;
+}) {
   const {
     formTestId = 'form',
     fields = {},
