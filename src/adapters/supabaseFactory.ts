@@ -16,7 +16,7 @@ import { IConsentDataProvider } from '@/core/consent/IConsentDataProvider';
 import { ISessionDataProvider as SessionDataProvider } from '@/core/session/ISessionDataProvider';
 import { ISsoDataProvider as SsoDataProvider } from '@/core/sso/ISsoDataProvider';
 import { ISubscriptionDataProvider as SubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataProvider';
-import { IApiKeyDataProvider as ApiKeyDataProvider } from '@/core/apiKeys/IApiKeyDataProvider';
+import { IApiKeyDataProvider as ApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
 import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
@@ -44,7 +44,7 @@ import { createSupabaseTwoFactorProvider } from '@/adapters/twoFactor/factory';
 import { createSupabaseSavedSearchProvider } from '@/adapters/savedSearch/factory';
 import { createSupabaseDataExportProvider } from '@/adapters/dataExport/factory';
 import type { IDataExportDataProvider } from '@/core/dataExport/IDataExportDataProvider';
-import { createSupabaseApiKeyProvider } from '@/adapters/apiKeys/factory';
+import { createSupabaseApiKeyProvider } from '@/adapters/api-keys/factory';
 import type { ICompanyNotificationDataProvider } from '@/core/companyNotification/ICompanyNotificationDataProvider';
 
 

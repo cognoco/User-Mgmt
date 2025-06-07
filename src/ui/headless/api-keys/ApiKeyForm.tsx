@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import type { ApiKey } from '@/core/apiKeys/types';
+import type { ApiKey } from '@/core/api-keys/types';
 
 export interface ApiKeyFormRenderProps {
   name: string;

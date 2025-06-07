@@ -9,8 +9,8 @@ import {
   ApiKeyCreateResult,
   ApiKeyQuery,
   ApiKeyListResult
-} from '@/core/apiKeys/models';
-import type { IApiKeyDataProvider } from '@/core/apiKeys/IApiKeyDataProvider';
+} from '@/core/api-keys/models';
+import type { IApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
 import { generateApiKey } from '@/lib/apiKeys/apiKeyUtils';
 
 export class SupabaseApiKeyProvider implements IApiKeyDataProvider {

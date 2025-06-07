@@ -1,3 +1,3 @@
-export * from '@/ui/styled/apiKeys/ApiKeyList';
-export * from '@/ui/styled/apiKeys/ApiKeyForm';
-export * from '@/ui/styled/apiKeys/ApiKeyDetail';
+export * from '@/ui/styled/api-keys/ApiKeyList';
+export * from '@/ui/styled/api-keys/ApiKeyForm';
+export * from '@/ui/styled/api-keys/ApiKeyDetail';

@@ -7,5 +7,5 @@ export function initializeUserManagement(config: UserManagementConfig) {
 }
 
 export * from '@/ui/styled';
-export * from '@/ui/headless';
+export * as Headless from '@/ui/headless';
 export * from '@/core/auth/interfaces';

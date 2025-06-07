@@ -17,7 +17,7 @@ import { SessionDataProvider } from '@/core/session/ISessionDataProvider';
 import { SsoDataProvider } from '@/core/sso/ISsoDataProvider';
 import { OAuthDataProvider } from '@/core/oauth/IOAuthDataProvider';
 import { SubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataProvider';
-import { ApiKeyDataProvider } from '@/core/apiKeys/IApiKeyDataProvider';
+import { ApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import { ISavedSearchDataProvider } from '@/core/savedSearch/ISavedSearchDataProvider';
 import type { ITwoFactorDataProvider } from '@/core/twoFactor/ITwoFactorDataProvider';
