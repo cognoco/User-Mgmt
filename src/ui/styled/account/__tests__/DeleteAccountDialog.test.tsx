@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { vi } from 'vitest'; // Import vi
+import { vi, type Mock } from 'vitest';
 import DeleteAccountDialog from '@/ui/styled/account/DeleteAccountDialog';
 import { useDeleteAccount } from '@/hooks/user/useDeleteAccount';
 import { act } from 'react';
@@ -10,13 +10,13 @@ vi.mock('@/hooks/user/useDeleteAccount');
 
 describe('DeleteAccountDialog', () => {
   let handleClose: ReturnType<typeof vi.fn>;
-  let mockDeleteAccount: vi.Mock<[], Promise<void>>;
+  let mockDeleteAccount: Mock<() => Promise<void>>;
   const mockUseDeleteAccount = vi.mocked(useDeleteAccount);
 
   beforeEach(() => {
     // Reset mocks before each test
     handleClose = vi.fn();
-    mockDeleteAccount = vi.fn<[], Promise<void>>();
+    mockDeleteAccount = vi.fn<() => Promise<void>>();
     mockUseDeleteAccount.mockReturnValue({
       deleteAccount: mockDeleteAccount as () => Promise<void>,
       isLoading: false,
