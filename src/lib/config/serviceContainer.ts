@@ -39,7 +39,7 @@ import { getApiUserService } from '@/services/user/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { getApiTeamService } from '@/services/team/factory';
 import { getApiSsoService } from '@/services/sso/factory';
-import { getApiTwoFactorService } from '@/services/twoFactor/factory';
+import { getApiTwoFactorService } from '@/services/two-factor/factory';
 import { getApiSubscriptionService } from '@/services/subscription/factory';
 // ApiKey and GDPR services are constructed directly to avoid circular deps
 import type { IApiKeyDataProvider } from '@/core/apiKeys';
