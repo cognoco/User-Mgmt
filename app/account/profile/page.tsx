@@ -12,17 +12,14 @@ import { ProfileEditor } from '@/ui/styled/profile/ProfileEditor';
 import { useUserProfile } from '@/hooks/user/useUserProfile';
 import { useAccountSettings } from '@/hooks/user/useAccountSettings';
 
-export default function ProfilePage(): JSX.Element {
+export default function ProfilePage() {
   const { t } = useTranslation();
   
   // Use our hooks from the new architecture
-  const { 
-    profile, 
-    isLoading, 
-    error, 
-    updateProfile,
-    uploadAvatar,
-    removeAvatar
+  const {
+    profile,
+    isLoading,
+    error
   } = useUserProfile();
   
   useAccountSettings();
@@ -66,15 +63,8 @@ export default function ProfilePage(): JSX.Element {
           {t('profile.title', 'Manage Your Profile')}
         </h1>
         
-        {/* Use our new ProfileEditor component */}
-        <ProfileEditor 
-          title={t('profile.details.title', 'Profile Details')}
-          description={t('profile.details.description', 'Update your personal information and preferences')}
-          profile={profile}
-          onUpdateProfile={updateProfile}
-          onAvatarUpload={uploadAvatar}
-          onAvatarRemove={removeAvatar}
-        />
+          {/* Use our new ProfileEditor component */}
+          <ProfileEditor />
         
         {/* Password Change Section */}
         <Card>
