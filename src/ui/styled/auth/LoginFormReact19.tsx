@@ -12,9 +12,9 @@ import { ErrorBoundary, DefaultErrorFallback } from '@/ui/styled/common/ErrorBou
 import Link from 'next/link';
 import { Spinner } from '@/ui/primitives/spinner';
 import {
-  LoginFormReact19 as HeadlessLoginFormReact19,
-  type LoginPayload
+  LoginFormReact19 as HeadlessLoginFormReact19
 } from '@/ui/headless/auth/LoginFormReact19';
+import type { LoginPayload } from '@/core/auth/models';
 
 export function LoginFormReact19() {
   const [apiError, setApiError] = useState<string | null>(null);
