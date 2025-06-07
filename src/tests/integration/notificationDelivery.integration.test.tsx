@@ -101,7 +101,10 @@ describe('Notification Delivery System', () => {
         type: 'email' as const
       };
 
-      const spy = vi.spyOn(notificationService, 'processEmailNotification');
+      const spy = vi.spyOn(
+        notificationService as unknown as Record<string, any>,
+        'processEmailNotification'
+      );
       
       // Mock the processor function to simulate successful delivery
       spy.mockResolvedValue(true);
@@ -127,7 +130,10 @@ describe('Notification Delivery System', () => {
         type: 'push' as const
       };
 
-      const spy = vi.spyOn(notificationService, 'processPushNotification');
+      const spy = vi.spyOn(
+        notificationService as unknown as Record<string, any>,
+        'processPushNotification'
+      );
       
       // Mock the processor function to simulate successful delivery
       spy.mockResolvedValue(true);
@@ -166,7 +172,10 @@ describe('Notification Delivery System', () => {
     test('should handle email delivery failures', async () => {
       // Setup mocks to simulate failure
       const apiError = new Error('Email delivery failed');
-      const emailProcessor = vi.spyOn(notificationService, 'processEmailNotification');
+      const emailProcessor = vi.spyOn(
+        notificationService as unknown as Record<string, any>,
+        'processEmailNotification'
+      );
       emailProcessor.mockRejectedValue(apiError);
       
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -206,11 +215,12 @@ describe('Notification Delivery System', () => {
       (notificationQueue.getStatus as any).mockReturnValueOnce(mockEntry);
       
       const status = notificationService.getNotificationStatus('retry-test-id');
-      
+
       expect(status).toBeDefined();
-      expect(status.status).toBe('pending');
-      expect(status.attempts).toBe(1);
-      expect(status.maxAttempts).toBe(3);
+      const definedStatus = status as NonNullable<typeof status>;
+      expect(definedStatus.status).toBe('pending');
+      expect(definedStatus.attempts).toBe(1);
+      expect(definedStatus.maxAttempts).toBe(3);
     });
   });
 }); 
