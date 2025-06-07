@@ -17,7 +17,7 @@ import type { PermissionService } from '@/core/permission/interfaces';
 import type { TeamService } from '@/core/team/interfaces';
 import type { SsoService } from '@/core/sso/interfaces';
 import type { GdprService } from '@/core/gdpr/interfaces';
-import type { TwoFactorService } from '@/core/twoFactor/interfaces';
+import type { TwoFactorService } from '@/core/two-factor/interfaces';
 import type { SubscriptionService } from '@/core/subscription/interfaces';
 import type { ApiKeyService } from '@/core/api-keys/interfaces';
 import type { NotificationService } from '@/core/notification/interfaces';
@@ -39,7 +39,7 @@ import { getApiUserService } from '@/services/user/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { getApiTeamService } from '@/services/team/factory';
 import { getApiSsoService } from '@/services/sso/factory';
-import { getApiTwoFactorService } from '@/services/twoFactor/factory';
+import { getApiTwoFactorService } from '@/services/two-factor/factory';
 import { getApiSubscriptionService } from '@/services/subscription/factory';
 // ApiKey and GDPR services are constructed directly to avoid circular deps
 import type { IApiKeyDataProvider } from '@/core/api-keys';

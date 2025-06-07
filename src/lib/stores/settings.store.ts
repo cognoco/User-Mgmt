@@ -7,10 +7,14 @@ interface SettingsState {
     email: boolean;
     push: boolean;
     sms: boolean;
+    marketing?: boolean;
+    mobile?: boolean;
   };
   privacy: {
     showProfile: boolean;
     showActivity: boolean;
+    profileVisibility?: 'public' | 'private' | 'friends';
+    showOnlineStatus?: boolean;
   };
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setLanguage: (language: string) => void;
@@ -25,10 +29,14 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     email: true,
     push: true,
     sms: false,
+    marketing: false,
+    mobile: true,
   },
   privacy: {
     showProfile: true,
     showActivity: false,
+    profileVisibility: 'public',
+    showOnlineStatus: true,
   },
   setTheme: (theme) => set({ theme }),
   setLanguage: (language) => set({ language }),

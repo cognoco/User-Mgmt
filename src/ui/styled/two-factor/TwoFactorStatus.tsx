@@ -3,18 +3,19 @@ import { format } from 'date-fns';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { Button } from '@/ui/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
-import { TwoFactorStatus as HeadlessTwoFactorStatus } from '@/ui/headless/twoFactor/TwoFactorStatus';
+import { TwoFactorStatus as HeadlessTwoFactorStatus, TwoFactorStatusRenderProps } from '@/ui/headless/two-factor/TwoFactorStatus';
 
 interface StyledTwoFactorStatusProps {
   isEnabled: boolean;
   lastUsed?: Date;
+  loading: boolean;
   error: Error | null;
   onDisable: () => Promise<void>;
 }
 
 export function TwoFactorStatus(props: StyledTwoFactorStatusProps) {
   return (
-    <HeadlessTwoFactorStatus {...props}>
+    <HeadlessTwoFactorStatus {...props} loading={false}>
       {({
         isEnabled,
         lastUsed,
@@ -22,7 +23,7 @@ export function TwoFactorStatus(props: StyledTwoFactorStatusProps) {
         disableButtonProps,
         viewBackupCodesButtonProps,
         regenerateBackupCodesButtonProps
-      }) => (
+      }: TwoFactorStatusRenderProps) => (
         <Card className="w-full space-y-4 p-4">
           <CardHeader>
             <CardTitle>Two-Factor Authentication</CardTitle>

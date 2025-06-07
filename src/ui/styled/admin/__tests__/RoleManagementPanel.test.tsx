@@ -22,8 +22,8 @@ const mockRoles: RoleSchema[] = [
     description: 'Admin role',
     permissions: [PermissionValues.MANAGE_ROLES, PermissionValues.ADMIN_ACCESS],
     isSystem: false,
-    createdAt: '',
-    updatedAt: ''
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
   {
     id: 'r2',
@@ -31,8 +31,8 @@ const mockRoles: RoleSchema[] = [
     description: 'User role',
     permissions: [PermissionValues.VIEW_ANALYTICS],
     isSystem: false,
-    createdAt: '',
-    updatedAt: ''
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
 ];
 

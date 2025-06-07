@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Card } from '@/ui/primitives/card';
-import { TwoFactorSetup as HeadlessTwoFactorSetup } from '@/ui/headless/twoFactor/TwoFactorSetup';
+import { TwoFactorSetup as HeadlessTwoFactorSetup, TwoFactorSetupRenderProps } from '@/ui/headless/two-factor/TwoFactorSetup';
 import QRCodeDisplay from '@/ui/styled/two-factor/QRCodeDisplay';
 import BackupCodesList from '@/ui/styled/two-factor/BackupCodesList';
 import { WebAuthnRegistration } from '@/ui/styled/two-factor/WebAuthnRegistration';
@@ -14,7 +14,7 @@ export function TwoFactorSetup() {
     <HeadlessTwoFactorSetup
       onComplete={() => setCode('')}
     >
-      {({ step, secret, qrCode, backupCodes, start, verify, cancel, loading, error }) => (
+      {({ step, secret, qrCode, backupCodes, start, verify, cancel, loading, error }: TwoFactorSetupRenderProps) => (
         <Card className="p-4 space-y-4 w-full max-w-md">
           {step === 'initial' && (
             <div className="space-y-6">

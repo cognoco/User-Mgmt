@@ -20,7 +20,7 @@ import { SubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataP
 import { ApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import { ISavedSearchDataProvider } from '@/core/savedSearch/ISavedSearchDataProvider';
-import type { ITwoFactorDataProvider } from '@/core/twoFactor/ITwoFactorDataProvider';
+import type { ITwoFactorDataProvider } from '@/core/two-factor/ITwoFactorDataProvider';
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
 import { ICompanyNotificationDataProvider } from '@/core/companyNotification/ICompanyNotificationDataProvider';
 import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';

@@ -11,38 +11,17 @@ This document provides clear, unambiguous guidelines for developing the User Man
 - Business logic MUST reside ONLY in dedicated service or core classes/functions
 - UI components MUST be limited to display, user interaction, and calling service methods
 - Data transformation, validation, and processing MUST happen in services, not UI components
-- All imports must me in this form:   @/core/, @/lib/, @/tests/ etc
-- All imports MUST use the `@/` alias pattern for absolute imports
+
 
 **📁 IMPORT PATH RULES:**
-- `@/` alias maps to **PROJECT ROOT** (not src/)
-- Examples of CORRECT imports:
-  - `@/src/core/auth/interfaces` → `/src/core/auth/interfaces`
-  - `@/app/api/auth/route` → `/app/api/auth/route`
-  - `@/middleware/auth` → `/middleware/auth`
-  - `@/lib/config/settings` → `/lib/config/settings`
-  - `@/tests/utils/helpers` → `/tests/utils/helpers`
+- - Use `@/` for any file or module inside the `src/` directory.
+- Use `@app/` for any file or module inside the `app/` directory.
 
 **❌ FORBIDDEN:**
 - UI components MUST NOT contain API calls
 - UI components MUST NOT implement validation logic
 - UI components MUST NOT directly manipulate data stores or state
- -Imports like MUST NOT BE CREATED./../core/ , ../../../lib/ , ../../../tests/  etc
-- Relative imports like `../../../core/`, `../../lib/`, `../../../../middleware/`
-- Imports assuming `@/` maps to `src/` directory
 
-**⚙️ TYPESCRIPT CONFIGURATION:**
-Your `tsconfig.json` MUST have this path mapping:
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "@/*": ["./*"]
-    }
-  }
-}
-```
-This ensures `@/` resolves to project root, enabling imports like `@/src/`, `@/app/`, `@/middleware/`.
 
 
 #### 1.2 Layered Architecture
@@ -384,3 +363,52 @@ Before committing any code, ask yourself:
 11. Are my tests using global mocks instead of local mocks?
 
 Following these guidelines ensures the User Management Module remains truly modular, pluggable, and easy to integrate into any host application.
+
+## Path Aliases: @ and @app
+
+To keep imports clean and maintainable, this project uses TypeScript path aliases configured in `tsconfig.json`:
+
+```json
+"paths": {
+  "@/*": ["./src/*"],
+  "@app/*": ["./app/*"]
+}
+```
+
+### How to Use
+
+- Use `@/` for any file or module inside the `src/` directory.
+- Use `@app/` for any file or module inside the `app/` directory.
+
+#### Examples
+
+**Importing from `src/`**
+```typescript
+// ✅ DO:
+import { MyComponent } from '@/ui/styled/profile/MyComponent';
+
+// ❌ DON'T:
+import { MyComponent } from '@/src/ui/styled/profile/MyComponent'; // (Redundant 'src')
+import { MyComponent } from '@app/ui/styled/profile/MyComponent'; // (Wrong alias)
+```
+
+**Importing from `app/`**
+```typescript
+// ✅ DO:
+import AccessRulesClientPage from '@app/admin/access-rules/ClientPage';
+
+// ❌ DON'T:
+import AccessRulesClientPage from '@/app/admin/access-rules/ClientPage'; // (Wrong alias)
+import AccessRulesClientPage from '@/src/app/admin/access-rules/ClientPage'; // (Wrong alias)
+```
+
+### Summary Table
+| Folder         | Correct Alias | Example Import Path                                 |
+|----------------|--------------|-----------------------------------------------------|
+| `src/`         | `@/`         | `@/ui/styled/profile/Profile`                        |
+| `app/`         | `@app/`      | `@app/admin/access-rules/ClientPage`                |
+
+### Best Practices
+- Never use `@/src/` or `@/app/` in import paths.
+- Never use relative imports (like `../../`) for modules that can be referenced via an alias.
+- Keep alias usage consistent across the codebase.

@@ -1,3 +1,3 @@
-export * from '@/core/twoFactor/ITwoFactorDataProvider';
-export * from '@/core/twoFactor/interfaces';
-export * from '@/core/twoFactor/models';
+export * from '@/core/two-factor/ITwoFactorDataProvider';
+export * from '@/core/two-factor/interfaces';
+export * from '@/core/two-factor/models';
