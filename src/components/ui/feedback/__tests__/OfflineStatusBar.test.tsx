@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import OfflineStatusBar from '../OfflineStatusBar';
+import OfflineStatusBar from '@/src/components/ui/feedback/OfflineStatusBar'164;
 import useOfflineStatus from '@/hooks/utils/useOfflineStatus';
 
 vi.mock('@/hooks/utils/useOfflineStatus');

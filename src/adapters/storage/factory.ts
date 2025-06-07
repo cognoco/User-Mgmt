@@ -1,4 +1,4 @@
-import { SupabaseStorageAdapter } from './supabase/SupabaseStorageAdapter';
+import { SupabaseStorageAdapter } from '@/src/adapters/storage/supabase/SupabaseStorageAdapter'0;
 import type { StorageAdapter } from '@/core/storage/interfaces';
 
 export function createSupabaseStorageAdapter(options: {

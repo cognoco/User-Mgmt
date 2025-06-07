@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useSubscription } from '../useSubscription';
+import { useSubscription } from '@/src/hooks/subscription/useSubscription'59;
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 import { useSubscriptionStore } from '@/lib/stores/subscription.store';

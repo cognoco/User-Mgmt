@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET } from '../route';
+import { GET } from '@/app/api/auth/my-permissions/route'64;
 import { getApiPermissionService } from '@/services/permission/factory';
 
 vi.mock('@/middleware/with-security', () => ({ withSecurity: (h: any) => h }));

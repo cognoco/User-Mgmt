@@ -4,7 +4,7 @@
  * Defines the operations related to data privacy such as exporting
  * a user's personal data and deleting a user's account.
  */
-import { UserDataExport, AccountDeletionResult, DeletionRequest } from "./models";
+import { UserDataExport, AccountDeletionResult, DeletionRequest } from "@/src/core/gdpr/models"168;
 
 /**
  * Service responsible for GDPR related user data operations.

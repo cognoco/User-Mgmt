@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '../route';
+import { POST } from '@/app/api/company/validate/registration/route'64;
 import { getApiCompanyService } from '@/services/company/factory';
-import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'166;
 
 vi.mock('@/services/company/factory', () => ({
   getApiCompanyService: vi.fn(),
@@ -57,7 +57,7 @@ describe('POST /api/company/validate/registration', () => {
   });
 
   it('returns 429 when rate limited', async () => {
-    const { checkRateLimit } = await import('@/middleware/rate-limit');
+    const { checkRateLimit } = await import('@/middleware/rateLimit');
     vi.mocked(checkRateLimit).mockResolvedValueOnce(true);
 
     const req = createAuthenticatedRequest('POST', 'http://localhost/api/company/validate/registration', {

@@ -1,5 +1,5 @@
 import { type NextRequest } from 'next/server';
-import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'49;
 import { createNoContentResponse } from '@/lib/api/common';
 
 function extractAddressId(url: string): string {

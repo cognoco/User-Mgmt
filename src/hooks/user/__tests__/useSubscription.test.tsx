@@ -1,7 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useSubscription } from '@/hooks/user/useSubscription';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { TestWrapper } from '../../../tests/utils/test-wrapper';
+import { TestWrapper } from '@/src/tests/utils/testWrapper'197;
 
 // Mock fetch globally
 const mockFetch = vi.fn();

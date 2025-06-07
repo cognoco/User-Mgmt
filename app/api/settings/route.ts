@@ -2,10 +2,10 @@ import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 
 import { createSuccessResponse } from '@/lib/api/common';
-import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'136;
 import type { UserService } from '@/core/user/interfaces';
 import { userPreferencesSchema } from '@/types/database';
-import { mapUserServiceError } from '@/lib/api/user/error-handler';
+import { mapUserServiceError } from '@/lib/api/user/errorHandler'329;
 
 const UpdateSchema = userPreferencesSchema
   .omit({ id: true, userId: true, createdAt: true, updatedAt: true })

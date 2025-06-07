@@ -14,8 +14,8 @@ import type {
   PermissionAssignment,
   RoleCreationPayload,
   RoleUpdatePayload,
-} from "./models";
-import type { PermissionEventHandler } from "./events";
+} from "@/src/core/permission/models"273;
+import type { PermissionEventHandler } from "@/src/core/permission/events"440;
 
 /**
  * Permission data provider interface.

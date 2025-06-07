@@ -1,9 +1,9 @@
 export interface PrioritizedError {
-  dim: import('./error-metrics').ErrorMetricDimensions;
+  dim: import('@/src/lib/telemetry/errorMetrics').ErrorMetricDimensions;
   score: number;
 }
 
-import { ErrorMetrics, ErrorMetricDimensions } from './error-metrics';
+import { ErrorMetrics, ErrorMetricDimensions } from '@/src/lib/telemetry/errorMetrics'117;
 
 export class ErrorPrioritizer {
   constructor(private metrics: ErrorMetrics) {}

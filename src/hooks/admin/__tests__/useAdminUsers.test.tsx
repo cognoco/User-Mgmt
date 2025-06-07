@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useAdminUsers } from '../useAdminUsers';
+import { useAdminUsers } from '@/src/hooks/admin/useAdminUsers'153;
 import { useApi } from '@/hooks/core/useApi';
-import { useRealtimeUserSearch } from '../useRealtimeUserSearch';
+import { useRealtimeUserSearch } from '@/src/hooks/admin/useRealtimeUserSearch'251;
 
 vi.mock('@/hooks/core/useApi');
 vi.mock('../useRealtimeUserSearch');

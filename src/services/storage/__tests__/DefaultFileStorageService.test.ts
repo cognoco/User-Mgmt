@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { DefaultFileStorageService } from '../DefaultFileStorageService';
+import { DefaultFileStorageService } from '@/src/services/storage/DefaultFileStorageService'52;
 import type { StorageAdapter } from '@/core/storage/interfaces';
 
 function createAdapterMock(): StorageAdapter {

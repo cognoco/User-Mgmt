@@ -1,20 +1,20 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 let AdapterRegistry: typeof import('@/adapters/registry').AdapterRegistry;
-let getApiAdminService: typeof import('../factory').getApiAdminService;
-let DefaultAdminService: typeof import('../default-admin.service').DefaultAdminService;
-let configureServices: typeof import('@/lib/config/service-container').configureServices;
-let resetServiceContainer: typeof import('@/lib/config/service-container').resetServiceContainer;
+let getApiAdminService: typeof import('@/src/services/admin/factory').getApiAdminService;
+let DefaultAdminService: typeof import('@/src/services/admin/defaultAdmin.service').DefaultAdminService;
+let configureServices: typeof import('@/lib/config/serviceContainer').configureServices;
+let resetServiceContainer: typeof import('@/lib/config/serviceContainer').resetServiceContainer;
 
 describe('getApiAdminService', () => {
   beforeEach(async () => {
     vi.resetModules();
     ({ AdapterRegistry } = await import('@/adapters/registry'));
     (AdapterRegistry as any).instance = null;
-    ({ configureServices, resetServiceContainer } = await import('@/lib/config/service-container'));
+    ({ configureServices, resetServiceContainer } = await import('@/lib/config/serviceContainer'));
     resetServiceContainer();
-    ({ getApiAdminService } = await import('../factory'));
-    ({ DefaultAdminService } = await import('../default-admin.service'));
+    ({ getApiAdminService } = await import('@/src/services/admin/factory'));
+    ({ DefaultAdminService } = await import('@/src/services/admin/defaultAdmin.service'));
   });
 
   it('returns configured service if registered in ServiceContainer', () => {

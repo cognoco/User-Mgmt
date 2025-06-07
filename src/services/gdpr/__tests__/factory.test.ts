@@ -1,20 +1,20 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 let AdapterRegistry: typeof import('@/adapters/registry').AdapterRegistry;
-let configureServices: typeof import('@/lib/config/service-container').configureServices;
-let resetServiceContainer: typeof import('@/lib/config/service-container').resetServiceContainer;
+let configureServices: typeof import('@/lib/config/serviceContainer').configureServices;
+let resetServiceContainer: typeof import('@/lib/config/serviceContainer').resetServiceContainer;
 
-let getApiGdprService: typeof import('../factory').getApiGdprService;
-let DefaultGdprService: typeof import('../default-gdpr.service').DefaultGdprService;
+let getApiGdprService: typeof import('@/src/services/gdpr/factory').getApiGdprService;
+let DefaultGdprService: typeof import('@/src/services/gdpr/defaultGdpr.service').DefaultGdprService;
 
 describe('getApiGdprService', () => {
   beforeEach(async () => {
     vi.resetModules();
     ({ AdapterRegistry } = await import('@/adapters/registry'));
-    ({ configureServices, resetServiceContainer } = await import('@/lib/config/service-container'));
+    ({ configureServices, resetServiceContainer } = await import('@/lib/config/serviceContainer'));
     (AdapterRegistry as any).instance = null;
     resetServiceContainer();
-    ({ getApiGdprService } = await import('../factory'));
-    ({ DefaultGdprService } = await import('../default-gdpr.service'));
+    ({ getApiGdprService } = await import('@/src/services/gdpr/factory'));
+    ({ DefaultGdprService } = await import('@/src/services/gdpr/defaultGdpr.service'));
   });
 
   it('returns configured service if registered', () => {

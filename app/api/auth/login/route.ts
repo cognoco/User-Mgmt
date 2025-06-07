@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { createApiHandler } from '@/lib/api/route-helpers';
+import { createApiHandler } from '@/lib/api/routeHelpers'26;
 import { LoginPayload } from '@/core/auth/models';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
-import { createInvalidCredentialsError, createEmailNotVerifiedError } from '@/lib/api/auth/error-handler';
+import { createInvalidCredentialsError, createEmailNotVerifiedError } from '@/lib/api/auth/errorHandler'221;
 
 // Zod schema for login data
 const LoginSchema = z.object({

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { addressSchema } from '../validation';
+import { addressSchema } from '@/src/core/address/validation'48;
 
 describe('addressSchema', () => {
   it('validates required fields', () => {

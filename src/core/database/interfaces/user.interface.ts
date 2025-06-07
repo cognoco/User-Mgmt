@@ -1,6 +1,6 @@
-import type { IUserRepository } from '../../user/IUserRepository';
-import type { BaseDatabaseInterface } from './base.interface';
-import type { UserProfile } from '../../user/models';
+import type { IUserRepository } from '@/src/core/user/IUserRepository'0;
+import type { BaseDatabaseInterface } from '@/src/core/database/interfaces/base.interface'68;
+import type { UserProfile } from '@/src/core/user/models'132;
 
 /**
  * Database interface for user entities.

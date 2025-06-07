@@ -17,19 +17,19 @@ import { SessionDataProvider } from '@/core/session/ISessionDataProvider';
 import { SsoDataProvider } from '@/core/sso/ISsoDataProvider';
 import { OAuthDataProvider } from '@/core/oauth/IOAuthDataProvider';
 import { SubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataProvider';
-import { ApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
+import { ApiKeyDataProvider } from '@/core/apiKeys/IApiKeyDataProvider'1053;
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
-import { ISavedSearchDataProvider } from '@/core/saved-search/ISavedSearchDataProvider';
-import type { ITwoFactorDataProvider } from '@/core/two-factor/ITwoFactorDataProvider';
+import { ISavedSearchDataProvider } from '@/core/savedSearch/ISavedSearchDataProvider'1206;
+import type { ITwoFactorDataProvider } from '@/core/twoFactor/ITwoFactorDataProvider'1296;
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
-import { ICompanyNotificationDataProvider } from '@/core/company-notification/ICompanyNotificationDataProvider';
+import { ICompanyNotificationDataProvider } from '@/core/companyNotification/ICompanyNotificationDataProvider'1477;
 import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
-import { IDataExportDataProvider } from '@/core/data-export/IDataExportDataProvider';
+import { IDataExportDataProvider } from '@/core/dataExport/IDataExportDataProvider'1662;
 import { 
   DatabaseProvider, 
   DatabaseConfig 
-} from '../core/database/interfaces';
-import { BaseRepository } from '../core/database/interfaces/base.interface';
+} from '@/src/core/database/interfaces'1749;
+import { BaseRepository } from '@/src/core/database/interfaces/base.interface'1840;
 
 
 

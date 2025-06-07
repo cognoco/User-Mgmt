@@ -1,6 +1,6 @@
-import { DefaultOAuthService } from "./default-oauth.service";
+import { DefaultOAuthService } from "@/src/services/oauth/defaultOauth.service"0;
 import type { OAuthService } from "@/core/oauth/interfaces";
-import { getServiceContainer } from "@/lib/config/service-container";
+import { getServiceContainer } from "@/lib/config/serviceContainer"126;
 
 export interface ApiOAuthServiceOptions {
   reset?: boolean;

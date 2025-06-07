@@ -5,7 +5,7 @@ import {
   Features as HeadlessFeatures,
   FeatureItem,
   FeaturesProps as HeadlessProps,
-} from "../../headless/layout/Features";
+} from "@/src/ui/headless/layout/Features"126;
 
 export interface FeaturesProps extends Omit<HeadlessProps, "children"> {
   className?: string;

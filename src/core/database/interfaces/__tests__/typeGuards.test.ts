@@ -4,7 +4,7 @@ import {
   isFilterCondition,
   type QueryResult,
   type FilterCondition
-} from '../index';
+} from '@/src/core/database/interfaces/index'48;
 
 describe('database interface type guards', () => {
   it('validates QueryResult objects', () => {

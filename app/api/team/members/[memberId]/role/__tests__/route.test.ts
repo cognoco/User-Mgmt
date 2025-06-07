@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { PATCH } from '../route';
+import { PATCH } from '@/app/api/team/members/[memberId]/role/route'64;
 import { prisma } from '@/lib/database/prisma';
 import { withRouteAuth } from '@/middleware/auth';
 import { NextResponse } from 'next/server';

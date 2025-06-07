@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import ProfileVerification from '../ProfileVerification';
+import ProfileVerification from '@/src/ui/styled/profile/ProfileVerification'218;
 import { useProfileStore } from '@/lib/stores/profile.store';
 
 vi.mock('@/lib/stores/profile.store');

@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { SsoProvider as SsoServiceProvider, SsoService } from '@/lib/context/SsoContext';
-import { useSso } from '../useSso';
+import { useSso } from '@/src/hooks/sso/useSso'202;
 
 const mockService: SsoService = {
   listProviders: vi.fn(async () => [{ id: '1', name: 'Test', type: 'saml' }]),

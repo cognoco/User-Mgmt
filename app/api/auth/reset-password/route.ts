@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createApiHandler } from "@/lib/api/route-helpers";
+import { createApiHandler } from "@/lib/api/routeHelpers"26;
 import { logUserAction } from "@/lib/audit/auditLogger";
 import { createSuccessResponse } from "@/lib/api/common";
 

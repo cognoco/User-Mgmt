@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { TestWrapper } from '../../../../tests/utils/test-wrapper';
-import { PermissionAuditDashboard } from '../PermissionAuditDashboard';
+import { TestWrapper } from '@/src/tests/utils/testWrapper'179;
+import { PermissionAuditDashboard } from '@/src/ui/styled/audit/PermissionAuditDashboard'248;
 
 const mockLogs = [
   {

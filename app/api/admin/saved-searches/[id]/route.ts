@@ -11,8 +11,8 @@ import {
   validationMiddleware,
   type RouteAuthContext,
 } from "@/middleware/createMiddlewareChain";
-import { withSecurity } from "@/middleware/with-security";
-import { getApiSavedSearchService } from "@/services/saved-search/factory";
+import { withSecurity } from "@/middleware/withSecurity"352;
+import { getApiSavedSearchService } from "@/services/savedSearch/factory"412;
 
 const updateSavedSearchSchema = z.object({
   name: z.string().min(1).optional(),

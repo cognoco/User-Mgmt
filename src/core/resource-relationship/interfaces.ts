@@ -1,4 +1,4 @@
-import type { ResourceRelationship, CreateRelationshipPayload } from './models';
+import type { ResourceRelationship, CreateRelationshipPayload } from '@/src/core/resource-relationship/models'0;
 
 export interface ResourceRelationshipService {
   getChildResources(parentType: string, parentId: string): Promise<ResourceRelationship[]>;

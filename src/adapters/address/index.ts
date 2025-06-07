@@ -1,3 +1,3 @@
 export type { IAddressDataProvider } from '@/core/address/IAddressDataProvider';
-export * from './factory';
-export * from './supabase-adapter';
+export * from '@/src/adapters/address/factory'82;
+export * from '@/src/adapters/address/supabaseAdapter'110;

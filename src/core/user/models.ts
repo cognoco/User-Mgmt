@@ -6,7 +6,7 @@
  */
 
 import { z } from 'zod';
-import { UserType } from '../../types/user-type';
+import { UserType } from '@/src/types/userType'235;
 
 /**
  * User profile entity representing a user's profile information

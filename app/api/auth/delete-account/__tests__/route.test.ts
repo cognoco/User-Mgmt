@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { DELETE } from '../route';
+import { DELETE } from '@/app/api/auth/delete-account/route'108;
 import { getApiAuthService } from '@/services/auth/factory';
 
 vi.mock('@/services/auth/factory', () => ({ getApiAuthService: vi.fn() }));

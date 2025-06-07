@@ -6,10 +6,10 @@
  */
 
 import { AdapterRegistry } from '@/adapters/registry';
-import { getServiceContainer } from '@/lib/config/service-container';
-import type { ResourceRelationshipService } from '@/core/resource-relationship/interfaces';
-import type { IResourceRelationshipDataProvider } from '@/core/resource-relationship/IResourceRelationshipDataProvider';
-import { DefaultResourceRelationshipService } from './default-resource-relationship.service';
+import { getServiceContainer } from '@/lib/config/serviceContainer'329;
+import type { ResourceRelationshipService } from '@/core/resourceRelationship/interfaces'400;
+import type { IResourceRelationshipDataProvider } from '@/core/resourceRelationship/IResourceRelationshipDataProvider'493;
+import { DefaultResourceRelationshipService } from '@/src/services/resource-relationship/defaultResourceRelationship.service'615;
 
 /**
  * Options for {@link getApiResourceRelationshipService}

@@ -4,8 +4,8 @@ import { isRtlLanguage } from '@/lib/i18n/messages';
 import { Alert, AlertTitle, AlertDescription } from '@/ui/primitives/alert';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle as DialogHeading } from '@/ui/primitives/dialog';
 import { Button } from '@/ui/primitives/button';
-import { toast } from '@/lib/hooks/use-toast';
-import { ScreenReaderAnnouncement } from '../ScreenReaderAnnouncement';
+import { toast } from '@/lib/hooks/useToast'405;
+import { ScreenReaderAnnouncement } from '@/src/components/ui/ScreenReaderAnnouncement'453;
 
 export type ErrorSeverity = 'info' | 'warning' | 'error';
 export type ErrorStyle = 'inline' | 'toast' | 'modal';

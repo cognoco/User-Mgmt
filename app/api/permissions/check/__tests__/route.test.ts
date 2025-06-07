@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET, POST } from '../route';
+import { GET, POST } from '@/app/api/permissions/check/route'64;
 import { withRouteAuth } from '@/middleware/auth';
 
 const mockPermissionService = {

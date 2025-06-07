@@ -4,7 +4,7 @@ import {
   createSuccessResponse,
   createNoContentResponse,
 } from '@/lib/api/common';
-import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'201;
 
 function extractAddressId(url: string): string {
   const parts = new URL(url).pathname.split('/');

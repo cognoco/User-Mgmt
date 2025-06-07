@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '../route';
+import { POST } from '@/app/api/webhooks/stripe/route'64;
 
 vi.mock('@/lib/payments/stripe', () => ({
   stripe: {
@@ -17,7 +17,7 @@ vi.mock('@/lib/audit/auditLogger', () => ({ logUserAction: vi.fn() }));
 
 import { stripe } from '@/lib/payments/stripe';
 import { getApiSubscriptionService } from '@/services/subscription/factory';
-import { checkRateLimit } from '@/middleware/rate-limit';
+import { checkRateLimit } from '@/middleware/rateLimit'623;
 import { logUserAction } from '@/lib/audit/auditLogger';
 
 function createRequest(body: any, signature = 'sig') {

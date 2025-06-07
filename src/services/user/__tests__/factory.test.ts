@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AdapterRegistry } from '@/adapters/registry';
-import { getApiUserService } from '../factory';
-import { DefaultUserService } from '../default-user.service';
+import { getApiUserService } from '@/src/services/user/factory'120;
+import { DefaultUserService } from '@/src/services/user/defaultUser.service'169;
 
 describe('getApiUserService', () => {
   beforeEach(() => {

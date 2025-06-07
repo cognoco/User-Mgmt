@@ -12,7 +12,7 @@ import {
   UserDataExport,
   UserExportData,
   DataExportResponse
-} from './types';
+} from '@/src/lib/exports/types'261;
 
 // Default options for exports
 const DEFAULT_EXPORT_OPTIONS: ExportOptions = {

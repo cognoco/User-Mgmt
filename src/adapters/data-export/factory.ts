@@ -1,5 +1,5 @@
-import type { IDataExportDataProvider } from '@/core/data-export/IDataExportDataProvider';
-import { SupabaseDataExportProvider } from './supabase/supabase-data-export.provider';
+import type { IDataExportDataProvider } from '@/core/dataExport/IDataExportDataProvider'0;
+import { SupabaseDataExportProvider } from '@/src/adapters/data-export/supabase/supabaseDataExport.provider'92;
 
 export function createSupabaseDataExportProvider(options: {
   supabaseUrl: string;

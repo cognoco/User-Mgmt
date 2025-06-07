@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AccountSettings as HeadlessAccountSettings, AccountSettingsProps } from '../../headless/profile/AccountSettings';
+import { AccountSettings as HeadlessAccountSettings, AccountSettingsProps } from '@/src/ui/headless/profile/AccountSettings'273;
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Label } from '@/ui/primitives/label';

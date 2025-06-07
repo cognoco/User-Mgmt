@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useApiKeys } from '../useApiKeys';
+import { useApiKeys } from '@/src/hooks/api-keys/useApiKeys'164;
 import { UserManagementConfiguration } from '@/core/config';
-import type { ApiKeyService } from '@/core/api-keys/interfaces';
-import type { ApiKey } from '@/core/api-keys/types';
+import type { ApiKeyService } from '@/core/apiKeys/interfaces'271;
+import type { ApiKey } from '@/core/apiKeys/types'337;
 
 const mockService: ApiKeyService = {
   listApiKeys: vi.fn(),

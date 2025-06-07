@@ -8,7 +8,7 @@ import {
   MAX_FILE_SIZE, 
   ALLOWED_IMAGE_TYPES,
   canvasPreview
-} from '@/lib/utils/file-upload';
+} from '@/lib/utils/fileUpload'307;
 
 // Predefined avatar type
 export interface PredefinedAvatar {

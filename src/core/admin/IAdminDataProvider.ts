@@ -6,10 +6,10 @@
  * Implementations should provide purely data access logic without
  * any business rules.
  */
-import type { UserProfile } from '../user/models';
-import type { AuditLogEntry, AuditLogQuery } from '../audit/models';
-import type { PaginationMeta } from '@/lib/api/common/response-formatter';
-import type { ListUsersParams, SearchUsersParams } from './interfaces';
+import type { UserProfile } from '@/src/core/user/models'272;
+import type { AuditLogEntry, AuditLogQuery } from '@/src/core/audit/models'324;
+import type { PaginationMeta } from '@/lib/api/common/responseFormatter'394;
+import type { ListUsersParams, SearchUsersParams } from '@/src/core/admin/interfaces'470;
 
 export interface IAdminDataProvider {
   /**

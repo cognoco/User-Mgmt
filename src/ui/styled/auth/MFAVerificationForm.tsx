@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MFAVerificationForm as HeadlessMFAVerificationForm, MFAVerificationFormProps } from '../../headless/auth/MFAVerificationForm';
+import { MFAVerificationForm as HeadlessMFAVerificationForm, MFAVerificationFormProps } from '@/src/ui/headless/auth/MFAVerificationForm'42;
 import { Button } from '@/ui/primitives/button';
 import { Input } from '@/ui/primitives/input';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';

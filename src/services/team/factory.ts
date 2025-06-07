@@ -7,9 +7,9 @@
 
 import { TeamService } from '@/core/team/interfaces';
 import type { ITeamDataProvider } from '@/core/team/ITeamDataProvider';
-import { DefaultTeamService } from './default-team.service';
+import { DefaultTeamService } from '@/src/services/team/defaultTeam.service'367;
 import { AdapterRegistry } from '@/adapters/registry';
-import { getServiceContainer, getServiceConfiguration } from '@/lib/config/service-container';
+import { getServiceContainer, getServiceConfiguration } from '@/lib/config/serviceContainer'485;
 
 export interface ApiTeamServiceOptions {
   /** When true, resets the cached instance. Useful for tests */

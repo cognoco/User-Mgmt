@@ -13,7 +13,7 @@ import {
   User,
   MFASetupResponse,
   MFAVerifyResponse
-} from './models';
+} from '@/src/core/auth/models'258;
 import type { OAuthProvider, OAuthUserProfile, OAuthProviderConfig } from '@/types/oauth';
 import type { TwoFactorMethod } from '@/types/2fa';
 

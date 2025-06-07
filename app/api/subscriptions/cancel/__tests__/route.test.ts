@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '../route';
+import { POST } from '@/app/api/subscriptions/cancel/route'64;
 import { getApiSubscriptionService } from '@/services/subscription/factory';
-import { checkRateLimit } from '@/middleware/rate-limit';
+import { checkRateLimit } from '@/middleware/rateLimit'176;
 import { logUserAction } from '@/lib/audit/auditLogger';
 
 vi.mock('@/services/subscription/factory', () => ({

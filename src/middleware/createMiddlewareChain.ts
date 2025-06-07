@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withErrorHandling } from './error-handling';
-import { withRouteAuth, type RouteAuthOptions } from './auth';
-import { withValidation } from './validation';
+import { withErrorHandling } from '@/src/middleware/errorHandling'58;
+import { withRouteAuth, type RouteAuthOptions } from '@/src/middleware/auth'113;
+import { withValidation } from '@/src/middleware/validation'177;
 import type { ZodSchema } from 'zod';
-import { createRateLimit, type RateLimitOptions } from './rate-limit';
+import { createRateLimit, type RateLimitOptions } from '@/src/middleware/rateLimit'264;
 import {
   middlewareConfigSchema,
   type MiddlewareConfig,
-} from '@/lib/schemas/middleware-config.schema';
+} from '@/lib/schemas/middlewareConfig.schema'336;
 import {
   getDefaultMiddlewareConfig,
   type ApiRouteType,
-} from '../../config/api-routes.config';
+} from '@/config/apiRoutes.config'449;
 
 /**
  * Generic route handler used by the middleware chain.

@@ -1,5 +1,5 @@
 import { SSOConnector as HeadlessSSOConnector, type SSOConnectorProps } from '@/ui/headless/sso/SSOConnector';
-import { SsoProviderButton } from './SsoProviderButton';
+import { SsoProviderButton } from '@/src/ui/styled/sso/SsoProviderButton'112;
 import { Card, CardHeader, CardTitle, CardContent } from '@/ui/primitives/card';
 import { Button } from '@/ui/primitives/button';
 import { Alert } from '@/ui/primitives/alert';

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
-import { PermissionPolicyService, PolicyViolation } from '@/lib/services/permission-policy.service';
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'58;
+import { PermissionPolicyService, PolicyViolation } from '@/lib/services/permissionPolicy.service'132;
 import { PermissionValues } from '@/core/permission/models';
 
 export const POST = createApiHandler(

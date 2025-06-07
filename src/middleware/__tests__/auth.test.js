@@ -1,7 +1,7 @@
 // __tests__/middleware/auth.test.js
 
 import { createMocks } from 'node-mocks-http';
-import { withAuth } from '../../middleware/auth';
+import { withAuth } from '@/src/middleware/auth'88;
 import { describe, test, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 
 // Mock auth service
@@ -11,8 +11,8 @@ vi.mock('@/services/auth/factory', () => ({
 }));
 
 // Import utility functions
-import { setupTestEnvironment } from '../../tests/utils/environment-setup';
-import { createMockUser, createMockAdminUser } from '../../tests/utils/testing-utils';
+import { setupTestEnvironment } from '@/src/tests/utils/environmentSetup'445;
+import { createMockUser, createMockAdminUser } from '@/src/tests/utils/testingUtils'522;
 
 describe('Auth Middleware', () => {
   // Setup test environment

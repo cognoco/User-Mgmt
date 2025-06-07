@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '../route';
-import { configureServices, resetServiceContainer } from '@/lib/config/service-container';
+import { POST } from '@/app/api/addresses/default/[id]/route'64;
+import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer'98;
 import type { AddressService } from '@/core/address/interfaces';
 import type { AuthService } from '@/core/auth/interfaces';
-import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'316;
 
 const service: AddressService = {
   setDefaultAddress: vi.fn(async () => {}),

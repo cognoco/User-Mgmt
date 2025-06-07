@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server';
-import { GET, PATCH } from '../route';
+import { GET, PATCH } from '@/app/api/profile/route'44;
 import { 
   resetServiceContainer, 
   configureServices 
-} from '@/lib/config/service-container';
+} from '@/lib/config/serviceContainer'84;
 import type { UserService } from '@/core/user/interfaces';
 import type { AuthService } from '@/core/auth/interfaces';
 import { vi } from 'vitest';

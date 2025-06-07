@@ -35,21 +35,18 @@ function convertFileName(fileName) {
   return kebabToCamelCase(baseName) + ext;
 }
 
-// Get specific directory kebab-case files
-function findKebabCaseFiles(rootDir, includePatterns = ['src']) {
+// Get ALL kebab-case files recursively
+function findKebabCaseFiles(rootDir) {
   const files = [];
   
-  for (const pattern of includePatterns) {
-    const searchDir = path.join(rootDir, pattern);
-    try {
-      const command = `find "${searchDir}" -name "*-*" -type f 2>/dev/null | grep -E "\\.(ts|tsx|js|jsx)$" | grep -v ".git" | grep -v "node_modules"`;
-      const output = execSync(command, { encoding: 'utf8' }).trim();
-      if (output) {
-        files.push(...output.split('\n').filter(f => f.length > 0));
-      }
-    } catch (error) {
-      // Pattern might not exist, continue
+  try {
+    const command = `find "${rootDir}" -name "*-*" -type f 2>/dev/null | grep -E "\\.(ts|tsx|js|jsx)$" | grep -v ".git" | grep -v "node_modules" | grep -v "playwright-report" | grep -v "generated"`;
+    const output = execSync(command, { encoding: 'utf8' }).trim();
+    if (output) {
+      files.push(...output.split('\n').filter(f => f.length > 0));
     }
+  } catch (error) {
+    console.error('Error finding files:', error.message);
   }
   
   return [...new Set(files)]; // Remove duplicates
@@ -78,147 +75,175 @@ function createFileMapping(files) {
   return mapping;
 }
 
-// Update imports in a single file - only replace imports that definitely point to renamed files
-function updateImportsInFile(filePath, fileMapping, rootDir) {
+// Create reverse mapping for import resolution
+function createImportMapping(fileMapping, rootDir) {
+  const importMapping = new Map();
+  
+  for (const [oldPath, newPath] of fileMapping) {
+    // Store mappings without extensions for import resolution
+    const oldWithoutExt = oldPath.replace(/\.(ts|tsx|js|jsx)$/, '');
+    const newWithoutExt = newPath.replace(/\.(ts|tsx|js|jsx)$/, '');
+    
+    importMapping.set(oldWithoutExt, newWithoutExt);
+    
+    // Also store with common extensions
+    for (const ext of ['.ts', '.tsx', '.js', '.jsx']) {
+      importMapping.set(oldWithoutExt + ext, newWithoutExt);
+    }
+  }
+  
+  return importMapping;
+}
+
+// Update imports in a single file according to Architecture Guidelines
+function updateImportsInFile(filePath, importMapping, rootDir) {
   const content = fs.readFileSync(filePath, 'utf8');
   let newContent = content;
   let changeCount = 0;
   
   const currentDir = path.dirname(filePath);
   
-  // Find all import/require/export statements (both relative and absolute with @/ alias)
-  const importExportRegex = /(?:(?:import\s+.*?\s+from|export\s+.*?\s+from|export\s*\*\s*from)\s+['"`]([^'"`]+)['"`]|require\s*\(\s*['"`]([^'"`]+)['"`]\s*\))/g;
+  // Comprehensive regex to match all import/export/require statements
+  const importExportPatterns = [
+    // import statements: import ... from 'path'
+    /(import\s+[^'"`]*from\s+)(['"`])([^'"`]+?)(['"`])/g,
+    // export statements: export ... from 'path'
+    /(export\s+[^'"`]*from\s+)(['"`])([^'"`]+?)(['"`])/g,
+    // export * from 'path'
+    /(export\s*\*\s*from\s+)(['"`])([^'"`]+?)(['"`])/g,
+    // require statements: require('path')
+    /(require\s*\(\s*)(['"`])([^'"`]+?)(['"`])(\s*\))/g,
+    // dynamic import: import('path')
+    /(import\s*\(\s*)(['"`])([^'"`]+?)(['"`])(\s*\))/g
+  ];
   
-  let match;
-  const replacements = [];
-  
-  while ((match = importExportRegex.exec(content)) !== null) {
-    const importPath = match[1] || match[2];
-    const fullMatch = match[0];
-    const matchIndex = match.index;
-    
-    // Skip npm packages (don't start with . or @/)
-    if (!importPath.startsWith('.') && !importPath.startsWith('@/')) {
-      continue;
-    }
-    
-    let resolvedImportPath;
-    
-    if (importPath.startsWith('@/')) {
-      // Handle absolute imports with @/ alias
-      // @/ maps to project root directory according to the architecture guidelines
-      const relativePath = importPath.substring(2); // Remove '@/'
-      resolvedImportPath = path.resolve(rootDir, relativePath);
-    } else {
-      // Handle relative imports
-      try {
-        resolvedImportPath = path.resolve(currentDir, importPath);
-      } catch (error) {
-        continue; // Skip invalid paths
+  // Process each pattern separately for better control
+  for (const pattern of importExportPatterns) {
+    newContent = newContent.replace(pattern, (match, prefix, openQuote, originalImportPath, closeQuote, suffix = '') => {
+      // Skip npm packages
+      if (!originalImportPath.startsWith('.') && !originalImportPath.startsWith('@/')) {
+        return match;
       }
-    }
-    
-    // Check if this resolved path matches any of our old file paths (with or without extension)
-    for (const [oldPath, newPath] of fileMapping) {
-      const oldPathWithoutExt = oldPath.replace(/\.(ts|tsx|js|jsx)$/, '');
-      const resolvedWithoutExt = resolvedImportPath.replace(/\.(ts|tsx|js|jsx)$/, '');
       
-      // Check if the import points to this specific file
-      // Handle cases where import might have extension or not
-      const isMatch = resolvedWithoutExt === oldPathWithoutExt || 
-                     resolvedImportPath === oldPath ||
-                     resolvedImportPath === oldPathWithoutExt ||
-                     (resolvedImportPath + '.ts') === oldPath ||
-                     (resolvedImportPath + '.tsx') === oldPath ||
-                     (resolvedImportPath + '.js') === oldPath ||
-                     (resolvedImportPath + '.jsx') === oldPath;
+      let newImportPath = originalImportPath;
+      let changed = false;
       
-      if (isMatch) {
-        let newImportPath;
-        
-        if (importPath.startsWith('@/')) {
-          // For @/ imports, maintain the absolute import style
-          const newPathWithoutExt = newPath.replace(/\.(ts|tsx|js|jsx)$/, '');
-          const rootRelativePath = path.relative(rootDir, newPathWithoutExt);
-          newImportPath = `@/${rootRelativePath}`;
+      // Step 1: Convert kebab-case to camelCase in the path
+      const pathParts = originalImportPath.split('/');
+      const convertedParts = pathParts.map(part => {
+        if (part.includes('-') && !part.startsWith('.') && !part.startsWith('@')) {
+          // Handle special extensions
+          if (part.includes('.test') || part.includes('.spec') || part.includes('.e2e') || part.includes('.d.')) {
+            const dotParts = part.split('.');
+            const name = dotParts[0];
+            const extensions = dotParts.slice(1);
+            const convertedName = kebabToCamelCase(name);
+            return [convertedName, ...extensions].join('.');
+          } else {
+            const ext = path.extname(part);
+            const baseName = path.basename(part, ext);
+            return kebabToCamelCase(baseName) + ext;
+          }
+        }
+        return part;
+      });
+      
+      newImportPath = convertedParts.join('/');
+      if (newImportPath !== originalImportPath) {
+        changed = true;
+      }
+      
+      // Step 2: Check if this path maps to a renamed file (from our file mapping)
+      let resolvedImportPath;
+      if (newImportPath.startsWith('@/')) {
+        const relativePath = newImportPath.substring(2);
+        resolvedImportPath = path.resolve(rootDir, relativePath);
+      } else {
+        resolvedImportPath = path.resolve(currentDir, newImportPath);
+      }
+      
+      // Check if this maps to a renamed file
+      const mappedPath = importMapping.get(resolvedImportPath);
+      if (mappedPath) {
+        if (newImportPath.startsWith('@/')) {
+          const newRelativePath = path.relative(rootDir, mappedPath);
+          newImportPath = `@/${newRelativePath}`;
         } else {
-          // For relative imports, maintain the relative import style
-          const newPathWithoutExt = newPath.replace(/\.(ts|tsx|js|jsx)$/, '');
-          const newRelativePath = path.relative(currentDir, newPathWithoutExt);
+          const newRelativePath = path.relative(currentDir, mappedPath);
           newImportPath = newRelativePath.startsWith('.') ? newRelativePath : `./${newRelativePath}`;
         }
-        
-        // Replace the import/export path in the full match
-        const newStatement = fullMatch.replace(importPath, newImportPath);
-        
-        replacements.push({
-          index: matchIndex,
-          length: fullMatch.length,
-          replacement: newStatement
-        });
-        
-        changeCount++;
-        break; // Found the match, no need to check other mappings
+        changed = true;
       }
-    }
-  }
-  
-  // Apply replacements in reverse order to maintain correct indices
-  replacements.sort((a, b) => b.index - a.index);
-  
-  for (const replacement of replacements) {
-    newContent = newContent.substring(0, replacement.index) + 
-                replacement.replacement + 
-                newContent.substring(replacement.index + replacement.length);
+      
+      // Step 3: Convert relative imports to @/ pattern (Architecture Guidelines requirement)
+      if ((newImportPath.startsWith('./') || newImportPath.startsWith('../')) && !newImportPath.includes('node_modules')) {
+        try {
+          const resolvedPath = path.resolve(currentDir, newImportPath);
+          const relativePath = path.relative(rootDir, resolvedPath);
+          
+          // Only convert if it's within our project structure
+          if (!relativePath.startsWith('..') && !path.isAbsolute(relativePath)) {
+            const newAbsolutePath = `@/${relativePath}`;
+            if (newAbsolutePath !== newImportPath) {
+              newImportPath = newAbsolutePath;
+              changed = true;
+            }
+          }
+        } catch (error) {
+          // Keep original path if resolution fails
+        }
+      }
+      
+      if (changed) {
+        changeCount++;
+        console.log(`    Updated: ${originalImportPath} → ${newImportPath}`);
+        return `${prefix}${openQuote}${newImportPath}${closeQuote}${suffix}`;
+      }
+      
+      return match;
+    });
   }
   
   return { newContent, hasChanges: changeCount > 0, changeCount };
 }
 
 // Update imports in all TypeScript/JavaScript files
-function updateImports(rootDir, fileMapping, includePatterns) {
+function updateImports(rootDir, importMapping) {
   console.log('📦 Updating import and export statements...');
   
   let updatedFiles = 0;
   let totalUpdates = 0;
   
-  for (const pattern of includePatterns) {
-    const searchDir = path.join(rootDir, pattern);
-    try {
-      const command = `find "${searchDir}" -type f 2>/dev/null | grep -E "\\.(ts|tsx|js|jsx)$" | grep -v ".git" | grep -v "node_modules"`;
-      const files = execSync(command, { encoding: 'utf8' }).trim().split('\n').filter(f => f.length > 0);
-      
-      for (const filePath of files) {
-        try {
-          const result = updateImportsInFile(filePath, fileMapping, rootDir);
-          
-          if (result.hasChanges) {
-            fs.writeFileSync(filePath, result.newContent);
-            updatedFiles++;
-            totalUpdates += result.changeCount;
-            console.log(`  ✅ Updated ${result.changeCount} import/export statements in ${path.relative(rootDir, filePath)}`);
-          }
-        } catch (error) {
-          console.error(`  ❌ Error updating ${filePath}: ${error.message}`);
+  try {
+    const command = `find "${rootDir}" -type f 2>/dev/null | grep -E "\\.(ts|tsx|js|jsx)$" | grep -v ".git" | grep -v "node_modules" | grep -v "playwright-report" | grep -v "generated"`;
+    const files = execSync(command, { encoding: 'utf8' }).trim().split('\n').filter(f => f.length > 0);
+    
+    for (const filePath of files) {
+      try {
+        const result = updateImportsInFile(filePath, importMapping, rootDir);
+        
+        if (result.hasChanges) {
+          fs.writeFileSync(filePath, result.newContent);
+          updatedFiles++;
+          totalUpdates += result.changeCount;
+          console.log(`  ✅ Updated ${result.changeCount} import/export statements in ${path.relative(rootDir, filePath)}`);
         }
+      } catch (error) {
+        console.error(`  ❌ Error updating ${filePath}: ${error.message}`);
       }
-    } catch (error) {
-      // Directory might not exist, continue
     }
+  } catch (error) {
+    console.error('Error finding files for import updates:', error.message);
   }
   
   return { updatedFiles, totalUpdates };
 }
 
 // Dry run - show what would be changed
-function dryRun(rootDir, focusedMode = true) {
+function dryRun(rootDir) {
   console.log('🔍 Scanning for kebab-case files...\n');
   
-  const includePatterns = focusedMode ? 
-    ['src', 'app', 'config'] : 
-    ['.'];
-  
-  const kebabFiles = findKebabCaseFiles(rootDir, includePatterns);
+  const kebabFiles = findKebabCaseFiles(rootDir);
   console.log(`Found ${kebabFiles.length} kebab-case files\n`);
   
   const fileMapping = createFileMapping(kebabFiles);
@@ -262,14 +287,10 @@ function dryRun(rootDir, focusedMode = true) {
 }
 
 // Execute the renames and import updates
-function execute(rootDir, focusedMode = true) {
+function execute(rootDir) {
   console.log('🚀 Executing file renames and import updates...\n');
   
-  const includePatterns = focusedMode ? 
-    ['src', 'app', 'config'] : 
-    ['.'];
-  
-  const kebabFiles = findKebabCaseFiles(rootDir, includePatterns);
+  const kebabFiles = findKebabCaseFiles(rootDir);
   const fileMapping = createFileMapping(kebabFiles);
   
   if (fileMapping.size === 0) {
@@ -277,8 +298,13 @@ function execute(rootDir, focusedMode = true) {
     return;
   }
   
+  console.log(`Found ${fileMapping.size} files to rename\n`);
+  
+  // Create import mapping for path resolution
+  const importMapping = createImportMapping(fileMapping, rootDir);
+  
   // First, update all import statements
-  const importResults = updateImports(rootDir, fileMapping, includePatterns);
+  const importResults = updateImports(rootDir, importMapping);
   
   // Then, rename the files
   console.log('\n🔄 Renaming files...');
@@ -317,17 +343,20 @@ function main() {
   
   if (args.includes('--help') || args.includes('-h')) {
     console.log(`
-File Naming Convention Fixer (Path-Specific)
-============================================
+Complete File Naming & Import Path Fixer
+========================================
 
-This script converts kebab-case file names to camelCase and updates import/export statements
-using path resolution to ensure only the correct imports and exports are updated.
+This script performs COMPLETE conversion according to Architecture Guidelines:
+1. Renames ALL kebab-case files to camelCase
+2. Converts ALL kebab-case import paths to camelCase
+3. Converts ALL relative imports to @/ absolute imports (Architecture Guidelines)
 
 Key Features:
-- Path-specific import replacement (no global string replacement)
-- Handles multiple files with same name in different directories
-- Only updates imports and exports that actually point to the renamed files
-- Handles both import and re-export statements
+- Finds ALL kebab-case files recursively across entire project
+- Updates import/export statements comprehensively
+- Converts relative imports (./,../) to @/ absolute imports
+- Follows Architecture Guidelines: @/ maps to project root
+- Handles all import patterns: import, export, require, dynamic imports
 
 Usage:
   node fix-file-naming-correct.cjs [options]
@@ -335,19 +364,18 @@ Usage:
 Options:
   --dry-run     Preview changes without executing them (default)
   --execute     Execute the file renames and import updates
-  --full        Include all files (not just src/, app/, config/)
   --help, -h    Show this help message
 
 Examples:
-  node fix-file-naming-correct.cjs --dry-run         # Preview core files
-  node fix-file-naming-correct.cjs --execute         # Execute changes
+  node fix-file-naming-correct.cjs --dry-run     # Preview all changes
+  node fix-file-naming-correct.cjs --execute     # Execute complete conversion
 
-⚠️  WARNING: Always run --dry-run first and review the changes!
+⚠️  WARNING: This will make comprehensive changes to follow Architecture Guidelines!
+⚠️  Always run --dry-run first and commit your changes before --execute!
 `);
     return;
   }
   
-  const focusedMode = !args.includes('--full');
   
   if (args.includes('--execute')) {
     const readline = require('readline');
@@ -361,13 +389,13 @@ Examples:
     rl.question('\nDo you want to continue? (y/N): ', (answer) => {
       rl.close();
       if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
-        execute(rootDir, focusedMode);
+        execute(rootDir);
       } else {
         console.log('Operation cancelled.');
       }
     });
   } else {
-    dryRun(rootDir, focusedMode);
+    dryRun(rootDir);
   }
 }
 
@@ -380,6 +408,7 @@ module.exports = {
   convertFileName,
   findKebabCaseFiles,
   createFileMapping,
+  createImportMapping,
   updateImportsInFile,
   updateImports,
   dryRun,

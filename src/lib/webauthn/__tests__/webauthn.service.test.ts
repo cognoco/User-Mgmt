@@ -26,7 +26,7 @@ import {
   verifyRegistration,
   generateAuthentication,
   verifyAuthentication,
-} from '../webauthn.service';
+} from '@/src/lib/webauthn/webauthn.service'730;
 import {
   setTableMockData,
   resetSupabaseMock,

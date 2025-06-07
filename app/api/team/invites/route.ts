@@ -16,7 +16,7 @@ import type { RouteAuthContext } from '@/middleware/auth';
 import {
   createTeamNotFoundError,
   createTeamMemberAlreadyExistsError
-} from '@/lib/api/team/error-handler';
+} from '@/lib/api/team/errorHandler'595;
 
 const inviteSchema = z.object({
   email: z.string().email(),

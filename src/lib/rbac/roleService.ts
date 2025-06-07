@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/database/prisma';
-import { Permission, RoleType, RoleDefinition } from './roles';
+import { Permission, RoleType, RoleDefinition } from '@/src/lib/rbac/roles'49;
 import { TeamRole } from '@prisma/client';
 
 /**

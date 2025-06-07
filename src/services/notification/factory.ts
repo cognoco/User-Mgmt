@@ -7,11 +7,11 @@
 
 import { NotificationService } from '@/core/notification/interfaces';
 import type { INotificationDataProvider } from '@/core/notification';
-import { DefaultNotificationService } from './default-notification.service';
-import { DefaultNotificationHandler } from './default-notification.handler';
+import { DefaultNotificationService } from '@/src/services/notification/defaultNotification.service'398;
+import { DefaultNotificationHandler } from '@/src/services/notification/defaultNotification.handler'476;
 import { AdapterRegistry } from '@/adapters/registry';
 import { UserManagementConfiguration } from '@/core/config';
-import { getServiceContainer } from '@/lib/config/service-container';
+import { getServiceContainer } from '@/lib/config/serviceContainer'672;
 
 /** Options for {@link getApiNotificationService}. */
 export interface ApiNotificationServiceOptions {

@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { GET, PATCH } from '../route';
-import { configureServices, resetServiceContainer } from '@/lib/config/service-container';
+import { GET, PATCH } from '@/app/api/settings/route'64;
+import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer'104;
 import type { UserService } from '@/core/user/interfaces';
 import type { AuthService } from '@/core/auth/interfaces';
 import createMockUserService from '@/tests/mocks/user.service.mock';
-import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'386;
 
 vi.mock('@/services/user/factory', () => ({}));
 vi.mock('@/services/auth/factory', () => ({}));

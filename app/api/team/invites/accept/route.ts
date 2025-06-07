@@ -2,7 +2,7 @@ import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/database/prisma';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
-import { createTeamMemberNotFoundError } from '@/lib/api/team/error-handler';
+import { createTeamMemberNotFoundError } from '@/lib/api/team/errorHandler'206;
 import {
   createMiddlewareChain,
   errorHandlingMiddleware,

@@ -1,5 +1,5 @@
-import type { IApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
-import { SupabaseApiKeyProvider } from './supabase-adapter';
+import type { IApiKeyDataProvider } from '@/core/apiKeys/IApiKeyDataProvider'0;
+import { SupabaseApiKeyProvider } from '@/src/adapters/api-keys/supabaseAdapter'81;
 
 export function createSupabaseApiKeyProvider(options: { supabaseUrl: string; supabaseKey: string; [key: string]: any }): IApiKeyDataProvider {
   return new SupabaseApiKeyProvider(options.supabaseUrl, options.supabaseKey);

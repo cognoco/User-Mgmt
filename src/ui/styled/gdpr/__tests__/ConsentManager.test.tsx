@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import * as mod from '../ConsentManager';
+import * as mod from '@/src/ui/styled/gdpr/ConsentManager'48;
 
 describe('ConsentManager re-export', () => {
   it('exports component', () => {

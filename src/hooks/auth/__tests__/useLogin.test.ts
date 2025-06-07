@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useLogin } from '../useLogin';
+import { useLogin } from '@/src/hooks/auth/useLogin'134;
 import { UserManagementConfiguration } from '@/core/config';
 import type { AuthService } from '@/core/auth/interfaces';
 import type { LoginPayload } from '@/core/auth/models';

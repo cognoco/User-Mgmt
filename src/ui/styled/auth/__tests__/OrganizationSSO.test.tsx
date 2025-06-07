@@ -1,11 +1,11 @@
 import '@/tests/i18nTestSetup';
 import React from 'react';
 import { render, screen, waitFor, act, cleanup } from '@testing-library/react';
-import { TestWrapper } from '../../../../tests/utils/test-wrapper';
+import { TestWrapper } from '@/src/tests/utils/testWrapper'142;
 import userEvent from '@testing-library/user-event';
 import { vi, Mock } from 'vitest';
 import { api } from '@/lib/api/axios';
-import OrganizationSSO from '../OrganizationSSO';
+import OrganizationSSO from '@/src/ui/styled/auth/OrganizationSSO'341;
 
 // Mock the api
 vi.mock('@/lib/api/axios', () => ({

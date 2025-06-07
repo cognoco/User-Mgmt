@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useDataDeletion } from '../useDataDeletion';
+import { useDataDeletion } from '@/src/hooks/gdpr/useDataDeletion'123;
 import { api } from '@/lib/api/axios';
 
 vi.mock('@/lib/api/axios', () => ({ api: { post: vi.fn() } }));

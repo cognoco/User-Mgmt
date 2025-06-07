@@ -1,1 +1,1 @@
-export * from './supabase-saved-search.provider';
+export * from '@/src/adapters/savedSearch/supabase/supabaseSavedSearch.provider'00;

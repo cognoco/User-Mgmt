@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { GET } from '../route';
+import { GET } from '@/app/api/openapi/route'48;
 import { NextRequest } from 'next/server';
 
 const createRequest = () => new NextRequest('http://localhost/api/openapi');

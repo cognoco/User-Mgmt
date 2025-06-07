@@ -28,9 +28,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/ui/primitives/dropdown-menu';
+} from '@/ui/primitives/dropdownMenu'761;
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/ui/primitives/dialog';
-import { ScrollArea } from '@/ui/primitives/scroll-area';
+import { ScrollArea } from '@/ui/primitives/scrollArea'1022;
 import { HeadlessAuditLogViewer } from '@/ui/headless/audit/AuditLogViewer';
 
 interface AuditLog {

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '../route';
+import { POST } from '@/app/api/storage/upload/route'64;
 import { getStorageService } from '@/services/storage';
-import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'155;
 
 vi.mock('@/services/storage', () => ({ getStorageService: vi.fn() }));
 vi.mock('@/lib/auth/utils', () => ({

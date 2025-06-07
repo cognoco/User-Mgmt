@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { OAuthProvider } from '@/types/oauth';
-import { createApiHandler } from '@/lib/api/route-helpers';
+import { createApiHandler } from '@/lib/api/routeHelpers'74;
 import {
   createSuccessResponse,
   ApiError,

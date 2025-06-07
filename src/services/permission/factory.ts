@@ -7,9 +7,9 @@
 
 import { PermissionService } from "@/core/permission/interfaces";
 import type { IPermissionDataProvider } from "@/core/permission/IPermissionDataProvider";
-import { DefaultPermissionService } from "./default-permission.service";
+import { DefaultPermissionService } from "@/src/services/permission/defaultPermission.service"408;
 import { AdapterRegistry } from "@/adapters/registry";
-import { getServiceContainer } from "@/lib/config/service-container";
+import { getServiceContainer } from "@/lib/config/serviceContainer"538;
 
 export interface ApiPermissionServiceOptions {
   /**

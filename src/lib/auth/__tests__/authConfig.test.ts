@@ -29,7 +29,7 @@ describe('authConfig', () => {
       })),
     }));
 
-    const mod = await import('../authConfig');
+    const mod = await import('@/src/lib/auth/authConfig');
     const session = await mod.auth();
     expect(session).toEqual({ id: '1' });
   });
@@ -49,7 +49,7 @@ describe('authConfig', () => {
       })),
     }));
 
-    const mod = await import('../authConfig');
+    const mod = await import('@/src/lib/auth/authConfig');
     const session = await mod.auth();
     expect(session).toBeNull();
   });
@@ -65,7 +65,7 @@ describe('authConfig', () => {
       })),
     }));
 
-    const mod = await import('../authConfig');
+    const mod = await import('@/src/lib/auth/authConfig');
     expect(mod.supabaseAuthConfig.legacySessionCookie).toBe('legacy-name');
   });
 });

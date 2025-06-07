@@ -1,5 +1,5 @@
 import type { IOAuthDataProvider } from '@/core/oauth/IOAuthDataProvider';
-import { SupabaseOAuthProvider } from './supabase/supabase-oauth.provider';
+import { SupabaseOAuthProvider } from '@/src/adapters/oauth/supabase/supabaseOauth.provider'76;
 
 export function createSupabaseOAuthProvider(options: {
   supabaseUrl: string;

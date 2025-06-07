@@ -21,7 +21,7 @@ beforeEach(async () => {
 describe('getUser', () => {
   it('returns mock user in development', async () => {
     vi.stubEnv('NODE_ENV', 'development');
-    const { getUser } = await import('../getUser');
+    const { getUser } = await import('@/src/lib/auth/getUser');
     const user = await getUser();
     expect(user?.id).toBe('mock-user-id');
   });
@@ -29,7 +29,7 @@ describe('getUser', () => {
   it('returns user from auth service and caches result', async () => {
     const mockUser = { id: '1', email: 'a@test.com' } as any;
     mockService.getCurrentUser.mockResolvedValue(mockUser);
-    const { getUser } = await import('../getUser');
+    const { getUser } = await import('@/src/lib/auth/getUser');
     const first = await getUser();
     const second = await getUser();
     expect(first).toEqual(mockUser);
@@ -39,7 +39,7 @@ describe('getUser', () => {
 
   it('handles errors and returns null', async () => {
     mockService.getCurrentUser.mockRejectedValue(new Error('fail'));
-    const { getUser } = await import('../getUser');
+    const { getUser } = await import('@/src/lib/auth/getUser');
     const user = await getUser();
     expect(user).toBeNull();
   });

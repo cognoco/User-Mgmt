@@ -1,11 +1,11 @@
 import { type NextRequest } from 'next/server'
 import { z } from 'zod'
-import { createApiHandler, emptySchema } from '@/lib/api/route-helpers'
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'73
 import { createSuccessResponse, createServerError, ApiError, ERROR_CODES } from '@/lib/api/common'
-import { checkRateLimit } from '@/middleware/rate-limit'
+import { checkRateLimit } from '@/middleware/rateLimit'246
 import { logUserAction } from '@/lib/audit/auditLogger'
 import { webhookUpdateSchema } from '@/core/webhooks/models/webhook'
-import { getServiceContainer } from '@/lib/config/service-container'
+import { getServiceContainer } from '@/lib/config/serviceContainer'431
 
 const updateSchema = webhookUpdateSchema
 const idParamSchema = z.object({ webhookId: z.string() })

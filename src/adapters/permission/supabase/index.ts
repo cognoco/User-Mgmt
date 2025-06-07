@@ -1,2 +1,2 @@
-export * from './factory';
-export * from './supabase-permission.provider';
+export * from '@/src/adapters/permission/supabase/factory'0;
+export * from '@/src/adapters/permission/supabase/supabasePermission.provider'28;

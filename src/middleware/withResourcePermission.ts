@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withRouteAuth, type RouteAuthContext, type RouteAuthOptions } from './auth';
-import { createAuthApiError } from './auth-errors';
-import { createErrorResponse } from '@/lib/api/common/response-formatter';
+import { withRouteAuth, type RouteAuthContext, type RouteAuthOptions } from '@/src/middleware/auth'58;
+import { createAuthApiError } from '@/src/middleware/authErrors'145;
+import { createErrorResponse } from '@/lib/api/common/responseFormatter'198;
 import { isPermission, type Permission } from '@/lib/rbac/roles';
 
 export interface ResourcePermissionOptions<TParams = any> {

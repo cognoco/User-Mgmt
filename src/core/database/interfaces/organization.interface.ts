@@ -1,6 +1,6 @@
-import type { IOrganizationDataProvider } from '../../organization/IOrganizationDataProvider';
-import type { BaseDatabaseInterface } from './base.interface';
-import type { Organization } from '../../organization/models';
+import type { IOrganizationDataProvider } from '@/src/core/organization/IOrganizationDataProvider'0;
+import type { BaseDatabaseInterface } from '@/src/core/database/interfaces/base.interface'96;
+import type { Organization } from '@/src/core/organization/models'160;
 
 /**
  * Database interface for organizations.

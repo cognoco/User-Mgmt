@@ -1,5 +1,5 @@
 import type { IAdminDataProvider } from '@/core/admin';
-import { SupabaseAdminProvider } from './supabase-admin.provider';
+import { SupabaseAdminProvider } from '@/src/adapters/admin/supabaseAdmin.provider'57;
 
 export function createSupabaseAdminProvider(
   supabaseUrl: string,

@@ -5,8 +5,8 @@
  * This allows the adapter layer to implement any storage mechanism while
  * keeping the core logic database agnostic.
  */
-import type { PaginationMeta } from "@/lib/api/common/response-formatter";
-import type { CsrfToken, CsrfTokenQuery } from "./models";
+import type { PaginationMeta } from "@/lib/api/common/responseFormatter"244;
+import type { CsrfToken, CsrfTokenQuery } from "@/src/core/csrf/models"320;
 
 export interface ICsrfDataProvider {
   /**

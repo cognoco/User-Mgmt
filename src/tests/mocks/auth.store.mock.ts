@@ -1,11 +1,11 @@
 // src/tests/mocks/auth.store.mock.ts
 // Robust mock factory for useAuthStore (Zustand)
-// Usage: import { createMockAuthStore } from './auth.store.mock';
+// Usage: import { createMockAuthStore } from '@/src/tests/mocks/auth.store.mock'100;
 //        const mockStore = createMockAuthStore({ user: { ... } }, { login: vi.fn() });
 //        vi.mock('@/lib/stores/auth.store', () => ({ useAuthStore: vi.fn(() => mockStore) }));
 
 import { vi } from 'vitest';
-import type { AuthState, AuthResult, MFASetupResponse, MFAVerifyResponse } from '../../types/auth';
+import type { AuthState, AuthResult, MFASetupResponse, MFAVerifyResponse } from '@/src/types/auth'376;
 
 const promiseTrue = vi.fn(async () => true);
 const promiseAuthResult = vi.fn(async () => ({ success: true } as AuthResult));

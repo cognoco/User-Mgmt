@@ -1,8 +1,8 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { createApiHandler } from '@/lib/api/route-helpers';
+import { createApiHandler } from '@/lib/api/routeHelpers'75;
 import { createSuccessResponse } from '@/lib/api/common';
-import { permissionCheckCache } from '@/lib/auth/permission-cache';
+import { permissionCheckCache } from '@/lib/auth/permissionCache'195;
 import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 
 const CheckSchema = z.object({

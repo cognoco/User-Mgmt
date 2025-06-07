@@ -5,8 +5,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { usePermission, withPermission } from '@/hooks/permission/usePermissions';
 import { checkRolePermission } from '@/lib/rbac/roleService';
 import { render } from '@testing-library/react';
-import { TestWrapper } from '../../../tests/utils/test-wrapper';
-import { setupTestServices } from '../../../tests/utils/test-service-setup';
+import { TestWrapper } from '@/src/tests/utils/testWrapper'448;
+import { setupTestServices } from '@/src/tests/utils/testServiceSetup'514;
 
 // Mocks
 vi.mock('@/hooks/auth/useAuth', () => ({

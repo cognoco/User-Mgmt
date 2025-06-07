@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET, PATCH, DELETE } from '../route';
+import { GET, PATCH, DELETE } from '@/app/api/team/[teamId]/route'108;
 import { getApiTeamService } from '@/services/team/factory';
 import { withRouteAuth } from '@/middleware/auth';
 

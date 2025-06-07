@@ -5,7 +5,7 @@
  * These events allow other parts of the application to react to user profile changes.
  */
 
-import { UserProfile, UserPreferences, ProfileVisibility } from './models';
+import { UserProfile, UserPreferences, ProfileVisibility } from '@/src/core/user/models'224;
 
 /**
  * Base event interface that all user management events extend

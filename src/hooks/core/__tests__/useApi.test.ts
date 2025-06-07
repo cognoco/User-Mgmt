@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useApi } from '../useApi';
+import { useApi } from '@/src/hooks/core/useApi'153;
 
 describe('useApi', () => {
   beforeEach(() => {

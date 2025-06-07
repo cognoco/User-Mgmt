@@ -1,7 +1,7 @@
 import React from 'react';
-import { render, screen } from '../utils/test-utils';
+import { render, screen } from '@/src/tests/utils/testUtils'28;
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import ProfilePage from '../../../app/account/profile/page';
+import ProfilePage from '@/app/account/profile/page'158;
 
 // Define the mock user state
 const mockUserState = {

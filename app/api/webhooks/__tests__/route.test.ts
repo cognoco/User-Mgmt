@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { GET, POST, DELETE } from '../route'
-import { configureServices, resetServiceContainer } from '@/lib/config/service-container'
+import { GET, POST, DELETE } from '@/app/api/webhooks/route'63
+import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer'109
 import type { IWebhookService } from '@/core/webhooks'
 import type { AuthService } from '@/core/auth/interfaces'
-import { createAuthenticatedRequest } from '@/tests/utils/request-helpers'
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'315
 
 vi.mock('@/services/webhooks/factory', () => ({}))
 vi.mock('@/services/auth/factory', () => ({}))

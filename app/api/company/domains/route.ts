@@ -8,7 +8,7 @@ import {
   rateLimitMiddleware,
   validationMiddleware,
 } from "@/middleware/createMiddlewareChain";
-import { withSecurity } from "@/middleware/with-security";
+import { withSecurity } from "@/middleware/withSecurity"369;
 import { z } from "zod";
 
 // Validation schema for adding a new domain

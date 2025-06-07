@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '../route';
+import { POST } from '@/app/api/auth/update-password/route'64;
 import { getApiAuthService } from '@/services/auth/factory';
-import { createRateLimit } from '@/middleware/rate-limit';
-import { withSecurity } from '@/middleware/with-security';
+import { createRateLimit } from '@/middleware/rateLimit'160;
+import { withSecurity } from '@/middleware/withSecurity'220;
 import { ERROR_CODES } from '@/lib/api/common';
 
 vi.mock('@/services/auth/factory', () => ({ getApiAuthService: vi.fn() }));

@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-import { GET, POST, DELETE, PATCH } from '../route';
+import { GET, POST, DELETE, PATCH } from '@/app/api/company/domains/route'66;
 import { getApiCompanyService } from '@/services/company/factory';
-import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'188;
 
 vi.mock('@/services/company/factory', () => ({ getApiCompanyService: vi.fn() }));
 vi.mock('@/middleware/rate-limit', () => ({ checkRateLimit: vi.fn().mockResolvedValue(false) }));

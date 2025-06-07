@@ -1,5 +1,5 @@
 import React from 'react';
-import { TeamList as HeadlessTeamList, TeamListProps } from '../../headless/team/TeamList';
+import { TeamList as HeadlessTeamList, TeamListProps } from '@/src/ui/headless/team/TeamList'28;
 import { Input } from '@/ui/primitives/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Button } from '@/ui/primitives/button';

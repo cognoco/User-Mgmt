@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createApiHandler } from '@/lib/api/route-helpers';
+import { createApiHandler } from '@/lib/api/routeHelpers'26;
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import { TwoFactorMethod } from '@/types/2fa';
 

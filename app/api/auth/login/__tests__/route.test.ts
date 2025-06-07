@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { POST } from '../route';
+import { POST } from '@/app/api/auth/login/route'122;
 import { ERROR_CODES } from '@/lib/api/common';
 
 // Mock the service container to avoid circular dependencies
@@ -42,7 +42,7 @@ describe('POST /api/auth/login', () => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
     
     // Mock the service container to return our mock services
-    const { getServiceContainer } = await import('@/lib/config/service-container');
+    const { getServiceContainer } = await import('@/lib/config/serviceContainer');
     (getServiceContainer as any).mockReturnValue(mockServices);
     
     // Set up default successful login response

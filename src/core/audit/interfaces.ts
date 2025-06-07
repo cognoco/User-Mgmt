@@ -1,4 +1,4 @@
-import type { AuditLogEntry, AuditLogQuery } from "./models";
+import type { AuditLogEntry, AuditLogQuery } from "@/src/core/audit/models"0;
 
 /**
  * High level audit logging service.

@@ -17,7 +17,7 @@ vi.mock('@/hooks/address/useAddresses', () => ({
   })
 }));
 
-import AddressManagementPage from '../page';
+import AddressManagementPage from '@/app/settings/addresses/page'661;
 
 describe('AddressManagementPage', () => {
   it('renders address list', () => {

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { UpgradeToBusinessFlow } from '@/ui/styled/auth/UpgradeToBusinessFlow';
 import { api } from '@/lib/api';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { useNotificationStore } from '@/lib/stores/notification-store';
+import { useNotificationStore } from '@/lib/stores/notificationStore'351;
 
 // Mock API calls
 vi.mock('@/lib/api', () => ({

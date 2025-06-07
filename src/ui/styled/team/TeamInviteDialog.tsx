@@ -10,11 +10,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../../../components/ui/dialog';
-import { Button } from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
-import { Label } from '../../../components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
+} from '@/src/components/ui/dialog'263;
+import { Button } from '@/src/components/ui/button'433;
+import { Input } from '@/src/components/ui/input'490;
+import { Label } from '@/src/components/ui/label'545;
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/components/ui/select'600;
 import { UserPlus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 

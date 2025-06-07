@@ -1,9 +1,9 @@
 import React from 'react';
 import { PermissionAuditDashboard as Headless } from '@/ui/headless/audit/PermissionAuditDashboard';
-import { PermissionLogTimeline } from './PermissionLogTimeline';
-import { PermissionHistoryView } from './PermissionHistoryView';
-import { PermissionDiffViewer } from './PermissionDiffViewer';
-import { PermissionSummary } from './PermissionSummary';
+import { PermissionLogTimeline } from '@/src/ui/styled/audit/PermissionLogTimeline'130;
+import { PermissionHistoryView } from '@/src/ui/styled/audit/PermissionHistoryView'196;
+import { PermissionDiffViewer } from '@/src/ui/styled/audit/PermissionDiffViewer'262;
+import { PermissionSummary } from '@/src/ui/styled/audit/PermissionSummary'326;
 import type { PermissionAuditDashboardProps } from '@/ui/headless/audit/PermissionAuditDashboard';
 
 export function PermissionAuditDashboard(props: Omit<PermissionAuditDashboardProps, 'children'>) {

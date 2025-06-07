@@ -1,5 +1,5 @@
-import type { ITwoFactorDataProvider } from '@/core/two-factor/ITwoFactorDataProvider';
-import { SupabaseTwoFactorProvider } from './supabase/supabase-two-factor.provider';
+import type { ITwoFactorDataProvider } from '@/core/twoFactor/ITwoFactorDataProvider'0;
+import { SupabaseTwoFactorProvider } from '@/src/adapters/two-factor/supabase/supabaseTwoFactor.provider'89;
 
 export function createSupabaseTwoFactorProvider(options: {
   supabaseUrl: string;

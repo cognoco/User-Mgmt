@@ -2,9 +2,9 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import Profile from '../Profile';
-import { TestWrapper } from '../../../../tests/utils/test-wrapper';
-import { setupTestServices } from '../../../../tests/utils/test-service-setup';
+import Profile from '@/src/ui/styled/user/Profile'190;
+import { TestWrapper } from '@/src/tests/utils/testWrapper'225;
+import { setupTestServices } from '@/src/tests/utils/testServiceSetup'294;
 import '@/tests/i18nTestSetup';
 
 let mockUserService: any;

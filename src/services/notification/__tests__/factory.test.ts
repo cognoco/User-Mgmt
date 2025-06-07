@@ -1,23 +1,23 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 let AdapterRegistry: typeof import('@/adapters/registry').AdapterRegistry;
 let UserManagementConfiguration: typeof import('@/core/config').UserManagementConfiguration;
-let configureServices: typeof import('@/lib/config/service-container').configureServices;
-let resetServiceContainer: typeof import('@/lib/config/service-container').resetServiceContainer;
+let configureServices: typeof import('@/lib/config/serviceContainer').configureServices;
+let resetServiceContainer: typeof import('@/lib/config/serviceContainer').resetServiceContainer;
 
-let getApiNotificationService: typeof import('../factory').getApiNotificationService;
-let DefaultNotificationService: typeof import('../default-notification.service').DefaultNotificationService;
+let getApiNotificationService: typeof import('@/src/services/notification/factory').getApiNotificationService;
+let DefaultNotificationService: typeof import('@/src/services/notification/defaultNotification.service').DefaultNotificationService;
 
 describe('getApiNotificationService', () => {
   beforeEach(async () => {
     vi.resetModules();
     ({ AdapterRegistry } = await import('@/adapters/registry'));
     ({ UserManagementConfiguration } = await import('@/core/config'));
-    ({ configureServices, resetServiceContainer } = await import('@/lib/config/service-container'));
+    ({ configureServices, resetServiceContainer } = await import('@/lib/config/serviceContainer'));
     (AdapterRegistry as any).instance = null;
     UserManagementConfiguration.reset();
     resetServiceContainer();
-    ({ getApiNotificationService } = await import('../factory'));
-    ({ DefaultNotificationService } = await import('../default-notification.service'));
+    ({ getApiNotificationService } = await import('@/src/services/notification/factory'));
+    ({ DefaultNotificationService } = await import('@/src/services/notification/defaultNotification.service'));
   });
 
   it('returns configured service if registered', () => {

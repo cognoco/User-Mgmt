@@ -5,8 +5,8 @@
  * and reset functionality for tests.
  */
 import { UserManagementConfiguration } from '@/core/config';
-import { DefaultCompanyService, type CompanyService } from './companyService';
-import { getServiceContainer } from '@/lib/config/service-container';
+import { DefaultCompanyService, type CompanyService } from '@/src/services/company/companyService'239;
+import { getServiceContainer } from '@/lib/config/serviceContainer'319;
 
 /** Options for {@link getApiCompanyService}. */
 export interface ApiCompanyServiceOptions {

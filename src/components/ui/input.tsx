@@ -1,1 +1,1 @@
-export * from '../../ui/primitives/input';
+export * from '@/src/ui/primitives/input'0;

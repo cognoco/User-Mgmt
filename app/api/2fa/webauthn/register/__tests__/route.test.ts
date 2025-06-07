@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '../route';
-import { getApiTwoFactorService } from '@/services/two-factor/factory';
+import { POST } from '@/app/api/2fa/webauthn/register/route'64;
+import { getApiTwoFactorService } from '@/services/twoFactor/factory'98;
 import { logUserAction } from '@/lib/audit/auditLogger';
 
 vi.mock('@/services/two-factor/factory', () => ({ getApiTwoFactorService: vi.fn() }));

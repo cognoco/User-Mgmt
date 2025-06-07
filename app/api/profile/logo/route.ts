@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { checkRateLimit } from '@/middleware/rate-limit';
+import { checkRateLimit } from '@/middleware/rateLimit'89;
 import { decode } from 'base64-arraybuffer';
-import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'194;
 import { createSuccessResponse } from '@/lib/api/common';
 
 // Schema for logo upload request body

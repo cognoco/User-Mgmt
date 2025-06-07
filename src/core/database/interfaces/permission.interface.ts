@@ -1,6 +1,6 @@
-import type { IPermissionDataProvider } from '../../permission/IPermissionDataProvider';
-import type { BaseDatabaseInterface } from './base.interface';
-import type { RoleWithPermissions } from '../../permission/models';
+import type { IPermissionDataProvider } from '@/src/core/permission/IPermissionDataProvider'0;
+import type { BaseDatabaseInterface } from '@/src/core/database/interfaces/base.interface'90;
+import type { RoleWithPermissions } from '@/src/core/permission/models'154;
 
 /**
  * Database interface for permissions and roles.

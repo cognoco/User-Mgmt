@@ -2,16 +2,16 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AdapterRegistry } from '@/adapters/registry';
 import { UserManagementConfiguration } from '@/core/config';
 
-let getApiConsentService: typeof import('../factory').getApiConsentService;
-let DefaultConsentService: typeof import('../default-consent.service').DefaultConsentService;
+let getApiConsentService: typeof import('@/src/services/consent/factory').getApiConsentService;
+let DefaultConsentService: typeof import('@/src/services/consent/defaultConsent.service').DefaultConsentService;
 
 describe('getApiConsentService', () => {
   beforeEach(async () => {
     vi.resetModules();
     (AdapterRegistry as any).instance = null;
     UserManagementConfiguration.reset();
-    ({ getApiConsentService } = await import('../factory'));
-    ({ DefaultConsentService } = await import('../default-consent.service'));
+    ({ getApiConsentService } = await import('@/src/services/consent/factory'));
+    ({ DefaultConsentService } = await import('@/src/services/consent/defaultConsent.service'));
   });
 
   it('returns configured service if registered', () => {

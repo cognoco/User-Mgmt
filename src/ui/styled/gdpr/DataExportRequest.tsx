@@ -2,7 +2,7 @@
 
 import { Button } from "@/ui/primitives/button";
 import { Alert, AlertDescription } from "@/ui/primitives/alert";
-import { DataExportRequest as HeadlessDataExportRequest } from "../../headless/gdpr/DataExportRequest";
+import { DataExportRequest as HeadlessDataExportRequest } from "@/src/ui/headless/gdpr/DataExportRequest"133;
 
 export function DataExportRequest() {
   return (

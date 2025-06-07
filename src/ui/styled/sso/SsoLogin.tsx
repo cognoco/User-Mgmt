@@ -1,7 +1,7 @@
 import React from 'react';
 import type { SsoProvider } from '@/types/sso';
 import { SsoLogin as HeadlessLogin } from '@/ui/headless/sso/SsoLogin';
-import { SsoProviderButton } from './SsoProviderButton';
+import { SsoProviderButton } from '@/src/ui/styled/sso/SsoProviderButton'150;
 
 export interface StyledSsoLoginProps {
   providers: SsoProvider[];

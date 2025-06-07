@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET } from '../route';
+import { GET } from '@/app/api/roles/[roleId]/hierarchy/info/route'64;
 
 const mockService = {
   getAncestorRoles: vi.fn(),

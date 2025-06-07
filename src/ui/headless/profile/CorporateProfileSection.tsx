@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Company, companySchema, UserType } from '@/types/user-type';
+import { Company, companySchema, UserType } from '@/types/userType'299;
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 
 export interface CorporateProfileSectionProps {

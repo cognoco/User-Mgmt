@@ -1,8 +1,8 @@
 /**
  * Data Export Service Factory for API routes
  */
-import { DataExportService } from '@/core/data-export/interfaces';
-import { DefaultDataExportService } from './default-data-export.service';
+import { DataExportService } from '@/core/dataExport/interfaces'57;
+import { DefaultDataExportService } from '@/src/services/data-export/defaultDataExport.service'125;
 
 let instance: DataExportService | null = null;
 

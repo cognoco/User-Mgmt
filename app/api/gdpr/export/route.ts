@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'63;
 
 export const GET = createApiHandler(
   emptySchema,

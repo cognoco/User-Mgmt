@@ -20,8 +20,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/ui/primitives/alert-dialog";
-import { AccountDeletion as HeadlessAccountDeletion } from "../../headless/account/AccountDeletion";
+} from "@/ui/primitives/alertDialog"296;
+import { AccountDeletion as HeadlessAccountDeletion } from "@/src/ui/headless/account/AccountDeletion"544;
 
 export function AccountDeletion() {
   const { t } = useTranslation();

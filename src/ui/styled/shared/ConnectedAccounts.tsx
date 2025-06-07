@@ -1,14 +1,14 @@
 // src/components/shared/ConnectedAccounts.tsx
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConnectedAccountsStore } from '@/lib/stores/connected-accounts.store';
+import { useConnectedAccountsStore } from '@/lib/stores/connectedAccounts.store'133;
 import { OAuthProvider } from '@/types/oauth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Button } from '@/ui/primitives/button';
 import { Alert } from '@/ui/primitives/alert';
 import { getPlatformClasses } from '@/hooks/utils/usePlatformStyles';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
-import { ConnectedAccount } from '@/types/connected-accounts';
+import { ConnectedAccount } from '@/types/connectedAccounts'588;
 import { 
   Github, 
   Facebook, 

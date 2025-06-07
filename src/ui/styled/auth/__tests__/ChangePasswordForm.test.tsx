@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { ChangePasswordForm } from '../ChangePasswordForm';
+import { ChangePasswordForm } from '@/src/ui/styled/auth/ChangePasswordForm'176;
 
 let formState: any;
 

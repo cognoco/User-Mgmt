@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
-import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'71;
 import {
   createSuccessResponse,
   ApiError,
@@ -8,7 +8,7 @@ import {
 } from '@/lib/api/common';
 import {
   createTeamNotFoundError
-} from '@/lib/api/team/error-handler';
+} from '@/lib/api/team/errorHandler'237;
 import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 
 const UpdateTeamSchema = z.object({

@@ -27,7 +27,7 @@ import {
   deserializeError,
   createError,
 } from "..";
-import { SERVER_ERROR, AUTH_ERROR } from "../error-codes";
+import { SERVER_ERROR, AUTH_ERROR } from "@/src/core/common/errorCodes"651;
 
 describe("ApplicationError hierarchy", () => {
   it("preserves inheritance and properties", () => {

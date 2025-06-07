@@ -5,8 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { Shield, ShieldAlert, ShieldCheck, KeyRound } from 'lucide-react';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { TwoFactorSetup } from './TwoFactorSetup';
-import { BackupCodesDisplay } from './BackupCodesDisplay';
+import { TwoFactorSetup } from '@/src/ui/styled/auth/TwoFactorSetup'424;
+import { BackupCodesDisplay } from '@/src/ui/styled/auth/BackupCodesDisplay'476;
 import { Dialog, DialogContent } from '@/ui/primitives/dialog';
 import { MFAManagementSection as HeadlessMFAManagementSection, type MFAMethod } from '@/ui/headless/auth/MFAManagementSection';
 

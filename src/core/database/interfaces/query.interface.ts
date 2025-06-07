@@ -12,7 +12,7 @@ import type {
   SortOption,
   PaginationParams,
   QueryResult
-} from './index';
+} from '@/src/core/database/interfaces/index'292;
 
 export interface QueryBuilder<T> {
   /** Apply a filter condition */

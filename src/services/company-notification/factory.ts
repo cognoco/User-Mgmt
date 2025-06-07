@@ -1,6 +1,6 @@
-import { DefaultCompanyNotificationService } from './default-company-notification.service';
-import type { CompanyNotificationService } from '@/core/company-notification/interfaces';
-import { getServiceContainer } from '@/lib/config/service-container';
+import { DefaultCompanyNotificationService } from '@/src/services/company-notification/defaultCompanyNotification.service'0;
+import type { CompanyNotificationService } from '@/core/companyNotification/interfaces'93;
+import { getServiceContainer } from '@/lib/config/serviceContainer'184;
 
 export interface ApiCompanyNotificationServiceOptions {
   reset?: boolean;

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
-import { TwoFactorState, TwoFactorMethod, TwoFactorVerification } from '../../types/2fa';
+import { TwoFactorState, TwoFactorMethod, TwoFactorVerification } from '@/src/types/2fa'75;
 
 export const use2FAStore = create<TwoFactorState>((set) => ({
   config: {

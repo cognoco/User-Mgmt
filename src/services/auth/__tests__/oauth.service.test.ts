@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { DefaultAuthService } from '../default-auth.service';
-import type { OAuthDataProvider } from '@/adapters/auth/providers/oauth-provider';
+import { DefaultAuthService } from '@/src/services/auth/defaultAuth.service'52;
+import type { OAuthDataProvider } from '@/adapters/auth/providers/oauthProvider'115;
 import { OAuthProvider } from '@/types/oauth';
 
 function createProvider(): OAuthDataProvider {

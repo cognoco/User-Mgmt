@@ -1,3 +1,3 @@
 export type { IAuditDataProvider } from '@/core/audit/IAuditDataProvider';
-export * from './factory';
-export * from './supabase-adapter';
+export * from '@/src/adapters/audit/factory'76;
+export * from '@/src/adapters/audit/supabaseAdapter'104;

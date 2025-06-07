@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AdapterRegistry } from '@/adapters/registry';
 import { UserManagementConfiguration } from '@/core/config';
-import { configureServices, resetServiceContainer } from '@/lib/config/service-container';
+import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer'182;
 
-let getApiAuditService: typeof import('../factory').getApiAuditService;
-let DefaultAuditService: typeof import('../default-audit.service').DefaultAuditService;
+let getApiAuditService: typeof import('@/src/services/audit/factory').getApiAuditService;
+let DefaultAuditService: typeof import('@/src/services/audit/defaultAudit.service').DefaultAuditService;
 
 describe('getApiAuditService', () => {
   beforeEach(async () => {
@@ -12,8 +12,8 @@ describe('getApiAuditService', () => {
     (AdapterRegistry as any).instance = null;
     UserManagementConfiguration.reset();
     resetServiceContainer();
-    ({ getApiAuditService } = await import('../factory'));
-    ({ DefaultAuditService } = await import('../default-audit.service'));
+    ({ getApiAuditService } = await import('@/src/services/audit/factory'));
+    ({ DefaultAuditService } = await import('@/src/services/audit/defaultAudit.service'));
   });
 
   it('returns configured service if registered', () => {

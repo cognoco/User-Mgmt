@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getApiCompanyService } from '@/services/company/factory';
-import { checkRateLimit } from '@/middleware/rate-limit';
-import { createApiHandler } from '@/lib/api/route-helpers';
+import { checkRateLimit } from '@/middleware/rateLimit'157;
+import { createApiHandler } from '@/lib/api/routeHelpers'216;
 import { createSuccessResponse } from '@/lib/api/common';
 
 const ValidationRequestSchema = z.object({

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/database/prisma';
-import { GET, POST } from '../route';
+import { GET, POST } from '@/app/api/team/members/route'171;
 import { ERROR_CODES } from '@/lib/api/common';
-import { checkRateLimit } from '@/middleware/rate-limit';
+import { checkRateLimit } from '@/middleware/rateLimit'259;
 import { withRouteAuth } from '@/middleware/auth';
 
 // Mocks

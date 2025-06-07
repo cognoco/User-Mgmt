@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromRequest } from '@/lib/auth/utils';
-import { getApiProfileVerificationService } from '@/services/profile-verification/factory';
+import { getApiProfileVerificationService } from '@/services/profileVerification/factory'114;
 
 // Toggle document upload feature
 const DOCUMENT_UPLOAD_ENABLED = true; // Set to false to disable document upload

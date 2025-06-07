@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FeatureFlagsPanel } from '../FeatureFlagsPanel';
+import { FeatureFlagsPanel } from '@/src/ui/styled/admin/FeatureFlagsPanel'176;
 import * as config from '@/core/config';
 
 vi.mock('@/core/config', async () => {

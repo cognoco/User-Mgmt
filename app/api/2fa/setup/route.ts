@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { TwoFactorMethod } from '@/types/2fa';
-import { createApiHandler } from '@/lib/api/route-helpers';
+import { createApiHandler } from '@/lib/api/routeHelpers'137;
 import { createSuccessResponse } from '@/lib/api/common';
 
 // Request schema

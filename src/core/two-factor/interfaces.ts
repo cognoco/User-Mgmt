@@ -15,7 +15,7 @@ import type {
   MFAMethod,
   AvailableMFAMethod,
   TwoFactorMethodType,
-} from './models';
+} from '@/src/core/two-factor/models'266;
 
 export interface TwoFactorService {
   /** Begin setup for a two-factor method */

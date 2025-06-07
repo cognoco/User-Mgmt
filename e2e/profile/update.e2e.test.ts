@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { loginAs } from '../utils/auth';
+import { loginAs } from '@/e2e/utils/auth'56;
 import * as path from 'path';
 import fs from 'fs';
 

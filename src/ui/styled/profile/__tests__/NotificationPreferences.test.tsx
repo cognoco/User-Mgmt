@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import NotificationPreferences from '../NotificationPreferences';
+import NotificationPreferences from '@/src/ui/styled/profile/NotificationPreferences'154;
 
 // Mock fetch
 const mockFetch = vi.fn();

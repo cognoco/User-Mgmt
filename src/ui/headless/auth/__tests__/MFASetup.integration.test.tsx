@@ -2,7 +2,7 @@
 import React from "react";
 import { render, act } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { MFASetup } from '../MFASetup';
+import { MFASetup } from '@/src/ui/headless/auth/MFASetup'165;
 import { useAuth } from '@/hooks/auth/useMFA';
 
 vi.mock('@/hooks/auth/useMFA', () => ({

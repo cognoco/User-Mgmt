@@ -1,3 +1,3 @@
 export type { IOAuthDataProvider } from '@/core/oauth/IOAuthDataProvider';
-export * from './factory';
-export * from './supabase';
+export * from '@/src/adapters/oauth/factory'76;
+export * from '@/src/adapters/oauth/supabase'104;

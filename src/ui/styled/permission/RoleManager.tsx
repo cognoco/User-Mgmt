@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { RoleManager as HeadlessRoleManager, RoleManagerProps } from '../../headless/permission/RoleManager';
+import { RoleManager as HeadlessRoleManager, RoleManagerProps } from '@/src/ui/headless/permission/RoleManager'279;
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';

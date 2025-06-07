@@ -17,4 +17,4 @@ if (!supabaseAnonKey) {
 export const supabase: SupabaseClient<any, 'public'> = createClient<any, 'public'>(supabaseUrl, supabaseAnonKey);
 
 // Optional: Export the provider class if needed elsewhere, though the client instance is often sufficient
-// export { SupabaseProvider } from './providers/supabase'; 
+// export { SupabaseProvider } from '@/src/lib/database/providers/supabase'931; 

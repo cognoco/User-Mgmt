@@ -1,23 +1,23 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 let AdapterRegistry: typeof import('@/adapters/registry').AdapterRegistry;
 let UserManagementConfiguration: typeof import('@/core/config').UserManagementConfiguration;
-let configureServices: typeof import('@/lib/config/service-container').configureServices;
-let resetServiceContainer: typeof import('@/lib/config/service-container').resetServiceContainer;
+let configureServices: typeof import('@/lib/config/serviceContainer').configureServices;
+let resetServiceContainer: typeof import('@/lib/config/serviceContainer').resetServiceContainer;
 
-let getApiWebhookService: typeof import('../factory').getApiWebhookService;
-let WebhookServiceClass: typeof import('../WebhookService').WebhookService;
+let getApiWebhookService: typeof import('@/src/services/webhooks/factory').getApiWebhookService;
+let WebhookServiceClass: typeof import('@/src/services/webhooks/WebhookService').WebhookService;
 
 describe('getApiWebhookService', () => {
   beforeEach(async () => {
     vi.resetModules();
     ({ AdapterRegistry } = await import('@/adapters/registry'));
     ({ UserManagementConfiguration } = await import('@/core/config'));
-    ({ configureServices, resetServiceContainer } = await import('@/lib/config/service-container'));
+    ({ configureServices, resetServiceContainer } = await import('@/lib/config/serviceContainer'));
     (AdapterRegistry as any).instance = null;
     UserManagementConfiguration.reset();
     resetServiceContainer();
-    ({ getApiWebhookService } = await import('../factory'));
-    ({ WebhookService: WebhookServiceClass } = await import('../WebhookService'));
+    ({ getApiWebhookService } = await import('@/src/services/webhooks/factory'));
+    ({ WebhookService: WebhookServiceClass } = await import('@/src/services/webhooks/WebhookService'));
   });
 
   it('returns configured service if registered', () => {

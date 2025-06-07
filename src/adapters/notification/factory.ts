@@ -1,5 +1,5 @@
 import type { INotificationDataProvider } from '@/core/notification/INotificationDataProvider';
-import { InMemoryNotificationProvider } from './in-memory-provider';
+import { InMemoryNotificationProvider } from '@/src/adapters/notification/inMemoryProvider'97;
 
 export function createInMemoryNotificationProvider(): INotificationDataProvider {
   return new InMemoryNotificationProvider();

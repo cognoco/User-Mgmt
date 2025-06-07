@@ -8,8 +8,8 @@ import { ConsentService } from '@/core/consent/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
 import type { IConsentDataProvider } from '@/core/consent';
 import { AdapterRegistry } from '@/adapters/registry';
-import { getServiceContainer } from '@/lib/config/service-container';
-import { DefaultConsentService } from './default-consent.service';
+import { getServiceContainer } from '@/lib/config/serviceContainer'437;
+import { DefaultConsentService } from '@/src/services/consent/defaultConsent.service'508;
 
 /** Options for {@link getApiConsentService}. */
 export interface ApiConsentServiceOptions {

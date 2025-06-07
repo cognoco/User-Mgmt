@@ -18,7 +18,7 @@ vi.mock('@/hooks/session/useSession', () => ({
   })
 }));
 
-import SessionsPage from '../page';
+import SessionsPage from '@/app/settings/sessions/page'727;
 
 describe('SessionsPage', () => {
   it('renders active sessions list', () => {

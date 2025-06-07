@@ -1,5 +1,5 @@
 import type { IAuditDataProvider } from '@/core/audit/IAuditDataProvider';
-import { SupabaseAuditAdapter } from './supabase-adapter';
+import { SupabaseAuditAdapter } from '@/src/adapters/audit/supabaseAdapter'76;
 
 export function createSupabaseAuditProvider(
   supabaseUrl: string,

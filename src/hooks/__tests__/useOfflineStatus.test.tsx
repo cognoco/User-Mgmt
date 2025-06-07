@@ -1,7 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useOfflineStatus } from '../useOfflineStatus';
-import * as queueService from '@/lib/services/offline-queue.service';
+import { useOfflineStatus } from '@/src/hooks/useOfflineStatus'143;
+import * as queueService from '@/lib/services/offlineQueue.service'200;
 
 describe('useOfflineStatus', () => {
   beforeEach(() => {

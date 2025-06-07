@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { UserType, Company } from '@/types/user-type';
+import { UserType, Company } from '@/types/userType'84;
 import { Button } from '@/ui/primitives/button';
 import { Input } from '@/ui/primitives/input';
 import { Label } from '@/ui/primitives/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Separator } from '@/ui/primitives/separator';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
-import { CompanyLogoUpload } from './CompanyLogoUpload';
+import { CompanyLogoUpload } from '@/src/ui/styled/profile/CompanyLogoUpload'519;
 import HeadlessCorporateProfileSection from '@/ui/headless/profile/CorporateProfileSection';
 
 interface Props {

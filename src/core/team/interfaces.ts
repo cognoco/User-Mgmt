@@ -19,7 +19,7 @@ import {
   TeamInvitationResult,
   TeamSearchParams,
   TeamSearchResult
-} from './models';
+} from '@/src/core/team/models'260;
 
 /**
  * Core team management service interface

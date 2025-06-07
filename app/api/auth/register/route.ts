@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createApiHandler } from '@/lib/api/route-helpers';
+import { createApiHandler } from '@/lib/api/routeHelpers'26;
 import { User } from '@/core/auth/models';
 import {
   createSuccessResponse,
@@ -7,7 +7,7 @@ import {
   ApiError,
   ERROR_CODES
 } from '@/lib/api/common';
-import { createUserAlreadyExistsError } from '@/lib/api/user/error-handler';
+import { createUserAlreadyExistsError } from '@/lib/api/user/errorHandler'249;
 
 // Extended interfaces for registration that include corporate fields
 interface ExtendedRegistrationPayload {

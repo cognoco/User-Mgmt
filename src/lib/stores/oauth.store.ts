@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { OAuthProvider, OAuthState } from '@/types/oauth';
-import { useUserManagement } from '../auth/UserManagementProvider';
+import { useUserManagement } from '@/src/lib/auth/UserManagementProvider'95;
 import { api } from '@/lib/api/axios';
 import { useAuth } from '@/lib/hooks/useAuth';
 

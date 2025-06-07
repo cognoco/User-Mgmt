@@ -6,8 +6,8 @@
  */
 
 import { NotificationService, NotificationHandler } from '@/core/notification/interfaces';
-import { DefaultNotificationService } from './default-notification.service';
-import { DefaultNotificationHandler } from './default-notification.handler';
+import { DefaultNotificationService } from '@/src/services/notification/defaultNotification.service'322;
+import { DefaultNotificationHandler } from '@/src/services/notification/defaultNotification.handler'400;
 import type { NotificationDataProvider } from '@/core/notification/INotificationDataProvider';
 
 /**

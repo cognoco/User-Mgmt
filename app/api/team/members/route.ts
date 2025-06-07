@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/database/prisma';
 import { z } from 'zod';
-import { createApiHandler } from '@/lib/api/route-helpers';
+import { createApiHandler } from '@/lib/api/routeHelpers'75;
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 import { Permission } from '@/lib/rbac/roles';

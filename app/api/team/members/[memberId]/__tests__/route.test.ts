@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DELETE } from '../route';
+import { DELETE } from '@/app/api/team/members/[memberId]/route'64;
 // RESOLVED VERSION
 import { prisma } from '@/lib/database/prisma';
 import { withRouteAuth } from '@/middleware/auth';

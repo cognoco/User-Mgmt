@@ -1,4 +1,4 @@
-import type { ApiKey } from '@/core/api-keys/types';
+import type { ApiKey } from '@/core/apiKeys/types'0;
 
 export interface ApiKeyListProps {
   apiKeys: ApiKey[];

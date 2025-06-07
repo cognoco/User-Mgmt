@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
-import { supabase } from '../supabase';
+import { supabase } from '@/src/lib/supabase'75;
 import {
     ProfileState,
 } from '@/types/profile';
-import { fileToBase64 } from '@/lib/utils/file-upload';
+import { fileToBase64 } from '@/lib/utils/fileUpload'172;
 import { useAuth } from '@/lib/hooks/useAuth';
 
 import { Profile as DbProfile } from '@/types/database';

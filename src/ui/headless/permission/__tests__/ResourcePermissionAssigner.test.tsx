@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { ResourcePermissionAssigner } from '../ResourcePermissionAssigner';
+import { ResourcePermissionAssigner } from '@/src/ui/headless/permission/ResourcePermissionAssigner'141;
 import * as usePermissionsHook from '@/hooks/permission/usePermissions';
 import * as useHierarchyHook from '@/hooks/resource/useResourceHierarchy';
 

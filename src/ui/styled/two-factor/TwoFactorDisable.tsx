@@ -2,7 +2,7 @@
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Card } from '@/ui/primitives/card';
-import { TwoFactorDisable as HeadlessTwoFactorDisable } from '@/ui/headless/two-factor/TwoFactorDisable';
+import { TwoFactorDisable as HeadlessTwoFactorDisable } from '@/ui/headless/twoFactor/TwoFactorDisable'159;
 
 export function TwoFactorDisable({ onSuccess, onCancel }: { onSuccess?: () => void; onCancel?: () => void }) {
   return (

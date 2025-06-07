@@ -1,6 +1,6 @@
 // src/tests/mocks/preferences.store.mock.ts
 // Robust mock factory for usePreferencesStore (Zustand)
-// Usage: import { createMockPreferencesStore } from './preferences.store.mock';
+// Usage: import { createMockPreferencesStore } from '@/src/tests/mocks/preferences.store.mock'114;
 //        const mockStore = createMockPreferencesStore({ preferences: { ... } }, { updatePreferences: vi.fn() });
 //        vi.mock('@/lib/stores/preferences.store', () => ({ usePreferencesStore: vi.fn(() => mockStore) }));
 

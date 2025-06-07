@@ -1,1 +1,1 @@
-export * from './supabase-oauth.provider';
+export * from '@/src/adapters/oauth/supabase/supabaseOauth.provider'0;

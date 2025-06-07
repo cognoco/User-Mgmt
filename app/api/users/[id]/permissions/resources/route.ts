@@ -1,7 +1,7 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createSuccessResponse } from '@/lib/api/common';
-import { createApiHandler } from '@/lib/api/route-helpers';
+import { createApiHandler } from '@/lib/api/routeHelpers'134;
 import { PermissionValues } from '@/core/permission/models';
 import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 

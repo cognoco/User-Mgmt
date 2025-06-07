@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET, DELETE } from '../route';
+import { GET, DELETE } from '@/app/api/session/route'64;
 import { withRouteAuth } from '@/middleware/auth';
 import { getApiSessionService } from '@/services/session/factory';
-import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'225;
 
 vi.mock('@/middleware/auth', () => ({
   withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'user-1', role: 'user' })),

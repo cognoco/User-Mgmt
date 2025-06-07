@@ -1,8 +1,8 @@
 import React from 'react';
-import { render, screen } from '@/tests/test-utils';
+import { render, screen } from '@/tests/testUtils'28;
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { SessionTimeout } from '../SessionTimeout';
+import { SessionTimeout } from '@/src/ui/styled/session/SessionTimeout'200;
 
 let logoutMock: any;
 

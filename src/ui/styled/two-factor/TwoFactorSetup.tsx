@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Card } from '@/ui/primitives/card';
-import { TwoFactorSetup as HeadlessTwoFactorSetup } from '@/ui/headless/two-factor/TwoFactorSetup';
-import QRCodeDisplay from './QRCodeDisplay';
-import BackupCodesList from './BackupCodesList';
-import { WebAuthnRegistration } from './WebAuthnRegistration';
+import { TwoFactorSetup as HeadlessTwoFactorSetup } from '@/ui/headless/twoFactor/TwoFactorSetup'194;
+import QRCodeDisplay from '@/src/ui/styled/two-factor/QRCodeDisplay'295;
+import BackupCodesList from '@/src/ui/styled/two-factor/BackupCodesList'341;
+import { WebAuthnRegistration } from '@/src/ui/styled/two-factor/WebAuthnRegistration'391;
 
 export function TwoFactorSetup() {
   const [code, setCode] = useState('');

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET, PUT, DELETE } from '../route';
+import { GET, PUT, DELETE } from '@/app/api/admin/users/[id]/route'108;
 
 vi.mock('@/middleware/createMiddlewareChain', async () => {
   const actual = await vi.importActual<any>('@/middleware/createMiddlewareChain');
@@ -85,7 +85,7 @@ describe('Admin Users by ID API', () => {
   it('calls auth middleware for PUT', async () => {
     await PUT(req, ctx);
     const { routeAuthMiddleware } = await import('@/middleware/createMiddlewareChain');
-    const { withSecurity } = await import('@/middleware/with-security');
+    const { withSecurity } = await import('@/middleware/withSecurity');
     expect(routeAuthMiddleware).toHaveBeenCalled();
     expect(withSecurity).toHaveBeenCalled();
   });
@@ -93,7 +93,7 @@ describe('Admin Users by ID API', () => {
   it('calls auth middleware for DELETE', async () => {
     await DELETE(req, ctx);
     const { routeAuthMiddleware } = await import('@/middleware/createMiddlewareChain');
-    const { withSecurity } = await import('@/middleware/with-security');
+    const { withSecurity } = await import('@/middleware/withSecurity');
     expect(routeAuthMiddleware).toHaveBeenCalled();
     expect(withSecurity).toHaveBeenCalled();
   });

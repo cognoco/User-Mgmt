@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-let getApiCompanyService: typeof import('../factory').getApiCompanyService;
-let DefaultCompanyService: typeof import('../companyService').DefaultCompanyService;
+let getApiCompanyService: typeof import('@/src/services/company/factory').getApiCompanyService;
+let DefaultCompanyService: typeof import('@/src/services/company/companyService').DefaultCompanyService;
 let UserManagementConfiguration: typeof import('@/core/config').UserManagementConfiguration;
 
 describe('getApiCompanyService', () => {
@@ -9,8 +9,8 @@ describe('getApiCompanyService', () => {
     vi.resetModules();
     ({ UserManagementConfiguration } = await import('@/core/config'));
     UserManagementConfiguration.reset();
-    ({ getApiCompanyService } = await import('../factory'));
-    ({ DefaultCompanyService } = await import('../companyService'));
+    ({ getApiCompanyService } = await import('@/src/services/company/factory'));
+    ({ DefaultCompanyService } = await import('@/src/services/company/companyService'));
   });
 
   it('returns configured service if registered', () => {

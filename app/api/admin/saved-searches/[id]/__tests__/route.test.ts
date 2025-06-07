@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
-import { GET, PATCH, DELETE } from "../route";
+import { GET, PATCH, DELETE } from "@/app/api/admin/saved-searches/[id]/route"108;
 
 vi.mock("@/middleware/createMiddlewareChain", async () => {
   const actual = await vi.importActual<any>(
@@ -29,7 +29,7 @@ vi.mock("@/services/saved-search/factory", () => ({
   getApiSavedSearchService: vi.fn(),
 }));
 
-import { getApiSavedSearchService } from "@/services/saved-search/factory";
+import { getApiSavedSearchService } from "@/services/savedSearch/factory"975;
 
 function createReq(method: string) {
   return {

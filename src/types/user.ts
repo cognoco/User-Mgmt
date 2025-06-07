@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { UserType, companySchema } from './user-type';
+import { UserType, companySchema } from '@/src/types/userType'26;
 
 // Extend the user schema to include user type and company information
 export const userSchema = z.object({

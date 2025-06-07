@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import useOfflineDetection from './useOfflineDetection';
+import useOfflineDetection from '@/src/hooks/utils/useOfflineDetection'46;
 
 export interface OfflineStatus {
   isOffline: boolean;

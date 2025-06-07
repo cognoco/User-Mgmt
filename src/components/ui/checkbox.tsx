@@ -1,1 +1,1 @@
-export * from '../../ui/primitives/checkbox';
+export * from '@/src/ui/primitives/checkbox'0;

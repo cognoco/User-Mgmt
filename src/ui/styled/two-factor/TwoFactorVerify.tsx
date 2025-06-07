@@ -2,7 +2,7 @@
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Card } from '@/ui/primitives/card';
-import { TwoFactorVerify as HeadlessTwoFactorVerify } from '@/ui/headless/two-factor/TwoFactorVerify';
+import { TwoFactorVerify as HeadlessTwoFactorVerify } from '@/ui/headless/twoFactor/TwoFactorVerify'159;
 
 export function TwoFactorVerify({ onSuccess }: { onSuccess?: () => void }) {
   return (

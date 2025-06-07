@@ -6,7 +6,7 @@
  */
 
 import type { IPermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
-import { SupabasePermissionProvider } from './supabase-permission-provider';
+import { SupabasePermissionProvider } from '@/src/adapters/permission/supabasePermissionProvider'308;
 
 /**
  * Create a Supabase permission data provider

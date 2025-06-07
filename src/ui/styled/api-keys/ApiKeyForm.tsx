@@ -5,7 +5,7 @@ import { Checkbox } from '@/ui/primitives/checkbox';
 import {
   ApiKeyForm as HeadlessApiKeyForm,
   ApiKeyFormProps as HeadlessApiKeyFormProps,
-} from '@/ui/headless/api-keys/ApiKeyForm';
+} from '@/ui/headless/apiKeys/ApiKeyForm'234;
 
 export interface ApiKeyFormProps extends HeadlessApiKeyFormProps {
   availablePermissions: string[];

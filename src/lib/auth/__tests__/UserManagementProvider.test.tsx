@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { UserManagementProvider } from '../UserManagementProvider';
+import { UserManagementProvider } from '@/src/lib/auth/UserManagementProvider'58;
 import { describe, it, expect } from 'vitest';
 
 describe('UserManagementProvider', () => {

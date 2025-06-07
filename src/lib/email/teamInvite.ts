@@ -1,4 +1,4 @@
-import { sendEmail } from './sendEmail';
+import { sendEmail } from '@/src/lib/email/sendEmail'0;
 
 interface TeamInviteEmailParams {
   to: string;

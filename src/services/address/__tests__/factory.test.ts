@@ -19,25 +19,25 @@ vi.mock('@/lib/config/service-container', () => {
   };
 });
 
-let getApiAddressService: typeof import('../factory').getApiAddressService;
-let getApiPersonalAddressService: typeof import('../factory').getApiPersonalAddressService;
-let DefaultAddressService: typeof import('../default-address.service').DefaultAddressService;
+let getApiAddressService: typeof import('@/src/services/address/factory').getApiAddressService;
+let getApiPersonalAddressService: typeof import('@/src/services/address/factory').getApiPersonalAddressService;
+let DefaultAddressService: typeof import('@/src/services/address/defaultAddress.service').DefaultAddressService;
 let AdapterRegistry: typeof import('@/adapters/registry').AdapterRegistry;
-let configureServices: typeof import('@/lib/config/service-container').configureServices;
-let resetServiceContainer: typeof import('@/lib/config/service-container').resetServiceContainer;
+let configureServices: typeof import('@/lib/config/serviceContainer').configureServices;
+let resetServiceContainer: typeof import('@/lib/config/serviceContainer').resetServiceContainer;
 let UserManagementConfiguration: typeof import('@/core/config').UserManagementConfiguration;
 
 describe('getApiAddressService', () => {
   beforeEach(async () => {
     vi.resetModules();
     ({ AdapterRegistry } = await import('@/adapters/registry'));
-    ({ configureServices, resetServiceContainer } = await import('@/lib/config/service-container'));
+    ({ configureServices, resetServiceContainer } = await import('@/lib/config/serviceContainer'));
     ({ UserManagementConfiguration } = await import('@/core/config'));
     (AdapterRegistry as any).instance = null;
     resetServiceContainer();
     UserManagementConfiguration.reset();
-    ({ getApiAddressService, getApiPersonalAddressService } = await import('../factory'));
-    ({ DefaultAddressService } = await import('../default-address.service'));
+    ({ getApiAddressService, getApiPersonalAddressService } = await import('@/src/services/address/factory'));
+    ({ DefaultAddressService } = await import('@/src/services/address/defaultAddress.service'));
   });
 
   it('returns configured service if registered', () => {
@@ -70,13 +70,13 @@ describe('getApiPersonalAddressService', () => {
   beforeEach(async () => {
     vi.resetModules();
     ({ AdapterRegistry } = await import('@/adapters/registry'));
-    ({ configureServices, resetServiceContainer } = await import('@/lib/config/service-container'));
+    ({ configureServices, resetServiceContainer } = await import('@/lib/config/serviceContainer'));
     ({ UserManagementConfiguration } = await import('@/core/config'));
     (AdapterRegistry as any).instance = null;
     resetServiceContainer();
     UserManagementConfiguration.reset();
-    ({ getApiAddressService, getApiPersonalAddressService } = await import('../factory'));
-    ({ DefaultAddressService } = await import('../default-address.service'));
+    ({ getApiAddressService, getApiPersonalAddressService } = await import('@/src/services/address/factory'));
+    ({ DefaultAddressService } = await import('@/src/services/address/defaultAddress.service'));
   });
 
   it('returns configured personal service if registered', () => {

@@ -1,5 +1,5 @@
 import { GdprService } from '@/core/gdpr/interfaces';
-import { DefaultGdprService } from './default-gdpr.service';
+import { DefaultGdprService } from '@/src/services/gdpr/defaultGdpr.service'55;
 import type { GdprDataProvider } from '@/core/gdpr/IGdprDataProvider';
 
 export interface GdprServiceConfig {

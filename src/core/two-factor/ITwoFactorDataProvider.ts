@@ -6,7 +6,7 @@ import type {
   TwoFactorDisableResponse,
   BackupCodesResponse,
   TwoFactorMethodType,
-} from './models';
+} from '@/src/core/two-factor/models'0;
 
 /**
  * Two-Factor Authentication Data Provider Interface

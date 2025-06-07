@@ -5,7 +5,7 @@ import {
   UserManagementProvider,
   UserManagementConfig,
   IntegrationCallbacks,
-} from "./UserManagementProvider";
+} from "@/src/lib/auth/UserManagementProvider"70;
 import { initializeCsrf } from "@/lib/api/axios";
 import { supabase } from "@/lib/database/supabase";
 import { UserManagementConfiguration } from "@/core/config";
@@ -14,7 +14,7 @@ import { User } from "@/core/auth/models";
 import toast, { Toaster } from "react-hot-toast";
 import { OAuthProvider } from "@/types/oauth";
 import { SessionPolicyEnforcer } from "@/ui/styled/session/SessionPolicyEnforcer";
-import { registerAllServices } from "@/scripts/fix-initialization";
+import { registerAllServices } from "@/scripts/fixInitialization"641;
 import { AuthProvider } from '@/lib/context/AuthContext';
 
 // Define the callbacks inside the Client Component

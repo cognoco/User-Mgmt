@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { prisma } from '@/lib/database/prisma';
-import { Permission } from '../roles';
+import { Permission } from '@/src/lib/rbac/roles'113;
 import {
   initializeRolePermissions,
   getRolePermissions,
   checkRolePermission,
   syncRolePermissions,
-} from '../roleService';
+} from '@/src/lib/rbac/roleService'153;
 import { TeamRole } from '@prisma/client';
 
 vi.mock('@/lib/database/prisma', () => ({

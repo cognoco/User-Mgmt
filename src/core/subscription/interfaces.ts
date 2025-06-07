@@ -1,7 +1,7 @@
 /**
  * Subscription Service Interface
  */
-import type { SubscriptionPlan, UserSubscription, SubscriptionUpsertPayload } from "./models";
+import type { SubscriptionPlan, UserSubscription, SubscriptionUpsertPayload } from "@/src/core/subscription/models"45;
 
 /**
  * Service managing user subscription plans.

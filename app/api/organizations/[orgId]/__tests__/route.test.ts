@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET, PUT, DELETE } from '../route';
-import { configureServices, resetServiceContainer } from '@/lib/config/service-container';
-import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
+import { GET, PUT, DELETE } from '@/app/api/organizations/[orgId]/route'108;
+import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer'154;
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'246;
 
 
 describe('[orgId] API', () => {

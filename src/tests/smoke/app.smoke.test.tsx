@@ -1,6 +1,6 @@
 import React from 'react';
-import { render, screen } from '../utils/test-utils';
-import HomePage from '../../../app/page';
+import { render, screen } from '@/src/tests/utils/testUtils'28;
+import HomePage from '@/app/page'83;
 import { describe, it, expect } from 'vitest';
 
 describe('Smoke: App Entry', () => {

@@ -1,8 +1,8 @@
-export { createSupabaseDatabaseProvider } from './supabase-factory';
-export { createPrismaDatabaseProvider } from './prisma-factory';
-export { createMockDatabaseProvider } from './mock-factory';
+export { createSupabaseDatabaseProvider } from '@/src/adapters/database/factory/supabaseFactory'0;
+export { createPrismaDatabaseProvider } from '@/src/adapters/database/factory/prismaFactory'70;
+export { createMockDatabaseProvider } from '@/src/adapters/database/factory/mockFactory'136;
 
-import type { DatabaseConfig, DatabaseProvider } from '../../../lib/database/types';
+import type { DatabaseConfig, DatabaseProvider } from '@/src/lib/database/types'200;
 
 /**
  * Get a database provider instance by name.

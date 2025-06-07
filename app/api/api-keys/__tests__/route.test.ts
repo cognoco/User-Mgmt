@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { GET, POST } from '../route'
-import { configureServices, resetServiceContainer } from '@/lib/config/service-container'
-import type { ApiKeyService } from '@/core/api-keys/interfaces'
+import { GET, POST } from '@/app/api/api-keys/route'63
+import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer'101
+import type { ApiKeyService } from '@/core/apiKeys/interfaces'192
 import type { AuthService } from '@/core/auth/interfaces'
-import { createAuthenticatedRequest } from '@/tests/utils/request-helpers'
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'316
 
 vi.mock('@/services/api-keys/factory', () => ({}))
 vi.mock('@/services/auth/factory', () => ({}))

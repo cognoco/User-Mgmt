@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { EmailVerification } from '../EmailVerification';
+import { EmailVerification } from '@/src/ui/styled/auth/EmailVerification'176;
 
 let state: any;
 

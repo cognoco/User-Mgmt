@@ -1,7 +1,7 @@
 import React from 'react';
-import { render, screen } from '@/tests/test-utils';
+import { render, screen } from '@/tests/testUtils'28;
 import { describe, it, expect, vi } from 'vitest';
-import { ProfileForm } from '../ProfileForm';
+import { ProfileForm } from '@/src/ui/styled/profile/ProfileForm'134;
 
 // Mock dependencies
 const fetchProfileMock = vi.fn();

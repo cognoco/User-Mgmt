@@ -6,7 +6,7 @@
  * in permissions and roles.
  */
 
-import { Permission, RoleWithPermissions, UserRole } from './models';
+import { Permission, RoleWithPermissions, UserRole } from '@/src/core/permission/models'226;
 
 /**
  * Enumeration of all permission event types

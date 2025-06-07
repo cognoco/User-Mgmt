@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { AdminAuditLogs } from '../audit-logs/AdminAuditLogs';
+import { AdminAuditLogs } from '@/src/ui/styled/admin/auditLogs/AdminAuditLogs'152;
 
-import { __setIsError } from '@/tests/mocks/headless-admin-audit-logs.mock';
-vi.mock('@/ui/headless/admin/audit-logs/AdminAuditLogs', async () => await import('@/tests/mocks/headless-admin-audit-logs.mock'));
-vi.mock('@/ui/styled/audit/AuditLogViewer', async () => await import('@/tests/mocks/audit-log-viewer.mock'));
+import { __setIsError } from '@/tests/mocks/headlessAdminAuditLogs.mock'218;
+vi.mock('@/ui/headless/admin/audit-logs/AdminAuditLogs', async () => await import('@/tests/mocks/headlessAdminAuditLogs.mock'));
+vi.mock('@/ui/styled/audit/AuditLogViewer', async () => await import('@/tests/mocks/auditLogViewer.mock'));
 vi.mock('@/ui/primitives/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }));
 
 describe('AdminAuditLogs', () => {

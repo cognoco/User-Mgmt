@@ -1,3 +1,3 @@
-export { getApiProfileVerificationService } from './factory';
-export { DefaultProfileVerificationService } from './default-profile-verification.service';
-export type { ProfileVerificationService } from '@/core/profile-verification/interfaces';
+export { getApiProfileVerificationService } from '@/src/services/profile-verification/factory'0;
+export { DefaultProfileVerificationService } from '@/src/services/profile-verification/defaultProfileVerification.service'63;
+export type { ProfileVerificationService } from '@/core/profileVerification/interfaces'156;

@@ -9,8 +9,8 @@ import { CompanyAddressService, AddressService } from '@/core/address/interfaces
 import { UserManagementConfiguration } from '@/core/config';
 import type { IAddressDataProvider } from '@/core/address';
 import { AdapterRegistry } from '@/adapters/registry';
-import { DefaultAddressService } from './default-address.service';
-import { getServiceContainer, getServiceConfiguration } from '@/lib/config/service-container';
+import { DefaultAddressService } from '@/src/services/address/defaultAddress.service'508;
+import { getServiceContainer, getServiceConfiguration } from '@/lib/config/serviceContainer'576;
 
 export interface ApiAddressServiceOptions {
   /** Reset cached instances, mainly for testing */

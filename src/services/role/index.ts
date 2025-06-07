@@ -1,11 +1,11 @@
-export { DefaultRoleService } from './default-role.service';
-export type { RoleRecord, RoleHierarchyRecord } from './default-role.service';
-export { RoleService } from './role.service';
+export { DefaultRoleService } from '@/src/services/role/defaultRole.service'0;
+export type { RoleRecord, RoleHierarchyRecord } from '@/src/services/role/defaultRole.service'62;
+export { RoleService } from '@/src/services/role/role.service'142;
 export type {
   Role,
   RoleCreateData,
   RoleUpdateData,
   UserRoleAssignment,
   RoleHierarchyNode,
-} from './role.service';
-export { getApiRoleService } from './factory';
+} from '@/src/services/role/role.service'189;
+export { getApiRoleService } from '@/src/services/role/factory'322;

@@ -12,9 +12,9 @@ import type { PermissionService } from '@/core/permission/interfaces';
 import type { TeamService } from '@/core/team/interfaces';
 import type { SsoService } from '@/core/sso/interfaces';
 import type { GdprService } from '@/core/gdpr/interfaces';
-import type { TwoFactorService } from '@/core/two-factor/interfaces';
+import type { TwoFactorService } from '@/core/twoFactor/interfaces'647;
 import type { SubscriptionService } from '@/core/subscription/interfaces';
-import type { ApiKeyService } from '@/core/api-keys/interfaces';
+import type { ApiKeyService } from '@/core/apiKeys/interfaces'794;
 import type { NotificationService } from '@/core/notification/interfaces';
 import type { IWebhookService } from '@/core/webhooks/interfaces';
 import type { SessionService } from '@/core/session/interfaces';
@@ -25,7 +25,7 @@ import type { AuditService } from '@/core/audit/interfaces';
 import type { AdminService } from '@/core/admin/interfaces';
 import type { RoleService } from '@/core/role/interfaces';
 import type { AddressService, CompanyAddressService } from '@/core/address/interfaces';
-import type { ResourceRelationshipService } from '@/core/resource-relationship/interfaces';
+import type { ResourceRelationshipService } from '@/core/resourceRelationship/interfaces'1545;
 
 // Import additional service interfaces as they become available
 // TODO: Add imports for other service interfaces when they exist
@@ -54,7 +54,7 @@ export interface ServiceContainer {
   // TODO: Add other services as their interfaces become available
   role?: RoleService;
   address?: CompanyAddressService;
-  companyNotification?: import("@/core/company-notification/interfaces").CompanyNotificationService;
+  companyNotification?: import("@/core/companyNotification/interfaces").CompanyNotificationService;
   resourceRelationship?: ResourceRelationshipService;
   oauth?: import('@/core/oauth/interfaces').OAuthService;
 }
@@ -158,7 +158,7 @@ export interface ServiceConfig {
    */
   addressService?: CompanyAddressService;
   oauthService?: import('@/core/oauth/interfaces').OAuthService;
-  companyNotificationService?: import("@/core/company-notification/interfaces").CompanyNotificationService;
+  companyNotificationService?: import("@/core/companyNotification/interfaces").CompanyNotificationService;
 
   /**
    * Custom resource relationship service implementation

@@ -15,7 +15,7 @@ import {
   NotificationBatch,
   NotificationFilter,
   NotificationDeliveryStatus
-} from './models';
+} from '@/src/core/notification/models'254;
 
 /**
  * Core notification service interface

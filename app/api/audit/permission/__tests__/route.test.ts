@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { GET } from '../route';
+import { GET } from '@/app/api/audit/permission/route'64;
 import { withRouteAuth } from '@/middleware/auth';
 import { setTableMockData, resetSupabaseMock } from '@/tests/mocks/supabase';
 import { NextResponse } from 'next/server';
-import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'273;
 
 vi.mock('@/middleware/auth', () => ({
   withRouteAuth: vi.fn((handler: any) => async (req: any) => handler(req, { userId: 'u1' }))

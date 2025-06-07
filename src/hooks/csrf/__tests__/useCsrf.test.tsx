@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { useCsrf } from '../useCsrf';
+import { useCsrf } from '@/src/hooks/csrf/useCsrf'111;
 import { CsrfProvider } from '@/ui/headless/csrf/CsrfProvider';
 import type { CsrfService } from '@/core/csrf/interfaces';
 

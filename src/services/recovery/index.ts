@@ -1,1 +1,1 @@
-export { RecoveryManager } from './recovery-manager';
+export { RecoveryManager } from '@/src/services/recovery/recoveryManager'0;

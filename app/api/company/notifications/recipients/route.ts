@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createApiHandler } from '@/lib/api/route-helpers';
+import { createApiHandler } from '@/lib/api/routeHelpers'26;
 import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 import { createCreatedResponse, createValidationError, createForbiddenError, createUnauthorizedError, createServerError } from '@/lib/api/common';
 

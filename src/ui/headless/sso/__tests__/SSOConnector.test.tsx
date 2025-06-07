@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { SSOConnector } from '../SSOConnector';
+import { SSOConnector } from '@/src/ui/headless/sso/SSOConnector'149;
 import { useSso } from '@/hooks/sso/useSso';
 
 vi.mock('@/hooks/sso/useSso', () => ({ useSso: vi.fn() }));

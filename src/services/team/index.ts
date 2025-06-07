@@ -8,10 +8,10 @@
 // Import required types and classes
 import type { ITeamDataProvider } from '@/core/team/ITeamDataProvider';
 import type { TeamService } from '@/core/team/interfaces';
-import { DefaultTeamService } from './default-team.service';
+import { DefaultTeamService } from '@/src/services/team/defaultTeam.service'385;
 
 // Client-safe exports only
-export * from './api-team.service';
+export * from '@/src/services/team/apiTeam.service'498;
 export type { TeamService } from '@/core/team/interfaces';
 
 /**

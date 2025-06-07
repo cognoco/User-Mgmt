@@ -1,5 +1,5 @@
-import type { ISavedSearchDataProvider } from '@/core/saved-search/ISavedSearchDataProvider';
-import { SupabaseSavedSearchProvider } from './supabase/supabase-saved-search.provider';
+import type { ISavedSearchDataProvider } from '@/core/savedSearch/ISavedSearchDataProvider'0;
+import { SupabaseSavedSearchProvider } from '@/src/adapters/saved-search/supabase/supabaseSavedSearch.provider'95;
 
 /**
  * Create a Supabase saved search data provider instance.

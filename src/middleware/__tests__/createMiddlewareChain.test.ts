@@ -33,15 +33,15 @@ import {
   standardApiMiddleware,
   createMiddlewareChainFromConfig,
   type RouteMiddleware,
-} from '../createMiddlewareChain';
+} from '@/src/middleware/createMiddlewareChain'749;
 import {
   configureApiRoutes,
   resetApiRoutesConfig,
-} from '../../../config/api-routes.config';
-import { withRouteAuth } from '../auth';
-import { withErrorHandling } from '../error-handling';
-import { withValidation } from '../validation';
-import { createRateLimit } from '../rate-limit';
+} from '@/config/apiRoutes.config'1009;
+import { withRouteAuth } from '@/src/middleware/auth'1112;
+import { withErrorHandling } from '@/src/middleware/errorHandling'1154;
+import { withValidation } from '@/src/middleware/validation'1210;
+import { createRateLimit } from '@/src/middleware/rateLimit'1259;
 
 const req = new NextRequest('http://test');
 

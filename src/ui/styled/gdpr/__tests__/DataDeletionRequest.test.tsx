@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { DataDeletionRequest } from '../DataDeletionRequest';
+import { DataDeletionRequest } from '@/src/ui/styled/gdpr/DataDeletionRequest'143;
 
 vi.mock('../../../headless/gdpr/DataDeletionRequest', () => ({
   DataDeletionRequest: ({ render }: any) =>

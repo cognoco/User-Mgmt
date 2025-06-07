@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { PasswordResetForm as HeadlessPasswordResetForm, PasswordResetFormProps } from '../../headless/auth/PasswordResetForm';
+import { PasswordResetForm as HeadlessPasswordResetForm, PasswordResetFormProps } from '@/src/ui/headless/auth/PasswordResetForm'278;
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Label } from '@/ui/primitives/label';

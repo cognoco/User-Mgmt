@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, beforeEach, describe, it, expect } from 'vitest';
-import { MFASetup } from '../MFASetup';
+import { MFASetup } from '@/src/ui/styled/auth/MFASetup'176;
 
 let state: any;
 

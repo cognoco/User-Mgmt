@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sanitizePII } from '../pii';
+import { sanitizePII } from '@/src/lib/utils/pii'48;
 
 describe('sanitizePII', () => {
   it('redacts detected PII fields and values', () => {

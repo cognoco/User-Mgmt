@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { usePermission } from '../usePermission';
+import { usePermission } from '@/src/hooks/usePermission'127;
 import { useAuth } from '@/hooks/auth/useAuth';
 
 vi.mock('@/hooks/auth/useAuth', () => ({

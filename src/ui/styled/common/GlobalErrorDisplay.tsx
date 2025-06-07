@@ -1,11 +1,11 @@
 "use client";
 
 import React, { Suspense } from "react";
-import { DevErrorDetailsPanel } from './DevErrorDetailsPanel';
-import { getClientConfig } from '@/core/config/runtime-config';
+import { DevErrorDetailsPanel } from '@/src/ui/styled/common/DevErrorDetailsPanel'59;
+import { getClientConfig } from '@/core/config/runtimeConfig'123;
 import { useGlobalError, useErrorStore } from "@/lib/state/errorStore";
 
-const ApiErrorAlert = React.lazy(() => import("./ApiErrorAlert"));
+const ApiErrorAlert = React.lazy(() => import("@/src/ui/styled/common/ApiErrorAlert"));
 
 export function GlobalErrorDisplay() {
   const error = useGlobalError();

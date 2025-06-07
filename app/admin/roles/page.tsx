@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import RolesManagementPageClient from "./ClientPage";
+import RolesManagementPageClient from "@/app/admin/roles/ClientPage"79;
 import { getSupabaseServerClient } from "@/lib/auth";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { hasPermission } from "@/lib/auth/hasPermission";

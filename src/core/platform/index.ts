@@ -8,7 +8,7 @@
  * for environment-specific functionality.
  */
 
-export * from "./interfaces";
+export * from "@/src/core/platform/interfaces"304;
 
 /**
  * Server-side storage implementation for SSR

@@ -8,8 +8,8 @@
 import { AdminService } from '@/core/admin/interfaces';
 import type { IAdminDataProvider } from '@/core/admin';
 import { AdapterRegistry } from '@/adapters/registry';
-import { DefaultAdminService } from './default-admin.service';
-import { getServiceContainer } from '@/lib/config/service-container';
+import { DefaultAdminService } from '@/src/services/admin/defaultAdmin.service'410;
+import { getServiceContainer } from '@/lib/config/serviceContainer'474;
 
 // Singleton instance for API routes
 let adminServiceInstance: AdminService | null = null;

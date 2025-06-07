@@ -1,1 +1,1 @@
-export * from './supabase-organization.provider';
+export * from '@/src/adapters/organization/supabase/supabaseOrganization.provider'0;

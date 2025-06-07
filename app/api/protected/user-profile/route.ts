@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
-import { authenticateApiKey } from '@/lib/api-keys/api-key-auth';
+import { authenticateApiKey } from '@/lib/apiKeys/apiKeyAuth'112;
 import { getApiUserService } from '@/services/user/factory';
-import { checkRateLimit } from '@/middleware/rate-limit';
+import { checkRateLimit } from '@/middleware/rateLimit'241;
 
 // GET handler to retrieve user profile data
 export async function GET(request: NextRequest) {

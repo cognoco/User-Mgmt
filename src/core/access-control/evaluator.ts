@@ -1,5 +1,5 @@
 import { MemoryCache } from '@/lib/cache';
-import { AccessRule, AttributeCondition, AccessAuditEntry } from './models';
+import { AccessRule, AttributeCondition, AccessAuditEntry } from '@/src/core/access-control/models'44;
 
 export interface EvaluationContext {
   user: Record<string, unknown>;

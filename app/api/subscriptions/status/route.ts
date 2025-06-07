@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server';
-import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'44;
 import {
   createSuccessResponse,
   ApiError,
   ERROR_CODES,
 } from '@/lib/api/common';
-import { checkRateLimit } from '@/middleware/rate-limit';
+import { checkRateLimit } from '@/middleware/rateLimit'211;
 import { logUserAction } from '@/lib/audit/auditLogger';
 
 /**

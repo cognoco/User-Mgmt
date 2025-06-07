@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useNotifications } from '../useNotifications';
+import { useNotifications } from '@/src/hooks/notification/useNotifications'123;
 import { UserManagementConfiguration } from '@/core/config';
 import type { NotificationService } from '@/core/notification/interfaces';
 import type { NotificationBatch, Notification } from '@/core/notification/models';

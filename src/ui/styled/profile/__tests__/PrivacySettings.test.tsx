@@ -3,7 +3,7 @@ import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { PrivacySettings } from '../PrivacySettings';
+import { PrivacySettings } from '@/src/ui/styled/profile/PrivacySettings'211;
 import { useProfile } from '@/hooks/user/useProfile';
 import { Profile as DbProfile } from '@/types/database';
 

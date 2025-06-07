@@ -4,7 +4,7 @@
  * Provides behavior for initiating personal data exports without UI.
  */
 import { useState } from 'react';
-import { ExportFormat, ExportCategory } from '@/lib/utils/data-export';
+import { ExportFormat, ExportCategory } from '@/lib/utils/dataExport'155;
 import { ExportStatus } from '@/lib/exports/types';
 import useDataExport from '@/hooks/user/useDataExport';
 

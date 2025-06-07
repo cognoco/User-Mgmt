@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { POST } from '../route';
+import { POST } from '@/app/api/company/domains/[id]/verify-initiate/route'121;
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiCompanyService } from '@/services/company/factory';
 

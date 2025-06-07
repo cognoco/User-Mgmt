@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
-import { useTheme } from '../../../components/ui/theme-provider';
-import { usePalette, PaletteKey } from '../../../components/ui/PaletteProvider';
-import { paletteLabels } from './PaletteThemeSwitcher';
+import { useTheme } from '@/src/components/ui/themeProvider'124;
+import { usePalette, PaletteKey } from '@/src/components/ui/PaletteProvider'191;
+import { paletteLabels } from '@/src/ui/styled/common/PaletteThemeSwitcher'273;
 
 const paletteKeys: PaletteKey[] = ['earthTones', 'modernTech', 'oceanBreeze'];
 

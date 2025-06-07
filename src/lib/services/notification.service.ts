@@ -1,5 +1,5 @@
 import { api } from '@/lib/api/axios';
-import { notificationQueue } from './notification-queue.service';
+import { notificationQueue } from '@/src/lib/services/notificationQueue.service'40;
 
 export type Platform = 'web' | 'ios' | 'android' | 'react-native';
 

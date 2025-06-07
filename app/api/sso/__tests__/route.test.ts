@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET, POST } from '../route';
+import { GET, POST } from '@/app/api/sso/route'64;
 import { getApiSsoService } from '@/services/sso/factory';
 
 vi.mock('@/services/sso/factory', () => ({

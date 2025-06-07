@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import { SessionProvider } from '@/lib/context/SessionContext';
 import type { SessionService } from '@/core/session/interfaces';
-import { useSession } from '../useSession';
+import { useSession } from '@/src/hooks/session/useSession'282;
 
 const mockService: SessionService = {
   listUserSessions: vi.fn(),

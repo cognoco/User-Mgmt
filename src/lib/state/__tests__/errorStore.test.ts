@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useErrorStore, useHasErrorType } from '../errorStore';
+import { useErrorStore, useHasErrorType } from '@/src/lib/state/errorStore'75;
 import { act, renderHook } from '@testing-library/react';
 
 vi.mock('@/lib/audit/error-logger', () => ({
   logApiError: vi.fn(),
 }));
 
-const { logApiError } = await import('@/lib/audit/error-logger');
+const { logApiError } = await import('@/lib/audit/errorLogger');
 
 describe('errorStore', () => {
   beforeEach(() => {

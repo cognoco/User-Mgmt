@@ -1,17 +1,17 @@
 // Central registry exporting all middleware utilities
 // This enables a single import point for middleware across the app
 
-export * from './auth';
-export * from './audit-log';
-export * from './cors';
-export * from './csrf';
-export * from './error-handling';
-export * from './export-rate-limit';
-export * from './index'; // combineMiddleware, createApiMiddleware, withSecurity
-export * from './permissions';
-export * from './rate-limit';
-export * from './security-headers';
-export * from './validation';
-export * from './with-auth-rate-limit';
-export * from './with-security';
-export * from './protected-route';
+export * from '@/src/middleware/auth'81;
+export * from '@/src/middleware/auditLog'169;
+export * from '@/src/middleware/cors'199;
+export * from '@/src/middleware/csrf'224;
+export * from '@/src/middleware/errorHandling'249;
+export * from '@/src/middleware/exportRateLimit'284;
+export * from '@/src/middleware/index'322; // combineMiddleware, createApiMiddleware, withSecurity
+export * from '@/src/middleware/permissions'404;
+export * from '@/src/middleware/rateLimit'436;
+export * from '@/src/middleware/securityHeaders'467;
+export * from '@/src/middleware/validation'504;
+export * from '@/src/middleware/withAuthRateLimit'535;
+export * from '@/src/middleware/withSecurity'576;
+export * from '@/src/middleware/protectedRoute'610;

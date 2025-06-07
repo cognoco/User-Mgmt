@@ -1,9 +1,9 @@
 'use client';
 import '@/lib/i18n';
 import { useTranslation } from 'react-i18next';
-import { ApiKeyForm } from '@/ui/styled/api-keys/ApiKeyForm';
-import { ApiKeyList } from '@/ui/styled/api-keys/ApiKeyList';
-import { useApiKeys } from '@/hooks/api-keys/useApiKeys';
+import { ApiKeyForm } from '@/ui/styled/apiKeys/ApiKeyForm'86;
+import { ApiKeyList } from '@/ui/styled/apiKeys/ApiKeyList'149;
+import { useApiKeys } from '@/hooks/apiKeys/useApiKeys'212;
 
 export default function ApiKeysPage() {
   const { t } = useTranslation();

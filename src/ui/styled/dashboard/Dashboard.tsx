@@ -1,6 +1,6 @@
 import React from "react";
 // Already uses the headless dashboard implementation
-import { Dashboard as HeadlessDashboard } from "../../headless/dashboard/Dashboard";
+import { Dashboard as HeadlessDashboard } from "@/src/ui/headless/dashboard/Dashboard"83;
 
 export const Dashboard: React.FC = () => (
   <HeadlessDashboard>

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET, PUT, DELETE } from '../route';
-import { configureServices, resetServiceContainer } from '@/lib/config/service-container';
+import { GET, PUT, DELETE } from '@/app/api/addresses/[id]/route'64;
+import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer'110;
 import type { AddressService } from '@/core/address/interfaces';
 import type { AuthService } from '@/core/auth/interfaces';
-import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'328;
 
 const service: AddressService = {
   getAddress: vi.fn(async () => ({ id: '1', fullName: 'John Doe' })),

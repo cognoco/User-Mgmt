@@ -4,7 +4,7 @@
  * Defines the contracts for session management services.
  */
 
-import { SessionInfo } from './models';
+import { SessionInfo } from '@/src/core/session/models'106;
 
 /**
  * Core session service interface

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
-import { ApiKeyList } from '../ApiKeyList';
+import { ApiKeyList } from '@/src/ui/headless/api-keys/ApiKeyList'144;
 
 describe('ApiKeyList', () => {
   it('renders api keys', () => {

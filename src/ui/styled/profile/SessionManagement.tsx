@@ -1,6 +1,6 @@
 import React from 'react';
 import { SessionManagement as HeadlessSessionManagement } from '@/ui/headless/profile/SessionManagement';
-import { toast } from '@/lib/hooks/use-toast';
+import { toast } from '@/lib/hooks/useToast'135;
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -11,7 +11,7 @@ import {
   AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
-} from '@/ui/primitives/alert-dialog';
+} from '@/ui/primitives/alertDialog'183;
 
 const SessionManagement: React.FC = () => {
   const [pendingSessionId, setPendingSessionId] = React.useState<string | null>(null);

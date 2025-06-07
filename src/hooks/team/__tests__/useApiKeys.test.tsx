@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useApiKeys } from '../useApiKeys';
+import { useApiKeys } from '@/src/hooks/team/useApiKeys'240;
 
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);

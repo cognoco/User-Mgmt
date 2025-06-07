@@ -8,8 +8,8 @@
 import { GdprService } from '@/core/gdpr/interfaces';
 import type { IGdprDataProvider } from '@/core/gdpr';
 import { AdapterRegistry } from '@/adapters/registry';
-import { getServiceContainer } from '@/lib/config/service-container';
-import { DefaultGdprService } from './default-gdpr.service';
+import { getServiceContainer } from '@/lib/config/serviceContainer'405;
+import { DefaultGdprService } from '@/src/services/gdpr/defaultGdpr.service'476;
 
 export interface GdprServiceOptions {
   reset?: boolean;

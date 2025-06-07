@@ -4,8 +4,8 @@ import '@/lib/i18n';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Button } from '@/ui/primitives/button';
-import { TwoFactorSetup } from '@/ui/styled/two-factor/TwoFactorSetup';
-import { TwoFactorStatus } from '@/ui/styled/two-factor/TwoFactorStatus';
+import { TwoFactorSetup } from '@/ui/styled/twoFactor/TwoFactorSetup'184;
+import { TwoFactorStatus } from '@/ui/styled/twoFactor/TwoFactorStatus'257;
 import { use2FAStore } from '@/lib/stores/2fa.store';
 
 export default function TwoFactorPage() {

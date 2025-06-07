@@ -1,6 +1,6 @@
-import type { ProfileVerificationService } from '@/core/profile-verification/interfaces';
-import { DefaultProfileVerificationService } from './default-profile-verification.service';
-import { getServiceContainer } from '@/lib/config/service-container';
+import type { ProfileVerificationService } from '@/core/profileVerification/interfaces'0;
+import { DefaultProfileVerificationService } from '@/src/services/profile-verification/defaultProfileVerification.service'91;
+import { getServiceContainer } from '@/lib/config/serviceContainer'184;
 
 export interface ApiProfileVerificationServiceOptions {
   reset?: boolean;

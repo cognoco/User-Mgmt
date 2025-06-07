@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { DefaultCompanyService } from '../companyService';
+import { DefaultCompanyService } from '@/src/services/company/companyService'52;
 import { getServiceSupabase } from '@/lib/database/supabase';
 
 vi.mock('@/lib/database/supabase', () => {

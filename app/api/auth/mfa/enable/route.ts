@@ -1,4 +1,4 @@
-import { createApiHandler, emptySchema } from '@/lib/api/route-helpers';
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'0;
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 
 /**

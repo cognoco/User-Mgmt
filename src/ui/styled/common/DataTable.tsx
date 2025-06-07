@@ -14,7 +14,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger
-} from '@/ui/primitives/dropdown-menu';
+} from '@/ui/primitives/dropdownMenu'361;
 import DataTableHeadless, {
   type DataTableProps as HeadlessProps,
   type Column as HeadlessColumn,

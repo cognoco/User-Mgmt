@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { createApiHandler } from '@/lib/api/route-helpers';
+import { createApiHandler } from '@/lib/api/routeHelpers'70;
 import { createSuccessResponse } from '@/lib/api/common';
-import { createResourcePermissionResolver } from '@/lib/services/resource-permission-resolver.service';
+import { createResourcePermissionResolver } from '@/lib/services/resourcePermissionResolver.service'190;
 
 const querySchema = z.object({
   userId: z.string(),

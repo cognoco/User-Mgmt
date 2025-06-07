@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
-import { POST } from '../route';
+import { POST } from '@/app/api/auth/send-verification-email/route'70;
 import { NextRequest, NextResponse } from 'next/server';
 import { ERROR_CODES } from '@/lib/api/common';
 
@@ -45,7 +45,7 @@ describe('POST /api/auth/send-verification-email', () => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
     
     // Mock the service container to return our mock services
-    const { getServiceContainer } = await import('@/lib/config/service-container');
+    const { getServiceContainer } = await import('@/lib/config/serviceContainer');
     (getServiceContainer as any).mockReturnValue(mockServices);
     
     mockAuthService.sendVerificationEmail.mockResolvedValue({ success: true });

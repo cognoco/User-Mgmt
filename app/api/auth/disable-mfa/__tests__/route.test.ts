@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { POST } from '../route';
+import { POST } from '@/app/api/auth/disable-mfa/route'108;
 
 // Mock the service container to avoid circular dependencies
 vi.mock('@/lib/config/service-container', () => ({
@@ -48,7 +48,7 @@ describe('POST /api/auth/disable-mfa', () => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
     
     // Mock the service container to return our mock services
-    const { getServiceContainer } = await import('@/lib/config/service-container');
+    const { getServiceContainer } = await import('@/lib/config/serviceContainer');
     (getServiceContainer as any).mockReturnValue(mockServices);
     
     mockAuthService.disableMFA.mockResolvedValue({ success: true });

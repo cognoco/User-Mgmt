@@ -1,6 +1,6 @@
 import { type NextRequest } from 'next/server';
 import { createSuccessResponse } from '@/lib/api/common';
-import { createApiHandler } from '@/lib/api/route-helpers';
+import { createApiHandler } from '@/lib/api/routeHelpers'108;
 import { z } from 'zod';
 
 const myPermissionsSchema = z.object({});

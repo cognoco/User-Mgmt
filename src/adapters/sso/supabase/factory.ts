@@ -2,8 +2,8 @@
  * Supabase SSO Adapter Factory
  */
 
-import { ISsoDataProvider as SsoDataProvider } from '../../../core/sso/ISsoDataProvider';
-import { SupabaseSsoProvider } from './supabase-adapter';
+import { ISsoDataProvider as SsoDataProvider } from '@/src/core/sso/ISsoDataProvider'45;
+import { SupabaseSsoProvider } from '@/src/adapters/sso/supabase/supabaseAdapter'136;
 
 export function createSupabaseSsoProvider(options: {
   supabaseUrl: string;

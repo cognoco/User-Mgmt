@@ -3,7 +3,7 @@ let POST: (req: Request) => Promise<Response>;
 // import { NextResponse } from 'next/server';
 import { OAuthProvider } from "@/types/oauth";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getServiceContainer } from '@/lib/config/service-container';
+import { getServiceContainer } from '@/lib/config/serviceContainer'252;
 
 // --- Mocks ---
 
@@ -107,7 +107,7 @@ describe("POST /api/auth/oauth", () => {
     mockService.getOAuthAuthorizationUrl.mockReturnValue(
       'https://example.com/auth'
     );
-    POST = (await import("../route")).POST;
+    POST = (await import("@/app/api/auth/oauth/route")).POST;
   });
 
   it("should return authorization URL and state for a valid provider (Google)", async () => {

@@ -1,9 +1,9 @@
 import { type NextRequest } from 'next/server'
-import { createApiHandler, emptySchema } from '@/lib/api/route-helpers'
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'48
 import { createSuccessResponse, createServerError, ApiError, ERROR_CODES } from '@/lib/api/common'
-import { checkRateLimit } from '@/middleware/rate-limit'
+import { checkRateLimit } from '@/middleware/rateLimit'221
 import { logUserAction } from '@/lib/audit/auditLogger'
-import { getServiceContainer } from '@/lib/config/service-container'
+import { getServiceContainer } from '@/lib/config/serviceContainer'336
 
 const handler = async (req: NextRequest, ctx: any, _data: unknown, params: { keyId: string }) => {
   if (await checkRateLimit(req)) {

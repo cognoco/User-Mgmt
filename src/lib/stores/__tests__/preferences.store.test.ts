@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act } from '@testing-library/react';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
 import { useAuthStore } from '@/lib/stores/auth.store';
-import { api } from '../../api/axios';
+import { api } from '@/src/lib/api/axios'239;
 import type { UserPreferences } from '@/types/database';
 
 // Mock the auth store

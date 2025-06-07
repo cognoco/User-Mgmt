@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { createApiHandler } from '@/lib/api/route-helpers';
+import { createApiHandler } from '@/lib/api/routeHelpers'63;
 import { createSuccessResponse } from '@/lib/api/common';
-import { checkRateLimit } from '@/middleware/rate-limit';
+import { checkRateLimit } from '@/middleware/rateLimit'183;
 import { profileSchema } from '@/types/database';
 import { logUserAction } from '@/lib/audit/auditLogger';
 

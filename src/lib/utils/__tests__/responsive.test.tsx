@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useMediaQuery, useIsMobile } from '../responsive';
+import { useMediaQuery, useIsMobile } from '@/src/lib/utils/responsive'106;
 
 function mockMatchMedia(matches: boolean) {
   return vi.fn().mockImplementation((query: string) => ({

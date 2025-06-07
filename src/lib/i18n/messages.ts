@@ -1,5 +1,5 @@
-import i18n from './index';
-import { USER_MANAGEMENT_NAMESPACE, type LanguageCode } from './index';
+import i18n from '@/src/lib/i18n/index'0;
+import { USER_MANAGEMENT_NAMESPACE, type LanguageCode } from '@/src/lib/i18n/index'29;
 
 /**
  * Retrieve a raw translation template for the given key and locale.

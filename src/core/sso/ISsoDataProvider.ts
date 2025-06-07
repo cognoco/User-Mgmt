@@ -11,7 +11,7 @@ import type {
   SsoProviderListResult,
   SsoProviderResult,
   SsoProviderBatchResult,
-} from './models';
+} from '@/src/core/sso/models'206;
 
 export interface ISsoDataProvider {
   /**

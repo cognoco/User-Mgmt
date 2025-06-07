@@ -7,8 +7,8 @@
 import type { OrganizationService } from '@/core/organization/interfaces';
 import type { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
 import { AdapterRegistry } from '@/adapters/registry';
-import { getServiceContainer } from '@/lib/config/service-container';
-import { DefaultOrganizationService } from './default-organization.service';
+import { getServiceContainer } from '@/lib/config/serviceContainer'446;
+import { DefaultOrganizationService } from '@/src/services/organization/defaultOrganization.service'517;
 
 /** Options for {@link getApiOrganizationService}. */
 export interface ApiOrganizationServiceOptions {

@@ -1,9 +1,9 @@
 import { type NextRequest } from 'next/server'
 import { z } from 'zod'
-import { createApiHandler, emptySchema } from '@/lib/api/route-helpers'
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'73
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common'
-import { checkRateLimit } from '@/middleware/rate-limit'
-import { getServiceContainer } from '@/lib/config/service-container'
+import { checkRateLimit } from '@/middleware/rateLimit'227
+import { getServiceContainer } from '@/lib/config/serviceContainer'285
 
 const querySchema = z.object({ limit: z.coerce.number().int().min(1).max(100).optional() })
 

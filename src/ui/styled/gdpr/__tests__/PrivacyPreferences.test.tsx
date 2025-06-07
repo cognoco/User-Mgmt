@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { PrivacyPreferences } from '../PrivacyPreferences';
+import { PrivacyPreferences } from '@/src/ui/styled/gdpr/PrivacyPreferences'143;
 
 vi.mock('@/lib/stores/preferences.store', () => ({
   usePreferencesStore: () => ({

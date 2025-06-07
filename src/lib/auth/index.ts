@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import type { CurrentSession } from './session';
+import type { CurrentSession } from '@/src/lib/auth/session'158;
 import {
   getCurrentSession,
   getCurrentUser as sessionGetCurrentUser,
@@ -11,14 +11,14 @@ import {
   refreshSession,
   handleSessionTimeout,
   persistSession,
-} from './session';
+} from '@/src/lib/auth/session'208;
 import {
   extractAuthToken,
   validateAuthToken,
   verifyEmailToken,
   getUserFromRequest,
   type AuthenticatedUser,
-} from './utils';
+} from '@/src/lib/auth/utils'413;
 
 // Export an empty object to satisfy existing imports while the codebase
 // migrates away from NextAuth. Supabase is now used for authentication.
@@ -93,5 +93,5 @@ export {
 
 export type { CurrentSession, AuthenticatedUser };
 
-export * from './supabase-auth.config';
-export { initializeSupabaseAuth } from './initialize-supabase-auth';
+export * from '@/src/lib/auth/supabaseAuth.config'774;
+export { initializeSupabaseAuth } from '@/src/lib/auth/initializeSupabaseAuth'2549;

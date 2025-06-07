@@ -9,7 +9,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import initializeApp from '@/core/initialization/app-init';
+import initializeApp from '@/core/initialization/appInit'346;
 import { UserManagementConfiguration } from '@/core/config';
 
 export function AppInitializer({ children }: { children: React.ReactNode }) {

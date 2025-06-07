@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { subscribeToTableChanges } from '@/lib/realtime/supabase-realtime';
+import { subscribeToTableChanges } from '@/lib/realtime/supabaseRealtime'95;
 
 interface RealtimeUserSearchProps {
   onUserChange: (payload: any) => void;

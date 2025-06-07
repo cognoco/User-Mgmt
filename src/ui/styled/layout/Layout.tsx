@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { Layout as HeadlessLayout } from "../../headless/layout/Layout";
+import { Layout as HeadlessLayout } from "@/src/ui/headless/layout/Layout"44;
 
 export function Layout() {
   return (

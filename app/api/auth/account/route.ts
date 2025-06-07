@@ -1,6 +1,6 @@
 import { type NextRequest } from "next/server";
 import { z } from "zod";
-import { createApiHandler } from '@/lib/api/route-helpers';
+import { createApiHandler } from '@/lib/api/routeHelpers'75;
 import { logUserAction } from "@/lib/audit/auditLogger";
 import {
   createSuccessResponse,

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, act } from '@testing-library/react';
 import { describe, it, expect, vi, Mock } from 'vitest';
-import { TwoFactorStatus } from '../TwoFactorStatus';
+import { TwoFactorStatus } from '@/src/ui/headless/two-factor/TwoFactorStatus'143;
 
 vi.mock('@/lib/stores/2fa.store', () => ({
   use2FAStore: vi.fn()

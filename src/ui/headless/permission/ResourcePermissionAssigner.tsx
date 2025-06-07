@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Permission } from '@/core/permission/models';
-import { ResourcePermissionResolver } from '@/lib/services/resource-permission-resolver.service';
+import { ResourcePermissionResolver } from '@/lib/services/resourcePermissionResolver.service'115;
 import { usePermissions } from '@/hooks/permission/usePermissions';
 import useResourceHierarchy, { ResourceNode } from '@/hooks/resource/useResourceHierarchy';
 

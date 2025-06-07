@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { DELETE, PATCH } from '../route';
+import { DELETE, PATCH } from '@/app/api/company/domains/[id]/route'64;
 import { getApiCompanyService } from '@/services/company/factory';
-import { createAuthenticatedRequest } from '@/tests/utils/request-helpers';
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'175;
 import { checkPermission } from '@/lib/auth/permissionCheck';
 
 vi.mock('@/services/company/factory', () => ({ getApiCompanyService: vi.fn() }));

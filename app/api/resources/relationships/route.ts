@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { getApiResourceRelationshipService } from "@/services/resource-relationship/factory";
+import { getApiResourceRelationshipService } from "@/services/resourceRelationship/factory"70;
 import {
   createMiddlewareChain,
   errorHandlingMiddleware,

@@ -16,7 +16,7 @@ import {
 
 } from '@/core/team/models';
 import { UserManagementConfiguration } from '@/core/config';
-import { useAuth } from '../auth/useAuth';
+import { useAuth } from '@/src/hooks/auth/useAuth'467;
 
 /**
  * Hook for team management functionality

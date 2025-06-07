@@ -1,5 +1,5 @@
-import { render, screen } from '@/tests/utils/test-utils';
-import { DataTable } from '../DataTable';
+import { render, screen } from '@/tests/utils/testUtils'0;
+import { DataTable } from '@/src/ui/styled/common/DataTable'60;
 
 interface Row { id: number; name: string; }
 

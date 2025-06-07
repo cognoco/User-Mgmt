@@ -1,6 +1,6 @@
 import { renderHook, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { useAuth } from "../useAuth";
+import { useAuth } from "@/src/hooks/auth/useAuth"134;
 import { UserManagementConfiguration } from "@/core/config";
 import type { AuthService } from "@/core/auth/interfaces";
 import type { User } from "@/core/auth/models";

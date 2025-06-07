@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ConsentManagement } from '../ConsentManagement';
+import { ConsentManagement } from '@/src/ui/headless/gdpr/ConsentManagement'155;
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
 
 vi.mock('@/lib/stores/preferences.store', () => ({ usePreferencesStore: vi.fn() }));

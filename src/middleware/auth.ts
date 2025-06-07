@@ -4,10 +4,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getApiAuthService } from '@/services/auth/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { Permission } from '@/lib/rbac/roles';
-import { ApiError } from '@/lib/api/common/api-error';
-import { createAuthApiError } from './auth-errors';
-import { createErrorResponse } from '@/lib/api/common/response-formatter';
-import { validateAuthToken } from './validate-auth-token';
+import { ApiError } from '@/lib/api/common/apiError'351;
+import { createAuthApiError } from '@/src/middleware/authErrors'407;
+import { createErrorResponse } from '@/lib/api/common/responseFormatter'460;
+import { validateAuthToken } from '@/src/middleware/validateAuthToken'536;
 
 /**
  * Options for {@link withAuth} middleware.

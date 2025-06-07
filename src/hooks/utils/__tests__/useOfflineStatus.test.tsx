@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import useOfflineStatus from '../useOfflineStatus';
-import useOfflineDetection from '../useOfflineDetection';
+import useOfflineStatus from '@/src/hooks/utils/useOfflineStatus'106;
+import useOfflineDetection from '@/src/hooks/utils/useOfflineDetection'159;
 
 vi.mock('../useOfflineDetection', () => ({
   __esModule: true,

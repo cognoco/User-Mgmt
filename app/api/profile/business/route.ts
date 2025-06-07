@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { getSessionFromToken } from '@/services/auth/factory';
 import { getApiProfileService } from '@/services/profile/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
-import { checkRateLimit } from '@/middleware/rate-limit';
+import { checkRateLimit } from '@/middleware/rateLimit'269;
 import { profileSchema } from '@/types/database'; // Corrected import path
 
 // --- GET Handler for fetching business profile --- 

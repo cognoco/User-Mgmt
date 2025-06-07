@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DataExportRequest } from '../DataExportRequest';
+import { DataExportRequest } from '@/src/ui/headless/gdpr/DataExportRequest'155;
 import { useDataExport } from '@/hooks/gdpr/useDataExport';
 
 vi.mock('@/hooks/gdpr/useDataExport', () => ({ useDataExport: vi.fn() }));

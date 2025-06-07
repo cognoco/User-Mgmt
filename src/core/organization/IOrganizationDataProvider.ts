@@ -5,7 +5,7 @@ import type {
   OrganizationResult,
   OrganizationMember,
   OrganizationMemberResult
-} from './models';
+} from '@/src/core/organization/models'0;
 
 export interface IOrganizationDataProvider {
   createOrganization(ownerId: string, data: OrganizationCreatePayload): Promise<OrganizationResult>;
