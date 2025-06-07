@@ -5,8 +5,8 @@
  * It allows for dependency injection and makes it easy to swap implementations.
  */
 
-import type { AuthDataProvider } from '@/src/adapters/auth/interfaces';
-import { SupabaseAuthProvider } from '@/src/adapters/auth/providers/supabaseAuthProvider';
+import type { AuthDataProvider } from '@/adapters/auth/interfaces';
+import { SupabaseAuthProvider } from '@/adapters/auth/providers/supabaseAuthProvider';
 
 /**
  * Create a Supabase auth data provider

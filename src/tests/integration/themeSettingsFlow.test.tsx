@@ -16,7 +16,7 @@ vi.mock('@/lib/stores/preferences.store', () => ({
 
 // Mock the '@/lib/database/supabase' module
 vi.mock('@/lib/database/supabase', async () => {
-  const mod = await import('@/src/tests/mocks/supabase');
+  const mod = await import('@/tests/mocks/supabase');
   return { supabase: mod.supabase };
 });
 

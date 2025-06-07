@@ -1,3 +1,3 @@
-export * from "@/src/core/savedSearch/interfaces";
-export * from "@/src/core/savedSearch/models";
-export * from "@/src/core/savedSearch/ISavedSearchDataProvider";
+export * from "@/core/savedSearch/interfaces";
+export * from "@/core/savedSearch/models";
+export * from "@/core/savedSearch/ISavedSearchDataProvider";

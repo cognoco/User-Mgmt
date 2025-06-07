@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { GET, POST } from '@/app/api/subscription/route';
+import { GET, POST } from '@app/api/subscription/route';
 
 const mockRequest = (body: any) => new Request('http://localhost', { method: 'POST', body: JSON.stringify(body) });
 

@@ -2,7 +2,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import { WebAuthnRegistration } from '@/src/ui/styled/two-factor/WebAuthnRegistration';
+import { WebAuthnRegistration } from '@/ui/styled/two-factor/WebAuthnRegistration';
 
 vi.mock('@simplewebauthn/browser', () => ({
   startRegistration: vi.fn()

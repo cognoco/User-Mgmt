@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useAddresses } from '@/src/hooks/address/useAddresses';
+import { useAddresses } from '@/hooks/address/useAddresses';
 import type { AddressService } from '@/core/address/interfaces';
-import { TestWrapper } from '@/src/tests/utils/testWrapper';
+import { TestWrapper } from '@/tests/utils/testWrapper';
 import { useAuth } from '@/hooks/auth/useAuth';
 
 vi.mock('@/hooks/auth/useAuth');

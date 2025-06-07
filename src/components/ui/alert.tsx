@@ -1,1 +1,1 @@
-export * from '@/src/ui/primitives/alert';
+export * from '@/ui/primitives/alert';

@@ -9,7 +9,7 @@ import {
   Notification,
   NotificationChannel,
   NotificationPreferences
-} from '@/src/core/notification/models';
+} from '@/core/notification/models';
 
 /**
  * Base event interface that all notification events extend

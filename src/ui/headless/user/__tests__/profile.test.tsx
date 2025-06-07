@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
-import Profile from '@/src/ui/headless/user/Profile';
-import { TestWrapper } from '@/src/tests/utils/testWrapper';
-import { MockUserService } from '@/src/services/user/__tests__/mocks/mockUserService';
+import Profile from '@/ui/headless/user/Profile';
+import { TestWrapper } from '@/tests/utils/testWrapper';
+import { MockUserService } from '@/services/user/__tests__/mocks/mockUserService';
 
 vi.unmock('@/hooks/auth/useAuth');
 

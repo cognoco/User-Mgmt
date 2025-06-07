@@ -1,6 +1,6 @@
 // src/services/permission/__tests__/mocks/mock-permission-service.ts
 import { vi } from 'vitest';
-import { PermissionService } from '@/src/core/permission/interfaces';
+import { PermissionService } from '@/core/permission/interfaces';
 import { 
   Permission, 
   Role, 
@@ -9,11 +9,11 @@ import {
   PermissionAssignment,
   RoleCreationPayload,
   RoleUpdatePayload
-} from '@/src/core/permission/models';
+} from '@/core/permission/models';
 import {
   PermissionEventHandler,
   PermissionEventTypes,
-} from '@/src/core/permission/events';
+} from '@/core/permission/events';
 
 /**
  * Mock implementation of the PermissionService interface for testing

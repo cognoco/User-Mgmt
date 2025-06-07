@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@/src/tests/utils/testUtils';
+import { render, screen } from '@/tests/utils/testUtils';
 import userEvent from '@testing-library/user-event';
 import { RegistrationForm } from '@/ui/styled/auth/RegistrationForm';
 import { describe, it, expect } from 'vitest';

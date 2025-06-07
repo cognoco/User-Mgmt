@@ -6,10 +6,10 @@
  */
 
 // Export all interfaces
-export * from '@/src/core/auth/interfaces';
+export * from '@/core/auth/interfaces';
 
 // Export all models
-export * from '@/src/core/auth/models';
+export * from '@/core/auth/models';
 
 // Export all events
-export * from '@/src/core/auth/events';
+export * from '@/core/auth/events';

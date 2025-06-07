@@ -303,7 +303,7 @@ if (typeof window !== 'undefined' && !window.DOMRect) {
 // --- Global Supabase Mock ---
 // Mock the supabase client for all possible import patterns
 vi.mock('@/lib/database/supabase', async () => {
-  const mod = await import('@/src/tests/mocks/supabase');
+  const mod = await import('@/tests/mocks/supabase');
   return { 
     supabase: mod.supabase,
     createClient: mod.createClient,
@@ -314,7 +314,7 @@ vi.mock('@/lib/database/supabase', async () => {
 
 // Also mock relative imports that might be used in some tests
 vi.mock('../supabase', async () => {
-  const mod = await import('@/src/tests/mocks/supabase');
+  const mod = await import('@/tests/mocks/supabase');
   return { 
     supabase: mod.supabase,
     createClient: mod.createClient,
@@ -325,7 +325,7 @@ vi.mock('../supabase', async () => {
 
 // Mock the core Supabase library to ensure all instances use our mock
 vi.mock('@supabase/supabase-js', async () => {
-  const mod = await import('@/src/tests/mocks/supabase');
+  const mod = await import('@/tests/mocks/supabase');
   return {
     createClient: mod.createClient
   };

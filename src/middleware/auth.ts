@@ -5,9 +5,9 @@ import { getApiAuthService } from '@/services/auth/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { Permission } from '@/lib/rbac/roles';
 import { ApiError } from '@/lib/api/common/apiError';
-import { createAuthApiError } from '@/src/middleware/authErrors';
+import { createAuthApiError } from '@/middleware/authErrors';
 import { createErrorResponse } from '@/lib/api/common/responseFormatter';
-import { validateAuthToken } from '@/src/middleware/validateAuthToken';
+import { validateAuthToken } from '@/middleware/validateAuthToken';
 
 /**
  * Options for {@link withAuth} middleware.

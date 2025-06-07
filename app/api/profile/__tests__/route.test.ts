@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { GET, PATCH } from '@/app/api/profile/route';
+import { GET, PATCH } from '@app/api/profile/route';
 import { 
   resetServiceContainer, 
   configureServices 

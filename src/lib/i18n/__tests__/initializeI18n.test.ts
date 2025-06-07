@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { initializeI18n, languages } from '@/src/lib/i18n/index';
+import { initializeI18n, languages } from '@/lib/i18n/index';
 
 describe('initializeI18n', () => {
   it('registers custom resources and returns translations', () => {

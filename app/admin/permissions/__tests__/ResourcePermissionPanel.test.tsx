@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import ResourcePermissionPanel from '@/app/admin/permissions/ResourcePermissionPanel';
+import ResourcePermissionPanel from '@app/admin/permissions/ResourcePermissionPanel';
 import { usePermission } from '@/hooks/permission/usePermissions';
 import { UserManagementConfiguration } from '@/core/config';
 

@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests/utils/testUtils';
 import { describe, it, expect } from 'vitest';
-import { DevErrorDetailsPanel } from '@/src/ui/styled/common/DevErrorDetailsPanel';
+import { DevErrorDetailsPanel } from '@/ui/styled/common/DevErrorDetailsPanel';
 import type { ErrorEntry } from '@/lib/state/errorStore';
 
 const error: ErrorEntry & { stack?: string } = {

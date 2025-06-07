@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET } from '@/app/api/subscriptions/status/route';
+import { GET } from '@app/api/subscriptions/status/route';
 import { getApiSubscriptionService } from '@/services/subscription/factory';
 import { checkRateLimit } from '@/middleware/rateLimit';
 import { logUserAction } from '@/lib/audit/auditLogger';

@@ -5,7 +5,7 @@ import {
   UserManagementProvider,
   UserManagementConfig,
   IntegrationCallbacks,
-} from "@/src/lib/auth/UserManagementProvider";
+} from "@/lib/auth/UserManagementProvider";
 import { initializeCsrf } from "@/lib/api/axios";
 import { supabase } from "@/lib/database/supabase";
 import { UserManagementConfiguration } from "@/core/config";

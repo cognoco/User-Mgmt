@@ -7,7 +7,7 @@
 
 import { UserService } from "@/core/user/interfaces";
 import type { IUserDataProvider } from "@/core/user/IUserDataProvider";
-import { DefaultUserService } from "@/src/services/user/defaultUser.service";
+import { DefaultUserService } from "@/services/user/defaultUser.service";
 import { AdapterRegistry } from "@/adapters/registry";
 import { getServiceContainer } from "@/lib/config/serviceContainer";
 

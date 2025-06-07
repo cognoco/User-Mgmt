@@ -1,2 +1,2 @@
-export * from '@/src/adapters/team/supabase/factory';
-export * from '@/src/adapters/team/supabase/supabaseTeam.provider';
+export * from '@/adapters/team/supabase/factory';
+export * from '@/adapters/team/supabase/supabaseTeam.provider';

@@ -6,7 +6,7 @@
  * keeping the core logic database agnostic.
  */
 import type { PaginationMeta } from "@/lib/api/common/responseFormatter";
-import type { CsrfToken, CsrfTokenQuery } from "@/src/core/csrf/models";
+import type { CsrfToken, CsrfTokenQuery } from "@/core/csrf/models";
 
 export interface ICsrfDataProvider {
   /**

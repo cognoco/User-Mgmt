@@ -1,4 +1,4 @@
-export * from '@/src/core/organization/interfaces';
-export * from '@/src/core/organization/IOrganizationDataProvider';
-export * from '@/src/core/organization/models';
-export type { IOrganizationDataProvider } from '@/src/core/organization/IOrganizationDataProvider';
+export * from '@/core/organization/interfaces';
+export * from '@/core/organization/IOrganizationDataProvider';
+export * from '@/core/organization/models';
+export type { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { BrowserCsrfService } from '@/src/services/csrf/browserCsrf.service';
+import { BrowserCsrfService } from '@/services/csrf/browserCsrf.service';
 import type { CsrfDataProvider } from '@/core/csrf/ICsrfDataProvider';
 
 afterEach(() => {

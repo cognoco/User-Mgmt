@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { getApiRoleService } from '@/src/services/role/factory';
-import { RoleService } from '@/src/services/role/role.service';
+import { getApiRoleService } from '@/services/role/factory';
+import { RoleService } from '@/services/role/role.service';
 
 describe('getApiRoleService', () => {
   it('returns new service instance', () => {

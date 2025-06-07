@@ -14,7 +14,7 @@ import type {
   DataExportQuery,
   DeletionRequest,
   DeletionRequestQuery,
-} from "@/src/core/gdpr/models";
+} from "@/core/gdpr/models";
 
 export interface IGdprDataProvider {
   /**

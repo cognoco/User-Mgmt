@@ -4,7 +4,7 @@
  * Exports all interfaces, models, and events from the permission domain.
  */
 
-export * from '@/src/core/permission/interfaces';
-export * from '@/src/core/permission/IPermissionDataProvider';
-export * from '@/src/core/permission/models';
-export * from '@/src/core/permission/events';
+export * from '@/core/permission/interfaces';
+export * from '@/core/permission/IPermissionDataProvider';
+export * from '@/core/permission/models';
+export * from '@/core/permission/events';

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, act } from '@testing-library/react';
-import { EmailVerification } from '@/src/ui/headless/auth/EmailVerification';
+import { EmailVerification } from '@/ui/headless/auth/EmailVerification';
 import { useAuth } from '@/hooks/auth/useAuth';
 
 vi.mock('@/hooks/auth/useAuth', () => ({

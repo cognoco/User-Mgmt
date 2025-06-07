@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import * as UserManagementProvider from '@/lib/auth/UserManagementProvider';
 
-import { CorporateProfileSection } from '@/src/ui/styled/profile/CorporateProfileSection';
+import { CorporateProfileSection } from '@/ui/styled/profile/CorporateProfileSection';
 import { UserType, Company } from '@/types/userType';
 import type { UserManagementContextValue } from '@/lib/auth/UserManagementProvider';
 import { Platform } from '@/types/platform';

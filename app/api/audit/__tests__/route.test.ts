@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET } from '@/app/api/audit/route';
+import { GET } from '@app/api/audit/route';
 import { withRouteAuth } from '@/middleware/auth';
 import { hasPermission } from '@/lib/auth/hasPermission';
 import { getApiAuditService } from '@/services/audit/factory';

@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import { UserSearch } from "@/app/admin/users/UserSearch";
-import { SavedSearches } from "@/app/admin/users/SavedSearches";
-import { ExportOptions } from "@/app/admin/users/ExportOptions";
+import { UserSearch } from "@app/admin/users/UserSearch";
+import { SavedSearches } from "@app/admin/users/SavedSearches";
+import { ExportOptions } from "@app/admin/users/ExportOptions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/primitives/card";
 import { RealtimeStatus } from "@/components/ui/RealtimeStatus";
 import { useAdminRealtimeChannel } from "@/hooks/admin/useAdminRealtimeChannel";

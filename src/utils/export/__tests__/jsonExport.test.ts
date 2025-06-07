@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatJSONForExport } from '@/src/utils/export/jsonExport';
+import { formatJSONForExport } from '@/utils/export/jsonExport';
 
 describe('formatJSONForExport', () => {
   it('formats pretty json by default', () => {

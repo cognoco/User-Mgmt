@@ -14,8 +14,8 @@ import {
   PermissionAssignment,
   RoleCreationPayload,
   RoleUpdatePayload
-} from '@/src/core/permission/models';
-import { PermissionEventHandler } from '@/src/core/permission/events';
+} from '@/core/permission/models';
+import { PermissionEventHandler } from '@/core/permission/events';
 
 /**
  * Core permission service interface

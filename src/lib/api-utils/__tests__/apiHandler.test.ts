@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createApiHandler, createApiResponse, createErrorResponse } from '@/src/lib/api-utils/apiHandler';
+import { createApiHandler, createApiResponse, createErrorResponse } from '@/lib/api-utils/apiHandler';
 import { ApiError } from '@/lib/api/common';
 import { createApiMocks } from '@/tests/utils/apiTestingUtils';
 import { z } from 'zod';

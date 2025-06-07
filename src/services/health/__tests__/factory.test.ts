@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { createHealthService, getHealthService } from '@/src/services/health/factory';
-import { DefaultHealthService } from '@/src/services/health/defaultHealth.service';
+import { createHealthService, getHealthService } from '@/services/health/factory';
+import { DefaultHealthService } from '@/services/health/defaultHealth.service';
 import { AdapterRegistry } from '@/adapters/registry';
 
 vi.mock('../../adapters/registry', () => ({

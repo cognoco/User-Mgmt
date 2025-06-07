@@ -1,3 +1,3 @@
-export * from '@/src/core/resourceRelationship/interfaces';
-export * from '@/src/core/resourceRelationship/IResourceRelationshipDataProvider';
-export * from '@/src/core/resourceRelationship/models';
+export * from '@/core/resourceRelationship/interfaces';
+export * from '@/core/resourceRelationship/IResourceRelationshipDataProvider';
+export * from '@/core/resourceRelationship/models';

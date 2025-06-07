@@ -8,7 +8,7 @@ import {
   ValidationErrorDisplay,
   NotFoundErrorDisplay,
   PermissionErrorDisplay,
-} from '@/src/components/ui/errors/ErrorDisplay';
+} from '@/components/ui/errors/ErrorDisplay';
 import { toast } from '@/lib/hooks/useToast';
 
 vi.mock('@/lib/hooks/use-toast', () => {

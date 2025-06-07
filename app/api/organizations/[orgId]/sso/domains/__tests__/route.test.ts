@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET, POST, DELETE } from '@/app/api/organizations/[orgId]/sso/domains/route';
+import { GET, POST, DELETE } from '@app/api/organizations/[orgId]/sso/domains/route';
 
 describe('Domain Verification API Routes', () => {
   const mockOrgId = 'test-org-123';

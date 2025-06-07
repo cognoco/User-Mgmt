@@ -7,8 +7,8 @@
 
 import { NotificationService } from '@/core/notification/interfaces';
 import type { INotificationDataProvider } from '@/core/notification';
-import { DefaultNotificationService } from '@/src/services/notification/defaultNotification.service';
-import { DefaultNotificationHandler } from '@/src/services/notification/defaultNotification.handler';
+import { DefaultNotificationService } from '@/services/notification/defaultNotification.service';
+import { DefaultNotificationHandler } from '@/services/notification/defaultNotification.handler';
 import { AdapterRegistry } from '@/adapters/registry';
 import { UserManagementConfiguration } from '@/core/config';
 import { getServiceContainer } from '@/lib/config/serviceContainer';

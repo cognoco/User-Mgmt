@@ -1,6 +1,6 @@
-import { MemoryCache } from '@/src/lib/cache/memoryCache';
-import type { RedisCache } from '@/src/lib/cache/redisCache';
-import { broadcastInvalidation, subscribeInvalidation } from '@/src/lib/cache/cacheSync';
+import { MemoryCache } from '@/lib/cache/memoryCache';
+import type { RedisCache } from '@/lib/cache/redisCache';
+import { broadcastInvalidation, subscribeInvalidation } from '@/lib/cache/cacheSync';
 
 export interface MultiLevelCacheMetrics {
   hits: number;

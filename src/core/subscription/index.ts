@@ -1,5 +1,5 @@
 // Subscription Domain Index
 
-export * from '@/src/core/subscription/interfaces';
-export * from '@/src/core/subscription/models';
-export * from '@/src/core/subscription/ISubscriptionDataProvider';
+export * from '@/core/subscription/interfaces';
+export * from '@/core/subscription/models';
+export * from '@/core/subscription/ISubscriptionDataProvider';

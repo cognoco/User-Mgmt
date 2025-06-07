@@ -1,1 +1,1 @@
-export * from '@/src/ui/primitives/dialog';
+export * from '@/ui/primitives/dialog';

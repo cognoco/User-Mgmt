@@ -12,8 +12,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/src/hooks/auth/useAuth';
-import { useLogin } from '@/src/hooks/auth/useLogin';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { useLogin } from '@/hooks/auth/useLogin';
 import { useSectionErrors, useErrorStore } from '@/lib/state/errorStore';
 import type { LoginPayload } from '@/core/auth/models';
 

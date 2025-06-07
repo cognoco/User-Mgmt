@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { SearchCache } from '@/src/utils/cache/searchCache';
+import { SearchCache } from '@/utils/cache/searchCache';
 
 describe('SearchCache', () => {
   it('stores and retrieves items', () => {

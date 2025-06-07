@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
-import { usePayment } from '@/src/hooks/user/usePayment';
+import { usePayment } from '@/hooks/user/usePayment';
 import { describe, it, expect, vi, beforeEach, MockInstance } from 'vitest';
 import { api } from '@/lib/api/axios';
-import { TestWrapper } from '@/src/tests/utils/testWrapper';
+import { TestWrapper } from '@/tests/utils/testWrapper';
 
 // Define types if they don't exist in the codebase
 interface PaymentMethod {

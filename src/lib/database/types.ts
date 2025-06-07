@@ -1,4 +1,4 @@
-import { User, Profile, UserPreferences, ActivityLog, UserWithRelations } from '@/src/types/database';
+import { User, Profile, UserPreferences, ActivityLog, UserWithRelations } from '@/types/database';
 
 export interface DatabaseProvider {
   // User operations

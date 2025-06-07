@@ -1,1 +1,1 @@
-export { PrismaRepository } from '@/src/adapters/database/prisma/prismaRepository';
+export { PrismaRepository } from '@/adapters/database/prisma/prismaRepository';

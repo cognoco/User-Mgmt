@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useToast } from '@/src/hooks/notification/useToast';
+import { useToast } from '@/hooks/notification/useToast';
 import { toast } from 'sonner';
 
 vi.mock('sonner', () => {

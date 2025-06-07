@@ -15,7 +15,7 @@ import type {
   SessionOperationResult,
   SessionDeletionResult,
   SessionBatchResult,
-} from '@/src/core/session/models';
+} from '@/core/session/models';
 
 /**
  * Interface for session persistence operations.

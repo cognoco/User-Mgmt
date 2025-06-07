@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/database/supabase';
 import { OrganizationSecurityPolicy, DEFAULT_SECURITY_POLICY } from '@/types/organizations';
-import { validatePasswordWithPolicy, validatePassword } from '@/src/lib/security/passwordValidation';
+import { validatePasswordWithPolicy, validatePassword } from '@/lib/security/passwordValidation';
 
 /**
  * Fetches the security policy for an organization

@@ -2,7 +2,7 @@ import {
   SavedSearch,
   SavedSearchCreatePayload,
   SavedSearchUpdatePayload,
-} from "@/src/core/saved-search/models";
+} from "@/core/saved-search/models";
 
 export interface SavedSearchService {
   listSavedSearches(userId: string): Promise<SavedSearch[]>;

@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import TeamDashboardPageClient from '@/app/teams/ClientPage';
+import TeamDashboardPageClient from '@app/teams/ClientPage';
 
 export const metadata: Metadata = {
   title: 'Team Dashboard',

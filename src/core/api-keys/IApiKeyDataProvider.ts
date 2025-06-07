@@ -11,7 +11,7 @@ import type {
   ApiKeyCreateResult,
   ApiKeyQuery,
   ApiKeyListResult
-} from '@/src/core/api-keys/models';
+} from '@/core/api-keys/models';
 
 export interface IApiKeyDataProvider {
   /**

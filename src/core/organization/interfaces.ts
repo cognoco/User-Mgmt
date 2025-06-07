@@ -5,7 +5,7 @@ import type {
   OrganizationResult,
   OrganizationMember,
   OrganizationMemberResult
-} from '@/src/core/organization/models';
+} from '@/core/organization/models';
 
 /**
  * Service interface for managing organizations.

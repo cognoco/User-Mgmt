@@ -13,7 +13,7 @@ import {
   FeatureFlags,
   ServiceProviderRegistry,
   DEFAULT_CONFIG
-} from '@/src/core/config/interfaces';
+} from '@/core/config/interfaces';
 
 // The global configuration instance
 let configInstance: UserManagementConfig = { ...DEFAULT_CONFIG };
@@ -128,13 +128,13 @@ export function getServiceProvider<T>(providerName: string): T | undefined {
 }
 
 // Export the interfaces and default values
-export * from '@/src/core/config/interfaces';
-export * from '@/src/core/config/configContext';
-export * from '@/src/core/config/adapterConfig';
-export * from '@/src/core/config/clientConfig';
-export * from '@/src/core/config/environment';
-export * from '@/src/core/config/runtimeConfig';
-export * from '@/src/core/config/AppInitializer';
+export * from '@/core/config/interfaces';
+export * from '@/core/config/configContext';
+export * from '@/core/config/adapterConfig';
+export * from '@/core/config/clientConfig';
+export * from '@/core/config/environment';
+export * from '@/core/config/runtimeConfig';
+export * from '@/core/config/AppInitializer';
 
 // Export a singleton instance for convenience
 export const UserManagementConfiguration = {

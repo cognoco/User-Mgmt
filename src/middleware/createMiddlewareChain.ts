@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withErrorHandling } from '@/src/middleware/errorHandling';
-import { withRouteAuth, type RouteAuthOptions } from '@/src/middleware/auth';
-import { withValidation } from '@/src/middleware/validation';
+import { withErrorHandling } from '@/middleware/errorHandling';
+import { withRouteAuth, type RouteAuthOptions } from '@/middleware/auth';
+import { withValidation } from '@/middleware/validation';
 import type { ZodSchema } from 'zod';
-import { createRateLimit, type RateLimitOptions } from '@/src/middleware/rateLimit';
+import { createRateLimit, type RateLimitOptions } from '@/middleware/rateLimit';
 import {
   middlewareConfigSchema,
   type MiddlewareConfig,

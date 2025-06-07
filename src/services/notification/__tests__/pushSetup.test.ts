@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { DefaultNotificationService } from '@/src/services/notification/defaultNotification.service';
+import { DefaultNotificationService } from '@/services/notification/defaultNotification.service';
 
 const createProvider = () => ({
   registerDevice: vi.fn(),

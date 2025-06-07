@@ -1,2 +1,2 @@
-export type { UserManagementContextValue } from '@/src/lib/auth/UserManagementProvider';
-export { Platform } from '@/src/types/platform';
+export type { UserManagementContextValue } from '@/lib/auth/UserManagementProvider';
+export { Platform } from '@/types/platform';

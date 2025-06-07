@@ -1,4 +1,4 @@
-import { POST } from '@/app/api/auth/oauth/verify/route';
+import { POST } from '@app/api/auth/oauth/verify/route';
 import { OAuthProvider } from '@/types/oauth';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getServiceContainer } from '@/lib/config/serviceContainer';

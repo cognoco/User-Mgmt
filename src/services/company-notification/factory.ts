@@ -1,4 +1,4 @@
-import { DefaultCompanyNotificationService } from '@/src/services/company-notification/defaultCompanyNotification.service';
+import { DefaultCompanyNotificationService } from '@/services/company-notification/defaultCompanyNotification.service';
 import type { CompanyNotificationService } from '@/core/companyNotification/interfaces';
 import { getServiceContainer } from '@/lib/config/serviceContainer';
 

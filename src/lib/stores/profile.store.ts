@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
-import { supabase } from '@/src/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import {
     ProfileState,
 } from '@/types/profile';

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DefaultAuthService } from '@/src/services/auth/defaultAuth.service';
-import type { AuthStorage } from '@/src/services/auth/authStorage';
+import { DefaultAuthService } from '@/services/auth/defaultAuth.service';
+import type { AuthStorage } from '@/services/auth/authStorage';
 import type { AuthDataProvider } from '@/adapters/auth/interfaces';
 import type { AuthResult, LoginPayload } from '@/core/auth/models';
 

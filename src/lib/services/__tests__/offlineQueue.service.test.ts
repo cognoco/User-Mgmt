@@ -3,7 +3,7 @@ import {
   offlineQueue,
   processQueue,
   clearQueue,
-} from '@/src/lib/services/offlineQueue.service';
+} from '@/lib/services/offlineQueue.service';
 
 describe('OfflineQueueService', () => {
   beforeEach(() => {

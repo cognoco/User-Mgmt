@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { OAuthProvider } from '@/src/types/oauth';
+import { OAuthProvider } from '@/types/oauth';
 
 export const connectedAccountSchema = z.object({
   id: z.string(),

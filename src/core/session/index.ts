@@ -2,6 +2,6 @@
  * Session Domain Exports
  */
 
-export * from '@/src/core/session/interfaces';
-export * from '@/src/core/session/ISessionDataProvider';
-export * from '@/src/core/session/models';
+export * from '@/core/session/interfaces';
+export * from '@/core/session/ISessionDataProvider';
+export * from '@/core/session/models';

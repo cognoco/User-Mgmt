@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import type { User } from '@supabase/supabase-js';
 import { getSessionFromToken } from '@/services/auth/factory';
 import { ApiError } from '@/lib/api/common/apiError';
-import { createAuthApiError } from '@/src/middleware/authErrors';
+import { createAuthApiError } from '@/middleware/authErrors';
 import { extractAuthToken } from '@/lib/auth/utils';
 
 export interface TokenValidationResult {

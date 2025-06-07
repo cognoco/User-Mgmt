@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createStorageService, getStorageService } from '@/src/services/storage/factory';
-import { DefaultFileStorageService } from '@/src/services/storage/DefaultFileStorageService';
+import { createStorageService, getStorageService } from '@/services/storage/factory';
+import { DefaultFileStorageService } from '@/services/storage/DefaultFileStorageService';
 import { AdapterRegistry } from '@/adapters/registry';
 
 vi.mock('../../adapters/registry', () => ({

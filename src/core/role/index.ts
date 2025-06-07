@@ -1,1 +1,1 @@
-export * from '@/src/core/role/interfaces';
+export * from '@/core/role/interfaces';

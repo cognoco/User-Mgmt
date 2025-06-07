@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MemoryCache } from '@/src/lib/cache/memoryCache';
+import { MemoryCache } from '@/lib/cache/memoryCache';
 import { errorLogger } from '@/lib/monitoring/errorLogger';
 import { telemetry } from '@/lib/monitoring/errorSystem';
 

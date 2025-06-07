@@ -13,7 +13,7 @@ import {
 import {
   Header as HeadlessHeader,
   NavItem,
-} from "@/src/ui/headless/layout/Header";
+} from "@/ui/headless/layout/Header";
 
 interface HeaderProps {
   type?: "fixed" | "static" | "sticky";

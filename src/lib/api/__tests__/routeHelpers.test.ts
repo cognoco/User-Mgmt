@@ -6,7 +6,7 @@ vi.mock('../../auth/unified-auth.middleware', () => ({
   createAuthMiddleware: vi.fn((opts: any) => (handler: any) => handler)
 }));
 
-const { createAuthMiddleware } = await import('@/src/lib/auth/unifiedAuth.middleware');
+const { createAuthMiddleware } = await import('@/lib/auth/unifiedAuth.middleware');
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -16,7 +16,7 @@ describe('createApiHandler', () => {
   it('passes services to handler and calls auth middleware with options', async () => {
     const schema = z.object({ name: z.string() });
     const handler = vi.fn().mockResolvedValue(new NextResponse('ok'));
-    const { createApiHandler } = await import('@/src/lib/api/routeHelpers');
+    const { createApiHandler } = await import('@/lib/api/routeHelpers');
     const mockAuth = {} as any;
     const mockUser = {} as any;
     const apiHandler = createApiHandler(schema, handler, {
@@ -38,7 +38,7 @@ describe('createApiHandler', () => {
   it('returns validation error for invalid data', async () => {
     const schema = z.object({ name: z.string() });
     const handler = vi.fn();
-    const { createApiHandler } = await import('@/src/lib/api/routeHelpers');
+    const { createApiHandler } = await import('@/lib/api/routeHelpers');
     const apiHandler = createApiHandler(schema, handler);
     const req = new NextRequest(new Request('http://test', { method: 'POST', body: JSON.stringify({}) }));
     const res = await apiHandler(req);

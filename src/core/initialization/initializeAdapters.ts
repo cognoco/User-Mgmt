@@ -35,7 +35,7 @@ import { createResourceRelationshipProvider } from '@/adapters/resourceRelations
 import { DefaultResourceRelationshipService } from '@/services/resourceRelationship/defaultResourceRelationship.service';
 import { UserManagementConfiguration } from '@/core/config';
 import { AdapterRegistry } from '@/adapters/registry';
-import { isServer } from '@/src/core/platform';
+import { isServer } from '@/core/platform';
 
 /**
  * Initialize adapters and services using the adapter registry

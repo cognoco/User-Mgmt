@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { render, screen, fireEvent } from '@testing-library/react';
-import { AddressList } from '@/src/ui/headless/address/AddressList';
+import { AddressList } from '@/ui/headless/address/AddressList';
 import type { Address } from '@/core/address/types';
 
 describe('AddressList', () => {

@@ -1,1 +1,1 @@
-export * from '@/src/core/profile/interfaces';
+export * from '@/core/profile/interfaces';

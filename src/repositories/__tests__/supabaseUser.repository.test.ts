@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
-import { SupabaseUserRepository } from '@/src/repositories/supabaseUser.repository';
+import { SupabaseUserRepository } from '@/repositories/supabaseUser.repository';
 import { setTableMockData, resetSupabaseMock } from '@/tests/mocks/supabase';
 import { setupTestEnvironment } from '@/tests/utils/environmentSetup';
 import { UserType } from '@/types/userType';

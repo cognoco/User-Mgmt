@@ -1,1 +1,1 @@
-export * from '@/src/hooks/auth/useLogin';
+export * from '@/hooks/auth/useLogin';

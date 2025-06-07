@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET } from '@/app/api/webhooks/[webhookId]/deliveries/route';
+import { GET } from '@app/api/webhooks/[webhookId]/deliveries/route';
 import { NextRequest } from 'next/server';
 import { getApiWebhookService } from '@/services/webhooks/factory';
 import { getCurrentUser } from '@/lib/auth/session';

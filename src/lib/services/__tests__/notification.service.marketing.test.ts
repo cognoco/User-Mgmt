@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-let notificationService: typeof import('@/src/lib/services/notification.service').notificationService;
+let notificationService: typeof import('@/lib/services/notification.service').notificationService;
 let notificationQueue: { enqueue: any; registerProcessor: any };
 
 vi.mock('../notification-queue.service', () => ({
@@ -13,8 +13,8 @@ describe('NotificationService marketing & SMS', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     vi.resetModules();
-    ({ notificationService } = await import('@/src/lib/services/notification.service'));
-    ({ notificationQueue } = await import('@/src/lib/services/notificationQueue.service'));
+    ({ notificationService } = await import('@/lib/services/notification.service'));
+    ({ notificationQueue } = await import('@/lib/services/notificationQueue.service'));
     notificationService.setConfig({
       enabled: true,
       providers: { marketing: true, sms: true },

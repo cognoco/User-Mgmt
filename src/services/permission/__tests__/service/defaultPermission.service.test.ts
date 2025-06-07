@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { DefaultPermissionService } from "@/src/services/permission/defaultPermission.service";
+import { DefaultPermissionService } from "@/services/permission/defaultPermission.service";
 import { PermissionValues, UserRole } from "@/core/permission/models";
 import { MemoryCache, MultiLevelCache, RedisCache } from '@/lib/cache';
 import { Redis } from '@upstash/redis';
 import { logPermissionChange } from '@/lib/audit/permissionAuditLogger';
-import { permissionCacheService } from '@/src/services/permission/permissionCache.service';
+import { permissionCacheService } from '@/services/permission/permissionCache.service';
 
 
 vi.mock('@upstash/redis', () => ({ Redis: vi.fn(() => ({ get: vi.fn(), set: vi.fn(), del: vi.fn() })) }));

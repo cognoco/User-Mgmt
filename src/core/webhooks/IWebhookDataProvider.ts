@@ -10,7 +10,7 @@ import type {
   WebhookDelivery,
   WebhookListQuery,
   WebhookDeliveryQuery
-} from '@/src/core/webhooks/models';
+} from '@/core/webhooks/models';
 import type { PaginationMeta } from '@/lib/api/common/responseFormatter';
 
 export interface IWebhookDataProvider {

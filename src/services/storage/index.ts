@@ -1,2 +1,2 @@
-export * from '@/src/services/storage/factory';
-export * from '@/src/services/storage/DefaultFileStorageService';
+export * from '@/services/storage/factory';
+export * from '@/services/storage/DefaultFileStorageService';

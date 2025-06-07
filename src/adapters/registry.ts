@@ -28,8 +28,8 @@ import { IDataExportDataProvider } from '@/core/dataExport/IDataExportDataProvid
 import { 
   DatabaseProvider, 
   DatabaseConfig 
-} from '@/src/core/database/interfaces';
-import { BaseRepository } from '@/src/core/database/interfaces/base.interface';
+} from '@/core/database/interfaces';
+import { BaseRepository } from '@/core/database/interfaces/base.interface';
 
 
 

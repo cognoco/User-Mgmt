@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ResourceRelationshipService } from '@/src/lib/services/resourceRelationship.service';
+import { ResourceRelationshipService } from '@/lib/services/resourceRelationship.service';
 import {
   EntityConsistencyError,
   RelationshipHierarchyError,

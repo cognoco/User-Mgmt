@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET, DELETE } from '@/app/api/session/route';
+import { GET, DELETE } from '@app/api/session/route';
 import { withRouteAuth } from '@/middleware/auth';
 import { getApiSessionService } from '@/services/session/factory';
 import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers';

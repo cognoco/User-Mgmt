@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
-import ProfileForm from '@/src/ui/headless/user/ProfileForm';
-import { TestWrapper } from '@/src/tests/utils/testWrapper';
-import { createMockProfileStore } from '@/src/tests/mocks/profile.store.mock';
+import ProfileForm from '@/ui/headless/user/ProfileForm';
+import { TestWrapper } from '@/tests/utils/testWrapper';
+import { createMockProfileStore } from '@/tests/mocks/profile.store.mock';
 import { api } from '@/lib/api/axios';
 vi.unmock('@/hooks/auth/useAuth');
 

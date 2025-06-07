@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { DefaultResourceRelationshipService } from '@/src/services/resource-relationship/defaultResourceRelationship.service';
+import { DefaultResourceRelationshipService } from '@/services/resource-relationship/defaultResourceRelationship.service';
 import type { IResourceRelationshipDataProvider } from '@/core/resourceRelationship/IResourceRelationshipDataProvider';
 
 const relationship = {

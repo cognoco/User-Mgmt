@@ -19,7 +19,7 @@ describe('authEnvironment', () => {
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'anon');
     vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'service');
 
-    const mod = await import('@/src/lib/auth/authEnvironment');
+    const mod = await import('@/lib/auth/authEnvironment');
     expect(mod.authEnv.sessionCookieName).toBe('user-management-session');
     expect(mod.validateAuthEnv()).toBe(true);
     expect(mod.isSupabaseConfigured()).toBe(true);
@@ -33,7 +33,7 @@ describe('authEnvironment', () => {
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', '');
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', '');
 
-    const mod = await import('@/src/lib/auth/authEnvironment');
+    const mod = await import('@/lib/auth/authEnvironment');
     expect(mod.validateAuthEnv()).toBe(false);
     expect(mod.isSupabaseConfigured()).toBe(false);
   });

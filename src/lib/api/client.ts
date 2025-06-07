@@ -1,6 +1,6 @@
-import { api } from '@/src/lib/api/axios';
-import { detectNetworkStatus } from '@/src/lib/offline/networkDetector';
-import { queueRequest, processQueue, setRequestExecutor } from '@/src/lib/offline/requestQueue';
+import { api } from '@/lib/api/axios';
+import { detectNetworkStatus } from '@/lib/offline/networkDetector';
+import { queueRequest, processQueue, setRequestExecutor } from '@/lib/offline/requestQueue';
 
 export interface RequestOptions extends RequestInit {
   /** queue request when offline */

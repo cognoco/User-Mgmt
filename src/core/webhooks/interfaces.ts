@@ -6,4 +6,4 @@
  * domain grows.
  */
 
-export { IWebhookService } from '@/src/core/webhooks/IWebhookService';
+export { IWebhookService } from '@/core/webhooks/IWebhookService';

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getServerSession } from '@/src/middleware/authAdapter';
+import { getServerSession } from '@/middleware/authAdapter';
 import { getCurrentSession, getSessionFromRequest } from '@/lib/auth/session';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { NextRequest } from 'next/server';

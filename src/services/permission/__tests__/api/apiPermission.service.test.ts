@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ApiPermissionService } from '@/src/services/permission/apiPermission.service';
+import { ApiPermissionService } from '@/services/permission/apiPermission.service';
 
 describe('ApiPermissionService', () => {
   beforeEach(() => {

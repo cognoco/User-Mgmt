@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { MFASetup as HeadlessMFASetup, MFASetupProps } from '@/src/ui/headless/auth/MFASetup';
+import { MFASetup as HeadlessMFASetup, MFASetupProps } from '@/ui/headless/auth/MFASetup';
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Label } from '@/ui/primitives/label';

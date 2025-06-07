@@ -1,5 +1,5 @@
 import { SubscriptionTier, SubscriptionStatus } from '@/core/subscription/models';
-import { getApiSubscriptionService } from '@/src/services/subscription/factory';
+import { getApiSubscriptionService } from '@/services/subscription/factory';
 import { ApiError } from '@/lib/api/common';
 import { ERROR_CODES } from '@/lib/api/common/errorCodes';
 

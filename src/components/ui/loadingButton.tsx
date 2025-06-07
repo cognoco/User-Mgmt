@@ -1,1 +1,1 @@
-export * from '@/src/ui/primitives/loadingButton';
+export * from '@/ui/primitives/loadingButton';

@@ -5,7 +5,7 @@
  */
 
 import type { PaginationMeta } from '@/lib/api/common/responseFormatter';
-import type { DataProviderError } from '@/src/core/common/errors';
+import type { DataProviderError } from '@/core/common/errors';
 
 /**
  * Basic information about a user session

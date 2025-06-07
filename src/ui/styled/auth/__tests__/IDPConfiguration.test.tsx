@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
-import { TestWrapper } from '@/src/tests/utils/testWrapper';
+import { TestWrapper } from '@/tests/utils/testWrapper';
 import userEvent from '@testing-library/user-event';
 import { vi, MockInstance } from 'vitest';
 import { api } from '@/lib/api/axios';
-import IDPConfiguration from '@/src/ui/styled/auth/IDPConfiguration';
+import IDPConfiguration from '@/ui/styled/auth/IDPConfiguration';
 import { createMockSamlConfig, createMockOidcConfig } from '@/tests/mocks/testMocks';
 
 // Mock the api

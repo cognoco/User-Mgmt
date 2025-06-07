@@ -20,7 +20,7 @@ describe('supabase-auth.config', () => {
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'anon');
     vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'service');
 
-    const mod = await import('@/src/lib/auth/supabaseAuth.config');
+    const mod = await import('@/lib/auth/supabaseAuth.config');
     expect(mod.supabaseAuthConfig.cookieName).toBe('sb-access-token');
     expect(mod.supabaseAuthConfig.autoRefreshToken).toBe(true);
     expect(mod.validateSupabaseAuthConfig()).toBe(true);
@@ -31,7 +31,7 @@ describe('supabase-auth.config', () => {
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', '');
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', '');
 
-    const mod = await import('@/src/lib/auth/supabaseAuth.config');
+    const mod = await import('@/lib/auth/supabaseAuth.config');
     expect(mod.validateSupabaseAuthConfig()).toBe(false);
   });
 });

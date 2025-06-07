@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, act } from '@testing-library/react';
-import { PasswordResetForm } from '@/src/ui/headless/auth/PasswordResetForm';
+import { PasswordResetForm } from '@/ui/headless/auth/PasswordResetForm';
 import { useAuth } from '@/hooks/auth/useAuth';
 
 vi.mock('@/hooks/auth/useAuth', () => ({

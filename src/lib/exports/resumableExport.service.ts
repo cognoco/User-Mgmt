@@ -7,13 +7,13 @@ import {
   DataExportStorageBucket,
   UserExportData,
   CompanyExportData,
-} from '@/src/lib/exports/types';
+} from '@/lib/exports/types';
 import {
   getUserExportData,
   getUserDataExportById,
   getCompanyExportData,
   getCompanyDataExportById,
-} from '@/src/lib/exports/export.service';
+} from '@/lib/exports/export.service';
 import { DataExportError } from '@/core/common/errors';
 import { EXPORT_ERROR } from '@/core/common/errorCodes';
 

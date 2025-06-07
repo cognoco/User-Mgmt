@@ -1,2 +1,2 @@
-export { DefaultSavedSearchService } from "@/src/services/saved-search/defaultSavedSearch.service";
-export { getApiSavedSearchService } from "@/src/services/saved-search/factory";
+export { DefaultSavedSearchService } from "@/services/saved-search/defaultSavedSearch.service";
+export { getApiSavedSearchService } from "@/services/saved-search/factory";

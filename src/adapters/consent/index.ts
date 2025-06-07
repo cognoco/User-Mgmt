@@ -1,3 +1,3 @@
 export type { IConsentDataProvider } from '@/core/consent/IConsentDataProvider';
-export * from '@/src/adapters/consent/factory';
-export * from '@/src/adapters/consent/supabase';
+export * from '@/adapters/consent/factory';
+export * from '@/adapters/consent/supabase';

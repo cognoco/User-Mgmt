@@ -1,6 +1,6 @@
 import React from 'react';
 import { SessionManager as HeadlessSessionManager } from '@/ui/headless/session/SessionManager';
-import SessionList from '@/src/ui/styled/session/SessionList';
+import SessionList from '@/ui/styled/session/SessionList';
 
 export function SessionManager() {
   return (

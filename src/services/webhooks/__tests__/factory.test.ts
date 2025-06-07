@@ -4,8 +4,8 @@ let UserManagementConfiguration: typeof import('@/core/config').UserManagementCo
 let configureServices: typeof import('@/lib/config/serviceContainer').configureServices;
 let resetServiceContainer: typeof import('@/lib/config/serviceContainer').resetServiceContainer;
 
-let getApiWebhookService: typeof import('@/src/services/webhooks/factory').getApiWebhookService;
-let WebhookServiceClass: typeof import('@/src/services/webhooks/WebhookService').WebhookService;
+let getApiWebhookService: typeof import('@/services/webhooks/factory').getApiWebhookService;
+let WebhookServiceClass: typeof import('@/services/webhooks/WebhookService').WebhookService;
 
 describe('getApiWebhookService', () => {
   beforeEach(async () => {
@@ -16,8 +16,8 @@ describe('getApiWebhookService', () => {
     (AdapterRegistry as any).instance = null;
     UserManagementConfiguration.reset();
     resetServiceContainer();
-    ({ getApiWebhookService } = await import('@/src/services/webhooks/factory'));
-    ({ WebhookService: WebhookServiceClass } = await import('@/src/services/webhooks/WebhookService'));
+    ({ getApiWebhookService } = await import('@/services/webhooks/factory'));
+    ({ WebhookService: WebhookServiceClass } = await import('@/services/webhooks/WebhookService'));
   });
 
   it('returns configured service if registered', () => {

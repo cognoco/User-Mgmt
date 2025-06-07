@@ -1,3 +1,3 @@
-export * from '@/src/core/sso/interfaces';
-export * from '@/src/core/sso/ISsoDataProvider';
-export * from '@/src/core/sso/models';
+export * from '@/core/sso/interfaces';
+export * from '@/core/sso/ISsoDataProvider';
+export * from '@/core/sso/models';

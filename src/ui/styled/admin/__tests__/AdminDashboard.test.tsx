@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
-import { AdminDashboard } from '@/src/ui/styled/admin/AdminDashboard';
+import { AdminDashboard } from '@/ui/styled/admin/AdminDashboard';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { TestWrapper } from '@/src/tests/utils/testWrapper';
+import { TestWrapper } from '@/tests/utils/testWrapper';
 
 // Mock data
 const mockDashboardData = {

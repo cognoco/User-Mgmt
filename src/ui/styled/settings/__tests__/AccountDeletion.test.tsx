@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@/tests/testUtils';
 import { describe, it, expect, vi } from 'vitest';
-import { AccountDeletion } from '@/src/ui/styled/settings/AccountDeletion';
+import { AccountDeletion } from '@/ui/styled/settings/AccountDeletion';
 
 // Mock the auth hook - this is what we're testing
 const deleteAccountMock = vi.fn();

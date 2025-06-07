@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DefaultSsoService } from '@/src/services/sso/defaultSso.service';
+import { DefaultSsoService } from '@/services/sso/defaultSso.service';
 import type { SsoDataProvider } from '@/core/sso/ISsoDataProvider';
 
 vi.mock('@/services/common/service-error-handler', () => ({

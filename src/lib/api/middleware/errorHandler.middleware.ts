@@ -4,7 +4,7 @@ import {
   ApplicationError,
   createErrorFromUnknown,
 } from '@/core/common/errors';
-import { createErrorResponse, ResponseMeta } from '@/src/lib/api/response/apiResponse';
+import { createErrorResponse, ResponseMeta } from '@/lib/api/response/apiResponse';
 
 export interface ErrorHandlerContext extends ResponseMeta {
   service?: string;

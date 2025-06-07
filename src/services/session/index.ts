@@ -1,5 +1,5 @@
-import { DefaultSessionService } from '@/src/services/session/defaultSession.service';
-export { ApiSessionService, getApiSessionService } from '@/src/services/session/apiSession.service';
+import { DefaultSessionService } from '@/services/session/defaultSession.service';
+export { ApiSessionService, getApiSessionService } from '@/services/session/apiSession.service';
 import type { SessionService } from '@/core/session/interfaces';
 import type { SessionDataProvider } from '@/core/session/ISessionDataProvider';
 

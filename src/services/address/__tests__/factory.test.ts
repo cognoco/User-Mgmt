@@ -19,9 +19,9 @@ vi.mock('@/lib/config/service-container', () => {
   };
 });
 
-let getApiAddressService: typeof import('@/src/services/address/factory').getApiAddressService;
-let getApiPersonalAddressService: typeof import('@/src/services/address/factory').getApiPersonalAddressService;
-let DefaultAddressService: typeof import('@/src/services/address/defaultAddress.service').DefaultAddressService;
+let getApiAddressService: typeof import('@/services/address/factory').getApiAddressService;
+let getApiPersonalAddressService: typeof import('@/services/address/factory').getApiPersonalAddressService;
+let DefaultAddressService: typeof import('@/services/address/defaultAddress.service').DefaultAddressService;
 let AdapterRegistry: typeof import('@/adapters/registry').AdapterRegistry;
 let configureServices: typeof import('@/lib/config/serviceContainer').configureServices;
 let resetServiceContainer: typeof import('@/lib/config/serviceContainer').resetServiceContainer;
@@ -36,8 +36,8 @@ describe('getApiAddressService', () => {
     (AdapterRegistry as any).instance = null;
     resetServiceContainer();
     UserManagementConfiguration.reset();
-    ({ getApiAddressService, getApiPersonalAddressService } = await import('@/src/services/address/factory'));
-    ({ DefaultAddressService } = await import('@/src/services/address/defaultAddress.service'));
+    ({ getApiAddressService, getApiPersonalAddressService } = await import('@/services/address/factory'));
+    ({ DefaultAddressService } = await import('@/services/address/defaultAddress.service'));
   });
 
   it('returns configured service if registered', () => {
@@ -75,8 +75,8 @@ describe('getApiPersonalAddressService', () => {
     (AdapterRegistry as any).instance = null;
     resetServiceContainer();
     UserManagementConfiguration.reset();
-    ({ getApiAddressService, getApiPersonalAddressService } = await import('@/src/services/address/factory'));
-    ({ DefaultAddressService } = await import('@/src/services/address/defaultAddress.service'));
+    ({ getApiAddressService, getApiPersonalAddressService } = await import('@/services/address/factory'));
+    ({ DefaultAddressService } = await import('@/services/address/defaultAddress.service'));
   });
 
   it('returns configured personal service if registered', () => {

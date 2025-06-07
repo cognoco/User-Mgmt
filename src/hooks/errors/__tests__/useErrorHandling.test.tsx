@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { useErrorHandling } from '@/src/hooks/errors/useErrorHandling';
+import { useErrorHandling } from '@/hooks/errors/useErrorHandling';
 
 describe('useErrorHandling', () => {
   it('handles errors and clears them', () => {

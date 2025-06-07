@@ -1,1 +1,1 @@
-export { NotificationCenter as default } from '@/src/ui/styled/notification/NotificationCenter';
+export { NotificationCenter as default } from '@/ui/styled/notification/NotificationCenter';

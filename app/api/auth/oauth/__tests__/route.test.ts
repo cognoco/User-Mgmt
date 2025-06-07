@@ -107,7 +107,7 @@ describe("POST /api/auth/oauth", () => {
     mockService.getOAuthAuthorizationUrl.mockReturnValue(
       'https://example.com/auth'
     );
-    POST = (await import("@/app/api/auth/oauth/route")).POST;
+    POST = (await import("@app/api/auth/oauth/route")).POST;
   });
 
   it("should return authorization URL and state for a valid provider (Google)", async () => {

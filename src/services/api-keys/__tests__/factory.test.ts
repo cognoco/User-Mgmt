@@ -2,16 +2,16 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AdapterRegistry } from '@/adapters/registry';
 import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer';
 
-let getApiKeyService: typeof import('@/src/services/api-keys/factory').getApiKeyService;
-let DefaultApiKeysService: typeof import('@/src/services/api-keys/defaultApiKeys.service').DefaultApiKeysService;
+let getApiKeyService: typeof import('@/services/api-keys/factory').getApiKeyService;
+let DefaultApiKeysService: typeof import('@/services/api-keys/defaultApiKeys.service').DefaultApiKeysService;
 
 describe('getApiKeyService', () => {
   beforeEach(async () => {
     vi.resetModules();
     (AdapterRegistry as any).instance = null;
     resetServiceContainer();
-    ({ getApiKeyService } = await import('@/src/services/api-keys/factory'));
-    ({ DefaultApiKeysService } = await import('@/src/services/api-keys/defaultApiKeys.service'));
+    ({ getApiKeyService } = await import('@/services/api-keys/factory'));
+    ({ DefaultApiKeysService } = await import('@/services/api-keys/defaultApiKeys.service'));
   });
 
   it('returns configured service if registered', () => {

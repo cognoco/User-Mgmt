@@ -1,6 +1,6 @@
-import type { RequestOptions } from '@/src/lib/api/client';
+import type { RequestOptions } from '@/lib/api/client';
 import { openDB, IDBPDatabase } from 'idb';
-import { isNetworkError } from '@/src/lib/utils/error';
+import { isNetworkError } from '@/lib/utils/error';
 
 interface QueuedRequest {
   id: string;

@@ -4,8 +4,8 @@ let UserManagementConfiguration: typeof import('@/core/config').UserManagementCo
 let configureServices: typeof import('@/lib/config/serviceContainer').configureServices;
 let resetServiceContainer: typeof import('@/lib/config/serviceContainer').resetServiceContainer;
 
-let getApiNotificationService: typeof import('@/src/services/notification/factory').getApiNotificationService;
-let DefaultNotificationService: typeof import('@/src/services/notification/defaultNotification.service').DefaultNotificationService;
+let getApiNotificationService: typeof import('@/services/notification/factory').getApiNotificationService;
+let DefaultNotificationService: typeof import('@/services/notification/defaultNotification.service').DefaultNotificationService;
 
 describe('getApiNotificationService', () => {
   beforeEach(async () => {
@@ -16,8 +16,8 @@ describe('getApiNotificationService', () => {
     (AdapterRegistry as any).instance = null;
     UserManagementConfiguration.reset();
     resetServiceContainer();
-    ({ getApiNotificationService } = await import('@/src/services/notification/factory'));
-    ({ DefaultNotificationService } = await import('@/src/services/notification/defaultNotification.service'));
+    ({ getApiNotificationService } = await import('@/services/notification/factory'));
+    ({ DefaultNotificationService } = await import('@/services/notification/defaultNotification.service'));
   });
 
   it('returns configured service if registered', () => {

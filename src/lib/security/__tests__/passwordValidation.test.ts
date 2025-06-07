@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validatePassword } from '@/src/lib/security/passwordValidation';
+import { validatePassword } from '@/lib/security/passwordValidation';
 
 describe('validatePassword', () => {
   it('rejects weak passwords', () => {

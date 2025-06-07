@@ -1,2 +1,2 @@
-export * from '@/src/services/storage';
-export * from '@/src/services/health';
+export * from '@/services/storage';
+export * from '@/services/health';

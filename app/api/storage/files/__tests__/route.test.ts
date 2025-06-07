@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET, DELETE } from '@/app/api/storage/files/route';
+import { GET, DELETE } from '@app/api/storage/files/route';
 import { getStorageService } from '@/services/storage';
 import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers';
 

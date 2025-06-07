@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { initializeI18n } from '@/src/lib/i18n/index';
-import { getMessageTemplate, formatMessage, formatErrorMessage } from '@/src/lib/i18n/messages';
+import { initializeI18n } from '@/lib/i18n/index';
+import { getMessageTemplate, formatMessage, formatErrorMessage } from '@/lib/i18n/messages';
 
 describe('i18n message helpers', () => {
   it('extracts template by locale', () => {

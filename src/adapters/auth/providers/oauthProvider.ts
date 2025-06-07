@@ -1,4 +1,4 @@
-import type { AuthDataProvider } from '@/src/adapters/auth/interfaces';
+import type { AuthDataProvider } from '@/adapters/auth/interfaces';
 import { randomBytes, createHash } from "crypto";
 import type {
   OAuthProviderConfig,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isDescendant, validateParentSelection, HierarchyNode } from '@/src/utils/hierarchy';
+import { isDescendant, validateParentSelection, HierarchyNode } from '@/utils/hierarchy';
 
 const tree: HierarchyNode[] = [
   {

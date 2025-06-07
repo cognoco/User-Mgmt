@@ -1,2 +1,2 @@
-export * from '@/src/repositories/interfaces/IUserRepository';
-export * from '@/src/repositories/supabaseUser.repository';
+export * from '@/repositories/interfaces/IUserRepository';
+export * from '@/repositories/supabaseUser.repository';

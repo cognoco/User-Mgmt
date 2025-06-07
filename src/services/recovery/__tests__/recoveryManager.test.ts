@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { RecoveryManager } from '@/src/services/recovery/recoveryManager';
+import { RecoveryManager } from '@/services/recovery/recoveryManager';
 
 describe('RecoveryManager', () => {
   it('executes registered recovery task', async () => {

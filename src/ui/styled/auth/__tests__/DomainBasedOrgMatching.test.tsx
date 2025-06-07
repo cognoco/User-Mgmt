@@ -3,8 +3,8 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DomainBasedOrgMatching } from '@/src/ui/styled/auth/DomainBasedOrgMatching';
-import { TestWrapper } from '@/src/tests/utils/testWrapper';
+import { DomainBasedOrgMatching } from '@/ui/styled/auth/DomainBasedOrgMatching';
+import { TestWrapper } from '@/tests/utils/testWrapper';
 import { api } from '@/lib/api/axios';
 
 vi.mock('@/lib/api/axios');

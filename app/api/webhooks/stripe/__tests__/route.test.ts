@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '@/app/api/webhooks/stripe/route';
+import { POST } from '@app/api/webhooks/stripe/route';
 
 vi.mock('@/lib/payments/stripe', () => ({
   stripe: {

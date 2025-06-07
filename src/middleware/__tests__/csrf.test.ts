@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { csrf, getCSRFToken, type CSRFTokenProvider } from '@/src/middleware/csrf';
+import { csrf, getCSRFToken, type CSRFTokenProvider } from '@/middleware/csrf';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 // Mock crypto module properly using importOriginal

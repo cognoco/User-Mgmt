@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { Hero as HeadlessHero } from "@/src/ui/headless/layout/Hero";
+import { Hero as HeadlessHero } from "@/ui/headless/layout/Hero";
 
 interface HeroProps {
   title?: ReactNode;

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import {
   Footer as HeadlessFooter,
   FooterProps as HeadlessProps,
-} from "@/src/ui/headless/layout/Footer";
+} from "@/ui/headless/layout/Footer";
 
 interface FooterProps extends Omit<HeadlessProps, "children"> {}
 

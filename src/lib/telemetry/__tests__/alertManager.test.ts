@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AlertManager, AlertRule } from '@/src/lib/telemetry/alertManager';
+import { AlertManager, AlertRule } from '@/lib/telemetry/alertManager';
 import { NotificationChannel } from '@/core/notification/models';
 import { ApplicationError } from '@/core/common/errors';
 import { SERVER_ERROR } from '@/core/common/errorCodes';

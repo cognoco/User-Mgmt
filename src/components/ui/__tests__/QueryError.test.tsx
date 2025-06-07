@@ -1,7 +1,7 @@
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { QueryError } from '@/src/components/ui/QueryError';
+import { QueryError } from '@/components/ui/QueryError';
 
 vi.useFakeTimers();
 

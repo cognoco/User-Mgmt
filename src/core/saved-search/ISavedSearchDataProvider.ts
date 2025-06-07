@@ -2,7 +2,7 @@ import type {
   SavedSearch,
   SavedSearchCreatePayload,
   SavedSearchUpdatePayload
-} from '@/src/core/saved-search/models';
+} from '@/core/saved-search/models';
 
 /**
  * Data provider interface for saved search persistence.

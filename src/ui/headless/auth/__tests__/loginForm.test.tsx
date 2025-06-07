@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, act } from '@testing-library/react';
-import { LoginForm } from '@/src/ui/headless/auth/LoginForm';
+import { LoginForm } from '@/ui/headless/auth/LoginForm';
 import { useAuth } from '@/hooks/auth/useAuth';
 import type { LoginData } from '@/types/auth';
 import * as React from 'react';

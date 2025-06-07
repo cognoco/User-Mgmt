@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ErrorMetrics, ErrorMetricDimensions } from '@/src/lib/telemetry/errorMetrics';
+import { ErrorMetrics, ErrorMetricDimensions } from '@/lib/telemetry/errorMetrics';
 
 describe('ErrorMetrics', () => {
   let metrics: ErrorMetrics;

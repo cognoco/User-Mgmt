@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import SessionManagement from '@/src/ui/styled/profile/SessionManagement';
+import SessionManagement from '@/ui/styled/profile/SessionManagement';
 import { useSession } from '@/hooks/session/useSession';
 
 // Mock useSession hook

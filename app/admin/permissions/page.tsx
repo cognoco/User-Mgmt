@@ -1,10 +1,10 @@
 'use client';
 import { Metadata } from 'next';
-import RoleManagementPanel from '@/app/admin/permissions/RoleManagementPanel';
-import UserRoleAssignmentPanel from '@/app/admin/permissions/UserRoleAssignmentPanel';
-import ResourcePermissionPanel from '@/app/admin/permissions/ResourcePermissionPanel';
-import AuditLogViewer from '@/app/admin/permissions/AuditLogViewer';
-import PermissionAuditDashboard from '@/app/admin/permissions/PermissionAuditDashboard';
+import RoleManagementPanel from '@app/admin/permissions/RoleManagementPanel';
+import UserRoleAssignmentPanel from '@app/admin/permissions/UserRoleAssignmentPanel';
+import ResourcePermissionPanel from '@app/admin/permissions/ResourcePermissionPanel';
+import AuditLogViewer from '@app/admin/permissions/AuditLogViewer';
+import PermissionAuditDashboard from '@app/admin/permissions/PermissionAuditDashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
 
 export const metadata: Metadata = {

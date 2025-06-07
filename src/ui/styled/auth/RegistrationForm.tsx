@@ -10,8 +10,8 @@ import { RadioGroup, RadioGroupItem } from '@/ui/primitives/radioGroup';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 import { Check, X, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { OAuthButtons } from '@/src/ui/styled/auth/OAuthButtons';
-import { PasswordRequirements } from '@/src/ui/styled/auth/PasswordRequirements';
+import { OAuthButtons } from '@/ui/styled/auth/OAuthButtons';
+import { PasswordRequirements } from '@/ui/styled/auth/PasswordRequirements';
 import { RegistrationForm as HeadlessRegistrationForm } from '@/ui/headless/auth/RegistrationForm';
 import { useAuth } from '@/hooks/auth/useAuth';
 

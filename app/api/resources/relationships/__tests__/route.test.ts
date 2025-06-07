@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET, POST } from '@/app/api/resources/relationships/route';
+import { GET, POST } from '@app/api/resources/relationships/route';
 import { createResourceRelationshipService } from '@/services/resourceRelationship/factory';
 
 vi.mock('@/middleware/createMiddlewareChain', async () => {

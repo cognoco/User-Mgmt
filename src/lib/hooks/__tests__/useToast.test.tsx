@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { act, waitFor } from '@testing-library/react';
 import { describe, test, expect } from 'vitest';
-import { useToast, toast } from '@/src/lib/hooks/useToast';
+import { useToast, toast } from '@/lib/hooks/useToast';
 
 const renderCounts = { current: 0 };
 

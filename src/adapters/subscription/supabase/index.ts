@@ -1,2 +1,2 @@
-export * from '@/src/adapters/subscription/supabase/supabaseAdapter';
-export * from '@/src/adapters/subscription/supabase/supabaseSubscription.provider';
+export * from '@/adapters/subscription/supabase/supabaseAdapter';
+export * from '@/adapters/subscription/supabase/supabaseSubscription.provider';

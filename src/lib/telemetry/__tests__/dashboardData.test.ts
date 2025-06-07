@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Telemetry } from '@/lib/monitoring/telemetry';
-import { ErrorDashboardData, TimeRange } from '@/src/lib/telemetry/dashboardData';
-import { ErrorReporter } from '@/src/lib/telemetry/errorReporting';
+import { ErrorDashboardData, TimeRange } from '@/lib/telemetry/dashboardData';
+import { ErrorReporter } from '@/lib/telemetry/errorReporting';
 
 describe('ErrorDashboardData', () => {
   let telemetry: Telemetry;

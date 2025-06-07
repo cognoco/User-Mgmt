@@ -14,13 +14,13 @@ import type {
   ServiceContainer 
 } from '@/core/config/interfaces';
 import { getServiceContainer } from '@/lib/config/serviceContainer';
-import { createAuthMiddleware } from '@/src/lib/api/authMiddleware';
+import { createAuthMiddleware } from '@/lib/api/authMiddleware';
 import { 
   createSuccessResponse, 
   createErrorResponse, 
   ApiError, 
   ERROR_CODES 
-} from '@/src/lib/api/common';
+} from '@/lib/api/common';
 
 /**
  * API Handler function signature

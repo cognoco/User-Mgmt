@@ -1,6 +1,6 @@
 // src/services/auth/__tests__/mocks/mock-auth-service.ts
 import { vi } from 'vitest';
-import { AuthService, AuthState } from '@/src/core/auth/interfaces';
+import { AuthService, AuthState } from '@/core/auth/interfaces';
 import { 
   AuthResult, 
   LoginPayload, 
@@ -8,7 +8,7 @@ import {
   MFAVerifyResponse, 
   RegistrationPayload, 
   User 
-} from '@/src/core/auth/models';
+} from '@/core/auth/models';
 
 /**
  * Mock implementation of the AuthService interface for testing

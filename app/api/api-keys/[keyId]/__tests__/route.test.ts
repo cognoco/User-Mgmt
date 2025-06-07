@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { DELETE } from '@/app/api/api-keys/[keyId]/route'
+import { DELETE } from '@app/api/api-keys/[keyId]/route'
 import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer'
 import type { ApiKeyService } from '@/core/apiKeys/interfaces'
 import type { AuthService } from '@/core/auth/interfaces'

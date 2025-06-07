@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { WebhookService } from '@/src/services/webhooks/WebhookService';
+import { WebhookService } from '@/services/webhooks/WebhookService';
 import type { IWebhookDataProvider } from '@/core/webhooks';
 
 vi.mock('@/services/subscription/subscription-access', () => ({

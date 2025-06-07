@@ -1,5 +1,5 @@
 import type { IAddressDataProvider } from '@/core/address/IAddressDataProvider';
-import { SupabaseAddressAdapter } from '@/src/adapters/address/supabaseAdapter';
+import { SupabaseAddressAdapter } from '@/adapters/address/supabaseAdapter';
 
 export function createSupabaseAddressProvider(
   supabaseUrl: string,

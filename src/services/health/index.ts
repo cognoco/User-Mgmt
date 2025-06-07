@@ -1,2 +1,2 @@
-export * from '@/src/services/health/factory';
-export * from '@/src/services/health/defaultHealth.service';
+export * from '@/services/health/factory';
+export * from '@/services/health/defaultHealth.service';

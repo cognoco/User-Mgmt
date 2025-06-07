@@ -7,7 +7,7 @@
 
 import { TwoFactorService } from '@/core/twoFactor/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
-import { DefaultTwoFactorService } from '@/src/services/two-factor/defaultTwoFactor.service';
+import { DefaultTwoFactorService } from '@/services/two-factor/defaultTwoFactor.service';
 import {
   getServiceContainer,
   getServiceConfiguration

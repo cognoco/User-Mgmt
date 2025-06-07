@@ -2,7 +2,7 @@
 
 import { Button } from "@/ui/primitives/button";
 import { Alert, AlertDescription } from "@/ui/primitives/alert";
-import { DataDeletionRequest as HeadlessDataDeletionRequest } from "@/src/ui/headless/gdpr/DataDeletionRequest";
+import { DataDeletionRequest as HeadlessDataDeletionRequest } from "@/ui/headless/gdpr/DataDeletionRequest";
 
 export function DataDeletionRequest() {
   return (

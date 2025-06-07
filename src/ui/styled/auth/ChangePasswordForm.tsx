@@ -4,7 +4,7 @@ import { Button } from '@/ui/primitives/button';
 import { Input } from '@/ui/primitives/input';
 import { Label } from '@/ui/primitives/label';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
-import { PasswordRequirements } from '@/src/ui/styled/auth/PasswordRequirements';
+import { PasswordRequirements } from '@/ui/styled/auth/PasswordRequirements';
 import { ChangePasswordForm as HeadlessChangePasswordForm } from '@/ui/headless/auth/ChangePasswordForm';
 
 /**

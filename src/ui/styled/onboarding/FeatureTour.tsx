@@ -1,5 +1,5 @@
-import { Button } from '@/src/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/src/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import FeatureTourHeadless, { TourStep } from '@/ui/headless/onboarding/FeatureTour';
 
 const tourSteps: TourStep[] = [

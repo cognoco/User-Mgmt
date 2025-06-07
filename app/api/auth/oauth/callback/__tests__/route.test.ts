@@ -1,4 +1,4 @@
-import { POST } from '@/app/api/auth/oauth/callback/route';
+import { POST } from '@app/api/auth/oauth/callback/route';
 import { OAuthProvider } from '@/types/oauth';
 import { describe, it, expect } from 'vitest';
 

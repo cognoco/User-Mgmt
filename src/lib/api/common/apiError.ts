@@ -5,8 +5,8 @@
  * This module provides consistent error formatting and status code mapping.
  */
 
-import { ERROR_CODES, ErrorCode } from '@/src/lib/api/common/errorCodes';
-import { getErrorStatus, getErrorCategory, ErrorCategory } from '@/src/lib/api/errorHandler';
+import { ERROR_CODES, ErrorCode } from '@/lib/api/common/errorCodes';
+import { getErrorStatus, getErrorCategory, ErrorCategory } from '@/lib/api/errorHandler';
 
 /**
  * API Error class for standardized error responses returned from API routes.

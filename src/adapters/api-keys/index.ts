@@ -1,4 +1,4 @@
 export type { IApiKeyDataProvider } from '@/core/apiKeys/IApiKeyDataProvider';
-export * from '@/src/adapters/apiKeys/factory';
-export * from '@/src/adapters/apiKeys/supabaseAdapter';
-export * from '@/src/adapters/apiKeys/supabase';
+export * from '@/adapters/apiKeys/factory';
+export * from '@/adapters/apiKeys/supabaseAdapter';
+export * from '@/adapters/apiKeys/supabase';

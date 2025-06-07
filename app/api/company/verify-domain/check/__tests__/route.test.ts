@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { POST } from '@/app/api/company/verify-domain/check/route';
+import { POST } from '@app/api/company/verify-domain/check/route';
 import { getApiCompanyService } from '@/services/company/factory';
 
 vi.mock('@/middleware/rate-limit', () => ({

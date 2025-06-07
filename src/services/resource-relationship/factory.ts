@@ -9,7 +9,7 @@ import { AdapterRegistry } from '@/adapters/registry';
 import { getServiceContainer } from '@/lib/config/serviceContainer';
 import type { ResourceRelationshipService } from '@/core/resourceRelationship/interfaces';
 import type { IResourceRelationshipDataProvider } from '@/core/resourceRelationship/IResourceRelationshipDataProvider';
-import { DefaultResourceRelationshipService } from '@/src/services/resource-relationship/defaultResourceRelationship.service';
+import { DefaultResourceRelationshipService } from '@/services/resource-relationship/defaultResourceRelationship.service';
 
 /**
  * Options for {@link getApiResourceRelationshipService}

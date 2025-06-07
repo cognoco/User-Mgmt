@@ -3,7 +3,7 @@ import {
   supabaseAuthConfig,
   validateSupabaseAuthConfig,
   type SupabaseAuthConfig,
-} from '@/src/lib/auth/supabaseAuth.config';
+} from '@/lib/auth/supabaseAuth.config';
 
 let supabaseClient: SupabaseClient | null = null;
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { GET } from '@/app/api/team/roles/[roleId]/route';
+import { GET } from '@app/api/team/roles/[roleId]/route';
 
 describe('team role id API', () => {
   it('GET returns role for valid id', async () => {

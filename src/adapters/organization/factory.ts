@@ -1,6 +1,6 @@
 import type { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
-import { DefaultOrganizationAdapter } from '@/src/adapters/organization/defaultOrganizationAdapter';
-import { SupabaseOrganizationProvider } from '@/src/adapters/organization/supabase/supabaseOrganization.provider';
+import { DefaultOrganizationAdapter } from '@/adapters/organization/defaultOrganizationAdapter';
+import { SupabaseOrganizationProvider } from '@/adapters/organization/supabase/supabaseOrganization.provider';
 
 export function createDefaultOrganizationProvider(): IOrganizationDataProvider {
   return new DefaultOrganizationAdapter();

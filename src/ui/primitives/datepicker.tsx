@@ -1,6 +1,6 @@
 'use client';
 import { Control, Controller } from 'react-hook-form';
-import { Input } from '@/src/ui/primitives/input';
+import { Input } from '@/ui/primitives/input';
 
 interface DatePickerProps {
   control: Control<any>;

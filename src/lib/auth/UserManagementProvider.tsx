@@ -17,8 +17,8 @@ import { OAuthModuleConfig } from '@/types/oauth';
 // import { initializeCsrf } from '@/lib/api/axios'; // Removed unused import
 // import { LoginPayload, AuthResult } from '@/core/auth/models'; // Commented out
 import { PaletteProvider } from '@/ui/primitives/PaletteProvider';
-import { initializeNotifications } from '@/src/lib/services/notification.service';
-import { notificationPreferencesService } from '@/src/lib/services/notificationPreferences.service';
+import { initializeNotifications } from '@/lib/services/notification.service';
+import { notificationPreferencesService } from '@/lib/services/notificationPreferences.service';
 
 // Detect platform automatically (can be overridden in config)
 const detectPlatform = (): Platform => {

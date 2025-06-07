@@ -5,7 +5,7 @@
  * All configuration options are forwarded to the client constructor.
  */
 import { PrismaClient } from '@prisma/client';
-import type { DatabaseConfig, DatabaseProvider } from '@/src/lib/database/types';
+import type { DatabaseConfig, DatabaseProvider } from '@/lib/database/types';
 
 class PrismaDatabaseProvider extends PrismaClient implements DatabaseProvider {
   // TODO: Implement DatabaseProvider methods using Prisma queries

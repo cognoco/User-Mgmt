@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { webhookCreateSchema, webhookUpdateSchema } from '@/src/core/webhooks/models';
+import { webhookCreateSchema, webhookUpdateSchema } from '@/core/webhooks/models';
 
 describe('webhook schemas', () => {
   it('validates create payload', () => {

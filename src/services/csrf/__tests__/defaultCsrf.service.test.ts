@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { DefaultCsrfService } from '@/src/services/csrf/defaultCsrf.service';
+import { DefaultCsrfService } from '@/services/csrf/defaultCsrf.service';
 import type { CsrfDataProvider } from '@/core/csrf/ICsrfDataProvider';
 
 describe('DefaultCsrfService', () => {

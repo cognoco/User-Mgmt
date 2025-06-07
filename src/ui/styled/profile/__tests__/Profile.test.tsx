@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event';
 // Import our utility functions
 import { setupTestEnvironment } from '@/tests/utils/environmentSetup';
 import { renderWithProviders, createMockFile } from '@/tests/utils/componentTestingUtils';
-import { TestWrapper } from '@/src/tests/utils/testWrapper';
+import { TestWrapper } from '@/tests/utils/testWrapper';
 import { createMockUser, createMockProfile } from '@/tests/utils/testingUtils';
 
 // Import and use our standardized mock
@@ -121,7 +121,7 @@ describe('Profile Component', () => {
     const originalFrom = supabase.from;
     (supabase.from as any) = vi.fn((table: string) => (table === 'profiles' ? builder : {}));
     
-    const Profile = (await import('@/src/ui/styled/profile/Profile.jsx')).default;
+    const Profile = (await import('@/ui/styled/profile/Profile.jsx')).default;
     renderWithWrapper(<Profile user={mockUser} />);
     
     await waitFor(() => {
@@ -165,7 +165,7 @@ describe('Profile Component', () => {
       website: 'https://updated-example.com',
     };
     
-    const Profile = (await import('@/src/ui/styled/profile/Profile.jsx')).default;
+    const Profile = (await import('@/ui/styled/profile/Profile.jsx')).default;
     renderWithWrapper(<Profile user={mockUser} />);
     
     await waitFor(() => {
@@ -205,7 +205,7 @@ describe('Profile Component', () => {
     const originalFrom = supabase.from;
     (supabase.from as any) = vi.fn((table: string) => (table === 'profiles' ? builder : {}));
     
-    const Profile = (await import('@/src/ui/styled/profile/Profile.jsx')).default;
+    const Profile = (await import('@/ui/styled/profile/Profile.jsx')).default;
     renderWithWrapper(<Profile user={mockUser} />);
     
     await waitFor(() => {
@@ -242,7 +242,7 @@ describe('Profile Component', () => {
     const originalFrom = supabase.from;
     (supabase.from as any) = vi.fn((table: string) => (table === 'profiles' ? builder : {}));
     
-    const Profile = (await import('@/src/ui/styled/profile/Profile.jsx')).default;
+    const Profile = (await import('@/ui/styled/profile/Profile.jsx')).default;
     renderWithWrapper(<Profile user={mockUser} />);
     
     await waitFor(() => {
@@ -279,7 +279,7 @@ describe('Profile Component', () => {
     // Override uploadSpy to simulate error
     uploadSpy.mockResolvedValue({ data: null, error: { message: 'Failed to upload avatar' } });
     
-    const Profile = (await import('@/src/ui/styled/profile/Profile.jsx')).default;
+    const Profile = (await import('@/ui/styled/profile/Profile.jsx')).default;
     renderWithWrapper(<Profile user={mockUser} />);
     
     await waitFor(() => {

@@ -6,8 +6,8 @@ import {
   resetServiceContainer
 } from '@/lib/config/serviceContainer';
 
-let getApiCsrfService: typeof import('@/src/services/csrf/factory').getApiCsrfService;
-let DefaultCsrfService: typeof import('@/src/services/csrf/defaultCsrf.service').DefaultCsrfService;
+let getApiCsrfService: typeof import('@/services/csrf/factory').getApiCsrfService;
+let DefaultCsrfService: typeof import('@/services/csrf/defaultCsrf.service').DefaultCsrfService;
 
 describe('getApiCsrfService', () => {
   beforeEach(async () => {
@@ -15,8 +15,8 @@ describe('getApiCsrfService', () => {
     (AdapterRegistry as any).instance = null;
     UserManagementConfiguration.reset();
     resetServiceContainer();
-    ({ getApiCsrfService } = await import('@/src/services/csrf/factory'));
-    ({ DefaultCsrfService } = await import('@/src/services/csrf/defaultCsrf.service'));
+    ({ getApiCsrfService } = await import('@/services/csrf/factory'));
+    ({ DefaultCsrfService } = await import('@/services/csrf/defaultCsrf.service'));
   });
 
   it('returns configured service if registered', () => {

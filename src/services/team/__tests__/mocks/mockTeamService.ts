@@ -1,6 +1,6 @@
 // src/services/team/__tests__/mocks/mock-team-service.ts
 import { vi } from 'vitest';
-import { TeamService } from '@/src/core/team/interfaces';
+import { TeamService } from '@/core/team/interfaces';
 import { 
   Team, 
   TeamMember, 
@@ -14,7 +14,7 @@ import {
   TeamInvitationResult,
   TeamSearchParams,
   TeamSearchResult
-} from '@/src/core/team/models';
+} from '@/core/team/models';
 
 /**
  * Mock implementation of the TeamService interface for testing

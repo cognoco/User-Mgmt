@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DefaultSessionTracker } from '@/src/services/auth/sessionTracker';
+import { DefaultSessionTracker } from '@/services/auth/sessionTracker';
 import { createSessionTrackerMock } from "@/tests/mocks/sessionTracker.mock";
 
 describe('DefaultSessionTracker', () => {

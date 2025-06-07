@@ -6,7 +6,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { ApiError } from '@/src/lib/api/common/apiError';
+import { ApiError } from '@/lib/api/common/apiError';
 
 /**
  * Pagination metadata interface

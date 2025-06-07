@@ -4,7 +4,7 @@ import { describe, it, beforeEach, expect, vi } from "vitest";
 import AuthProvider from "@/lib/context/AuthContext";
 import type { AuthService } from "@/core/auth/interfaces";
 import type { User } from "@/core/auth/models";
-import { useAuth } from "@/src/hooks/auth/useAuth";
+import { useAuth } from "@/hooks/auth/useAuth";
 
 let mockAuthService: AuthService & { onAuthEvent?: any };
 

@@ -8,7 +8,7 @@
 import { AdminService } from '@/core/admin/interfaces';
 import type { IAdminDataProvider } from '@/core/admin';
 import { AdapterRegistry } from '@/adapters/registry';
-import { DefaultAdminService } from '@/src/services/admin/defaultAdmin.service';
+import { DefaultAdminService } from '@/services/admin/defaultAdmin.service';
 import { getServiceContainer } from '@/lib/config/serviceContainer';
 
 // Singleton instance for API routes

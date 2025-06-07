@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET, PUT, DELETE } from '@/app/api/organizations/[orgId]/route';
+import { GET, PUT, DELETE } from '@app/api/organizations/[orgId]/route';
 import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer';
 import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers';
 

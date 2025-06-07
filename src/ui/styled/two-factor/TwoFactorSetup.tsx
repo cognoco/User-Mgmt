@@ -4,9 +4,9 @@ import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Card } from '@/ui/primitives/card';
 import { TwoFactorSetup as HeadlessTwoFactorSetup } from '@/ui/headless/twoFactor/TwoFactorSetup';
-import QRCodeDisplay from '@/src/ui/styled/two-factor/QRCodeDisplay';
-import BackupCodesList from '@/src/ui/styled/two-factor/BackupCodesList';
-import { WebAuthnRegistration } from '@/src/ui/styled/two-factor/WebAuthnRegistration';
+import QRCodeDisplay from '@/ui/styled/two-factor/QRCodeDisplay';
+import BackupCodesList from '@/ui/styled/two-factor/BackupCodesList';
+import { WebAuthnRegistration } from '@/ui/styled/two-factor/WebAuthnRegistration';
 
 export function TwoFactorSetup() {
   const [code, setCode] = useState('');

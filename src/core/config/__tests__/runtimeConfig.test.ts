@@ -22,7 +22,7 @@ describe('runtime-config', () => {
     vi.stubEnv('RETENTION_PERSONAL_MONTHS', '24');
     vi.stubEnv('RETENTION_BUSINESS_MONTHS', '36');
 
-    const mod = await import('@/src/core/config/runtimeConfig');
+    const mod = await import('@/core/config/runtimeConfig');
     const cfg = mod.initializeConfiguration();
     expect(cfg.env.supabaseUrl).toBe('https://test.supabase.co');
     expect(cfg.env.supabaseAnonKey).toBe('anon');

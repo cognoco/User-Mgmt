@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
-import { TestWrapper } from '@/src/tests/utils/testWrapper';
+import { TestWrapper } from '@/tests/utils/testWrapper';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { ProfilePrivacySettings } from '@/ui/styled/profile/ProfilePrivacySettings';

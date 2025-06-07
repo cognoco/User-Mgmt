@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { POST } from '@/app/api/auth/register/route';
+import { POST } from '@app/api/auth/register/route';
 import { ERROR_CODES } from '@/lib/api/common';
 
 // Mock the service container to avoid circular dependencies

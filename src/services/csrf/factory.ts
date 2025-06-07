@@ -7,7 +7,7 @@
 
 import { CsrfService } from '@/core/csrf/interfaces';
 import type { ICsrfDataProvider } from '@/core/csrf';
-import { DefaultCsrfService } from '@/src/services/csrf/defaultCsrf.service';
+import { DefaultCsrfService } from '@/services/csrf/defaultCsrf.service';
 import { AdapterRegistry } from '@/adapters/registry';
 import { UserManagementConfiguration } from '@/core/config';
 import {

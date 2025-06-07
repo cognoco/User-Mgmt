@@ -1,2 +1,2 @@
-export * from '@/src/core/storage/interfaces';
-export * from '@/src/core/storage/services';
+export * from '@/core/storage/interfaces';
+export * from '@/core/storage/services';

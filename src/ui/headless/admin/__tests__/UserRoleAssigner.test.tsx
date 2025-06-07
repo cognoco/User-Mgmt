@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { UserRoleAssigner } from '@/src/ui/headless/admin/UserRoleAssigner';
+import { UserRoleAssigner } from '@/ui/headless/admin/UserRoleAssigner';
 import * as adminUsers from '@/hooks/admin/useAdminUsers';
 import * as useRolesHook from '@/hooks/team/useRoles';
 import { UserManagementConfiguration } from '@/core/config';

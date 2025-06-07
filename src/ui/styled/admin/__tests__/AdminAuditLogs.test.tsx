@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { AdminAuditLogs } from '@/src/ui/styled/admin/auditLogs/AdminAuditLogs';
+import { AdminAuditLogs } from '@/ui/styled/admin/auditLogs/AdminAuditLogs';
 
 import { __setIsError } from '@/tests/mocks/headlessAdminAuditLogs.mock';
 vi.mock('@/ui/headless/admin/audit-logs/AdminAuditLogs', async () => await import('@/tests/mocks/headlessAdminAuditLogs.mock'));

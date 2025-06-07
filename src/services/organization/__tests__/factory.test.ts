@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AdapterRegistry } from '@/adapters/registry';
-import { getApiOrganizationService } from '@/src/services/organization/factory';
-import { DefaultOrganizationService } from '@/src/services/organization/defaultOrganization.service';
+import { getApiOrganizationService } from '@/services/organization/factory';
+import { DefaultOrganizationService } from '@/services/organization/defaultOrganization.service';
 
 describe('getApiOrganizationService', () => {
   beforeEach(() => {

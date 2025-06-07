@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withRouteAuth, type RouteAuthContext } from '@/src/middleware/auth';
-import { checkRateLimit } from '@/src/middleware/rateLimit';
+import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
+import { checkRateLimit } from '@/middleware/rateLimit';
 import { ApiError, ERROR_CODES } from '@/lib/api/common';
 import { createErrorResponse } from '@/lib/api/common/responseFormatter';
 

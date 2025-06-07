@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 // Note: This test file appears to be testing a non-existent route
 // The upgrade-to-business functionality should be implemented as an API route
 // For now, commenting out the problematic import
-// import { POST } from '@/app/upgradeToBusiness/route';
+// import { POST } from '@app/upgradeToBusiness/route';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
 // Mock dependencies

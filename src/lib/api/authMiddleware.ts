@@ -9,7 +9,7 @@ import { NextRequest } from 'next/server';
 import type { AuthContext } from '@/core/config/interfaces';
 import type { AuthService } from '@/core/auth/interfaces';
 import type { PermissionService } from '@/core/permission/interfaces';
-import { ApiError, ERROR_CODES } from '@/src/lib/api/common';
+import { ApiError, ERROR_CODES } from '@/lib/api/common';
 
 /**
  * Configuration for authentication middleware

@@ -4,8 +4,8 @@
  * This file implements a factory for creating Supabase team adapters.
  */
 
-import { ITeamDataProvider as TeamDataProvider } from '@/src/core/team/ITeamDataProvider';
-import { SupabaseTeamProvider } from '@/src/adapters/team/supabaseTeamProvider';
+import { ITeamDataProvider as TeamDataProvider } from '@/core/team/ITeamDataProvider';
+import { SupabaseTeamProvider } from '@/adapters/team/supabaseTeamProvider';
 
 /**
  * Create a Supabase team data provider

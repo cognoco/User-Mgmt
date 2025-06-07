@@ -1,1 +1,1 @@
-export * from '@/src/adapters/dataExport/supabase/supabaseDataExport.provider';
+export * from '@/adapters/dataExport/supabase/supabaseDataExport.provider';

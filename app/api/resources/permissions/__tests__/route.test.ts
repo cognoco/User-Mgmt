@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST, DELETE } from '@/app/api/resources/permissions/route';
+import { POST, DELETE } from '@app/api/resources/permissions/route';
 import { withRouteAuth } from '@/middleware/auth';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { checkPermission } from '@/lib/auth/permissionCheck';

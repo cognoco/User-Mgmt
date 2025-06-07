@@ -5,6 +5,6 @@
  */
 
 export type { ITeamDataProvider } from '@/core/team/ITeamDataProvider';
-export * from '@/src/adapters/team/factory';
-export * from '@/src/adapters/team/supabaseTeamProvider';
-export * from '@/src/adapters/team/supabase';
+export * from '@/adapters/team/factory';
+export * from '@/adapters/team/supabaseTeamProvider';
+export * from '@/adapters/team/supabase';

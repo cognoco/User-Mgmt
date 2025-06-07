@@ -1,4 +1,4 @@
-import { logUserAction } from '@/src/lib/audit/auditLogger';
+import { logUserAction } from '@/lib/audit/auditLogger';
 import type { AuditLogStatus } from '@/core/audit/models';
 
 export interface PermissionChangeLog {

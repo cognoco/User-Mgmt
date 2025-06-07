@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { MockRepository } from '@/src/adapters/database/mock';
+import { MockRepository } from '@/adapters/database/mock';
 
 interface Item { id: string; name: string; type?: string }
 

@@ -1,5 +1,5 @@
 import type { IConsentDataProvider } from '@/core/consent/IConsentDataProvider';
-import { SupabaseConsentProvider } from '@/src/adapters/consent/supabase/supabaseConsent.provider';
+import { SupabaseConsentProvider } from '@/adapters/consent/supabase/supabaseConsent.provider';
 
 export function createSupabaseConsentProvider(options: {
   supabaseUrl: string;

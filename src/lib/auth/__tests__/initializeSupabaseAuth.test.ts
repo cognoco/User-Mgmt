@@ -10,7 +10,7 @@ describe('initializeSupabaseAuth', () => {
   });
 
   test('initializes client and registers listener', async () => {
-    const { initializeSupabaseAuth } = await import('@/src/lib/auth/initializeSupabaseAuth');
+    const { initializeSupabaseAuth } = await import('@/lib/auth/initializeSupabaseAuth');
 
     const client = initializeSupabaseAuth({
       url: 'https://test.supabase.co',
@@ -25,7 +25,7 @@ describe('initializeSupabaseAuth', () => {
   });
 
   test('throws when configuration invalid', async () => {
-    const { initializeSupabaseAuth } = await import('@/src/lib/auth/initializeSupabaseAuth');
+    const { initializeSupabaseAuth } = await import('@/lib/auth/initializeSupabaseAuth');
 
     expect(() =>
       initializeSupabaseAuth({ url: '', anonKey: '' }),

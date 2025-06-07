@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '@/app/api/2fa/webauthn/register/route';
+import { POST } from '@app/api/2fa/webauthn/register/route';
 import { getApiTwoFactorService } from '@/services/twoFactor/factory';
 import { logUserAction } from '@/lib/audit/auditLogger';
 

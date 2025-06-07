@@ -53,7 +53,7 @@ vi.mock('@/lib/config', () => ({
 import { NextApiRequest, NextApiResponse } from 'next';
 import { NextRequest } from 'next/server';
 import { Redis } from '@upstash/redis';
-import * as rateLimitModule from '@/src/middleware/rateLimit';
+import * as rateLimitModule from '@/middleware/rateLimit';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 // Improved mock for NextRequest with proper Headers implementation

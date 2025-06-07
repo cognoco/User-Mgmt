@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { InvitationManager as HeadlessInvitationManager, InvitationManagerProps } from '@/src/ui/headless/team/InvitationManager';
+import { InvitationManager as HeadlessInvitationManager, InvitationManagerProps } from '@/ui/headless/team/InvitationManager';
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Label } from '@/ui/primitives/label';

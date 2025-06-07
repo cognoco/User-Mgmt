@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle, XCircle, AlertTriangle, Clock } from 'lucide-react';
 import { useOrgSsoConfig } from '@/hooks/sso/useOrgSsoConfig';
-import BusinessSSOSetup from '@/src/ui/styled/auth/BusinessSSOSetup';
-import IDPConfiguration from '@/src/ui/styled/auth/IDPConfiguration';
+import BusinessSSOSetup from '@/ui/styled/auth/BusinessSSOSetup';
+import IDPConfiguration from '@/ui/styled/auth/IDPConfiguration';
 
 interface OrganizationSSOProps {
   orgId: string;

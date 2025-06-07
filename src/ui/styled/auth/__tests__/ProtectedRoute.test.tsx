@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
-import { ProtectedRoute } from '@/src/ui/styled/auth/ProtectedRoute';
+import { ProtectedRoute } from '@/ui/styled/auth/ProtectedRoute';
 import { useAuth } from '@/hooks/auth/useAuth';
 
 // Mock next/navigation

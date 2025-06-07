@@ -5,6 +5,6 @@
  */
 
 export type { IUserDataProvider } from '@/core/user/IUserDataProvider';
-export * from '@/src/adapters/user/factory';
-export * from '@/src/adapters/user/supabaseUserProvider';
-export * from '@/src/adapters/user/supabase';
+export * from '@/adapters/user/factory';
+export * from '@/adapters/user/supabaseUserProvider';
+export * from '@/adapters/user/supabase';

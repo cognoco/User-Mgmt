@@ -1,6 +1,6 @@
-import { getServiceSupabase } from '@/src/lib/database/supabase';
-import { RetentionStatus, RetentionType } from '@/src/lib/database/schemas/retention';
-import { sendEmail } from '@/src/lib/email/sendEmail';
+import { getServiceSupabase } from '@/lib/database/supabase';
+import { RetentionStatus, RetentionType } from '@/lib/database/schemas/retention';
+import { sendEmail } from '@/lib/email/sendEmail';
 import { addMonths, addDays, format, differenceInDays } from 'date-fns';
 import { getServerConfig } from '@/core/config/runtimeConfig';
 

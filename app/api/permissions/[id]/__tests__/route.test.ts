@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET, PUT } from '@/app/api/permissions/[id]/route';
+import { GET, PUT } from '@app/api/permissions/[id]/route';
 import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer';
 import type { AuthService } from '@/core/auth/interfaces';
 import type { PermissionService } from '@/core/permission/interfaces';

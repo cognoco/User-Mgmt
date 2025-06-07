@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
-import { POST } from '@/app/api/auth/send-verification-email/route';
+import { POST } from '@app/api/auth/send-verification-email/route';
 import { NextRequest, NextResponse } from 'next/server';
 import { ERROR_CODES } from '@/lib/api/common';
 

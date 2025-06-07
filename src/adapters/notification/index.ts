@@ -1,3 +1,3 @@
 export type { INotificationDataProvider } from '@/core/notification/INotificationDataProvider';
-export * from '@/src/adapters/notification/factory';
-export * from '@/src/adapters/notification/inMemoryProvider';
+export * from '@/adapters/notification/factory';
+export * from '@/adapters/notification/inMemoryProvider';

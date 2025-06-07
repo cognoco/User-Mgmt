@@ -5,7 +5,7 @@ import { Checkbox } from '@/ui/primitives/checkbox';
 import { Label } from '@/ui/primitives/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { supabase } from '@/lib/database/supabase';
-import { SearchPage as HeadlessSearchPage } from '@/src/ui/headless/search/SearchPage';
+import { SearchPage as HeadlessSearchPage } from '@/ui/headless/search/SearchPage';
 
 interface SearchItem {
   id: string;

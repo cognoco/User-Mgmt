@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
-import { ProfileForm } from '@/src/ui/styled/user/ProfileForm';
+import { ProfileForm } from '@/ui/styled/user/ProfileForm';
 import HeadlessProfileForm from '@/ui/headless/user/ProfileForm';
 
 // Mock the headless component

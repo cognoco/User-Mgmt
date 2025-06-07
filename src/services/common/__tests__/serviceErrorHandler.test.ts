@@ -7,7 +7,7 @@ import {
   safeQuery,
   validateAndExecute,
   type ErrorContext,
-} from '@/src/services/common/serviceErrorHandler';
+} from '@/services/common/serviceErrorHandler';
 import { ApplicationError } from '@/core/common/errors';
 import { ERROR_CODES as CORE_ERROR_CODES } from '@/core/common/errorCodes';
 import { ERROR_CODES as API_ERROR_CODES } from '@/lib/api/common/errorCodes';

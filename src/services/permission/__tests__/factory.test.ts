@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AdapterRegistry } from '@/adapters/registry';
-import { getApiPermissionService } from '@/src/services/permission/factory';
-import { DefaultPermissionService } from '@/src/services/permission/defaultPermission.service';
+import { getApiPermissionService } from '@/services/permission/factory';
+import { DefaultPermissionService } from '@/services/permission/defaultPermission.service';
 
 describe('getApiPermissionService', () => {
   beforeEach(() => {

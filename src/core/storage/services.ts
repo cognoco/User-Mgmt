@@ -4,7 +4,7 @@ import type {
   FileUploadOptions,
   FileUploadResult,
   FileDeleteResult,
-} from '@/src/core/storage/interfaces';
+} from '@/core/storage/interfaces';
 
 /**
  * Business-level service for interacting with file storage.

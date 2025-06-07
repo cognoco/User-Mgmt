@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import nodemailer from 'nodemailer';
-import { sendEmail } from '@/src/lib/email/sendEmail';
+import { sendEmail } from '@/lib/email/sendEmail';
 
 vi.mock('nodemailer');
 

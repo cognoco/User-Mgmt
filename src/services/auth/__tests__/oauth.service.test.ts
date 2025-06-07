@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { DefaultAuthService } from '@/src/services/auth/defaultAuth.service';
+import { DefaultAuthService } from '@/services/auth/defaultAuth.service';
 import type { OAuthDataProvider } from '@/adapters/auth/providers/oauthProvider';
 import { OAuthProvider } from '@/types/oauth';
 

@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from 'vitest';
-import { validateDomain, generateVerificationToken, validateTxtRecord } from '@/src/utils/domainValidation';
+import { validateDomain, generateVerificationToken, validateTxtRecord } from '@/utils/domainValidation';
 
 describe('Domain Validation', () => {
   describe('validateDomain', () => {

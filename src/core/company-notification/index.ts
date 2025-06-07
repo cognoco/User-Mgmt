@@ -1,3 +1,3 @@
-export * from '@/src/core/companyNotification/interfaces';
-export * from '@/src/core/companyNotification/ICompanyNotificationDataProvider';
-export type { ICompanyNotificationDataProvider } from '@/src/core/company-notification/ICompanyNotificationDataProvider';
+export * from '@/core/companyNotification/interfaces';
+export * from '@/core/companyNotification/ICompanyNotificationDataProvider';
+export type { ICompanyNotificationDataProvider } from '@/core/company-notification/ICompanyNotificationDataProvider';

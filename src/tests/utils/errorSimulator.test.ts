@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { simulateError } from '@/src/tests/utils/errorSimulator';
+import { simulateError } from '@/tests/utils/errorSimulator';
 
 describe('simulateError', () => {
   it('throws with given message', () => {

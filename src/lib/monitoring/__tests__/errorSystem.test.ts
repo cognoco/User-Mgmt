@@ -15,7 +15,7 @@ vi.mock('../telemetry', () => {
   return { Telemetry: vi.fn().mockImplementation(() => ({ recordError: vi.fn() })) };
 });
 
-const { initializeErrorSystem, reportError, telemetry } = await import('@/src/lib/monitoring/errorSystem');
+const { initializeErrorSystem, reportError, telemetry } = await import('@/lib/monitoring/errorSystem');
 const { ErrorReporter } = await import('@/lib/telemetry');
 
 describe('error-system', () => {

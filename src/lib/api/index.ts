@@ -1,4 +1,4 @@
-export { default as api } from '@/src/lib/api/client';
-export * from '@/src/lib/api/client';
-export * from '@/src/lib/api/routeHelpers';
-export * from '@/src/lib/api/common';
+export { default as api } from '@/lib/api/client';
+export * from '@/lib/api/client';
+export * from '@/lib/api/routeHelpers';
+export * from '@/lib/api/common';

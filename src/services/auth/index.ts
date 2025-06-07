@@ -6,10 +6,10 @@
  */
 
 import { AuthService } from '@/core/auth/interfaces';
-import { DefaultAuthService } from '@/src/services/auth/defaultAuth.service';
+import { DefaultAuthService } from '@/services/auth/defaultAuth.service';
 import type { AuthDataProvider } from '@/adapters/auth/interfaces';
-import type { AuthStorage } from '@/src/services/auth/authStorage';
-import { BrowserAuthStorage } from '@/src/services/auth/authStorage';
+import type { AuthStorage } from '@/services/auth/authStorage';
+import { BrowserAuthStorage } from '@/services/auth/authStorage';
 
 
 /**
@@ -43,7 +43,7 @@ export default {
   createAuthService
 };
 
-export type { SessionTracker, SessionTrackerDeps } from '@/src/services/auth/sessionTracker';
-export { DefaultSessionTracker } from '@/src/services/auth/sessionTracker';
-export type { MFAHandler } from '@/src/services/auth/mfaHandler';
-export { DefaultMFAHandler } from '@/src/services/auth/mfaHandler';
+export type { SessionTracker, SessionTrackerDeps } from '@/services/auth/sessionTracker';
+export { DefaultSessionTracker } from '@/services/auth/sessionTracker';
+export type { MFAHandler } from '@/services/auth/mfaHandler';
+export { DefaultMFAHandler } from '@/services/auth/mfaHandler';

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '@/app/api/auth/update-password/route';
+import { POST } from '@app/api/auth/update-password/route';
 import { getApiAuthService } from '@/services/auth/factory';
 import { createRateLimit } from '@/middleware/rateLimit';
 import { withSecurity } from '@/middleware/withSecurity';

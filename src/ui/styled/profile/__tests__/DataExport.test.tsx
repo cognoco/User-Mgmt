@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import DataExport from '@/src/ui/styled/profile/DataExport';
+import DataExport from '@/ui/styled/profile/DataExport';
 
 global.URL.createObjectURL = vi.fn(() => 'blob:url');
 

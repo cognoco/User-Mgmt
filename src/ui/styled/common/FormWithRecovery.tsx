@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useId } from 'react';
-import { ErrorBoundary, DefaultErrorFallback } from '@/src/ui/styled/common/ErrorBoundary';
+import { ErrorBoundary, DefaultErrorFallback } from '@/ui/styled/common/ErrorBoundary';
 
 /**
  * FormWithRecovery Component - Enhanced for React 19

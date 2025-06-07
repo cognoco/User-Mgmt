@@ -1,5 +1,5 @@
 import type { ISubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataProvider';
-import { SupabaseSubscriptionProvider } from '@/src/adapters/subscription/supabase/supabaseSubscription.provider';
+import { SupabaseSubscriptionProvider } from '@/adapters/subscription/supabase/supabaseSubscription.provider';
 
 export function createSupabaseSubscriptionProvider(options: { supabaseUrl: string; supabaseKey: string }): ISubscriptionDataProvider {
   return new SupabaseSubscriptionProvider(options.supabaseUrl, options.supabaseKey);

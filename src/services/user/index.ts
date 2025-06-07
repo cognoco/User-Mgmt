@@ -6,9 +6,9 @@
  */
 
 import { UserService } from '@/core/user/interfaces';
-import { DefaultUserService } from '@/src/services/user/defaultUser.service';
-export { RepositoryUserService } from '@/src/services/user/repositoryUser.service';
-export { ApiUserService, getApiUserService } from '@/src/services/user/apiUser.service';
+import { DefaultUserService } from '@/services/user/defaultUser.service';
+export { RepositoryUserService } from '@/services/user/repositoryUser.service';
+export { ApiUserService, getApiUserService } from '@/services/user/apiUser.service';
 import type { UserDataProvider } from '@/core/user/IUserDataProvider';
 
 /**

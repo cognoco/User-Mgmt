@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createMocks } from 'node-mocks-http';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { withPermission } from '@/src/middleware/withPermission';
+import { withPermission } from '@/middleware/withPermission';
 import { getCurrentUser } from '@/lib/auth';
 import { hasPermission } from '@/lib/auth/hasPermission';
 

@@ -5,7 +5,7 @@ vi.mock('@/ui/styled/gdpr/DataExportRequest', () => ({ DataExportRequest: () => 
 vi.mock('@/ui/styled/gdpr/DataDeletionRequest', () => ({ DataDeletionRequest: () => <div>DeleteComponent</div> }));
 vi.mock('@/ui/styled/gdpr/ConsentManagement', () => ({ ConsentManagement: () => <div>ConsentComponent</div> }));
 
-import GdprSettingsPage from '@/app/settings/gdpr/page';
+import GdprSettingsPage from '@app/settings/gdpr/page';
 
 describe('GdprSettingsPage', () => {
   it('renders gdpr controls', () => {

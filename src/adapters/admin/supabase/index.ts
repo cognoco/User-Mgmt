@@ -1,1 +1,1 @@
-export * from '@/src/adapters/admin/supabase/factory';
+export * from '@/adapters/admin/supabase/factory';

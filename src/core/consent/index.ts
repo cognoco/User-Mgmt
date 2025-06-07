@@ -1,3 +1,3 @@
-export * from '@/src/core/consent/interfaces';
-export * from '@/src/core/consent/IConsentDataProvider';
-export * from '@/src/core/consent/models';
+export * from '@/core/consent/interfaces';
+export * from '@/core/consent/IConsentDataProvider';
+export * from '@/core/consent/models';

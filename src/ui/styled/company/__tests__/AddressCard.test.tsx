@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AddressCard } from '@/src/ui/styled/company/AddressCard';
+import { AddressCard } from '@/ui/styled/company/AddressCard';
 import { CompanyAddress } from '@/types/company';
 
 describe('AddressCard styled component', () => {

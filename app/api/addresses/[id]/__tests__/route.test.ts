@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET, PUT, DELETE } from '@/app/api/addresses/[id]/route';
+import { GET, PUT, DELETE } from '@app/api/addresses/[id]/route';
 import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer';
 import type { AddressService } from '@/core/address/interfaces';
 import type { AuthService } from '@/core/auth/interfaces';

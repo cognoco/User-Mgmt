@@ -5,11 +5,11 @@
  */
 
 // Export interfaces
-export * from '@/src/core/team/interfaces';
-export * from '@/src/core/team/ITeamDataProvider';
+export * from '@/core/team/interfaces';
+export * from '@/core/team/ITeamDataProvider';
 
 // Export models
-export * from '@/src/core/team/models';
+export * from '@/core/team/models';
 
 // Export events
-export * from '@/src/core/team/events';
+export * from '@/core/team/events';

@@ -1,1 +1,1 @@
-export * from '@/src/ui/primitives/pageLoader';
+export * from '@/ui/primitives/pageLoader';

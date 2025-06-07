@@ -1,1 +1,1 @@
-export * from '@/src/adapters/companyNotification/supabase/supabaseCompanyNotification.provider';
+export * from '@/adapters/companyNotification/supabase/supabaseCompanyNotification.provider';

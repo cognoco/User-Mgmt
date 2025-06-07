@@ -21,7 +21,7 @@ import { useIsMobile } from "@/lib/utils/responsive";
 import {
   DataExport as HeadlessDataExport,
   ExportFormat,
-} from "@/src/ui/headless/settings/DataExport";
+} from "@/ui/headless/settings/DataExport";
 
 export function DataExport() {
   const { t } = useTranslation();

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { GET } from '@/app/api/team/roles/route';
+import { GET } from '@app/api/team/roles/route';
 import * as rolesUtil from '@/lib/rbac/roles';
 
 describe('team roles API', () => {

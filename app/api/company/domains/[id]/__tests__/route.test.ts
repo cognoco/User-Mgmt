@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { DELETE, PATCH } from '@/app/api/company/domains/[id]/route';
+import { DELETE, PATCH } from '@app/api/company/domains/[id]/route';
 import { getApiCompanyService } from '@/services/company/factory';
 import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers';
 import { checkPermission } from '@/lib/auth/permissionCheck';

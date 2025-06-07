@@ -5,7 +5,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/ui/primitives/alert';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle as DialogHeading } from '@/ui/primitives/dialog';
 import { Button } from '@/ui/primitives/button';
 import { toast } from '@/lib/hooks/useToast';
-import { ScreenReaderAnnouncement } from '@/src/components/ui/ScreenReaderAnnouncement';
+import { ScreenReaderAnnouncement } from '@/components/ui/ScreenReaderAnnouncement';
 
 export type ErrorSeverity = 'info' | 'warning' | 'error';
 export type ErrorStyle = 'inline' | 'toast' | 'modal';

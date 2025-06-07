@@ -1,1 +1,1 @@
-export * from '@/src/ui/primitives/radioGroup';
+export * from '@/ui/primitives/radioGroup';

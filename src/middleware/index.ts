@@ -144,5 +144,5 @@ export function withSecurity(
   };
 }
 
-export { withErrorHandling } from '@/src/middleware/errorHandling';
+export { withErrorHandling } from '@/middleware/errorHandling';
 export { correlationIdMiddleware };

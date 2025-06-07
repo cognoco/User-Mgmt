@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/database/prisma';
-import { GET, POST } from '@/app/api/team/members/route';
+import { GET, POST } from '@app/api/team/members/route';
 import { ERROR_CODES } from '@/lib/api/common';
 import { checkRateLimit } from '@/middleware/rateLimit';
 import { withRouteAuth } from '@/middleware/auth';

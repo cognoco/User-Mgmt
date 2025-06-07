@@ -1,1 +1,1 @@
-export * from '@/src/ui/primitives/spinner';
+export * from '@/ui/primitives/spinner';

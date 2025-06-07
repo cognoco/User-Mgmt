@@ -1,6 +1,6 @@
 // src/tests/utils/test-wrapper.tsx
 import React, { useEffect } from 'react';
-import { setupTestServices } from '@/src/tests/utils/testServiceSetup';
+import { setupTestServices } from '@/tests/utils/testServiceSetup';
 import { AuthProvider } from '@/lib/context/AuthContext';
 
 interface TestWrapperProps {

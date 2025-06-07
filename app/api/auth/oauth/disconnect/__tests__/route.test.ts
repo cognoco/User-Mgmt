@@ -1,4 +1,4 @@
-import { POST } from '@/app/api/auth/oauth/disconnect/route';
+import { POST } from '@app/api/auth/oauth/disconnect/route';
 import { OAuthProvider } from '@/types/oauth';
 import { describe, it, expect, vi, beforeEach, MockedFunction } from 'vitest';
 import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer';

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
-import { GET } from "@/app/api/admin/users/route";
+import { GET } from "@app/api/admin/users/route";
 
 vi.mock("@/services/admin/factory", () => ({
   getApiAdminService: vi.fn(),

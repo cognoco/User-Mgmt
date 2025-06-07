@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { withErrorHandling } from '@/src/middleware/errorHandling';
+import { withErrorHandling } from '@/middleware/errorHandling';
 import { ApiError } from '@/lib/api/common/apiError';
 import { createErrorResponse } from '@/lib/api/common/responseFormatter';
 import { logApiError } from '@/lib/audit/errorLogger';

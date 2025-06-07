@@ -13,14 +13,14 @@ import {
   User,
   MFASetupResponse,
   MFAVerifyResponse
-} from '@/src/core/auth/models';
+} from '@/core/auth/models';
 import {
   InvalidRefreshTokenError,
   TokenRefreshError,
 } from '@/core/common/errors';
 import { saveRefreshToken, rotateRefreshToken } from '@/lib/auth/refreshTokenStore';
 
-import type { IAuthDataProvider as AuthDataProvider } from '@/src/adapters/auth/interfaces';
+import type { IAuthDataProvider as AuthDataProvider } from '@/adapters/auth/interfaces';
 
 
 /**

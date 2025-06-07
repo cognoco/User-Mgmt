@@ -42,7 +42,7 @@ describe('Auth Store Direct Tests', () => {
   });
 
   it('should expose all action functions through getState()', async () => {
-    const { useAuthStore } = await import('@/src/lib/stores/auth.store');
+    const { useAuthStore } = await import('@/lib/stores/auth.store');
     useAuthStore.setState({
       user: null,
       token: null,
@@ -92,7 +92,7 @@ describe('Auth Store Direct Tests', () => {
   });
 
   it('should be able to call functions obtained from getState()', async () => {
-    const { useAuthStore } = await import('@/src/lib/stores/auth.store');
+    const { useAuthStore } = await import('@/lib/stores/auth.store');
     useAuthStore.setState({
       user: null,
       token: null,
@@ -140,7 +140,7 @@ describe('Auth Store Direct Tests', () => {
   });
 
   it('should handle destructured function calls', async () => {
-    const { useAuthStore } = await import('@/src/lib/stores/auth.store');
+    const { useAuthStore } = await import('@/lib/stores/auth.store');
     useAuthStore.setState({
       user: null,
       token: null,

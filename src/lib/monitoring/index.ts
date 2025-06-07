@@ -1,3 +1,3 @@
-export * from '@/src/lib/monitoring/correlationId';
-export * from '@/src/lib/monitoring/errorSystem';
-export * from '@/src/lib/monitoring/monitoringSystem';
+export * from '@/lib/monitoring/correlationId';
+export * from '@/lib/monitoring/errorSystem';
+export * from '@/lib/monitoring/monitoringSystem';

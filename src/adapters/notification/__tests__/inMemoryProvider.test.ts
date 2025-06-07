@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { InMemoryNotificationProvider } from '@/src/adapters/notification/inMemoryProvider';
+import { InMemoryNotificationProvider } from '@/adapters/notification/inMemoryProvider';
 import { NotificationChannel } from '@/core/notification/models';
 
 describe('InMemoryNotificationProvider', () => {

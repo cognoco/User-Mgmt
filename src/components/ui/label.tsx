@@ -1,1 +1,1 @@
-export * from '@/src/ui/primitives/label';
+export * from '@/ui/primitives/label';

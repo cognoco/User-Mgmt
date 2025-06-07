@@ -8,7 +8,7 @@
 import { IWebhookService } from '@/core/webhooks';
 import type { IWebhookDataProvider } from '@/core/webhooks';
 import { AdapterRegistry } from '@/adapters/registry';
-import { WebhookService } from '@/src/services/webhooks/WebhookService';
+import { WebhookService } from '@/services/webhooks/WebhookService';
 import { UserManagementConfiguration } from '@/core/config';
 import { getServiceContainer } from '@/lib/config/serviceContainer';
 

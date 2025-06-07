@@ -1,1 +1,1 @@
-export * from '@/src/ui/primitives/themeProvider';
+export * from '@/ui/primitives/themeProvider';

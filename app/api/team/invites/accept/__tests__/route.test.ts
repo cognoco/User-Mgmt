@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '@/app/api/team/invites/accept/route';
+import { POST } from '@app/api/team/invites/accept/route';
 import { prisma } from '@/lib/database/prisma';
 import { withRouteAuth } from '@/middleware/auth';
 import { NextResponse } from 'next/server';

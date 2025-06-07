@@ -1,2 +1,2 @@
-export * from '@/src/core/accessControl/models';
-export * from '@/src/core/accessControl/evaluator';
+export * from '@/core/accessControl/models';
+export * from '@/core/accessControl/evaluator';

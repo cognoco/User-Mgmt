@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useDataExport } from '@/src/hooks/user/useDataExport';
+import { useDataExport } from '@/hooks/user/useDataExport';
 import { useAuth } from '@/hooks/auth/useAuth';
 import * as exportService from '@/lib/exports/export.service';
 

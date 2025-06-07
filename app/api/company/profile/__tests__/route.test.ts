@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextResponse } from 'next/server';
-import { POST, GET } from '@/app/api/company/profile/route';
+import { POST, GET } from '@app/api/company/profile/route';
 import { getApiCompanyService } from '@/services/company/factory';
 import { withRouteAuth } from '@/middleware/auth';
 import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers';

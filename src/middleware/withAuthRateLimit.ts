@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createRateLimit } from '@/src/middleware/rateLimit';
+import { createRateLimit } from '@/middleware/rateLimit';
 
 // Stricter rate limits for auth endpoints
 const authRateLimit = createRateLimit({

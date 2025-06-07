@@ -3,8 +3,8 @@ import { AdapterRegistry } from '@/adapters/registry';
 import { UserManagementConfiguration } from '@/core/config';
 import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer';
 
-let getApiAuditService: typeof import('@/src/services/audit/factory').getApiAuditService;
-let DefaultAuditService: typeof import('@/src/services/audit/defaultAudit.service').DefaultAuditService;
+let getApiAuditService: typeof import('@/services/audit/factory').getApiAuditService;
+let DefaultAuditService: typeof import('@/services/audit/defaultAudit.service').DefaultAuditService;
 
 describe('getApiAuditService', () => {
   beforeEach(async () => {
@@ -12,8 +12,8 @@ describe('getApiAuditService', () => {
     (AdapterRegistry as any).instance = null;
     UserManagementConfiguration.reset();
     resetServiceContainer();
-    ({ getApiAuditService } = await import('@/src/services/audit/factory'));
-    ({ DefaultAuditService } = await import('@/src/services/audit/defaultAudit.service'));
+    ({ getApiAuditService } = await import('@/services/audit/factory'));
+    ({ DefaultAuditService } = await import('@/services/audit/defaultAudit.service'));
   });
 
   it('returns configured service if registered', () => {

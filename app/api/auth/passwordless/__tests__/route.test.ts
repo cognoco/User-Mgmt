@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '@/app/api/auth/passwordless/route';
+import { POST } from '@app/api/auth/passwordless/route';
 import { getApiAuthService } from '@/services/auth/factory';
 
 vi.mock('@/services/auth/factory', () => ({ getApiAuthService: vi.fn() }));

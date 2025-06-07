@@ -2,8 +2,8 @@
  * Core database interface exports and common types.
  */
 
-import type { DataProviderError } from '@/src/core/common/errors';
-export { isDataProviderError as isDatabaseError } from '@/src/core/common/errors';
+import type { DataProviderError } from '@/core/common/errors';
+export { isDataProviderError as isDatabaseError } from '@/core/common/errors';
 
 /** Connection configuration options */
 export interface ConnectionOptions {
@@ -93,10 +93,10 @@ export function isFilterCondition(value: unknown): value is FilterCondition {
   );
 }
 
-export * from '@/src/core/database/interfaces/base.interface';
-export * from '@/src/core/database/interfaces/query.interface';
-export * from '@/src/core/database/interfaces/transaction.interface';
-export * from '@/src/core/database/interfaces/user.interface';
-export * from '@/src/core/database/interfaces/team.interface';
-export * from '@/src/core/database/interfaces/organization.interface';
-export * from '@/src/core/database/interfaces/permission.interface';
+export * from '@/core/database/interfaces/base.interface';
+export * from '@/core/database/interfaces/query.interface';
+export * from '@/core/database/interfaces/transaction.interface';
+export * from '@/core/database/interfaces/user.interface';
+export * from '@/core/database/interfaces/team.interface';
+export * from '@/core/database/interfaces/organization.interface';
+export * from '@/core/database/interfaces/permission.interface';

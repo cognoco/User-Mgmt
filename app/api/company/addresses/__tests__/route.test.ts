@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { POST, GET } from '@/app/api/company/addresses/route';
+import { POST, GET } from '@app/api/company/addresses/route';
 import { getApiAddressService } from '@/services/address/factory';
 import { getApiCompanyService } from '@/services/company/factory';
 import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers';

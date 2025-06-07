@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { DefaultHealthMonitoringService } from '@/src/services/health/defaultHealth.service';
+import { DefaultHealthMonitoringService } from '@/services/health/defaultHealth.service';
 
 describe('DefaultHealthMonitoringService', () => {
   it('reports service health based on error rate', () => {

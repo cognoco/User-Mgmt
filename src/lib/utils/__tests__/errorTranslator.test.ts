@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { translateDatabaseError, translateApiError, enhanceError, formatErrorForLogging, sanitizeErrorForClient } from '@/src/lib/utils/errorTranslator';
+import { translateDatabaseError, translateApiError, enhanceError, formatErrorForLogging, sanitizeErrorForClient } from '@/lib/utils/errorTranslator';
 import { SERVER_ERROR_CODES, USER_ERROR_CODES } from '@/lib/api/common/errorCodes';
 
 describe('error translator', () => {

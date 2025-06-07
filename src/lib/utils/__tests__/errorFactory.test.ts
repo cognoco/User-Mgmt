@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createError, createValidationError, createAuthenticationError, createNotFoundError, enhanceError } from '@/src/lib/utils/errorFactory';
+import { createError, createValidationError, createAuthenticationError, createNotFoundError, enhanceError } from '@/lib/utils/errorFactory';
 import { VALIDATION_ERROR_CODES, AUTH_ERROR_CODES, USER_ERROR_CODES } from '@/lib/api/common/errorCodes';
 
 describe('error factory', () => {

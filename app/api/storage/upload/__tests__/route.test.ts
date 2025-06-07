@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '@/app/api/storage/upload/route';
+import { POST } from '@app/api/storage/upload/route';
 import { getStorageService } from '@/services/storage';
 import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers';
 

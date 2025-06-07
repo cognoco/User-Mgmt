@@ -4,8 +4,8 @@ import { getApiPermissionService } from '@/services/permission/factory';
 import type { Permission } from '@/lib/rbac/roles';
 import { isPermission } from '@/lib/rbac/roles';
 import { checkPermission, checkAnyPermission, checkAllPermissions } from '@/lib/auth/permissionCheck';
-import { createAuthApiError } from '@/src/middleware/authErrors';
-import { withRouteAuth, type RouteAuthContext, type RouteAuthOptions } from '@/src/middleware/auth';
+import { createAuthApiError } from '@/middleware/authErrors';
+import { withRouteAuth, type RouteAuthContext, type RouteAuthOptions } from '@/middleware/auth';
 
 interface CacheEntry {
   result: boolean;

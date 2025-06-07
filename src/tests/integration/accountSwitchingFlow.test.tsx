@@ -4,9 +4,9 @@ import '@/tests/i18nTestSetup';
 import { setTableMockData } from '@/tests/mocks/supabase';
 
 // IMPORTANT: vi.mock must be at the top, BEFORE any variable declarations
-vi.mock('@/lib/database/supabase', async () => await import('@/src/tests/mocks/supabase'));
+vi.mock('@/lib/database/supabase', async () => await import('@/tests/mocks/supabase'));
 // Mock the accountSwitcherApi module
-vi.mock('@/lib/accountSwitcherApi', async () => await import('@/src/tests/mocks/accountSwitcherApi.mock'));
+vi.mock('@/lib/accountSwitcherApi', async () => await import('@/tests/mocks/accountSwitcherApi.mock'));
 
 // Type definitions for the Dialog components props
 import { render, screen, waitFor } from '@testing-library/react';

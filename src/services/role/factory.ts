@@ -1,5 +1,5 @@
 import type { RoleService as IRoleService } from "@/core/role/interfaces";
-import { RoleService } from "@/src/services/role/role.service";
+import { RoleService } from "@/services/role/role.service";
 import { getServiceContainer } from "@/lib/config/serviceContainer";
 
 export interface ApiRoleServiceOptions {

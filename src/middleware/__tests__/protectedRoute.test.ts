@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { withProtectedRoute } from '@/src/middleware/protectedRoute';
-import { checkRateLimit } from '@/src/middleware/rateLimit';
-import { withRouteAuth } from '@/src/middleware/auth';
+import { withProtectedRoute } from '@/middleware/protectedRoute';
+import { checkRateLimit } from '@/middleware/rateLimit';
+import { withRouteAuth } from '@/middleware/auth';
 
 vi.mock('../rate-limit');
 vi.mock('../auth');

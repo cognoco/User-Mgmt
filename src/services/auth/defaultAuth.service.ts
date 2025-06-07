@@ -33,10 +33,10 @@ import type {
   OAuthUserProfile,
 } from '@/types/oauth';
 import type { OAuthDataProvider } from '@/adapters/auth/providers/oauthProvider';
-import type { AuthStorage } from '@/src/services/auth/authStorage';
-import { BrowserAuthStorage } from '@/src/services/auth/authStorage';
-import { DefaultSessionTracker, type SessionTracker } from '@/src/services/auth/sessionTracker';
-import { DefaultMFAHandler, type MFAHandler } from '@/src/services/auth/mfaHandler';
+import type { AuthStorage } from '@/services/auth/authStorage';
+import { BrowserAuthStorage } from '@/services/auth/authStorage';
+import { DefaultSessionTracker, type SessionTracker } from '@/services/auth/sessionTracker';
+import { DefaultMFAHandler, type MFAHandler } from '@/services/auth/mfaHandler';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { authConfig } from '@/lib/auth/config';
 import { withRetry } from '@/lib/utils/retry';

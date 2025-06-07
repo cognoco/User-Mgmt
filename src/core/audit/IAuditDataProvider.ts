@@ -10,7 +10,7 @@ import type {
   AuditLogCreatePayload,
   AuditLogUpdatePayload,
   AuditLogResult,
-} from '@/src/core/audit/models';
+} from '@/core/audit/models';
 
 export interface IAuditDataProvider {
   /**

@@ -12,7 +12,7 @@ import {
   CompanyDataExport,
   CompanyExportData,
   DataExportResponse
-} from '@/src/lib/exports/types';
+} from '@/lib/exports/types';
 
 // Default options for exports
 const DEFAULT_EXPORT_OPTIONS: ExportOptions = {

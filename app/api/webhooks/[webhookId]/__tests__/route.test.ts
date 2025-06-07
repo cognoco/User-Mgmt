@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { GET, PATCH, DELETE } from '@/app/api/webhooks/[webhookId]/route'
+import { GET, PATCH, DELETE } from '@app/api/webhooks/[webhookId]/route'
 import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer'
 import type { IWebhookService } from '@/core/webhooks'
 import type { AuthService } from '@/core/auth/interfaces'

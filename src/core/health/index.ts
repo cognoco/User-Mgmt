@@ -1,1 +1,1 @@
-export * from '@/src/core/health/interfaces';
+export * from '@/core/health/interfaces';

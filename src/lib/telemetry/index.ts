@@ -1,3 +1,3 @@
-export { ErrorReporter } from '@/src/lib/telemetry/errorReporting';
-export type { ErrorReporterOptions } from '@/src/lib/telemetry/errorReporting';
-export { ErrorClusterer } from '@/src/lib/telemetry/errorClustering';
+export { ErrorReporter } from '@/lib/telemetry/errorReporting';
+export type { ErrorReporterOptions } from '@/lib/telemetry/errorReporting';
+export { ErrorClusterer } from '@/lib/telemetry/errorClustering';

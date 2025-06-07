@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { Button } from '@/ui/primitives/button';
 import { Input } from '@/ui/primitives/input';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
-import DataExport from '@/src/ui/styled/profile/DataExport';
-import CompanyDataExport from '@/src/ui/styled/profile/CompanyDataExport';
-import NotificationPreferences from '@/src/ui/styled/profile/NotificationPreferences';
-import ActivityLog from '@/src/ui/styled/profile/ActivityLog';
+import DataExport from '@/ui/styled/profile/DataExport';
+import CompanyDataExport from '@/ui/styled/profile/CompanyDataExport';
+import NotificationPreferences from '@/ui/styled/profile/NotificationPreferences';
+import ActivityLog from '@/ui/styled/profile/ActivityLog';
 import ProfileHeadless from '@/ui/headless/user/Profile';
 
 interface FormState {

@@ -8,7 +8,7 @@ export interface ErrorReporterOptions {
 import { v4 as uuidv4 } from 'uuid';
 import { ApplicationError, createErrorFromUnknown } from '@/core/common/errors';
 import { errorLogger } from '@/lib/monitoring/errorLogger';
-import { ErrorClusterer } from '@/src/lib/telemetry/errorClustering';
+import { ErrorClusterer } from '@/lib/telemetry/errorClustering';
 
 interface Breadcrumb {
   message: string;

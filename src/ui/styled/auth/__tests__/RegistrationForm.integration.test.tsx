@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
-import { RegistrationForm } from '@/src/ui/styled/auth/RegistrationForm';
+import { RegistrationForm } from '@/ui/styled/auth/RegistrationForm';
 import { ThemeProvider } from '@/ui/primitives/themeProvider';
 import { UserType } from '@/types/userType';
 import { OAuthProvider } from '@/types/oauth';

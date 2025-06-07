@@ -3,8 +3,8 @@ import {
   ErrorCode,
   SERVER_ERROR,
   AUTH_ERROR,
-} from "@/src/core/common/errorCodes";
-import type { ErrorSeverity } from "@/src/core/common/errorCodeRegistry";
+} from "@/core/common/errorCodes";
+import type { ErrorSeverity } from "@/core/common/errorCodeRegistry";
 
 function severityFromStatus(status: number): ErrorSeverity {
   if (status >= 500) return "high";

@@ -1,4 +1,4 @@
-import { RuntimeConfig } from '@/src/core/config/runtimeConfig';
+import { RuntimeConfig } from '@/core/config/runtimeConfig';
 
 const config: Partial<RuntimeConfig> = {
   env: {

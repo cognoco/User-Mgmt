@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { WebhookManager } from '@/src/ui/headless/webhooks/WebhookManager';
+import { WebhookManager } from '@/ui/headless/webhooks/WebhookManager';
 import { useWebhooks } from '@/hooks/webhooks/useWebhooks';
 
 vi.mock('@/hooks/webhooks/useWebhooks', () => ({ useWebhooks: vi.fn() }));

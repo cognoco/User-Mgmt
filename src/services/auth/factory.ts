@@ -7,9 +7,9 @@
 
 import { AuthService } from '@/core/auth/interfaces';
 import type { AuthDataProvider } from '@/adapters/auth/interfaces';
-import { DefaultAuthService } from '@/src/services/auth/defaultAuth.service';
-import type { AuthStorage } from '@/src/services/auth/authStorage';
-import { BrowserAuthStorage } from '@/src/services/auth/authStorage';
+import { DefaultAuthService } from '@/services/auth/defaultAuth.service';
+import type { AuthStorage } from '@/services/auth/authStorage';
+import { BrowserAuthStorage } from '@/services/auth/authStorage';
 import { AdapterRegistry } from '@/adapters/registry';
 import { createSupabaseAuthProvider } from '@/adapters/auth/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';

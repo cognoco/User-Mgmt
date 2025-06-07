@@ -17,7 +17,7 @@ import type {
   UserSearchParams,
   UserSearchResult,
   ProfileVisibility
-} from '@/src/core/user/models';
+} from '@/core/user/models';
 
 /** Payload for creating a new user */
 export interface UserCreatePayload extends ProfileUpdatePayload {

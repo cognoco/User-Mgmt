@@ -1,5 +1,5 @@
-import type { UserManagementConfig } from '@/src/core/config/interfaces';
-import { configureServices } from '@/src/lib/config/serviceContainer';
+import type { UserManagementConfig } from '@/core/config/interfaces';
+import { configureServices } from '@/lib/config/serviceContainer';
 
 export function initializeUserManagement(config: UserManagementConfig) {
   configureServices(config.services || {});
@@ -7,5 +7,5 @@ export function initializeUserManagement(config: UserManagementConfig) {
 }
 
 export * from '@/ui/styled';
-export * from '@/src/ui/headless';
-export * from '@/src/core/auth/interfaces';
+export * from '@/ui/headless';
+export * from '@/core/auth/interfaces';

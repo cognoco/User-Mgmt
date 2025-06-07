@@ -5,8 +5,8 @@ let UserManagementConfiguration: typeof import('@/core/config').UserManagementCo
 let configureServices: typeof import('@/lib/config/serviceContainer').configureServices;
 let resetServiceContainer: typeof import('@/lib/config/serviceContainer').resetServiceContainer;
 
-let getApiSubscriptionService: typeof import('@/src/services/subscription/factory').getApiSubscriptionService;
-let DefaultSubscriptionService: typeof import('@/src/services/subscription/defaultSubscription.service').DefaultSubscriptionService;
+let getApiSubscriptionService: typeof import('@/services/subscription/factory').getApiSubscriptionService;
+let DefaultSubscriptionService: typeof import('@/services/subscription/defaultSubscription.service').DefaultSubscriptionService;
 
 describe('getApiSubscriptionService', () => {
   beforeEach(async () => {
@@ -17,8 +17,8 @@ describe('getApiSubscriptionService', () => {
     (AdapterRegistry as any).instance = null;
     UserManagementConfiguration.reset();
     resetServiceContainer();
-    ({ getApiSubscriptionService } = await import('@/src/services/subscription/factory'));
-    ({ DefaultSubscriptionService } = await import('@/src/services/subscription/defaultSubscription.service'));
+    ({ getApiSubscriptionService } = await import('@/services/subscription/factory'));
+    ({ DefaultSubscriptionService } = await import('@/services/subscription/defaultSubscription.service'));
   });
 
   it('returns configured service if registered', () => {

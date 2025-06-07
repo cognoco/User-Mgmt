@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { withRouteAuth } from '@/src/middleware/auth';
-import { validateAuthToken } from '@/src/middleware/validateAuthToken';
+import { withRouteAuth } from '@/middleware/auth';
+import { validateAuthToken } from '@/middleware/validateAuthToken';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { Permission } from '@/lib/rbac/roles';
 
@@ -25,7 +25,7 @@ describe('withRouteAuth', () => {
   });
 
   it('returns 401 when token missing', async () => {
-    const { createAuthApiError } = await import('@/src/middleware/authErrors');
+    const { createAuthApiError } = await import('@/middleware/authErrors');
     vi.mocked(validateAuthToken).mockResolvedValue({ success: false, error: createAuthApiError('MISSING_TOKEN') } as any);
     const req = new NextRequest('http://test');
     const res = await withRouteAuth(() => Promise.resolve(new NextResponse('ok')), req);

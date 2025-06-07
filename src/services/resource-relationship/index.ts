@@ -1,2 +1,2 @@
-export * from '@/src/services/resourceRelationship/factory';
-export * from '@/src/services/resourceRelationship/defaultResourceRelationship.service';
+export * from '@/services/resourceRelationship/factory';
+export * from '@/services/resourceRelationship/defaultResourceRelationship.service';

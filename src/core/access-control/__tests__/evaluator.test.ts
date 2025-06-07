@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { AccessEvaluator, AccessRule } from '@/src/core/access-control/index';
+import { AccessEvaluator, AccessRule } from '@/core/access-control/index';
 
 const rules: AccessRule[] = [
   {

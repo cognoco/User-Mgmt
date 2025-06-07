@@ -5,12 +5,12 @@
  */
 
 // Export interfaces
-export * from '@/src/core/user/interfaces';
-export * from '@/src/core/user/IUserDataProvider';
-export * from '@/src/core/user/IUserRepository';
+export * from '@/core/user/interfaces';
+export * from '@/core/user/IUserDataProvider';
+export * from '@/core/user/IUserRepository';
 
 // Export models
-export * from '@/src/core/user/models';
+export * from '@/core/user/models';
 
 // Export events
-export * from '@/src/core/user/events';
+export * from '@/core/user/events';

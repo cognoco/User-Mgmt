@@ -27,8 +27,8 @@ export interface ErrorTrend {
 }
 
 import { Telemetry } from '@/lib/monitoring/telemetry';
-import { ErrorReporter } from '@/src/lib/telemetry/errorReporting';
-import type { ClusterSummary } from '@/src/lib/telemetry/errorClustering';
+import { ErrorReporter } from '@/lib/telemetry/errorReporting';
+import type { ClusterSummary } from '@/lib/telemetry/errorClustering';
 
 /**
  * Aggregates telemetry metrics for dashboard usage.

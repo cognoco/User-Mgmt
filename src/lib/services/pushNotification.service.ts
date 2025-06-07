@@ -1,4 +1,4 @@
-import { NotificationPayload } from "@/src/lib/services/notification.service";
+import { NotificationPayload } from "@/lib/services/notification.service";
 
 /**
  * NotificationHandler interface

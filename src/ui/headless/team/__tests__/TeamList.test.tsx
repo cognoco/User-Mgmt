@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, act } from '@testing-library/react';
-import { TeamList } from '@/src/ui/headless/team/TeamList';
+import { TeamList } from '@/ui/headless/team/TeamList';
 import { useTeams } from '@/hooks/team/useTeams';
 import { useAuth } from '@/hooks/auth/useAuth';
 

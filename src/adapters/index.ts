@@ -5,42 +5,42 @@
  * It provides a single entry point for importing adapters and registering factories.
  */
 
-export * from '@/src/adapters/registry';
-export * from '@/src/adapters/address';
-export * from '@/src/adapters/admin';
-export * from '@/src/adapters/apiKeys';
-export * from '@/src/adapters/audit';
-export * from '@/src/adapters/auth';
-export * from '@/src/adapters/companyNotification';
-export * from '@/src/adapters/consent';
-export * from '@/src/adapters/csrf';
-export * from '@/src/adapters/dataExport';
-export * from '@/src/adapters/database';
-export * from '@/src/adapters/gdpr';
-export * from '@/src/adapters/notification';
-export * from '@/src/adapters/oauth';
-export * from '@/src/adapters/organization';
-export * from '@/src/adapters/permission';
-export * from '@/src/adapters/resourceRelationship';
-export * from '@/src/adapters/savedSearch';
-export * from '@/src/adapters/session';
-export * from '@/src/adapters/sso';
-export * from '@/src/adapters/storage';
-export * from '@/src/adapters/subscription';
-export * from '@/src/adapters/team';
-export * from '@/src/adapters/twoFactor';
-export * from '@/src/adapters/user';
-export * from '@/src/adapters/webhooks';
+export * from '@/adapters/registry';
+export * from '@/adapters/address';
+export * from '@/adapters/admin';
+export * from '@/adapters/apiKeys';
+export * from '@/adapters/audit';
+export * from '@/adapters/auth';
+export * from '@/adapters/companyNotification';
+export * from '@/adapters/consent';
+export * from '@/adapters/csrf';
+export * from '@/adapters/dataExport';
+export * from '@/adapters/database';
+export * from '@/adapters/gdpr';
+export * from '@/adapters/notification';
+export * from '@/adapters/oauth';
+export * from '@/adapters/organization';
+export * from '@/adapters/permission';
+export * from '@/adapters/resourceRelationship';
+export * from '@/adapters/savedSearch';
+export * from '@/adapters/session';
+export * from '@/adapters/sso';
+export * from '@/adapters/storage';
+export * from '@/adapters/subscription';
+export * from '@/adapters/team';
+export * from '@/adapters/twoFactor';
+export * from '@/adapters/user';
+export * from '@/adapters/webhooks';
 
 
 // Import and register the Supabase adapter factory by default
-import { AdapterRegistry } from '@/src/adapters/registry';
-import { createSupabaseAdapterFactory } from '@/src/adapters/supabaseFactory';
-import { createSupabaseDatabaseProvider } from '@/src/adapters/database/factory/supabaseFactory';
+import { AdapterRegistry } from '@/adapters/registry';
+import { createSupabaseAdapterFactory } from '@/adapters/supabaseFactory';
+import { createSupabaseDatabaseProvider } from '@/adapters/database/factory/supabaseFactory';
 
 // Register the Supabase adapter factory
 AdapterRegistry.registerFactory('supabase', createSupabaseAdapterFactory);
 AdapterRegistry.registerDatabaseFactory('supabase', createSupabaseDatabaseProvider);
 
 // Re-export the registry instance for convenience
-export { AdapterRegistry as default } from "@/src/adapters/registry";
+export { AdapterRegistry as default } from "@/adapters/registry";

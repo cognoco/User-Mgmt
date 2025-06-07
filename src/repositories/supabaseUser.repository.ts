@@ -1,7 +1,7 @@
 import type { User, CreateUserDto } from '@/types/user';
 import { UserType } from '@/types/userType';
 import { getServiceSupabase } from '@/lib/database/supabase';
-import type { IUserRepository } from '@/src/repositories/interfaces/IUserRepository';
+import type { IUserRepository } from '@/repositories/interfaces/IUserRepository';
 
 /**
  * Supabase implementation of {@link IUserRepository}.

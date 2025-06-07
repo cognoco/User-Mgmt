@@ -10,7 +10,7 @@ import type {
   AddressUpdatePayload,
   AddressResult,
   AddressQuery,
-} from '@/src/core/address/models';
+} from '@/core/address/models';
 
 export interface IAddressDataProvider {
   /**

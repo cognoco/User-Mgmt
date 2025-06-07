@@ -4,7 +4,7 @@
  * This file defines the core interfaces for the SSO domain.
  */
 
-import { SsoProvider, SsoProviderPayload } from '@/src/core/sso/models';
+import { SsoProvider, SsoProviderPayload } from '@/core/sso/models';
 
 /**
  * SSO service interface used by the API layer and hooks

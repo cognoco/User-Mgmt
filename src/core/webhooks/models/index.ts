@@ -1,2 +1,2 @@
-export * from '@/src/core/webhooks/models/webhook';
-export * from '@/src/core/webhooks/models/webhookDelivery';
+export * from '@/core/webhooks/models/webhook';
+export * from '@/core/webhooks/models/webhookDelivery';

@@ -25,7 +25,7 @@ import {
 import type { PermissionDataProvider } from "@/core/permission/IPermissionDataProvider";
 import { translateError } from "@/lib/utils/error";
 import { TypedEventEmitter } from "@/lib/utils/typedEventEmitter";
-import { permissionCacheService } from '@/src/services/permission/permissionCache.service';
+import { permissionCacheService } from '@/services/permission/permissionCache.service';
 import { RoleService } from '@/services/role';
 import { ResourcePermissionResolver } from '@/lib/services/resourcePermissionResolver.service';
 import { logPermissionChange } from '@/lib/audit/permissionAuditLogger';

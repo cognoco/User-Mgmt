@@ -6,8 +6,8 @@
  */
 
 
-import { AdapterFactory, AdapterFactoryOptions } from '@/src/adapters/registry';
-import { AuthDataProvider } from '@/src/adapters/auth/interfaces';
+import { AdapterFactory, AdapterFactoryOptions } from '@/adapters/registry';
+import { AuthDataProvider } from '@/adapters/auth/interfaces';
 import { IUserDataProvider as UserDataProvider } from '@/core/user/IUserDataProvider';
 import { ITeamDataProvider as TeamDataProvider } from '@/core/team/ITeamDataProvider';
 import { IPermissionDataProvider as PermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
@@ -25,26 +25,26 @@ import { ISavedSearchDataProvider } from '@/core/savedSearch/ISavedSearchDataPro
 
 
 // Import domain-specific factories
-import { createSupabaseAuthProvider } from '@/src/adapters/auth/factory';
-import { createSupabaseUserProvider } from '@/src/adapters/user/factory';
-import { createSupabaseTeamProvider } from '@/src/adapters/team/factory';
-import { createSupabaseOrganizationProvider } from '@/src/adapters/organization/factory';
-import { createSupabasePermissionProvider } from '@/src/adapters/permission/factory';
-import { createSupabaseGdprProvider } from '@/src/adapters/gdpr/factory';
-import { createSupabaseConsentProvider } from '@/src/adapters/consent/factory';
-import { createSupabaseSessionProvider } from '@/src/adapters/session/factory';
-import { createSupabaseSsoProvider } from '@/src/adapters/sso/factory';
-import { createSupabaseOAuthProvider } from '@/src/adapters/oauth/factory';
-import type { OAuthDataProvider } from '@/src/adapters/oauth';
-import { createSupabaseSubscriptionProvider } from '@/src/adapters/subscription/factory';
-import { createSupabaseCompanyNotificationProvider } from '@/src/adapters/companyNotification/factory';
-import { createSupabaseWebhookProvider } from '@/src/adapters/webhooks';
-import { createSupabaseAdminProvider } from '@/src/adapters/admin/factory';
-import { createSupabaseTwoFactorProvider } from '@/src/adapters/twoFactor/factory';
-import { createSupabaseSavedSearchProvider } from '@/src/adapters/savedSearch/factory';
-import { createSupabaseDataExportProvider } from '@/src/adapters/dataExport/factory';
+import { createSupabaseAuthProvider } from '@/adapters/auth/factory';
+import { createSupabaseUserProvider } from '@/adapters/user/factory';
+import { createSupabaseTeamProvider } from '@/adapters/team/factory';
+import { createSupabaseOrganizationProvider } from '@/adapters/organization/factory';
+import { createSupabasePermissionProvider } from '@/adapters/permission/factory';
+import { createSupabaseGdprProvider } from '@/adapters/gdpr/factory';
+import { createSupabaseConsentProvider } from '@/adapters/consent/factory';
+import { createSupabaseSessionProvider } from '@/adapters/session/factory';
+import { createSupabaseSsoProvider } from '@/adapters/sso/factory';
+import { createSupabaseOAuthProvider } from '@/adapters/oauth/factory';
+import type { OAuthDataProvider } from '@/adapters/oauth';
+import { createSupabaseSubscriptionProvider } from '@/adapters/subscription/factory';
+import { createSupabaseCompanyNotificationProvider } from '@/adapters/companyNotification/factory';
+import { createSupabaseWebhookProvider } from '@/adapters/webhooks';
+import { createSupabaseAdminProvider } from '@/adapters/admin/factory';
+import { createSupabaseTwoFactorProvider } from '@/adapters/twoFactor/factory';
+import { createSupabaseSavedSearchProvider } from '@/adapters/savedSearch/factory';
+import { createSupabaseDataExportProvider } from '@/adapters/dataExport/factory';
 import type { IDataExportDataProvider } from '@/core/dataExport/IDataExportDataProvider';
-import { createSupabaseApiKeyProvider } from '@/src/adapters/apiKeys/factory';
+import { createSupabaseApiKeyProvider } from '@/adapters/apiKeys/factory';
 import type { ICompanyNotificationDataProvider } from '@/core/companyNotification/ICompanyNotificationDataProvider';
 
 

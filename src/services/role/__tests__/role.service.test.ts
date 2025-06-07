@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { RoleService } from '@/src/services/role/role.service';
+import { RoleService } from '@/services/role/role.service';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
 // Use a shared Supabase mock so tests can control return values

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
-import { GET } from "@/app/api/resources/[type]/[id]/ancestors/route";
+import { GET } from "@app/api/resources/[type]/[id]/ancestors/route";
 
 // Mock permission middleware to bypass auth
 vi.mock("@/middleware/auth", () => ({

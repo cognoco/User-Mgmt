@@ -1,3 +1,3 @@
 export type { StorageAdapter } from '@/core/storage/interfaces';
-export * from '@/src/adapters/storage/factory';
-export * from '@/src/adapters/storage/supabase';
+export * from '@/adapters/storage/factory';
+export * from '@/adapters/storage/supabase';

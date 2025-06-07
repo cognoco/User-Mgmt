@@ -1,4 +1,4 @@
-export { getApiOAuthService } from "@/src/services/oauth/factory";
+export { getApiOAuthService } from "@/services/oauth/factory";
 export type {
   OAuthService,
   OAuthCallbackResult,

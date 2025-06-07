@@ -1,7 +1,7 @@
 
 
-import { AdapterRegistry, AdapterFactory } from '@/src/adapters/registry';
-import { SupabaseAdapterFactory, createSupabaseAdapterFactory } from '@/src/adapters/supabaseFactory';
+import { AdapterRegistry, AdapterFactory } from '@/adapters/registry';
+import { SupabaseAdapterFactory, createSupabaseAdapterFactory } from '@/adapters/supabaseFactory';
 import { AuthService as AuthDataProvider } from '@/core/auth/interfaces';
 import { IUserDataProvider as UserDataProvider } from '@/core/user/IUserDataProvider';
 import { ITeamDataProvider as TeamDataProvider } from '@/core/team/ITeamDataProvider';

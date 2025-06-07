@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, act } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { TwoFactorSetup } from '@/src/ui/headless/two-factor/TwoFactorSetup';
+import { TwoFactorSetup } from '@/ui/headless/two-factor/TwoFactorSetup';
 
 vi.mock('@/hooks/auth/useMFA', () => ({
   useMFA: vi.fn()

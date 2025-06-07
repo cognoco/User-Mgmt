@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { MFAVerificationForm } from '@/src/ui/styled/auth/MFAVerificationForm';
+import { MFAVerificationForm } from '@/ui/styled/auth/MFAVerificationForm';
 
 let state: any;
 

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { withResourcePermission } from '@/src/middleware/withResourcePermission';
-import { withRouteAuth } from '@/src/middleware/auth';
-import { createAuthApiError } from '@/src/middleware/authErrors';
+import { withResourcePermission } from '@/middleware/withResourcePermission';
+import { withRouteAuth } from '@/middleware/auth';
+import { createAuthApiError } from '@/middleware/authErrors';
 import { createErrorResponse } from '@/lib/api/common/responseFormatter';
 
 vi.mock('../auth');

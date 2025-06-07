@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { LoginForm } from '@/src/ui/styled/auth/LoginForm';
+import { LoginForm } from '@/ui/styled/auth/LoginForm';
 import { useAuth } from '@/hooks/auth/useAuth';
 import type { LoginData } from '@/types/auth';
 import * as React from 'react';

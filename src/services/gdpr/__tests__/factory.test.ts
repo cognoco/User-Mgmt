@@ -3,8 +3,8 @@ let AdapterRegistry: typeof import('@/adapters/registry').AdapterRegistry;
 let configureServices: typeof import('@/lib/config/serviceContainer').configureServices;
 let resetServiceContainer: typeof import('@/lib/config/serviceContainer').resetServiceContainer;
 
-let getApiGdprService: typeof import('@/src/services/gdpr/factory').getApiGdprService;
-let DefaultGdprService: typeof import('@/src/services/gdpr/defaultGdpr.service').DefaultGdprService;
+let getApiGdprService: typeof import('@/services/gdpr/factory').getApiGdprService;
+let DefaultGdprService: typeof import('@/services/gdpr/defaultGdpr.service').DefaultGdprService;
 
 describe('getApiGdprService', () => {
   beforeEach(async () => {
@@ -13,8 +13,8 @@ describe('getApiGdprService', () => {
     ({ configureServices, resetServiceContainer } = await import('@/lib/config/serviceContainer'));
     (AdapterRegistry as any).instance = null;
     resetServiceContainer();
-    ({ getApiGdprService } = await import('@/src/services/gdpr/factory'));
-    ({ DefaultGdprService } = await import('@/src/services/gdpr/defaultGdpr.service'));
+    ({ getApiGdprService } = await import('@/services/gdpr/factory'));
+    ({ DefaultGdprService } = await import('@/services/gdpr/defaultGdpr.service'));
   });
 
   it('returns configured service if registered', () => {

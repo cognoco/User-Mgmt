@@ -8,7 +8,7 @@
  */
 
 import { UserManagementConfiguration } from '@/core/config';
-import { initializeUserManagement } from '@/src/core/initialization/initializeAdapters';
+import { initializeUserManagement } from '@/core/initialization/initializeAdapters';
 
 // Initialize the User Management Module with default configuration
 // This maintains backward compatibility with existing code

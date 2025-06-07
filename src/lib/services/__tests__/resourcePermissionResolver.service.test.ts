@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ResourcePermissionResolver } from '@/src/lib/services/resourcePermissionResolver.service';
+import { ResourcePermissionResolver } from '@/lib/services/resourcePermissionResolver.service';
 import { getServiceSupabase } from '@/lib/database/supabase';
 
 const supabase = { from: vi.fn() };

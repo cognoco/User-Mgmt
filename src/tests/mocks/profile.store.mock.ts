@@ -1,6 +1,6 @@
 // src/tests/mocks/profile.store.mock.ts
 // Robust mock factory for useProfileStore (Zustand)
-// Usage: import { createMockProfileStore } from '@/src/tests/mocks/profile.store.mock';
+// Usage: import { createMockProfileStore } from '@/tests/mocks/profile.store.mock';
 //        const mockStore = createMockProfileStore({ profile: { ... } }, { updateProfile: vi.fn() });
 //        vi.mock('@/lib/stores/profile.store', () => ({ useProfileStore: vi.fn(() => mockStore) }));
 

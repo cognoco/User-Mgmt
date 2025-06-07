@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ApplicationError } from '@/core/common/errors';
-import { ErrorClusterer } from '@/src/lib/telemetry/errorClustering';
+import { ErrorClusterer } from '@/lib/telemetry/errorClustering';
 
 describe('ErrorClusterer', () => {
   let clusterer: ErrorClusterer;

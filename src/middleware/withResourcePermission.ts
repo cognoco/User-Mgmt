@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withRouteAuth, type RouteAuthContext, type RouteAuthOptions } from '@/src/middleware/auth';
-import { createAuthApiError } from '@/src/middleware/authErrors';
+import { withRouteAuth, type RouteAuthContext, type RouteAuthOptions } from '@/middleware/auth';
+import { createAuthApiError } from '@/middleware/authErrors';
 import { createErrorResponse } from '@/lib/api/common/responseFormatter';
 import { isPermission, type Permission } from '@/lib/rbac/roles';
 

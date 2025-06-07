@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, act } from '@testing-library/react';
-import { RemoveMemberDialog } from '@/src/ui/headless/team/RemoveMemberDialog';
+import { RemoveMemberDialog } from '@/ui/headless/team/RemoveMemberDialog';
 import { useTeamMembers } from '@/hooks/team/useTeamMembers';
 
 vi.mock('@/hooks/team/useTeamMembers', () => ({

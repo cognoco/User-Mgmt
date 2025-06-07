@@ -1,4 +1,4 @@
-import { SupabasePermissionProvider as BaseProvider } from '@/src/adapters/permission/supabasePermissionProvider';
+import { SupabasePermissionProvider as BaseProvider } from '@/adapters/permission/supabasePermissionProvider';
 
 /**
  * Wrapper class to expose the SupabasePermissionProvider under a structured

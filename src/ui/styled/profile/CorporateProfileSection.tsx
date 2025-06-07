@@ -7,7 +7,7 @@ import { Label } from '@/ui/primitives/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Separator } from '@/ui/primitives/separator';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
-import { CompanyLogoUpload } from '@/src/ui/styled/profile/CompanyLogoUpload';
+import { CompanyLogoUpload } from '@/ui/styled/profile/CompanyLogoUpload';
 import HeadlessCorporateProfileSection from '@/ui/headless/profile/CorporateProfileSection';
 
 interface Props {

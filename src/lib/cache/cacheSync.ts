@@ -1,4 +1,4 @@
-import { getRedisClient } from '@/src/lib/cache/redisClient';
+import { getRedisClient } from '@/lib/cache/redisClient';
 import { errorLogger } from '@/lib/monitoring/errorLogger';
 import { telemetry } from '@/lib/monitoring/errorSystem';
 

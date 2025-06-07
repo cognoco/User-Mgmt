@@ -7,7 +7,7 @@
 
 import { PermissionService } from "@/core/permission/interfaces";
 import type { IPermissionDataProvider } from "@/core/permission/IPermissionDataProvider";
-import { DefaultPermissionService } from "@/src/services/permission/defaultPermission.service";
+import { DefaultPermissionService } from "@/services/permission/defaultPermission.service";
 import { AdapterRegistry } from "@/adapters/registry";
 import { getServiceContainer } from "@/lib/config/serviceContainer";
 

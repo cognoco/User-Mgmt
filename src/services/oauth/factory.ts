@@ -1,4 +1,4 @@
-import { DefaultOAuthService } from "@/src/services/oauth/defaultOauth.service";
+import { DefaultOAuthService } from "@/services/oauth/defaultOauth.service";
 import type { OAuthService } from "@/core/oauth/interfaces";
 import { getServiceContainer } from "@/lib/config/serviceContainer";
 

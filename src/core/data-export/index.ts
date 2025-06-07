@@ -1,2 +1,2 @@
-export * from '@/src/core/dataExport/interfaces';
-export * from '@/src/core/dataExport/IDataExportDataProvider';
+export * from '@/core/dataExport/interfaces';
+export * from '@/core/dataExport/IDataExportDataProvider';

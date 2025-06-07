@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { translateSsoError } from '@/src/services/sso/errorMapper';
+import { translateSsoError } from '@/services/sso/errorMapper';
 import { SSO_ERROR } from '@/core/common/errorCodes';
 
 describe('translateSsoError', () => {

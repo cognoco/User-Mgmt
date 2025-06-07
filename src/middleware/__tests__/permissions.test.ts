@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { withPermissionCheck } from '@/src/middleware/permissions';
+import { withPermissionCheck } from '@/middleware/permissions';
 import { getApiAuthService } from '@/services/auth/factory';
 import { Permission } from '@/lib/rbac/roles';
 import { getApiPermissionService } from '@/services/permission/factory';

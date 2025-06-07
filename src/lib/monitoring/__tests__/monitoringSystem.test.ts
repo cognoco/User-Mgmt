@@ -16,7 +16,7 @@ vi.mock('@/core/common/errors', async () => {
   return { ...actual, ApplicationError: actual.ApplicationError };
 });
 
-const { initializeMonitoringSystem } = await import('@/src/lib/monitoring/monitoringSystem');
+const { initializeMonitoringSystem } = await import('@/lib/monitoring/monitoringSystem');
 
 describe('monitoring-system', () => {
   beforeEach(() => {

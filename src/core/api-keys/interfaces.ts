@@ -1,4 +1,4 @@
-import type { ApiKey, ApiKeyCreatePayload, ApiKeyCreateResult } from "@/src/core/api-keys/models";
+import type { ApiKey, ApiKeyCreatePayload, ApiKeyCreateResult } from "@/core/api-keys/models";
 
 /**
  * Service for high level API key management.

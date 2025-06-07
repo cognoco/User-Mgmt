@@ -1,6 +1,6 @@
 // Create file: lib/auth/unified-auth.middleware.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { AuthContext } from '@/src/lib/auth/types';
+import { AuthContext } from '@/lib/auth/types';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { getApiPermissionService } from '@/services/permission/factory';
 import type { AuthService } from '@/core/auth/interfaces';

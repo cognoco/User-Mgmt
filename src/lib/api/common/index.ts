@@ -4,10 +4,10 @@
  * This file exports all common utilities for API routes.
  */
 
-export * from '@/src/lib/api/common/errorCodes';
-export * from '@/src/lib/api/common/apiError';
-export * from '@/src/lib/api/common/responseFormatter';
-export * from '@/src/lib/api/errorHandler';
+export * from '@/lib/api/common/errorCodes';
+export * from '@/lib/api/common/apiError';
+export * from '@/lib/api/common/responseFormatter';
+export * from '@/lib/api/errorHandler';
 
 // Re-export middleware functions for convenience
 export { withErrorHandling } from '@/middleware/errorHandling';

@@ -4,7 +4,7 @@ import { getSupabaseServerClient } from "@/lib/auth";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { hasPermission } from "@/lib/auth/hasPermission";
 import { PermissionValues } from "@/core/permission/models";
-import AdminUsersPageClient from "@/app/admin/users/ClientPage";
+import AdminUsersPageClient from "@app/admin/users/ClientPage";
 
 export const metadata: Metadata = {
   title: "User Management",

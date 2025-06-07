@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react';
-import RoleManagementPanel from '@/src/ui/styled/admin/RoleManagementPanel';
+import RoleManagementPanel from '@/ui/styled/admin/RoleManagementPanel';
 import { useRBACStore } from '@/lib/stores/rbac.store';
 import { User } from '@/types/user';
 import { RoleSchema, UserRoleSchema, RoleValues, PermissionValues } from '@/types/rbac';

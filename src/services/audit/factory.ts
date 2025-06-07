@@ -9,7 +9,7 @@ import { AuditService } from '@/core/audit/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
 import type { IAuditDataProvider } from '@/core/audit';
 import { AdapterRegistry } from '@/adapters/registry';
-import { DefaultAuditService } from '@/src/services/audit/defaultAudit.service';
+import { DefaultAuditService } from '@/services/audit/defaultAudit.service';
 import { getServiceContainer } from '@/lib/config/serviceContainer';
 
 /** Options for {@link getApiAuditService}. */

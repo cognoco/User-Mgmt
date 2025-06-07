@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { translateError } from '@/src/lib/utils/error';
+import { translateError } from '@/lib/utils/error';
 
 describe('translateError', () => {
   it('returns translated message for known code', () => {

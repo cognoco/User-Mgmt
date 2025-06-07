@@ -9,7 +9,7 @@ import { ApiKeyService } from '@/core/apiKeys/interfaces';
 import type { IApiKeyDataProvider } from '@/core/apiKeys';
 import { AdapterRegistry } from '@/adapters/registry';
 import { getServiceContainer } from '@/lib/config/serviceContainer';
-import { DefaultApiKeysService } from '@/src/services/api-keys/defaultApiKeys.service';
+import { DefaultApiKeysService } from '@/services/api-keys/defaultApiKeys.service';
 
 export interface ApiKeysServiceOptions {
   reset?: boolean;

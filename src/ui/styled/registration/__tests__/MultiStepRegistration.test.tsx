@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@/tests/utils/testUtils';
-import { MultiStepRegistration } from '@/src/ui/styled/registration/MultiStepRegistration';
+import { MultiStepRegistration } from '@/ui/styled/registration/MultiStepRegistration';
 
 describe('MultiStepRegistration', () => {
   it('moves focus to first input on step change', () => {

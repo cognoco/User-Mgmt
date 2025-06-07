@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { AccountSettings } from '@/src/ui/styled/profile/AccountSettings';
+import { AccountSettings } from '@/ui/styled/profile/AccountSettings';
 
 let accState: any;
 

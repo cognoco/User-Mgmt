@@ -7,7 +7,7 @@
 
 import { TeamService } from '@/core/team/interfaces';
 import type { ITeamDataProvider } from '@/core/team/ITeamDataProvider';
-import { DefaultTeamService } from '@/src/services/team/defaultTeam.service';
+import { DefaultTeamService } from '@/services/team/defaultTeam.service';
 import { AdapterRegistry } from '@/adapters/registry';
 import { getServiceContainer, getServiceConfiguration } from '@/lib/config/serviceContainer';
 

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import UserRoleAssignmentPanel from '@/app/admin/permissions/UserRoleAssignmentPanel';
+import UserRoleAssignmentPanel from '@app/admin/permissions/UserRoleAssignmentPanel';
 import { useAdminUsers } from '@/hooks/admin/useAdminUsers';
 import { usePermission } from '@/hooks/permission/usePermissions';
 

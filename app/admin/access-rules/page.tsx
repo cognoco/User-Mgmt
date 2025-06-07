@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import AccessRulesClientPage from '@/app/admin/access-rules/ClientPage';
+import AccessRulesClientPage from '@app/admin/access-rules/ClientPage';
 
 export const metadata: Metadata = {
   title: 'Access Rules',

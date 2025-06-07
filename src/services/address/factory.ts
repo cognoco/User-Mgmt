@@ -9,7 +9,7 @@ import { CompanyAddressService, AddressService } from '@/core/address/interfaces
 import { UserManagementConfiguration } from '@/core/config';
 import type { IAddressDataProvider } from '@/core/address';
 import { AdapterRegistry } from '@/adapters/registry';
-import { DefaultAddressService } from '@/src/services/address/defaultAddress.service';
+import { DefaultAddressService } from '@/services/address/defaultAddress.service';
 import { getServiceContainer, getServiceConfiguration } from '@/lib/config/serviceContainer';
 
 export interface ApiAddressServiceOptions {

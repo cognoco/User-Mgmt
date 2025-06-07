@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act } from '@testing-library/react';
-import { useSubscriptionStore } from '@/src/lib/stores/subscription.store';
-import { api } from '@/src/lib/api/axios';
+import { useSubscriptionStore } from '@/lib/stores/subscription.store';
+import { api } from '@/lib/api/axios';
 import { SubscriptionTier, SubscriptionPeriod, SubscriptionStatus } from 'src/types/subscription';
 
 // Mock axios api
