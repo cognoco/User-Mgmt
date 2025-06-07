@@ -12,13 +12,36 @@ This document provides clear, unambiguous guidelines for developing the User Man
 - Business logic MUST reside ONLY in dedicated service or core classes/functions
 - UI components MUST be limited to display, user interaction, and calling service methods
 - Data transformation, validation, and processing MUST happen in services, not UI components
-- All imports must me in this form:   @/core/, @/lib/, @/tests/ etc
+- All imports MUST use the `@/` alias pattern for absolute imports
+
+**📁 IMPORT PATH RULES:**
+- `@/` alias maps to **PROJECT ROOT** (not src/)
+- Examples of CORRECT imports:
+  - `@/src/core/auth/interfaces` → `/src/core/auth/interfaces`
+  - `@/app/api/auth/route` → `/app/api/auth/route`
+  - `@/middleware/auth` → `/middleware/auth`
+  - `@/lib/config/settings` → `/lib/config/settings`
+  - `@/tests/utils/helpers` → `/tests/utils/helpers`
 
 **❌ FORBIDDEN:**
 - UI components MUST NOT contain API calls
 - UI components MUST NOT implement validation logic
 - UI components MUST NOT directly manipulate data stores or state
- -Imports like MUST NOT BE CREATED./../core/ , ../../../lib/ , ../../../tests/  etc
+- Relative imports like `../../../core/`, `../../lib/`, `../../../../middleware/`
+- Imports assuming `@/` maps to `src/` directory
+
+**⚙️ TYPESCRIPT CONFIGURATION:**
+Your `tsconfig.json` MUST have this path mapping:
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}
+```
+This ensures `@/` resolves to project root, enabling imports like `@/src/`, `@/app/`, `@/middleware/`.
 
 #### 1.2 Layered Architecture
 
