@@ -31,9 +31,7 @@ interface Profile {
 
 
 export const useProfile = () => {
-  const profile = useProfileStore((state) => state.profile);
-  const isLoading = useProfileStore((state) => state.isLoading);
-  const updatePrivacySettings = useProfileStore((state) => state.updatePrivacySettings);
+  const { profile, isLoading } = useProfileStore();
 
   // You could add more selectors here if needed, e.g., specific parts of the profile
   // const avatarUrl = useProfileStore((state) => state.profile?.avatarUrl);
@@ -41,7 +39,5 @@ export const useProfile = () => {
   return {
     profile,
     isLoading,
-    updatePrivacySettings,
-    // Add other selected state/actions here if needed
   };
 };
