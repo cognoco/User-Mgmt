@@ -11,17 +11,17 @@ vi.mock('@/hooks/session/useSession');
 const mockSessions = [
   {
     id: 'session-1',
-    user_agent: 'Chrome on Windows',
-    ip_address: '192.168.1.1',
-    last_active_at: new Date().toISOString(),
-    is_current: true,
+    userAgent: 'Chrome on Windows',
+    ipAddress: '192.168.1.1',
+    lastActiveAt: new Date().toISOString(),
+    isCurrent: true,
   },
   {
     id: 'session-2',
-    user_agent: 'Safari on iPhone',
-    ip_address: '10.0.0.2',
-    last_active_at: new Date(Date.now() - 100000).toISOString(),
-    is_current: false,
+    userAgent: 'Safari on iPhone',
+    ipAddress: '10.0.0.2',
+    lastActiveAt: new Date(Date.now() - 100000).toISOString(),
+    isCurrent: false,
   },
 ];
 

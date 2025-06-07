@@ -4,7 +4,9 @@ import {
   RoleManagementPanelProps,
 } from '@/ui/headless/admin/RoleManagementPanel';
 
-const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({ users }) => (
+type StyledRoleManagementPanelProps = Omit<RoleManagementPanelProps, 'children'>;
+
+const RoleManagementPanel: React.FC<StyledRoleManagementPanelProps> = ({ users }) => (
   <HeadlessRoleManagementPanel users={users}>
     {({
       roles,

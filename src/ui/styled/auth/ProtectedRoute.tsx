@@ -26,10 +26,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const user = useAuth().user;
   
   // Update to use individual selectors for RBAC store
-  const hasRole = useRBACStore(state => state.hasRole);
-  const hasPermission = useRBACStore(state => state.hasPermission);
-  const fetchUserRoles = useRBACStore(state => state.fetchUserRoles);
-  const rbacLoading = useRBACStore(state => state.isLoading);
+  const {
+    hasRole,
+    hasPermission,
+    fetchUserRoles,
+    isLoading: rbacLoading,
+  } = useRBACStore();
 
   useEffect(() => {
     if (user) {

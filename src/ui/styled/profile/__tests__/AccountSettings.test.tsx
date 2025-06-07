@@ -12,53 +12,49 @@ vi.mock('../../../headless/profile/AccountSettings', () => ({
 describe('AccountSettings styled component', () => {
   beforeEach(() => {
     accState = {
-      handlePasswordChange: vi.fn((e: any) => e.preventDefault()),
-      handleDeleteAccount: vi.fn(),
-      handlePrivacySettingsChange: vi.fn((e: any) => e.preventDefault()),
-      handleSecuritySettingsChange: vi.fn((e: any) => e.preventDefault()),
-      passwordForm: { currentPassword: '', newPassword: '', confirmPassword: '' },
-      updatePasswordForm: vi.fn(),
-      deleteAccountConfirmation: '',
-      updateDeleteConfirmation: vi.fn(),
-      privacySettings: {
-        profileVisibility: 'public',
-        activityTracking: false,
-        communicationEmails: false,
-        marketingEmails: false
+      handleUpdatePreferences: vi.fn((e: any) => e.preventDefault()),
+      handleUpdateVisibility: vi.fn((e: any) => e.preventDefault()),
+      preferences: {
+        language: 'en',
+        theme: 'light',
+        emailNotifications: {
+          marketing: false,
+          securityAlerts: false,
+          accountUpdates: false,
+          teamInvitations: false
+        },
+        pushNotifications: { enabled: false, events: [] }
       },
-      securitySettings: {
-        twoFactorEnabled: false,
-        loginNotifications: false,
-        deviceManagement: false
+      visibility: {
+        email: 'private',
+        fullName: 'public',
+        profilePicture: 'public',
+        companyInfo: 'team_only',
+        lastLogin: 'private'
       },
+      setPreferenceValue: vi.fn(),
+      setEmailNotificationValue: vi.fn(),
+      setPushNotificationValue: vi.fn(),
+      setVisibilityValue: vi.fn(),
       isSubmitting: false,
-      isSuccess: false,
       errors: {},
-      touched: { currentPassword: false, newPassword: false, confirmPassword: false },
-      handleBlur: vi.fn(),
-      sessions: [],
-      handleSessionLogout: vi.fn(),
-      connectedAccounts: [],
-      handleDisconnectAccount: vi.fn(),
-      handleConnectAccount: vi.fn(),
-      exportData: vi.fn(),
-      isExporting: false
+      successMessage: undefined,
+      availableLanguages: [{ code: 'en', name: 'English' }],
+      availableThemes: [{ value: 'light', label: 'Light' }],
+      availableVisibilityLevels: [{ value: 'public', label: 'Public' }]
     };
   });
 
-  it('submits password form via handler', async () => {
+  it('submits preferences form via handler', async () => {
     const user = userEvent.setup();
     render(<AccountSettings />);
-    await user.type(screen.getByLabelText('Current Password'), 'old');
-    await user.type(screen.getByLabelText('New Password'), 'newpass1A');
-    await user.type(screen.getByLabelText('Confirm New Password'), 'newpass1A');
-    await user.click(screen.getByRole('button', { name: /update password/i }));
-    expect(accState.handlePasswordChange).toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: /save preferences/i }));
+    expect(accState.handleUpdatePreferences).toHaveBeenCalled();
   });
 
-  it('shows success alert when isSuccess is true', () => {
-    accState.isSuccess = true;
+  it('shows success alert when successMessage is provided', () => {
+    accState.successMessage = 'done';
     render(<AccountSettings />);
-    expect(screen.getByText('Settings updated successfully')).toBeInTheDocument();
+    expect(screen.getByText('done')).toBeInTheDocument();
   });
 });

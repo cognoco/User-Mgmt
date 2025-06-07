@@ -1,25 +1,28 @@
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '@/lib/stores/settings.store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Switch } from '@/ui/primitives/switch';
 import { Label } from '@/ui/primitives/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/primitives/select';
-import { Alert } from '@/ui/primitives/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
 import { getPlatformClasses } from '@/hooks/utils/usePlatformStyles';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
-import { Platform } from '@/types/platform';
+
 import { ProviderManagementPanel } from '@/ui/styled/auth/ProviderManagementPanel';
 
 export function SettingsPanel() {
   const { t } = useTranslation();
-  const { settings, isLoading, error, fetchSettings, updateSettings } = useSettingsStore();
+  const {
+    theme,
+    language,
+    notifications,
+    privacy,
+    setTheme,
+    setLanguage,
+    updateNotifications,
+    updatePrivacy,
+  } = useSettingsStore();
   const { platform, isNative } = useUserManagement();
-
-  useEffect(() => {
-    fetchSettings();
-  }, [fetchSettings]);
 
   const containerClasses = getPlatformClasses({
     base: "container mx-auto py-8",
@@ -31,25 +34,6 @@ export function SettingsPanel() {
     mobile: "rounded-md"
   }, { platform, isNative });
 
-  if (isLoading) {
-    return (
-      <div className={containerClasses}>
-        <div className="text-center">{t('common.loading')}</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={containerClasses}>
-        <Alert variant="destructive">{error}</Alert>
-      </div>
-    );
-  }
-
-  if (!settings) {
-    return null;
-  }
 
   return (
     <div className={containerClasses}>
@@ -72,8 +56,8 @@ export function SettingsPanel() {
                 <div className="space-y-2">
                   <Label>{t('settings.language')}</Label>
                   <Select
-                    value={settings.language}
-                    onValueChange={(value: string) => updateSettings({ language: value })}
+                    value={language}
+                    onValueChange={(value: string) => setLanguage(value)}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -89,9 +73,9 @@ export function SettingsPanel() {
                 <div className="space-y-2">
                   <Label>{t('settings.theme')}</Label>
                   <Select
-                    value={settings.theme}
-                    onValueChange={(value: 'light' | 'dark' | 'system') => 
-                      updateSettings({ theme: value })
+                    value={theme}
+                    onValueChange={(value: 'light' | 'dark' | 'system') =>
+                      setTheme(value)
                     }
                   >
                     <SelectTrigger>
@@ -118,11 +102,9 @@ export function SettingsPanel() {
                     </p>
                   </div>
                   <Switch
-                    checked={settings.notifications.email}
+                    checked={notifications.email}
                     onCheckedChange={(checked: boolean) =>
-                      updateSettings({
-                        notifications: { ...settings.notifications, email: checked }
-                      })
+                      updateNotifications({ email: checked })
                     }
                   />
                 </div>
@@ -135,16 +117,14 @@ export function SettingsPanel() {
                     </p>
                   </div>
                   <Switch
-                    checked={settings.notifications.push}
+                    checked={notifications.push}
                     onCheckedChange={(checked: boolean) =>
-                      updateSettings({
-                        notifications: { ...settings.notifications, push: checked }
-                      })
+                      updateNotifications({ push: checked })
                     }
                   />
                 </div>
 
-                {platform === Platform.MOBILE && (
+                {(platform === 'ios' || platform === 'android') && (
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>{t('settings.preferences.mobileNotifications')}</Label>
@@ -153,11 +133,9 @@ export function SettingsPanel() {
                       </p>
                     </div>
                     <Switch
-                      checked={settings.notifications.mobile}
+                      checked={notifications.mobile ?? true}
                       onCheckedChange={(checked: boolean) =>
-                        updateSettings({
-                          notifications: { ...settings.notifications, mobile: checked }
-                        })
+                        updateNotifications({ mobile: checked })
                       }
                     />
                   </div>
@@ -171,11 +149,9 @@ export function SettingsPanel() {
                     </p>
                   </div>
                   <Switch
-                    checked={settings.notifications.marketing}
+                    checked={notifications.marketing ?? false}
                     onCheckedChange={(checked: boolean) =>
-                      updateSettings({
-                        notifications: { ...settings.notifications, marketing: checked }
-                      })
+                      updateNotifications({ marketing: checked })
                     }
                   />
                 </div>
@@ -188,11 +164,9 @@ export function SettingsPanel() {
                 <div className="space-y-2">
                   <Label>{t('settings.preferences.profileVisibility')}</Label>
                   <Select
-                    value={settings.privacy.profileVisibility}
+                    value={privacy.profileVisibility}
                     onValueChange={(value: 'public' | 'private' | 'friends') =>
-                      updateSettings({
-                        privacy: { ...settings.privacy, profileVisibility: value }
-                      })
+                      updatePrivacy({ profileVisibility: value })
                     }
                   >
                     <SelectTrigger>
@@ -214,11 +188,9 @@ export function SettingsPanel() {
                     </p>
                   </div>
                   <Switch
-                    checked={settings.privacy.showOnlineStatus}
+                    checked={privacy.showOnlineStatus ?? false}
                     onCheckedChange={(checked: boolean) =>
-                      updateSettings({
-                        privacy: { ...settings.privacy, showOnlineStatus: checked }
-                      })
+                      updatePrivacy({ showOnlineStatus: checked })
                     }
                   />
                 </div>
