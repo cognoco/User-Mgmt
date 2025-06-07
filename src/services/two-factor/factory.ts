@@ -5,7 +5,7 @@
  * It ensures consistent configuration and dependency injection across all API endpoints.
  */
 
-import { TwoFactorService } from '@/core/twoFactor/interfaces';
+import { TwoFactorService } from '@/core/two-factor/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
 import { DefaultTwoFactorService } from '@/services/two-factor/defaultTwoFactor.service';
 import {
