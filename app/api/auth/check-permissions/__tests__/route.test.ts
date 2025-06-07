@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '@/app/api/auth/check-permissions/route'64;
-import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer'98;
+import { POST } from '@/app/api/auth/check-permissions/route';
+import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer';
 import type { PermissionService } from '@/core/permission/interfaces';
 import type { AuthService } from '@/core/auth/interfaces';
-import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'322;
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers';
 
 vi.mock('@/services/permission/factory', () => ({}));
 vi.mock('@/services/auth/factory', () => ({}));

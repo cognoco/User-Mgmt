@@ -73,9 +73,9 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RegistrationForm } from '@/ui/styled/auth/RegistrationForm';
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
-import { ThemeProvider } from '@/ui/primitives/themeProvider'2605;
+import { ThemeProvider } from '@/ui/primitives/themeProvider';
 import { OAuthProvider } from '@/types/oauth';
-import { UserType } from '@/types/userType'2718;
+import { UserType } from '@/types/userType';
 
 describe('RegistrationForm (headless)', () => {
   const testConfig = {

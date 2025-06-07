@@ -1,4 +1,4 @@
-import { SupabaseTeamProvider as BaseProvider } from '@/src/adapters/team/supabaseTeamProvider'0;
+import { SupabaseTeamProvider as BaseProvider } from '@/src/adapters/team/supabaseTeamProvider';
 
 /**
  * Wrapper class to expose the SupabaseTeamProvider under a structured path.

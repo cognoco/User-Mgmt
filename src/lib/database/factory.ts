@@ -1,5 +1,5 @@
-import { DatabaseConfig, DatabaseProvider } from '@/src/lib/database/types'0;
-import { SupabaseProvider } from '@/src/lib/database/providers/supabase'61;
+import { DatabaseConfig, DatabaseProvider } from '@/src/lib/database/types';
+import { SupabaseProvider } from '@/src/lib/database/providers/supabase';
 
 export function createDatabaseProvider(config: DatabaseConfig): DatabaseProvider {
   switch (config.provider) {

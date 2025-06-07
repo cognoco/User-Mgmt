@@ -1,8 +1,8 @@
-import { Button } from '@/src/components/ui/button'0;
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/src/components/ui/card'57;
-import { Progress } from '@/src/components/ui/progress'158;
-import { Label } from '@/src/components/ui/label'219;
-import { Checkbox } from '@/src/components/ui/checkbox'274;
+import { Button } from '@/src/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Progress } from '@/src/components/ui/progress';
+import { Label } from '@/src/components/ui/label';
+import { Checkbox } from '@/src/components/ui/checkbox';
 import SetupWizardHeadless, { SetupStep } from '@/ui/headless/onboarding/SetupWizard';
 
 export function SetupWizard() {

@@ -5,10 +5,10 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 // Import our utility functions
-import { setupTestEnvironment } from '@/tests/utils/environmentSetup'219;
-import { renderWithProviders, createMockFile } from '@/tests/utils/componentTestingUtils'292;
-import { TestWrapper } from '@/src/tests/utils/testWrapper'386;
-import { createMockUser, createMockProfile } from '@/tests/utils/testingUtils'455;
+import { setupTestEnvironment } from '@/tests/utils/environmentSetup';
+import { renderWithProviders, createMockFile } from '@/tests/utils/componentTestingUtils';
+import { TestWrapper } from '@/src/tests/utils/testWrapper';
+import { createMockUser, createMockProfile } from '@/tests/utils/testingUtils';
 
 // Import and use our standardized mock
 import { describe, test, beforeAll, afterAll, beforeEach, afterEach, expect, vi } from 'vitest';

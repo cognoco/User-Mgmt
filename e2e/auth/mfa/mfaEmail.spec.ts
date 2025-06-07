@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { loginAs } from '@/e2e/utils/auth'56;
+import { loginAs } from '@/e2e/utils/auth';
 
 // Test credentials
 const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';

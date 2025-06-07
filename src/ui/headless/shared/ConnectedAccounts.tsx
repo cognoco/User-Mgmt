@@ -4,8 +4,8 @@
  * Provides account linking state and actions without UI.
  */
 import { useEffect } from 'react';
-import { useConnectedAccountsStore } from '@/lib/stores/connectedAccounts.store'151;
-import type { ConnectedAccount, OAuthProvider } from '@/types/connectedAccounts'235;
+import { useConnectedAccountsStore } from '@/lib/stores/connectedAccounts.store';
+import type { ConnectedAccount, OAuthProvider } from '@/types/connectedAccounts';
 
 export interface ConnectedAccountsProps {
   render: (props: {

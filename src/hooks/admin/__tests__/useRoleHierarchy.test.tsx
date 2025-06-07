@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useRoleHierarchy } from '@/src/hooks/admin/useRoleHierarchy'153;
+import { useRoleHierarchy } from '@/src/hooks/admin/useRoleHierarchy';
 import { useApi } from '@/hooks/core/useApi';
 
 vi.mock('@/hooks/core/useApi');

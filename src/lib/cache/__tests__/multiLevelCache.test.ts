@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MemoryCache, MultiLevelCache, RedisCache } from '@/lib/cache';
-import * as sync from '@/lib/cache/cacheSync'137;
+import * as sync from '@/lib/cache/cacheSync';
 
 vi.mock('@/lib/cache/cache-sync', () => ({
   broadcastInvalidation: vi.fn(),

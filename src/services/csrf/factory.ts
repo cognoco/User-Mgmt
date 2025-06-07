@@ -7,13 +7,13 @@
 
 import { CsrfService } from '@/core/csrf/interfaces';
 import type { ICsrfDataProvider } from '@/core/csrf';
-import { DefaultCsrfService } from '@/src/services/csrf/defaultCsrf.service'349;
+import { DefaultCsrfService } from '@/src/services/csrf/defaultCsrf.service';
 import { AdapterRegistry } from '@/adapters/registry';
 import { UserManagementConfiguration } from '@/core/config';
 import {
   getServiceContainer,
   getServiceConfiguration
-} from '@/lib/config/serviceContainer'529;
+} from '@/lib/config/serviceContainer';
 
 // Singleton instance for API routes
 export interface ApiCsrfServiceOptions {

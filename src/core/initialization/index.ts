@@ -5,6 +5,6 @@
  * including application initialization, configuration, and adapter setup.
  */
 
-export * from '@/src/core/initialization/appInit'211;
-export * from '@/src/core/initialization/config'240;
-export * from '@/src/core/initialization/initializeAdapters'267;
+export * from '@/src/core/initialization/appInit';
+export * from '@/src/core/initialization/config';
+export * from '@/src/core/initialization/initializeAdapters';

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getApiCompanyService } from "@/services/company/factory";
 import { type RouteAuthContext } from "@/middleware/auth";
-import { createApiHandler } from "@/lib/api/routeHelpers"212;
+import { createApiHandler } from "@/lib/api/routeHelpers";
 import { createSuccessResponse } from "@/lib/api/common";
 
 

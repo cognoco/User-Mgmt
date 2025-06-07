@@ -8,7 +8,7 @@ vi.mock('@/lib/database/supabase', () => ({
 // Then import everything else
 import { createMocks } from 'node-mocks-http';
 import { NextApiRequest } from 'next';
-import { auditLog } from '@/src/middleware/auditLog'351;
+import { auditLog } from '@/src/middleware/auditLog';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 // Import our mocked supabase client

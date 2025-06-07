@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { supabase } from '@/src/lib/supabase'35;
+import { supabase } from '@/src/lib/supabase';
 
 interface UserProfile {
   id: string;

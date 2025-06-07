@@ -1,4 +1,4 @@
-import { permissionCacheService } from '@/services/permission/permissionCache.service'0;
+import { permissionCacheService } from '@/services/permission/permissionCache.service';
 import {
   createErrorFromUnknown,
   EntityConsistencyError,

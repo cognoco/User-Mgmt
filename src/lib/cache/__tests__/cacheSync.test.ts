@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { broadcastInvalidation, subscribeInvalidation } from '@/src/lib/cache/cacheSync'52;
-import { getRedisClient } from '@/src/lib/cache/redisClient'131;
+import { broadcastInvalidation, subscribeInvalidation } from '@/src/lib/cache/cacheSync';
+import { getRedisClient } from '@/src/lib/cache/redisClient';
 
 vi.mock('../redis-client', () => ({ getRedisClient: vi.fn() }));
 

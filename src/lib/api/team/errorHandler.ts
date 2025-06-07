@@ -5,7 +5,7 @@
  * This module provides error handling specific to team management.
  */
 
-import { ApiError, ERROR_CODES } from '@/src/lib/api/common'168;
+import { ApiError, ERROR_CODES } from '@/src/lib/api/common';
 
 /**
  * Create a team not found error

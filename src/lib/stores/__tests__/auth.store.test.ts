@@ -31,7 +31,7 @@ import { useAuth } from '@/hooks/auth/useAuth';
 
 const useAuthStore = useAuth;
 import { User, RegistrationPayload, LoginPayload, AuthResult } from '@/core/auth/models';
-import { api } from '@/src/lib/api/axios'1010;
+import { api } from '@/src/lib/api/axios';
 import { act } from '@testing-library/react';
 import { supabase as supabaseMock } from '@/lib/database/supabase';
 

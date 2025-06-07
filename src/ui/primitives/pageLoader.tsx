@@ -1,4 +1,4 @@
-import { Spinner } from '@/src/ui/primitives/spinner'0;
+import { Spinner } from '@/src/ui/primitives/spinner';
 
 interface PageLoaderProps {
   label?: string;

@@ -1,6 +1,6 @@
 import type { IWebhookService } from '@/core/webhooks/IWebhookService';
 import type { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
-import { WebhookService } from '@/src/services/webhooks/WebhookService'156;
+import { WebhookService } from '@/src/services/webhooks/WebhookService';
 
 export interface WebhookServiceConfig {
   webhookDataProvider: IWebhookDataProvider;

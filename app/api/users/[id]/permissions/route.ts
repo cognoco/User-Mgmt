@@ -1,7 +1,7 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createSuccessResponse } from '@/lib/api/common';
-import { createApiHandler } from '@/lib/api/routeHelpers'134;
+import { createApiHandler } from '@/lib/api/routeHelpers';
 import { PermissionValues, type Permission } from '@/core/permission/models';
 
 // GET /api/users/[id]/permissions - Get effective permissions for a user

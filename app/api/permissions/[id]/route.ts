@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'58;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import { createSuccessResponse } from '@/lib/api/common';
 import { PermissionValues, Permission } from '@/core/permission/models';
-import { permissionCategoryMap } from '@/lib/rbac/permissionCategories'265;
+import { permissionCategoryMap } from '@/lib/rbac/permissionCategories';
 import { isPermission } from '@/lib/rbac/roles';
 
 function getPermissionId(req: NextRequest): string {

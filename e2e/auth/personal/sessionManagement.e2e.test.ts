@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { loginUser } from '@/e2e/utils/authUtils'56;
+import { loginUser } from '@/e2e/utils/authUtils';
 
 test.describe('1.4: Token Handling & Session Management', () => {
   let page: Page;

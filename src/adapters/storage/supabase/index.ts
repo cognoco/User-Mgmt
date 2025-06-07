@@ -1,1 +1,1 @@
-export * from '@/src/adapters/storage/supabase/SupabaseStorageAdapter'0;
+export * from '@/src/adapters/storage/supabase/SupabaseStorageAdapter';

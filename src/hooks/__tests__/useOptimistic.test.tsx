@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { useOptimistic } from '@/src/hooks/useOptimistic'111;
+import { useOptimistic } from '@/src/hooks/useOptimistic';
 
 describe('useOptimistic', () => {
   it('updates optimistically and rolls back on failure', async () => {

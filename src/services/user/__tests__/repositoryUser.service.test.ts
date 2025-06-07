@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { RepositoryUserService } from '@/src/services/user/repositoryUser.service'64;
-import { MockAuthService } from '@/src/services/auth/__tests__/mocks/mockAuthService'133;
+import { RepositoryUserService } from '@/src/services/user/repositoryUser.service';
+import { MockAuthService } from '@/src/services/auth/__tests__/mocks/mockAuthService';
 import type { IUserRepository } from '@/repositories/interfaces/IUserRepository';
 
 function createRepoMock(): IUserRepository {

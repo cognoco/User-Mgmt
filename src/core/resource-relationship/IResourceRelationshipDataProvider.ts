@@ -1,4 +1,4 @@
-import type { ResourceRelationship, CreateRelationshipPayload } from '@/src/core/resource-relationship/models'0;
+import type { ResourceRelationship, CreateRelationshipPayload } from '@/src/core/resource-relationship/models';
 
 export interface IResourceRelationshipDataProvider {
   createRelationship(payload: CreateRelationshipPayload): Promise<ResourceRelationship>;

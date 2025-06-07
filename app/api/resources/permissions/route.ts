@@ -7,14 +7,14 @@ import {
   createCreatedResponse,
   createNoContentResponse,
 } from '@/lib/api/common';
-import { createApiHandler } from '@/lib/api/routeHelpers'359;
+import { createApiHandler } from '@/lib/api/routeHelpers';
 import {
   PermissionValues,
   PermissionSchema,
 } from '@/core/permission/models';
 
 import { checkPermission } from '@/lib/auth/permissionCheck';
-import { mapPermissionServiceError } from '@/lib/api/permission/errorHandler'573;
+import { mapPermissionServiceError } from '@/lib/api/permission/errorHandler';
 
 const assignSchema = z.object({
   userId: z.string(),

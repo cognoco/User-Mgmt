@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { sendSms } from '@/src/lib/sms/sendSms'60;
+import { sendSms } from '@/src/lib/sms/sendSms';
 
 // Helper to reset env vars
 function resetEnv() {

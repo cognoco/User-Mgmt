@@ -30,9 +30,9 @@ import {
   validateAuthToken,
   verifyEmailToken,
   getUserFromRequest,
-} from '@/src/lib/auth/index'556;
-import * as sessionModule from '@/src/lib/auth/session'721;
-import * as utilsModule from '@/src/lib/auth/utils'767;
+} from '@/src/lib/auth/index';
+import * as sessionModule from '@/src/lib/auth/session';
+import * as utilsModule from '@/src/lib/auth/utils';
 
 describe('auth index utilities', () => {
   beforeEach(() => {

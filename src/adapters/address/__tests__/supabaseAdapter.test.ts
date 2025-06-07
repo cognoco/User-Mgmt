@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { SupabaseAddressAdapter } from '@/src/adapters/address/supabaseAdapter'60;
+import { SupabaseAddressAdapter } from '@/src/adapters/address/supabaseAdapter';
 import { setTableMockData, resetSupabaseMock } from '@/tests/mocks/supabase';
 
 const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;

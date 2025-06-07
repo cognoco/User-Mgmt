@@ -1,9 +1,9 @@
 import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { toast } from '@/lib/hooks/useToast'198;
+import { toast } from '@/lib/hooks/useToast';
 import { notificationService } from '@/lib/services/notification.service';
-import { notificationQueue } from '@/lib/services/notificationQueue.service'322;
+import { notificationQueue } from '@/lib/services/notificationQueue.service';
 
 // Mock dependencies
 vi.mock('@/lib/services/notification-queue.service', () => ({

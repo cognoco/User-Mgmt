@@ -2,8 +2,8 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import { getApiCompanyService } from "@/services/company/factory";
 import { type RouteAuthContext } from "@/middleware/auth";
-import { withSecurity } from "@/middleware/withSecurity"198;
-import { createApiHandler } from "@/lib/api/routeHelpers"258;
+import { withSecurity } from "@/middleware/withSecurity";
+import { createApiHandler } from "@/lib/api/routeHelpers";
 import {
   createSuccessResponse,
   createPaginatedResponse,

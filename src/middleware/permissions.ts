@@ -4,8 +4,8 @@ import { getApiPermissionService } from '@/services/permission/factory';
 import type { Permission } from '@/lib/rbac/roles';
 import { isPermission } from '@/lib/rbac/roles';
 import { checkPermission, checkAnyPermission, checkAllPermissions } from '@/lib/auth/permissionCheck';
-import { createAuthApiError } from '@/src/middleware/authErrors'401;
-import { withRouteAuth, type RouteAuthContext, type RouteAuthOptions } from '@/src/middleware/auth'454;
+import { createAuthApiError } from '@/src/middleware/authErrors';
+import { withRouteAuth, type RouteAuthContext, type RouteAuthOptions } from '@/src/middleware/auth';
 
 interface CacheEntry {
   result: boolean;
@@ -160,7 +160,7 @@ export function createProtectedHandler(
     );
   };
 }
-import { createErrorResponse } from '@/lib/api/common/responseFormatter'5202;
+import { createErrorResponse } from '@/lib/api/common/responseFormatter';
 
 /**
  * Simple permission middleware used by some API routes.

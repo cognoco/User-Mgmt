@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { supabase, resetSupabaseMock } from '@/tests/mocks/supabase';
-import * as exportService from '@/src/lib/exports/export.service'135;
-import { processUserExportResumable } from '@/src/lib/exports/resumableExport.service'188;
-import { ExportFormat, ExportStatus, DataExportStorageBucket } from '@/src/lib/exports/types'263;
+import * as exportService from '@/src/lib/exports/export.service';
+import { processUserExportResumable } from '@/src/lib/exports/resumableExport.service';
+import { ExportFormat, ExportStatus, DataExportStorageBucket } from '@/src/lib/exports/types';
 import { DataExportError } from '@/core/common/errors';
-import { EXPORT_ERROR } from '@/core/common/errorCodes'401;
+import { EXPORT_ERROR } from '@/core/common/errorCodes';
 
 describe('processUserExportResumable', () => {
   beforeEach(() => {

@@ -3,7 +3,7 @@ export interface PrioritizedError {
   score: number;
 }
 
-import { ErrorMetrics, ErrorMetricDimensions } from '@/src/lib/telemetry/errorMetrics'117;
+import { ErrorMetrics, ErrorMetricDimensions } from '@/src/lib/telemetry/errorMetrics';
 
 export class ErrorPrioritizer {
   constructor(private metrics: ErrorMetrics) {}

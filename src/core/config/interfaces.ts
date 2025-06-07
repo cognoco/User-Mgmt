@@ -12,9 +12,9 @@ import type { PermissionService } from '@/core/permission/interfaces';
 import type { TeamService } from '@/core/team/interfaces';
 import type { SsoService } from '@/core/sso/interfaces';
 import type { GdprService } from '@/core/gdpr/interfaces';
-import type { TwoFactorService } from '@/core/twoFactor/interfaces'647;
+import type { TwoFactorService } from '@/core/twoFactor/interfaces';
 import type { SubscriptionService } from '@/core/subscription/interfaces';
-import type { ApiKeyService } from '@/core/apiKeys/interfaces'794;
+import type { ApiKeyService } from '@/core/apiKeys/interfaces';
 import type { NotificationService } from '@/core/notification/interfaces';
 import type { IWebhookService } from '@/core/webhooks/interfaces';
 import type { SessionService } from '@/core/session/interfaces';
@@ -25,7 +25,7 @@ import type { AuditService } from '@/core/audit/interfaces';
 import type { AdminService } from '@/core/admin/interfaces';
 import type { RoleService } from '@/core/role/interfaces';
 import type { AddressService, CompanyAddressService } from '@/core/address/interfaces';
-import type { ResourceRelationshipService } from '@/core/resourceRelationship/interfaces'1545;
+import type { ResourceRelationshipService } from '@/core/resourceRelationship/interfaces';
 
 // Import additional service interfaces as they become available
 // TODO: Add imports for other service interfaces when they exist

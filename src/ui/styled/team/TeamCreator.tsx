@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { TeamCreator as HeadlessTeamCreator, TeamCreatorProps } from '@/src/ui/headless/team/TeamCreator'265;
+import { TeamCreator as HeadlessTeamCreator, TeamCreatorProps } from '@/src/ui/headless/team/TeamCreator';
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Label } from '@/ui/primitives/label';

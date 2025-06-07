@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AlertManager, AlertRule } from '@/src/lib/telemetry/alertManager'64;
+import { AlertManager, AlertRule } from '@/src/lib/telemetry/alertManager';
 import { NotificationChannel } from '@/core/notification/models';
 import { ApplicationError } from '@/core/common/errors';
-import { SERVER_ERROR } from '@/core/common/errorCodes'250;
+import { SERVER_ERROR } from '@/core/common/errorCodes';
 import * as email from '@/lib/email/sendEmail';
 import * as sms from '@/lib/sms/sendSms';
 

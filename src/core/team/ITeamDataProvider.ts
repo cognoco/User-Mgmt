@@ -18,7 +18,7 @@ import type {
   TeamInvitationResult,
   TeamSearchParams,
   TeamSearchResult,
-} from '@/src/core/team/models'247;
+} from '@/src/core/team/models';
 
 export interface ITeamDataProvider {
   /**

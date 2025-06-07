@@ -1,6 +1,6 @@
 import { WebhookManager as HeadlessWebhookManager, type WebhookManagerProps } from '@/ui/headless/webhooks/WebhookManager';
-import { WebhookForm } from '@/src/ui/styled/webhooks/WebhookForm'125;
-import { WebhookList } from '@/src/ui/styled/webhooks/WebhookList'171;
+import { WebhookForm } from '@/src/ui/styled/webhooks/WebhookForm';
+import { WebhookList } from '@/src/ui/styled/webhooks/WebhookList';
 import { Alert } from '@/ui/primitives/alert';
 
 export type StyledWebhookManagerProps = Omit<WebhookManagerProps, 'children'> & {

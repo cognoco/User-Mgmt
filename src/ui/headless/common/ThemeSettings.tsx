@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
-import { useTheme } from '@/ui/primitives/themeProvider'117;
+import { useTheme } from '@/ui/primitives/themeProvider';
 import { usePalette, PaletteKey } from '@/ui/primitives/PaletteProvider';
 
 /**

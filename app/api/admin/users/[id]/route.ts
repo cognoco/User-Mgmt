@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'89;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import { createSuccessResponse, createNoContentResponse } from '@/lib/api/common';
 import { PermissionValues } from '@/core/permission/models';
-import { createUserNotFoundError } from '@/lib/api/admin/errorHandler'309;
+import { createUserNotFoundError } from '@/lib/api/admin/errorHandler';
 import { notifyUserChanges } from '@/lib/realtime/notifyUserChanges';
 
 const updateUserSchema = z.object({

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DefaultSessionTracker } from '@/src/services/auth/sessionTracker'64;
-import { createSessionTrackerMock } from "@/tests/mocks/sessionTracker.mock"125;
+import { DefaultSessionTracker } from '@/src/services/auth/sessionTracker';
+import { createSessionTrackerMock } from "@/tests/mocks/sessionTracker.mock";
 
 describe('DefaultSessionTracker', () => {
   let refresh: any;

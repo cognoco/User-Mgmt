@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'45;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import { createSuccessResponse } from '@/lib/api/common';
 import { logUserAction } from '@/lib/audit/auditLogger';
-import { checkRateLimit } from '@/middleware/rateLimit'236;
+import { checkRateLimit } from '@/middleware/rateLimit';
 import { PermissionValues } from '@/types/rbac';
 import { personalProfileUpdateSchema } from '@/lib/schemas/profile.schema';
 

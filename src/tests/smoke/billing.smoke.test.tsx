@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import BillingPage from '@/app/account/billing/page'138;
+import BillingPage from '@/app/account/billing/page';
 import { useSubscription } from '@/hooks/subscription/useSubscription';
 import { useBilling } from '@/hooks/subscription/useBilling';
 

@@ -9,7 +9,7 @@ import type {
   UserSubscription,
   SubscriptionUpsertPayload,
   SubscriptionQuery
-} from '@/src/core/subscription/models'219;
+} from '@/src/core/subscription/models';
 
 export interface ISubscriptionDataProvider {
   /**

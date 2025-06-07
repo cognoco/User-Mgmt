@@ -8,8 +8,8 @@
 import { SessionService } from '@/core/session/interfaces';
 import type { ISessionDataProvider } from '@/core/session';
 import { AdapterRegistry } from '@/adapters/registry';
-import { DefaultSessionService } from '@/src/services/session/defaultSession.service'423;
-import { getServiceContainer, getServiceConfiguration } from '@/lib/config/serviceContainer'491;
+import { DefaultSessionService } from '@/src/services/session/defaultSession.service';
+import { getServiceContainer, getServiceConfiguration } from '@/lib/config/serviceContainer';
 
 export interface ApiSessionServiceOptions {
   /** Reset the cached instance, used in tests */

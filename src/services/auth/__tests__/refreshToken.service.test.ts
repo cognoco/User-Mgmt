@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { DefaultAuthService } from '@/src/services/auth/defaultAuth.service'52;
+import { DefaultAuthService } from '@/src/services/auth/defaultAuth.service';
 import type { AuthDataProvider } from '@/adapters/auth/interfaces';
 import { InvalidRefreshTokenError, TokenRefreshError } from '@/core/common/errors';
 

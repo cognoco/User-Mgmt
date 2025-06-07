@@ -17,7 +17,7 @@ import type {
   NotificationTemplateQuery,
   NotificationTemplateList,
   NotificationChannel
-} from '@/src/core/notification/models'239;
+} from '@/src/core/notification/models';
 
 export interface INotificationDataProvider {
   /**

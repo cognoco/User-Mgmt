@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, act } from '@testing-library/react';
-import { InviteMemberModal } from '@/src/ui/headless/team/InviteMemberModal'149;
+import { InviteMemberModal } from '@/src/ui/headless/team/InviteMemberModal';
 import { useTeamInvite } from '@/hooks/team/useTeamInvite';
 
 vi.mock('@/hooks/team/useTeamInvite', () => ({

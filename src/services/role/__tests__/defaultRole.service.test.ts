@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { DefaultRoleService, type RoleRecord } from '@/src/services/role/defaultRole.service'60;
+import { DefaultRoleService, type RoleRecord } from '@/src/services/role/defaultRole.service';
 
 describe('DefaultRoleService', () => {
   let service: DefaultRoleService;

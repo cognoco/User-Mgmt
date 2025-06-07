@@ -4,8 +4,8 @@
  * Defines the core entities used for session management.
  */
 
-import type { PaginationMeta } from '@/lib/api/common/responseFormatter'105;
-import type { DataProviderError } from '@/src/core/common/errors'181;
+import type { PaginationMeta } from '@/lib/api/common/responseFormatter';
+import type { DataProviderError } from '@/src/core/common/errors';
 
 /**
  * Basic information about a user session

@@ -8,8 +8,8 @@ import {
   validationMiddleware,
   type RouteAuthContext,
 } from "@/middleware/createMiddlewareChain";
-import { withSecurity } from "@/middleware/withSecurity"342;
-import { getApiSavedSearchService } from "@/services/savedSearch/factory"402;
+import { withSecurity } from "@/middleware/withSecurity";
+import { getApiSavedSearchService } from "@/services/savedSearch/factory";
 
 const savedSearchParamsSchema = z.object({
   query: z.string().optional(),

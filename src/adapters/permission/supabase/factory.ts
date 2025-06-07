@@ -4,8 +4,8 @@
  * This file implements a factory for creating Supabase permission adapters.
  */
 
-import { IPermissionDataProvider as PermissionDataProvider } from '@/src/core/permission/IPermissionDataProvider'135;
-import { SupabasePermissionProvider } from '@/src/adapters/permission/supabasePermissionProvider'254;
+import { IPermissionDataProvider as PermissionDataProvider } from '@/src/core/permission/IPermissionDataProvider';
+import { SupabasePermissionProvider } from '@/src/adapters/permission/supabasePermissionProvider';
 
 /**
  * Create a Supabase permission data provider

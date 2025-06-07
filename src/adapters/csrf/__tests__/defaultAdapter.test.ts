@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DefaultCsrfProvider } from '@/src/adapters/csrf/defaultAdapter'48;
+import { DefaultCsrfProvider } from '@/src/adapters/csrf/defaultAdapter';
 
 describe('DefaultCsrfProvider', () => {
   it('generates a random token', async () => {

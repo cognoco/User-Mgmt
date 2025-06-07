@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import RoleManagementPanel from '@/app/admin/permissions/RoleManagementPanel'152;
+import RoleManagementPanel from '@/app/admin/permissions/RoleManagementPanel';
 import { usePermission } from '@/hooks/permission/usePermissions';
 
 vi.mock('@/hooks/permission/usePermissions');

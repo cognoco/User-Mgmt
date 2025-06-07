@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { useToast } from '@/lib/hooks/useToast'57;
+import { useToast } from '@/lib/hooks/useToast';
 
 /**
  * Headless AdminAuditLogs component that provides audit log functionality through render props

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DataDeletionRequest } from '@/src/ui/headless/gdpr/DataDeletionRequest'155;
+import { DataDeletionRequest } from '@/src/ui/headless/gdpr/DataDeletionRequest';
 import { useDataDeletion } from '@/hooks/gdpr/useDataDeletion';
 
 vi.mock('@/hooks/gdpr/useDataDeletion', () => ({ useDataDeletion: vi.fn() }));

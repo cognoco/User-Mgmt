@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { createSessionProvider } from '@/adapters/session/factory';
-import { getSessionTimeout, getMaxSessionsPerUser } from '@/lib/security/securityPolicy.service'180;
+import { getSessionTimeout, getMaxSessionsPerUser } from '@/lib/security/securityPolicy.service';
 
 export interface EnforceResult {
   success: boolean;

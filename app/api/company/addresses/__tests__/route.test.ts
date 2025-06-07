@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { POST, GET } from '@/app/api/company/addresses/route'64;
+import { POST, GET } from '@/app/api/company/addresses/route';
 import { getApiAddressService } from '@/services/address/factory';
 import { getApiCompanyService } from '@/services/company/factory';
-import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'239;
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers';
 
 // Mock service factories
 vi.mock('@/services/address/factory', () => ({ getApiAddressService: vi.fn() }));

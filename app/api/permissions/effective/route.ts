@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { createResourcePermissionResolver } from '@/lib/services/resourcePermissionResolver.service'70;
+import { createResourcePermissionResolver } from '@/lib/services/resourcePermissionResolver.service';
 import {
   createMiddlewareChain,
   errorHandlingMiddleware,

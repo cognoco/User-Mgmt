@@ -3,7 +3,7 @@ import { Checkbox } from '@/ui/primitives/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Button } from '@/ui/primitives/button';
 import { PermissionValues, type Permission } from '@/core/permission/models';
-import { ResourcePermissionAssigner, ResourcePermissionAssignerProps } from '@/src/ui/headless/permission/ResourcePermissionAssigner'307;
+import { ResourcePermissionAssigner, ResourcePermissionAssignerProps } from '@/src/ui/headless/permission/ResourcePermissionAssigner';
 
 interface NodeProps {
   node: any;

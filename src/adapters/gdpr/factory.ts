@@ -4,7 +4,7 @@
  * Provides helper functions to create GDPR adapters.
  */
 import type { IGdprDataProvider } from '@/core/gdpr/IGdprDataProvider';
-import { SupabaseGdprProvider } from '@/src/adapters/gdpr/supabase/supabaseGdpr.provider'173;
+import { SupabaseGdprProvider } from '@/src/adapters/gdpr/supabase/supabaseGdpr.provider';
 
 export function createSupabaseGdprProvider(options: {
   supabaseUrl: string;

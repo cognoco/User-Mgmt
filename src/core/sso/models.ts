@@ -6,8 +6,8 @@
  */
 
 import { z } from 'zod';
-import type { PaginationMeta } from '@/lib/api/common/responseFormatter'192;
-import type { DataProviderError } from '@/src/core/common/errors'268;
+import type { PaginationMeta } from '@/lib/api/common/responseFormatter';
+import type { DataProviderError } from '@/src/core/common/errors';
 
 /**
  * Supported SSO provider types

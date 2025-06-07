@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { api } from '@/lib/api/axios';
-import { useOrgSsoConfig } from '@/src/hooks/sso/useOrgSsoConfig'163;
+import { useOrgSsoConfig } from '@/src/hooks/sso/useOrgSsoConfig';
 
 vi.mock('@/lib/api/axios', () => ({ api: { get: vi.fn(), put: vi.fn() } }));
 

@@ -1,1 +1,1 @@
-export * from '@/src/adapters/webhooks/supabase/supabaseWebhook.provider'0;
+export * from '@/src/adapters/webhooks/supabase/supabaseWebhook.provider';

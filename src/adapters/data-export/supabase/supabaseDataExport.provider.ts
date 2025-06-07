@@ -1,4 +1,4 @@
-import type { IDataExportDataProvider } from '@/core/dataExport/IDataExportDataProvider'0;
+import type { IDataExportDataProvider } from '@/core/dataExport/IDataExportDataProvider';
 import {
   createUserDataExport,
   processUserDataExport,
@@ -18,7 +18,7 @@ import {
   getCompanyDataExportByToken,
   getCompanyExportDownloadUrl,
   isCompanyRateLimited,
-} from '@/lib/exports/companyExport.service'347;
+} from '@/lib/exports/companyExport.service';
 import type {
   ExportOptions,
   UserDataExport,

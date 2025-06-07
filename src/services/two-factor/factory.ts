@@ -5,13 +5,13 @@
  * It ensures consistent configuration and dependency injection across all API endpoints.
  */
 
-import { TwoFactorService } from '@/core/twoFactor/interfaces'237;
+import { TwoFactorService } from '@/core/twoFactor/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
-import { DefaultTwoFactorService } from '@/src/services/two-factor/defaultTwoFactor.service'365;
+import { DefaultTwoFactorService } from '@/src/services/two-factor/defaultTwoFactor.service';
 import {
   getServiceContainer,
   getServiceConfiguration
-} from '@/lib/config/serviceContainer'438;
+} from '@/lib/config/serviceContainer';
 
 // Singleton instance for API routes
 export interface ApiTwoFactorServiceOptions {

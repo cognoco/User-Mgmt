@@ -4,8 +4,8 @@ import {
   createSuccessResponse,
   createCreatedResponse,
 } from '@/lib/api/common';
-import { createApiHandler } from '@/lib/api/routeHelpers'165;
-import { mapPermissionServiceError } from '@/lib/api/permission/errorHandler'226;
+import { createApiHandler } from '@/lib/api/routeHelpers';
+import { mapPermissionServiceError } from '@/lib/api/permission/errorHandler';
 import { PermissionValues } from '@/core/permission/models';
 
 const createSchema = z.object({

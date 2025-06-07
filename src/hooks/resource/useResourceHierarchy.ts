@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { UserManagementConfiguration } from '@/core/config';
-import type { ResourceRelationshipService } from '@/core/resourceRelationship/interfaces'121;
+import type { ResourceRelationshipService } from '@/core/resourceRelationship/interfaces';
 
 export interface ResourceNode {
   id: string;

@@ -1,5 +1,5 @@
 import React, { useId, useTransition } from 'react';
-import { ErrorBoundary } from '@/ui/primitives/errorBoundary'54;
+import { ErrorBoundary } from '@/ui/primitives/errorBoundary';
 import { Button } from '@/ui/primitives/button';
 
 interface FormWithRecoveryProps extends React.FormHTMLAttributes<HTMLFormElement> {

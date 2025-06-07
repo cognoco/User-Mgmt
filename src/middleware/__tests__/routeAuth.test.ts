@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { withRouteAuth } from '@/src/middleware/auth'122;
-import { validateAuthToken } from '@/src/middleware/validateAuthToken'164;
+import { withRouteAuth } from '@/src/middleware/auth';
+import { validateAuthToken } from '@/src/middleware/validateAuthToken';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { Permission } from '@/lib/rbac/roles';
 

@@ -1,10 +1,10 @@
 // src/tests/utils/test-service-setup.ts
 import { vi } from 'vitest';
-import { UserManagementConfiguration } from '@/src/core/config'72;
-import { MockAuthService } from '@/src/services/auth/__tests__/mocks/mockAuthService'138;
-import { MockUserService } from '@/src/services/user/__tests__/mocks/mockUserService'228;
-import { MockTeamService } from '@/src/services/team/__tests__/mocks/mockTeamService'318;
-import { MockPermissionService } from '@/src/services/permission/__tests__/mocks/mockPermissionService'408;
+import { UserManagementConfiguration } from '@/src/core/config';
+import { MockAuthService } from '@/src/services/auth/__tests__/mocks/mockAuthService';
+import { MockUserService } from '@/src/services/user/__tests__/mocks/mockUserService';
+import { MockTeamService } from '@/src/services/team/__tests__/mocks/mockTeamService';
+import { MockPermissionService } from '@/src/services/permission/__tests__/mocks/mockPermissionService';
 
 /**
  * Sets up mock services for UI component testing

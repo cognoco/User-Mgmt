@@ -1,5 +1,5 @@
 /**
- * Run node scripts/update-test-results.js
+ * Run node scripts/updateTestResults.js
  * Runs each Vitest test file individually and generates a Markdown summary of passing, failing, and skipped test files.
  * Reads: none (runs Vitest directly)
  * Writes: docs/TestResultLatest.md (summary), docs/TestResultsPrevious.md (previous summary)

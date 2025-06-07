@@ -1,1 +1,1 @@
-export * from '@/src/adapters/twoFactor/supabase/supabaseTwoFactor.provider'00;
+export * from '@/src/adapters/twoFactor/supabase/supabaseTwoFactor.provider';

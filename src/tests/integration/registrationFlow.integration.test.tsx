@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { RegistrationForm } from '@/ui/styled/auth/RegistrationForm';
 import { EmailVerification } from '@/ui/styled/auth/EmailVerification';
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';
-import { UserType } from '@/types/userType'441;
+import { UserType } from '@/types/userType';
 
 const mockRegister = vi.fn();
 const mockVerifyEmail = vi.fn();

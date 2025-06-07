@@ -9,8 +9,8 @@ import { SubscriptionService } from '@/core/subscription/interfaces';
 import { UserManagementConfiguration } from '@/core/config';
 import type { ISubscriptionDataProvider } from '@/core/subscription';
 import { AdapterRegistry } from '@/adapters/registry';
-import { DefaultSubscriptionService } from '@/src/services/subscription/defaultSubscription.service'515;
-import { getServiceContainer } from '@/lib/config/serviceContainer'593;
+import { DefaultSubscriptionService } from '@/src/services/subscription/defaultSubscription.service';
+import { getServiceContainer } from '@/lib/config/serviceContainer';
 
 /** Options for {@link getApiSubscriptionService}. */
 export interface ApiSubscriptionServiceOptions {

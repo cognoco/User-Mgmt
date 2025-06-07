@@ -3,7 +3,7 @@
  *
  * Supports explicit control over commit/rollback and isolation levels.
  */
-import type { TransactionOptions } from '@/src/core/database/interfaces/index'163;
+import type { TransactionOptions } from '@/src/core/database/interfaces/index';
 
 export interface TransactionInterface {
   /** Begin a new transaction */

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET } from '@/app/api/audit/route'64;
+import { GET } from '@/app/api/audit/route';
 import { withRouteAuth } from '@/middleware/auth';
 import { hasPermission } from '@/lib/auth/hasPermission';
 import { getApiAuditService } from '@/services/audit/factory';
-import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'272;
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers';
 
 vi.mock('@/middleware/auth', () => ({ withRouteAuth: vi.fn((h: any) => h) }));
 vi.mock('@/lib/auth/hasPermission', () => ({ hasPermission: vi.fn().mockResolvedValue(true) }));

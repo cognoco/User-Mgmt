@@ -1,11 +1,11 @@
-import type { UserManagementConfig } from '@/src/core/config/interfaces'0;
-import { configureServices } from '@/src/lib/config/serviceContainer'71;
+import type { UserManagementConfig } from '@/src/core/config/interfaces';
+import { configureServices } from '@/src/lib/config/serviceContainer';
 
 export function initializeUserManagement(config: UserManagementConfig) {
   configureServices(config.services || {});
   // Initialize with overrides
 }
 
-export * from '@/src/ui/styled'152;
-export * from '@/src/ui/headless'338;
-export * from '@/src/core/auth/interfaces'370;
+export * from '@/src/ui/styled';
+export * from '@/src/ui/headless';
+export * from '@/src/core/auth/interfaces';

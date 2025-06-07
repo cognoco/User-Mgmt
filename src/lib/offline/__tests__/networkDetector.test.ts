@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { detectNetworkStatus, verifyConnectivity, NetworkDetector } from '@/src/lib/offline/networkDetector'75;
+import { detectNetworkStatus, verifyConnectivity, NetworkDetector } from '@/src/lib/offline/networkDetector';
 
 describe('detectNetworkStatus', () => {
   afterEach(() => {

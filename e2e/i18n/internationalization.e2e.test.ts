@@ -13,7 +13,7 @@ This file tests the internationalization functionality:
 */
 
 import { test, expect } from '@playwright/test';
-import { loginAs } from '@/e2e/utils/authUtils'529;
+import { loginAs } from '@/e2e/utils/authUtils';
 
 // Constants for URLs and test data
 const HOME_URL = '/';

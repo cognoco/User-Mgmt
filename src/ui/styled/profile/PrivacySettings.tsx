@@ -1,14 +1,14 @@
 import { PrivacySettings as HeadlessPrivacySettings } from '@/ui/headless/profile/PrivacySettings';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card'101;
-import { Label } from '@/src/components/ui/label'190;
-import { Switch } from '@/src/components/ui/switch'245;
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Label } from '@/src/components/ui/label';
+import { Switch } from '@/src/components/ui/switch';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select'302;
+} from '@/src/components/ui/select';
 
 export function PrivacySettings() {
   return (

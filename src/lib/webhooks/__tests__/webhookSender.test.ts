@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { createWebhookSender, verifySignature, DeliveryErrorType } from '@/src/lib/webhooks/webhookSender'75;
+import { createWebhookSender, verifySignature, DeliveryErrorType } from '@/src/lib/webhooks/webhookSender';
 import type { IWebhookDataProvider } from '@/core/webhooks';
 import crypto from 'crypto';
 

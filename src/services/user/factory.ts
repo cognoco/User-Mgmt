@@ -7,9 +7,9 @@
 
 import { UserService } from "@/core/user/interfaces";
 import type { IUserDataProvider } from "@/core/user/IUserDataProvider";
-import { DefaultUserService } from "@/src/services/user/defaultUser.service"366;
+import { DefaultUserService } from "@/src/services/user/defaultUser.service";
 import { AdapterRegistry } from "@/adapters/registry";
-import { getServiceContainer } from "@/lib/config/serviceContainer"484;
+import { getServiceContainer } from "@/lib/config/serviceContainer";
 
 export interface ApiUserServiceOptions {
   /**

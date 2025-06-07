@@ -1,10 +1,10 @@
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'0;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import {
   createSuccessResponse,
   ApiError,
   ERROR_CODES,
 } from '@/lib/api/common';
-import { checkRateLimit } from '@/middleware/rateLimit'167;
+import { checkRateLimit } from '@/middleware/rateLimit';
 
 /**
  * Public endpoint to list available subscription plans.

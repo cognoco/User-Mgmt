@@ -6,8 +6,8 @@
  */
 
 
-import { AdapterFactory, AdapterFactoryOptions } from '@/src/adapters/registry'216;
-import { AuthDataProvider } from '@/src/adapters/auth/interfaces'285;
+import { AdapterFactory, AdapterFactoryOptions } from '@/src/adapters/registry';
+import { AuthDataProvider } from '@/src/adapters/auth/interfaces';
 import { IUserDataProvider as UserDataProvider } from '@/core/user/IUserDataProvider';
 import { ITeamDataProvider as TeamDataProvider } from '@/core/team/ITeamDataProvider';
 import { IPermissionDataProvider as PermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
@@ -16,36 +16,36 @@ import { IConsentDataProvider } from '@/core/consent/IConsentDataProvider';
 import { ISessionDataProvider as SessionDataProvider } from '@/core/session/ISessionDataProvider';
 import { ISsoDataProvider as SsoDataProvider } from '@/core/sso/ISsoDataProvider';
 import { ISubscriptionDataProvider as SubscriptionDataProvider } from '@/core/subscription/ISubscriptionDataProvider';
-import { IApiKeyDataProvider as ApiKeyDataProvider } from '@/core/apiKeys/IApiKeyDataProvider'1097;
+import { IApiKeyDataProvider as ApiKeyDataProvider } from '@/core/apiKeys/IApiKeyDataProvider';
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
 import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
-import type { ITwoFactorDataProvider } from '@/core/twoFactor/ITwoFactorDataProvider'1436;
-import { ISavedSearchDataProvider } from '@/core/savedSearch/ISavedSearchDataProvider'1525;
+import type { ITwoFactorDataProvider } from '@/core/twoFactor/ITwoFactorDataProvider';
+import { ISavedSearchDataProvider } from '@/core/savedSearch/ISavedSearchDataProvider';
 
 
 // Import domain-specific factories
-import { createSupabaseAuthProvider } from '@/src/adapters/auth/factory'1656;
-import { createSupabaseUserProvider } from '@/src/adapters/user/factory'1718;
-import { createSupabaseTeamProvider } from '@/src/adapters/team/factory'1780;
-import { createSupabaseOrganizationProvider } from '@/src/adapters/organization/factory'1842;
-import { createSupabasePermissionProvider } from '@/src/adapters/permission/factory'1920;
-import { createSupabaseGdprProvider } from '@/src/adapters/gdpr/factory'1994;
-import { createSupabaseConsentProvider } from '@/src/adapters/consent/factory'2056;
-import { createSupabaseSessionProvider } from '@/src/adapters/session/factory'2124;
-import { createSupabaseSsoProvider } from '@/src/adapters/sso/factory'2192;
-import { createSupabaseOAuthProvider } from '@/src/adapters/oauth/factory'2252;
-import type { OAuthDataProvider } from '@/src/adapters/oauth'2316;
-import { createSupabaseSubscriptionProvider } from '@/src/adapters/subscription/factory'2367;
-import { createSupabaseCompanyNotificationProvider } from '@/src/adapters/companyNotification/factory'2445;
-import { createSupabaseWebhookProvider } from '@/src/adapters/webhooks'2538;
-import { createSupabaseAdminProvider } from '@/src/adapters/admin/factory'2599;
-import { createSupabaseTwoFactorProvider } from '@/src/adapters/twoFactor/factory'2663;
-import { createSupabaseSavedSearchProvider } from '@/src/adapters/savedSearch/factory'2736;
-import { createSupabaseDataExportProvider } from '@/src/adapters/dataExport/factory'2813;
-import type { IDataExportDataProvider } from '@/core/dataExport/IDataExportDataProvider'2888;
-import { createSupabaseApiKeyProvider } from '@/src/adapters/apiKeys/factory'2980;
-import type { ICompanyNotificationDataProvider } from '@/core/companyNotification/ICompanyNotificationDataProvider'3048;
+import { createSupabaseAuthProvider } from '@/src/adapters/auth/factory';
+import { createSupabaseUserProvider } from '@/src/adapters/user/factory';
+import { createSupabaseTeamProvider } from '@/src/adapters/team/factory';
+import { createSupabaseOrganizationProvider } from '@/src/adapters/organization/factory';
+import { createSupabasePermissionProvider } from '@/src/adapters/permission/factory';
+import { createSupabaseGdprProvider } from '@/src/adapters/gdpr/factory';
+import { createSupabaseConsentProvider } from '@/src/adapters/consent/factory';
+import { createSupabaseSessionProvider } from '@/src/adapters/session/factory';
+import { createSupabaseSsoProvider } from '@/src/adapters/sso/factory';
+import { createSupabaseOAuthProvider } from '@/src/adapters/oauth/factory';
+import type { OAuthDataProvider } from '@/src/adapters/oauth';
+import { createSupabaseSubscriptionProvider } from '@/src/adapters/subscription/factory';
+import { createSupabaseCompanyNotificationProvider } from '@/src/adapters/companyNotification/factory';
+import { createSupabaseWebhookProvider } from '@/src/adapters/webhooks';
+import { createSupabaseAdminProvider } from '@/src/adapters/admin/factory';
+import { createSupabaseTwoFactorProvider } from '@/src/adapters/twoFactor/factory';
+import { createSupabaseSavedSearchProvider } from '@/src/adapters/savedSearch/factory';
+import { createSupabaseDataExportProvider } from '@/src/adapters/dataExport/factory';
+import type { IDataExportDataProvider } from '@/core/dataExport/IDataExportDataProvider';
+import { createSupabaseApiKeyProvider } from '@/src/adapters/apiKeys/factory';
+import type { ICompanyNotificationDataProvider } from '@/core/companyNotification/ICompanyNotificationDataProvider';
 
 
 

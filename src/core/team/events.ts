@@ -5,7 +5,7 @@
  * These events allow other parts of the application to react to team changes.
  */
 
-import { Team, TeamMember, TeamInvitation, TeamVisibility } from '@/src/core/team/models'216;
+import { Team, TeamMember, TeamInvitation, TeamVisibility } from '@/src/core/team/models';
 
 /**
  * Base event interface that all team management events extend

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { Suspense } from "react";
-import { DevErrorDetailsPanel } from '@/src/ui/styled/common/DevErrorDetailsPanel'59;
-import { getClientConfig } from '@/core/config/runtimeConfig'123;
+import { DevErrorDetailsPanel } from '@/src/ui/styled/common/DevErrorDetailsPanel';
+import { getClientConfig } from '@/core/config/runtimeConfig';
 import { useGlobalError, useErrorStore } from "@/lib/state/errorStore";
 
 const ApiErrorAlert = React.lazy(() => import("@/src/ui/styled/common/ApiErrorAlert"));

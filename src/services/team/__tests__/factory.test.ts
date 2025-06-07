@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AdapterRegistry } from '@/adapters/registry';
-import { getApiTeamService } from '@/src/services/team/factory'120;
-import { DefaultTeamService } from '@/src/services/team/defaultTeam.service'169;
+import { getApiTeamService } from '@/src/services/team/factory';
+import { DefaultTeamService } from '@/src/services/team/defaultTeam.service';
 
 vi.mock('@/lib/config/service-container', () => ({
   getServiceContainer: vi.fn(() => ({ team: undefined })),

@@ -1,5 +1,5 @@
-import { render, screen, fireEvent } from '@/tests/utils/testUtils'0;
-import { KeyboardShortcutsDialog } from '@/src/ui/styled/common/KeyboardShortcutsDialog'71;
+import { render, screen, fireEvent } from '@/tests/utils/testUtils';
+import { KeyboardShortcutsDialog } from '@/src/ui/styled/common/KeyboardShortcutsDialog';
 
 const shortcuts = [
   { keys: ['?'], description: 'Open help' }

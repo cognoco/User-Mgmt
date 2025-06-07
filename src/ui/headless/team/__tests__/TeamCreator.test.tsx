@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, act, waitFor } from '@testing-library/react';
-import { TeamCreator } from '@/src/ui/headless/team/TeamCreator'128;
+import { TeamCreator } from '@/src/ui/headless/team/TeamCreator';
 import { useTeams } from '@/hooks/team/useTeams';
 import { useAuth } from '@/hooks/auth/useAuth';
 

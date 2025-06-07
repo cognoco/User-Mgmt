@@ -4,7 +4,7 @@
  */
 
 import { AdapterRegistry } from '@/adapters/registry';
-import { initializeUserManagement } from '@/core/initialization/initializeAdapters'103;
+import { initializeUserManagement } from '@/core/initialization/initializeAdapters';
 import { UserManagementConfiguration } from '@/core/config';
 
 describe('Adapter Registry - E2E', () => {

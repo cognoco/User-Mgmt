@@ -1,7 +1,7 @@
-import { render, screen } from '@/tests/utils/testUtils'0;
+import { render, screen } from '@/tests/utils/testUtils';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { ApiErrorAlert } from '@/src/ui/styled/common/ApiErrorAlert'166;
+import { ApiErrorAlert } from '@/src/ui/styled/common/ApiErrorAlert';
 
 describe('ApiErrorAlert', () => {
   it('renders message and calls retry', async () => {

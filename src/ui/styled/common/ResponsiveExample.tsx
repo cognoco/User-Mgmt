@@ -10,7 +10,7 @@ import {
   ResponsiveFormItems,
   ResponsiveFormRow,
   ResponsiveFormFooter
-} from '@/ui/primitives/formResponsive'458;
+} from '@/ui/primitives/formResponsive';
 
 interface User {
   id: number;

@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { DefaultPermissionService } from "@/src/services/permission/defaultPermission.service"64;
+import { DefaultPermissionService } from "@/src/services/permission/defaultPermission.service";
 import { PermissionValues, UserRole } from "@/core/permission/models";
 import { MemoryCache, MultiLevelCache, RedisCache } from '@/lib/cache';
 import { Redis } from '@upstash/redis';
 import { logPermissionChange } from '@/lib/audit/permissionAuditLogger';
-import { permissionCacheService } from '@/src/services/permission/permissionCache.service'402;
+import { permissionCacheService } from '@/src/services/permission/permissionCache.service';
 
 
 vi.mock('@upstash/redis', () => ({ Redis: vi.fn(() => ({ get: vi.fn(), set: vi.fn(), del: vi.fn() })) }));
 vi.mock('@/lib/audit/permissionAuditLogger', () => ({ logPermissionChange: vi.fn() }));
-import { ResourcePermissionResolver } from '@/lib/services/resourcePermissionResolver.service'677;
+import { ResourcePermissionResolver } from '@/lib/services/resourcePermissionResolver.service';
 
 const USER_ID = "u1";
 const ROLE_ID = "r1";

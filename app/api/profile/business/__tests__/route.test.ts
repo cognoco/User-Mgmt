@@ -3,11 +3,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest } from 'next/server';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { GET, PATCH } from '@/app/api/profile/business/route'297;
+import { GET, PATCH } from '@/app/api/profile/business/route';
 
 // TODO: Import global Supabase and rate-limit mocks as per project convention
 // import { getServiceSupabase } from '@/lib/database/supabase';
-// import { checkRateLimit } from '@/middleware/rateLimit'488;
+// import { checkRateLimit } from '@/middleware/rateLimit';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const corporateUser = { id: 'corp-user', email: 'biz@example.com' };

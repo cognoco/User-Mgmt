@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '@/src/lib/supabase'46;
+import { supabase } from '@/src/lib/supabase';
 
 export interface Organization {
   id: string;

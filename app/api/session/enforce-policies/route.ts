@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
-import { enforceSessionPolicies } from '@/services/session/enforceSessionPolicies.service'140;
+import { enforceSessionPolicies } from '@/services/session/enforceSessionPolicies.service';
 
 export async function POST(req: NextRequest) {
   const res = NextResponse.next();

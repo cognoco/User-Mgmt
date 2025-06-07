@@ -1,4 +1,4 @@
-import type { UserConsent, ConsentUpdatePayload } from '@/src/core/consent/models'0;
+import type { UserConsent, ConsentUpdatePayload } from '@/src/core/consent/models';
 
 export interface ConsentService {
   getUserConsent(userId: string): Promise<UserConsent | null>;

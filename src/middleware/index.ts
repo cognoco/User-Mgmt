@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { rateLimit } from '@/middleware/rateLimit'57;
-import { securityHeaders } from '@/middleware/securityHeaders'111;
-import { auditLog } from '@/middleware/auditLog'177;
+import { rateLimit } from '@/middleware/rateLimit';
+import { securityHeaders } from '@/middleware/securityHeaders';
+import { auditLog } from '@/middleware/auditLog';
 import { cors } from '@/middleware/cors';
 import { csrf } from '@/middleware/csrf';
 import { correlationIdMiddleware } from '@/lib/monitoring';
@@ -144,5 +144,5 @@ export function withSecurity(
   };
 }
 
-export { withErrorHandling } from '@/src/middleware/errorHandling'4722;
+export { withErrorHandling } from '@/src/middleware/errorHandling';
 export { correlationIdMiddleware };

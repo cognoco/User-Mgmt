@@ -9,7 +9,7 @@ import type {
   WebhookListQuery,
   WebhookDeliveryQuery
 } from '@/core/webhooks/models';
-import type { PaginationMeta } from '@/lib/api/common/responseFormatter'365;
+import type { PaginationMeta } from '@/lib/api/common/responseFormatter';
 
 /**
  * Supabase implementation of the {@link IWebhookDataProvider} interface.

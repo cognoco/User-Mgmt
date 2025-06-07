@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MemoryCache } from '@/src/lib/cache/memoryCache'64;
-import { errorLogger } from '@/lib/monitoring/errorLogger'112;
-import { telemetry } from '@/lib/monitoring/errorSystem'174;
+import { MemoryCache } from '@/src/lib/cache/memoryCache';
+import { errorLogger } from '@/lib/monitoring/errorLogger';
+import { telemetry } from '@/lib/monitoring/errorSystem';
 
 vi.mock('@/lib/monitoring/error-logger', () => ({ errorLogger: { error: vi.fn() } }));
 vi.mock('@/lib/monitoring/error-system', () => ({ telemetry: { recordError: vi.fn() } }));

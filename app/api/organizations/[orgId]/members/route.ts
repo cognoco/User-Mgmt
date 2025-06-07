@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'84;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 
 const AddMemberSchema = z.object({

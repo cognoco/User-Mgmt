@@ -1,6 +1,6 @@
 // SendGrid email provider implementation
 
-import { EmailProviderOptions } from '@/src/lib/email/types'45;
+import { EmailProviderOptions } from '@/src/lib/email/types';
 
 export async function sendViaSendGrid(
   to: string, 

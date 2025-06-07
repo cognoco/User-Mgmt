@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DefaultTeamService } from '@/src/services/team/defaultTeam.service'64;
+import { DefaultTeamService } from '@/src/services/team/defaultTeam.service';
 import type { TeamDataProvider } from '@/core/team/ITeamDataProvider';
 import { prisma } from '@/lib/database/prisma';
 

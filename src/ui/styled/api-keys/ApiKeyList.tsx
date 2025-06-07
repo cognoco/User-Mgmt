@@ -4,7 +4,7 @@ import { Badge } from '@/ui/primitives/badge';
 import {
   ApiKeyList as HeadlessApiKeyList,
   ApiKeyListProps as HeadlessApiKeyListProps,
-} from '@/ui/headless/apiKeys/ApiKeyList'180;
+} from '@/ui/headless/apiKeys/ApiKeyList';
 
 export function ApiKeyList(props: HeadlessApiKeyListProps) {
   return (

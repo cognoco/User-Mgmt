@@ -1,6 +1,6 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'75;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import { createSuccessResponse } from '@/lib/api/common';
 import { PermissionValues } from '@/core/permission/models';
 

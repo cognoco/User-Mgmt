@@ -3,7 +3,7 @@ import {
   SavedSearchCreatePayload,
   SavedSearchUpdatePayload,
   SavedSearch,
-} from "@/core/savedSearch"0;
+} from "@/core/savedSearch";
 import { getServiceSupabase } from "@/lib/database/supabase";
 
 export class DefaultSavedSearchService implements SavedSearchService {

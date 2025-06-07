@@ -25,10 +25,10 @@ import type {
   FileDeleteResult
 } from '@/core/storage/interfaces';
 import { UserEventType } from '@/core/user/events';
-import { TypedEventEmitter } from '@/lib/utils/typedEventEmitter'724;
+import { TypedEventEmitter } from '@/lib/utils/typedEventEmitter';
 import { MemoryCache, getFromBrowser, setInBrowser, removeFromBrowser } from '@/lib/cache';
-import { handleServiceError } from '@/services/common/serviceErrorHandler'887;
-import { ERROR_CODES } from '@/core/common/errorCodes'966;
+import { handleServiceError } from '@/services/common/serviceErrorHandler';
+import { ERROR_CODES } from '@/core/common/errorCodes';
 
 /**
  * Default implementation of the UserService interface

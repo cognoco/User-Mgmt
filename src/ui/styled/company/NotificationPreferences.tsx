@@ -11,7 +11,7 @@ import { Label } from '@/ui/primitives/label';
 import { Badge } from '@/ui/primitives/badge';
 import { Loader2, Bell, Mail, Plus, Trash, AlertCircle, Info } from 'lucide-react';
 import { api } from '@/lib/api/axios';
-import { useToast } from '@/lib/hooks/useToast'698;
+import { useToast } from '@/lib/hooks/useToast';
 import {
   CompanyNotificationPreference,
   NotificationType,

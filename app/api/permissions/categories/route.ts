@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'44;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import { createSuccessResponse } from '@/lib/api/common';
 import { PermissionValues } from '@/core/permission/models';
-import { listPermissionCategories } from '@/lib/rbac/permissionCategories'239;
+import { listPermissionCategories } from '@/lib/rbac/permissionCategories';
 
 async function handleGet(_req: NextRequest) {
   const categories = listPermissionCategories();

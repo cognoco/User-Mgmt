@@ -1,4 +1,4 @@
-import { ErrorMetrics } from '@/lib/telemetry/errorMetrics'0;
+import { ErrorMetrics } from '@/lib/telemetry/errorMetrics';
 import type { HealthMonitoringService, ServiceHealth, ServiceStatus } from '@/core/health/interfaces';
 
 /**

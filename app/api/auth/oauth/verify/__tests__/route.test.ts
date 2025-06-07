@@ -1,7 +1,7 @@
-import { POST } from '@/app/api/auth/oauth/verify/route'0;
+import { POST } from '@/app/api/auth/oauth/verify/route';
 import { OAuthProvider } from '@/types/oauth';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getServiceContainer } from '@/lib/config/serviceContainer'146;
+import { getServiceContainer } from '@/lib/config/serviceContainer';
 
 // Mock cookies
 const mockCookies = new Map<string, any>();

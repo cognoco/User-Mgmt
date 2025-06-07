@@ -9,7 +9,7 @@ import { randomBytes } from 'crypto';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { ICsrfDataProvider } from '@/core/csrf/ICsrfDataProvider';
 import type { CsrfToken, CsrfTokenQuery } from '@/core/csrf/models';
-import type { PaginationMeta } from '@/lib/api/common/responseFormatter'447;
+import type { PaginationMeta } from '@/lib/api/common/responseFormatter';
 
 /** Default token expiration in milliseconds (24 hours) */
 const DEFAULT_EXPIRATION_MS = 24 * 60 * 60 * 1000;

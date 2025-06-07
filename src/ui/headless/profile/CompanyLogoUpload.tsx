@@ -12,7 +12,7 @@ import {
   MAX_FILE_SIZE,
   ALLOWED_IMAGE_TYPES,
   canvasPreview
-} from '@/lib/utils/fileUpload'318;
+} from '@/lib/utils/fileUpload';
 
 export interface CompanyLogoUploadRenderProps {
   fileInputRef: React.RefObject<HTMLInputElement>;

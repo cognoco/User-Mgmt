@@ -1,1 +1,1 @@
-export * from '@/src/adapters/gdpr/supabase/supabaseGdpr.provider'0;
+export * from '@/src/adapters/gdpr/supabase/supabaseGdpr.provider';

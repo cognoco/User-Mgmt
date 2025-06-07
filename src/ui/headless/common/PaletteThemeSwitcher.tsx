@@ -1,5 +1,5 @@
 import { usePalette, PaletteKey } from '@/ui/primitives/PaletteProvider';
-import { useTheme } from '@/ui/primitives/themeProvider'75;
+import { useTheme } from '@/ui/primitives/themeProvider';
 
 /**
  * Headless Palette/Theme Switcher

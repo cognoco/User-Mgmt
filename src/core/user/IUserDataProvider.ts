@@ -15,7 +15,7 @@ import type {
   UserSearchParams,
   UserSearchResult,
   ProfileVisibility
-} from '@/src/core/user/models'291;
+} from '@/src/core/user/models';
 
 /**
  * Core interface for user data operations.

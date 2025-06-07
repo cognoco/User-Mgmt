@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { RetentionStatus, RetentionType } from '@/src/lib/database/schemas/retention'64;
-import { RetentionService } from '@/src/lib/services/retention.service'148;
-import { getServiceSupabase } from '@/src/lib/database/supabase'206;
+import { RetentionStatus, RetentionType } from '@/src/lib/database/schemas/retention';
+import { RetentionService } from '@/src/lib/services/retention.service';
+import { getServiceSupabase } from '@/src/lib/database/supabase';
 
 vi.mock('../../database/supabase');
 

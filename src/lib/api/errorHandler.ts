@@ -20,7 +20,7 @@ import {
   SERVER_ERROR_CODES,
   BILLING_ERROR_CODES,
   type ErrorCode,
-} from '@/src/lib/api/common/errorCodes'203;
+} from '@/src/lib/api/common/errorCodes';
 
 
 

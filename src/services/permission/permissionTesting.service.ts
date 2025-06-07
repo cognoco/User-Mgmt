@@ -1,7 +1,7 @@
 import type { PermissionService } from '@/core/permission/interfaces';
 import type { Permission } from '@/core/permission/models';
 import { RoleService } from '@/services/role';
-import { ResourcePermissionResolver } from '@/lib/services/resourcePermissionResolver.service'181;
+import { ResourcePermissionResolver } from '@/lib/services/resourcePermissionResolver.service';
 
 export interface PermissionTestResult {
   scenario: string;

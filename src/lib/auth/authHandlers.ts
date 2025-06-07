@@ -1,7 +1,7 @@
 // Create file: lib/auth/auth-handlers.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { AuthContext } from '@/src/lib/auth/types'101;
-import { createAuthMiddleware, AuthHandler } from '@/src/lib/auth/unifiedAuth.middleware'141;
+import { AuthContext } from '@/src/lib/auth/types';
+import { createAuthMiddleware, AuthHandler } from '@/src/lib/auth/unifiedAuth.middleware';
 import { PermissionValues } from '@/core/permission/models';
 
 export type RouteHandler<T = any> = (

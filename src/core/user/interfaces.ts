@@ -15,7 +15,7 @@ import {
   UserSearchParams,
   UserSearchResult,
   ProfileVisibility
-} from '@/src/core/user/models'260;
+} from '@/src/core/user/models';
 import type {
   FileUploadOptions,
   FileUploadResult,

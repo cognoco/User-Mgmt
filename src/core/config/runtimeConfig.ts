@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { loadEnvironment, validateEnvironment, EnvironmentConfig } from '@/src/core/config/environment'48;
-import { UserManagementConfig, DEFAULT_CONFIG } from '@/src/core/config/interfaces'138;
+import { loadEnvironment, validateEnvironment, EnvironmentConfig } from '@/src/core/config/environment';
+import { UserManagementConfig, DEFAULT_CONFIG } from '@/src/core/config/interfaces';
 
 export interface RuntimeConfig extends UserManagementConfig {
   env: EnvironmentConfig;

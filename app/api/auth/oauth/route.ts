@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { z } from 'zod';
 import { OAuthProvider, oauthProviderConfigSchema } from '@/types/oauth';
-import { createApiHandler } from '@/lib/api/routeHelpers'142;
+import { createApiHandler } from '@/lib/api/routeHelpers';
 import {
   createSuccessResponse,
   ApiError,

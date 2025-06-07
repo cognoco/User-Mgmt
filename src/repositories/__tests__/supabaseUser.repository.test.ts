@@ -1,8 +1,8 @@
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
-import { SupabaseUserRepository } from '@/src/repositories/supabaseUser.repository'71;
+import { SupabaseUserRepository } from '@/src/repositories/supabaseUser.repository';
 import { setTableMockData, resetSupabaseMock } from '@/tests/mocks/supabase';
-import { setupTestEnvironment } from '@/tests/utils/environmentSetup'221;
-import { UserType } from '@/types/userType'294;
+import { setupTestEnvironment } from '@/tests/utils/environmentSetup';
+import { UserType } from '@/types/userType';
 
 const sampleRow = {
   id: 'user-1',

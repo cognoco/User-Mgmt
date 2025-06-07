@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { checkRateLimit } from '@/middleware/rateLimit'89;
+import { checkRateLimit } from '@/middleware/rateLimit';
 
 // Schema for the address components expected by this endpoint
 const AddressValidationRequestSchema = z.object({

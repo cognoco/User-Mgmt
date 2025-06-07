@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createApiHandler } from '@/lib/api/routeHelpers'26;
+import { createApiHandler } from '@/lib/api/routeHelpers';
 import {
   createSuccessResponse,
   ApiError,

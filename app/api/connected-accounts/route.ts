@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromRequest } from '@/lib/auth/utils';
 import { prisma } from '@/lib/database/prisma';
-import { connectedAccountSchema } from '@/types/connectedAccounts'163;
+import { connectedAccountSchema } from '@/types/connectedAccounts';
 
 // GET /api/connected-accounts - fetch all connected accounts for the current user
 export async function GET(request: NextRequest) {

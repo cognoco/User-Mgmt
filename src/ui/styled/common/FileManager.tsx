@@ -5,12 +5,12 @@ import { Button } from '@/ui/primitives/button';
 import { Spinner } from '@/ui/primitives/spinner';
 import { Alert, AlertTitle, AlertDescription } from '@/ui/primitives/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/primitives/dialog';
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@/ui/primitives/alertDialog'449;
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@/ui/primitives/alertDialog';
 import { Label } from '@/ui/primitives/label';
 import { Input } from '@/ui/primitives/input';
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/ui/primitives/breadcrumb';
 import FileTypeIcon from '@/ui/primitives/FileTypeIcon';
-import { formatFileSize } from '@/lib/utils/fileUpload'921;
+import { formatFileSize } from '@/lib/utils/fileUpload';
 
 /**
  * FileManager Component

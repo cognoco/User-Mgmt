@@ -1,1 +1,1 @@
-export { SupabaseRepository } from '@/src/adapters/database/supabase/supabaseRepository'0;
+export { SupabaseRepository } from '@/src/adapters/database/supabase/supabaseRepository';

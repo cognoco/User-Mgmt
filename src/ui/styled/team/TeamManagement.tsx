@@ -8,7 +8,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card'257;
+} from '@/src/components/ui/card';
 import {
   Table,
   TableBody,
@@ -16,8 +16,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/src/components/ui/table'380;
-import { Button } from '@/src/components/ui/button'511;
+} from '@/src/components/ui/table';
+import { Button } from '@/src/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -26,14 +26,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/src/components/ui/dialog'568;
-import { Input } from '@/src/components/ui/input'738;
-import { Label } from '@/src/components/ui/label'793;
-import { Progress } from '@/src/components/ui/progress'848;
-import { Alert, AlertDescription, AlertTitle } from '@/src/components/ui/alert'909;
+} from '@/src/components/ui/dialog';
+import { Input } from '@/src/components/ui/input';
+import { Label } from '@/src/components/ui/label';
+import { Progress } from '@/src/components/ui/progress';
+import { Alert, AlertDescription, AlertTitle } from '@/src/components/ui/alert';
 import { Users, AlertCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
-import { TeamInviteDialog } from '@/src/ui/styled/team/TeamInviteDialog'1103;
+import { TeamInviteDialog } from '@/src/ui/styled/team/TeamInviteDialog';
 
 interface User {
   id: string;

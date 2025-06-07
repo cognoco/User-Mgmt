@@ -1,5 +1,5 @@
 import type { ProfileService } from '@/core/profile/interfaces';
-import { DefaultProfileService } from '@/src/services/profile/defaultProfile.service'66;
+import { DefaultProfileService } from '@/src/services/profile/defaultProfile.service';
 
 let instance: ProfileService | null = null;
 

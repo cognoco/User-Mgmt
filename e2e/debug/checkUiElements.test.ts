@@ -1,5 +1,5 @@
 import { test, Page } from '@playwright/test';
-import { loginAs } from '@/e2e/utils/auth'48;
+import { loginAs } from '@/e2e/utils/auth';
 
 const USER_EMAIL = process.env.E2E_USER_EMAIL || 'user@example.com';
 const USER_PASSWORD = process.env.E2E_USER_PASSWORD || 'password123';

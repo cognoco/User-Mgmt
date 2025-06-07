@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card'0;
-import { Progress } from '@/src/components/ui/progress'89;
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Progress } from '@/src/components/ui/progress';
 import { CheckCircle2, Circle } from 'lucide-react';
 import ProgressTrackerHeadless from '@/ui/headless/onboarding/ProgressTracker';
 

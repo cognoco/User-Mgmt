@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET, PUT, DELETE } from '@/app/api/admin/users/[id]/route'108;
+import { GET, PUT, DELETE } from '@/app/api/admin/users/[id]/route';
 
 vi.mock('@/middleware/createMiddlewareChain', async () => {
   const actual = await vi.importActual<any>('@/middleware/createMiddlewareChain');

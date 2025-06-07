@@ -1,9 +1,9 @@
-import { setupI18n } from '@/e2e/utils/i18nSetup'0;
+import { setupI18n } from '@/e2e/utils/i18nSetup';
 import * as dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { ensureUserExists } from '@/e2e/utils/userSetup'142;
-import { startMsw, stopMsw } from '@/e2e/utils/mswSupabase'192;
+import { ensureUserExists } from '@/e2e/utils/userSetup';
+import { startMsw, stopMsw } from '@/e2e/utils/mswSupabase';
 
 // Correct ESM path resolution
 const __filename = fileURLToPath(import.meta.url);

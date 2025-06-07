@@ -7,7 +7,7 @@ import type {
   TransactionInterface,
   DatabaseError
 } from '@/core/database/interfaces';
-import { SERVER_ERROR_CODES } from '@/lib/api/common/errorCodes'247;
+import { SERVER_ERROR_CODES } from '@/lib/api/common/errorCodes';
 
 /**
  * Generic Supabase repository implementing the BaseDatabaseInterface.

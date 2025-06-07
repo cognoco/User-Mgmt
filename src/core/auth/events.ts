@@ -5,7 +5,7 @@
  * These events allow other parts of the application to react to authentication state changes.
  */
 
-import { User } from '@/src/core/auth/models'230;
+import { User } from '@/src/core/auth/models';
 
 /**
  * Base event interface that all authentication events extend

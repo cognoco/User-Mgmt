@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { logPermissionChange } from '@/src/lib/audit/permissionAuditLogger'52;
-import { logUserAction } from '@/src/lib/audit/auditLogger'117;
+import { logPermissionChange } from '@/src/lib/audit/permissionAuditLogger';
+import { logUserAction } from '@/src/lib/audit/auditLogger';
 
 vi.mock('../auditLogger', () => ({ logUserAction: vi.fn() }));
 

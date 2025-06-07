@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/auth/useAuth';
 import { useTeams } from '@/hooks/team/useTeams';
 import { useSubscriptionStore } from '@/lib/stores/subscription.store';
 import { SubscriptionStatus } from '@/types/subscription';
-import { UserType } from '@/types/userType'281;
+import { UserType } from '@/types/userType';
 
 /**
  * Steps of the account deletion flow

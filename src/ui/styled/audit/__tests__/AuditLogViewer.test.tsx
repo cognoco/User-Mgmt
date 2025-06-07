@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { TestWrapper } from '@/src/tests/utils/testWrapper'106;
+import { TestWrapper } from '@/src/tests/utils/testWrapper';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { AuditLogViewer } from '@/src/ui/styled/audit/AuditLogViewer'259;
+import { AuditLogViewer } from '@/src/ui/styled/audit/AuditLogViewer';
 import { act } from 'react-dom/test-utils';
 
 const mockLogs = [

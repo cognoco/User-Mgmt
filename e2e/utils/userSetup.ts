@@ -1,5 +1,5 @@
 import { User } from '@supabase/supabase-js';
-import { getServiceSupabase } from '@/src/lib/database/supabase'47; // Adjust path if necessary
+import { getServiceSupabase } from '@/src/lib/database/supabase'; // Adjust path if necessary
 
 // Lazy initialization to avoid module-load-time errors
 function getSupabaseAdmin() {

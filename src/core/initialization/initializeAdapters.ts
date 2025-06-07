@@ -5,37 +5,37 @@
  * It creates and configures the appropriate adapters based on the configuration.
  */
 
-import { createAdapterFactory, validateAdapterConfig } from '@/core/config/adapterConfig'208;
-import { DefaultAuthService } from '@/services/auth/defaultAuth.service'301;
-import { BrowserAuthStorage } from '@/services/auth/authStorage'377;
-import { DefaultUserService } from '@/services/user/defaultUser.service'445;
-import { DefaultTeamService } from '@/services/team/defaultTeam.service'521;
-import { DefaultOrganizationService } from '@/services/organization/defaultOrganization.service'597;
-import { DefaultPermissionService } from '@/services/permission/defaultPermission.service'697;
-import { DefaultGdprService } from '@/services/gdpr/defaultGdpr.service'791;
-import { DefaultSsoService } from '@/services/sso/defaultSso.service'867;
-import { DefaultConsentService } from '@/services/consent/defaultConsent.service'940;
-import { DefaultSessionService } from '@/services/session/defaultSession.service'1025;
-import { DefaultSubscriptionService } from '@/services/subscription/defaultSubscription.service'1110;
-import { DefaultApiKeysService } from '@/services/apiKeys/defaultApiKeys.service'1210;
+import { createAdapterFactory, validateAdapterConfig } from '@/core/config/adapterConfig';
+import { DefaultAuthService } from '@/services/auth/defaultAuth.service';
+import { BrowserAuthStorage } from '@/services/auth/authStorage';
+import { DefaultUserService } from '@/services/user/defaultUser.service';
+import { DefaultTeamService } from '@/services/team/defaultTeam.service';
+import { DefaultOrganizationService } from '@/services/organization/defaultOrganization.service';
+import { DefaultPermissionService } from '@/services/permission/defaultPermission.service';
+import { DefaultGdprService } from '@/services/gdpr/defaultGdpr.service';
+import { DefaultSsoService } from '@/services/sso/defaultSso.service';
+import { DefaultConsentService } from '@/services/consent/defaultConsent.service';
+import { DefaultSessionService } from '@/services/session/defaultSession.service';
+import { DefaultSubscriptionService } from '@/services/subscription/defaultSubscription.service';
+import { DefaultApiKeysService } from '@/services/apiKeys/defaultApiKeys.service';
 import { WebhookService } from '@/services/webhooks/WebhookService';
-import { DefaultAddressService } from '@/services/address/defaultAddress.service'1367;
-import { DefaultNotificationService } from '@/services/notification/defaultNotification.service'1452;
-import { DefaultAuditService } from '@/services/audit/defaultAudit.service'1552;
-import { DefaultCsrfService } from '@/services/csrf/defaultCsrf.service'1631;
-import { DefaultNotificationHandler } from '@/services/notification/defaultNotification.handler'1707;
-import { DefaultAdminService } from '@/services/admin/defaultAdmin.service'1807;
+import { DefaultAddressService } from '@/services/address/defaultAddress.service';
+import { DefaultNotificationService } from '@/services/notification/defaultNotification.service';
+import { DefaultAuditService } from '@/services/audit/defaultAudit.service';
+import { DefaultCsrfService } from '@/services/csrf/defaultCsrf.service';
+import { DefaultNotificationHandler } from '@/services/notification/defaultNotification.handler';
+import { DefaultAdminService } from '@/services/admin/defaultAdmin.service';
 import {
   createAddressProvider
 } from '@/adapters/address/factory';
 import { createAuditProvider } from '@/adapters/audit/factory';
 import { createNotificationProvider } from '@/adapters/notification/factory';
 import { createCsrfProvider } from '@/adapters/csrf/factory';
-import { createResourceRelationshipProvider } from '@/adapters/resourceRelationship/factory'2166;
-import { DefaultResourceRelationshipService } from '@/services/resourceRelationship/defaultResourceRelationship.service'2262;
+import { createResourceRelationshipProvider } from '@/adapters/resourceRelationship/factory';
+import { DefaultResourceRelationshipService } from '@/services/resourceRelationship/defaultResourceRelationship.service';
 import { UserManagementConfiguration } from '@/core/config';
 import { AdapterRegistry } from '@/adapters/registry';
-import { isServer } from '@/src/core/platform'2506;
+import { isServer } from '@/src/core/platform';
 
 /**
  * Initialize adapters and services using the adapter registry

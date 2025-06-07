@@ -1,11 +1,11 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useAuth } from '@/src/hooks/auth/useAuth'134;
+import { useAuth } from '@/src/hooks/auth/useAuth';
 import { UserManagementConfiguration } from '@/core/config';
 import type { AuthService } from '@/core/auth/interfaces';
 import type { AuthDataProvider } from '@/adapters/auth/interfaces';
-import { DefaultAuthService } from '@/services/auth/defaultAuth.service'364;
-import type { AuthStorage } from '@/services/auth/authStorage'440;
+import { DefaultAuthService } from '@/services/auth/defaultAuth.service';
+import type { AuthStorage } from '@/services/auth/authStorage';
 
 // helper to build minimal auth service mocks
 function createMockAuthService(): AuthService {

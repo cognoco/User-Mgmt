@@ -7,14 +7,14 @@
  * or other storage mechanism.
  */
 
-import type { PaginationMeta } from "@/lib/api/common/responseFormatter"318;
+import type { PaginationMeta } from "@/lib/api/common/responseFormatter";
 import type {
   UserDataExport,
   AccountDeletionResult,
   DataExportQuery,
   DeletionRequest,
   DeletionRequestQuery,
-} from "@/src/core/gdpr/models"394;
+} from "@/src/core/gdpr/models";
 
 export interface IGdprDataProvider {
   /**

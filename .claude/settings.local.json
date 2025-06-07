@@ -16,7 +16,8 @@
       "Bash(rm:*)",
       "Bash(npm uninstall:*)",
       "Bash(rg:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(npm test:*)"
     ],
     "deny": []
   }

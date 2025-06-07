@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useErrorStore, useHasErrorType } from '@/src/lib/state/errorStore'75;
+import { useErrorStore, useHasErrorType } from '@/src/lib/state/errorStore';
 import { act, renderHook } from '@testing-library/react';
 
 vi.mock('@/lib/audit/error-logger', () => ({

@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { MFASetup as HeadlessMFASetup, MFASetupProps } from '@/src/ui/headless/auth/MFASetup'259;
+import { MFASetup as HeadlessMFASetup, MFASetupProps } from '@/src/ui/headless/auth/MFASetup';
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Label } from '@/ui/primitives/label';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';
-import { RadioGroup, RadioGroupItem } from '@/ui/primitives/radioGroup'675;
+import { RadioGroup, RadioGroupItem } from '@/ui/primitives/radioGroup';
 import { ExclamationTriangleIcon, CheckCircledIcon } from '@radix-ui/react-icons';
 
 export interface StyledMFASetupProps extends Omit<MFASetupProps, 'render'> {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ApiError } from '@/lib/api/common/apiError'58;
-import { createErrorResponse } from '@/lib/api/common/responseFormatter'114;
-import { logApiError } from '@/lib/audit/errorLogger'190;
+import { ApiError } from '@/lib/api/common/apiError';
+import { createErrorResponse } from '@/lib/api/common/responseFormatter';
+import { logApiError } from '@/lib/audit/errorLogger';
 
 /**
  * Middleware to handle API errors for route handlers.

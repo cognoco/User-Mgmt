@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ErrorLogger, ConsoleTransport, LogEntry } from "@/src/lib/monitoring/errorLogger"64;
+import { ErrorLogger, ConsoleTransport, LogEntry } from "@/src/lib/monitoring/errorLogger";
 
 class MemoryTransport implements ConsoleTransport {
   entries: LogEntry[] = [];

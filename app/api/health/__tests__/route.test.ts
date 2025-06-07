@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { GET } from '@/app/api/health/route'52;
+import { GET } from '@/app/api/health/route';
 import { getHealthService } from '@/services/health';
 
 vi.mock('@/services/health', () => ({

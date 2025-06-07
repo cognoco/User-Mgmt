@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { DefaultSubscriptionService } from '@/src/services/subscription/defaultSubscription.service'52;
+import { DefaultSubscriptionService } from '@/src/services/subscription/defaultSubscription.service';
 import type { ISubscriptionDataProvider } from '@/core/subscription';
 
 const provider: ISubscriptionDataProvider = {

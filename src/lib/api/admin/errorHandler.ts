@@ -5,7 +5,7 @@
  * This module provides error handling specific to admin operations.
  */
 
-import { ApiError, ERROR_CODES } from '@/src/lib/api/common'171;
+import { ApiError, ERROR_CODES } from '@/src/lib/api/common';
 
 /**
  * Create an admin operation failed error

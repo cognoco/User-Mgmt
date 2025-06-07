@@ -5,7 +5,7 @@ import { Button } from "@/ui/primitives/button";
 import { Label } from "@/ui/primitives/label";
 import { Alert, AlertDescription } from "@/ui/primitives/alert";
 // This component already follows the headless pattern, so no refactoring needed.
-import { ConsentManagement as HeadlessConsentManagement } from "@/src/ui/headless/gdpr/ConsentManagement"318;
+import { ConsentManagement as HeadlessConsentManagement } from "@/src/ui/headless/gdpr/ConsentManagement";
 
 export function ConsentManagement() {
   return (

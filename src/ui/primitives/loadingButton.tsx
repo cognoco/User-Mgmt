@@ -1,5 +1,5 @@
-import { Button, type ButtonProps } from '@/src/ui/primitives/button'0;
-import { Spinner } from '@/src/ui/primitives/spinner'54;
+import { Button, type ButtonProps } from '@/src/ui/primitives/button';
+import { Spinner } from '@/src/ui/primitives/spinner';
 import { cn } from '@/lib/utils';
 
 export interface LoadingButtonProps extends ButtonProps {

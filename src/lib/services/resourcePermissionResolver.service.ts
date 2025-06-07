@@ -1,6 +1,6 @@
 import { getServiceSupabase } from '@/lib/database/supabase';
-import { createResourceRelationshipService } from '@/services/resourceRelationship/factory'63;
-import { permissionCacheService } from '@/services/permission/permissionCache.service'158;
+import { createResourceRelationshipService } from '@/services/resourceRelationship/factory';
+import { permissionCacheService } from '@/services/permission/permissionCache.service';
 
 export class ResourcePermissionResolver {
   private relationshipService;

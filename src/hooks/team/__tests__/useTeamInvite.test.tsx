@@ -1,7 +1,7 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useTeamInvite } from '@/src/hooks/team/useTeamInvite'218;
+import { useTeamInvite } from '@/src/hooks/team/useTeamInvite';
 import { toast } from 'sonner';
 import { UserManagementConfiguration } from '@/core/config';
 import type { TeamService } from '@/core/team/interfaces';

@@ -1,5 +1,5 @@
-import { ApiError } from '@/lib/api/common/apiError'0;
-import { logUserAction } from '@/src/lib/audit/auditLogger'56;
+import { ApiError } from '@/lib/api/common/apiError';
+import { logUserAction } from '@/src/lib/audit/auditLogger';
 
 export type ErrorSeverity = 'INFO' | 'WARN' | 'ERROR';
 

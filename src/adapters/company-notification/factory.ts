@@ -1,5 +1,5 @@
-import type { ICompanyNotificationDataProvider } from '@/core/companyNotification/ICompanyNotificationDataProvider'0;
-import { SupabaseCompanyNotificationProvider } from '@/src/adapters/company-notification/supabase/supabaseCompanyNotification.provider'119;
+import type { ICompanyNotificationDataProvider } from '@/core/companyNotification/ICompanyNotificationDataProvider';
+import { SupabaseCompanyNotificationProvider } from '@/src/adapters/company-notification/supabase/supabaseCompanyNotification.provider';
 
 export function createSupabaseCompanyNotificationProvider(options: {
   supabaseUrl: string;

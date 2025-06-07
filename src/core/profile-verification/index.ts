@@ -1,1 +1,1 @@
-export * from '@/src/core/profileVerification/interfaces'00;
+export * from '@/src/core/profileVerification/interfaces';

@@ -6,10 +6,10 @@ import {
   createSuccessResponse,
   createNoContentResponse,
 } from '@/lib/api/common';
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'215;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import type { UserService } from '@/core/user/interfaces';
 
-import { createUserUpdateFailedError } from '@/lib/api/user/errorHandler'351;
+import { createUserUpdateFailedError } from '@/lib/api/user/errorHandler';
 
 // Schema for avatar upload request body (supports both custom uploads and predefined avatars)
 const AvatarUploadSchema = z.object({

@@ -1,11 +1,11 @@
 // src/tests/mocks/session.store.mock.ts
 // Robust mock factory for useSessionStore (Zustand)
-// Usage: import { createMockSessionStore } from '@/src/tests/mocks/session.store.mock'106;
+// Usage: import { createMockSessionStore } from '@/src/tests/mocks/session.store.mock';
 //        const mockStore = createMockSessionStore({ sessions: [...] }, { revokeSession: vi.fn() });
 //        vi.mock('@/lib/stores/session.store', () => ({ useSessionStore: vi.fn(() => mockStore) }));
 
 import { vi } from 'vitest';
-import type { SessionInfo } from '@/src/lib/stores/session.store'407;
+import type { SessionInfo } from '@/src/lib/stores/session.store';
 
 // Default initial state matching the real store
 const defaultState = {

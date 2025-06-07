@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET, POST } from '@/app/api/resources/relationships/route'64;
-import { createResourceRelationshipService } from '@/services/resourceRelationship/factory'103;
+import { GET, POST } from '@/app/api/resources/relationships/route';
+import { createResourceRelationshipService } from '@/services/resourceRelationship/factory';
 
 vi.mock('@/middleware/createMiddlewareChain', async () => {
   const actual = await vi.importActual<any>('@/middleware/createMiddlewareChain');

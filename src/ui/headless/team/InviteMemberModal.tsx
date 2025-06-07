@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { InviteMemberForm, InviteMemberFormRenderProps } from '@/src/ui/headless/team/InviteMemberForm'35;
+import { InviteMemberForm, InviteMemberFormRenderProps } from '@/src/ui/headless/team/InviteMemberForm';
 
 export interface SeatUsage {
   used: number;

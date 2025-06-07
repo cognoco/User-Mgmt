@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { PermissionCacheService } from '@/src/services/permission/permissionCache.service'64;
+import { PermissionCacheService } from '@/src/services/permission/permissionCache.service';
 import { Redis } from '@upstash/redis';
 
 vi.mock('@upstash/redis', () => ({ Redis: vi.fn(() => ({ get: vi.fn(), set: vi.fn(), del: vi.fn() })) }));

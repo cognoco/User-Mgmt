@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DefaultAdminService } from '@/src/services/admin/defaultAdmin.service'64;
+import { DefaultAdminService } from '@/src/services/admin/defaultAdmin.service';
 import type { IAdminDataProvider } from '@/core/admin';
 
 describe('DefaultAdminService.exportUsers', () => {

@@ -1,3 +1,3 @@
 
-export * from '@/src/adapters/database/factory'2;
+export * from '@/src/adapters/database/factory';
 

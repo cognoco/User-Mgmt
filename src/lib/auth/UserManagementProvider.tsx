@@ -1,7 +1,7 @@
 'use client'; // This component uses context and hooks, so it must be a Client Component
 
 import React, { createContext, useContext, ReactNode, useEffect, useMemo } from 'react';
-import { ThemeProvider } from '@/ui/primitives/themeProvider'182;
+import { ThemeProvider } from '@/ui/primitives/themeProvider';
 // import { Toaster } from '@/ui/primitives/toaster'; // Comment out unused import
 import { api } from '@/lib/api/axios';
 // import { useAuth } from '@/hooks/auth/useAuth'; // Commented out
@@ -12,13 +12,13 @@ import {
 } from '@/lib/services/notification.service';
 import { TwoFactorProviderConfig } from '@/types/2fa';
 import { SubscriptionProviderConfig, SubscriptionTier } from '@/types/subscription';
-import { CorporateUserConfig, UserType } from '@/types/userType'779;
+import { CorporateUserConfig, UserType } from '@/types/userType';
 import { OAuthModuleConfig } from '@/types/oauth';
 // import { initializeCsrf } from '@/lib/api/axios'; // Removed unused import
 // import { LoginPayload, AuthResult } from '@/core/auth/models'; // Commented out
 import { PaletteProvider } from '@/ui/primitives/PaletteProvider';
-import { initializeNotifications } from '@/src/lib/services/notification.service'1130;
-import { notificationPreferencesService } from '@/src/lib/services/notificationPreferences.service'1207;
+import { initializeNotifications } from '@/src/lib/services/notification.service';
+import { notificationPreferencesService } from '@/src/lib/services/notificationPreferences.service';
 
 // Detect platform automatically (can be overridden in config)
 const detectPlatform = (): Platform => {

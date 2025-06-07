@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { securityHeaders } from '@/middleware/securityHeaders'132;
+import { securityHeaders } from '@/middleware/securityHeaders';
 
 describe('Security Headers Middleware', () => {
   let req: NextApiRequest;

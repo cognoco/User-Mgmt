@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { ICompanyNotificationDataProvider } from '@/core/companyNotification/ICompanyNotificationDataProvider'71;
+import type { ICompanyNotificationDataProvider } from '@/core/companyNotification/ICompanyNotificationDataProvider';
 import type {
   CompanyNotificationPreference,
   CompanyNotificationRecipient,

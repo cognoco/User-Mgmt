@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { Button } from '@/ui/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
-import { TwoFactorStatus as HeadlessTwoFactorStatus } from '@/ui/headless/twoFactor/TwoFactorStatus'249;
+import { TwoFactorStatus as HeadlessTwoFactorStatus } from '@/ui/headless/twoFactor/TwoFactorStatus';
 
 interface StyledTwoFactorStatusProps {
   isEnabled: boolean;

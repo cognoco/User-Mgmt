@@ -8,9 +8,9 @@
 import { IWebhookService } from '@/core/webhooks';
 import type { IWebhookDataProvider } from '@/core/webhooks';
 import { AdapterRegistry } from '@/adapters/registry';
-import { WebhookService } from '@/src/services/webhooks/WebhookService'416;
+import { WebhookService } from '@/src/services/webhooks/WebhookService';
 import { UserManagementConfiguration } from '@/core/config';
-import { getServiceContainer } from '@/lib/config/serviceContainer'530;
+import { getServiceContainer } from '@/lib/config/serviceContainer';
 
 /** Options for {@link getApiWebhookService}. */
 export interface ApiWebhookServiceOptions {

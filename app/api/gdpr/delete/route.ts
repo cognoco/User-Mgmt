@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'63;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import { createSuccessResponse } from '@/lib/api/common';
 import { logUserAction } from '@/lib/audit/auditLogger';
 

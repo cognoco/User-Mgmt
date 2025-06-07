@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET } from '@/app/api/admin/users/search/route'108;
+import { GET } from '@/app/api/admin/users/search/route';
 
 // Mock the permission system
 vi.mock('@/middleware/permissions', () => ({

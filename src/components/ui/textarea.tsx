@@ -1,1 +1,1 @@
-export * from '@/src/ui/primitives/textarea'0;
+export * from '@/src/ui/primitives/textarea';

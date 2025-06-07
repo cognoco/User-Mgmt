@@ -2,7 +2,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UserManagementConfiguration } from '@/core/config';
-import { useWebhooks } from '@/src/hooks/webhooks/useWebhooks'269;
+import { useWebhooks } from '@/src/hooks/webhooks/useWebhooks';
 import type { IWebhookService } from '@/core/webhooks';
 
 function createWrapper() {

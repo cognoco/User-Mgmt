@@ -1,6 +1,6 @@
 import type { ICsrfDataProvider } from '@/core/csrf/ICsrfDataProvider';
-import { DefaultCsrfProvider } from '@/src/adapters/csrf/defaultAdapter'73;
-import { SupabaseCsrfProvider } from '@/src/adapters/csrf/supabase/supabaseCsrf.provider'131;
+import { DefaultCsrfProvider } from '@/src/adapters/csrf/defaultAdapter';
+import { SupabaseCsrfProvider } from '@/src/adapters/csrf/supabase/supabaseCsrf.provider';
 
 export function createDefaultCsrfProvider(): ICsrfDataProvider {
   return new DefaultCsrfProvider();

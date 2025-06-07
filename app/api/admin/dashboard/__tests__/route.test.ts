@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET } from '@/app/api/admin/dashboard/route'64;
+import { GET } from '@/app/api/admin/dashboard/route';
 import { prisma } from '@/lib/database/prisma';
 import { checkRolePermission } from '@/lib/rbac/roleService';
 import { routeAuthMiddleware } from '@/middleware/createMiddlewareChain';

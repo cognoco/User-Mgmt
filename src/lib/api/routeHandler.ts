@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodSchema } from 'zod';
-import { withProtectedRoute } from '@/middleware/protectedRoute'92;
+import { withProtectedRoute } from '@/middleware/protectedRoute';
 import { withValidation } from '@/middleware/validation';
-import { withErrorHandling } from '@/middleware/errorHandling'219;
+import { withErrorHandling } from '@/middleware/errorHandling';
 import type { RouteAuthContext } from '@/middleware/auth';
-import type { RateLimitOptions } from '@/middleware/rateLimit'345;
-import { withSecurity } from '@/middleware/withSecurity'411;
+import type { RateLimitOptions } from '@/middleware/rateLimit';
+import { withSecurity } from '@/middleware/withSecurity';
 
 export interface RouteHandlerOptions<T, C = any> {
   handler: (

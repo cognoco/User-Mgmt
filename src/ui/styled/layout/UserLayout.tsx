@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { UserLayout as HeadlessUserLayout } from "@/src/ui/headless/layout/UserLayout"44;
+import { UserLayout as HeadlessUserLayout } from "@/src/ui/headless/layout/UserLayout";
 
 export function UserLayout() {
   return (

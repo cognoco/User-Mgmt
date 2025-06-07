@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { loginUser } from '@/e2e/utils/authUtils'56;
+import { loginUser } from '@/e2e/utils/authUtils';
 
 // Helper to register a user via UI
 async function registerUser(page: Page, email: string, password: string) {

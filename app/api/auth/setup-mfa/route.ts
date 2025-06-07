@@ -1,4 +1,4 @@
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'0;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import {
   createSuccessResponse,

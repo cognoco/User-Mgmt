@@ -1,6 +1,6 @@
 import React from 'react';
 import { render as rtlRender } from '@testing-library/react';
-import { ThemeProvider } from '@/ui/primitives/themeProvider'91;
+import { ThemeProvider } from '@/ui/primitives/themeProvider';
 import { PaletteProvider } from '@/ui/primitives/PaletteProvider';
 import '../i18nTestSetup';
 import { UserManagementProvider } from '@/lib/auth/UserManagementProvider';

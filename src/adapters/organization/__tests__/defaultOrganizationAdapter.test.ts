@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DefaultOrganizationAdapter } from '@/src/adapters/organization/defaultOrganizationAdapter'48;
+import { DefaultOrganizationAdapter } from '@/src/adapters/organization/defaultOrganizationAdapter';
 
 describe('DefaultOrganizationAdapter', () => {
   const adapter = new DefaultOrganizationAdapter();

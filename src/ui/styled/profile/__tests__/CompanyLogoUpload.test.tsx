@@ -3,9 +3,9 @@ import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { CompanyLogoUpload } from '@/src/ui/styled/profile/CompanyLogoUpload'208;
+import { CompanyLogoUpload } from '@/src/ui/styled/profile/CompanyLogoUpload';
 import { useProfileStore } from '@/lib/stores/profile.store';
-import * as FileUploadUtils from '@/lib/utils/fileUpload'330; // Import utils to mock
+import * as FileUploadUtils from '@/lib/utils/fileUpload'; // Import utils to mock
 import { Profile } from '@/types/database';
 
 // Mock the Supabase client EARLY

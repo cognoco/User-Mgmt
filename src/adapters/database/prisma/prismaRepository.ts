@@ -7,7 +7,7 @@ import type {
   TransactionInterface,
   DatabaseError
 } from '@/core/database/interfaces';
-import { SERVER_ERROR_CODES } from '@/lib/api/common/errorCodes'224;
+import { SERVER_ERROR_CODES } from '@/lib/api/common/errorCodes';
 
 /**
  * Prisma implementation of the BaseDatabaseInterface.

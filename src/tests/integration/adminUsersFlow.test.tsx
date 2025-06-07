@@ -5,7 +5,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AdminUsers } from '@/ui/styled/admin/AdminUsers';
 import { describe, expect, beforeEach, vi } from 'vitest';
-import { UserType } from '@/types/userType'330;
+import { UserType } from '@/types/userType';
 
 // Mock user list to return from API
 const mockUsersList = [

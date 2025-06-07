@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { IResourceRelationshipDataProvider } from '@/core/resourceRelationship/IResourceRelationshipDataProvider'71;
-import type { ResourceRelationship, CreateRelationshipPayload } from '@/core/resourceRelationship/models'193;
+import type { IResourceRelationshipDataProvider } from '@/core/resourceRelationship/IResourceRelationshipDataProvider';
+import type { ResourceRelationship, CreateRelationshipPayload } from '@/core/resourceRelationship/models';
 
 /**
  * Supabase implementation of {@link IResourceRelationshipDataProvider}.

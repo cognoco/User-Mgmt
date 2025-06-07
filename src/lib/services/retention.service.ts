@@ -1,8 +1,8 @@
-import { getServiceSupabase } from '@/src/lib/database/supabase'0;
-import { RetentionStatus, RetentionType } from '@/src/lib/database/schemas/retention'60;
-import { sendEmail } from '@/src/lib/email/sendEmail'141;
+import { getServiceSupabase } from '@/src/lib/database/supabase';
+import { RetentionStatus, RetentionType } from '@/src/lib/database/schemas/retention';
+import { sendEmail } from '@/src/lib/email/sendEmail';
 import { addMonths, addDays, format, differenceInDays } from 'date-fns';
-import { getServerConfig } from '@/core/config/runtimeConfig'264;
+import { getServerConfig } from '@/core/config/runtimeConfig';
 
 // Define inactivity thresholds (in months)
 const config = getServerConfig();

@@ -6,7 +6,7 @@
  */
 
 import type { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
-import { SupabaseWebhookProvider } from '@/src/adapters/webhooks/supabase/supabaseWebhook.provider'272;
+import { SupabaseWebhookProvider } from '@/src/adapters/webhooks/supabase/supabaseWebhook.provider';
 
 /**
  * Create a Supabase webhook data provider

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiDataExportService } from '@/services/dataExport'58;
-import { isCompanyRateLimited } from '@/lib/exports/companyExport.service'125;
+import { getApiDataExportService } from '@/services/dataExport';
+import { isCompanyRateLimited } from '@/lib/exports/companyExport.service';
 
 /**
  * Check if user is rate limited for personal data exports

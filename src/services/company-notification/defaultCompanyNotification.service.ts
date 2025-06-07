@@ -5,7 +5,7 @@ import type {
   NotificationType,
   NotificationChannel,
 } from '@/types/company';
-import type { CompanyNotificationService } from '@/core/companyNotification/interfaces'217;
+import type { CompanyNotificationService } from '@/core/companyNotification/interfaces';
 
 export class DefaultCompanyNotificationService implements CompanyNotificationService {
   constructor(private supabase = getServiceSupabase()) {}

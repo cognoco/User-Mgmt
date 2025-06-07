@@ -3,14 +3,14 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ConnectedAccounts } from '@/ui/styled/shared/ConnectedAccounts'; // Corrected import path
-import { useConnectedAccountsStore } from '@/lib/stores/connectedAccounts.store'299; // CORRECT STORE
-import { createConnectedAccountsStoreMock } from '@/tests/mocks/connectedAccounts.store.mock'413;
+import { useConnectedAccountsStore } from '@/lib/stores/connectedAccounts.store'; // CORRECT STORE
+import { createConnectedAccountsStoreMock } from '@/tests/mocks/connectedAccounts.store.mock';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { OAuthProvider } from '@/types/oauth'; // Import OAuthProvider if needed
-import { ConnectedAccount } from '@/types/connectedAccounts'664; // Import ConnectedAccount type
+import { ConnectedAccount } from '@/types/connectedAccounts'; // Import ConnectedAccount type
 import { IntegrationCallbacks, LayoutOptions } from '@/lib/auth/UserManagementProvider';
 import { SubscriptionTier } from '@/types/subscription';
-import { UserType } from '@/types/userType'908;
+import { UserType } from '@/types/userType';
 
 // Mock necessary dependencies
 vi.mock('@/lib/stores/connected-accounts.store');

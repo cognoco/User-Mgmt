@@ -1,6 +1,6 @@
-import { Button } from '@/src/components/ui/button'0;
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/src/components/ui/card'57;
-import { Progress } from '@/src/components/ui/progress'158;
+import { Button } from '@/src/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Progress } from '@/src/components/ui/progress';
 import { ArrowRight, Rocket } from 'lucide-react';
 import WelcomeScreenHeadless from '@/ui/headless/onboarding/WelcomeScreen';
 

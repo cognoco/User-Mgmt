@@ -4,8 +4,8 @@ import {
   createBillingProviderError,
   createBillingPermissionError,
   createStateMismatchError,
-} from '@/src/lib/api/common/apiError'48;
-import { ERROR_CODES } from '@/src/lib/api/common/errorCodes'204;
+} from '@/src/lib/api/common/apiError';
+import { ERROR_CODES } from '@/src/lib/api/common/errorCodes';
 
 describe('billing error helpers', () => {
   it('creates payment failed error', () => {

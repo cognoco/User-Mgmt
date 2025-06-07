@@ -1,4 +1,4 @@
-import { TypedEventEmitter } from '@/lib/utils/typedEventEmitter'0;
+import { TypedEventEmitter } from '@/lib/utils/typedEventEmitter';
 
 export interface TelemetryErrorEvent {
   type: string;

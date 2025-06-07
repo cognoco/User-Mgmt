@@ -1,10 +1,10 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { ISavedSearchDataProvider } from '@/core/savedSearch/ISavedSearchDataProvider'71;
+import type { ISavedSearchDataProvider } from '@/core/savedSearch/ISavedSearchDataProvider';
 import type {
   SavedSearch,
   SavedSearchCreatePayload,
   SavedSearchUpdatePayload
-} from '@/core/savedSearch/models'166;
+} from '@/core/savedSearch/models';
 
 /**
  * Supabase implementation of {@link ISavedSearchDataProvider}.

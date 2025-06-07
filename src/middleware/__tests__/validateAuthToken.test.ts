@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'64;
-import { validateAuthToken } from '@/src/middleware/validateAuthToken'141;
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers';
+import { validateAuthToken } from '@/src/middleware/validateAuthToken';
 import { getSessionFromToken } from '@/services/auth/factory';
 import { extractAuthToken } from '@/lib/auth/utils';
-import { AUTH_ERROR_MAP } from '@/src/middleware/authErrors'320;
+import { AUTH_ERROR_MAP } from '@/src/middleware/authErrors';
 
 vi.mock('@/services/auth/factory');
 vi.mock('@/lib/auth/utils');

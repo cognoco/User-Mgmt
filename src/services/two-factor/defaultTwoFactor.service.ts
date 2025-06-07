@@ -1,4 +1,4 @@
-import { TwoFactorService } from '@/core/twoFactor/interfaces'0;
+import { TwoFactorService } from '@/core/twoFactor/interfaces';
 import type {
   TwoFactorSetupPayload,
   TwoFactorSetupResponse,
@@ -7,7 +7,7 @@ import type {
   TwoFactorDisableResponse,
   BackupCodesResponse,
   TwoFactorMethodType
-} from '@/core/twoFactor/models'66;
+} from '@/core/twoFactor/models';
 import { getServiceSupabase } from '@/lib/database/supabase';
 import { authenticator } from 'otplib';
 import * as qrcode from 'qrcode';

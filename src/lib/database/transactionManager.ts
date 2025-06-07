@@ -1,6 +1,6 @@
 import { TransactionInterface } from '@/core/database/interfaces';
 import { ApplicationError } from '@/core/common/errors';
-import { errorLogger } from '@/lib/monitoring/errorLogger'126;
+import { errorLogger } from '@/lib/monitoring/errorLogger';
 
 export type FailureCategory = 'transient' | 'permanent';
 

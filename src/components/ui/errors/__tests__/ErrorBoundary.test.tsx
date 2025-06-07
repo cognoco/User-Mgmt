@@ -1,8 +1,8 @@
-import { render, screen } from '@/tests/utils/testUtils'0;
+import { render, screen } from '@/tests/utils/testUtils';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
-import { ErrorBoundary } from '@/src/components/ui/errors/ErrorBoundary'194;
+import { ErrorBoundary } from '@/src/components/ui/errors/ErrorBoundary';
 
 vi.mock('@/lib/utils/analytics', () => ({
   analytics: { trackError: vi.fn() },

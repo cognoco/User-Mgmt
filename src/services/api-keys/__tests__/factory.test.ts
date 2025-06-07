@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AdapterRegistry } from '@/adapters/registry';
-import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer'120;
+import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer';
 
 let getApiKeyService: typeof import('@/src/services/api-keys/factory').getApiKeyService;
 let DefaultApiKeysService: typeof import('@/src/services/api-keys/defaultApiKeys.service').DefaultApiKeysService;

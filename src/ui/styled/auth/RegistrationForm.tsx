@@ -1,17 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { UserType } from '@/types/userType'63;
+import { UserType } from '@/types/userType';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { Button } from '@/ui/primitives/button';
 import { Input } from '@/ui/primitives/input';
 import { Label } from '@/ui/primitives/label';
-import { RadioGroup, RadioGroupItem } from '@/ui/primitives/radioGroup'328;
+import { RadioGroup, RadioGroupItem } from '@/ui/primitives/radioGroup';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 import { Check, X, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { OAuthButtons } from '@/src/ui/styled/auth/OAuthButtons'582;
-import { PasswordRequirements } from '@/src/ui/styled/auth/PasswordRequirements'630;
+import { OAuthButtons } from '@/src/ui/styled/auth/OAuthButtons';
+import { PasswordRequirements } from '@/src/ui/styled/auth/PasswordRequirements';
 import { RegistrationForm as HeadlessRegistrationForm } from '@/ui/headless/auth/RegistrationForm';
 import { useAuth } from '@/hooks/auth/useAuth';
 

@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { corsHeaders, createJsonResponse, createErrorResponse } from '@/supabase/functions/_shared/cors.ts'55;
+import { corsHeaders, createJsonResponse, createErrorResponse } from '@/supabase/functions/_shared/cors.ts';
 
 console.log('Hello from cleanup-unverified-users Function!')
 

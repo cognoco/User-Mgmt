@@ -1,6 +1,6 @@
 import { getServiceSupabase } from '@/lib/database/supabase';
 import type { ProfileVerification } from '@/types/profile';
-import type { ProfileVerificationService } from '@/core/profileVerification/interfaces'124;
+import type { ProfileVerificationService } from '@/core/profileVerification/interfaces';
 
 export class DefaultProfileVerificationService implements ProfileVerificationService {
   constructor(private supabase = getServiceSupabase()) {}

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useToast } from '@/lib/hooks/useToast'116;
+import { useToast } from '@/lib/hooks/useToast';
 import * as XLSX from 'xlsx';
 
 export interface AuditLog {

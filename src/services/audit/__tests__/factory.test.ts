@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AdapterRegistry } from '@/adapters/registry';
 import { UserManagementConfiguration } from '@/core/config';
-import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer'182;
+import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer';
 
 let getApiAuditService: typeof import('@/src/services/audit/factory').getApiAuditService;
 let DefaultAuditService: typeof import('@/src/services/audit/defaultAudit.service').DefaultAuditService;

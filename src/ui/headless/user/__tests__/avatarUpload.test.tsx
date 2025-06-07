@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { vi } from 'vitest';
-import AvatarUpload from '@/src/ui/headless/user/AvatarUpload'141;
+import AvatarUpload from '@/src/ui/headless/user/AvatarUpload';
 import { useProfileStore } from '@/lib/stores/profile.store';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { api } from '@/lib/api/axios';

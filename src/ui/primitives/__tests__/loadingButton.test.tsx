@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { LoadingButton } from '@/src/ui/primitives/loadingButton'164;
+import { LoadingButton } from '@/src/ui/primitives/loadingButton';
 
 describe('LoadingButton', () => {
   it('shows spinner when loading and disables button', async () => {

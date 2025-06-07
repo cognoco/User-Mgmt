@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getServiceSupabase } from '@/lib/database/supabase';
-import { hashApiKey, getKeyPrefix } from '@/src/lib/api-keys/apiKeyUtils'107;
+import { hashApiKey, getKeyPrefix } from '@/src/lib/api-keys/apiKeyUtils';
 
 export interface ApiKeyAuthResult {
   authenticated: boolean;

@@ -2,8 +2,8 @@
  * Core database interface exports and common types.
  */
 
-import type { DataProviderError } from '@/src/core/common/errors'66;
-export { isDataProviderError as isDatabaseError } from '@/src/core/common/errors'136;
+import type { DataProviderError } from '@/src/core/common/errors';
+export { isDataProviderError as isDatabaseError } from '@/src/core/common/errors';
 
 /** Connection configuration options */
 export interface ConnectionOptions {
@@ -93,10 +93,10 @@ export function isFilterCondition(value: unknown): value is FilterCondition {
   );
 }
 
-export * from '@/src/core/database/interfaces/base.interface'2143;
-export * from '@/src/core/database/interfaces/query.interface'2178;
-export * from '@/src/core/database/interfaces/transaction.interface'2214;
-export * from '@/src/core/database/interfaces/user.interface'2256;
-export * from '@/src/core/database/interfaces/team.interface'2291;
-export * from '@/src/core/database/interfaces/organization.interface'2326;
-export * from '@/src/core/database/interfaces/permission.interface'2369;
+export * from '@/src/core/database/interfaces/base.interface';
+export * from '@/src/core/database/interfaces/query.interface';
+export * from '@/src/core/database/interfaces/transaction.interface';
+export * from '@/src/core/database/interfaces/user.interface';
+export * from '@/src/core/database/interfaces/team.interface';
+export * from '@/src/core/database/interfaces/organization.interface';
+export * from '@/src/core/database/interfaces/permission.interface';

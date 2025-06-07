@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { logApiError } from '@/lib/audit/errorLogger'58;
+import { logApiError } from '@/lib/audit/errorLogger';
 import {
   ApplicationError,
   createErrorFromUnknown,
 } from '@/core/common/errors';
-import { createErrorResponse, ResponseMeta } from '@/src/lib/api/response/apiResponse'205;
+import { createErrorResponse, ResponseMeta } from '@/src/lib/api/response/apiResponse';
 
 export interface ErrorHandlerContext extends ResponseMeta {
   service?: string;

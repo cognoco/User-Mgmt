@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { ErrorMetrics, ErrorMetricDimensions } from '@/src/lib/telemetry/errorMetrics'48;
-import { ErrorPrioritizer } from '@/src/lib/telemetry/prioritization'121;
+import { ErrorMetrics, ErrorMetricDimensions } from '@/src/lib/telemetry/errorMetrics';
+import { ErrorPrioritizer } from '@/src/lib/telemetry/prioritization';
 
 const base: ErrorMetricDimensions = {
   errorCode: 'E1',

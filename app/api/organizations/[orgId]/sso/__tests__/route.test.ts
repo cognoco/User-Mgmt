@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET, PUT } from '@/app/api/organizations/[orgId]/sso/route'108;
+import { GET, PUT } from '@/app/api/organizations/[orgId]/sso/route';
 import { getApiSsoService } from '@/services/sso/factory';
 
 vi.mock('@/services/sso/factory', () => ({ getApiSsoService: vi.fn() }));

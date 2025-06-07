@@ -1,8 +1,8 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createNoContentResponse } from '@/lib/api/common';
-import { createApiHandler } from '@/lib/api/routeHelpers'136;
-import { createRoleNotFoundError } from '@/lib/api/permission/errorHandler'197;
+import { createApiHandler } from '@/lib/api/routeHelpers';
+import { createRoleNotFoundError } from '@/lib/api/permission/errorHandler';
 import { PermissionValues } from '@/core/permission/models';
 
 // DELETE /api/users/[id]/roles/[roleId] - Remove role from a user

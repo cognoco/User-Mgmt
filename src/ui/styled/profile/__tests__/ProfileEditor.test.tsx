@@ -3,9 +3,9 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useConnectedAccountsStore } from '@/lib/stores/connectedAccounts.store'210;
+import { useConnectedAccountsStore } from '@/lib/stores/connectedAccounts.store';
 import { OAuthProvider } from '@/types/oauth';
-import { createConnectedAccountsStoreMock } from '@/tests/mocks/connectedAccounts.store.mock'342;
+import { createConnectedAccountsStoreMock } from '@/tests/mocks/connectedAccounts.store.mock';
 import { vi, Mock } from 'vitest';
 import type { UserEvent } from '@testing-library/user-event';
 

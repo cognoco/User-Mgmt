@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createApiHandler } from '@/lib/api/routeHelpers'84;
+import { createApiHandler } from '@/lib/api/routeHelpers';
 import {
   createSuccessResponse,
   ApiError,
   ERROR_CODES,
 } from '@/lib/api/common';
-import { checkRateLimit } from '@/middleware/rateLimit'238;
+import { checkRateLimit } from '@/middleware/rateLimit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 
 const bodySchema = z.object({

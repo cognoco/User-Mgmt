@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { SupabasePermissionProvider } from '@/src/adapters/permission/supabasePermissionProvider'60;
+import { SupabasePermissionProvider } from '@/src/adapters/permission/supabasePermissionProvider';
 import { setTableMockData, resetSupabaseMock } from '@/tests/mocks/supabase';
 import type { Permission } from '@/core/permission/models';
 

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET } from '@/app/api/webhooks/[webhookId]/deliveries/route'64;
+import { GET } from '@/app/api/webhooks/[webhookId]/deliveries/route';
 import { NextRequest } from 'next/server';
 import { getApiWebhookService } from '@/services/webhooks/factory';
 import { getCurrentUser } from '@/lib/auth/session';
-import { checkRateLimit } from '@/middleware/rateLimit'264;
+import { checkRateLimit } from '@/middleware/rateLimit';
 
 vi.mock('@/services/webhooks/factory', () => ({ getApiWebhookService: vi.fn() }));
 vi.mock('@/lib/auth/session', () => ({ getCurrentUser: vi.fn().mockResolvedValue({ id: 'u1' }) }));

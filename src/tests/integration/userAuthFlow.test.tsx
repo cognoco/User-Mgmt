@@ -26,7 +26,7 @@ import { supabase } from '@/lib/database/supabase';
 import type { Profile } from '@/types/profile'; // Assuming type exists here
 import type { User, RateLimitInfo } from '@/types/auth'; // Import types
 // If ConnectedAccount is only used as a type, re-import it from the correct alias
-// import type { ConnectedAccount } from '@/types/connectedAccounts'1494;
+// import type { ConnectedAccount } from '@/types/connectedAccounts';
 
 // --- Mock Profile Store with exported state object ---
 const mockProfileStoreActions = {
@@ -51,11 +51,11 @@ vi.mock('@/lib/stores/profile.store', () => ({
 // --- End Profile Store Mock ---
 
 // --- Mock Connected Accounts Store ---
-// import { useConnectedAccountsStore } from '@/lib/stores/connectedAccounts.store'2547;
-// import { ConnectedAccount } from '@/types/connectedAccounts'2634;
+// import { useConnectedAccountsStore } from '@/lib/stores/connectedAccounts.store';
+// import { ConnectedAccount } from '@/types/connectedAccounts';
 // import { OAuthProvider } from '@/types/oauth';
 
-import { createConnectedAccountsStoreMock } from '@/tests/mocks/connectedAccounts.store.mock'2751;
+import { createConnectedAccountsStoreMock } from '@/tests/mocks/connectedAccounts.store.mock';
 
 let mockConnectedAccountsStoreActions = createConnectedAccountsStoreMock();
 

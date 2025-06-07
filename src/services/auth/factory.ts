@@ -7,13 +7,13 @@
 
 import { AuthService } from '@/core/auth/interfaces';
 import type { AuthDataProvider } from '@/adapters/auth/interfaces';
-import { DefaultAuthService } from '@/src/services/auth/defaultAuth.service'363;
-import type { AuthStorage } from '@/src/services/auth/authStorage'425;
-import { BrowserAuthStorage } from '@/src/services/auth/authStorage'477;
+import { DefaultAuthService } from '@/src/services/auth/defaultAuth.service';
+import type { AuthStorage } from '@/src/services/auth/authStorage';
+import { BrowserAuthStorage } from '@/src/services/auth/authStorage';
 import { AdapterRegistry } from '@/adapters/registry';
 import { createSupabaseAuthProvider } from '@/adapters/auth/factory';
 import { getServiceSupabase } from '@/lib/database/supabase';
-import { getServiceContainer, getServiceConfiguration } from '@/lib/config/serviceContainer'721;
+import { getServiceContainer, getServiceConfiguration } from '@/lib/config/serviceContainer';
 
 /**
  * Options for {@link getApiAuthService}

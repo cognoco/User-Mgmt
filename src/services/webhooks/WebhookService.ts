@@ -6,9 +6,9 @@ import type {
   WebhookUpdatePayload,
   WebhookDelivery,
 } from '@/core/webhooks/models';
-import { createWebhookSender } from '@/lib/webhooks/webhookSender'287;
+import { createWebhookSender } from '@/lib/webhooks/webhookSender';
 import { SubscriptionTier } from '@/core/subscription/models';
-import { ensureSubscriptionTier } from '@/services/subscription/subscriptionAccess'421;
+import { ensureSubscriptionTier } from '@/services/subscription/subscriptionAccess';
 
 export class WebhookService implements IWebhookService {
   private sender;

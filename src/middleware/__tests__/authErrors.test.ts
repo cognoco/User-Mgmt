@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createAuthError, createAuthApiError } from '@/src/middleware/authErrors'64;
+import { createAuthError, createAuthApiError } from '@/src/middleware/authErrors';
 import { ERROR_CODES } from '@/lib/api/common';
 
 vi.mock('@/lib/audit/auditLogger', () => ({

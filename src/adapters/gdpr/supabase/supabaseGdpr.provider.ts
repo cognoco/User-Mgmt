@@ -14,7 +14,7 @@ import type {
   DeletionRequest,
   DeletionRequestQuery,
 } from '@/core/gdpr/models';
-import type { PaginationMeta } from '@/lib/api/common/responseFormatter'476;
+import type { PaginationMeta } from '@/lib/api/common/responseFormatter';
 
 export class SupabaseGdprProvider implements IGdprDataProvider {
   private supabase: SupabaseClient;

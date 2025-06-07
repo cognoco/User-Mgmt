@@ -1,6 +1,6 @@
 import type { RoleService as IRoleService } from "@/core/role/interfaces";
-import { RoleService } from "@/src/services/role/role.service"76;
-import { getServiceContainer } from "@/lib/config/serviceContainer"123;
+import { RoleService } from "@/src/services/role/role.service";
+import { getServiceContainer } from "@/lib/config/serviceContainer";
 
 export interface ApiRoleServiceOptions {
   /** Reset cached instance */

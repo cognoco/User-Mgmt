@@ -1,5 +1,5 @@
-import type { ApiKey } from '@/core/apiKeys/types'0;
-import { useApiKeys } from '@/hooks/apiKeys/useApiKeys'54;
+import type { ApiKey } from '@/core/apiKeys/types';
+import { useApiKeys } from '@/hooks/apiKeys/useApiKeys';
 
 export interface ApiKeyDetailRenderProps {
   apiKey: ApiKey;

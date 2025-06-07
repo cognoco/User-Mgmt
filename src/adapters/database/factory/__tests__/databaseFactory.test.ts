@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { getDatabaseProvider } from '@/src/adapters/database/factory/index'48;
-import { createMockDatabaseProvider } from '@/src/adapters/database/factory/mockFactory'97;
-import { createSupabaseDatabaseProvider } from '@/src/adapters/database/factory/supabaseFactory'160;
+import { getDatabaseProvider } from '@/src/adapters/database/factory/index';
+import { createMockDatabaseProvider } from '@/src/adapters/database/factory/mockFactory';
+import { createSupabaseDatabaseProvider } from '@/src/adapters/database/factory/supabaseFactory';
 
 // Minimal config used for factories
 const config = { provider: 'supabase', connectionString: 'supabase://test' } as any;

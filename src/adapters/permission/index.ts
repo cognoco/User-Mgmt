@@ -5,6 +5,6 @@
  */
 
 export type { IPermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
-export * from '@/src/adapters/permission/factory'213;
-export * from '@/src/adapters/permission/supabasePermissionProvider'241;
-export * from '@/src/adapters/permission/supabase'290;
+export * from '@/src/adapters/permission/factory';
+export * from '@/src/adapters/permission/supabasePermissionProvider';
+export * from '@/src/adapters/permission/supabase';

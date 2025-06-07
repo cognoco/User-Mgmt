@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { logApiError } from '@/lib/audit/errorLogger'35;
+import { logApiError } from '@/lib/audit/errorLogger';
 
 export interface ErrorEntry {
   id: string;

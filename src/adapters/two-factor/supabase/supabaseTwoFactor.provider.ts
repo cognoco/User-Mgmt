@@ -16,8 +16,8 @@ import type {
   TwoFactorDisableResponse,
   BackupCodesResponse,
   TwoFactorMethodType
-} from '@/core/twoFactor/models'375;
-import type { ITwoFactorDataProvider } from '@/core/twoFactor/ITwoFactorDataProvider'610;
+} from '@/core/twoFactor/models';
+import type { ITwoFactorDataProvider } from '@/core/twoFactor/ITwoFactorDataProvider';
 
 export class SupabaseTwoFactorProvider implements ITwoFactorDataProvider {
   private supabase: SupabaseClient;

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PermissionTestingService } from '@/src/services/permission/permissionTesting.service'60;
+import { PermissionTestingService } from '@/src/services/permission/permissionTesting.service';
 import type { Permission } from '@/core/permission/models';
 
 class FakePermissionService {

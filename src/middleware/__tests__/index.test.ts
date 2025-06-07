@@ -1,7 +1,7 @@
 import { createMocks } from 'node-mocks-http';
 import { combineMiddleware, createApiMiddleware, withSecurity } from '@/middleware/index';
-import { rateLimit } from '@/middleware/rateLimit'140;
-import { securityHeaders } from '@/middleware/securityHeaders'194;
+import { rateLimit } from '@/middleware/rateLimit';
+import { securityHeaders } from '@/middleware/securityHeaders';
 import { cors } from '@/middleware/cors';
 import { csrf } from '@/middleware/csrf';
 import { vi, describe, it, expect, beforeEach } from 'vitest';

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import { PageLoader } from '@/src/ui/primitives/pageLoader'106;
+import { PageLoader } from '@/src/ui/primitives/pageLoader';
 
 describe('PageLoader', () => {
   it('renders spinner and label', () => {

@@ -1,9 +1,9 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render, screen } from '@/tests/testUtils'78;
+import { render, screen } from '@/tests/testUtils';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Header } from '@/src/ui/styled/layout/Header'250;
+import { Header } from '@/src/ui/styled/layout/Header';
 
 let authState: any;
 let logoutMock: any;

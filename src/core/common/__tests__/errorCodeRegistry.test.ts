@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ErrorCodeRegistry, ErrorSeverity } from '@/src/core/common/errorCodeRegistry'60;
+import { ErrorCodeRegistry, ErrorSeverity } from '@/src/core/common/errorCodeRegistry';
 
 describe('ErrorCodeRegistry', () => {
   beforeEach(() => {

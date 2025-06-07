@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { CircuitBreaker } from '@/src/lib/utils/circuitBreaker'52;
+import { CircuitBreaker } from '@/src/lib/utils/circuitBreaker';
 
 describe('CircuitBreaker', () => {
   it('opens after failures and recovers after timeout', async () => {

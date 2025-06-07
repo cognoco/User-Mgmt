@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { queueRequest, processQueue, setRequestExecutor, getQueueLength, clearQueue } from '@/src/lib/offline/requestQueue'64;
-import type { RequestOptions } from '@/src/lib/api/client'176;
+import { queueRequest, processQueue, setRequestExecutor, getQueueLength, clearQueue } from '@/src/lib/offline/requestQueue';
+import type { RequestOptions } from '@/src/lib/api/client';
 
 const flush = () => new Promise(r => setTimeout(r, 0));
 

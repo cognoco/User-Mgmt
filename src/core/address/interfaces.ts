@@ -3,8 +3,8 @@ import {
   AddressCreatePayload,
   AddressUpdatePayload,
   AddressResult,
-} from "@/src/core/address/models"0;
-import type { Address } from "@/src/core/address/types"117;
+} from "@/src/core/address/models";
+import type { Address } from "@/src/core/address/types";
 
 /**
  * Service for managing company level addresses.

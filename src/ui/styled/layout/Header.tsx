@@ -9,11 +9,11 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/ui/primitives/dropdownMenu"287;
+} from "@/ui/primitives/dropdownMenu";
 import {
   Header as HeadlessHeader,
   NavItem,
-} from "@/src/ui/headless/layout/Header"450;
+} from "@/src/ui/headless/layout/Header";
 
 interface HeaderProps {
   type?: "fixed" | "static" | "sticky";

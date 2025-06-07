@@ -1,6 +1,6 @@
 // Application-wide error factory and utilities
-import { VALIDATION_ERROR_CODES, AUTH_ERROR_CODES, SERVER_ERROR_CODES, USER_ERROR_CODES } from '@/lib/api/common/errorCodes'49;
-import type { ErrorCode } from '@/lib/api/common/errorCodes'177;
+import { VALIDATION_ERROR_CODES, AUTH_ERROR_CODES, SERVER_ERROR_CODES, USER_ERROR_CODES } from '@/lib/api/common/errorCodes';
+import type { ErrorCode } from '@/lib/api/common/errorCodes';
 import type { LanguageCode } from '@/lib/i18n';
 import { formatErrorMessage } from '@/lib/i18n/messages';
 

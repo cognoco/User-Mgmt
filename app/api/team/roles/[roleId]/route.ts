@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
 import { createSuccessResponse } from '@/lib/api/common';
 import { RoleDefinition, isRole, RoleType } from '@/lib/rbac/roles';
-import { createRoleNotFoundError } from '@/lib/api/permission/errorHandler'173;
-import { withErrorHandling } from '@/middleware/errorHandling'252;
+import { createRoleNotFoundError } from '@/lib/api/permission/errorHandler';
+import { withErrorHandling } from '@/middleware/errorHandling';
 
 async function handleGet(roleId: string) {
   if (!isRole(roleId)) {

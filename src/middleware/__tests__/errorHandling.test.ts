@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { withErrorHandling } from '@/src/middleware/errorHandling'122;
-import { ApiError } from '@/lib/api/common/apiError'178;
-import { createErrorResponse } from '@/lib/api/common/responseFormatter'234;
-import { logApiError } from '@/lib/audit/errorLogger'310;
+import { withErrorHandling } from '@/src/middleware/errorHandling';
+import { ApiError } from '@/lib/api/common/apiError';
+import { createErrorResponse } from '@/lib/api/common/responseFormatter';
+import { logApiError } from '@/lib/audit/errorLogger';
 
 vi.mock('@/lib/audit/error-logger', () => ({ logApiError: vi.fn() }));
 vi.mock('@/lib/api/common/response-formatter', () => ({

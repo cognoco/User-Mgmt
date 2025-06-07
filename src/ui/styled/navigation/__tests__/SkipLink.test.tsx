@@ -1,5 +1,5 @@
-import { render, screen } from '@/tests/utils/testUtils'0;
-import { SkipLink } from '@/src/ui/styled/navigation/SkipLink'60;
+import { render, screen } from '@/tests/utils/testUtils';
+import { SkipLink } from '@/src/ui/styled/navigation/SkipLink';
 
 describe('SkipLink', () => {
   it('renders an anchor with correct href', () => {

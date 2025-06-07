@@ -5,7 +5,7 @@ import { CompanyDomain } from '@/types/company';
 import { Button } from '@/ui/primitives/button';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/primitives/alert';
 import { api } from '@/lib/api/axios';
-import { useToast } from '@/lib/hooks/useToast'277;
+import { useToast } from '@/lib/hooks/useToast';
 import { CheckCircle, AlertCircle, Loader2, Copy } from 'lucide-react';
 
 interface SingleDomainVerificationProps {

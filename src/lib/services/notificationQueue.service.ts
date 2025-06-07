@@ -1,4 +1,4 @@
-import { NotificationPayload } from '@/src/lib/services/notification.service'0;
+import { NotificationPayload } from '@/src/lib/services/notification.service';
 
 // Queue entry type with metadata for tracking
 interface QueueEntry {

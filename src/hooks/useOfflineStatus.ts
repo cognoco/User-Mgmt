@@ -5,7 +5,7 @@ import {
   subscribeToQueueUpdates,
   unsubscribeFromQueueUpdates,
   verifyConnectivity,
-} from '@/lib/services/offlineQueue.service'46;
+} from '@/lib/services/offlineQueue.service';
 
 function getConnectionQuality(): string {
   const connection = (navigator as any).connection;

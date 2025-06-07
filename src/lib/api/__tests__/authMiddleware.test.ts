@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { createAuthMiddleware } from '@/src/lib/api/authMiddleware'122;
+import { createAuthMiddleware } from '@/src/lib/api/authMiddleware';
 
 const request = new NextRequest('http://test');
 

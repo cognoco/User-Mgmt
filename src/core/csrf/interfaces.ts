@@ -1,4 +1,4 @@
-import { CsrfToken } from "@/src/core/csrf/models"0;
+import { CsrfToken } from "@/src/core/csrf/models";
 
 /**
  * Service responsible for managing CSRF tokens.

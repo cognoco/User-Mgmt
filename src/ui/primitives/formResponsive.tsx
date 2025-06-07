@@ -7,7 +7,7 @@ import {
   FormControl,
   FormDescription,
   FormMessage,
-} from '@/src/ui/primitives/form'123;
+} from '@/src/ui/primitives/form';
 
 interface ResponsiveFormRowProps extends React.HTMLAttributes<HTMLDivElement> {
   label: string;

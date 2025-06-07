@@ -6,8 +6,8 @@ import { SsoService } from '@/core/sso/interfaces';
 import { SsoDataProvider } from '@/core/sso/ISsoDataProvider';
 import { SsoProvider, SsoProviderPayload } from '@/core/sso/models';
 import { translateError } from '@/lib/utils/error';
-import { logServiceError } from '@/services/common/serviceErrorHandler'291;
-import { translateSsoError } from '@/src/services/sso/errorMapper'367;
+import { logServiceError } from '@/services/common/serviceErrorHandler';
+import { translateSsoError } from '@/src/services/sso/errorMapper';
 
 export class DefaultSsoService implements SsoService {
   constructor(private readonly provider: SsoDataProvider) {}

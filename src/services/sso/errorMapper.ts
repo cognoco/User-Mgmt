@@ -1,5 +1,5 @@
 import { createError, ApplicationError, isApplicationError } from '@/core/common/errors';
-import { SSO_ERROR } from '@/core/common/errorCodes'91;
+import { SSO_ERROR } from '@/core/common/errorCodes';
 
 export type SsoAuthStage = 'configuration' | 'discovery' | 'authentication' | 'federation' | 'token';
 

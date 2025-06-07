@@ -6,7 +6,7 @@
  */
 
 import type { IUserDataProvider } from '@/core/user/IUserDataProvider';
-import { SupabaseUserProvider } from '@/src/adapters/user/supabaseUserProvider'278;
+import { SupabaseUserProvider } from '@/src/adapters/user/supabaseUserProvider';
 
 /**
  * Create a Supabase user data provider

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { TwoFactorMethod } from '@/types/2fa';
-import { createApiHandler } from '@/lib/api/routeHelpers'74;
+import { createApiHandler } from '@/lib/api/routeHelpers';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 

@@ -5,11 +5,11 @@
  */
 
 // Export interfaces
-export * from '@/src/core/notification/interfaces'156;
-export * from '@/src/core/notification/INotificationDataProvider'187;
+export * from '@/src/core/notification/interfaces';
+export * from '@/src/core/notification/INotificationDataProvider';
 
 // Export models
-export * from '@/src/core/notification/models'253;
+export * from '@/src/core/notification/models';
 
 // Export events
-export * from '@/src/core/notification/events'300;
+export * from '@/src/core/notification/events';

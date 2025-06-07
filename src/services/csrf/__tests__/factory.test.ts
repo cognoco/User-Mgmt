@@ -4,7 +4,7 @@ import { UserManagementConfiguration } from '@/core/config';
 import {
   configureServices,
   resetServiceContainer
-} from '@/lib/config/serviceContainer'182;
+} from '@/lib/config/serviceContainer';
 
 let getApiCsrfService: typeof import('@/src/services/csrf/factory').getApiCsrfService;
 let DefaultCsrfService: typeof import('@/src/services/csrf/defaultCsrf.service').DefaultCsrfService;

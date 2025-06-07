@@ -1,5 +1,5 @@
 // AccountSwitcher API abstraction for Supabase (easy to swap for other backends)
-import { supabase } from '@/src/lib/supabase'83;
+import { supabase } from '@/src/lib/supabase';
 
 // Types
 export interface Account {

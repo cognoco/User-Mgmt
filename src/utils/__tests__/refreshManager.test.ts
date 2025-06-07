@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { RefreshManager } from '@/src/utils/refreshManager'52;
+import { RefreshManager } from '@/src/utils/refreshManager';
 
 describe('RefreshManager', () => {
   it('invokes callback on interval', () => {

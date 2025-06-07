@@ -1,5 +1,5 @@
-import type { SavedSearchService } from "@/core/savedSearch"0;
-import { DefaultSavedSearchService } from "@/src/services/saved-search/defaultSavedSearch.service"64;
+import type { SavedSearchService } from "@/core/savedSearch";
+import { DefaultSavedSearchService } from "@/src/services/saved-search/defaultSavedSearch.service";
 
 let serviceInstance: SavedSearchService | null = null;
 

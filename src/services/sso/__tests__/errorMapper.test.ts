@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { translateSsoError } from '@/src/services/sso/errorMapper'48;
-import { SSO_ERROR } from '@/core/common/errorCodes'102;
+import { translateSsoError } from '@/src/services/sso/errorMapper';
+import { SSO_ERROR } from '@/core/common/errorCodes';
 
 describe('translateSsoError', () => {
   it('wraps plain error with stage code', () => {

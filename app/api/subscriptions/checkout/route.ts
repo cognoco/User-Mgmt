@@ -8,7 +8,7 @@ import {
   ApiError,
   ERROR_CODES,
 } from '@/lib/api/common';
-import { checkRateLimit } from '@/middleware/rateLimit'275;
+import { checkRateLimit } from '@/middleware/rateLimit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 
 const bodySchema = z.object({ plan: z.string() });

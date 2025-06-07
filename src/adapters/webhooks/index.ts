@@ -5,5 +5,5 @@
  */
 
 export type { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
-export * from '@/src/adapters/webhooks/factory'184;
-export * from '@/src/adapters/webhooks/supabase'212;
+export * from '@/src/adapters/webhooks/factory';
+export * from '@/src/adapters/webhooks/supabase';

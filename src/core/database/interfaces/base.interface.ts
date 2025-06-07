@@ -16,7 +16,7 @@ import type {
   QueryResult,
   TransactionInterface,
   DatabaseError
-} from '@/src/core/database/interfaces/index'468;
+} from '@/src/core/database/interfaces/index';
 
 export interface BaseDatabaseInterface<T> {
   /** Connect to the underlying database */

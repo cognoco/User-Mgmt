@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import compliance from '@/config/compliance.config'57;
+import compliance from '@/config/compliance.config';
 
 export const up = async (client: SupabaseClient) => {
   await client.rpc('exec', {

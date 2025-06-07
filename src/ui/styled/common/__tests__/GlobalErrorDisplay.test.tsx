@@ -1,8 +1,8 @@
-import { render, screen } from '@/tests/utils/testUtils'0;
+import { render, screen } from '@/tests/utils/testUtils';
 import userEvent from '@testing-library/user-event';
 import { act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GlobalErrorDisplay } from '@/src/ui/styled/common/GlobalErrorDisplay'225;
+import { GlobalErrorDisplay } from '@/src/ui/styled/common/GlobalErrorDisplay';
 import { useErrorStore } from '@/lib/state/errorStore';
 
 describe('GlobalErrorDisplay', () => {

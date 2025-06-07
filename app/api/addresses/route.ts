@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'44;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import { addressSchema } from '@/core/address/validation';
 import {
   createSuccessResponse,

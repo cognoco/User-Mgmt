@@ -3,7 +3,7 @@
 import { AuditLogViewer } from '@/ui/styled/audit/AuditLogViewer';
 import {
   AdminAuditLogs as HeadlessAdminAuditLogs,
-} from '@/ui/headless/admin/auditLogs/AdminAuditLogs'85;
+} from '@/ui/headless/admin/auditLogs/AdminAuditLogs';
 
 export function AdminAuditLogs() {
   return (

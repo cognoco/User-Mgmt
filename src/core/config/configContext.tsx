@@ -1,7 +1,7 @@
 'use client';
 import React, { createContext, useContext } from 'react';
-import type { UserManagementConfig } from '@/src/core/config/interfaces'74;
-import { DEFAULT_CONFIG } from '@/src/core/config/interfaces'133;
+import type { UserManagementConfig } from '@/src/core/config/interfaces';
+import { DEFAULT_CONFIG } from '@/src/core/config/interfaces';
 
 const ConfigContext = createContext<UserManagementConfig>(DEFAULT_CONFIG);
 

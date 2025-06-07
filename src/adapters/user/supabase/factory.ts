@@ -4,8 +4,8 @@
  * This file implements a factory for creating Supabase user adapters.
  */
 
-import { IUserDataProvider as UserDataProvider } from '@/src/core/user/IUserDataProvider'123;
-import { SupabaseUserProvider } from '@/src/adapters/user/supabaseUserProvider'218;
+import { IUserDataProvider as UserDataProvider } from '@/src/core/user/IUserDataProvider';
+import { SupabaseUserProvider } from '@/src/adapters/user/supabaseUserProvider';
 
 /**
  * Create a Supabase user data provider

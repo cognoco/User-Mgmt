@@ -1,4 +1,4 @@
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'0;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 
 async function handleDelete(_req: Request, auth: AuthContext, _data: unknown, services: ServiceContainer, id: string) {

@@ -1,1 +1,1 @@
-export * from '@/src/adapters/csrf/supabase/supabaseCsrf.provider'0;
+export * from '@/src/adapters/csrf/supabase/supabaseCsrf.provider';

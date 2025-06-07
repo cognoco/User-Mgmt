@@ -10,7 +10,7 @@ import type {
   WebhookCreatePayload,
   WebhookUpdatePayload,
   WebhookDelivery,
-} from "@/src/core/webhooks/models"243;
+} from "@/src/core/webhooks/models";
 
 export interface IWebhookService {
   /** Create a new webhook for the given user */

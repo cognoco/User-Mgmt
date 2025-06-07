@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createApiHandler } from '@/lib/api/routeHelpers'26;
+import { createApiHandler } from '@/lib/api/routeHelpers';
 import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 
 const updateSchema = z.object({

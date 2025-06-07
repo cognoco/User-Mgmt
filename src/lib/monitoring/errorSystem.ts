@@ -1,6 +1,6 @@
 import { ErrorReporter } from '@/lib/telemetry';
-import { errorLogger } from '@/src/lib/monitoring/errorLogger'50;
-import { Telemetry } from '@/src/lib/monitoring/telemetry'97;
+import { errorLogger } from '@/src/lib/monitoring/errorLogger';
+import { Telemetry } from '@/src/lib/monitoring/telemetry';
 
 let initialized = false;
 const telemetry = new Telemetry();

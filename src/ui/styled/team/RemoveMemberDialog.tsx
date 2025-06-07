@@ -6,7 +6,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle
-} from '@/ui/primitives/alertDialog'0;
+} from '@/ui/primitives/alertDialog';
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import {

@@ -6,7 +6,7 @@ import {
   ApiError,
   ERROR_CODES
 } from '@/lib/api/common';
-import { createApiHandler } from '@/lib/api/routeHelpers'227;
+import { createApiHandler } from '@/lib/api/routeHelpers';
 
 const emptySchema = z.object({});
 

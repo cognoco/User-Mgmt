@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
-import { EmailParams, EmailProviderOptions, EmailProviderResponse } from '@/src/lib/email/types'38;
-import { sendViaSendGrid } from '@/src/lib/email/sendViaSendGrid'123;
+import { EmailParams, EmailProviderOptions, EmailProviderResponse } from '@/src/lib/email/types';
+import { sendViaSendGrid } from '@/src/lib/email/sendViaSendGrid';
 
 export async function sendEmail({ to, subject, html, options }: EmailParams): Promise<EmailProviderResponse> {
   const provider = options?.provider || process.env.EMAIL_PROVIDER || 'nodemailer';

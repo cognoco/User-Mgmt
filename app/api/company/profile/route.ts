@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getApiCompanyService } from "@/services/company/factory";
-import { createApiHandler, emptySchema } from "@/lib/api/routeHelpers"152;
+import { createApiHandler, emptySchema } from "@/lib/api/routeHelpers";
 import { createSuccessResponse } from "@/lib/api/common";
 import { logUserAction } from "@/lib/audit/auditLogger";
 import { type RouteAuthContext } from "@/middleware/auth";
-import { withSecurity } from "@/middleware/withSecurity"403;
-import { checkRateLimit } from "@/middleware/rateLimit"463;
+import { withSecurity } from "@/middleware/withSecurity";
+import { checkRateLimit } from "@/middleware/rateLimit";
 import { PermissionValues } from "@/types/rbac";
 import { companyProfileUpdateSchema } from "@/lib/schemas/profile.schema";
 

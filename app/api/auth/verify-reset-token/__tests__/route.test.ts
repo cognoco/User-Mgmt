@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '@/app/api/auth/verify-reset-token/route'64;
+import { POST } from '@/app/api/auth/verify-reset-token/route';
 import { getApiAuthService } from '@/services/auth/factory';
-import { withAuthRateLimit } from '@/middleware/withAuthRateLimit'160;
-import { withSecurity } from '@/middleware/withSecurity'232;
+import { withAuthRateLimit } from '@/middleware/withAuthRateLimit';
+import { withSecurity } from '@/middleware/withSecurity';
 
 vi.mock('@/services/auth/factory', () => ({ getApiAuthService: vi.fn() }));
 vi.mock('@/middleware/with-auth-rate-limit', () => ({

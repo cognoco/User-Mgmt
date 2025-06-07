@@ -1,4 +1,4 @@
-import { PaginationMeta } from '@/lib/api/common/responseFormatter'0;
+import { PaginationMeta } from '@/lib/api/common/responseFormatter';
 
 export interface ListUsersParams {
   page: number;

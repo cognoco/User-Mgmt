@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DefaultMFAHandler } from '@/src/services/auth/mfaHandler'64;
+import { DefaultMFAHandler } from '@/src/services/auth/mfaHandler';
 import { authenticator, hotp } from 'otplib';
 
 function generateTOTPToken(secret: string, time: number = Date.now()) {

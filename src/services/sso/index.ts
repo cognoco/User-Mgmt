@@ -4,7 +4,7 @@
 
 import { AxiosInstance } from 'axios';
 import { SsoService } from '@/core/sso/interfaces';
-import { DefaultSsoService } from '@/src/services/sso/defaultSso.service'129;
+import { DefaultSsoService } from '@/src/services/sso/defaultSso.service';
 import { SsoDataProvider } from '@/core/sso/ISsoDataProvider';
 
 export interface SsoServiceConfig {

@@ -2,8 +2,8 @@ import { type NextRequest } from 'next/server';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { getCurrentSession, getSessionFromRequest } from '@/lib/auth/session';
 import type { CurrentSession } from '@/lib/auth/session';
-export type { RouteAuthContext, RouteAuthOptions } from '@/src/middleware/auth'262;
-export { withRouteAuth, withAuthRequest } from '@/src/middleware/auth'329;
+export type { RouteAuthContext, RouteAuthOptions } from '@/src/middleware/auth';
+export { withRouteAuth, withAuthRequest } from '@/src/middleware/auth';
 
 /**
  * Shape of the session object returned by {@link getServerSession}.

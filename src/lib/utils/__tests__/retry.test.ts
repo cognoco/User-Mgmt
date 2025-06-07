@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { withRetry } from '@/src/lib/utils/retry'52;
+import { withRetry } from '@/src/lib/utils/retry';
 
 function createFlakyTask(failures: number) {
   let attempts = 0;

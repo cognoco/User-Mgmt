@@ -17,7 +17,7 @@ import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { usePreferencesStore, type PreferencesState } from '@/lib/stores/preferences.store';
 import { api } from '@/lib/api/axios';
 import { UserManagementConfiguration } from '@/core/config';
-import { createMockNotificationService } from '@/src/tests/mocks/notification.service.mock'863;
+import { createMockNotificationService } from '@/src/tests/mocks/notification.service.mock';
 
 // Import our standardized mock
 import { NotificationCenter } from '@/ui/styled/common/NotificationCenter';

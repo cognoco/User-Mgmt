@@ -1,7 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
 import type { ListUsersParams, SearchUsersParams } from '@/core/admin/interfaces';
-import type { PaginationMeta } from '@/lib/api/common/responseFormatter'231;
+import type { PaginationMeta } from '@/lib/api/common/responseFormatter';
 import type { UserProfile } from '@/core/user/models';
 
 export class SupabaseAdminProvider implements IAdminDataProvider {

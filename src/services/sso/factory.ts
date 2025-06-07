@@ -8,8 +8,8 @@
 import { SsoService } from '@/core/sso/interfaces';
 import type { ISsoDataProvider } from '@/core/sso';
 import { AdapterRegistry } from '@/adapters/registry';
-import { DefaultSsoService } from '@/src/services/sso/defaultSso.service'399;
-import { getServiceContainer, getServiceConfiguration } from '@/lib/config/serviceContainer'459;
+import { DefaultSsoService } from '@/src/services/sso/defaultSso.service';
+import { getServiceContainer, getServiceConfiguration } from '@/lib/config/serviceContainer';
 
 export interface ApiSsoServiceOptions {
   /** Reset the cached instance for testing */

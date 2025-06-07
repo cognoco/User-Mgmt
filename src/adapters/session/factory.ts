@@ -3,7 +3,7 @@
  */
 
 import type { ISessionDataProvider } from '@/core/session/ISessionDataProvider';
-import { SupabaseSessionProvider } from '@/src/adapters/session/supabaseAdapter'128;
+import { SupabaseSessionProvider } from '@/src/adapters/session/supabaseAdapter';
 
 export function createSupabaseSessionProvider(options: {
   supabaseUrl: string;

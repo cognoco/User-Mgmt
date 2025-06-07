@@ -1,1 +1,1 @@
-export * from '@/src/adapters/consent/supabase/supabaseConsent.provider'0;
+export * from '@/src/adapters/consent/supabase/supabaseConsent.provider';

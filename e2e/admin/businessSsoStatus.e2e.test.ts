@@ -1,7 +1,7 @@
 import { test, expect, Page } from '@playwright/test';
 import * as dotenv from 'dotenv';
 import path from 'path';
-import { loginAs } from '@/e2e/utils/auth'117;
+import { loginAs } from '@/e2e/utils/auth';
 
 // Load environment variables from the root .env file
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });

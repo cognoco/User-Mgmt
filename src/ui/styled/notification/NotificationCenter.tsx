@@ -4,7 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/ui/primitives/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
 import { Button } from '@/ui/primitives/button';
 import { Badge } from '@/ui/primitives/badge';
-import { ScrollArea } from '@/ui/primitives/scrollArea'416;
+import { ScrollArea } from '@/ui/primitives/scrollArea';
 import { Separator } from '@/ui/primitives/separator';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';

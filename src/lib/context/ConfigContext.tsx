@@ -1,6 +1,6 @@
 'use client';
 import React, { createContext, useContext, ReactNode } from 'react';
-import { RuntimeConfig, getClientConfig } from '@/core/config/runtimeConfig'85;
+import { RuntimeConfig, getClientConfig } from '@/core/config/runtimeConfig';
 
 const ConfigContext = createContext<RuntimeConfig>(getClientConfig());
 

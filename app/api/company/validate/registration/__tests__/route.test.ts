@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '@/app/api/company/validate/registration/route'64;
+import { POST } from '@/app/api/company/validate/registration/route';
 import { getApiCompanyService } from '@/services/company/factory';
-import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'166;
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers';
 
 vi.mock('@/services/company/factory', () => ({
   getApiCompanyService: vi.fn(),

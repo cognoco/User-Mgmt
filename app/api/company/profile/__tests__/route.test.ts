@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextResponse } from 'next/server';
-import { POST, GET } from '@/app/api/company/profile/route'109;
+import { POST, GET } from '@/app/api/company/profile/route';
 import { getApiCompanyService } from '@/services/company/factory';
 import { withRouteAuth } from '@/middleware/auth';
-import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'268;
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers';
 
 vi.mock('@/services/company/factory', () => ({
   getApiCompanyService: vi.fn(),

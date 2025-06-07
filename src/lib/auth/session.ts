@@ -6,8 +6,8 @@ import { createServerClient } from '@supabase/ssr';
 import type { NextRequest } from 'next/server';
 import type { Session } from '@supabase/supabase-js';
 import { getApiAuthService } from '@/services/auth/factory';
-import { authConfig, isProduction } from '@/src/lib/auth/config'341;
-import { extractAuthToken, validateAuthToken } from '@/src/lib/auth/utils'395;
+import { authConfig, isProduction } from '@/src/lib/auth/config';
+import { extractAuthToken, validateAuthToken } from '@/src/lib/auth/utils';
 
 /**
  * Shape of the session object returned by helpers in this module.

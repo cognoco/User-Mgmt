@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useIsMobile } from '@/lib/utils/responsive';
-import { TeamMemberManager as HeadlessTeamMemberManager, TeamMemberManagerProps } from '@/src/ui/headless/team/TeamMemberManager'333;
+import { TeamMemberManager as HeadlessTeamMemberManager, TeamMemberManagerProps } from '@/src/ui/headless/team/TeamMemberManager';
 import { Button } from '@/ui/primitives/button';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/ui/primitives/card';

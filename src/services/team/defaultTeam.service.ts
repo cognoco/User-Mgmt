@@ -25,11 +25,11 @@ import {
 import { TeamEventType } from '@/core/team/events';
 import type { TeamDataProvider } from '@/core/team/ITeamDataProvider';
 import { translateError } from '@/lib/utils/error';
-import { TypedEventEmitter } from '@/lib/utils/typedEventEmitter'735;
+import { TypedEventEmitter } from '@/lib/utils/typedEventEmitter';
 import { MemoryCache } from '@/lib/cache';
 import { prisma } from '@/lib/database/prisma';
-import { handleServiceError } from '@/services/common/serviceErrorHandler'898;
-import { ERROR_CODES } from '@/core/common/errorCodes'977;
+import { handleServiceError } from '@/services/common/serviceErrorHandler';
+import { ERROR_CODES } from '@/core/common/errorCodes';
 
 /**
  * Default implementation of the TeamService interface

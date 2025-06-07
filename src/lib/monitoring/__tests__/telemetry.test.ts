@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Telemetry, AlertNotifier } from '@/src/lib/monitoring/telemetry'64;
+import { Telemetry, AlertNotifier } from '@/src/lib/monitoring/telemetry';
 
 class TestNotifier implements AlertNotifier {
   public alerts: any[] = [];

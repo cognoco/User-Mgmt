@@ -3,7 +3,7 @@ import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Select, SelectItem } from '@/ui/primitives/select';
-import { UserRoleAssigner, UserRoleAssignerProps } from '@/src/ui/headless/admin/UserRoleAssigner'284;
+import { UserRoleAssigner, UserRoleAssignerProps } from '@/src/ui/headless/admin/UserRoleAssigner';
 
 export function UserRoleAssignerStyled(props: Omit<UserRoleAssignerProps, 'render'> & { title?: string }) {
   const [query, setQuery] = useState('');

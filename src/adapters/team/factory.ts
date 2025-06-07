@@ -6,7 +6,7 @@
  */
 
 import type { ITeamDataProvider } from '@/core/team/ITeamDataProvider';
-import { SupabaseTeamProvider } from '@/src/adapters/team/supabaseTeamProvider'278;
+import { SupabaseTeamProvider } from '@/src/adapters/team/supabaseTeamProvider';
 
 /**
  * Create a Supabase team data provider

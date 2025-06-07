@@ -2,7 +2,7 @@
 import '@/lib/i18n';
 
 import { useEffect } from 'react';
-import { toast } from '@/ui/primitives/useToast'75;
+import { toast } from '@/ui/primitives/useToast';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { Skeleton } from '@/ui/primitives/skeleton';

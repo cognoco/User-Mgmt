@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import TeamManagementPageClient from '@/app/teams/manage/ClientPage'34;
+import TeamManagementPageClient from '@/app/teams/manage/ClientPage';
 
 export const metadata: Metadata = {
   title: 'Team Management',

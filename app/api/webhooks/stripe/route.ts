@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/payments/stripe";
 import { getApiSubscriptionService } from "@/services/subscription/factory";
-import { checkRateLimit } from '@/middleware/rateLimit'185;
+import { checkRateLimit } from '@/middleware/rateLimit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { ApiError, ERROR_CODES } from '@/lib/api/common';
 import type Stripe from "stripe";

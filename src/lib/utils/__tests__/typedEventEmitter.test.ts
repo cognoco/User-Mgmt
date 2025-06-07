@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { TypedEventEmitter } from '@/src/lib/utils/typedEventEmitter'48;
+import { TypedEventEmitter } from '@/src/lib/utils/typedEventEmitter';
 
 interface TestEvent {
   type: 'a' | 'b';

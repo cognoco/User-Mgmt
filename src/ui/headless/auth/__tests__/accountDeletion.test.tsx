@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { render, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AccountDeletion } from '@/src/ui/headless/auth/AccountDeletion'149;
-import { UserType } from '@/types/userType'204;
+import { AccountDeletion } from '@/src/ui/headless/auth/AccountDeletion';
+import { UserType } from '@/types/userType';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useTeams } from '@/hooks/team/useTeams';
 import { useSubscriptionStore } from '@/lib/stores/subscription.store';

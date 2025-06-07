@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET } from '@/app/api/permissions/categories/route'64;
-import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer'97;
+import { GET } from '@/app/api/permissions/categories/route';
+import { configureServices, resetServiceContainer } from '@/lib/config/serviceContainer';
 import type { PermissionService } from '@/core/permission/interfaces';
 import type { AuthService } from '@/core/auth/interfaces';
-import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers'321;
+import { createAuthenticatedRequest } from '@/tests/utils/requestHelpers';
 
 const mockPermission: Partial<PermissionService> = { getAllPermissions: vi.fn() };
 const mockAuth: Partial<AuthService> = { getCurrentUser: vi.fn().mockResolvedValue({ id: 'u1' }) };

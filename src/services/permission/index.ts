@@ -6,9 +6,9 @@
  */
 
 import { PermissionService } from '@/core/permission/interfaces';
-import { DefaultPermissionService } from '@/src/services/permission/defaultPermission.service'293;
-export { ApiPermissionService, getApiPermissionService } from '@/src/services/permission/apiPermission.service'393;
-export { ResourcePermissionResolver } from '@/lib/services/resourcePermissionResolver.service'484;
+import { DefaultPermissionService } from '@/src/services/permission/defaultPermission.service';
+export { ApiPermissionService, getApiPermissionService } from '@/src/services/permission/apiPermission.service';
+export { ResourcePermissionResolver } from '@/lib/services/resourcePermissionResolver.service';
 import type { PermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
 
 /**

@@ -1,2 +1,2 @@
-export * from '@/lib/hooks/useToast'0;
+export * from '@/lib/hooks/useToast';
 

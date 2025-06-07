@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withRouteAuth, type RouteAuthContext } from '@/src/middleware/auth'58;
-import { checkRateLimit } from '@/src/middleware/rateLimit'122;
+import { withRouteAuth, type RouteAuthContext } from '@/src/middleware/auth';
+import { checkRateLimit } from '@/src/middleware/rateLimit';
 import { ApiError, ERROR_CODES } from '@/lib/api/common';
-import { createErrorResponse } from '@/lib/api/common/responseFormatter'229;
+import { createErrorResponse } from '@/lib/api/common/responseFormatter';
 
 export interface ProtectedRouteOptions {
   skipRateLimit?: boolean;

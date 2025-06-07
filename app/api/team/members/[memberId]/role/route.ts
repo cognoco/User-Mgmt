@@ -4,10 +4,10 @@ import { prisma } from '@/lib/database/prisma';
 import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
-import { withErrorHandling } from '@/middleware/errorHandling'339;
+import { withErrorHandling } from '@/middleware/errorHandling';
 import { withValidation } from '@/middleware/validation';
-import { createTeamMemberNotFoundError } from '@/lib/api/team/errorHandler'464;
-import { withSecurity } from '@/middleware/withSecurity'543;
+import { createTeamMemberNotFoundError } from '@/lib/api/team/errorHandler';
+import { withSecurity } from '@/middleware/withSecurity';
 
 const updateRoleSchema = z.object({
   role: z.enum(['admin', 'member', 'viewer']),

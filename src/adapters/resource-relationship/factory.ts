@@ -1,5 +1,5 @@
-import type { IResourceRelationshipDataProvider } from '@/core/resourceRelationship/IResourceRelationshipDataProvider'0;
-import { SupabaseResourceRelationshipProvider } from '@/src/adapters/resource-relationship/supabase/supabaseResourceRelationship.provider'122;
+import type { IResourceRelationshipDataProvider } from '@/core/resourceRelationship/IResourceRelationshipDataProvider';
+import { SupabaseResourceRelationshipProvider } from '@/src/adapters/resource-relationship/supabase/supabaseResourceRelationship.provider';
 
 export function createSupabaseResourceRelationshipProvider(options: {
   supabaseUrl: string;

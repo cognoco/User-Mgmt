@@ -7,7 +7,7 @@ import { Input } from '@/ui/primitives/input';
 import { Checkbox } from '@/ui/primitives/checkbox';
 import { Label } from '@/ui/primitives/label';
 import { Alert, AlertTitle, AlertDescription } from '@/ui/primitives/alert';
-import { OAuthButtons } from '@/src/ui/styled/auth/OAuthButtons'379;
+import { OAuthButtons } from '@/src/ui/styled/auth/OAuthButtons';
 import { ErrorBoundary, DefaultErrorFallback } from '@/ui/styled/common/ErrorBoundary';
 import Link from 'next/link';
 import { Spinner } from '@/ui/primitives/spinner';

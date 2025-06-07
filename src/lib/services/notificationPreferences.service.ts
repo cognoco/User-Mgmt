@@ -1,4 +1,4 @@
-import { notificationService } from '@/src/lib/services/notification.service'0;
+import { notificationService } from '@/src/lib/services/notification.service';
 import { usePreferencesStore } from '@/lib/stores/preferences.store';
 
 /**

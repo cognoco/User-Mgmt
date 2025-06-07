@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { NextRequest } from 'next/server';
-import { createApiHandler } from '@/lib/api/routeHelpers'70;
+import { createApiHandler } from '@/lib/api/routeHelpers';
 import { createSuccessResponse } from '@/lib/api/common';
 
 const CompanySchema = z.object({ companyName: z.string() });

@@ -14,7 +14,7 @@ import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { KeyRound, AlertCircle, CheckCircle, Upload } from 'lucide-react';
 import { useOrgSsoConfig } from '@/hooks/sso/useOrgSsoConfig';
 import { Skeleton } from '@/ui/primitives/skeleton';
-import { CopyButton } from '@/ui/primitives/copyButton'889; // Assuming you have this component
+import { CopyButton } from '@/ui/primitives/copyButton'; // Assuming you have this component
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/primitives/tabs';
 import { isValidUrl } from '@/lib/utils'; // Assuming a utility function to validate URLs
 

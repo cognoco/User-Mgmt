@@ -1,12 +1,12 @@
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 
-import { createApiHandler } from '@/lib/api/routeHelpers'77;
+import { createApiHandler } from '@/lib/api/routeHelpers';
 import { createSuccessResponse } from '@/lib/api/common';
 import {
   createPermissionNotFoundError,
   mapPermissionServiceError,
-} from '@/lib/api/permission/errorHandler'197;
+} from '@/lib/api/permission/errorHandler';
 import { isPermission, Permission } from '@/lib/rbac/roles';
 
 const querySchema = z.object({

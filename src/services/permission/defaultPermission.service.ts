@@ -24,12 +24,12 @@ import {
 } from "@/core/permission/events";
 import type { PermissionDataProvider } from "@/core/permission/IPermissionDataProvider";
 import { translateError } from "@/lib/utils/error";
-import { TypedEventEmitter } from "@/lib/utils/typedEventEmitter"792;
-import { permissionCacheService } from '@/src/services/permission/permissionCache.service'862;
+import { TypedEventEmitter } from "@/lib/utils/typedEventEmitter";
+import { permissionCacheService } from '@/src/services/permission/permissionCache.service';
 import { RoleService } from '@/services/role';
-import { ResourcePermissionResolver } from '@/lib/services/resourcePermissionResolver.service'980;
+import { ResourcePermissionResolver } from '@/lib/services/resourcePermissionResolver.service';
 import { logPermissionChange } from '@/lib/audit/permissionAuditLogger';
-import { PermissionPolicyService } from '@/lib/services/permissionPolicy.service'1153;
+import { PermissionPolicyService } from '@/lib/services/permissionPolicy.service';
 
 /**
  * Default implementation of the PermissionService interface

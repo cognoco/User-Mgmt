@@ -12,7 +12,7 @@ import { api } from "@/lib/api/axios";
 import { createAuthService } from "@/services/auth";
 import { createUserService } from "@/services/user";
 // Import API-based team service for client use
-import { getApiTeamService } from "@/services/team/apiTeam.service"494; // client-safe
+import { getApiTeamService } from "@/services/team/apiTeam.service"; // client-safe
 // Do NOT import Prisma-based createTeamService at the top level!
 import { createPermissionService } from "@/services/permission";
 import { createWebhookService } from "@/services/webhooks";
@@ -25,7 +25,7 @@ import { createSupabaseTeamProvider } from "@/adapters/team";
 import { createSupabasePermissionProvider } from "@/adapters/permission";
 import { createSupabaseWebhookProvider } from "@/adapters/webhooks";
 import { AdapterRegistry } from '@/adapters/registry';
-import SupabaseCsrfProvider from '@/adapters/csrf/supabase/supabaseCsrf.provider'1197;
+import SupabaseCsrfProvider from '@/adapters/csrf/supabase/supabaseCsrf.provider';
 
 // Initialize the application
 export function initializeApp() {

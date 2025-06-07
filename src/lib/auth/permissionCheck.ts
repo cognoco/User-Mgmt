@@ -1,5 +1,5 @@
 import { getApiPermissionService } from '@/services/permission/factory';
-import { permissionCheckCache } from '@/lib/auth/permissionCache'74;
+import { permissionCheckCache } from '@/lib/auth/permissionCache';
 import type { Permission } from '@/core/permission/models';
 
 /**

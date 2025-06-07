@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ResourceRelationshipService } from '@/src/lib/services/resourceRelationship.service'64;
+import { ResourceRelationshipService } from '@/src/lib/services/resourceRelationship.service';
 import {
   EntityConsistencyError,
   RelationshipHierarchyError,
   PartialRelationshipError,
 } from '@/core/common/errors';
-import { permissionCacheService } from '@/services/permission/permissionCache.service'274;
+import { permissionCacheService } from '@/services/permission/permissionCache.service';
 
 vi.mock('@/services/permission/permission-cache.service', () => ({
   permissionCacheService: { clearResource: vi.fn() },

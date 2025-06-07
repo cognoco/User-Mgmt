@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { POST } from '@/app/api/auth/verify-email/route'108;
+import { POST } from '@/app/api/auth/verify-email/route';
 
 // Mock the service container to avoid circular dependencies
 vi.mock('@/lib/config/service-container', () => ({

@@ -1,1 +1,1 @@
-export { MockRepository } from '@/src/adapters/database/mock/mockRepository'0;
+export { MockRepository } from '@/src/adapters/database/mock/mockRepository';

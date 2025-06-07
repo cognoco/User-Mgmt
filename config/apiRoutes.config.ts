@@ -1,4 +1,4 @@
-import type { MiddlewareConfig } from '@/src/lib/schemas/middlewareConfig.schema'0;
+import type { MiddlewareConfig } from '@/src/lib/schemas/middlewareConfig.schema';
 
 export type ApiRouteType = 'public' | 'protected';
 

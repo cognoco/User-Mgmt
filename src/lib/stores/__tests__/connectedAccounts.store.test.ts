@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
-import { useConnectedAccountsStore } from '@/src/lib/stores/connectedAccounts.store'70;
-import { api } from '@/src/lib/api/axios'144;
-import { ConnectedAccount, ConnectedAccountsState } from '@/types/connectedAccounts'184;
+import { useConnectedAccountsStore } from '@/src/lib/stores/connectedAccounts.store';
+import { api } from '@/src/lib/api/axios';
+import { ConnectedAccount, ConnectedAccountsState } from '@/types/connectedAccounts';
 import { act } from '@testing-library/react';
 import { OAuthProvider } from '@/types/oauth';
 

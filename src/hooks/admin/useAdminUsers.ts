@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { useApi } from '@/hooks/core/useApi';
-import { useRealtimeUserSearch } from '@/src/hooks/admin/useRealtimeUserSearch'103;
+import { useRealtimeUserSearch } from '@/src/hooks/admin/useRealtimeUserSearch';
 
 interface SearchParams {
   query?: string;

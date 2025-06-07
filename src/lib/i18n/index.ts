@@ -1,9 +1,9 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import enTranslations from '@/src/lib/i18n/locales/en'80;
+import enTranslations from '@/src/lib/i18n/locales/en';
 // TODO: migrate es and fr to .ts and import here
-// import esTranslations from '@/src/lib/i18n/locales/es'162;
-// import frTranslations from '@/src/lib/i18n/locales/fr'225;
+// import esTranslations from '@/src/lib/i18n/locales/es';
+// import frTranslations from '@/src/lib/i18n/locales/fr';
 const esTranslations = {};
 const frTranslations = {};
 

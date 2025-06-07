@@ -5,7 +5,7 @@
  * This module provides error handling specific to authentication and authorization.
  */
 
-import { ApiError, ERROR_CODES } from '@/src/lib/api/common'185;
+import { ApiError, ERROR_CODES } from '@/src/lib/api/common';
 
 /**
  * Create an invalid credentials error

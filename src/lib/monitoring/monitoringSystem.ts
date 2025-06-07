@@ -1,6 +1,6 @@
 // Monitoring system integration for error aggregation and alerting
-import { telemetry } from '@/src/lib/monitoring/errorSystem'69;
-import { AlertManager, AlertRule } from '@/lib/telemetry/alertManager'114;
+import { telemetry } from '@/src/lib/monitoring/errorSystem';
+import { AlertManager, AlertRule } from '@/lib/telemetry/alertManager';
 import { ApplicationError } from '@/core/common/errors';
 
 let initialized = false;

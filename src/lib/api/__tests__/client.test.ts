@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { OfflineError } from '@/src/lib/api/client'64;
-import * as detector from '@/src/lib/offline/networkDetector'112;
-import * as queue from '@/src/lib/offline/requestQueue'173;
+import type { OfflineError } from '@/src/lib/api/client';
+import * as detector from '@/src/lib/offline/networkDetector';
+import * as queue from '@/src/lib/offline/requestQueue';
 
 vi.mock('../axios', () => ({ api: { request: vi.fn() } }));
 

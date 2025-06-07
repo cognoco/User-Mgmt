@@ -1,5 +1,5 @@
 import { PlanSelector as HeadlessPlanSelector, type PlanSelectorProps } from '@/ui/headless/subscription/PlanSelector';
-import { PlanCard } from '@/src/ui/styled/subscription/PlanCard'121;
+import { PlanCard } from '@/src/ui/styled/subscription/PlanCard';
 import { Alert } from '@/ui/primitives/alert';
 
 export type StyledPlanSelectorProps = Omit<PlanSelectorProps, 'render'>;

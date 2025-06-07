@@ -17,9 +17,9 @@ import type { PermissionService } from '@/core/permission/interfaces';
 import type { TeamService } from '@/core/team/interfaces';
 import type { SsoService } from '@/core/sso/interfaces';
 import type { GdprService } from '@/core/gdpr/interfaces';
-import type { TwoFactorService } from '@/core/twoFactor/interfaces'749;
+import type { TwoFactorService } from '@/core/twoFactor/interfaces';
 import type { SubscriptionService } from '@/core/subscription/interfaces';
-import type { ApiKeyService } from '@/core/apiKeys/interfaces'896;
+import type { ApiKeyService } from '@/core/apiKeys/interfaces';
 import type { NotificationService } from '@/core/notification/interfaces';
 import type { IWebhookService } from '@/core/webhooks/interfaces';
 import type { SessionService } from '@/core/session/interfaces';
@@ -30,7 +30,7 @@ import type { AuditService } from '@/core/audit/interfaces';
 import type { AdminService } from '@/core/admin/interfaces';
 import type { RoleService } from '@/core/role/interfaces';
 import type { CompanyAddressService } from '@/core/address/interfaces';
-import type { ResourceRelationshipService } from '@/core/resourceRelationship/interfaces'1631;
+import type { ResourceRelationshipService } from '@/core/resourceRelationship/interfaces';
 import type { OAuthService } from '@/core/oauth/interfaces';
 
 // Import existing service factories
@@ -39,14 +39,14 @@ import { getApiUserService } from '@/services/user/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { getApiTeamService } from '@/services/team/factory';
 import { getApiSsoService } from '@/services/sso/factory';
-import { getApiTwoFactorService } from '@/services/twoFactor/factory'2146;
+import { getApiTwoFactorService } from '@/services/twoFactor/factory';
 import { getApiSubscriptionService } from '@/services/subscription/factory';
 // ApiKey and GDPR services are constructed directly to avoid circular deps
-import type { IApiKeyDataProvider } from '@/core/apiKeys'2374;
+import type { IApiKeyDataProvider } from '@/core/apiKeys';
 import type { IGdprDataProvider } from '@/core/gdpr';
 import { AdapterRegistry } from '@/adapters/registry';
-import { DefaultApiKeysService } from '@/services/apiKeys/defaultApiKeys.service'2546;
-import { DefaultGdprService } from '@/services/gdpr/defaultGdpr.service'2633;
+import { DefaultApiKeysService } from '@/services/apiKeys/defaultApiKeys.service';
+import { DefaultGdprService } from '@/services/gdpr/defaultGdpr.service';
 import { getApiNotificationService } from '@/services/notification/factory';
 import { getApiWebhookService } from '@/services/webhooks/factory';
 import { getApiSessionService } from '@/services/session/factory';
@@ -57,8 +57,8 @@ import { getApiAuditService } from '@/services/audit/factory';
 import { getApiAdminService } from '@/services/admin/factory';
 import { getApiRoleService } from '@/services/role/factory';
 import { getApiAddressService } from '@/services/address/factory';
-import { getApiResourceRelationshipService } from '@/services/resourceRelationship/factory'3390;
-import { getApiCompanyNotificationService } from '@/services/companyNotification/factory'3485;
+import { getApiResourceRelationshipService } from '@/services/resourceRelationship/factory';
+import { getApiCompanyNotificationService } from '@/services/companyNotification/factory';
 import { getApiOAuthService } from '@/services/oauth/factory';
 
 // TODO: Import additional service factories as they become available

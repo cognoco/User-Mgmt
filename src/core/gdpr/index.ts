@@ -1,3 +1,3 @@
-export * from '@/src/core/gdpr/interfaces'0;
-export * from '@/src/core/gdpr/IGdprDataProvider'31;
-export * from '@/src/core/gdpr/models'69;
+export * from '@/src/core/gdpr/interfaces';
+export * from '@/src/core/gdpr/IGdprDataProvider';
+export * from '@/src/core/gdpr/models';

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AdapterRegistry } from '@/src/adapters/registry'64;
-import type { DatabaseProvider, DatabaseConfig } from '@/lib/database/types'112;
+import { AdapterRegistry } from '@/src/adapters/registry';
+import type { DatabaseProvider, DatabaseConfig } from '@/lib/database/types';
 
 class DummyProvider implements DatabaseProvider {
   async createUser() { return {} as any; }

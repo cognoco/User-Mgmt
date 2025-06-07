@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'26;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 
 // Validation schema for creating a new notification preference

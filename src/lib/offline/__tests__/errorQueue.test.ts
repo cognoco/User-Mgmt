@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { OfflineErrorQueue, SerializedError } from '@/src/lib/offline/errorQueue'75;
+import { OfflineErrorQueue, SerializedError } from '@/src/lib/offline/errorQueue';
 
 describe('OfflineErrorQueue', () => {
   let queue: OfflineErrorQueue;

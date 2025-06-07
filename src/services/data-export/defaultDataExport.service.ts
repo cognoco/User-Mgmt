@@ -1,4 +1,4 @@
-import { DataExportService } from '@/core/dataExport/interfaces'0;
+import { DataExportService } from '@/core/dataExport/interfaces';
 import {
   createUserDataExport,
   processUserDataExport,

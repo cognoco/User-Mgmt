@@ -1,5 +1,5 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
-import { clientConfig } from '@/core/config/clientConfig'60;
+import { clientConfig } from '@/core/config/clientConfig';
 
 const { env } = clientConfig;
 console.log('API URL:', env.apiBaseUrl);

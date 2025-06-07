@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { getApiCompanyService } from '@/services/company/factory';
-import { createApiHandler } from '@/lib/api/routeHelpers'138;
-import { checkRateLimit } from '@/middleware/rateLimit'199;
+import { createApiHandler } from '@/lib/api/routeHelpers';
+import { checkRateLimit } from '@/middleware/rateLimit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { ApiError, ERROR_CODES, createSuccessResponse } from '@/lib/api/common';
 

@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { useKeyboardShortcuts } from '@/src/hooks/useKeyboardShortcuts'54;
+import { useKeyboardShortcuts } from '@/src/hooks/useKeyboardShortcuts';
 
 describe('useKeyboardShortcuts', () => {
   it('calls handler for matching key combo', () => {

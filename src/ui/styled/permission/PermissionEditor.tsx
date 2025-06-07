@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { PermissionEditor as HeadlessPermissionEditor, PermissionEditorProps } from '@/src/ui/headless/permission/PermissionEditor'275;
+import { PermissionEditor as HeadlessPermissionEditor, PermissionEditorProps } from '@/src/ui/headless/permission/PermissionEditor';
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Label } from '@/ui/primitives/label';

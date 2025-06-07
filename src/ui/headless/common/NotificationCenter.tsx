@@ -1,1 +1,1 @@
-export { NotificationCenter as default } from '@/src/ui/headless/notification/NotificationCenter'0;
+export { NotificationCenter as default } from '@/src/ui/headless/notification/NotificationCenter';

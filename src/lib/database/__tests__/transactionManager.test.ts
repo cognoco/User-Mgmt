@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { executeTransaction, classifyFailure } from '@/src/lib/database/transactionManager'52;
+import { executeTransaction, classifyFailure } from '@/src/lib/database/transactionManager';
 import { ApplicationError } from '@/core/common/errors';
 
 function createTx() {

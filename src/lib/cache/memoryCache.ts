@@ -1,5 +1,5 @@
-import { errorLogger } from '@/lib/monitoring/errorLogger'0;
-import { telemetry } from '@/lib/monitoring/errorSystem'62;
+import { errorLogger } from '@/lib/monitoring/errorLogger';
+import { telemetry } from '@/lib/monitoring/errorSystem';
 
 export interface MemoryCacheEntry<V> {
   value: V;

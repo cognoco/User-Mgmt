@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { DefaultSystemHealthService } from '@/src/services/health/systemHealth.service'52;
+import { DefaultSystemHealthService } from '@/src/services/health/systemHealth.service';
 
 describe('DefaultSystemHealthService', () => {
   it('returns ok when all services are healthy', async () => {

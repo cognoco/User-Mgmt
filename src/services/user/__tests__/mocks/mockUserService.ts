@@ -1,6 +1,6 @@
 // src/services/user/__tests__/mocks/mock-user-service.ts
 import { vi } from 'vitest';
-import { UserService } from '@/src/core/user/interfaces'89;
+import { UserService } from '@/src/core/user/interfaces';
 import { 
   UserProfile, 
   ProfileUpdatePayload, 
@@ -11,13 +11,13 @@ import {
   UserSearchResult,
   ProfileVisibility,
   VisibilityLevel
-} from '@/src/core/user/models'154;
-import { UserType } from '@/src/types/userType'402;
+} from '@/src/core/user/models';
+import { UserType } from '@/src/types/userType';
 import type {
   FileUploadOptions,
   FileUploadResult,
   FileDeleteResult
-} from '@/src/core/storage/interfaces'459;
+} from '@/src/core/storage/interfaces';
 
 /**
  * Mock implementation of the UserService interface for testing

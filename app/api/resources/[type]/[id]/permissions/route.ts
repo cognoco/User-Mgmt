@@ -3,7 +3,7 @@
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createApiHandler } from '@/lib/api/routeHelpers'258;
+import { createApiHandler } from '@/lib/api/routeHelpers';
 import { createPaginatedResponse } from '@/lib/api/common';
 import { checkPermission } from '@/lib/auth/permissionCheck';
 import { PermissionValues } from '@/core/permission/models';

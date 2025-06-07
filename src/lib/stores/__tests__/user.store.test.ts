@@ -6,7 +6,7 @@ vi.mock('@/lib/stores/user.store', () => {
 });
 
 import { useUserStore } from '@/lib/stores/user.store';
-import { supabase } from '@/src/lib/supabase'308;
+import { supabase } from '@/src/lib/supabase';
 import { act } from '@testing-library/react';
 
 // Mock the Supabase client

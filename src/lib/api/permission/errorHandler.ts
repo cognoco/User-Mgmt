@@ -6,7 +6,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { ApiError, ERROR_CODES } from '@/src/lib/api/common'231;
+import { ApiError, ERROR_CODES } from '@/src/lib/api/common';
 
 /**
  * Create a permission not found error

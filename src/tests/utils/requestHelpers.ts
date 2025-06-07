@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { generateTestJwt } from '@/tests/utils/supabaseAuthUtils'44;
+import { generateTestJwt } from '@/tests/utils/supabaseAuthUtils';
 
 /**
  * Create a request object with an Authorization header set.

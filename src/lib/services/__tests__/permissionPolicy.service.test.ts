@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { PermissionPolicyService } from '@/src/lib/services/permissionPolicy.service'52;
+import { PermissionPolicyService } from '@/src/lib/services/permissionPolicy.service';
 import { PermissionValues, RoleValues } from '@/core/permission/models';
 import { logUserAction } from '@/lib/audit/auditLogger';
 

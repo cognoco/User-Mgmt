@@ -1,4 +1,4 @@
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'0;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import { createSuccessResponse, ApiError, ERROR_CODES } from '@/lib/api/common';
 
 export const POST = createApiHandler(

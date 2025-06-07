@@ -61,7 +61,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RegistrationForm } from '@/ui/styled/auth/RegistrationForm';
 import { UserManagementProvider, UserManagementConfig } from '@/lib/auth/UserManagementProvider';
-import { UserType } from '@/types/userType'2288;
+import { UserType } from '@/types/userType';
 import { SubscriptionTier } from '@/types/subscription';
 import { describe, test, expect, beforeEach } from 'vitest';
 

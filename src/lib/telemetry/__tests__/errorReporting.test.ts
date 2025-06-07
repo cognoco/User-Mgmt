@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ErrorReporter } from '@/src/lib/telemetry/errorReporting'64;
-import { errorLogger } from '@/lib/monitoring/errorLogger'117;
+import { ErrorReporter } from '@/src/lib/telemetry/errorReporting';
+import { errorLogger } from '@/lib/monitoring/errorLogger';
 
 vi.mock('@/lib/monitoring/error-logger', () => ({
   errorLogger: { error: vi.fn() },

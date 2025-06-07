@@ -2,7 +2,7 @@
 // POST /api/permissions - Not supported (permissions are static)
 
 import { type NextRequest, NextResponse } from 'next/server';
-import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers'180;
+import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import { createSuccessResponse } from '@/lib/api/common';
 import { PermissionValues } from '@/core/permission/models';
 

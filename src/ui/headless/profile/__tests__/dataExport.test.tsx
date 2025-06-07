@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DataExport } from '@/src/ui/headless/profile/DataExport'149;
+import { DataExport } from '@/src/ui/headless/profile/DataExport';
 import { ExportStatus } from '@/lib/exports/types';
 import useDataExport from '@/hooks/user/useDataExport';
 

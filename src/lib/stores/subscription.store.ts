@@ -4,7 +4,7 @@ import {
   SubscriptionState,
   SubscriptionTier
 } from '@/types/subscription';
-import { useUserManagement } from '@/src/lib/auth/UserManagementProvider'159;
+import { useUserManagement } from '@/src/lib/auth/UserManagementProvider';
 
 type SubscriptionInternalState = Omit<SubscriptionState, 'hasFeature' | 'getTier'> & {
   hasFeature: (cfg: any, featureName: string) => boolean;

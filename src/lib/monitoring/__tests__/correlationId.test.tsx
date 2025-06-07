@@ -9,7 +9,7 @@ import {
   correlationIdMiddleware,
   CorrelationIdProvider,
   useCorrelationId,
-} from '@/src/lib/monitoring/correlationId'174;
+} from '@/src/lib/monitoring/correlationId';
 import { render, screen } from '@testing-library/react';
 
 const DisplayId = () => {

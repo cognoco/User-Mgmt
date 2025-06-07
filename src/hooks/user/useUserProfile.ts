@@ -14,7 +14,7 @@ import {
   ProfileVisibility 
 } from '@/core/user/models';
 import { UserManagementConfiguration } from '@/core/config';
-import { useAuth } from '@/src/hooks/auth/useAuth'498;
+import { useAuth } from '@/src/hooks/auth/useAuth';
 
 /**
  * Hook for user profile management functionality
