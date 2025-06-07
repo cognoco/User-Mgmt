@@ -16,7 +16,7 @@ const dashboardState: any = {
 vi.mock('../dashboard/../../headless/dashboard/Dashboard', () => ({
   Dashboard: ({ children }: any) => children(dashboardState),
 }));
-import { Dashboard } from '@/src/ui/styled/dashboard/Dashboard';
+import { Dashboard } from '@/ui/styled/dashboard/Dashboard';
 
 const consentState: any = {
   marketing: true,
@@ -29,7 +29,7 @@ const consentState: any = {
 vi.mock('../gdpr/../../headless/gdpr/ConsentManagement', () => ({
   ConsentManagement: ({ render }: any) => render(consentState),
 }));
-import { ConsentManagement } from '@/src/ui/styled/gdpr/ConsentManagement';
+import { ConsentManagement } from '@/ui/styled/gdpr/ConsentManagement';
 
 const searchState: any = {
   searchTerm: '',
@@ -44,7 +44,7 @@ vi.mock('../search/../../headless/search/SearchPage', () => ({
     return render(searchState);
   },
 }));
-import SearchPage from '@/src/ui/styled/search/SearchPage';
+import SearchPage from '@/ui/styled/search/SearchPage';
 
 const featuresState: any = {
   title: 'Title',
@@ -54,7 +54,7 @@ const featuresState: any = {
 vi.mock('../layout/../../headless/layout/Features', () => ({
   Features: ({ children }: any) => children(featuresState),
 }));
-import { Features } from '@/src/ui/styled/layout/Features';
+import { Features } from '@/ui/styled/layout/Features';
 
 const footerState: any = {
   footerClasses: 'footer',
@@ -66,7 +66,7 @@ const footerState: any = {
 vi.mock('../layout/../../headless/layout/Footer', () => ({
   Footer: ({ children }: any) => children(footerState),
 }));
-import { Footer } from '@/src/ui/styled/layout/Footer';
+import { Footer } from '@/ui/styled/layout/Footer';
 
 describe('Styled wrappers', () => {
   it('renders Dashboard list', () => {

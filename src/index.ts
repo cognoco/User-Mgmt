@@ -6,6 +6,6 @@ export function initializeUserManagement(config: UserManagementConfig) {
   // Initialize with overrides
 }
 
-export * from '@/src/ui/styled';
+export * from '@/ui/styled';
 export * from '@/src/ui/headless';
 export * from '@/src/core/auth/interfaces';
