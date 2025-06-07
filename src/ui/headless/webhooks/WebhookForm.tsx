@@ -63,7 +63,7 @@ export function WebhookForm({
       if (onSubmit) {
         await onSubmit(data);
       } else {
-        await createWebhook(data);
+        await (createWebhook.mutateAsync ? createWebhook.mutateAsync(data) : createWebhook(data));
       }
       // Reset form only on successful submission
       setData({ name: '', url: '', events: [] });
