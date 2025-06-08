@@ -4,8 +4,6 @@ export interface AlertManagerOptions {
 
 import { ApplicationError } from '@/core/common/errors';
 import { NotificationChannel } from '@/core/notification/models';
-import { sendEmail } from '@/lib/email/sendEmail';
-import { sendSms } from '@/lib/sms/sendSms';
 
 /** Simple fixed size circular buffer */
 class CircularBuffer<T extends { timestamp: string }> {
@@ -94,22 +92,38 @@ export class AlertManager {
   }
 
   private async triggerAlert(rule: AlertRule, count: number): Promise<void> {
+    // Alert triggering only works on server side
+    if (typeof window !== 'undefined') {
+      console.warn('Alert triggering attempted on client side - skipping');
+      return;
+    }
+    
     const subject = `[${rule.severity.toUpperCase()}] ${rule.name}`;
     const message = `${rule.name} triggered with ${count} errors`;
     for (const ch of rule.channels) {
       switch (ch) {
         case NotificationChannel.EMAIL:
-          await sendEmail({
-            to: process.env.ALERT_EMAIL_TO || 'alerts@example.com',
-            subject,
-            html: message,
-          });
+          try {
+            const { sendEmail } = await import('@/lib/email/sendEmail');
+            await sendEmail({
+              to: process.env.ALERT_EMAIL_TO || 'alerts@example.com',
+              subject,
+              html: message,
+            });
+          } catch (error) {
+            console.error('Failed to send email alert:', error);
+          }
           break;
         case NotificationChannel.SMS:
-          await sendSms({
-            to: process.env.ALERT_SMS_TO || '',
-            message,
-          });
+          try {
+            const { sendSms } = await import('@/lib/sms/sendSms');
+            await sendSms({
+              to: process.env.ALERT_SMS_TO || '',
+              message,
+            });
+          } catch (error) {
+            console.error('Failed to send SMS alert:', error);
+          }
           break;
         default:
           console.log(`[${ch}] ${message}`);

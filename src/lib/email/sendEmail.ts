@@ -1,8 +1,13 @@
-import nodemailer from 'nodemailer';
 import { EmailParams, EmailProviderOptions, EmailProviderResponse } from './types';
 import { sendViaSendGrid } from './sendViaSendGrid';
 
 export async function sendEmail({ to, subject, html, options }: EmailParams): Promise<EmailProviderResponse> {
+  // Email sending is only available on server side
+  if (typeof window !== 'undefined') {
+    console.warn('Email sending attempted on client side - skipping');
+    return { success: false, error: 'Email sending not available on client side' };
+  }
+  
   const provider = options?.provider || process.env.EMAIL_PROVIDER || 'nodemailer';
   
   try {
@@ -29,7 +34,14 @@ async function sendViaNodemailer(
   html: string, 
   options?: EmailProviderOptions
 ): Promise<EmailProviderResponse> {
-  const transporter = nodemailer.createTransport({
+  // Only import nodemailer on server side and when needed
+  if (typeof window !== 'undefined') {
+    throw new Error('Email sending is not available on client side');
+  }
+  
+  const nodemailer = await import('nodemailer');
+  
+  const transporter = nodemailer.default.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '587'),
     secure: process.env.SMTP_SECURE === 'true',

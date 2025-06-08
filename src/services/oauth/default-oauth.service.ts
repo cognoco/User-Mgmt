@@ -1,5 +1,4 @@
 import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { OAuthProvider } from "@/types/oauth";
 import { logUserAction } from "@/lib/audit/auditLogger";
 import { ApiError, ERROR_CODES } from "@/lib/api/common";
@@ -9,7 +8,13 @@ import { sendProviderLinkedNotification } from "@/lib/notifications/sendProvider
 import { OAuthService, OAuthCallbackResult } from "@/core/oauth/interfaces";
 
 export class DefaultOAuthService implements OAuthService {
-  private createSupabase() {
+  private async createSupabase() {
+    // OAuth service only works on server side
+    if (typeof window !== 'undefined') {
+      throw new Error('OAuth service not available on client side');
+    }
+    
+    const { cookies } = await import("next/headers");
     const cookieStore = cookies();
     return createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,6 +38,12 @@ export class DefaultOAuthService implements OAuthService {
     code: string,
     state?: string,
   ): Promise<OAuthCallbackResult> {
+    // OAuth service only works on server side
+    if (typeof window !== 'undefined') {
+      throw new Error('OAuth service not available on client side');
+    }
+    
+    const { cookies } = await import("next/headers");
     const cookieStore = cookies();
     const stateCookie = cookieStore.get(`oauth_state_${provider}`)?.value;
     if (!state || !stateCookie || state !== stateCookie) {
@@ -55,7 +66,7 @@ export class DefaultOAuthService implements OAuthService {
       path: "/",
     });
 
-    const supabase = this.createSupabase();
+    const supabase = await this.createSupabase();
     const { data: currentSession, error: sessionError } =
       await supabase.auth.getSession();
     if (sessionError) {

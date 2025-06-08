@@ -15,6 +15,12 @@ interface NotificationOptions {
  * @returns Object with success/error information
  */
 export async function sendCompanyNotification(options: NotificationOptions) {
+  // Company notifications are only available on server side
+  if (typeof window !== 'undefined') {
+    console.warn('Company notification attempted on client side - skipping');
+    return { success: false, error: 'Company notifications not available on client side' };
+  }
+  
   const { companyId, notificationType, subject, content } = options;
   const supabase = getServiceSupabase();
   

@@ -1,14 +1,12 @@
+'use client';
+
 import { v4 as uuidv4 } from 'uuid';
-import { AsyncLocalStorage } from 'async_hooks';
-import { isServer } from '@/core/platform';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import React, { createContext, useContext } from 'react';
 
 interface Store { correlationId: string; }
 
-const asyncStorage: AsyncLocalStorage<Store> | undefined =
-  isServer ? new AsyncLocalStorage<Store>() : undefined;
-
+// Server-side storage is handled separately
 let clientCorrelationId: string | undefined;
 
 const CorrelationIdContext = createContext<string | undefined>(undefined);
@@ -37,24 +35,17 @@ export function generateCorrelationId(parentId?: string): string {
 }
 
 export function getCorrelationId(): string | undefined {
-  if (isServer && asyncStorage) {
-    return asyncStorage.getStore()?.correlationId;
-  }
+  // This is client-side only now
   return clientCorrelationId;
 }
 
 export function setCorrelationId(id: string) {
-  if (isServer && asyncStorage) {
-    asyncStorage.enterWith({ correlationId: id });
-  } else {
-    clientCorrelationId = id;
-  }
+  // Client-side only now
+  clientCorrelationId = id;
 }
 
 export function runWithCorrelationId<T>(id: string, fn: () => T): T {
-  if (isServer && asyncStorage) {
-    return asyncStorage.run({ correlationId: id }, fn);
-  }
+  // Client-side only now
   const previous = clientCorrelationId;
   clientCorrelationId = id;
   try {

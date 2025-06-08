@@ -2,8 +2,6 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { authenticator } from 'otplib';
 import * as qrcode from 'qrcode';
 import crypto from 'crypto';
-import { sendEmail } from '@/lib/email/sendEmail';
-import { sendSms } from '@/lib/sms/sendSms';
 import {
   generateRegistration,
   verifyRegistration
@@ -56,11 +54,15 @@ export class SupabaseTwoFactorProvider implements ITwoFactorDataProvider {
         const code = this.generateCode();
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
         try {
-          await sendEmail({
-            to: targetEmail,
-            subject: 'Your MFA Verification Code',
-            html: `<p>Your verification code is: <b>${code}</b></p>`
-          });
+          // Only send email on server side
+          if (typeof window === 'undefined') {
+            const { sendEmail } = await import('@/lib/email/sendEmail');
+            await sendEmail({
+              to: targetEmail,
+              subject: 'Your MFA Verification Code',
+              html: `<p>Your verification code is: <b>${code}</b></p>`
+            });
+          }
         } catch {
           return { success: false, error: 'Failed to send verification email' };
         }
@@ -76,7 +78,11 @@ export class SupabaseTwoFactorProvider implements ITwoFactorDataProvider {
         const code = this.generateCode();
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
         try {
-          await sendSms({ to: targetPhone, message: `Your verification code is: ${code}` });
+          // Only send SMS on server side
+          if (typeof window === 'undefined') {
+            const { sendSms } = await import('@/lib/sms/sendSms');
+            await sendSms({ to: targetPhone, message: `Your verification code is: ${code}` });
+          }
         } catch {
           return { success: false, error: 'Failed to send SMS verification code' };
         }

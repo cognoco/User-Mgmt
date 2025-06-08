@@ -3,14 +3,11 @@
 /**
  * App Initializer Component
  * 
- * This component initializes the application by importing and executing the app-init.ts file.
- * It should be included at the root level of the application to ensure services are registered
- * before any components try to use them.
+ * This component provides a client-side wrapper that bypasses server-side initialization
+ * since Next.js handles service initialization on the server.
  */
 
 import { useEffect, useState } from 'react';
-import initializeApp from '@/core/initialization/app-init';
-import { UserManagementConfiguration } from '@/core/config';
 
 export function AppInitializer({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -26,24 +23,16 @@ export function AppInitializer({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
-      console.log('[AppInitializer] Initializing application...');
-      // Initialize the application and get the service instances
-      const services = initializeApp();
+      console.log('[AppInitializer] Client-side initialization...');
       
-      // Ensure services are properly registered with UserManagementConfiguration
-      UserManagementConfiguration.configureServiceProviders({
-        authService: services.authService,
-        userService: services.userService,
-        teamService: services.teamService,
-        permissionService: services.permissionService,
-        webhookService: services.webhookService
-      });
+      // Client-side initialization is minimal - services are initialized on server
+      // This is just for client-side configuration and state management
       
-      console.log('[AppInitializer] Application initialized successfully');
+      console.log('[AppInitializer] Client initialized successfully');
       setIsInitialized(true);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error during initialization';
-      console.error('[AppInitializer] Failed to initialize application:', errorMessage);
+      console.error('[AppInitializer] Failed to initialize client:', errorMessage);
       setError(errorMessage);
     }
   }, []);
