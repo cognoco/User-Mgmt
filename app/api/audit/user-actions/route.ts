@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getApiAuditService } from "@/services/audit/factory";
 import { hasPermission } from "@/lib/auth/hasPermission";
-import { middleware } from "@/middleware";
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  rateLimitMiddleware,
+} from "@/middleware/createMiddlewareChain";
+import { withSecurity } from "@/middleware/withSecurity";
+import type { RouteAuthContext } from "@/middleware/auth";
 
 // Query parameters schema for filtering user actions
 const querySchema = z.object({
@@ -22,94 +29,85 @@ const querySchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });
 
-export const GET = middleware(
-  ["cors", "csrf", "rateLimit"],
-  async (req: NextRequest) => {
-    try {
-      // Get user from request (set by auth middleware)
-      const user = (req as any).user;
-      if (!user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
+const middleware = createMiddlewareChain([
+  rateLimitMiddleware(),
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ includeUser: true }),
+]);
 
-      // Parse and validate query parameters
-      const searchParams = Object.fromEntries(new URL(req.url).searchParams);
-      const {
-        startDate,
-        endDate,
-        userId,
-        action,
-        status,
-        resourceType,
-        resourceId,
-        ipAddress,
-        userAgent,
-        search,
-        page,
-        limit,
-        sortBy,
-        sortOrder,
-      } = querySchema.parse({
-        ...searchParams,
-        page: searchParams.page ? parseInt(searchParams.page) : undefined,
-        limit: searchParams.limit ? parseInt(searchParams.limit) : undefined,
-      });
+async function handleGet(
+  req: NextRequest,
+  auth: RouteAuthContext,
+) {
+  if (!auth.userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-      // RBAC: Users can only see their own logs unless they have permission
-      const targetUserId = userId || user.id;
-      if (userId && userId !== user.id) {
-        // Only allow admins to view other users' logs
-        if (!(await hasPermission(user.id, "VIEW_ALL_USER_ACTION_LOGS"))) {
-          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-      }
+  const searchParams = Object.fromEntries(new URL(req.url).searchParams);
+  const {
+    startDate,
+    endDate,
+    userId,
+    action,
+    status,
+    resourceType,
+    resourceId,
+    ipAddress,
+    userAgent,
+    search,
+    page,
+    limit,
+    sortBy,
+    sortOrder,
+  } = querySchema.parse({
+    ...searchParams,
+    page: searchParams.page ? parseInt(searchParams.page) : undefined,
+    limit: searchParams.limit ? parseInt(searchParams.limit) : undefined,
+  });
 
-      const service = getApiAuditService();
-      if (!service) {
-        return NextResponse.json(
-          { error: "Audit service not available" },
-          { status: 500 },
-        );
-      }
-
-      const { logs, count } = await service.getLogs({
-        page,
-        limit,
-        userId: targetUserId,
-        action,
-        status,
-        resourceType,
-        resourceId,
-        startDate,
-        endDate,
-        ipAddress,
-        userAgent,
-        search,
-        sortBy,
-        sortOrder,
-      });
-
-      return NextResponse.json({
-        logs,
-        pagination: {
-          page,
-          limit,
-          total: count,
-          totalPages: Math.ceil(count / limit),
-        },
-      });
-    } catch (error) {
-      console.error("Error in user action logs endpoint:", error);
-      if (error instanceof z.ZodError) {
-        return NextResponse.json(
-          { error: "Invalid query parameters", details: error.errors },
-          { status: 400 },
-        );
-      }
-      return NextResponse.json(
-        { error: "Internal server error" },
-        { status: 500 },
-      );
+  const targetUserId = userId || auth.userId;
+  if (userId && userId !== auth.userId) {
+    if (!(await hasPermission(auth.userId, "VIEW_ALL_USER_ACTION_LOGS"))) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
-  },
+  }
+
+  const service = getApiAuditService();
+  if (!service) {
+    return NextResponse.json(
+      { error: "Audit service not available" },
+      { status: 500 },
+    );
+  }
+
+  const { logs, count } = await service.getLogs({
+    page,
+    limit,
+    userId: targetUserId,
+    action,
+    status,
+    resourceType,
+    resourceId,
+    startDate,
+    endDate,
+    ipAddress,
+    userAgent,
+    search,
+    sortBy,
+    sortOrder,
+  });
+
+  return NextResponse.json({
+    logs,
+    pagination: {
+      page,
+      limit,
+      total: count,
+      totalPages: Math.ceil(count / limit),
+    },
+  });
+}
+
+export const GET = withSecurity((req: NextRequest) =>
+  middleware((r, auth) => handleGet(r, auth))(req)
 );
