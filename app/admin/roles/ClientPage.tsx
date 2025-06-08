@@ -6,28 +6,36 @@ import { Alert, AlertDescription } from '@/ui/primitives/alert';
 import { RoleManager } from '@/ui/styled/permission/RoleManager';
 import { useRoles } from '@/hooks/team/useRoles';
 import { usePermissions } from '@/hooks/permission/usePermissions';
+import type { RoleCreationPayload, RoleUpdatePayload } from '@/core/permission/models';
 
-export default function RolesManagementPageClient(): JSX.Element {
+export default function RolesManagementPageClient() {
   const {
-    roles,
     isLoading: rolesLoading,
     error: rolesError,
     createRole,
     updateRole,
-    deleteRole,
-    selectedRole,
-    setSelectedRole
+    deleteRole
   } = useRoles();
 
   const {
-    permissions,
-    permissionCategories,
     isLoading: permissionsLoading,
     error: permissionsError
   } = usePermissions();
 
   const isLoading = rolesLoading || permissionsLoading;
   const error = rolesError || permissionsError;
+
+  const handleCreateRole = async (roleData: RoleCreationPayload) => {
+    await createRole(roleData);
+  };
+
+  const handleUpdateRole = async (roleId: string, roleData: RoleUpdatePayload) => {
+    await updateRole(roleId, roleData);
+  };
+
+  const handleDeleteRole = async (roleId: string) => {
+    await deleteRole(roleId);
+  };
 
   return (
     <div className="container py-6 space-y-6">
@@ -48,16 +56,11 @@ export default function RolesManagementPageClient(): JSX.Element {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : (
-        <RoleManager
-          roles={roles || []}
-          permissions={permissions || []}
-          permissionCategories={permissionCategories || []}
-          selectedRole={selectedRole}
-          onSelectRole={setSelectedRole}
-          onCreateRole={createRole}
-          onUpdateRole={updateRole}
-          onDeleteRole={deleteRole}
-        />
+          <RoleManager
+            onCreateRole={handleCreateRole}
+            onUpdateRole={handleUpdateRole}
+            onDeleteRole={handleDeleteRole}
+          />
       )}
     </div>
   );
