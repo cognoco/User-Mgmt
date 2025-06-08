@@ -2,7 +2,7 @@ let POST: (req: Request) => Promise<Response>;
 // import { cookies } from 'next/headers';
 // import { NextResponse } from 'next/server';
 import { OAuthProvider } from "@/types/oauth";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { getServiceContainer } from '@/lib/config/service-container';
 
 // --- Mocks ---
@@ -103,11 +103,11 @@ describe("POST /api/auth/oauth", () => {
     process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI =
       "http://localhost:3000/api/auth/oauth/callback";
 
-    (getServiceContainer as vi.Mock).mockReturnValue(mockServices);
+      (getServiceContainer as Mock).mockReturnValue(mockServices);
     mockService.getOAuthAuthorizationUrl.mockReturnValue(
       'https://example.com/auth'
     );
-    POST = (await import("../route")).POST;
+      POST = (await import("../route")).POST as unknown as (req: Request) => Promise<Response>;
   });
 
   it("should return authorization URL and state for a valid provider (Google)", async () => {

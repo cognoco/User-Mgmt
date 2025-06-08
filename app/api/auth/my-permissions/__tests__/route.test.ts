@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { GET } from '../route';
 import { getApiPermissionService } from '@/services/permission/factory';
 
@@ -19,7 +19,7 @@ const mockService = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (getApiPermissionService as unknown as vi.Mock).mockReturnValue(mockService);
+  (getApiPermissionService as unknown as Mock).mockReturnValue(mockService);
   mockService.getUserRoles.mockResolvedValue([{ roleId: 'r1' }]);
   mockService.getRoleById.mockResolvedValue({ name: 'ADMIN', permissions: ['P1'] });
 });

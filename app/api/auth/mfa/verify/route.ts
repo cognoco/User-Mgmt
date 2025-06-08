@@ -29,12 +29,12 @@ export const POST = createApiHandler(
       const { code, method, accessToken, rememberDevice } = data;
 
       // Verify MFA code using the AuthService
-      const verifyResult = await services.auth.verifyMfaCode({
-        code,
-        method,
-        accessToken,
-        rememberDevice: rememberDevice || false,
-      });
+        const verifyResult = await services.auth.verifyMfaCode({
+          code,
+          method: method as TwoFactorMethod,
+          accessToken,
+          rememberDevice: rememberDevice || false,
+        });
 
       // Log the MFA verification attempt
       await logUserAction({

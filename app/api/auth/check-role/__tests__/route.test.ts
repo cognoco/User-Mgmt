@@ -20,7 +20,7 @@ beforeEach(() => {
     permissionService: mockService as PermissionService,
     authService: mockAuth as AuthService,
   });
-  vi.mocked(mockService.hasRole).mockResolvedValue(true);
+  vi.mocked(mockService.hasRole!).mockResolvedValue(true);
 });
 
 function makeReq(body: any) {
