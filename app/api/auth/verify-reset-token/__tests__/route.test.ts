@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { POST } from '@app/api/auth/verify-reset-token/route';
 import { getApiAuthService } from '@/services/auth/factory';
 import { withAuthRateLimit } from '@/middleware/withAuthRateLimit';
@@ -21,7 +21,7 @@ describe('POST /api/auth/verify-reset-token', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (getApiAuthService as unknown as vi.Mock).mockReturnValue(mockAuthService);
+    (getApiAuthService as unknown as Mock).mockReturnValue(mockAuthService);
     mockAuthService.verifyPasswordResetToken.mockResolvedValue({ valid: true });
   });
 

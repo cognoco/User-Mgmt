@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { NextRequest } from 'next/server';
 import { DELETE } from '@app/api/auth/delete-account/route';
 import { getApiAuthService } from '@/services/auth/factory';
@@ -21,7 +21,7 @@ describe('DELETE /api/auth/delete-account', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (getApiAuthService as unknown as vi.Mock).mockReturnValue(mockAuthService);
+    (getApiAuthService as unknown as Mock).mockReturnValue(mockAuthService);
     mockAuthService.deleteAccount.mockResolvedValue(undefined);
   });
 

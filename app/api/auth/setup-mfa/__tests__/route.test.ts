@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { POST } from '@app/api/auth/setup-mfa/route';
 import { getApiAuthService } from '@/services/auth/factory';
 
@@ -16,7 +16,7 @@ describe('POST /api/auth/setup-mfa', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (getApiAuthService as unknown as vi.Mock).mockReturnValue(mockAuthService);
+    (getApiAuthService as unknown as Mock).mockReturnValue(mockAuthService);
     mockAuthService.setupMFA.mockResolvedValue({ success: true });
   });
 

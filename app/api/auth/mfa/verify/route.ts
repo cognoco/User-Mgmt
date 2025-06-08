@@ -26,7 +26,7 @@ export const POST = createApiHandler(
     const userAgent = request.headers.get("user-agent") || "unknown";
 
     try {
-      const { code, method, accessToken, rememberDevice } = data;
+      const { code, method = TwoFactorMethod.TOTP, accessToken, rememberDevice } = data;
 
       // Verify MFA code using the AuthService
       const verifyResult = await services.auth.verifyMfaCode({

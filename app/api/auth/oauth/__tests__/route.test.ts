@@ -1,8 +1,9 @@
-let POST: (req: Request) => Promise<Response>;
+import { NextRequest, NextResponse } from 'next/server';
+let POST: (req: NextRequest) => Promise<NextResponse>;
 // import { cookies } from 'next/headers';
 // import { NextResponse } from 'next/server';
 import { OAuthProvider } from "@/types/oauth";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { getServiceContainer } from '@/lib/config/serviceContainer';
 
 // --- Mocks ---
@@ -103,7 +104,7 @@ describe("POST /api/auth/oauth", () => {
     process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI =
       "http://localhost:3000/api/auth/oauth/callback";
 
-    (getServiceContainer as vi.Mock).mockReturnValue(mockServices);
+    (getServiceContainer as Mock).mockReturnValue(mockServices);
     mockService.getOAuthAuthorizationUrl.mockReturnValue(
       'https://example.com/auth'
     );

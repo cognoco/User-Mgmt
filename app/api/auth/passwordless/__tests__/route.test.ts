@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { POST } from '@app/api/auth/passwordless/route';
 import { getApiAuthService } from '@/services/auth/factory';
 
@@ -20,7 +20,7 @@ describe('POST /api/auth/passwordless', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (getApiAuthService as unknown as vi.Mock).mockReturnValue(mockAuthService);
+    (getApiAuthService as unknown as Mock).mockReturnValue(mockAuthService);
     mockAuthService.sendMagicLink.mockResolvedValue({ success: true });
   });
 

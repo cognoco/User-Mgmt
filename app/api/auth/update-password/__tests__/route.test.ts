@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { POST } from '@app/api/auth/update-password/route';
 import { getApiAuthService } from '@/services/auth/factory';
 import { createRateLimit } from '@/middleware/rateLimit';
@@ -26,7 +26,7 @@ describe('POST /api/auth/update-password', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (getApiAuthService as unknown as vi.Mock).mockReturnValue(mockAuthService);
+    (getApiAuthService as unknown as Mock).mockReturnValue(mockAuthService);
     mockAuthService.getCurrentUser.mockResolvedValue({ id: '1' });
     mockAuthService.updatePassword.mockResolvedValue(undefined);
     mockAuthService.updatePasswordWithToken.mockResolvedValue({ success: true, user: { id: '1' } });

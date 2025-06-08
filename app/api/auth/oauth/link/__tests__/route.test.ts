@@ -1,6 +1,6 @@
 import { POST } from '@app/api/auth/oauth/link/route';
 import { OAuthProvider } from '@/types/oauth';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { getServiceContainer } from '@/lib/config/serviceContainer';
 
 vi.mock('@/lib/config/service-container', () => ({
@@ -21,7 +21,7 @@ const createRequest = (body: object) =>
 describe('POST /api/auth/oauth/link', () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    (getServiceContainer as vi.Mock).mockReturnValue({ oauth: mockService });
+    (getServiceContainer as Mock).mockReturnValue({ oauth: mockService });
   });
 
   it('returns error when service fails', async () => {

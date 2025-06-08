@@ -1,6 +1,6 @@
 import { POST } from '@app/api/auth/oauth/verify/route';
 import { OAuthProvider } from '@/types/oauth';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { getServiceContainer } from '@/lib/config/serviceContainer';
 
 // Mock cookies
@@ -41,7 +41,7 @@ describe('oauth verify route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCookies.clear();
-    (getServiceContainer as vi.Mock).mockReturnValue({ oauth: mockService });
+    (getServiceContainer as Mock).mockReturnValue({ oauth: mockService });
     mockService.verifyProviderEmail.mockResolvedValue({ success: true });
   });
 
