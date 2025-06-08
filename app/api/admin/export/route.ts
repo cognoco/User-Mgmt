@@ -8,8 +8,8 @@ import {
   errorHandlingMiddleware,
   routeAuthMiddleware,
   rateLimitMiddleware,
-  type RouteAuthContext,
 } from '@/middleware/createMiddlewareChain';
+import type { RouteAuthContext } from '@/middleware/auth';
 import { withSecurity } from '@/middleware/withSecurity';
 
 
@@ -43,7 +43,7 @@ async function handleGet(req: NextRequest, auth: RouteAuthContext) {
     });
   }
   const permissionService = getApiPermissionService();
-  const isAdmin = await permissionService.hasRole(user.id, 'admin');
+  const isAdmin = await permissionService.hasRole(user.id, 'ADMIN');
   if (!isAdmin) {
     // Log forbidden export attempt
     await logUserAction({

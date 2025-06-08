@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getApiAuditService } from "@/services/audit/factory";
-import { middleware } from "@/middleware";
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  rateLimitMiddleware,
+} from "@/middleware/createMiddlewareChain";
+import { withSecurity } from "@/middleware/withSecurity";
+import type { RouteAuthContext } from "@/middleware/auth";
 
 const querySchema = z.object({
   startDate: z.string().optional(),
@@ -19,44 +26,42 @@ const querySchema = z.object({
   format: z.enum(["csv", "json", "xlsx", "pdf"]).default("json"),
 });
 
-export const GET = middleware(
-  ["cors", "csrf", "rateLimit"],
-  async (req: NextRequest) => {
-    try {
-      const user = (req as any).user;
-      if (!user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-      const searchParams = Object.fromEntries(new URL(req.url).searchParams);
-      const params = querySchema.parse(searchParams);
-      const service = getApiAuditService();
-      if (!service) {
-        return NextResponse.json(
-          { error: "Audit service not available" },
-          { status: 500 },
-        );
-      }
-      const blob = await service.exportLogs({
-        ...params,
-        page: 1,
-        limit: 1000,
-      });
-      return new NextResponse(blob, {
-        status: 200,
-        headers: {
-          "Content-Type": blob.type,
-          "Content-Disposition": `attachment; filename="audit-logs.${params.format}"`,
-        },
-      });
-    } catch (error) {
-      console.error("Audit log export error:", error);
-      if (error instanceof z.ZodError) {
-        return NextResponse.json({ error: "Invalid query" }, { status: 400 });
-      }
-      return NextResponse.json(
-        { error: "Internal server error" },
-        { status: 500 },
-      );
-    }
-  },
+const middleware = createMiddlewareChain([
+  rateLimitMiddleware(),
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ includeUser: true }),
+]);
+
+async function handleGet(
+  req: NextRequest,
+  auth: RouteAuthContext,
+) {
+  if (!auth.userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const searchParams = Object.fromEntries(new URL(req.url).searchParams);
+  const params = querySchema.parse(searchParams);
+  const service = getApiAuditService();
+  if (!service) {
+    return NextResponse.json(
+      { error: "Audit service not available" },
+      { status: 500 },
+    );
+  }
+  const blob = await service.exportLogs({
+    ...params,
+    page: 1,
+    limit: 1000,
+  });
+  return new NextResponse(blob, {
+    status: 200,
+    headers: {
+      "Content-Type": blob.type,
+      "Content-Disposition": `attachment; filename="audit-logs.${params.format}"`,
+    },
+  });
+}
+
+export const GET = withSecurity((req: NextRequest) =>
+  middleware((r, auth) => handleGet(r, auth))(req)
 );

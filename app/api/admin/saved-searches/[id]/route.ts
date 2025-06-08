@@ -9,10 +9,11 @@ import {
   errorHandlingMiddleware,
   routeAuthMiddleware,
   validationMiddleware,
-  type RouteAuthContext,
 } from "@/middleware/createMiddlewareChain";
+import type { RouteAuthContext } from "@/middleware/auth";
 import { withSecurity } from "@/middleware/withSecurity";
-import { getApiSavedSearchService } from "@/services/savedSearch/factory";
+import { getApiSavedSearchService } from "@/services/saved-search/factory";
+import { Permission } from "@/lib/rbac/roles";
 
 const updateSavedSearchSchema = z.object({
   name: z.string().min(1).optional(),
@@ -75,12 +76,12 @@ async function deleteSavedSearch(
 
 const baseMiddleware = createMiddlewareChain([
   errorHandlingMiddleware(),
-  routeAuthMiddleware({ requiredPermissions: ["admin.users.list"] }),
+  routeAuthMiddleware({ requiredPermissions: [Permission.ACCESS_ADMIN_DASHBOARD] }),
 ]);
 
 const patchMiddleware = createMiddlewareChain([
   errorHandlingMiddleware(),
-  routeAuthMiddleware({ requiredPermissions: ["admin.users.list"] }),
+  routeAuthMiddleware({ requiredPermissions: [Permission.ACCESS_ADMIN_DASHBOARD] }),
   validationMiddleware(updateSavedSearchSchema),
 ]);
 

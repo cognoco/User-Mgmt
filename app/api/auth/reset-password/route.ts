@@ -14,7 +14,7 @@ const ResetRequestSchema = z.object({
 export const POST = createApiHandler(
   ResetRequestSchema,
   async (request, _authContext, data, services) => {
-    const ipAddress = request.ip || request.headers.get("x-forwarded-for") || "unknown";
+    const ipAddress = request.headers.get("x-forwarded-for") || "unknown";
     const userAgent = request.headers.get("user-agent") || "unknown";
 
     const { email } = data;
@@ -46,8 +46,8 @@ export const POST = createApiHandler(
         "If an account exists with this email, you will receive password reset instructions.",
     });
   },
-  { 
+  {
     requireAuth: false, // Password reset doesn't require auth
-    rateLimit: { windowMs: 15 * 60 * 1000, max: 5 } // Strict rate limiting for password reset
-  }
+    rateLimit: { windowMs: 15 * 60 * 1000, max: 5 }, // Strict rate limiting for password reset
+  },
 );
