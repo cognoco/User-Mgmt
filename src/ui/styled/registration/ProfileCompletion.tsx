@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver, type SubmitHandler, type Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useTranslation } from 'react-i18next';
@@ -44,7 +44,7 @@ export function ProfileCompletion() {
   const { updateProfile, updateSettings, uploadAvatar } = useUserStore();
   
   const form = useForm<ProfileFormData>({
-    resolver: zodResolver(profileSchema),
+    resolver: zodResolver(profileSchema) as Resolver<ProfileFormData>,
     defaultValues: {
       settings: {
         theme: 'light',
@@ -56,6 +56,8 @@ export function ProfileCompletion() {
       },
     },
   });
+
+  const control: Control<ProfileFormData> = form.control;
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
@@ -80,7 +82,12 @@ export function ProfileCompletion() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit(
+          onSubmit as SubmitHandler<ProfileFormData>
+        )}
+        className="space-y-6"
+      >
         <div className="space-y-2">
           <Label htmlFor="avatar">{t('profile.avatar.label')}</Label>
           <Input
@@ -93,7 +100,7 @@ export function ProfileCompletion() {
 
         <div className="grid grid-cols-2 gap-4">
           <FormField
-            control={form.control}
+            control={control}
             name="first_name"
             render={({ field }) => (
               <FormItem>
@@ -106,7 +113,7 @@ export function ProfileCompletion() {
           />
 
           <FormField
-            control={form.control}
+            control={control}
             name="last_name"
             render={({ field }) => (
               <FormItem>
@@ -120,7 +127,7 @@ export function ProfileCompletion() {
         </div>
 
         <FormField
-          control={form.control}
+          control={control}
           name="bio"
           render={({ field }) => (
             <FormItem>
@@ -134,7 +141,7 @@ export function ProfileCompletion() {
 
         <div className="grid grid-cols-2 gap-4">
           <FormField
-            control={form.control}
+            control={control}
             name="date_of_birth"
             render={({ field }) => (
               <FormItem>
@@ -147,7 +154,7 @@ export function ProfileCompletion() {
           />
 
           <FormField
-            control={form.control}
+            control={control}
             name="gender"
             render={({ field }) => (
               <FormItem>
@@ -171,7 +178,7 @@ export function ProfileCompletion() {
         </div>
 
         <FormField
-          control={form.control}
+          control={control}
           name="address"
           render={({ field }) => (
             <FormItem>
@@ -185,7 +192,7 @@ export function ProfileCompletion() {
 
         <div className="grid grid-cols-2 gap-4">
           <FormField
-            control={form.control}
+            control={control}
             name="city"
             render={({ field }) => (
               <FormItem>
@@ -198,7 +205,7 @@ export function ProfileCompletion() {
           />
 
           <FormField
-            control={form.control}
+            control={control}
             name="state"
             render={({ field }) => (
               <FormItem>
@@ -213,7 +220,7 @@ export function ProfileCompletion() {
 
         <div className="grid grid-cols-2 gap-4">
           <FormField
-            control={form.control}
+            control={control}
             name="country"
             render={({ field }) => (
               <FormItem>
@@ -226,7 +233,7 @@ export function ProfileCompletion() {
           />
 
           <FormField
-            control={form.control}
+            control={control}
             name="postal_code"
             render={({ field }) => (
               <FormItem>
@@ -240,7 +247,7 @@ export function ProfileCompletion() {
         </div>
 
         <FormField
-          control={form.control}
+          control={control}
           name="phone_number"
           render={({ field }) => (
             <FormItem>
@@ -257,7 +264,7 @@ export function ProfileCompletion() {
 
           <div className="grid grid-cols-2 gap-4">
             <FormField
-              control={form.control}
+              control={control}
               name="settings.theme"
               render={({ field }) => (
                 <FormItem>
@@ -278,7 +285,7 @@ export function ProfileCompletion() {
             />
 
             <FormField
-              control={form.control}
+              control={control}
               name="settings.language"
               render={({ field }) => (
                 <FormItem>
@@ -301,7 +308,7 @@ export function ProfileCompletion() {
           </div>
 
           <FormField
-            control={form.control}
+            control={control}
             name="settings.email_notifications"
             render={({ field }) => (
               <FormItem className="flex items-center justify-between">
@@ -323,7 +330,7 @@ export function ProfileCompletion() {
           />
 
           <FormField
-            control={form.control}
+            control={control}
             name="settings.push_notifications"
             render={({ field }) => (
               <FormItem className="flex items-center justify-between">
@@ -345,7 +352,7 @@ export function ProfileCompletion() {
           />
 
           <FormField
-            control={form.control}
+            control={control}
             name="settings.two_factor_auth"
             render={({ field }) => (
               <FormItem className="flex items-center justify-between">
@@ -367,7 +374,7 @@ export function ProfileCompletion() {
           />
 
           <FormField
-            control={form.control}
+            control={control}
             name="settings.login_alerts"
             render={({ field }) => (
               <FormItem className="flex items-center justify-between">
