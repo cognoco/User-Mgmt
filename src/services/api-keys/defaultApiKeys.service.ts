@@ -1,7 +1,7 @@
 import { ApiKeyService } from '@/core/api-keys/interfaces';
 import type { IApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
 import type { ApiKey, ApiKeyCreatePayload, ApiKeyCreateResult } from '@/core/api-keys/models';
-import { getKeyPrefix } from '@/lib/apiKeys/apiKeyUtils';
+import { getKeyPrefix } from '@/lib/api-keys/apiKeyUtils';
 import { SubscriptionTier } from '@/core/subscription/models';
 import { ensureSubscriptionTier } from '@/services/subscription/subscriptionAccess';
 

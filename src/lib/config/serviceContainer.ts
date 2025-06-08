@@ -30,7 +30,7 @@ import type { AuditService } from '@/core/audit/interfaces';
 import type { AdminService } from '@/core/admin/interfaces';
 import type { RoleService } from '@/core/role/interfaces';
 import type { AddressService, CompanyAddressService } from '@/core/address/interfaces';
-import type { ResourceRelationshipService } from '@/core/resourceRelationship/interfaces';
+import type { ResourceRelationshipService } from '@/core/resource-relationship/interfaces';
 import type { OAuthService } from '@/core/oauth/interfaces';
 
 // Import existing service factories
@@ -57,8 +57,8 @@ import { getApiAuditService } from '@/services/audit/factory';
 import { getApiAdminService } from '@/services/admin/factory';
 import { getApiRoleService } from '@/services/role/factory';
 import { getApiAddressService, getApiPersonalAddressService } from '@/services/address/factory';
-import { getApiResourceRelationshipService } from '@/services/resourceRelationship/factory';
-import { getApiCompanyNotificationService } from '@/services/companyNotification/factory';
+import { getApiResourceRelationshipService } from '@/services/resource-relationship/factory';
+import { getApiCompanyNotificationService } from '@/services/company-notification/factory';
 import { getApiOAuthService } from '@/services/oauth/factory';
 
 // TODO: Import additional service factories as they become available
@@ -453,7 +453,7 @@ export function getConfiguredOAuthService(override?: OAuthService): OAuthService
 /**
  * Get a specific service with fallback to global configuration
  */
-export function getConfiguredCompanyNotificationService(override?: import("@/core/companyNotification/interfaces").CompanyNotificationService): import("@/core/companyNotification/interfaces").CompanyNotificationService {
+export function getConfiguredCompanyNotificationService(override?: import("@/core/company-notification/interfaces").CompanyNotificationService): import("@/core/company-notification/interfaces").CompanyNotificationService {
   return override || globalServiceConfig.companyNotificationService || getApiCompanyNotificationService();
 }
 
