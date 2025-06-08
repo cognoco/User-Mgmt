@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getApiCompanyService } from "@/services/company/factory";
-import { type RouteAuthContext } from "@/middleware/auth";
+import type { AuthContext } from "@/core/config/interfaces";
 import { createApiHandler } from "@/lib/api/route-helpers";
 import { createSuccessResponse } from "@/lib/api/common";
 
@@ -10,7 +10,7 @@ import { createSuccessResponse } from "@/lib/api/common";
 async function handleDelete(
   _request: NextRequest,
   params: { documentId: string },
-  auth: RouteAuthContext,
+  auth: AuthContext,
 ) {
   try {
     const companyService = getApiCompanyService();
