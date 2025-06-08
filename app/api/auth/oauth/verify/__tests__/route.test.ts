@@ -55,8 +55,6 @@ const createRequest = (body: object) =>
     body: JSON.stringify(body),
   });
 
-const loggedInUser = { id: "user1", email: "test@example.com" };
-
 describe("oauth verify route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
