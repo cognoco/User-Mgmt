@@ -1,12 +1,9 @@
-import { z } from 'zod';
-import { OAuthProvider } from '@/types/oauth';
-import { createApiHandler } from '@/lib/api/routeHelpers';
-import {
-  createSuccessResponse,
-  ApiError,
-  ERROR_CODES
-} from '@/lib/api/common';
-import { logUserAction } from '@/lib/audit/auditLogger';
+import { z } from "zod";
+import { OAuthProvider } from "@/types/oauth";
+import { createApiHandler } from "@/lib/api/routeHelpers";
+import { createSuccessResponse, ApiError, ERROR_CODES } from "@/lib/api/common";
+import { logUserAction } from "@/lib/audit/auditLogger";
+import { getApiOAuthService } from "@/services/oauth/factory";
 
 const verifySchema = z.object({
   providerId: z.nativeEnum(OAuthProvider),
@@ -16,54 +13,60 @@ const verifySchema = z.object({
 export const POST = createApiHandler(
   verifySchema,
   async (request, _authContext, data, services) => {
-    const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
-    const userAgent = request.headers.get('user-agent') || 'unknown';
+    const ipAddress = request.headers.get("x-forwarded-for") || "unknown";
+    const userAgent = request.headers.get("user-agent") || "unknown";
 
     try {
-      const result = await services.oauth.verifyProviderEmail(
+      const oauthService = services.oauth ?? getApiOAuthService();
+      const result = await oauthService.verifyProviderEmail(
         data.providerId,
-        data.email
+        data.email,
       );
 
       await logUserAction({
-        action: 'OAUTH_VERIFY',
-        status: result.success ? 'SUCCESS' : 'FAILURE',
+        action: "OAUTH_VERIFY",
+        status: result.success ? "SUCCESS" : "FAILURE",
         ipAddress,
         userAgent,
-        targetResourceType: 'oauth',
+        targetResourceType: "oauth",
         targetResourceId: data.providerId,
-        details: { email: data.email, error: result.success ? null : result.error }
+        details: {
+          email: data.email,
+          error: result.success ? null : result.error,
+        },
       });
 
       if (!result.success) {
         throw new ApiError(
           ERROR_CODES.INVALID_REQUEST,
-          result.error || 'Verification failed',
-          result.status ?? 400
+          result.error || "Verification failed",
+          result.status ?? 400,
         );
       }
 
       return createSuccessResponse({ success: true });
     } catch (error: any) {
       await logUserAction({
-        action: 'OAUTH_VERIFY',
-        status: 'FAILURE',
+        action: "OAUTH_VERIFY",
+        status: "FAILURE",
         ipAddress,
         userAgent,
-        targetResourceType: 'oauth',
+        targetResourceType: "oauth",
         targetResourceId: data.providerId,
-        details: { error: error instanceof Error ? error.message : String(error) }
+        details: {
+          error: error instanceof Error ? error.message : String(error),
+        },
       });
 
       throw new ApiError(
         ERROR_CODES.INTERNAL_ERROR,
-        error instanceof Error ? error.message : 'Failed to verify provider',
-        400
+        error instanceof Error ? error.message : "Failed to verify provider",
+        400,
       );
     }
   },
   {
     requireAuth: true,
-    rateLimit: { windowMs: 15 * 60 * 1000, max: 10 }
-  }
+    rateLimit: { windowMs: 15 * 60 * 1000, max: 10 },
+  },
 );
