@@ -44,6 +44,8 @@ out
 .nuxt
 .cache
 .output
+*.tsbuildinfo
+tsconfig.tsbuildinfo
 
 # Misc
 .DS_Store
