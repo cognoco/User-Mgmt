@@ -4,7 +4,14 @@ import { AlertManager, AlertRule } from '@/lib/telemetry/alert-manager';
 import { ApplicationError } from '@/core/common/errors';
 
 let initialized = false;
-export const alertManager = new AlertManager();
+let alertManager: AlertManager | null = null;
+
+function getAlertManager(): AlertManager {
+  if (!alertManager) {
+    alertManager = new AlertManager();
+  }
+  return alertManager;
+}
 
 export interface MonitoringConfig {
   alertRules?: AlertRule[];
@@ -12,11 +19,19 @@ export interface MonitoringConfig {
 
 export function initializeMonitoringSystem(config: MonitoringConfig = {}): void {
   if (initialized) return;
+  
+  // Only initialize monitoring system on server side
+  if (typeof window !== 'undefined') {
+    return;
+  }
+  
   initialized = true;
 
+  const manager = getAlertManager();
+  
   if (config.alertRules) {
     for (const rule of config.alertRules) {
-      alertManager.addRule(rule);
+      manager.addRule(rule);
     }
   }
 
@@ -26,6 +41,8 @@ export function initializeMonitoringSystem(config: MonitoringConfig = {}): void 
       alert.message,
       alert.severity === 'critical' ? 500 : 400,
     );
-    alertManager.registerError(error);
+    manager.registerError(error);
   });
 }
+
+export { getAlertManager as alertManager };
