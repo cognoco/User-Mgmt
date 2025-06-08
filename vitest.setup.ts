@@ -313,15 +313,15 @@ vi.mock('@/lib/database/supabase', async () => {
 });
 
 // Also mock relative imports that might be used in some tests
-vi.mock('../supabase', async () => {
+(vi as any).mock('../supabase', async () => {
   const mod = await import('@/tests/mocks/supabase');
-  return { 
+  return {
     supabase: mod.supabase,
     createClient: mod.createClient,
     getServiceSupabase: mod.getServiceSupabase,
     default: mod.supabase
   };
-}, { virtual: true });
+}, { virtual: true } as any);
 
 // Mock the core Supabase library to ensure all instances use our mock
 vi.mock('@supabase/supabase-js', async () => {
