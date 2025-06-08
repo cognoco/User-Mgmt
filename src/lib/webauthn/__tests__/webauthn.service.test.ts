@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock(
+(vi as any).mock(
   '@simplewebauthn/server',
   () => ({
     generateRegistrationOptions: vi.fn(async () => ({ challenge: 'reg-chal' })),
