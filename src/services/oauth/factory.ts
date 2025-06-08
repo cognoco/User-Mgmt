@@ -1,37 +1,19 @@
-import { DefaultOAuthService } from "@/services/oauth/defaultOauth.service";
 import type { OAuthService } from "@/core/oauth/interfaces";
-import { getServiceContainer } from "@/lib/config/serviceContainer";
 
 export interface ApiOAuthServiceOptions {
   reset?: boolean;
 }
 
-let instance: OAuthService | null = null;
-let constructing = false;
+// Client-side stub that throws for any method call
+const clientStub: OAuthService = {
+  handleCallback: () => Promise.reject(new Error('OAuth service only available on server')),
+  linkProvider: () => Promise.reject(new Error('OAuth service only available on server')),
+  disconnectProvider: () => Promise.reject(new Error('OAuth service only available on server')),
+  verifyProviderEmail: () => Promise.reject(new Error('OAuth service only available on server')),
+};
 
-export function getApiOAuthService(
-  options: ApiOAuthServiceOptions = {},
-): OAuthService {
-  if (options.reset) {
-    instance = null;
-  }
-
-  if (!instance && !constructing) {
-    constructing = true;
-    try {
-      const container = getServiceContainer();
-      const existing = (container as any).oauth as OAuthService | undefined;
-      if (existing) {
-        instance = existing;
-      }
-    } finally {
-      constructing = false;
-    }
-  }
-
-  if (!instance) {
-    instance = new DefaultOAuthService();
-  }
-
-  return instance;
+export function getApiOAuthService(): OAuthService {
+  // Always return client stub to avoid importing server-only code
+  // Server-side code should use getServerOAuthService from ./server
+  return clientStub;
 }

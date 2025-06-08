@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiDataExportService } from '@/services/dataExport';
+import { getApiDataExportService } from '@/services/data-export';
 import { isCompanyRateLimited } from '@/lib/exports/companyExport.service';
 
 /**

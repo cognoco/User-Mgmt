@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { getSupabaseServerClient } from '@/lib/auth';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { hasPermission } from '@/lib/auth/hasPermission';
-import { AdminAuditLogs } from '@/ui/styled/admin/auditLogs/AdminAuditLogs';
+import { AdminAuditLogs } from '@/ui/styled/admin/audit-logs/AdminAuditLogs';
 
 export const metadata: Metadata = {
   title: 'Admin Audit Logs',

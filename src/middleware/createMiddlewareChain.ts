@@ -11,7 +11,7 @@ import {
 import {
   getDefaultMiddlewareConfig,
   type ApiRouteType,
-} from '@/config/apiRoutes.config';
+} from '@/../config/apiRoutes.config';
 
 /**
  * Generic route handler used by the middleware chain.

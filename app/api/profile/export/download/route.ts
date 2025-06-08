@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logUserAction } from '@/lib/audit/auditLogger';
-import { getApiDataExportService } from '@/services/dataExport';
+import { getApiDataExportService } from '@/services/data-export';
 import { ExportStatus } from '@/lib/exports/types';
 
 /**

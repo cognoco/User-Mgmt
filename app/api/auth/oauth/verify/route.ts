@@ -3,7 +3,7 @@ import { OAuthProvider } from "@/types/oauth";
 import { createApiHandler } from "@/lib/api/routeHelpers";
 import { createSuccessResponse, ApiError, ERROR_CODES } from "@/lib/api/common";
 import { logUserAction } from "@/lib/audit/auditLogger";
-import { getApiOAuthService } from "@/services/oauth/factory";
+import { getServerOAuthService } from "@/services/oauth/server";
 
 const verifySchema = z.object({
   providerId: z.nativeEnum(OAuthProvider),
@@ -17,7 +17,7 @@ export const POST = createApiHandler(
     const userAgent = request.headers.get("user-agent") || "unknown";
 
     try {
-      const oauthService = services.oauth ?? getApiOAuthService();
+      const oauthService = services.oauth ?? getServerOAuthService();
       const result = await oauthService.verifyProviderEmail(
         data.providerId,
         data.email,

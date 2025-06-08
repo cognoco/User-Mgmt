@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
-import { authenticateApiKey } from '@/lib/apiKeys/apiKeyAuth';
+import { authenticateApiKey } from '@/lib/api-keys/apiKeyAuth';
 import { getApiUserService } from '@/services/user/factory';
 import { checkRateLimit } from '@/middleware/rateLimit';
 

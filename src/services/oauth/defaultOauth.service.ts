@@ -9,8 +9,8 @@ import { sendProviderLinkedNotification } from "@/lib/notifications/sendProvider
 import { OAuthService, OAuthCallbackResult } from "@/core/oauth/interfaces";
 
 export class DefaultOAuthService implements OAuthService {
-  private createSupabase() {
-    const cookieStore = cookies();
+  private async createSupabase() {
+    const cookieStore = await cookies();
     return createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -33,7 +33,7 @@ export class DefaultOAuthService implements OAuthService {
     code: string,
     state?: string,
   ): Promise<OAuthCallbackResult> {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const stateCookie = cookieStore.get(`oauth_state_${provider}`)?.value;
     if (!state || !stateCookie || state !== stateCookie) {
       await logUserAction({
@@ -55,7 +55,7 @@ export class DefaultOAuthService implements OAuthService {
       path: "/",
     });
 
-    const supabase = this.createSupabase();
+    const supabase = await this.createSupabase();
     const { data: currentSession, error: sessionError } =
       await supabase.auth.getSession();
     if (sessionError) {
@@ -262,7 +262,7 @@ export class DefaultOAuthService implements OAuthService {
     collision?: boolean;
   }> {
     try {
-      const supabase = this.createSupabase();
+      const supabase = await this.createSupabase();
       const {
         data: { user },
         error: authError,
@@ -379,7 +379,7 @@ export class DefaultOAuthService implements OAuthService {
     provider: OAuthProvider,
   ): Promise<{ success: boolean; error?: string; status?: number }> {
     try {
-      const supabase = this.createSupabase();
+      const supabase = await this.createSupabase();
       const {
         data: { user },
         error: authError,
@@ -514,7 +514,7 @@ export class DefaultOAuthService implements OAuthService {
     email: string,
   ): Promise<{ success: boolean; error?: string; status?: number }> {
     try {
-      const supabase = this.createSupabase();
+      const supabase = await this.createSupabase();
       const {
         data: { user },
         error: authError,

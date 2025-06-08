@@ -3,7 +3,7 @@ import { z } from "zod";
 import { OAuthProvider } from "@/types/oauth";
 import { createApiHandler } from "@/lib/api/routeHelpers";
 import type { AuthContext, ServiceContainer } from "@/core/config/interfaces";
-import { getApiOAuthService } from "@/services/oauth/factory";
+import { getServerOAuthService } from "@/services/oauth/server";
 import {
   createSuccessResponse,
   ApiError,
@@ -23,7 +23,7 @@ async function handlePost(
   services: ServiceContainer,
 ) {
   const { provider } = data;
-  const service = services.oauth ?? getApiOAuthService();
+  const service = services.oauth ?? getServerOAuthService();
   const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
   const userAgent = request.headers.get('user-agent') || 'unknown';
 
