@@ -1,6 +1,6 @@
 import { POST } from '@app/api/auth/oauth/verify/route';
 import { OAuthProvider } from '@/types/oauth';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { getServiceContainer } from '@/lib/config/serviceContainer';
 
 // Mock cookies
@@ -41,27 +41,27 @@ describe('oauth verify route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCookies.clear();
-    (getServiceContainer as vi.Mock).mockReturnValue({ oauth: mockService });
+    (getServiceContainer as unknown as Mock).mockReturnValue({ oauth: mockService });
     mockService.verifyProviderEmail.mockResolvedValue({ success: true });
   });
 
   it('returns 401 when unauthenticated', async () => {
     mockService.verifyProviderEmail.mockResolvedValueOnce({ success: false, status: 401, error: 'auth' });
     const request = createRequest({ providerId: OAuthProvider.GITHUB, email: 'new@example.com' });
-    const res = await POST(request);
+    const res = await POST(request as any);
     expect(res.status).toBe(401);
   });
 
   it('returns 409 when email already used by another user', async () => {
     mockService.verifyProviderEmail.mockResolvedValueOnce({ success: false, status: 409, error: 'exists' });
     const request = createRequest({ providerId: OAuthProvider.GITHUB, email: 'existing@example.com' });
-    const res = await POST(request);
+    const res = await POST(request as any);
     expect(res.status).toBe(409);
   });
 
   it('returns success and sends notification', async () => {
     const request = createRequest({ providerId: OAuthProvider.GITHUB, email: 'new@example.com' });
-    const res = await POST(request);
+    const res = await POST(request as any);
     const json = await res.json();
     expect(res.status).toBe(200);
     expect(json.success).toBe(true);
