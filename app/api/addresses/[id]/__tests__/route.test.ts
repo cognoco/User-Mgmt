@@ -22,7 +22,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   resetServiceContainer();
   configureServices({
-    addressService: service as AddressService,
+    personalAddressService: service as AddressService,
     authService: authService as AuthService,
   });
 });
