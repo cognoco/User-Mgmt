@@ -30,7 +30,7 @@ vi.mock("@/services/saved-search/factory", () => ({
   getApiSavedSearchService: vi.fn(),
 }));
 
-import { getApiSavedSearchService } from "@/services/savedSearch/factory";
+import { getApiSavedSearchService } from "@/services/saved-search/factory";
 
 function createRequest(method: string) {
   return {

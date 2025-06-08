@@ -54,6 +54,8 @@ export interface ServiceContainer {
   // TODO: Add other services as their interfaces become available
   role?: RoleService;
   address?: CompanyAddressService;
+  /** Personal address service for managing user addresses */
+  addressService: AddressService;
   companyNotification?: import("@/core/companyNotification/interfaces").CompanyNotificationService;
   resourceRelationship?: ResourceRelationshipService;
   oauth?: import('@/core/oauth/interfaces').OAuthService;
@@ -157,6 +159,10 @@ export interface ServiceConfig {
    * Custom address service implementation (for company addresses)
    */
   addressService?: CompanyAddressService;
+  /**
+   * Custom personal address service implementation
+   */
+  personalAddressService?: AddressService;
   oauthService?: import('@/core/oauth/interfaces').OAuthService;
   companyNotificationService?: import("@/core/companyNotification/interfaces").CompanyNotificationService;
 

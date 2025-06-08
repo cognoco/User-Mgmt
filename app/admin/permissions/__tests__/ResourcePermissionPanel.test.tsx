@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import ResourcePermissionPanel from '@app/admin/permissions/ResourcePermissionPanel';
 import { usePermission } from '@/hooks/permission/usePermissions';
 import { UserManagementConfiguration } from '@/core/config';
@@ -14,7 +14,7 @@ vi.mock('@/core/config', () => ({ UserManagementConfiguration: { getServiceProvi
 describe('ResourcePermissionPanel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (UserManagementConfiguration.getServiceProvider as unknown as vi.Mock).mockReturnValue(undefined);
+    (UserManagementConfiguration.getServiceProvider as unknown as Mock).mockReturnValue(undefined);
   });
 
   it('shows loading state while permission check in progress', () => {

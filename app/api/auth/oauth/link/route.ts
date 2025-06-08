@@ -7,6 +7,7 @@ import {
   ERROR_CODES
 } from '@/lib/api/common';
 import { logUserAction } from '@/lib/audit/auditLogger';
+import { getApiOAuthService } from '@/services/oauth/factory';
 
 const linkRequestSchema = z.object({
   provider: z.nativeEnum(OAuthProvider),
@@ -19,7 +20,8 @@ export const POST = createApiHandler(
     const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
-    const result = await services.oauth.linkProvider(data.provider, data.code);
+    const service = services.oauth ?? getApiOAuthService();
+    const result = await service.linkProvider(data.provider, data.code);
 
     await logUserAction({
       action: 'OAUTH_LINK',

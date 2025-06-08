@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { type RouteAuthContext } from "@/middleware/auth";
+import type { AuthContext } from "@/core/config/interfaces";
 import { addressUpdateSchema } from "@/core/address/models";
 import { createApiHandler } from "@/lib/api/routeHelpers";
 import { createSuccessResponse } from "@/lib/api/common";
@@ -13,7 +13,7 @@ type AddressUpdateRequest = z.infer<typeof addressUpdateSchema>;
 async function handlePut(
   _request: NextRequest,
   params: { addressId: string },
-  auth: RouteAuthContext,
+  auth: AuthContext,
   data: AddressUpdateRequest,
 ) {
   try {
@@ -59,7 +59,7 @@ async function handlePut(
 async function handleDelete(
   _request: NextRequest,
   params: { addressId: string },
-  auth: RouteAuthContext,
+  auth: AuthContext,
 ) {
   try {
     const userId = auth.userId!;
@@ -104,15 +104,15 @@ export const PUT = (req: NextRequest, ctx: { params: { addressId: string } }) =>
   createApiHandler(
     addressUpdateSchema,
     (r, auth, data) => handlePut(r, ctx.params, auth, data),
-    { requireAuth: true }
+    { requireAuth: true },
   )(req);
 
 export const DELETE = (
   req: NextRequest,
-  ctx: { params: { addressId: string } }
+  ctx: { params: { addressId: string } },
 ) =>
   createApiHandler(
     z.object({}),
     (r, auth, d) => handleDelete(r, ctx.params, auth),
-    { requireAuth: true }
+    { requireAuth: true },
   )(req);

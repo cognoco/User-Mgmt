@@ -13,22 +13,15 @@ export default function RegisterPage() { // Use default export for Next.js pages
       <h1 className="text-3xl font-bold text-center mb-8">
         {t('auth.register.title', 'Create Your Account')}
       </h1>
-      <RegistrationForm 
-        title={t('auth.register.formTitle', 'Sign Up')}
-        description={t('auth.register.formDescription', 'Enter your information to create a new account')}
-        termsLink="/terms"
-        privacyLink="/privacy"
-        footer={
-          <div className="text-center text-sm w-full">
-            <div className="mt-2">
-              {t('auth.register.alreadyHaveAccount', 'Already have an account?')}{' '}
-              <Link href="/auth/login" className="text-primary font-medium hover:underline">
-                {t('auth.register.signIn', 'Sign in')}
-              </Link>
-            </div>
-          </div>
-        }
-      />
+      <RegistrationForm />
+      <div className="text-center text-sm w-full mt-4">
+        <div className="mt-2">
+          {t('auth.register.alreadyHaveAccount', 'Already have an account?')}{' '}
+          <Link href="/auth/login" className="text-primary font-medium hover:underline">
+            {t('auth.register.signIn', 'Sign in')}
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

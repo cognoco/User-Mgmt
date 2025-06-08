@@ -29,7 +29,7 @@ import type { ConsentService } from '@/core/consent/interfaces';
 import type { AuditService } from '@/core/audit/interfaces';
 import type { AdminService } from '@/core/admin/interfaces';
 import type { RoleService } from '@/core/role/interfaces';
-import type { CompanyAddressService } from '@/core/address/interfaces';
+import type { AddressService, CompanyAddressService } from '@/core/address/interfaces';
 import type { ResourceRelationshipService } from '@/core/resourceRelationship/interfaces';
 import type { OAuthService } from '@/core/oauth/interfaces';
 
@@ -56,7 +56,7 @@ import { getApiConsentService } from '@/services/consent/factory';
 import { getApiAuditService } from '@/services/audit/factory';
 import { getApiAdminService } from '@/services/admin/factory';
 import { getApiRoleService } from '@/services/role/factory';
-import { getApiAddressService } from '@/services/address/factory';
+import { getApiAddressService, getApiPersonalAddressService } from '@/services/address/factory';
 import { getApiResourceRelationshipService } from '@/services/resourceRelationship/factory';
 import { getApiCompanyNotificationService } from '@/services/companyNotification/factory';
 import { getApiOAuthService } from '@/services/oauth/factory';
@@ -233,6 +233,13 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
     serviceInstances.address = getApiAddressService();
   }
 
+  // Create personal address service if not cached
+  if (!serviceInstances.addressService && globalServiceConfig.personalAddressService) {
+    serviceInstances.addressService = globalServiceConfig.personalAddressService;
+  } else if (!serviceInstances.addressService && globalServiceConfig.featureFlags?.addresses !== false) {
+    serviceInstances.addressService = getApiPersonalAddressService();
+  }
+
   // Create OAuth service if not cached
   if (!serviceInstances.oauth && globalServiceConfig.oauthService) {
     serviceInstances.oauth = globalServiceConfig.oauthService;
@@ -277,6 +284,7 @@ export function getServiceContainer(overrides?: Partial<ServiceContainer>): Serv
     admin: overrides?.admin || serviceInstances.admin,
     role: overrides?.role || serviceInstances.role,
     address: overrides?.address || serviceInstances.address,
+    addressService: overrides?.addressService || serviceInstances.addressService,
     oauth: overrides?.oauth || serviceInstances.oauth,
     companyNotification: overrides?.companyNotification || serviceInstances.companyNotification,
     resourceRelationship: overrides?.resourceRelationship || serviceInstances.resourceRelationship,
@@ -420,6 +428,19 @@ export function getConfiguredRoleService(override?: RoleService): RoleService | 
  */
 export function getConfiguredAddressService(override?: CompanyAddressService): CompanyAddressService | undefined {
   return override || globalServiceConfig.addressService || getApiAddressService();
+}
+
+/**
+ * Get a personal address service with fallback to global configuration
+ */
+export function getConfiguredPersonalAddressService(
+  override?: AddressService,
+): AddressService | undefined {
+  return (
+    override ||
+    globalServiceConfig.personalAddressService ||
+    getApiPersonalAddressService()
+  );
 }
 
 /**
