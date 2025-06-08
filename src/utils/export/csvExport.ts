@@ -5,16 +5,16 @@
  * @param columns Optional column configuration
  * @returns CSV string
  */
-export function objectsToCSV<T extends Record<string, any>>(  
+export function objectsToCSV<T extends Record<string, any>>(
   data: T[],
   columns?: {
-    key: keyof T;
-    header: string;
-    format?: (value: any) => string;
+    key: keyof T
+    header: string
+    format?: (value: any) => string
   }[]
 ): string {
   if (!data.length) return '';
-  const cols =
+  const cols: { key: keyof T; header: string; format?: (value: any) => string }[] =
     columns ||
     (Object.keys(data[0]) as (keyof T)[]).map((key) => ({
       key,
