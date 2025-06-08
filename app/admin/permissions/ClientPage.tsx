@@ -3,22 +3,12 @@
 import { Skeleton } from '@/ui/primitives/skeleton';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
 
+import type React from 'react';
 import { PermissionEditor } from '@/ui/styled/permission/PermissionEditor';
 import { usePermissions } from '@/hooks/permission/usePermissions';
 
-export default function PermissionsManagementPageClient(): JSX.Element {
-  const {
-    permissions,
-    permissionCategories,
-    isLoading,
-    error,
-    createPermission,
-    updatePermission,
-    deletePermission,
-    createCategory,
-    selectedPermission,
-    setSelectedPermission
-  } = usePermissions();
+export default function PermissionsManagementPageClient(): React.JSX.Element {
+  const { isLoading, error } = usePermissions();
 
   return (
     <div className="container py-6 space-y-6">
@@ -39,16 +29,7 @@ export default function PermissionsManagementPageClient(): JSX.Element {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : (
-        <PermissionEditor
-          permissions={permissions || []}
-          permissionCategories={permissionCategories || []}
-          onCreatePermission={createPermission}
-          onUpdatePermission={updatePermission}
-          onDeletePermission={deletePermission}
-          onCreateCategory={createCategory}
-          selectedPermission={selectedPermission}
-          onSelectPermission={setSelectedPermission}
-        />
+        <PermissionEditor />
       )}
     </div>
   );
