@@ -1,3 +1,3 @@
-export type { IDataExportDataProvider } from '@/core/dataExport/IDataExportDataProvider';
-export * from '@/adapters/dataExport/factory';
-export * from '@/adapters/dataExport/supabase';
+export type { IDataExportDataProvider } from '@/core/data-export/IDataExportDataProvider';
+export * from '@/adapters/data-export/factory';
+export * from '@/adapters/data-export/supabase';

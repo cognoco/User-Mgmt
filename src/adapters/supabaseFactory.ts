@@ -20,8 +20,8 @@ import { IApiKeyDataProvider as ApiKeyDataProvider } from '@/core/api-keys/IApiK
 import { IWebhookDataProvider } from '@/core/webhooks/IWebhookDataProvider';
 import { IOrganizationDataProvider } from '@/core/organization/IOrganizationDataProvider';
 import { IAdminDataProvider } from '@/core/admin/IAdminDataProvider';
-import type { ITwoFactorDataProvider } from '@/core/twoFactor/ITwoFactorDataProvider';
-import { ISavedSearchDataProvider } from '@/core/savedSearch/ISavedSearchDataProvider';
+import type { ITwoFactorDataProvider } from '@/core/two-factor/ITwoFactorDataProvider';
+import { ISavedSearchDataProvider } from '@/core/saved-search/ISavedSearchDataProvider';
 
 
 // Import domain-specific factories
@@ -37,15 +37,15 @@ import { createSupabaseSsoProvider } from '@/adapters/sso/factory';
 import { createSupabaseOAuthProvider } from '@/adapters/oauth/factory';
 import type { OAuthDataProvider } from '@/adapters/oauth';
 import { createSupabaseSubscriptionProvider } from '@/adapters/subscription/factory';
-import { createSupabaseCompanyNotificationProvider } from '@/adapters/companyNotification/factory';
+import { createSupabaseCompanyNotificationProvider } from '@/adapters/company-notification/factory';
 import { createSupabaseWebhookProvider } from '@/adapters/webhooks';
 import { createSupabaseAdminProvider } from '@/adapters/admin/factory';
-import { createSupabaseTwoFactorProvider } from '@/adapters/twoFactor/factory';
-import { createSupabaseSavedSearchProvider } from '@/adapters/savedSearch/factory';
-import { createSupabaseDataExportProvider } from '@/adapters/dataExport/factory';
-import type { IDataExportDataProvider } from '@/core/dataExport/IDataExportDataProvider';
+import { createSupabaseTwoFactorProvider } from '@/adapters/two-factor/factory';
+import { createSupabaseSavedSearchProvider } from '@/adapters/saved-search/factory';
+import { createSupabaseDataExportProvider } from '@/adapters/data-export/factory';
+import type { IDataExportDataProvider } from '@/core/data-export/IDataExportDataProvider';
 import { createSupabaseApiKeyProvider } from '@/adapters/api-keys/factory';
-import type { ICompanyNotificationDataProvider } from '@/core/companyNotification/ICompanyNotificationDataProvider';
+import type { ICompanyNotificationDataProvider } from '@/core/company-notification/ICompanyNotificationDataProvider';
 
 
 

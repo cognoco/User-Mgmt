@@ -11,7 +11,7 @@ import {
   ApiKeyListResult
 } from '@/core/api-keys/models';
 import type { IApiKeyDataProvider } from '@/core/api-keys/IApiKeyDataProvider';
-import { generateApiKey } from '@/lib/apiKeys/apiKeyUtils';
+import { generateApiKey } from '@/lib/api-keys/apiKeyUtils';
 
 export class SupabaseApiKeyProvider implements IApiKeyDataProvider {
   private supabase: SupabaseClient;

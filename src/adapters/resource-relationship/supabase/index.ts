@@ -1,1 +1,1 @@
-export * from '@/adapters/resourceRelationship/supabase/supabaseResourceRelationship.provider';
+export * from '@/adapters/resource-relationship/supabase/supabaseResourceRelationship.provider';

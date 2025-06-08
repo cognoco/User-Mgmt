@@ -1,4 +1,3 @@
-'use client';
 import { Metadata } from 'next';
 import RoleManagementPanel from '@app/admin/permissions/RoleManagementPanel';
 import UserRoleAssignmentPanel from '@app/admin/permissions/UserRoleAssignmentPanel';
