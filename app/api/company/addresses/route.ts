@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { type RouteAuthContext } from "@/middleware/auth";
+import { type AuthContext } from "@/core/config/interfaces";
 import { addressCreateSchema } from "@/core/address/models";
 import { createApiHandler } from "@/lib/api/route-helpers";
 import { createSuccessResponse } from "@/lib/api/common";
@@ -11,7 +11,7 @@ type AddressRequest = z.infer<typeof addressCreateSchema>;
 
 async function handlePost(
   _request: NextRequest,
-  auth: RouteAuthContext,
+  auth: AuthContext,
   data: AddressRequest,
 ) {
   try {
@@ -51,7 +51,7 @@ async function handlePost(
 
 async function handleGet(
   _request: NextRequest,
-  auth: RouteAuthContext,
+  auth: AuthContext,
   _data: unknown,
 ) {
   try {
