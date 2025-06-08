@@ -8,7 +8,10 @@ import { Button } from '@/ui/primitives/button';
 import { Alert } from '@/ui/primitives/alert';
 import { Checkbox } from '@/ui/primitives/checkbox';
 import { Progress } from '@/ui/primitives/progress';
-import { HeadlessMultiStepRegistration } from '@/ui/headless/registration/MultiStepRegistration';
+import {
+  MultiStepRegistration as HeadlessMultiStepRegistration,
+  type MultiStepRegistrationProps,
+} from '@/ui/headless/registration/MultiStepRegistration';
 
 const registrationSchema = z.object({
   email: z.string().email(),
@@ -67,11 +70,16 @@ export function MultiStepRegistration(): React.ReactElement {
     return Object.keys(errors).length === 0;
   };
 
+  type RenderProps = Parameters<
+    MultiStepRegistrationProps['render']
+  >[0];
+
   return (
     <HeadlessMultiStepRegistration
       steps={steps}
       onComplete={handleComplete}
-      render={({ currentStep, next, back, setValue, values, handleSubmit }) => {
+      render={(props: RenderProps) => {
+        const { currentStep, next, back, setValue, values, handleSubmit } = props;
         // Update local state when currentStep changes
         if (currentStep !== currentStepState) {
           setCurrentStepState(currentStep);
