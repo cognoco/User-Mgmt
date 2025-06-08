@@ -4,8 +4,6 @@ export interface AlertManagerOptions {
 
 import { ApplicationError } from '@/core/common/errors';
 import { NotificationChannel } from '@/core/notification/models';
-import { sendEmail } from '@/lib/email/sendEmail';
-import { sendSms } from '@/lib/sms/sendSms';
 
 /** Simple fixed size circular buffer */
 class CircularBuffer<T extends { timestamp: string }> {
@@ -96,25 +94,16 @@ export class AlertManager {
   private async triggerAlert(rule: AlertRule, count: number): Promise<void> {
     const subject = `[${rule.severity.toUpperCase()}] ${rule.name}`;
     const message = `${rule.name} triggered with ${count} errors`;
-    for (const ch of rule.channels) {
-      switch (ch) {
-        case NotificationChannel.EMAIL:
-          await sendEmail({
-            to: process.env.ALERT_EMAIL_TO || 'alerts@example.com',
-            subject,
-            html: message,
-          });
-          break;
-        case NotificationChannel.SMS:
-          await sendSms({
-            to: process.env.ALERT_SMS_TO || '',
-            message,
-          });
-          break;
-        default:
-          console.log(`[${ch}] ${message}`);
-      }
+    
+    // In browser environment, only log the alert
+    if (typeof window !== 'undefined') {
+      console.warn(`Alert triggered: ${message}`);
+      return;
     }
+    
+    // Server-side alert handling would go here
+    // This should be handled by a server-side service
+    console.log(`[SERVER] Alert: ${message}`);
   }
 
   private loadRules(): void {

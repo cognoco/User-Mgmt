@@ -7,7 +7,7 @@ import { KeyboardShortcutsDialog } from '@/ui/styled/common/KeyboardShortcutsDia
 import dynamic from 'next/dynamic';
 import { useGlobalError } from '@/lib/state/errorStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import { initializeErrorSystem, initializeMonitoringSystem } from '@/lib/monitoring';
+import { initializeErrorSystem } from '@/lib/monitoring';
 
 const GlobalErrorDisplay = dynamic(
   () => import('@/ui/styled/common/GlobalErrorDisplay'),
@@ -26,7 +26,6 @@ export default function RootLayoutClient({
   });
   useEffect(() => {
     initializeErrorSystem();
-    initializeMonitoringSystem();
   }, []);
   return (
     <>
