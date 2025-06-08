@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { vi } from 'vitest';
+import { vi, type Mock } from 'vitest';
 import { WebAuthnRegistration } from '@/ui/styled/two-factor/WebAuthnRegistration';
 
 vi.mock('@simplewebauthn/browser', () => ({
@@ -16,7 +16,7 @@ describe('WebAuthnRegistration', () => {
   });
 
   it('registers security key successfully', async () => {
-    (startRegistration as unknown as vi.Mock).mockResolvedValue({ id: 'cred' });
+    (startRegistration as unknown as Mock).mockResolvedValue({ id: 'cred' });
     const fetchMock = vi.fn()
       .mockResolvedValueOnce({ ok: true, json: async () => ({ challenge: 'c' }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ success: true }) });

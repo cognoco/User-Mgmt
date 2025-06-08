@@ -1,5 +1,5 @@
 import React from 'react';
-import { WebhookForm as HeadlessWebhookForm } from '@/ui/headless/webhooks/WebhookForm';
+import { WebhookForm as HeadlessWebhookForm, type WebhookFormRenderProps } from '@/ui/headless/webhooks/WebhookForm';
 import { Input } from '@/ui/primitives/input';
 import { Button } from '@/ui/primitives/button';
 import { Checkbox } from '@/ui/primitives/checkbox';
@@ -31,34 +31,21 @@ export function WebhookForm({
   error: externalError = null,
   children
 }: WebhookFormProps) {
-  const renderDefault = ({ 
-    data, 
-    setData, 
-    submit, 
-    loading, 
-    error: formError 
-  }: {
-    data: WebhookCreatePayload;
-    setData: (data: WebhookCreatePayload) => void;
-    submit: () => Promise<void>;
-    loading: boolean;
-    error: string | null;
-  }) => {
-    const toggleEvent = (event: string) => {
-      setData({
-        ...data,
-        events: data.events.includes(event)
-          ? data.events.filter(e => e !== event)
-          : [...data.events, event]
-      });
-    };
+  const renderDefault = ({
+    data,
+    setData,
+    submit,
+    isSubmitting,
+    error: formError,
+    toggleEvent
+  }: WebhookFormRenderProps) => {
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
       void submit();
     };
 
-    const isLoading = loading || externalLoading;
+    const isLoading = isSubmitting || externalLoading;
     const error = formError || externalError;
 
     return (
@@ -115,9 +102,16 @@ export function WebhookForm({
     );
   };
 
+  const render = children ?? renderDefault;
+
   return (
-    <HeadlessWebhookForm userId={userId} onSubmit={onSubmit}>
-      {children || renderDefault}
+    <HeadlessWebhookForm
+      userId={userId}
+      onSubmit={onSubmit}
+      loading={externalLoading}
+      error={externalError}
+    >
+      {render}
     </HeadlessWebhookForm>
   );
 }

@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { corsHeaders, createJsonResponse, createErrorResponse } from '@/supabase/functions/_shared/cors.ts';
+import { corsHeaders, createJsonResponse, createErrorResponse } from '../_shared/cors';
 
 console.log('Hello from cleanup-unverified-users Function!')
 
@@ -8,7 +8,7 @@ const CLEANUP_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 // Alternative: Use ISO duration string for Supabase query if needed
 // const CLEANUP_THRESHOLD_INTERVAL = '24 hours'; 
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
   // This function should be triggered by a schedule, not HTTP requests.
   // However, we need the basic serve structure for deployment.
   // We can add a check for a secret header if we want manual invocation later.
@@ -109,11 +109,12 @@ Deno.serve(async (req) => {
       message: `Cleanup complete. Deleted ${deletedCount} users.`,
       failures: failedDeletions 
     });
-  } catch (error) {
-    console.error('Error during cleanup:', error);
-    return createErrorResponse(error.message || 'Unknown error occurred');
-  }
-})
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Error during cleanup:', error);
+      return createErrorResponse(message);
+    }
+  })
 
 // Note: You need to configure Supabase Function secrets for:
 // - SUPABASE_URL

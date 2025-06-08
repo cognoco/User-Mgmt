@@ -17,3 +17,5 @@ declare module '../_shared/cors.ts' {
   export function createJsonResponse(data: any, status?: number): Response;
   export function createErrorResponse(message: string, status?: number): Response;
 }
+
+declare const Deno: any;

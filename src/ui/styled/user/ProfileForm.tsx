@@ -45,13 +45,13 @@ export function ProfileForm() {
         onSubmit,
         userEmail
       }) => {
-        const handlePrivacyChangeWithToast = async (checked: boolean) => {
-          try {
-            const response = await handlePrivacyChange(checked);
-            toast({ 
-              title: "Success", 
-              description: response.message || "Privacy settings updated successfully" 
-            });
+          const handlePrivacyChangeWithToast = async (checked: boolean) => {
+            try {
+              await handlePrivacyChange(checked);
+              toast({
+                title: "Success",
+                description: "Privacy settings updated successfully"
+              });
           } catch (err: any) {
             toast({
               variant: "destructive",

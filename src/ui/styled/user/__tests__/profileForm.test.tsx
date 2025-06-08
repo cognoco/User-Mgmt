@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
+import type { UseFormRegister, UseFormWatch } from 'react-hook-form';
 import { ProfileForm } from '@/ui/styled/user/ProfileForm';
 import HeadlessProfileForm from '@/ui/headless/user/ProfileForm';
 
@@ -29,8 +30,8 @@ vi.mock('@/ui/headless/user/ProfileForm', () => {
         isEditing: false,
         errors: {},
         isDirty: false,
-        register: () => ({}),
-        watch: () => true,
+        register: (() => ({} as any)) as unknown as UseFormRegister<any>,
+        watch: (() => true) as unknown as UseFormWatch<any>,
         handleSubmit: (cb: any) => (e: any) => {
           e.preventDefault();
           return cb({});
@@ -89,8 +90,8 @@ describe('Styled ProfileForm Component', () => {
         isEditing: false,
         errors: {},
         isDirty: false,
-        register: () => ({}),
-        watch: () => true,
+        register: (() => ({} as any)) as unknown as UseFormRegister<any>,
+        watch: (() => true) as unknown as UseFormWatch<any>,
         handleSubmit: (cb: any) => (e: any) => {
           e.preventDefault();
           return cb({});
@@ -145,8 +146,8 @@ describe('Styled ProfileForm Component', () => {
         isEditing: true, // Set to true for edit mode
         errors: {},
         isDirty: true,
-        register: () => ({}),
-        watch: () => true,
+        register: (() => ({} as any)) as unknown as UseFormRegister<any>,
+        watch: (() => true) as unknown as UseFormWatch<any>,
         handleSubmit: (cb: any) => (e: any) => {
           e.preventDefault();
           return cb({});
@@ -198,8 +199,8 @@ describe('Styled ProfileForm Component', () => {
         isEditing: true,
         errors: {},
         isDirty: false,
-        register: () => ({}),
-        watch: () => true,
+        register: (() => ({} as any)) as unknown as UseFormRegister<any>,
+        watch: (() => true) as unknown as UseFormWatch<any>,
         handleSubmit: (cb: any) => (e: any) => {
           e.preventDefault();
           return cb({});
@@ -250,8 +251,8 @@ describe('Styled ProfileForm Component', () => {
           phone_number: { message: 'Invalid phone number' }
         },
         isDirty: true,
-        register: () => ({}),
-        watch: () => true,
+        register: (() => ({} as any)) as unknown as UseFormRegister<any>,
+        watch: (() => true) as unknown as UseFormWatch<any>,
         handleSubmit: (cb: any) => (e: any) => {
           e.preventDefault();
           return cb({});
@@ -295,8 +296,8 @@ describe('Styled ProfileForm Component', () => {
         isEditing: false,
         errors: {},
         isDirty: false,
-        register: () => ({}),
-        watch: () => true,
+        register: (() => ({} as any)) as unknown as UseFormRegister<any>,
+        watch: (() => true) as unknown as UseFormWatch<any>,
         handleSubmit: (cb: any) => (e: any) => {
           e.preventDefault();
           return cb({});
