@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getApiAuditService } from "@/services/audit/factory";
-import { middleware } from "@/middleware";
+import {
+  createMiddlewareChain,
+  errorHandlingMiddleware,
+  routeAuthMiddleware,
+  rateLimitMiddleware,
+} from "@/middleware/createMiddlewareChain";
+import { withSecurity } from "@/middleware/withSecurity";
+import type { RouteAuthContext } from "@/middleware/auth";
 
 const querySchema = z.object({
   startDate: z.string().optional(),
@@ -14,53 +21,48 @@ const querySchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).optional(),
 });
 
-export const GET = middleware(
-  ["cors", "csrf", "rateLimit"],
-  async (req: NextRequest) => {
-    try {
-      const user = (req as any).user;
-      if (!user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
+const middleware = createMiddlewareChain([
+  rateLimitMiddleware(),
+  errorHandlingMiddleware(),
+  routeAuthMiddleware({ includeUser: true }),
+]);
 
-      const params = querySchema.parse(
-        Object.fromEntries(new URL(req.url).searchParams.entries()),
-      );
+async function handleGet(
+  req: NextRequest,
+  auth: RouteAuthContext,
+) {
+  if (!auth.userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-      const service = getApiAuditService();
-      if (!service) {
-        return NextResponse.json(
-          { error: "Audit service not available" },
-          { status: 500 },
-        );
-      }
+  const params = querySchema.parse(
+    Object.fromEntries(new URL(req.url).searchParams.entries()),
+  );
 
-      const { logs, count } = await service.getLogs({
-        ...params,
-        resourceType: "permission",
-      });
+  const service = getApiAuditService();
+  if (!service) {
+    return NextResponse.json(
+      { error: "Audit service not available" },
+      { status: 500 },
+    );
+  }
 
-      return NextResponse.json({
-        logs,
-        pagination: {
-          page: params.page,
-          limit: params.limit,
-          total: count,
-          totalPages: Math.ceil(count / params.limit),
-        },
-      });
-    } catch (error) {
-      console.error("Error in permission audit endpoint:", error);
-      if (error instanceof z.ZodError) {
-        return NextResponse.json(
-          { error: "Invalid query parameters", details: error.errors },
-          { status: 400 },
-        );
-      }
-      return NextResponse.json(
-        { error: "Internal server error" },
-        { status: 500 },
-      );
-    }
-  },
+  const { logs, count } = await service.getLogs({
+    ...params,
+    resourceType: "permission",
+  });
+
+  return NextResponse.json({
+    logs,
+    pagination: {
+      page: params.page,
+      limit: params.limit,
+      total: count,
+      totalPages: Math.ceil(count / params.limit),
+    },
+  });
+}
+
+export const GET = withSecurity((req: NextRequest) =>
+  middleware((r, auth) => handleGet(r, auth))(req)
 );
