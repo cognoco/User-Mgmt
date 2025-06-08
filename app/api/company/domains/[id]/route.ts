@@ -10,6 +10,7 @@ import {
 import { z } from "zod";
 import { checkPermission } from "@/lib/auth/permissionCheck";
 import { PermissionValues } from "@/core/permission/models";
+import { type RouteAuthContext } from "@/middleware/auth";
 
 // Validation schema for updating a domain
 const domainUpdateSchema = z.object({

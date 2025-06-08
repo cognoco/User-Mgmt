@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { getApiCompanyService } from "@/services/company/factory";
-import { type RouteAuthContext } from "@/middleware/auth";
+import type { AuthContext } from "@/core/config/interfaces";
 import { withSecurity } from "@/middleware/withSecurity";
 import { createApiHandler } from "@/lib/api/routeHelpers";
 import {
@@ -40,7 +40,7 @@ const ALLOWED_MIME_TYPES = [
 // --- POST Handler for uploading company documents ---
 async function handlePost(
   _request: NextRequest,
-  auth: RouteAuthContext,
+  auth: AuthContext,
   data: DocumentUploadRequest,
 ) {
   try {
@@ -86,7 +86,7 @@ async function handlePost(
 // --- GET Handler for fetching company documents ---
 async function handleGet(
   request: NextRequest,
-  auth: RouteAuthContext,
+  auth: AuthContext,
   _data: unknown,
 ) {
   try {
