@@ -64,6 +64,7 @@ Validation errors are used for most data issues.
 | server/database_error | Database error | Connection or query failure | Retry or contact support | 500 |
 | server/operation_failed | Operation failed | Unexpected issue | Retry or contact support | 500 |
 | server/retrieval_failed | Retrieval failed | Backend could not load data | Retry or contact support | 500 |
+| server/delete_failed | Delete failed | Could not delete resource | Retry or contact support | 500 |
 
 ## Searching and Filtering
 
