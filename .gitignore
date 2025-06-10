@@ -59,3 +59,8 @@ node_modules/
 # OS specific
 # Task files
 tasks.json
+
+# Generated files
+generated/
+*.d.ts
+!src/**/*.d.ts
