@@ -1,5 +1,4 @@
 import { getServiceSupabase } from '@/lib/database/supabase';
-import { sendCompanyNotification } from '@/lib/notifications/sendCompanyNotification';
 
 /**
  * Checks if an email domain matches any verified company domains

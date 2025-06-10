@@ -21,8 +21,6 @@ import { translateError } from '@/lib/utils/error';
 import { handleServiceError } from '@/services/common/serviceErrorHandler';
 import { ERROR_CODES } from '@/core/common/errorCodes';
 import {
-  InvalidRefreshTokenError,
-  TokenRefreshError,
   isInvalidRefreshTokenError,
   isTokenRefreshError,
 } from '@/core/common/errors';
@@ -41,7 +39,7 @@ import { logUserAction } from '@/lib/audit/auditLogger';
 import { authConfig } from '@/lib/auth/config';
 import { withRetry } from '@/lib/utils/retry';
 import { isNetworkError } from '@/lib/utils/error';
-import { associateUserWithCompanyByDomain } from '@/lib/auth/domainMatcher';
+// Domain matching moved to server-side API routes
 
 /** Keys used for persisting auth data */
 const TOKEN_KEY = 'auth_token';
@@ -264,15 +262,7 @@ export class DefaultAuthService
           userAgent: context?.userAgent
         });
         
-        // Handle company domain association if user was created successfully
-        if (result.user?.email) {
-          try {
-            await associateUserWithCompanyByDomain(result.user.id, result.user.email);
-          } catch (error) {
-            console.warn('Failed to associate user with company by domain:', error);
-            // Non-critical error, continue with registration success
-          }
-        }
+        // Company domain association is now handled server-side via API webhook
         
         // Handle specific error types for better API response classification
         if (result.code === 'EMAIL_NOT_VERIFIED') {

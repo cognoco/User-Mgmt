@@ -31,6 +31,8 @@ This document outlines the detailed step-by-step implementation plan to address 
 ```bash
 # Run TypeScript compilation check
 npx tsc --noEmit 2>&1 | wc -l
+# count
+(npx tsc --noEmit 2>&1 | Measure-Object).Count
 
 # Get specific error patterns (first 50 errors)
 npx tsc --noEmit > typescript-errors.txt 2>&1
