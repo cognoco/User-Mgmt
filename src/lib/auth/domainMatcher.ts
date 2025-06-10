@@ -1,4 +1,5 @@
 import { getServiceSupabase } from '@/lib/database/supabase';
+import { sendCompanyNotification } from '@/lib/notifications/sendCompanyNotification';
 
 /**
  * Checks if an email domain matches any verified company domains
@@ -138,12 +139,17 @@ export async function associateUserWithCompanyByDomain(userId: string, email: st
     }
 
     // Send notification to company admins
-    await sendCompanyNotification({
-      companyId,
-      notificationType: 'new_member_domain',
-      subject: 'New Team Member Joined',
-      content: `A new user (${email}) has joined your company via verified domain.`
-    });
+    try {
+      await sendCompanyNotification({
+        companyId,
+        notificationType: 'new_member_domain',
+        subject: 'New Team Member Joined',
+        content: `A new user (${email}) has joined your company via verified domain.`
+      });
+    } catch (notificationError) {
+      console.error('Error sending company notification:', notificationError);
+      // Don't fail the whole operation if notification fails
+    }
 
     return {
       success: true,

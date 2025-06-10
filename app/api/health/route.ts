@@ -28,4 +28,6 @@ async function handleGet() {
   }
 }
 
-export const GET = middleware(() => handleGet());
+export function GET() {
+  return middleware(() => handleGet())();
+}

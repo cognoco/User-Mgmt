@@ -1,9 +1,18 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { vi, type Mock } from 'vitest';
-import DeleteAccountDialog from '@/ui/styled/account/DeleteAccountDialog';
+import { vi, describe, it, expect, beforeEach } from 'vitest'
+import { DeleteAccountDialog } from '../DeleteAccountDialog';
 import { useDeleteAccount } from '@/hooks/user/useDeleteAccount';
 import { act } from 'react';
+
+// Mock Next.js router
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+  }),
+  usePathname: () => '/account',
+}));
 
 // Mock the custom hook
 vi.mock('@/hooks/user/useDeleteAccount');
@@ -26,9 +35,7 @@ describe('DeleteAccountDialog', () => {
 
   const renderComponent = (open = true) => {
     return render(
-      <MemoryRouter>
-        <DeleteAccountDialog open={open} onClose={handleClose} />
-      </MemoryRouter>
+      <DeleteAccountDialog open={open} onClose={handleClose} />
     );
   };
 

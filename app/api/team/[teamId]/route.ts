@@ -62,7 +62,7 @@ async function handleDelete(
 
 export const GET = (
   req: Request,
-  ctx: { params: { teamId: string } }
+  ctx: { params: Promise<{ teamId: string }> }
 ) => {
   const parsed = ParamSchema.safeParse(ctx.params);
   if (!parsed.success) {
@@ -76,7 +76,7 @@ export const GET = (
 
 export const PATCH = (
   req: Request,
-  ctx: { params: { teamId: string } }
+  ctx: { params: Promise<{ teamId: string }> }
 ) => {
   const parsed = ParamSchema.safeParse(ctx.params);
   if (!parsed.success) {
@@ -90,7 +90,7 @@ export const PATCH = (
 
 export const DELETE = (
   req: Request,
-  ctx: { params: { teamId: string } }
+  ctx: { params: Promise<{ teamId: string }> }
 ) => {
   const parsed = ParamSchema.safeParse(ctx.params);
   if (!parsed.success) {

@@ -7,6 +7,8 @@ YOU HAVE ACCESS TO ALL FIES IN THE CODEBASE, don’t ask me to share code or che
 ALWAYS READ: docs\Product documentation\Architecture Guidelines.md.
 NEVER USE REAL API KEYS in any config file - always reference .env file. 
 
+Do not run the terminal - provide user with the terminal command for Powershell and wait for the user to provide the output unless user specifies that you shall run the terminal. 
+
 
 - **Required Rule Structure:**
   ```markdown

@@ -1,7 +1,7 @@
 'use client';
 import { FeatureFlagsPanel } from '@/ui/styled/admin/FeatureFlagsPanel';
 
-export default function FeatureFlagsPage(): JSX.Element {
+export default function FeatureFlagsPage() {
   return (
     <div className="container py-6 space-y-4">
       <div>

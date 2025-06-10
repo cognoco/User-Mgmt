@@ -53,28 +53,29 @@ export async function GET(req: NextRequest) {
  * POST /api/profile/export
  * Initiate a new export request
  */
-export const POST = middleware(['cors', 'csrf'], async (req: NextRequest) => {
-  const user = (req as any).user;
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export async function POST(req: NextRequest) {
+  return middleware(['cors', 'csrf'], async (request: NextRequest) => {
+    const user = (request as any).user;
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  return withExportRateLimit(
-    req,
-    async (request: NextRequest) => {
-      try {
-        // Parse and validate request body
-        const body = await request.json().catch(() => ({}));
-        const parseResult = exportOptionsSchema.safeParse(body);
-        
-        if (!parseResult.success) {
-          return NextResponse.json({ 
-            error: 'Invalid export options',
-            details: parseResult.error.format()
-          }, { status: 400 });
-        }
-        
-        const requestedFormat = parseResult.data.format;
+    return withExportRateLimit(
+      request,
+      async (innerRequest: NextRequest) => {
+        try {
+          // Parse and validate request body
+          const body = await innerRequest.json().catch(() => ({}));
+          const parseResult = exportOptionsSchema.safeParse(body);
+          
+          if (!parseResult.success) {
+            return NextResponse.json({ 
+              error: 'Invalid export options',
+              details: parseResult.error.format()
+            }, { status: 400 });
+          }
+          
+          const requestedFormat = parseResult.data.format;
         
         // Log the export request
         await logUserAction({
@@ -119,11 +120,12 @@ export const POST = middleware(['cors', 'csrf'], async (req: NextRequest) => {
           error: 'Failed to initiate export',
           details: error instanceof Error ? error.message : 'Unknown error'
         }, { status: 500 });
-      }
-    },
-    { type: 'user', userId: user.id }
-  );
-});
+        }
+      },
+      { type: 'user', userId: user.id }
+    );
+  })(req);
+}
 
 /**
  * Legacy handler for immediate exports

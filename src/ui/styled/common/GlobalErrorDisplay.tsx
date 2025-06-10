@@ -2,7 +2,7 @@
 
 import React, { Suspense } from "react";
 import { DevErrorDetailsPanel } from '@/ui/styled/common/DevErrorDetailsPanel';
-import { getClientConfig } from '@/core/config/runtimeConfig';
+import { getClientConfig } from '@/core/config/clientConfig';
 import { useGlobalError, useErrorStore } from "@/lib/state/errorStore";
 
 const ApiErrorAlert = React.lazy(() => import("@/ui/styled/common/ApiErrorAlert"));

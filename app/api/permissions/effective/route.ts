@@ -44,4 +44,6 @@ async function handleGet(req: NextRequest, auth: any, data: z.infer<typeof query
   });
 }
 
-export const GET = middleware(handleGet);
+export function GET(req: NextRequest) {
+  return middleware(handleGet)(req);
+}

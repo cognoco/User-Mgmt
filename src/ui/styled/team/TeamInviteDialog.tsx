@@ -1,3 +1,4 @@
+'use client';
 // NOTE: This component handles sending team invitations and does not have a
 // matching headless implementation yet, so it retains its local logic.
 import React, { useState } from 'react';
@@ -35,7 +36,7 @@ async function inviteTeamMember(data: { email: string; role: 'admin' | 'member' 
   }
 }
 
-export function TeamInviteDialog({ availableSeats }: TeamInviteDialogProps): JSX.Element {
+export function TeamInviteDialog({ availableSeats }: TeamInviteDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'admin' | 'member'>('member');

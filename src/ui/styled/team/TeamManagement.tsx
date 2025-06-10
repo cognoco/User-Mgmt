@@ -91,7 +91,7 @@ async function removeMember(memberId: string): Promise<void> {
   }
 }
 
-export function TeamManagement(): JSX.Element {
+export function TeamManagement() {
   const [isUpdateOpen, setIsUpdateOpen] = useState<boolean>(false);
   const [newSeatCount, setNewSeatCount] = useState<string>('');
   const queryClient = useQueryClient();

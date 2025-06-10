@@ -5,6 +5,7 @@
  */
 
 export type { IUserDataProvider } from '@/core/user/IUserDataProvider';
-export * from '@/adapters/user/factory';
-export * from '@/adapters/user/supabaseUserProvider';
-export * from '@/adapters/user/supabase';
+export { createUserProvider } from '@/adapters/user/factory';
+// Export Supabase-specific items from the main provider file to avoid duplicates
+export { SupabaseUserProvider } from '@/adapters/user/supabaseUserProvider';
+export { createSupabaseUserProvider } from '@/adapters/user/factory';

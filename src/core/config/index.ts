@@ -131,9 +131,10 @@ export function getServiceProvider<T>(providerName: string): T | undefined {
 export * from '@/core/config/interfaces';
 export * from '@/core/config/configContext';
 export * from '@/core/config/adapterConfig';
-export * from '@/core/config/clientConfig';
-export * from '@/core/config/environment';
-export * from '@/core/config/runtimeConfig';
+// Export specific items to avoid conflicts between client and runtime configs
+export { type ClientConfig, getClientConfig, clientConfig } from '@/core/config/clientConfig';
+export { loadEnvironment, validateEnvironment } from '@/core/config/environment';
+export { type RuntimeConfig, getServerConfig, initializeConfiguration } from '@/core/config/runtimeConfig';
 export * from '@/core/config/AppInitializer';
 
 // Export a singleton instance for convenience

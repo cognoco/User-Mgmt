@@ -5,6 +5,7 @@
  */
 
 export type { IPermissionDataProvider } from '@/core/permission/IPermissionDataProvider';
-export * from '@/adapters/permission/factory';
-export * from '@/adapters/permission/supabasePermissionProvider';
-export * from '@/adapters/permission/supabase';
+export { createPermissionProvider } from '@/adapters/permission/factory';
+// Export Supabase-specific items from the main provider file to avoid duplicates
+export { SupabasePermissionProvider } from '@/adapters/permission/supabasePermissionProvider';
+export { createSupabasePermissionProvider } from '@/adapters/permission/factory';

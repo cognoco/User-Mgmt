@@ -6,7 +6,7 @@ import { checkRateLimit } from '@/middleware/rateLimit';
 import { logUserAction } from '@/lib/audit/auditLogger';
 import { ApiError, ERROR_CODES, createSuccessResponse } from '@/lib/api/common';
 
-async function handlePost(request: NextRequest, params: { id: string }, auth: { userId?: string }) {
+async function handlePost(request: NextRequest, params: Promise<{ id: string }>, auth: { userId?: string }) {
   if (await checkRateLimit(request, { windowMs: 15 * 60 * 1000, max: 10 })) {
     throw new ApiError(ERROR_CODES.OPERATION_FAILED, 'Too many requests', 429);
   }
@@ -15,8 +15,9 @@ async function handlePost(request: NextRequest, params: { id: string }, auth: { 
   const userAgent = request.headers.get('user-agent') || 'unknown';
 
   try {
+    const { id } = await params;
     const companyService = getApiCompanyService();
-    const result = await companyService.checkDomainVerification(params.id, auth.userId!);
+    const result = await companyService.checkDomainVerification(id, auth.userId!);
 
     await logUserAction({
       userId: auth.userId,
@@ -25,7 +26,7 @@ async function handlePost(request: NextRequest, params: { id: string }, auth: { 
       ipAddress,
       userAgent,
       targetResourceType: 'company',
-      targetResourceId: params.id,
+      targetResourceId: id,
     });
 
     return createSuccessResponse({ verified: result.verified, message: result.message }, result.verified ? 200 : 400);
@@ -37,7 +38,7 @@ async function handlePost(request: NextRequest, params: { id: string }, auth: { 
       ipAddress,
       userAgent,
       targetResourceType: 'company',
-      targetResourceId: params.id,
+      targetResourceId: id,
       details: { error: error?.message }
     });
 
@@ -52,5 +53,5 @@ async function handlePost(request: NextRequest, params: { id: string }, auth: { 
   }
 }
 
-export const POST = (req: NextRequest, ctx: { params: { id: string } }) =>
+export const POST = (req: NextRequest, ctx: { params: Promise<{ id: string }> }) =>
   createApiHandler(z.object({}), (r, a) => handlePost(r, ctx.params, a), { requireAuth: true })(req);

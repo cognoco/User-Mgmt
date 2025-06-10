@@ -146,3 +146,6 @@ export function withSecurity(
 
 export { withErrorHandling } from '@/middleware/errorHandling';
 export { correlationIdMiddleware };
+
+// Export default middleware for convenience
+export const middleware = defaultSecurityMiddleware;

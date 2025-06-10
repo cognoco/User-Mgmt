@@ -7,12 +7,14 @@ import { getServiceContainer } from '@/lib/config/serviceContainer'
 
 const querySchema = z.object({ limit: z.coerce.number().int().min(1).max(100).optional() })
 
-async function handleGet(req: NextRequest, ctx: any, data: z.infer<typeof querySchema>, params: { webhookId: string }) {
+async function handleGet(req: NextRequest, ctx: any, data: z.infer<typeof querySchema>, params: Promise<{ webhookId: string }>) {
+  
+  const { webhookId } = await params;
   if (await checkRateLimit(req)) {
     throw new ApiError(ERROR_CODES.OPERATION_FAILED, 'Too many requests', 429)
   }
   const service = getServiceContainer().webhook!
-  const hook = await service.getWebhook(ctx.userId!, params.webhookId)
+  const hook = await service.getWebhook(ctx.userId!, webhookId)
   if (!hook) {
     throw new ApiError(ERROR_CODES.NOT_FOUND, 'Webhook not found', 404)
   }
@@ -20,5 +22,5 @@ async function handleGet(req: NextRequest, ctx: any, data: z.infer<typeof queryS
   return createSuccessResponse({ deliveries })
 }
 
-export const GET = (req: NextRequest, ctx: { params: { webhookId: string } }) =>
+export const GET = (req: NextRequest, ctx: { params: Promise<{ webhookId: string }> }) =>
   createApiHandler(querySchema, (r, auth, q) => handleGet(r, auth, q, ctx.params), { requireAuth: true })(req)

@@ -71,3 +71,5 @@ export function RoleHierarchyTree({ tree, onMove }: RoleHierarchyTreeProps) {
   );
 }
 
+export default RoleHierarchyTree;
+

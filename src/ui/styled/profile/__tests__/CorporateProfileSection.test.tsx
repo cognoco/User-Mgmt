@@ -2,13 +2,20 @@ import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
-import * as UserManagementProvider from '@/lib/auth/UserManagementProvider';
-
-import { CorporateProfileSection } from '@/ui/styled/profile/CorporateProfileSection';
+import { CorporateProfileSection } from '../CorporateProfileSection';
 import { UserType, Company } from '@/types/userType';
 import type { UserManagementContextValue } from '@/lib/auth/UserManagementProvider';
 import { Platform } from '@/types/platform';
+
+// Mock Next.js router
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+  }),
+  usePathname: () => '/profile',
+}));
 
 const mockOnUpdate = vi.fn();
 
@@ -131,13 +138,11 @@ describe('CorporateProfileSection Component', () => {
     let container: HTMLElement | undefined;
     await act(async () => {
       const result = render(
-        <MemoryRouter>
-          <CorporateProfileSection 
-            userType={UserType.CORPORATE} 
-            company={initialCompanyData} 
-            onUpdate={mockOnUpdate} 
-          />
-        </MemoryRouter>
+        <CorporateProfileSection 
+          userType={UserType.CORPORATE} 
+          company={initialCompanyData} 
+          onUpdate={mockOnUpdate} 
+        />
       );
       container = result.container;
     });
@@ -148,13 +153,11 @@ describe('CorporateProfileSection Component', () => {
     let container: HTMLElement | undefined;
     await act(async () => {
       const result = render(
-        <MemoryRouter>
-          <CorporateProfileSection 
-            userType={UserType.PRIVATE} // Pass PRIVATE type
-            company={initialCompanyData} 
-            onUpdate={mockOnUpdate} 
-          />
-        </MemoryRouter>
+        <CorporateProfileSection 
+          userType={UserType.PRIVATE} // Pass PRIVATE type
+          company={initialCompanyData} 
+          onUpdate={mockOnUpdate} 
+        />
       );
       container = result.container;
     });
@@ -164,13 +167,11 @@ describe('CorporateProfileSection Component', () => {
   it('should render the form with initial company data', async () => {
     await act(async () => {
       render(
-        <MemoryRouter>
-          <CorporateProfileSection 
-            userType={UserType.CORPORATE} 
-            company={initialCompanyData} 
-            onUpdate={mockOnUpdate} 
-          />
-        </MemoryRouter>
+        <CorporateProfileSection 
+          userType={UserType.CORPORATE} 
+          company={initialCompanyData} 
+          onUpdate={mockOnUpdate} 
+        />
       );
     });
 
@@ -194,13 +195,11 @@ describe('CorporateProfileSection Component', () => {
     const user = userEvent.setup();
     await act(async () => {
       render(
-        <MemoryRouter>
-          <CorporateProfileSection 
-            userType={UserType.CORPORATE} 
-            company={initialCompanyData} 
-            onUpdate={mockOnUpdate} 
-          />
-        </MemoryRouter>
+        <CorporateProfileSection 
+          userType={UserType.CORPORATE} 
+          company={initialCompanyData} 
+          onUpdate={mockOnUpdate} 
+        />
       );
     });
 
@@ -238,13 +237,11 @@ describe('CorporateProfileSection Component', () => {
     const user = userEvent.setup();
     await act(async () => {
       render(
-        <MemoryRouter>
-          <CorporateProfileSection 
-            userType={UserType.CORPORATE} 
-            company={initialCompanyData} // Start with address data
-            onUpdate={mockOnUpdate} 
-          />
-        </MemoryRouter>
+        <CorporateProfileSection 
+          userType={UserType.CORPORATE} 
+          company={initialCompanyData} // Start with address data
+          onUpdate={mockOnUpdate} 
+        />
       );
     });
 

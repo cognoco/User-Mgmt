@@ -1,3 +1,4 @@
+'use client';
 import {
   Dialog,
   DialogContent,
@@ -29,7 +30,7 @@ interface InviteMemberModalProps {
   seatUsage: SeatUsage;
 }
 
-export function InviteMemberModal({ teamId, seatUsage }: InviteMemberModalProps): JSX.Element {
+export function InviteMemberModal({ teamId, seatUsage }: InviteMemberModalProps) {
   return (
     <InviteMemberModalHeadless teamId={teamId} seatUsage={seatUsage}>
       {({ isOpen, open, close, seatUsage: usage, formProps }) => {

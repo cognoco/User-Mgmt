@@ -14,4 +14,6 @@ const middleware = createMiddlewareChain([
   errorHandlingMiddleware()
 ]);
 
-export const GET = middleware(() => handleGet());
+export function GET() {
+  return middleware(() => handleGet())();
+}

@@ -12,7 +12,7 @@ type AddressUpdateRequest = z.infer<typeof addressUpdateSchema>;
 
 async function handlePut(
   _request: NextRequest,
-  params: { addressId: string },
+  params: Promise<{ addressId: string }>,
   auth: AuthContext,
   data: AddressUpdateRequest,
 ) {
@@ -29,9 +29,10 @@ async function handlePut(
       );
     }
 
+    const { addressId } = await params;
     const result = await addressService.updateAddress(
       companyProfile.id,
-      params.addressId,
+      addressId,
       data,
     );
 
@@ -58,7 +59,7 @@ async function handlePut(
 
 async function handleDelete(
   _request: NextRequest,
-  params: { addressId: string },
+  params: Promise<{ addressId: string }>,
   auth: AuthContext,
 ) {
   try {
@@ -74,9 +75,10 @@ async function handleDelete(
       );
     }
 
+    const { addressId } = await params;
     const result = await addressService.deleteAddress(
       companyProfile.id,
-      params.addressId,
+      addressId,
     );
 
     if (!result.success) {
@@ -100,7 +102,7 @@ async function handleDelete(
   }
 }
 
-export const PUT = (req: NextRequest, ctx: { params: { addressId: string } }) =>
+export const PUT = (req: NextRequest, ctx: { params: Promise<{ addressId: string }> }) =>
   createApiHandler(
     addressUpdateSchema,
     (r, auth, data) => handlePut(r, ctx.params, auth, data),
@@ -109,7 +111,7 @@ export const PUT = (req: NextRequest, ctx: { params: { addressId: string } }) =>
 
 export const DELETE = (
   req: NextRequest,
-  ctx: { params: { addressId: string } },
+  ctx: { params: Promise<{ addressId: string }> },
 ) =>
   createApiHandler(
     z.object({}),

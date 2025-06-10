@@ -10,11 +10,12 @@ const domainSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { orgId: string } }
+  { params }: { params: Promise<{ orgId: string }> }
 ) {
   try {
+    const { orgId } = await params;
     const domains = await prisma.domain.findMany({
-      where: { organizationId: params.orgId }
+      where: { organizationId: orgId }
     });
     return NextResponse.json(domains);
   } catch (error) {
@@ -25,16 +26,17 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { orgId: string } }
+  { params }: { params: Promise<{ orgId: string }> }
 ) {
   try {
+    const { orgId } = await params;
     const body = await request.json();
     const validatedData = domainSchema.parse(body);
 
     const existingDomain = await prisma.domain.findFirst({
       where: { 
         domain: validatedData.domain,
-        organizationId: params.orgId 
+        organizationId: orgId 
       }
     });
 
@@ -48,7 +50,7 @@ export async function POST(
     const domain = await prisma.domain.create({
       data: {
         ...validatedData,
-        organizationId: params.orgId
+        organizationId: orgId
       }
     });
 
@@ -70,15 +72,16 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { orgId: string } }
+  { params }: { params: Promise<{ orgId: string }> }
 ) {
   try {
+    const { orgId } = await params;
     const { domain } = await request.json();
     
     const existingDomain = await prisma.domain.findFirst({
       where: { 
         domain,
-        organizationId: params.orgId 
+        organizationId: orgId 
       }
     });
 

@@ -9,46 +9,50 @@ const notificationPrefsSchema = z.object({
   marketing: z.boolean().optional(),
 });
 
-export const GET = middleware(['cors', 'csrf', 'rateLimit'], async (req: NextRequest) => {
-  const user = (req as any).user;
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export async function GET(req: NextRequest) {
+  return middleware(['cors', 'csrf', 'rateLimit'], async (request: NextRequest) => {
+    const user = (request as any).user;
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  const service = getApiNotificationService();
-  let preferences;
-  try {
-    preferences = await service.getUserPreferences(user.id);
-  } catch {
-    return NextResponse.json({ error: 'Failed to fetch notification preferences' }, { status: 500 });
-  }
-  return NextResponse.json({ notifications: preferences });
-});
+    const service = getApiNotificationService();
+    let preferences;
+    try {
+      preferences = await service.getUserPreferences(user.id);
+    } catch {
+      return NextResponse.json({ error: 'Failed to fetch notification preferences' }, { status: 500 });
+    }
+    return NextResponse.json({ notifications: preferences });
+  })(req);
+}
 
-export const PUT = middleware(['cors', 'csrf', 'rateLimit'], async (req: NextRequest) => {
-  const user = (req as any).user;
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export async function PUT(req: NextRequest) {
+  return middleware(['cors', 'csrf', 'rateLimit'], async (request: NextRequest) => {
+    const user = (request as any).user;
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  let body;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
-  }
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    }
 
-  const parse = notificationPrefsSchema.safeParse(body);
-  if (!parse.success) {
-    return NextResponse.json({ error: 'Invalid notification preferences', details: parse.error.errors }, { status: 400 });
-  }
+    const parse = notificationPrefsSchema.safeParse(body);
+    if (!parse.success) {
+      return NextResponse.json({ error: 'Invalid notification preferences', details: parse.error.errors }, { status: 400 });
+    }
 
-  const service = getApiNotificationService();
-  try {
-    await service.updateUserPreferences(user.id, parse.data);
-  } catch {
-    return NextResponse.json({ error: 'Failed to update notification preferences' }, { status: 500 });
-  }
+    const service = getApiNotificationService();
+    try {
+      await service.updateUserPreferences(user.id, parse.data);
+    } catch {
+      return NextResponse.json({ error: 'Failed to update notification preferences' }, { status: 500 });
+    }
 
-  return NextResponse.json({ success: true });
-});
+    return NextResponse.json({ success: true });
+  })(req);
+}

@@ -75,4 +75,6 @@ const middleware = createMiddlewareChain([
   validationMiddleware(acceptInviteSchema)
 ]);
 
-export const POST = middleware(handleAccept);
+export function POST(req: NextRequest) {
+  return middleware(handleAccept)(req);
+}

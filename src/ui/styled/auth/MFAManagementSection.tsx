@@ -151,3 +151,4 @@ const MFAManagementSection: React.FC<MFAManagementSectionProps> = (): React.JSX.
 }
 
 export default MFAManagementSection;
+export { MFAManagementSection };

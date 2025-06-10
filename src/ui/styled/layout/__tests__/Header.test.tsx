@@ -1,12 +1,19 @@
-import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { render, screen } from '@/tests/testUtils';
-import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Header } from '@/ui/styled/layout/Header';
+import { render, screen } from '@testing-library/react';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { Header } from '../Header';
 
 let authState: any;
 let logoutMock: any;
+
+// Mock Next.js router
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+  }),
+  usePathname: () => '/',
+}));
 
 vi.mock('@/hooks/auth/useAuth', () => ({
   useAuth: () => authState,
@@ -29,9 +36,7 @@ describe('Header component', () => {
 
   it('shows login link when user is not authenticated', () => {
     render(
-      <MemoryRouter>
-        <Header />
-      </MemoryRouter>
+      <Header />
     );
     expect(screen.getByRole('link', { name: /login/i })).toBeInTheDocument();
   });
@@ -40,9 +45,7 @@ describe('Header component', () => {
     authState.user = { id: '1' };
     const user = userEvent.setup();
     render(
-      <MemoryRouter>
-        <Header />
-      </MemoryRouter>
+      <Header />
     );
     await user.click(screen.getByRole('button', { name: /profile.menu/i }));
     await user.click(screen.getByRole('menuitem', { name: /logout/i }));

@@ -10,12 +10,14 @@ import { getServiceContainer } from '@/lib/config/serviceContainer'
 const updateSchema = webhookUpdateSchema
 const idParamSchema = z.object({ webhookId: z.string() })
 
-async function handleGet(req: NextRequest, ctx: any, _data: unknown, params: { webhookId: string }) {
+async function handleGet(req: NextRequest, ctx: any, _data: unknown, params: Promise<{ webhookId: string }>) {
+  
+  const { webhookId } = await params;
   if (await checkRateLimit(req)) {
     throw new ApiError(ERROR_CODES.OPERATION_FAILED, 'Too many requests', 429)
   }
   const service = getServiceContainer().webhook!
-  const hook = await service.getWebhook(ctx.userId!, params.webhookId)
+  const hook = await service.getWebhook(ctx.userId!, webhookId)
   if (!hook) {
     throw new ApiError(ERROR_CODES.NOT_FOUND, 'Webhook not found', 404)
   }
@@ -27,13 +29,15 @@ async function handlePatch(
   req: NextRequest,
   ctx: any,
   data: z.infer<typeof updateSchema>,
-  params: { webhookId: string },
+  params: Promise<{ webhookId: string }>,
 ) {
+  
+  const { webhookId } = await params;
   if (await checkRateLimit(req)) {
     throw new ApiError(ERROR_CODES.OPERATION_FAILED, 'Too many requests', 429)
   }
   const service = getServiceContainer().webhook!
-  const result = await service.updateWebhook(ctx.userId!, params.webhookId, {
+  const result = await service.updateWebhook(ctx.userId!, webhookId, {
     name: data.name,
     url: data.url,
     events: data.events,
@@ -64,13 +68,15 @@ async function handleDelete(
   req: NextRequest,
   ctx: any,
   _data: unknown,
-  params: { webhookId: string },
+  params: Promise<{ webhookId: string }>,
 ) {
+  
+  const { webhookId } = await params;
   if (await checkRateLimit(req)) {
     throw new ApiError(ERROR_CODES.OPERATION_FAILED, 'Too many requests', 429)
   }
   const service = getServiceContainer().webhook!
-  const existing = await service.getWebhook(ctx.userId!, params.webhookId)
+  const existing = await service.getWebhook(ctx.userId!, webhookId)
   if (!existing) {
     throw new ApiError(ERROR_CODES.NOT_FOUND, 'Webhook not found', 404)
   }
@@ -91,11 +97,11 @@ async function handleDelete(
   return createSuccessResponse({ message: 'Webhook deleted successfully' })
 }
 
-export const GET = (req: NextRequest, ctx: { params: { webhookId: string } }) =>
+export const GET = (req: NextRequest, ctx: { params: Promise<{ webhookId: string }> }) =>
   createApiHandler(emptySchema, (r, auth) => handleGet(r, auth, {}, ctx.params), { requireAuth: true })(req)
 
-export const PATCH = (req: NextRequest, ctx: { params: { webhookId: string } }) =>
+export const PATCH = (req: NextRequest, ctx: { params: Promise<{ webhookId: string }> }) =>
   createApiHandler(updateSchema, (r, auth, data) => handlePatch(r, auth, data, ctx.params), { requireAuth: true })(req)
 
-export const DELETE = (req: NextRequest, ctx: { params: { webhookId: string } }) =>
+export const DELETE = (req: NextRequest, ctx: { params: Promise<{ webhookId: string }> }) =>
   createApiHandler(emptySchema, (r, auth, data) => handleDelete(r, auth, data, ctx.params), { requireAuth: true })(req)

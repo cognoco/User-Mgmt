@@ -6,6 +6,6 @@ export const metadata: Metadata = {
   description: 'Manage attribute based access rules'
 };
 
-export default function AccessRulesPage(): JSX.Element {
+export default function AccessRulesPage() {
   return <AccessRulesClientPage />;
 }

@@ -7,10 +7,13 @@ const updateSchema = z.object({
   channel: z.enum(['email', 'in_app', 'both']).optional(),
 });
 
-async function handlePatch(_req: Request, auth: AuthContext, data: z.infer<typeof updateSchema>, services: ServiceContainer, id: string) {
-  const updated = await services.companyNotification!.updatePreference(auth.userId!, id, data);
+async function handlePatch(_req: Request, auth: AuthContext, data: z.infer<typeof updateSchema>, services: ServiceContainer, id: Promise<string>) {
+  const resolvedId = await id;
+  const updated = await services.companyNotification!.updatePreference(auth.userId!, resolvedId, data);
   return new Response(JSON.stringify(updated), { status: 200, headers: { 'Content-Type': 'application/json' } });
 }
 
-export const PATCH = (req: Request, ctx: { params: { id: string } }) =>
-  createApiHandler(updateSchema, (r, a, d, s) => handlePatch(r, a, d, s, ctx.params.id), { requireAuth: true })(req);
+export const PATCH = async (req: Request, ctx: { params: Promise<{ id: string }> }) => {
+  const params = await ctx.params;
+  return createApiHandler(updateSchema, (r, a, d, s) => handlePatch(r, a, d, s, Promise.resolve(params.id)), { requireAuth: true })(req);
+};

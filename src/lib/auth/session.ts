@@ -168,3 +168,6 @@ export async function getSessionFromRequest(req: NextRequest): Promise<CurrentSe
     expiresAt: Date.now() + authConfig.tokenExpiryDays * 24 * 60 * 60 * 1000,
   };
 }
+
+// Export alias for backward compatibility
+export const getSession = getCurrentSession;

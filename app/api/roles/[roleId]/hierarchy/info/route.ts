@@ -12,8 +12,7 @@ const middleware = createMiddlewareChain([
   routeAuthMiddleware(),
 ]);
 
-async function handleGet(_req: NextRequest, ctx: any) {
-  const roleId = ctx.params.roleId;
+async function handleGet(_req: NextRequest, ctx: any, roleId: string) {
   const service = createRoleHierarchyService();
 
   const [ancestors, descendants, inheritedPermissions, effectivePermissions] = await Promise.all([
@@ -32,4 +31,7 @@ async function handleGet(_req: NextRequest, ctx: any) {
   });
 }
 
-export const GET = middleware((req: NextRequest, auth: any) => handleGet(req, auth));
+export const GET = async (req: NextRequest, ctx: { params: Promise<{ roleId: string }> }) => {
+  const { roleId } = await ctx.params;
+  return middleware((r: NextRequest, auth: any) => handleGet(r, auth, roleId))(req);
+};

@@ -9,7 +9,7 @@ import { createSuccessResponse } from "@/lib/api/common";
 // --- DELETE Handler for removing company documents ---
 async function handleDelete(
   _request: NextRequest,
-  params: { documentId: string },
+  params: Promise<{ documentId: string }>,
   auth: AuthContext,
 ) {
   try {
@@ -25,9 +25,10 @@ async function handleDelete(
       );
     }
 
+    const { documentId } = await params;
     const document = await companyService.getDocument(
       companyProfile.id,
-      params.documentId,
+      documentId,
     );
 
     if (!document) {
@@ -37,7 +38,7 @@ async function handleDelete(
       );
     }
 
-    await companyService.deleteDocument(companyProfile.id, params.documentId);
+    await companyService.deleteDocument(companyProfile.id, documentId);
 
     return createSuccessResponse({ success: true });
   } catch (error) {
@@ -54,7 +55,7 @@ async function handleDelete(
 
 export const DELETE = (
   req: NextRequest,
-  ctx: { params: { documentId: string } }
+  ctx: { params: Promise<{ documentId: string }> }
 ) =>
   createApiHandler(
     z.object({}),

@@ -34,3 +34,6 @@ export class DefaultHealthMonitoringService implements HealthMonitoringService {
     return { serviceName, errorRate: rate, status };
   }
 }
+
+// Export alias for compatibility
+export { DefaultHealthMonitoringService as DefaultHealthService };

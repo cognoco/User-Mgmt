@@ -1,5 +1,6 @@
+'use client';
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useUserManagement } from '@/lib/auth/UserManagementProvider';
 import { getPlatformClasses } from '@/hooks/utils/usePlatformStyles';
@@ -32,13 +33,13 @@ export function Header({ type = 'fixed', navItems, children }: HeaderProps) {
   const { user, logout, loading: isLoading } = useAuth();
   const { isNative, platform } = useUserManagement();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
   const isMobile = useIsMobile();
 
   useEffect(() => {
     setMobileMenuOpen(false);
-  }, [location]);
+  }, [pathname]);
 
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -54,9 +55,9 @@ export function Header({ type = 'fixed', navItems, children }: HeaderProps) {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/auth/login');
+      router.push('/auth/login');
     } catch (error) {
-      navigate('/auth/login');
+      router.push('/auth/login');
     }
   };
 

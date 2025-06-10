@@ -36,11 +36,11 @@ const patchMiddleware = createMiddlewareChain([
 async function handleDelete(
   _request: NextRequest,
   auth: RouteAuthContext,
-  params: { id: string },
+  params: Promise<{ id: string }>,
 ) {
   try {
     // 2. Validate domain ID
-    const domainId = params.id;
+    const { id: domainId } = await params;
     if (!domainId) {
       return NextResponse.json(
         { error: "Domain ID is required" },
@@ -89,7 +89,7 @@ async function handleDelete(
     return NextResponse.json({ message: "Domain deleted successfully." });
   } catch (error) {
     console.error(
-      `Unexpected error in DELETE /api/company/domains/${params.id}:`,
+      `Unexpected error in DELETE /api/company/domains/${domainId}:`,
       error,
     );
     return NextResponse.json(
@@ -103,12 +103,12 @@ async function handleDelete(
 async function handlePatch(
   _request: NextRequest,
   auth: RouteAuthContext,
-  params: { id: string },
+  params: Promise<{ id: string }>,
   data: DomainUpdateRequest,
 ) {
   try {
     // 2. Validate domain ID
-    const domainId = params.id;
+    const { id: domainId } = await params;
     if (!domainId) {
       return NextResponse.json(
         { error: "Domain ID is required" },
@@ -149,7 +149,7 @@ async function handlePatch(
     return NextResponse.json(updatedDomain);
   } catch (error) {
     console.error(
-      `Unexpected error in PATCH /api/company/domains/${params.id}:`,
+      `Unexpected error in PATCH /api/company/domains/${domainId}:`,
       error,
     );
     return NextResponse.json(
@@ -159,10 +159,10 @@ async function handlePatch(
   }
 }
 
-export const DELETE = (req: NextRequest, ctx: { params: { id: string } }) =>
+export const DELETE = (req: NextRequest, ctx: { params: Promise<{ id: string }> }) =>
   baseMiddleware((r, auth) => handleDelete(r, auth, ctx.params))(req);
 
-export const PATCH = (req: NextRequest, ctx: { params: { id: string } }) =>
+export const PATCH = (req: NextRequest, ctx: { params: Promise<{ id: string }> }) =>
   patchMiddleware((r, auth, data) => handlePatch(r, auth, ctx.params, data))(
     req,
   );

@@ -25,13 +25,14 @@ const updateSavedSearchSchema = z.object({
 async function getSavedSearch(
   _req: NextRequest,
   auth: RouteAuthContext,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   if (!auth.userId) {
     throw new Error("Authentication required");
   }
   const service = getApiSavedSearchService();
-  const savedSearch = await service.getSavedSearch(params.id, auth.userId);
+  const { id } = await params;
+  const savedSearch = await service.getSavedSearch(id, auth.userId);
   if (!savedSearch) {
     throw new Error("Failed to fetch saved search");
   }
@@ -42,14 +43,15 @@ async function updateSavedSearch(
   _req: NextRequest,
   auth: RouteAuthContext,
   data: z.infer<typeof updateSavedSearchSchema>,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   if (!auth.userId) {
     throw new Error("Authentication required");
   }
   const service = getApiSavedSearchService();
+  const { id } = await params;
   const updatedSearch = await service.updateSavedSearch(
-    params.id,
+    id,
     auth.userId,
     {
       name: data.name,
@@ -64,13 +66,14 @@ async function updateSavedSearch(
 async function deleteSavedSearch(
   _req: NextRequest,
   auth: RouteAuthContext,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   if (!auth.userId) {
     throw new Error("Authentication required");
   }
   const service = getApiSavedSearchService();
-  await service.deleteSavedSearch(params.id, auth.userId);
+  const { id } = await params;
+  await service.deleteSavedSearch(id, auth.userId);
   return createNoContentResponse();
 }
 
@@ -85,17 +88,17 @@ const patchMiddleware = createMiddlewareChain([
   validationMiddleware(updateSavedSearchSchema),
 ]);
 
-export const GET = (req: NextRequest, ctx: { params: { id: string } }) =>
+export const GET = (req: NextRequest, ctx: { params: Promise<{ id: string }> }) =>
   baseMiddleware((r, auth) => getSavedSearch(r, auth, ctx))(req);
 
-export const PATCH = (req: NextRequest, ctx: { params: { id: string } }) =>
+export const PATCH = (req: NextRequest, ctx: { params: Promise<{ id: string }> }) =>
   withSecurity((r) =>
     patchMiddleware((r2, auth, data) => updateSavedSearch(r2, auth, data, ctx))(
       r,
     ),
   )(req);
 
-export const DELETE = (req: NextRequest, ctx: { params: { id: string } }) =>
+export const DELETE = (req: NextRequest, ctx: { params: Promise<{ id: string }> }) =>
   withSecurity((r) =>
     baseMiddleware((r2, auth) => deleteSavedSearch(r2, auth, ctx))(r),
   )(req);

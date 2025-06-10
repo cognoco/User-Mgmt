@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+'use client';
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Menu, X, User, LogOut, Settings, Home } from "lucide-react";
 import { Button } from "@/ui/primitives/button";
@@ -53,7 +54,7 @@ export function Header({ type = "fixed" }: HeaderProps) {
       }) => (
         <header className={headerClasses}>
           <div className="container mx-auto flex items-center justify-between">
-            <Link to="/" className="flex items-center space-x-2 relative z-20">
+            <Link href="/" className="flex items-center space-x-2 relative z-20">
               <span className="font-bold text-xl">User Management</span>
             </Link>
 
@@ -62,7 +63,7 @@ export function Header({ type = "fixed" }: HeaderProps) {
                 {navItems.slice(1).map((item) => (
                   <Link
                     key={item.to}
-                    to={item.to}
+                    href={item.to}
                     className="text-sm font-medium transition-colors hover:text-primary"
                   >
                     {item.label}
@@ -86,13 +87,13 @@ export function Header({ type = "fixed" }: HeaderProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
-                        <Link to="/profile" className="flex items-center">
+                        <Link href="/profile" className="flex items-center">
                           <User className="mr-2 h-4 w-4" />
                           {t("profile.title")}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link to="/settings" className="flex items-center">
+                        <Link href="/settings" className="flex items-center">
                           <Settings className="mr-2 h-4 w-4" />
                           {t("settings.title")}
                         </Link>
@@ -108,7 +109,7 @@ export function Header({ type = "fixed" }: HeaderProps) {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <Link to="/login">
+                  <Link href="/login">
                     <Button disabled={isLoading}>{t("auth.login")}</Button>
                   </Link>
                 )}
@@ -146,7 +147,7 @@ export function Header({ type = "fixed" }: HeaderProps) {
                 {navItems.map((item) => (
                   <Link
                     key={item.to}
-                    to={item.to}
+                    href={item.to}
                     className="px-2 py-3 text-lg font-medium flex items-center transition-colors hover:text-primary border-b border-border/30"
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -168,7 +169,7 @@ export function Header({ type = "fixed" }: HeaderProps) {
                     {t("auth.logout")}
                   </Button>
                 ) : (
-                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
                     <Button
                       variant="default"
                       size="lg"

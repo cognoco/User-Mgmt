@@ -22,6 +22,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Error Checking**
 - `npm run error:search` - Search for error codes in codebase
+- `npx tsc --noEmit` - Check TypeScript errors without emitting files
+- Check `typescript-errors.txt` for current known errors
 
 ## Architecture Overview
 
@@ -149,3 +151,33 @@ Required environment variables:
 - **Build**: Next.js with TypeScript, ESLint
 
 Never introduce new technologies without approval. The stack is intentionally curated for stability and modularity.
+
+## Cursor Integration Rules
+
+Key development constraints from Cursor configuration:
+- **NEVER USE REAL API KEYS** in any config file - always reference .env file
+- **ALWAYS READ** `docs/Product documentation/Architecture Guidelines.md` before making changes
+- **ACCESS ALL FILES** directly - don't ask users to share code or check files and imports
+- Focus on the big picture and process understanding rather than step-by-step explanations
+- **DO NOT CHANGE OR CREATE .ENV FILES** - you can read them but not modify them
+
+## Important Development Patterns
+
+### File Naming and Import Paths
+- Recent work has focused on standardizing import paths and fixing TypeScript errors
+- Follow the established patterns in `src/` for import paths
+- Use the factory pattern extensively for service creation
+- Check existing implementations before creating new ones
+
+### Error Handling
+- Error codes are tracked and searchable via `npm run error:search`
+- TypeScript errors are tracked in `typescript-errors.txt`
+- Use the established error code registry in `src/core/common/errorCodeRegistry.ts`
+
+### UI Component Architecture
+The codebase uses a three-tier UI system:
+- **Headless components** (`src/ui/headless/`) - Pure logic, no styling
+- **Primitive components** (`src/ui/primitives/`) - Basic styled building blocks  
+- **Styled components** (`src/ui/styled/`) - Fully featured, domain-specific components
+
+Always check which tier is appropriate before creating new UI components.

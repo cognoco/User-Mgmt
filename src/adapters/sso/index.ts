@@ -1,3 +1,4 @@
 export type { ISsoDataProvider } from '@/core/sso/ISsoDataProvider';
-export * from '@/adapters/sso/factory';
-export * from '@/adapters/sso/supabase';
+export { createSsoProvider } from '@/adapters/sso/factory';
+// Import specific exports to avoid conflicts
+export { createSupabaseSsoProvider } from '@/adapters/sso/factory';

@@ -1,12 +1,15 @@
-import { Outlet } from "react-router-dom";
 import { UserLayout as HeadlessUserLayout } from "@/ui/headless/layout/UserLayout";
 
-export function UserLayout() {
+interface UserLayoutProps {
+  children: React.ReactNode;
+}
+
+export function UserLayout({ children }: UserLayoutProps) {
   return (
     <HeadlessUserLayout>
       {({ SessionPolicyEnforcer }) => (
         <SessionPolicyEnforcer>
-          <Outlet />
+          {children}
         </SessionPolicyEnforcer>
       )}
     </HeadlessUserLayout>

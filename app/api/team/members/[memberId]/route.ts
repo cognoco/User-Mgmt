@@ -72,5 +72,5 @@ const middleware = createMiddlewareChain([
 
 export const DELETE = (
   req: NextRequest,
-  ctx: { params: { memberId: string } }
+  ctx: { params: Promise<{ memberId: string }> }
 ) => middleware((r, auth) => handleDelete(r, auth, paramSchema.parse(ctx.params)))(req);

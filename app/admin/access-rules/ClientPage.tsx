@@ -1,6 +1,6 @@
 'use client';
 
-export default function AccessRulesClientPage(): JSX.Element {
+export default function AccessRulesClientPage() {
   return (
     <div className="container py-6 space-y-6">
       <div>

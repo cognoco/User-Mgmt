@@ -1,3 +1,7 @@
+/**
+ * SERVER ONLY - This file uses Node.js modules (fs, path) and should never be imported by client components.
+ * For client-side configuration, use '@/core/config/clientConfig' instead.
+ */
 import fs from 'fs';
 import path from 'path';
 import { loadEnvironment, validateEnvironment, EnvironmentConfig } from '@/core/config/environment';
@@ -68,7 +72,14 @@ export function getServerConfig(): RuntimeConfig {
   return config;
 }
 
+/**
+ * @deprecated Use getClientConfig from '@/core/config/clientConfig' for client-side components
+ * This function should only be used on the server side.
+ */
 export function getClientConfig(): RuntimeConfig {
   const { serviceRoleKey, ...envRest } = config.env;
   return { ...config, env: { ...envRest } };
 }
+
+// Export the type for re-export in index.ts
+export type { RuntimeConfig };

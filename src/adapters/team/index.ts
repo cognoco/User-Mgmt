@@ -5,6 +5,7 @@
  */
 
 export type { ITeamDataProvider } from '@/core/team/ITeamDataProvider';
-export * from '@/adapters/team/factory';
-export * from '@/adapters/team/supabaseTeamProvider';
-export * from '@/adapters/team/supabase';
+export { createTeamProvider } from '@/adapters/team/factory';
+// Export Supabase-specific items from the main provider file to avoid duplicates
+export { SupabaseTeamProvider } from '@/adapters/team/supabaseTeamProvider';
+export { createSupabaseTeamProvider } from '@/adapters/team/factory';

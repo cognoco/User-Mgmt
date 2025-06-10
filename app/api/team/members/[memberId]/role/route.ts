@@ -73,17 +73,19 @@ async function handlePatch(
 
 async function handler(
   req: NextRequest,
-  context: { params: { memberId: string } }
+  context: { params: Promise<{ memberId: string }> }
 ) {
+  
+  const { memberId } = await params;
   const params = paramSchema.parse(context.params);
   return withRouteAuth(
     (r, auth) =>
-      withValidation(updateRoleSchema, (r2, data) => handlePatch(r2, auth, data, params.memberId), r),
+      withValidation(updateRoleSchema, (r2, data) => handlePatch(r2, auth, data, memberId), r),
     req
   );
 }
 
 export const PATCH = (
   req: NextRequest,
-  ctx: { params: { memberId: string } }
+  ctx: { params: Promise<{ memberId: string }> }
 ) => withSecurity((r) => withErrorHandling((req2) => handler(req2, ctx), r))(req);

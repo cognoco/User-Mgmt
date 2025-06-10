@@ -10,13 +10,14 @@ const ssoSettingsSchema = z.object({
 });
 
 // GET /api/organizations/[orgId]/sso/settings
-export const GET = (
+export const GET = async (
   req: NextRequest,
-  ctx: { params: { orgId: string } }
-) => createApiHandler(
-  emptySchema,
-  async (request: NextRequest, authContext: any, data: any, services: any) => {
-    const orgId = ctx.params.orgId;
+  ctx: { params: Promise<{ orgId: string }> }
+) => {
+  const { orgId } = await ctx.params;
+  return createApiHandler(
+    emptySchema,
+    async (request: NextRequest, authContext: any, data: any, services: any) => {
     const path = request.nextUrl.pathname;
 
     // Handle status endpoint
@@ -80,20 +81,22 @@ export const GET = (
     }
 
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  },
-  {
-    requireAuth: true,
-  }
-);
+    },
+    {
+      requireAuth: true,
+    }
+  )(req);
+};
 
 // PUT /api/organizations/[orgId]/sso/settings
-export const PUT = (
+export const PUT = async (
   req: NextRequest,
-  ctx: { params: { orgId: string } }
-) => createApiHandler(
-  ssoSettingsSchema,
-  async (request: NextRequest, authContext: any, settings: z.infer<typeof ssoSettingsSchema>, services: any) => {
-    const orgId = ctx.params.orgId;
+  ctx: { params: Promise<{ orgId: string }> }
+) => {
+  const { orgId } = await ctx.params;
+  return createApiHandler(
+    ssoSettingsSchema,
+    async (request: NextRequest, authContext: any, settings: z.infer<typeof ssoSettingsSchema>, services: any) => {
     const path = request.nextUrl.pathname;
 
     if (path.endsWith('/settings')) {
@@ -118,8 +121,9 @@ export const PUT = (
     }
 
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  },
-  {
-    requireAuth: true,
-  }
-); 
+    },
+    {
+      requireAuth: true,
+    }
+  )(req);
+}; 

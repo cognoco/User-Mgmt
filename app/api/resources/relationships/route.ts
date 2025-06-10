@@ -65,4 +65,6 @@ async function handlePost(
 export const GET = (req: NextRequest) =>
   errorHandlingMiddleware()(routeAuthMiddleware()(handleGet))(req);
 
-export const POST = middleware(handlePost);
+export function POST(req: NextRequest) {
+  return middleware(handlePost)(req);
+}

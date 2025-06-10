@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Manage your organization',
 };
 
-export default function AdminDashboardPage(): JSX.Element {
+export default function AdminDashboardPage() {
   return (
     <div className="container py-6 space-y-6">
       <div className="flex items-center justify-between">

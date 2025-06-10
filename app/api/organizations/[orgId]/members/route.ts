@@ -15,9 +15,10 @@ async function handleGet(
   _auth: any,
   _data: unknown,
   services: any,
-  orgId: string
+  orgId: Promise<string>
 ) {
-  const members = await services.organization.getOrganizationMembers(orgId);
+  const resolvedOrgId = await orgId;
+  const members = await services.organization.getOrganizationMembers(resolvedOrgId);
   return createSuccessResponse({ members });
 }
 
@@ -26,33 +27,36 @@ async function handlePost(
   _auth: any,
   data: z.infer<typeof AddMemberSchema>,
   services: any,
-  orgId: string
+  orgId: Promise<string>
 ) {
-  const result = await services.organization.addOrganizationMember(orgId, data.userId, data.role);
+  const resolvedOrgId = await orgId;
+  const result = await services.organization.addOrganizationMember(resolvedOrgId, data.userId, data.role);
   if (!result.success || !result.member) {
     throw new ApiError(ERROR_CODES.INVALID_REQUEST, result.error || 'Failed to add member', 400);
   }
   return createSuccessResponse({ member: result.member }, 201);
 }
 
-export const GET = (req: NextRequest, ctx: { params: { orgId: string } }) => {
-  const parsed = ParamSchema.safeParse(ctx.params);
+export const GET = async (req: NextRequest, ctx: { params: Promise<{ orgId: string }> }) => {
+  const params = await ctx.params;
+  const parsed = ParamSchema.safeParse(params);
   if (!parsed.success) {
     return NextResponse.json(
       new ApiError(ERROR_CODES.INVALID_REQUEST, parsed.error.message, 400).toResponse(),
       { status: 400 }
     );
   }
-  return createApiHandler(emptySchema, (r, a, d, s) => handleGet(r, a, d, s, parsed.data.orgId), { requireAuth: true })(req);
+  return createApiHandler(emptySchema, (r, a, d, s) => handleGet(r, a, d, s, Promise.resolve(parsed.data.orgId)), { requireAuth: true })(req);
 };
 
-export const POST = (req: NextRequest, ctx: { params: { orgId: string } }) => {
-  const parsed = ParamSchema.safeParse(ctx.params);
+export const POST = async (req: NextRequest, ctx: { params: Promise<{ orgId: string }> }) => {
+  const params = await ctx.params;
+  const parsed = ParamSchema.safeParse(params);
   if (!parsed.success) {
     return NextResponse.json(
       new ApiError(ERROR_CODES.INVALID_REQUEST, parsed.error.message, 400).toResponse(),
       { status: 400 }
     );
   }
-  return createApiHandler(AddMemberSchema, (r, a, d, s) => handlePost(r, a, d, s, parsed.data.orgId), { requireAuth: true })(req);
+  return createApiHandler(AddMemberSchema, (r, a, d, s) => handlePost(r, a, d, s, Promise.resolve(parsed.data.orgId)), { requireAuth: true })(req);
 };

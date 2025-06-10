@@ -22,7 +22,9 @@
       "Bash(git add:*)",
       "Bash(timeout 30 git add .)",
       "Bash(git commit:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(node:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }
