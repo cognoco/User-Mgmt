@@ -42,8 +42,7 @@
         "name": "next"
       }
     ],
-    "allowSyntheticDefaultImports": true,
-    "jsxImportSource": "react"
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "next-env.d.ts",
@@ -55,7 +54,6 @@
     "node_modules",
     ".git/**/*",
     "dist",
-    "build",
-    "**/*.d.ts"
+    "build"
   ]
 }

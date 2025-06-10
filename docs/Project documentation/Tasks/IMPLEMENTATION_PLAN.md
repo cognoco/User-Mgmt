@@ -33,7 +33,7 @@ This document outlines the detailed step-by-step implementation plan to address 
 npx tsc --noEmit 2>&1 | wc -l
 
 # Get specific error patterns (first 50 errors)
-npx tsc --noEmit 2>&1 | head -50 > typescript-errors.txt
+npx tsc --noEmit > typescript-errors.txt 2>&1
 
 # Check if build still works despite TS errors
 npm run build
