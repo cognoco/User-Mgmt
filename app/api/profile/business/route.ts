@@ -4,6 +4,7 @@ import { getApiProfileService } from '@/services/profile/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
 import { checkRateLimit } from '@/middleware/rateLimit';
 import { profileSchema } from '@/types/database'; // Corrected import path
+import { PermissionValues } from '@/core/permission/models';
 
 // --- GET Handler for fetching business profile --- 
 export async function GET(request: NextRequest) {
@@ -108,9 +109,9 @@ export async function PATCH(request: NextRequest) {
 
     // Permission check using RBAC service
     const permissionService = getApiPermissionService();
-    const hasPermission = await permissionService.checkUserPermission(
+    const hasPermission = await permissionService.hasPermission(
       user.id,
-      'profile.business.update'
+      PermissionValues.EDIT_USER_PROFILES
     );
 
     if (!hasPermission) {
