@@ -23,7 +23,7 @@ export const PATCH = createApiHandler(
     try {
       const result = await services.user.updateUserProfile(
         userId!,
-        { privacySettings: settings } as any
+        { visibility: settings } as any
       );
 
       if (!result.success || !result.profile) {
@@ -51,10 +51,10 @@ export const PATCH = createApiHandler(
         userAgent,
         targetResourceType: 'user_profile_privacy',
         targetResourceId: userIdForLogging,
-        details: { updatedSettings: result.profile.privacySettings },
+        details: { updatedSettings: result.profile.visibility },
       });
 
-      return createSuccessResponse(result.profile.privacySettings);
+      return createSuccessResponse(result.profile.visibility);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'An unexpected error occurred';
       await logUserAction({

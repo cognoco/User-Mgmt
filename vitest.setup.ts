@@ -1,4 +1,7 @@
+/// <reference types="vitest/globals" />
 import './src/tests/setup';
+import '@testing-library/jest-dom';
+import { expect, afterEach, vi } from 'vitest';
 
 // Add dummy environment variables for Supabase client initialization
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost:54321'; // Dummy URL
@@ -11,9 +14,6 @@ vi.mock('@/lib/database/prisma', () => ({
     $disconnect: vi.fn(),
   },
 }));
-
-import '@testing-library/jest-dom';
-import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
 import { createMockAuthStore } from '@/tests/mocks/auth.store.mock';

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { middleware } from '@/middleware';
+import { withSecurity } from '@/middleware/withSecurity';
 import { withExportRateLimit } from '@/middleware/exportRateLimit';
 import {
   ExportFormat,
@@ -53,16 +53,15 @@ export async function GET(req: NextRequest) {
  * POST /api/profile/export
  * Initiate a new export request
  */
-export async function POST(req: NextRequest) {
-  return middleware(['cors', 'csrf'], async (request: NextRequest) => {
-    const user = (request as any).user;
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export const POST = withSecurity(async (req: NextRequest) => {
+  const user = (req as any).user;
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-    return withExportRateLimit(
-      request,
-      async (innerRequest: NextRequest) => {
+  return withExportRateLimit(
+    req,
+    async (innerRequest: NextRequest) => {
         try {
           // Parse and validate request body
           const body = await innerRequest.json().catch(() => ({}));
@@ -99,7 +98,7 @@ export async function POST(req: NextRequest) {
         // For large datasets, process asynchronously (background job will handle it)
         if (!exportRecord.isLargeDataset) {
           // Start processing in the background without awaiting
-          service.processUserDataExport(exportRecord.id, user.id).catch(error => {
+          service.processUserDataExport(exportRecord.id, user.id).catch((error: any) => {
             console.error('Background export processing error:', error);
           });
         }
@@ -124,8 +123,7 @@ export async function POST(req: NextRequest) {
       },
       { type: 'user', userId: user.id }
     );
-  })(req);
-}
+});
 
 /**
  * Legacy handler for immediate exports
