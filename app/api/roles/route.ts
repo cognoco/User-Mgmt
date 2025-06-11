@@ -11,14 +11,14 @@ import { PermissionValues } from '@/core/permission/models';
 const createSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
-  permissions: z.array(z.string()).default([]),
+  permissions: z.array(z.string()).optional(),
 });
 
 type CreateRole = z.infer<typeof createSchema>;
 
 const querySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
+  page: z.coerce.number().int().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).optional(),
 });
 
 async function handleGet(
@@ -28,12 +28,14 @@ async function handleGet(
   services: any,
 ) {
   const roles = await services.permission.getAllRoles();
-  const start = (data.page - 1) * data.limit;
-  const paginated = roles.slice(start, start + data.limit);
+  const page = data.page ?? 1;
+  const limit = data.limit ?? 20;
+  const start = (page - 1) * limit;
+  const paginated = roles.slice(start, start + limit);
   return createSuccessResponse({
     roles: paginated,
-    page: data.page,
-    limit: data.limit,
+    page,
+    limit,
     total: roles.length,
   });
 }
@@ -45,7 +47,10 @@ async function handlePost(
   services: any,
 ) {
   try {
-    const role = await services.permission.createRole(data, auth.userId);
+    const role = await services.permission.createRole({
+      ...data,
+      permissions: data.permissions ?? []
+    }, auth.userId);
     return createCreatedResponse({ role });
   } catch (e) {
     throw mapPermissionServiceError(e as Error);

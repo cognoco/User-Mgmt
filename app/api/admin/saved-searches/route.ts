@@ -31,7 +31,7 @@ const createSavedSearchSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
   searchParams: savedSearchParamsSchema,
-  isPublic: z.boolean().default(false),
+  isPublic: z.boolean().optional(),
 });
 
 async function getAllSavedSearches(_req: NextRequest, auth: RouteAuthContext) {
@@ -57,7 +57,7 @@ async function createSavedSearch(
     name: data.name,
     description: data.description,
     searchParams: data.searchParams,
-    isPublic: data.isPublic,
+    isPublic: data.isPublic ?? false,
   });
   return createCreatedResponse({ savedSearch });
 }

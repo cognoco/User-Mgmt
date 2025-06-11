@@ -21,7 +21,7 @@ const querySchema = z.object({
   search: z.string().optional(),
   sortBy: z.string().optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
-  format: z.enum(["csv", "json", "xlsx", "pdf"]).default("json"),
+  format: z.enum(["csv", "json", "xlsx", "pdf"]).optional(),
 });
 
 const middleware = createMiddlewareChain([
@@ -47,8 +47,10 @@ async function handleGet(
       { status: 500 },
     );
   }
+  const format = params.format ?? "json";
   const blob = await service.exportLogs({
     ...params,
+    format,
     page: 1,
     limit: 1000,
     resourceType: "permission",
@@ -57,7 +59,7 @@ async function handleGet(
     status: 200,
     headers: {
       "Content-Type": blob.type,
-      "Content-Disposition": `attachment; filename="audit-logs.${params.format}"`,
+      "Content-Disposition": `attachment; filename="audit-logs.${format}"`,
     },
   });
 }

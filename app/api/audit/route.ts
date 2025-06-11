@@ -15,10 +15,10 @@ const querySchema = z.object({
   ipAddress: z.string().optional(),
   userAgent: z.string().optional(),
   search: z.string().optional(),
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
-  sortBy: z.enum(['created_at', 'action', 'status']).default('created_at'),
-  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+  page: z.coerce.number().int().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).optional(),
+  sortBy: z.enum(['created_at', 'action', 'status']).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -46,15 +46,15 @@ export async function GET(req: NextRequest) {
 
     const {
       userId,
-      page,
-      limit,
+      page = 1,
+      limit = 20,
       startDate,
       endDate,
       action,
       status,
       resourceType,
       resourceId,
-      sortOrder,
+      sortOrder = 'desc',
     } = result.data;
     const targetUserId = userId ?? user.id;
 
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
       ipAddress: result.data.ipAddress,
       userAgent: result.data.userAgent,
       search: result.data.search,
-      sortBy: result.data.sortBy,
+      sortBy: result.data.sortBy ?? 'created_at',
       sortOrder,
     });
 
