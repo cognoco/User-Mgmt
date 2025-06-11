@@ -9,8 +9,8 @@ import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 
 const querySchema = z.object({
   resourceType: z.string().optional(),
-  sortBy: z.enum(['created', 'type']).optional().default('created'),
-  order: z.enum(['asc', 'desc']).optional().default('asc'),
+  sortBy: z.enum(['created', 'type']).optional(),
+  order: z.enum(['asc', 'desc']).optional(),
 });
 type Query = z.infer<typeof querySchema>;
 
@@ -25,12 +25,15 @@ async function handleGet(
   if (query.resourceType) {
     permissions = permissions.filter((p) => p.resourceType === query.resourceType);
   }
-  if (query.sortBy === 'type') {
+  const sortBy = query.sortBy ?? 'created';
+  const order = query.order ?? 'asc';
+  
+  if (sortBy === 'type') {
     permissions.sort((a, b) => a.resourceType.localeCompare(b.resourceType));
   } else {
     permissions.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   }
-  if (query.order === 'desc') {
+  if (order === 'desc') {
     permissions.reverse();
   }
   return createSuccessResponse({ permissions });

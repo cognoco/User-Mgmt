@@ -10,8 +10,8 @@ import { PermissionValues } from '@/core/permission/models';
 import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 
 const querySchema = z.object({
-  page: z.coerce.number().int().positive().default(1).optional(),
-  pageSize: z.coerce.number().int().positive().max(100).default(20).optional(),
+  page: z.coerce.number().int().positive().optional(),
+  pageSize: z.coerce.number().int().positive().max(100).optional(),
   userId: z.string().optional(),
   permission: z.string().optional(),
 });

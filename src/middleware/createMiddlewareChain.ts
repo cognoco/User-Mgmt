@@ -106,7 +106,7 @@ export function createMiddlewareChainFromConfig(
   const cfg = middlewareConfigSchema.parse({ ...defaults, ...config });
   const mws: RouteMiddleware[] = [];
 
-  if (cfg.errorHandling) {
+  if (cfg.errorHandling ?? true) {
     mws.push(errorHandlingMiddleware());
   }
   if (cfg.auth) {

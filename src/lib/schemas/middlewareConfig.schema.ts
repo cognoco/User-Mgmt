@@ -24,7 +24,7 @@ export type RateLimitOptionsSchema = z.infer<typeof rateLimitOptionsSchema>;
 /** Configuration object for building a middleware chain */
 export const middlewareConfigSchema = z
   .object({
-    errorHandling: z.boolean().optional().default(true),
+    errorHandling: z.boolean().optional(),
     auth: routeAuthOptionsSchema.optional(),
     validationSchema: z.instanceof(ZodType).optional(),
     rateLimit: rateLimitOptionsSchema.optional(),
