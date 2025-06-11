@@ -44,8 +44,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         first_name: userData.firstName,
         last_name: userData.lastName,
-        avatar_url: userData.avatarUrl,
-        bio: userData.bio
+        avatar_url: userData.profilePictureUrl,
+        bio: userData.metadata?.bio
       });
     }
     
@@ -60,8 +60,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       first_name: profileData.firstName,
       last_name: profileData.lastName,
-      avatar_url: profileData.avatarUrl,
-      bio: profileData.bio
+      avatar_url: profileData.profilePictureUrl,
+      bio: profileData.metadata?.bio
     });
   } catch (error) {
     console.error('Unexpected error in protected endpoint:', error);
