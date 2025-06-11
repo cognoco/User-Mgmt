@@ -11,6 +11,7 @@ import {
 } from '@/middleware/createMiddlewareChain';
 import type { RouteAuthContext } from '@/middleware/auth';
 import { withSecurity } from '@/middleware/withSecurity';
+import { RoleValues } from '@/core/permission/models';
 
 
 async function handleGet(req: NextRequest, auth: RouteAuthContext) {
@@ -43,7 +44,7 @@ async function handleGet(req: NextRequest, auth: RouteAuthContext) {
     });
   }
   const permissionService = getApiPermissionService();
-  const isAdmin = await permissionService.hasRole(user.id, 'ADMIN');
+  const isAdmin = await permissionService.hasRole(user.id, RoleValues.ADMIN);
   if (!isAdmin) {
     // Log forbidden export attempt
     await logUserAction({
