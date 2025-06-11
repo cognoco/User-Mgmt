@@ -1,16 +1,7 @@
 // Type declarations for Supabase Edge Functions
 
-declare module '@supabase/supabase-js' {
-  export function createClient(supabaseUrl: string, supabaseKey: string, options?: any): any;
-  export interface SupabaseClient {
-    auth: {
-      admin: {
-        listUsers(options?: any): Promise<any>;
-        deleteUser(userId: string): Promise<any>;
-      };
-    };
-  }
-}
+// Note: Module augmentation removed as it was interfering with actual SupabaseClient types
+// If you need to extend SupabaseClient types, do it properly without overriding the core interface
 
 declare module '../_shared/cors.ts' {
   export const corsHeaders: Record<string, string>;
