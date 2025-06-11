@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { DELETE } from '@app/api/auth/delete-account/route';
-import { getApiAuthService } from '@/services/auth/factory';
+import { setupAuthServiceMock } from '@/tests/factories/authServiceFactory';
 
-vi.mock('@/services/auth/factory', () => ({ getApiAuthService: vi.fn() }));
+vi.mock('@/services/auth/factory');
 vi.mock('@/middleware/with-auth-rate-limit', () => ({
   withAuthRateLimit: vi.fn((_req, handler) => handler(_req))
 }));
@@ -12,7 +12,8 @@ vi.mock('@/middleware/with-security', () => ({
 }));
 
 describe('DELETE /api/auth/delete-account', () => {
-  const mockAuthService = { deleteAccount: vi.fn() };
+  let mockAuthService: ReturnType<typeof setupAuthServiceMock>;
+  
   const createRequest = (password?: string) => new NextRequest('http://localhost/api/auth/delete-account', {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
@@ -21,8 +22,8 @@ describe('DELETE /api/auth/delete-account', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (getApiAuthService as unknown as vi.Mock).mockReturnValue(mockAuthService);
-    mockAuthService.deleteAccount.mockResolvedValue(undefined);
+    mockAuthService = setupAuthServiceMock();
+    // Factory provides deleteAccount with default success response
   });
 
   it('returns 400 when password missing', async () => {

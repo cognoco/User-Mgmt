@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '@app/api/auth/send-verification-email/route';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { ERROR_CODES } from '@/lib/api/common';
+import { createMockAuthService } from '@/tests/factories/authServiceFactory';
 
 // Mock the service container to avoid circular dependencies
 vi.mock('@/lib/config/service-container', () => ({
@@ -14,10 +15,10 @@ vi.mock('@/middleware/with-auth-rate-limit', () => ({
 vi.mock('@/middleware/with-security', () => ({ withSecurity: (h: any) => h }));
 
 describe('POST /api/auth/send-verification-email', () => {
-  const mockAuthService = {
-    sendVerificationEmail: vi.fn(),
-    getCurrentUser: vi.fn().mockResolvedValue(null) // Public route
-  };
+  const mockAuthService = createMockAuthService({
+    getCurrentUser: null, // Public route - override default
+    sendVerificationEmail: { sent: true } // Use factory's default structure
+  });
   
   const mockServices = {
     auth: mockAuthService,
@@ -48,7 +49,7 @@ describe('POST /api/auth/send-verification-email', () => {
     const { getServiceContainer } = await import('@/lib/config/serviceContainer');
     (getServiceContainer as any).mockReturnValue(mockServices);
     
-    mockAuthService.sendVerificationEmail.mockResolvedValue({ success: true });
+    // Factory already provides sensible defaults, no need to manually set mock returns
   });
 
   // Skip complex rate limiting test for now since middleware mocking is complex
