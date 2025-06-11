@@ -8,7 +8,7 @@ const recipientSchema = z.object({
   company_id: z.string().uuid('Invalid company ID format'),
   preference_id: z.string().uuid('Invalid preference ID format').optional(),
   email: z.string().email('Invalid email address'),
-  is_admin: z.boolean().default(false),
+  is_admin: z.boolean().optional(),
 });
 
 // POST /api/company/notifications/recipients - Add a new notification recipient
@@ -17,7 +17,7 @@ async function handlePost(_req: Request, auth: AuthContext, data: z.infer<typeof
     companyId: data.company_id,
     preferenceId: data.preference_id ?? undefined,
     email: data.email,
-    isAdmin: data.is_admin,
+    isAdmin: data.is_admin ?? false,
   });
   return createCreatedResponse({ recipients: result.recipients, message: 'Recipient added successfully' });
 }

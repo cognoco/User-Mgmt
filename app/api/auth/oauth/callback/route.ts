@@ -23,6 +23,14 @@ export const POST = createApiHandler(
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     try {
+      if (!services.oauth) {
+        throw new ApiError(
+          ERROR_CODES.SERVICE_UNAVAILABLE,
+          'OAuth service is not available',
+          503
+        );
+      }
+
       const result = await services.oauth.handleCallback(
         data.provider,
         data.code,

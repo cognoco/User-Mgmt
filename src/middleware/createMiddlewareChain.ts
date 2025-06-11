@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandling } from '@/middleware/errorHandling';
-import { withRouteAuth, type RouteAuthOptions } from '@/middleware/auth';
+import { withRouteAuth, type RouteAuthOptions, type RouteAuthContext } from '@/middleware/auth';
 import { withValidation } from '@/middleware/validation';
 import type { ZodSchema } from 'zod';
 import { createRateLimit, type RateLimitOptions } from '@/middleware/rateLimit';
@@ -136,3 +136,6 @@ export const standardApiMiddleware = <T>(
     routeAuthMiddleware(),
     validationMiddleware(schema)
   ]);
+
+// Re-export types from other middleware modules
+export type { RouteAuthContext };

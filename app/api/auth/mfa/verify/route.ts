@@ -11,7 +11,7 @@ import {
 // Request schema for MFA verification
 const mfaVerifySchema = z.object({
   code: z.string().min(6).max(8),
-  method: z.nativeEnum(TwoFactorMethod).default(TwoFactorMethod.TOTP),
+  method: z.nativeEnum(TwoFactorMethod).optional(),
   accessToken: z.string(), // Temporary access token from initial login
   rememberDevice: z.boolean().optional(),
 });
@@ -28,10 +28,13 @@ export const POST = createApiHandler(
     try {
       const { code, method, accessToken, rememberDevice } = data;
 
+      // Apply default for method if not provided
+      const mfaMethod = method ?? TwoFactorMethod.TOTP;
+
       // Verify MFA code using the AuthService
       const verifyResult = await services.auth.verifyMfaCode({
         code,
-        method,
+        method: mfaMethod,
         accessToken,
         rememberDevice: rememberDevice || false,
       });

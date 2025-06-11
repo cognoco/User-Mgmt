@@ -11,7 +11,7 @@ import { logUserAction } from '@/lib/audit/auditLogger';
 
 // Request schema for export options
 const exportOptionsSchema = z.object({
-  format: z.enum([ExportFormat.JSON, ExportFormat.CSV]).default(ExportFormat.JSON),
+  format: z.enum([ExportFormat.JSON, ExportFormat.CSV]).optional(),
   // Add other export options as needed
 });
 
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
             }, { status: 400 });
           }
           
-          const requestedFormat = parseResult.data.format;
+          const requestedFormat = parseResult.data.format ?? ExportFormat.JSON;
         
         // Log the export request
         await logUserAction({

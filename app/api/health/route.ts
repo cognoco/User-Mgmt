@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getHealthService } from '@/services/health';
 import { createMiddlewareChain } from '@/middleware/createMiddlewareChain';
 import { errorHandlingMiddleware } from '@/middleware/createMiddlewareChain';
@@ -28,6 +28,6 @@ async function handleGet() {
   }
 }
 
-export function GET() {
-  return middleware(() => handleGet())();
+export function GET(req: NextRequest) {
+  return middleware(async () => handleGet())(req);
 }

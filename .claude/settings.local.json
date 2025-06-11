@@ -24,7 +24,10 @@
       "Bash(git commit:*)",
       "Bash(git checkout:*)",
       "Bash(node:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(timeout:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm run lint:*)"
     ],
     "deny": []
   }

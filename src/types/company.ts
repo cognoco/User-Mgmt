@@ -4,6 +4,9 @@ export interface CompanyProfile {
   legal_name: string;
   registration_number?: string;
   tax_id?: string;
+  tax_id_verified?: boolean;
+  tax_id_last_checked?: string | null;
+  tax_id_validation_details?: any;
   website?: string;
   industry: string;
   size_range: '1-10' | '11-50' | '51-200' | '201-500' | '501-1000' | '1000+';

@@ -13,9 +13,11 @@ async function handlePost(request: NextRequest, params: Promise<{ id: string }>,
 
   const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
   const userAgent = request.headers.get('user-agent') || 'unknown';
+  
+  // Extract id outside try block so it's available in catch
+  const { id } = await params;
 
   try {
-    const { id } = await params;
     const companyService = getApiCompanyService();
     const result = await companyService.checkDomainVerification(id, auth.userId!);
 

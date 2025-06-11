@@ -6,12 +6,12 @@ import type { AuthContext, ServiceContainer } from '@/core/config/interfaces';
 import { Permission } from '@/lib/rbac/roles';
 
 const querySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().max(100).default(10),
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
   search: z.string().optional(),
-  status: z.enum(['active', 'pending', 'all']).optional().default('all'),
-  sortBy: z.enum(['name', 'email', 'role', 'status', 'joinedAt']).optional().default('joinedAt'),
-  sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
+  status: z.enum(['active', 'pending', 'all']).optional(),
+  sortBy: z.enum(['name', 'email', 'role', 'status', 'joinedAt']).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
 });
 
 const addMemberSchema = z.object({
@@ -27,7 +27,14 @@ async function handleTeamMembers(
 ) {
   const params = data;
   
-  const { page, limit, search, status, sortBy, sortOrder } = params;
+  const { 
+    page = 1, 
+    limit = 10, 
+    search, 
+    status = 'all', 
+    sortBy = 'joinedAt', 
+    sortOrder = 'desc' 
+  } = params;
   const skip = (page - 1) * limit;
 
   // Get the team ID first to ensure we're looking at the correct team

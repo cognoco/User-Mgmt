@@ -39,7 +39,7 @@ async function handlePost(
   auth: RouteAuthContext,
   data?: CompanyProfileRequest,
 ) {
-  const ipAddress = request.ip;
+  const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
   const userAgent = request.headers.get("user-agent");
   if (await checkRateLimit(request)) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
@@ -125,7 +125,7 @@ async function handlePost(
 export const POST = withSecurity((req: NextRequest) =>
   createApiHandler(
     CompanyProfileSchema,
-    (r, a, d) => handlePost(r, a, d),
+    (r, a, d) => handlePost(r, { userId: a.userId || null, permissions: a.permissions, user: a.user } as RouteAuthContext, d),
     { requireAuth: true, requiredPermissions: [PermissionValues.EDIT_USER_PROFILES] }
   )(req)
 );
@@ -135,7 +135,7 @@ async function handleGet(
   auth: RouteAuthContext,
   _data: unknown,
 ) {
-  const ipAddress = request.ip;
+  const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
   const userAgent = request.headers.get("user-agent");
   if (await checkRateLimit(request)) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
@@ -189,7 +189,7 @@ async function handleGet(
 }
 
 export const GET = withSecurity((req: NextRequest) =>
-  createApiHandler(emptySchema, (r, a, d) => handleGet(r, a, d), {
+  createApiHandler(emptySchema, (r, a, d) => handleGet(r, { userId: a.userId || null, permissions: a.permissions, user: a.user } as RouteAuthContext, d), {
     requireAuth: true,
     requiredPermissions: [PermissionValues.EDIT_USER_PROFILES],
   })(req)
@@ -201,7 +201,7 @@ async function handlePut(
   data: CompanyProfileUpdateRequest,
 ) {
   // Get IP and User Agent early
-  const ipAddress = request.ip;
+  const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
   const userAgent = request.headers.get("user-agent");
   if (await checkRateLimit(request)) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
@@ -236,7 +236,9 @@ async function handlePut(
     companyProfileIdForLogging = existingProfile.id; // Store for logging
 
     // 4. Update Profile
-    const fieldsToUpdate = data;
+    const fieldsToUpdate = Object.fromEntries(
+      Object.entries(data).filter(([_, value]) => value !== null)
+    );
     const updatedProfile = await companyService.updateProfile(
       companyProfileIdForLogging,
       fieldsToUpdate,
@@ -298,7 +300,7 @@ async function handlePut(
 export const PUT = withSecurity((req: NextRequest) =>
   createApiHandler(
     companyProfileUpdateSchema,
-    (r, a, d) => handlePut(r, a, d),
+    (r, a, d) => handlePut(r, { userId: a.userId || null, permissions: a.permissions, user: a.user } as RouteAuthContext, d),
     { requireAuth: true, requiredPermissions: [PermissionValues.EDIT_USER_PROFILES] }
   )(req)
 );
@@ -308,7 +310,7 @@ async function handleDelete(
   auth: RouteAuthContext,
 ) {
   // Get IP and User Agent early
-  const ipAddress = request.ip;
+  const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
   const userAgent = request.headers.get("user-agent");
   if (await checkRateLimit(request)) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
@@ -406,7 +408,7 @@ async function handleDelete(
 }
 
 export const DELETE = withSecurity((req: NextRequest) =>
-  createApiHandler(emptySchema, (r, a, d) => handleDelete(r, a), {
+  createApiHandler(emptySchema, (r, a, d) => handleDelete(r, { userId: a.userId || null, permissions: a.permissions, user: a.user } as RouteAuthContext), {
     requireAuth: true,
     requiredPermissions: [PermissionValues.EDIT_USER_PROFILES],
   })(req)

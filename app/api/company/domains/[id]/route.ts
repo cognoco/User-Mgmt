@@ -89,7 +89,7 @@ async function handleDelete(
     return NextResponse.json({ message: "Domain deleted successfully." });
   } catch (error) {
     console.error(
-      `Unexpected error in DELETE /api/company/domains/${domainId}:`,
+      "Unexpected error in DELETE /api/company/domains/[id]:",
       error,
     );
     return NextResponse.json(
@@ -149,7 +149,7 @@ async function handlePatch(
     return NextResponse.json(updatedDomain);
   } catch (error) {
     console.error(
-      `Unexpected error in PATCH /api/company/domains/${domainId}:`,
+      "Unexpected error in PATCH /api/company/domains/[id]:",
       error,
     );
     return NextResponse.json(

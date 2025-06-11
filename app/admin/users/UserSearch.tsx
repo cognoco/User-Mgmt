@@ -1,11 +1,11 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/ui/primitives/button';
 import { Input } from '@/ui/primitives/input';
-import { Select } from '@/ui/primitives/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/primitives/select';
 import { DatePicker } from '@/ui/primitives/datepicker';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/primitives/card';
 import { Alert, AlertDescription } from '@/ui/primitives/alert';
@@ -16,18 +16,29 @@ import { useRealtimeUserSearch } from '@/hooks/admin/useRealtimeUserSearch';
 
 const searchFormSchema = z.object({
   query: z.string().optional(),
-  status: z.enum(['active', 'inactive', 'suspended', 'all']).default('all'),
+  status: z.enum(['active', 'inactive', 'suspended', 'all']).optional(),
   role: z.string().optional(),
   dateCreatedStart: z.date().optional(),
   dateCreatedEnd: z.date().optional(),
   dateLastLoginStart: z.date().optional(),
   dateLastLoginEnd: z.date().optional(),
-  sortBy: z.enum(['name', 'email', 'createdAt', 'lastLoginAt', 'status']).default('createdAt'),
-  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+  sortBy: z.enum(['name', 'email', 'createdAt', 'lastLoginAt', 'status']).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
   teamId: z.string().optional(),
 });
 
-type SearchFormValues = z.infer<typeof searchFormSchema>;
+interface SearchFormValues {
+  query?: string;
+  status?: 'active' | 'inactive' | 'suspended' | 'all';
+  role?: string;
+  dateCreatedStart?: Date;
+  dateCreatedEnd?: Date;
+  dateLastLoginStart?: Date;
+  dateLastLoginEnd?: Date;
+  sortBy?: 'name' | 'email' | 'createdAt' | 'lastLoginAt' | 'status';
+  sortOrder?: 'asc' | 'desc';
+  teamId?: string;
+}
 
 export interface UserSearchProps {
   initialSearchParams?: Record<string, any>;
@@ -172,21 +183,43 @@ export function UserSearch({ initialSearchParams = {}, onSearch }: UserSearchPro
               </div>
               <div className="space-y-2">
                 <label htmlFor="status" className="text-sm font-medium">Status</label>
-                <Select id="status" {...register('status')}>
-                  <option value="all">All Statuses</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="suspended">Suspended</option>
-                </Select>
+                <Controller
+                  control={control}
+                  name="status"
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger id="status">
+                        <SelectValue placeholder="All Statuses" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="suspended">Suspended</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </div>
               <div className="space-y-2">
                 <label htmlFor="role" className="text-sm font-medium">Role</label>
-                <Select id="role" {...register('role')}>
-                  <option value="">All Roles</option>
-                  <option value="admin">Admin</option>
-                  <option value="user">User</option>
-                  <option value="viewer">Viewer</option>
-                </Select>
+                <Controller
+                  control={control}
+                  name="role"
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger id="role">
+                        <SelectValue placeholder="All Roles" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Roles</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="viewer">Viewer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -14,7 +14,7 @@ const relationshipSchema = z.object({
   parentId: z.string().min(1),
   childType: z.string().min(1),
   childId: z.string().min(1),
-  relationshipType: z.string().min(1).default("contains"),
+  relationshipType: z.string().min(1).optional(),
 });
 
 const middleware = createMiddlewareChain([
@@ -56,6 +56,7 @@ async function handlePost(
   const service = getApiResourceRelationshipService();
   const relationship = await service.createRelationship({
     ...data,
+    relationshipType: data.relationshipType ?? "contains",
     createdBy: auth.userId,
   });
 
