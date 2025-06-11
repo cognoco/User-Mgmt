@@ -23,10 +23,10 @@ const querySchema = z.object({
   ipAddress: z.string().optional(),
   userAgent: z.string().optional(),
   search: z.string().optional(),
-  page: z.number().int().min(1).default(1),
-  limit: z.number().int().min(1).max(100).default(20),
-  sortBy: z.enum(["created_at", "action", "status"]).default("created_at"),
-  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  page: z.number().int().min(1).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+  sortBy: z.enum(["created_at", "action", "status"]).optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
 });
 
 const middleware = createMiddlewareChain([
@@ -55,10 +55,10 @@ async function handleGet(
     ipAddress,
     userAgent,
     search,
-    page,
-    limit,
-    sortBy,
-    sortOrder,
+    page = 1,
+    limit = 20,
+    sortBy = "created_at",
+    sortOrder = "desc",
   } = querySchema.parse({
     ...searchParams,
     page: searchParams.page ? parseInt(searchParams.page) : undefined,
