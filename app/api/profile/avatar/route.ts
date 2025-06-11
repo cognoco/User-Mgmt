@@ -55,12 +55,12 @@ async function handleUploadAvatar(
       throw createUserUpdateFailedError('Invalid predefined avatar ID');
     }
     const result = await userService.updateUserProfile(userId, {
-      avatarUrl: selected.url,
+      profilePictureUrl: selected.url,
     } as any);
     if (!result.success || !result.profile) {
       throw createUserUpdateFailedError(result.error);
     }
-    avatarUrl = result.profile.avatarUrl || selected.url;
+    avatarUrl = result.profile.profilePictureUrl || selected.url;
   } else if (data.avatar) {
     const match = data.avatar.match(/^data:(.+);base64,/);
     if (!match) {
