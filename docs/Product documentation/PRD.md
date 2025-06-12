@@ -1,563 +1,375 @@
-# User Management System - Product Requirements Document (PRD)
+# Product Requirements Document: Pluggable User Management System
+
+**Version:** 1.0
+**Status:** Approved
+**Author:** Ridcully, Product Manager
 
 ## 1. Introduction
 
 ### 1.1 Purpose
-The User Management System is a modular, pluggable authentication and user management solution designed to be easily integrated into any web or mobile application. It provides comprehensive user authentication, profile management, and team/organization management capabilities.
-
-### 1.2 Scope
-This document outlines the requirements for a standalone user management module that can be integrated into any application. The system will handle all aspects of user management, from registration and authentication to profile management and team organization.
-
-### 1.3 Product Vision
-To create a robust, secure, and flexible user management system that can be easily plugged into any application, providing a complete solution for authentication, profile management, and team organization while being database-agnostic and maintaining strict separation of frontend and backend concerns.
-
-## 2. Technology Stack
-
-- **Frontend**: Next.js (App Router), React, TypeScript, Tailwind CSS, Shadcn UI
-- **State Management**: Zustand
-- **Backend/Database**: Supabase (with design for database agnosticism)
-- **Testing**: Vitest, React Testing Library, User Event, MSW, JSDOM, Testing Library Jest DOM, Playwright (E2E)
-- **Infrastructure**: Database-agnostic architecture with initial Supabase implementation
-
-## 3. Product Features and Requirements
-
-The product will be developed in phases, with each phase building upon the previous one to create a comprehensive user management system.
-
-### 3.1 Phase 1: Foundational Setup & Core Personal Authentication
-
-#### 3.1.1 Personal User Registration
-- Registration form with fields for First Name, Last Name, Email Address, Password, Confirm Password
-- Dynamic password requirements helper that appears when typing in password field
-- Requirement helper disappears when focus is lost and password meets requirements
-- Mandatory checkbox for Terms and Conditions with clickable links to documents
-- Success message with email verification instructions
-- Client-side validation for all fields
-- Server-side error handling for email duplication, terms acceptance, rate limiting
-
-#### 3.1.2 User Login (Personal)
-- Login form with Email Address and Password fields
-- "Forgot Password" link
-- "Remember Me" checkbox
-- Link to Sign Up for new users
-- Feedback for success, invalid credentials, unverified accounts, locked accounts
-- Support for MFA verification (to be implemented in Phase 4)
-
-#### 3.1.3 User Logout
-- Accessible logout option in user profile dropdown
-- Immediate session termination on server
-- Redirection to login page or homepage
-- Optional confirmation message
-
-#### 3.1.4 Token Handling/Middleware
-- Protection for authenticated routes
-- Redirection to login for unauthenticated access attempts
-- Session expiry handling with redirection to login
-- Optional proactive session expiry warning
-
-#### 3.1.5 Password Reset Request
-- Form for email input to request password reset
-- Clear instructions for the process
-- Generic success message regardless of email existence (for security)
-- Rate limiting for multiple requests
-
-#### 3.1.6 Password Update (Post-Reset)
-- Form with fields for new password and confirmation
-- Dynamic password requirements helper
-- Success confirmation and redirection to login
-- Error handling for invalid/expired tokens, password mismatch
-
-#### 3.1.7 Send Verification Email
-- Option to resend verification email from login error or in-app prompt
-- Confirmation message for email sent
-- Rate limiting for multiple requests
-- Error handling for already verified users
-
-#### 3.1.8 Verify Email Address
-- Verification link in email that opens in browser
-- Success confirmation with login button/redirection
-- Error handling for invalid/expired links, already verified accounts
-
-#### 3.1.9 Update Password (Logged In)
-- Form with fields for current password, new password, confirmation
-- Dynamic password requirements helper
-- Success confirmation
-- Error handling for incorrect current password, mismatch, requirements
-- Security notification email when password is changed
-
-#### 3.1.10 Basic Error Handling
-- Clear, plain language error messages
-- Appropriate error message location (field-specific or general)
-- Specific error descriptions with guidance when possible
-- Consistent error styling throughout application
-- Non-blocking UI for errors
-
-#### 3.1.11 Input Validation
-- Real-time validation feedback
-- Visual cues for invalid fields
-- Specific error messages for validation rules
-- Disabled submit buttons until form validation passes
-- Server-side validation for security
-
-### 3.2 Phase 2: Personal User Profile & Account Management
-
-#### 3.2.1 Get Personal Profile
-- Display of user profile information
-- Fields for Name, Email, Bio, Contact Information, Avatar
-- Layout with clear sections
-- Prompts for completing optional fields
-- Edit button for profile modification
-
-#### 3.2.2 Update Personal Profile
-- Editable form with current profile data
-- Fields for Name, Bio, Contact Information
-- Save/Cancel buttons
-- Success/error messages
-- Validation for input fields
-
-#### 3.2.3 Avatar Upload
-- Option to set/change profile picture
-- File selection with guidance on allowed formats/sizes
-- Image cropping/preview functionality
-- Success/error feedback
-- Client-side validation for file type/size
-
-#### 3.2.4 Profile Visibility
-- Controls for setting profile visibility (public/private)
-- Clear explanations of visibility settings
-- Automatic or manual saving of changes
-- Success/error messages
-
-#### 3.2.5 Account Deletion
-- Access to account deletion in settings
-- Warning about permanent deletion consequences
-- Multi-step confirmation process
-- Success feedback with redirection
-- Error handling for confirmation failures
-
-### 3.3 Phase 3: Business User Registration & Core Profile
-
-#### 3.3.1 Business Registration
-- Registration form with user fields and company fields
-- User fields: First Name, Last Name, Email, Password, Confirm Password
-- Company fields: Company Name, Size, Industry, Website
-- User Role fields: Position/Job Title, Department
-- Terms & Conditions checkbox
-- Success message with verification instructions
-- Validation and error handling
-
-#### 3.3.2 Get Business Profile
-- Display of combined personal and company information
-- Sections for User Info and Company Info
-- Verification status display
-- Edit buttons with permission controls
-
-#### 3.3.3 Update Business Profile
-- Editable form for company details
-- Fields for Company Name, Size, Industry, Website, Contact, Address, VAT ID
-- Save/Cancel buttons
-- Permission-based access control
-- Success/error messages
-
-#### 3.3.4 Company Logo Upload
-- Option to upload/change company logo
-- File selection with guidance
-- Cropping/preview functionality
-- Success/error feedback
-- Permission-based access control
-
-#### 3.3.5 Business Address Management
-- Structured address fields in business profile
-- Support for international address formats
-- Optional address validation/lookup integration
-
-#### 3.3.6 Company Validation
-- Process for verifying company legitimacy
-- Status indicators for validation state
-- Manual or automatic trigger
-- Success/error feedback
-
-#### 3.3.7 Business Domain Verification
-- Process for proving ownership of company domain
-- Method implementation (DNS, email)
-- Clear instructions for verification steps
-- Status display
-- Success/error feedback
-
-### 3.4 Phase 4: Advanced Authentication (MFA, SSO)
-
-#### User Journeys
-- **MFA Setup:**
-  1. User logs in, is prompted to set up MFA (if required by policy).
-  2. User selects MFA method (TOTP app, SMS, email).
-  3. System displays QR code or sends code.
-  4. User enters code to verify setup.
-  5. Success feedback; backup codes offered.
-- **MFA Login:**
-  1. User enters credentials.
-  2. Prompted for MFA code.
-  3. User enters code; access granted or error shown.
-- **SSO Login:**
-  1. User clicks "Sign in with Google/Microsoft/SSO Provider."
-  2. Redirected to provider, authenticates, returns to app.
-  3. If first login, prompted to complete profile.
-
-#### UI/UX Expectations
-- Clear, stepwise MFA setup wizard.
-- Accessible QR code display, copy-paste fallback.
-- Backup code download/copy with warning to store securely.
-- Error feedback for invalid/expired codes.
-- SSO buttons styled per provider guidelines.
-- Loading indicators for external redirects.
-
-#### API Endpoints
-- `POST /api/auth/mfa/setup`
-  - Request: `{ method: "totp" | "sms" | "email" }`
-  - Response: `{ qrCodeUrl?: string, secret?: string, smsSent?: boolean }`
-- `POST /api/auth/mfa/verify`
-  - Request: `{ code: string }`
-  - Response: `{ success: boolean, backupCodes?: string[] }`
-- `POST /api/auth/mfa/disable`
-  - Request: `{ password: string, code: string }`
-- `POST /api/auth/sso/initiate`
-  - Request: `{ provider: "google" | "microsoft" | ... }`
-  - Response: `{ redirectUrl: string }`
-- `POST /api/auth/sso/callback`
-  - Request: `{ code: string, state: string }`
-  - Response: `{ token: string, profile: {...} }`
-
-#### Role/Permission Implications
-- MFA required for roles: admin, owner, configurable for others.
-- SSO may be restricted to business/org users.
-- Only user or admin can disable MFA.
-
-#### Error Handling & Edge Cases
-- Invalid/expired MFA codes.
-- SSO provider errors (network, denied consent).
-- MFA lockout after N failed attempts.
-- Backup code usage and regeneration.
-
-#### Integration Points & Extensibility
-- Pluggable MFA providers (TOTP, SMS, email, WebAuthn).
-- SSO provider registry (add/remove via config).
-- Hooks/events for successful/failed authentication.
-
-### 3.5 Phase 5: Team Management
-
-#### User Journeys
-- **Team Creation:**
-  1. User navigates to "Teams," clicks "Create Team."
-  2. Enters team name, description, visibility.
-  3. Team created; user is owner.
-- **Invite Member:**
-  1. Owner/admin clicks "Invite," enters email/role.
-  2. Invite sent; user receives email, accepts, joins team.
-- **Role Assignment:**
-  1. Owner/admin edits member, selects new role.
-  2. Member permissions update immediately.
-
-#### UI/UX Expectations
-- Team list with search/filter.
-- Member list with roles, status (pending, active).
-- Invite flow with email preview, resend option.
-- Role dropdowns, permission tooltips.
-- Confirmation dialogs for removals.
-
-#### API Endpoints
-- `POST /api/teams`
-  - Request: `{ name: string, description?: string, visibility: "private" | "public" }`
-- `POST /api/teams/:teamId/invite`
-  - Request: `{ email: string, role: string }`
-- `POST /api/teams/:teamId/members/:memberId/role`
-  - Request: `{ role: string }`
-- `DELETE /api/teams/:teamId/members/:memberId`
-- `GET /api/teams/:teamId`
-
-#### Role/Permission Implications
-- Roles: owner, admin, member, guest.
-- Only owner/admin can invite/remove or change roles.
-- Guests have read-only access.
-
-#### Error Handling & Edge Cases
-- Duplicate invites.
-- Invite expiration.
-- Removing last owner (prevent).
-- Team deletion confirmation.
-
-#### Integration Points & Extensibility
-- Webhooks for member join/leave.
-- Custom roles/permissions via config.
-- Team-scoped API tokens.
-
-### 3.6 Phase 6: Subscription & Billing
-
-#### User Journeys
-- **Upgrade Plan:**
-  1. User visits billing page, sees current plan.
-  2. Selects new plan, enters payment info.
-  3. Confirmation, immediate access to new features.
-- **View Invoices:**
-  1. User views billing history, downloads invoices.
-
-#### UI/UX Expectations
-- Plan comparison table.
-- Secure payment form (PCI-compliant).
-- Invoice list with download links.
-- Clear error/success messages.
-
-#### API Endpoints
-- `GET /api/billing/plans`
-- `POST /api/billing/subscribe`
-  - Request: `{ planId: string, paymentMethod: {...} }`
-- `GET /api/billing/invoices`
-- `POST /api/billing/cancel`
-- `POST /api/billing/update-payment`
-
-#### Role/Permission Implications
-- Only billing admins/owners can manage subscriptions.
-- Members can view plan/invoices.
-
-#### Error Handling & Edge Cases
-- Payment failures (card declined, expired).
-- Prorated upgrades/downgrades.
-- Grace period for failed payments.
-
-#### Integration Points & Extensibility
-- Pluggable payment providers (Stripe, Paddle, etc.).
-- Webhooks for payment events.
-- API for external billing system sync.
-
-### 3.7 Phase 7: Enterprise Features
-
-#### User Journeys
-- **Audit Log Review:**
-  1. Admin navigates to "Audit Logs."
-  2. Filters by user, action, date.
-  3. Views details, exports logs.
-- **Custom Security Policy:**
-  1. Admin sets password/MFA/session policies.
-  2. Changes take effect for all users.
-
-#### UI/UX Expectations
-- Log table with filters, export (CSV/JSON).
-- Policy editor with validation, previews.
-- Compliance status indicators.
-
-#### API Endpoints
-- `GET /api/audit/logs`
-  - Query: `?userId=&action=&dateFrom=&dateTo=`
-- `POST /api/security/policies`
-  - Request: `{ policyType: string, config: {...} }`
-- `GET /api/security/policies`
-
-#### Role/Permission Implications
-- Only enterprise admins can access logs/policies.
-- Policy changes may require re-authentication.
-
-#### Error Handling & Edge Cases
-- Large log exports (pagination, limits).
-- Invalid policy configs (validation errors).
-
-#### Integration Points & Extensibility
-- Custom policy plugins.
-- External SIEM/logging integrations.
-- API for compliance reporting.
-
-### 3.8 Phase 8: Platform Support & Integration
-
-#### User Journeys
-- **API Key Generation:**
-  1. User visits "Integrations," clicks "Create API Key."
-  2. Names key, sets scopes, copies key.
-- **Webhook Setup:**
-  1. User adds webhook URL, selects events.
-  2. System sends test event, confirms delivery.
-
-#### UI/UX Expectations
-- API key list with scopes, last used.
-- Webhook list with status, resend/test buttons.
-- Clear warnings about key exposure.
-
-#### API Endpoints
-- `POST /api/integrations/api-keys`
-  - Request: `{ name: string, scopes: string[] }`
-- `DELETE /api/integrations/api-keys/:keyId`
-- `POST /api/integrations/webhooks`
-  - Request: `{ url: string, events: string[] }`
-- `POST /api/integrations/webhooks/test`
-- `DELETE /api/integrations/webhooks/:webhookId`
-
-#### Role/Permission Implications
-- Only admins can create/delete API keys and webhooks.
-- Scopes restrict API key access.
-
-#### Error Handling & Edge Cases
-- Duplicate key/webhook names.
-- Webhook delivery failures (retries, status).
-- Key revocation and audit.
-
-#### Integration Points & Extensibility
-- Pluggable webhook event types.
-- API for external integration management.
-- Custom API key scopes.
-
-## 4. Non-Functional Requirements
-
-### 4.1 Performance
-- Page load time under 2 seconds
-- API response time under 500ms
-- Support for concurrent users
-
-### 4.2 Security
-- HTTPS for all connections
-- Secure password storage (hashing)
-- Protection against common attacks (XSS, CSRF, SQL Injection)
-- Rate limiting for sensitive operations
-- Token-based authentication
-
-### 4.3 Scalability
-- Horizontal scaling capability
-- Database connection pooling
-- Caching strategies for frequently accessed data
-
-### 4.4 Reliability
-- 99.9% uptime
-- Automatic error recovery
-- Graceful degradation during partial system failures
-
-### 4.5 Accessibility
-- WCAG 2.1 AA compliance
-- Keyboard navigation support
-- Screen reader compatibility
-- Sufficient color contrast
-
-### 4.6 Internationalization
-- Support for multiple languages
-- Culture-specific formatting (dates, numbers)
-- RTL language support
-
-### 4.7 Modularity & Pluggability
-- Clear separation between core and extended features
-- Easy enabling/disabling of non-core features
-- Well-defined integration points for host applications
-
-### 4.8 Database Agnosticism
-- Clean separation of database access code
-- Adapter pattern for database operations
-- Initial implementation with Supabase
-
-## 5. Technical Architecture
-
-### 5.1 Directory Structure
-```
-/
-├── e2e/                  # End-to-End (Playwright) tests
-├── app/                  # Next.js App Router pages and API routes
-├── src/                  # Core source code
-│   ├── components/       # React components
-│   ├── hooks/            # Custom React hooks
-│   ├── lib/              # Core libraries and utilities
-│   ├── middleware/       # Next.js middleware
-│   ├── types/            # TypeScript type definitions
-│   └── tests/            # Generic test utilities, mocks, and non-Playwright integration tests
-├── public/               # Static assets
-├── docs/                 # Documentation
-└── scripts/              # Utility scripts
-```
-
-### 5.2 Key Components
-- Next.js App Router for page routing and API routes
-- React components organized by feature domain
-- Zustand stores for state management
-- Supabase for initial database implementation
-- React Hook Form with Zod for form validation
-- Shadcn UI for component library
-
-### 5.3 Authentication Flow
-- JWT-based authentication
-- Token refresh mechanism
-- Session management
-- Role-based access control
-
-## 6. User Experience Requirements
-
-### 6.1 Responsive Design
-- Mobile-first approach
-- Responsive layouts for all screen sizes
-- Touch-friendly UI elements
-
-### 6.2 Consistent UI
-- Uniform design language throughout
-- Consistent positioning of navigation elements
-- Standard error and success message patterns
-
-### 6.3 Intuitive Navigation
-- Clear navigation hierarchy
-- Breadcrumbs for complex flows
-- Easily accessible back buttons
-
-### 6.4 Error Handling
-- Clear error messages in plain language
-- Contextual error display
-- Suggested resolution steps where applicable
-
-## 7. Implementation Constraints
-
-- Database-agnostic design with initial Supabase implementation
-- Strict separation of frontend and backend code
-- No changing existing functionality to please test files
-- No introduction of new technologies without approval
-- Must adhere to file structure guidelines
-
-## 8. Testing & Mocking
-
-### 8.1 Testing Philosophy
-- **Production-first, test-second:** Tests mirror real user flows and production scenarios.
-- **E2E focus:** End-to-end tests for all critical flows (auth, profile, billing, etc.).
-- **No "test-only" code paths:** All test hooks must be production-safe.
-
-### 8.2 Test Types & Priorities
-- **E2E (Playwright):** Registration, login, MFA, billing, team management, integrations.
-- **Integration (Vitest, RTL):** Component interactions, API integration, error boundaries.
-- **Unit:** Only for complex logic (validation, adapters).
-- **Accessibility (a11y):** Automated checks for all forms and flows.
-- **Internationalization (i18n):** Key flows tested in multiple languages.
-
-### 8.3 Mocking Strategy
-- **Global only:** All mocks (API, network, etc.) are global (MSW).
-- **No local mocks:** No per-test or per-file mocks.
-- **MSW for API mocking:** All network requests intercepted at the global level.
-
-### 8.4 Coverage Requirements
-- **Mirror implementation:** Test coverage must reflect real user flows and edge cases.
-- **Critical flows:** Registration, login, MFA, billing, team management, integrations.
-- **Edge cases:** Error states, permission denials, expired tokens, etc.
-
-### 8.5 Known Gaps & Improvement Plan
-- **Summarized from [GAP_ANALYSIS.md](../Project documentation/GAP_ANALYSIS.md):**
-  - Some edge cases (e.g., SSO errors, billing proration) need more E2E coverage.
-  - Accessibility and i18n coverage to be expanded in Phases 4–8.
-  - Mocking for new API endpoints to be added to global MSW handlers.
-  - Plan: Review and update test suites after each phase, referencing GAP_ANALYSIS.md.
-
-### 8.6 References to Key Docs
-- [TESTING.md](../Testing documentation/TESTING.md)
-- [TESTING_ISSUES.md](../Testing documentation/TESTING_ISSUES.md)
-- [GAP_ANALYSIS.md](../Project documentation/GAP_ANALYSIS.md)
-
-## 9. Explicit API/Role/Extensibility Details
-
-- **API Request/Response Examples:** See each phase above for endpoint and payload details.
-- **Role/Permission Matrix:** See [auth-roles.md](auth-roles.md) for full role and permission definitions.
-- **Integration/Extensibility Points:** Each phase lists extensibility hooks (e.g., pluggable providers, webhooks, custom policies). Reference or link to integration guides or API docs as they are developed.
-
-## 10. Glossary
-
-- **MFA**: Multi-Factor Authentication
-- **SSO**: Single Sign-On
-- **JWT**: JSON Web Token
-- **WCAG**: Web Content Accessibility Guidelines
-- **RTL**: Right-to-Left (languages)
-- **UI**: User Interface
-- **UX**: User Experience
-- **API**: Application Programming Interface
-- **E2E**: End-to-End (testing) 
+This document provides the detailed technical and functional requirements for the **Pluggable User Management System**. It represents the single source of truth for the project, merging previous drafts and analyses to guide development, architecture, and testing.
+
+### 1.2 Product Vision & Business Goals
+The core vision is to create a single, modular, and marketable asset that solves user management comprehensively, eliminating the need to rebuild it for future products. This strategy is divided into two distinct horizons:
+
+- **Horizon 1 (Foundational Core Module):** The immediate goal is to develop a robust, secure, and reusable user management module to serve as a core component in the **customer-facing products we build.** This allows us to create a battle-tested solution that meets our own high standards for security and developer experience. This horizon is itself staged, starting with a core MVP and iterating towards a complete foundational module.
+- **Horizon 2 (External Product):** The long-term vision is to evolve this proven foundational module into a fully-featured, enterprise-grade, marketable product.
+
+This approach will drastically reduce time-to-market for new applications and establish a secure, trusted standard for user identity.
+
+### 1.3 Scope Definition
+To manage development and clearly communicate priorities, all features are explicitly tagged to delineate scope according to the two-horizon strategy.
+
+- **`[Scope: H1-MVP]`**: Features required for the **Minimum Viable Product**. This initial version focuses on delivering a standalone solution for personal user identity, authentication, and subscription management for a host application.
+- **`[Scope: H1-Core]`**: Features required for the **Completed Foundational Module**. These build upon the MVP to support our more complex products, including team structures and core compliance capabilities.
+- **`[Scope: H2-Enterprise]`**: Features required for the **External Enterprise Product**. These are the advanced, extensible, and customizable features needed to package and sell the solution to third-party customers.
+
+---
+
+## 2. Core Architectural Principles
+
+These principles are **NON-NEGOTIABLE** and foundational to the project's success as a "pluggable" and maintainable module. They must be adhered to throughout the development lifecycle and override any conflicting, less-specific architectural statements.
+
+- **Strict Separation of Concerns:** Business logic, data access, and UI MUST be rigidly separated into distinct layers. UI components MUST NOT contain business logic.
+- **Interface-First & Pluggable Service Architecture:** The architecture's success hinges on true service interchangeability. This principle is an unbreakable law.
+  - **Service Contracts:** Before implementing any provider-specific code, the team MUST define provider-agnostic service contracts (e.g., `IAuthService`, `IPaymentService`) in pure TypeScript. These interfaces MUST use internally-defined data structures (e.g., a `UserSession` object), not vendor-specific pass-through objects.
+  - **Mock-Based Verification:** To prove the abstraction is genuine, a mock implementation of each interface (e.g., an in-memory `MockAuthService`) MUST be created and used in tests alongside the primary adapter (e.g., `SupabaseAuthAdapter`). The ability to swap these implementations interchangeably is the primary measure of success for this principle. The definition of "done" for any feature is that its tests pass with *both* the primary service adapter and the mock adapter. A feature that fails with the mock is considered broken, as this indicates a leaky abstraction. This is the project's primary quality gate against vendor lock-in.
+- **Pragmatic UI: Headless Core & Wrapped Vendor Elements:**
+  - **Tier 1 (Core UI):** The headless pattern MUST be used for all standard, non-critical UI components (forms, buttons, modals, layouts) to ensure design consistency and customizability by the host application.
+  - **Tier 2 (Sensitive Inputs):** For high-risk, security-critical elements, specifically payment card collection, the system MUST delegate to the vendor's battle-tested components (e.g., Stripe Elements). These vendor components should be wrapped in our own styled containers to control their appearance, but their core functionality MUST NOT be rebuilt. This gives us aesthetic control without inheriting unnecessary risk.
+- **Configuration-Driven Services:** The keystone of the pluggable architecture is configuration. The runtime selection of a service provider MUST be handled via environment variables. For example, `AUTH_PROVIDER="supabase"` will instruct the system's service container to instantiate the `SupabaseAuthAdapter` for the `IAuthService` interface. This makes the "how" of pluggability explicit and testable.
+- **Absolute Import Paths:** All internal imports MUST use absolute paths (`@/components`, `@/lib`, etc.) to prevent fragile relative pathing (`../..`).
+
+---
+
+## 3. User Personas
+
+- **End-User (Personal):** An individual using a host application for personal reasons. They are motivated by a simple, fast, and secure way to manage their own identity and profile. They expect intuitive interfaces and clear communication.
+- **End-User (Business):** An individual using a host application as part of their job. They belong to a team or organization within the system. Their priority is efficiency and clear role-based access.
+- **Team Admin:** A business user responsible for managing their team's members, settings, and potentially billing within the host application. They need clear dashboards and powerful, unambiguous controls.
+- **Application Developer:** A developer at a company that is integrating this User Management module into their own product. They require clear APIs, hooks, excellent documentation, and the ability to customize the UI to match their brand.
+- **System Owner:** The business or product owner of the host application. They are concerned with security, compliance, user retention, and overall system administration.
+
+---
+
+## 4. Functional Requirements & User Journeys
+
+This section details the specific features, user journeys, and technical requirements.
+
+### 4.1 Foundational Authentication & Profile (`[Scope: H1-MVP]`)
+
+#### 4.1.1 Personal User Registration
+- **User Story:** As a new user, I want to create a personal account quickly and securely so that I can access the application.
+
+- **User Journey & UI Requirements:**
+  1. User accesses the "Sign Up" page.
+  2. The UI presents a form with fields: `First Name`, `Last Name`, `Email Address`, `Password`, `Confirm Password`.
+  3. While typing in the `Password` field, the UI must provide clear, real-time feedback indicating which of the password strength requirements have been met.
+  4. **Implementation Note:** The mechanism for providing this real-time feedback must adhere strictly to the Core Architectural Principles (Section 2), particularly 'Separation of Concerns' and 'Headless UI'. The final pattern will be defined during the architectural design phase to ensure business logic is not duplicated on the front end.
+  5. A mandatory checkbox for "I agree to the Terms and Conditions and Privacy Policy" is present. The text "Terms and Conditions" and "Privacy Policy" **MUST** be clickable links opening in a new tab.
+  6. The "Register" button should be disabled until the T&C checkbox is checked.
+
+- **API Specification (`POST /api/auth/register`):**
+  - **On Success (200 OK):**
+    - The handler for this endpoint will invoke the `IAuthService.register()` method.
+    - A new user record is created in the database.
+    - An email with a secure, time-limited verification link is sent to the user's email address.
+    - The user is **NOT** logged in.
+  - **On Error:**
+    - `400 Bad Request` (Error Code: `validation/invalid_input`): For client-side validation failures (e.g., invalid email format, password mismatch, empty fields, password policy violation). The UI **MUST** display specific error messages directly below the relevant fields.
+    - `409 Conflict` (Error Code: `auth/email_exists`): If the email address already exists. The UI **MUST** display: "An account with this email address already exists. Please [Login Link] or use a different email."
+    - `429 Too Many Requests`: For rate-limiting violations.
+
+- **Acceptance Criteria:**
+  - GIVEN a user fills the form correctly and checks the T&C, WHEN they submit, THEN the system creates a new user record, sends a verification email, and displays the success message.
+  - GIVEN a user submits a form with an email that already exists, THEN the API returns a `409 Conflict` and the UI shows the corresponding error.
+  - GIVEN a user submits a form with a password that does not meet policy, THEN the API returns a `400 Bad Request` and the UI shows the corresponding error.
+  - GIVEN a user attempts to register, any leading/trailing whitespace in inputs MUST be trimmed before validation.
+
+#### 4.1.2 User Login
+- **User Story:** As a returning user, I want to log in securely with my email and password so that I can access my account.
+
+- **User Journey & UI Requirements:**
+  1. User accesses the "Login" page.
+  2. The UI presents a form with fields: `Email Address`, `Password`.
+  3. Helper links for "Forgot Password?" and "Don't have an account? Sign Up" are present.
+
+- **API Specification (`POST /api/auth/login`):**
+  - **On Success (200 OK):**
+    - The handler will invoke the `IAuthService.login()` method, which validates credentials and returns session tokens (e.g., JWT in an httpOnly cookie).
+    - The user is redirected to their personal dashboard (`/dashboard`).
+  - **On Error:**
+    - `401 Unauthorized` (Error Code: `auth/invalid_credentials`): For invalid email/password combination. UI **MUST** show a generic message: "Invalid email address or password. Please try again."
+    - `403 Forbidden` (Error Code: `auth/unverified`): If the user's account is not yet verified. UI **MUST** show: "Your account is not verified. Please check your email for the verification link. [Resend Verification Link]".
+    - `403 Forbidden` (Error Code: `auth/account_locked`): After 5 failed login attempts. UI **MUST** show: "Your account has been temporarily locked due to too many failed login attempts. Please try again later or reset your password."
+
+- **Acceptance Criteria:**
+  - GIVEN a verified user with valid credentials, WHEN they log in, THEN the system successfully integrates with the configured IAuthService implementation to validate the user and returns a 200 OK with session tokens, redirecting the user to their dashboard.
+  - GIVEN a user with invalid credentials, WHEN they attempt to log in, THEN the API returns a `401 Unauthorized` and the UI shows the correct error.
+  - GIVEN an unverified user, WHEN they attempt to log in, THEN the API returns a `403 Forbidden` and the UI prompts them to verify their email.
+  - GIVEN a user provides their email, it MUST be treated as case-insensitive, while the password MUST be case-sensitive.
+  - AFTER 5 failed login attempts for a single account, that account MUST be temporarily locked for 15 minutes.
+  - **Implementation Note:** This account-specific lockout mechanism serves as an inner layer of defense against brute-force attacks. It is distinct from and operates in addition to the general, IP-based rate limiting on the endpoint (as defined in NFR 6.1). The general rate limiter acts as the outer defense layer to prevent volumetric attacks.
+
+#### 4.1.3 User Logout
+- **User Story:** As a logged-in user, I want to securely log out to protect my account.
+- **User Journey & UI Requirements:**
+  1. A "Logout" option must be clearly accessible within a user profile menu or similar persistent UI element for authenticated users.
+- **API Specification (`POST /api/auth/logout`):**
+  - The API endpoint handler invalidates the user's session token on the server-side by invoking the `IAuthService.logout()` method.
+  - On Success (200 OK), the client-side session is cleared, and the user is immediately redirected to the public home page or login page.
+- **Acceptance Criteria:**
+  - GIVEN a logged-in user, WHEN they click "Logout", THEN their server session is terminated, and they are redirected to the login page.
+
+#### 4.1.4 Token Handling & Middleware
+- **User Story:** As a developer, I want all protected routes to be secured by default, redirecting any unauthenticated access to the login page to ensure application security.
+- **Logic & Requirements:**
+  1. Middleware **MUST** protect all authenticated routes/endpoints by calling an `IAuthService.validateSession()` method.
+  2. If an unauthenticated user attempts to access a protected route, they **MUST** be redirected to the login page.
+  3. If a logged-in user's session token expires, their next API request to a protected endpoint **MUST** result in a `401 Unauthorized` response (Error Code: `auth/session_expired`).
+  4. The client-side application **MUST** handle the `401 Unauthorized` response by clearing any local session data and redirecting the user to the login page with a message: "Your session has expired. Please log in again."
+- **Acceptance Criteria:**
+  - GIVEN an unauthenticated user, WHEN they attempt to navigate directly to `/dashboard`, THEN they are redirected to `/login`.
+  - GIVEN a user with an expired session token, WHEN they take an action that calls a protected API, THEN the API returns `401 Unauthorized` and the UI redirects them to `/login`.
+
+#### 4.1.5 Password Reset
+- **User Story:** As a user who forgot their password, I want to securely reset it via email so I can regain access to my account.
+- **User Journey & API Flow:**
+  1. User clicks "Forgot Password?" on the login page and is taken to a form with a single `Email Address` field.
+  2. User submits their email to `POST /api/auth/reset-password`. The endpoint handler will invoke the `IAuthService.requestPasswordReset()` method. This endpoint **MUST** be rate-limited.
+  3. The API **ALWAYS** returns a generic `200 OK` message ("If an account exists for [email], you will receive a password reset link.") to prevent user enumeration.
+  4. A secure, single-use, time-limited token is generated and emailed to the user.
+  5. User clicks the link, which directs them to a "Set New Password" page containing the token in the URL.
+  6. The page presents `New Password` and `Confirm New Password` fields. The dynamic password strength helper **MUST** be present and function as defined in the registration feature.
+  7. User submits the new password and the token to `POST /api/auth/update-password`. The endpoint handler will invoke the `IAuthService.updatePasswordWithResetToken()` method.
+- **API & Feedback:**
+  - **On Success (200 OK):** The user's password is updated. The UI shows "Password updated successfully!" and redirects to the Login page.
+  - **On Error (`POST /api/auth/update-password`):**
+    - `400 Bad Request` (Error Code: `auth/invalid_reset_token`): For invalid, expired, or already-used tokens. UI shows: "This password reset link is invalid or has expired."
+    - `400 Bad Request` (Error Code: `validation/password_mismatch`): If passwords don't match.
+- **Acceptance Criteria:**
+  - GIVEN a user requests a password reset, WHEN they submit their email, THEN the API always returns a `200 OK` and sends an email if the user exists.
+  - GIVEN a user with a valid reset token, WHEN they submit a valid new password, THEN the password is changed and they are redirected to login.
+  - GIVEN a user with an invalid or expired token, WHEN they attempt to reset their password, THEN the API returns a `400 Bad Request` and the UI shows the correct error.
+
+#### 4.1.6 Email Verification
+- **User Story:** As a new user, I want to verify my email address by clicking a link so that I can activate my account and log in.
+- **User Journey & API Flow:**
+  1. An unverified user is prompted to verify their email, with an option to trigger `POST /api/auth/send-verification-email`, which invokes `IAuthService.resendVerificationEmail()`, to resend the link. This endpoint **MUST** be rate-limited.
+  2. User clicks the unique, time-limited verification link in the email, which points to the verification page with the token: `/verify-email?token=[token]`.
+  3. The page automatically calls `GET /api/auth/verify-email?token=[token]`, which invokes the `IAuthService.verifyEmail()` method, on load.
+- **API & Feedback:**
+  - **On Success (200 OK):** The token is validated, and the user's account is marked as `verified` in the database. The UI shows "Email verified successfully! You can now log in." and provides a prominent "Login" button.
+  - **On Error (`GET /api/auth/verify-email`):**
+    - `400 Bad Request` (Error Code: `auth/invalid_verification_token`): For invalid or expired links. The UI shows: "This verification link is invalid or has expired. Please request a new one."
+- **Acceptance Criteria:**
+  - GIVEN a new user, WHEN they click the verification link in their email, THEN their account is marked as verified, and the UI displays a success message.
+  - GIVEN a user clicks an expired or invalid link, THEN the UI displays the correct error message.
+
+#### 4.1.7 Profile Management
+- **User Story:** As a logged-in user, I want to view and update my personal information and avatar so that my profile is accurate and personalized.
+- **User Journey & API Flow:**
+  1. User navigates to their "Profile" or "Account Settings" page. The page calls `GET /api/profile`, which invokes `IProfileService.getProfile()`, to load their current data.
+  2. The UI displays their `First Name`, `Last Name`, and `Bio` in a read-only view.
+  3. User enters an "edit" mode to update these text fields.
+  4. User can trigger a file upload flow for their `Avatar`.
+  5. On save, the updated data is sent via `PATCH /api/profile`, which invokes `IProfileService.updateProfile()`.
+- **API Specification:**
+  - `GET /api/profile`: Its handler invokes `IProfileService.getProfile()` and returns the current user's profile data (`firstName`, `lastName`, `bio`, `avatarUrl`).
+  - `PATCH /api/profile`: Its handler invokes `IProfileService.updateProfile()` and accepts `firstName`, `lastName`, and `bio`.
+  - `POST /api/profile/avatar`: Handles avatar image upload. Its handler invokes `IProfileService.updateAvatar()`. Client-side validation for file type (JPEG, PNG) and size (< 2MB) **MUST** be performed before upload to improve user experience. The server **MUST** independently re-validate these constraints and perform content sniffing to ensure the file is a valid image, rejecting any non-compliant uploads.
+- **Acceptance Criteria:**
+  - GIVEN a logged-in user, WHEN they navigate to the profile page, THEN their current information is displayed.
+  - GIVEN the user updates their name or bio and clicks save, THEN the new information is persisted and reflected in the UI.
+  - GIVEN the user uploads a valid avatar image, THEN the new avatar is displayed and associated with their profile.
+
+#### 4.1.8 Account Deletion
+- **User Story:** As a user, I want to permanently delete my account and all associated data so that I have control over my personal information.
+- **User Journey & UI Requirements:**
+  1. The option to "Delete Account" is available within the "Account Settings" or "Security" section.
+  2. Clicking "Delete Account" **MUST** open a confirmation modal or navigate to a dedicated confirmation page.
+  3. The confirmation dialog must clearly state that this action is permanent and irreversible.
+  4. To confirm, the user **MUST** type their password or a specific phrase (e.g., "DELETE MY ACCOUNT") into a text field. The confirmation button remains disabled until this is done.
+- **API Specification (`DELETE /api/account`):**
+  - Requires the user's current password in the request body for verification.
+  - On success, the API handler invokes the `IUserService.deleteAccount()` method, which begins the data erasure process as defined by the data retention policy (anonymization or hard delete).
+- **Acceptance Criteria:**
+  - GIVEN a user wishes to delete their account, WHEN they complete the multi-step confirmation process, THEN their account is queued for deletion and they are logged out.
+
+#### 4.1.9 Account Security Management (`[Scope: H1-MVP]`)
+- **Goal:** Allow a logged-in user to securely manage their primary credentials.
+
+- **Change Password:**
+  - **User Story:** As a logged-in user, I want to change my password so I can maintain account security.
+  - **User Journey & UI Requirements:**
+    1. A "Change Password" option is available in the "Account Settings" or "Security" section.
+    2. The UI presents a form with fields: `Current Password`, `New Password`, `Confirm New Password`.
+    3. The dynamic password strength helper **MUST** be present for the `New Password` field.
+  - **API Specification:**
+    - An endpoint (`PATCH /api/profile/password`) requires the user's current password for verification before updating to the new one.
+  - **Acceptance Criteria:**
+    - GIVEN a user provides their correct current password and a valid new password, THEN the password is changed successfully.
+
+- **Change Email Address:**
+  - **User Story:** As a logged-in user, I want to change my primary email address and verify the new one to ensure my contact information is up to date.
+  - **Security Requirement:** The email change process **MUST** involve a verification step for the new email address to prevent account takeover.
+  - **User Journey & API Flow:**
+    1. User enters a new email address in their profile settings and submits it to a dedicated endpoint (`POST /api/profile/change-email`).
+    2. The API sends a time-limited verification link to the *new* email address. The user's primary email address is **NOT** yet changed. The UI informs the user to check their new inbox.
+    3. When the user clicks the link, it triggers a verification endpoint (`GET /api/profile/verify-new-email?token=[token]`).
+    4. On successful token validation, the user's primary email address is updated in the database.
+    5. A confirmation notification **MUST** be sent to the user's *old* email address upon successful completion.
+  - **Acceptance Criteria:**
+    - GIVEN a user requests to change their email, THEN a verification link is sent to the new address and the old address remains active.
+    - GIVEN the user clicks the verification link sent to the new address, THEN their primary email is updated, and a notification is sent to the old address.
+
+#### 4.1.10 Advanced Authentication Onboarding (`[Scope: H1-MVP]`)
+- **Goal:** Allow users to log in using modern, convenient, and secure methods by integrating with the default authentication provider's capabilities.
+- **Features:**
+    - **Multi-Factor Authentication (MFA):** The system will integrate with the auth provider's MFA capabilities. The UI will provide the necessary flows for users to enroll a second factor (e.g., TOTP authenticator app), verify it during login, and manage recovery codes.
+    - **SSO Login/Registration (Google, GitHub):** The system will integrate with the auth provider's support for third-party identity providers. The UI will include "Sign in with Google" and "Sign in with GitHub" buttons, and the backend will handle the OAuth callback flow to register or log in the user.
+
+### 4.2 Monetization & Billing (`[Scope: H1-MVP]`)
+
+#### 4.2.1 Subscription & Billing Engine
+- **Goal:** Provide a flexible and secure backend engine for a host application to manage user subscriptions. The long-term goal is to support multiple payment providers.
+- **H1 Implementation Strategy:** For Horizon 1, this will be realized by integrating with Stripe as the default payment provider via a dedicated service module. The specific integration pattern (e.g., redirect-to-checkout vs. embedded elements) will be an architectural decision.
+
+- **API Specification:**
+  - **Create Checkout Session (`POST /api/billing/checkout`)**
+    - **Description:** An authenticated endpoint for the host application to create a Stripe Checkout session for a specific price ID. Its handler invokes the `IPaymentService.createCheckoutSession()` method.
+    - **Request Body:** `{ priceId: string }`
+    - **On Success (200 OK):** Returns `{ "url": "https://checkout.stripe.com/..." }`. The host application is responsible for redirecting the user to this URL.
+    - **Use Case:** A user in the host application clicks "Subscribe" or "Upgrade". The host app calls this endpoint and redirects the user to Stripe to complete the payment.
+
+  - **Create Customer Portal Session (`POST /api/billing/portal`)**
+    - **Description:** An authenticated endpoint for the host app to generate a link to the Stripe Customer Portal, allowing users to manage their existing subscriptions. Its handler invokes the `IPaymentService.createCustomerPortalSession()` method.
+    - **On Success (200 OK):** Returns `{ "url": "https://billing.stripe.com/p/..." }`. The host application is responsible for redirecting the user to this URL.
+    - **Use Case:** A user clicks a "Manage Billing" or "Manage Subscription" button in the host application.
+
+  - **Webhook Handler (`POST /api/webhooks/stripe`)**
+    - **Description:** A public endpoint to receive and process webhook events from Stripe. The handler for this endpoint will invoke methods on the `IPaymentService` such as `handleSubscriptionChange()` after validating the webhook. This is critical for keeping the local database in sync with Stripe's data.
+    - **Security:** The endpoint **MUST** validate the `Stripe-Signature` header to verify the event originated from Stripe.
+    - **Idempotency:** The endpoint **MUST** be designed to handle duplicate events gracefully.
+    - **Events to Handle:**
+      - `checkout.session.completed`: When a user successfully subscribes. The handler must create or update the user's subscription record in the local database, storing the Stripe customer ID and subscription status.
+      - `customer.subscription.updated`: When a subscription changes (e.g., upgrade, downgrade, cancellation). The handler must update the local subscription record accordingly.
+      - `customer.subscription.deleted`: When a subscription ends. The handler must update the local subscription record.
+
+  - **Get Subscription Status (`GET /api/subscription/status`)**
+    - **Description:** An authenticated endpoint for the host app to fetch the current user's subscription status from the local database (not by calling Stripe directly). Its handler invokes `IPaymentService.getSubscriptionStatus()`.
+    - **On Success (200 OK):** Returns the user's current subscription details, including `planId`, `status` (e.g., 'active', 'canceled', 'past_due'), `currentPeriodEndDate`, etc.
+    - **Use Case:** The host application calls this endpoint to determine if a user should have access to premium features.
+
+- **Acceptance Criteria:**
+  - GIVEN a host application, it can successfully initiate and manage subscription sessions for its authenticated users via the provided API endpoints.
+  - GIVEN a payment provider webhook event is sent, the webhook handler correctly validates it, processes it, and updates the local user subscription data.
+  - GIVEN a user has an active subscription, the host application can retrieve that user's subscription status via the API.
+
+---
+
+## 5. Future Horizon Scope
+
+This section outlines features that are part of the full product vision but are not required for the initial MVP. They are prioritized to guide future development phases.
+
+### 5.1 Horizon 1: Completed Foundational Module (`[Scope: H1-Core]`)
+These features represent the primary evolutionary path for the product beyond the MVP, completing the vision for a comprehensive foundational module for our products.
+
+#### 5.1.1 Business & Team Management
+- **Goal:** Allow users to create and manage a business entity (organization/team) within the host application.
+- **Features:**
+    - **Business Account Registration:** A flow for a user to register a new Business account/organization, defining an organization name and creating the initial administrator.
+    - **Team Member Invitations:** An organization administrator can invite new users to their team via email. This includes flows for sending, revoking, and accepting invitations.
+    - **Team Member Management:** Admins can view a list of all team members, see their role and status, and remove members from the team.
+    - **"Last Admin" Logic:** The system **MUST** prevent the removal or role demotion of a team's last remaining administrator to avoid orphaning the organization.
+
+#### 5.1.2 User-Facing Activity Log
+- **Goal:** Provide users with transparency and control over their account security.
+- **Feature:** A "My Activity" or "Session History" page in the user's account settings that displays a log of security-sensitive events, such as:
+    - Successful logins (including date, approximate location, and device/browser).
+    - Failed login attempts.
+    - Password changes.
+    - New device/browser authentications.
+
+#### 5.1.3 Advanced Authentication
+- **Goal:** Enhance security and provide more flexible login options for users.
+- **Features:**
+    - **Account Linking:** Allow a user who has registered with a password to link an SSO provider to their account, and vice-versa, so they can log in with either method.
+    - **Passkey/Biometric Login (WebAuthn):** Allow users to log in faster and more securely using their device's built-in authenticators (e.g., fingerprint, face recognition) via the WebAuthn standard, commonly known as "Passkeys". This provides a convenient, passwordless login experience.
+    - A user **MUST NOT** be able to disconnect the last remaining authentication method (e.g., if they only have Google SSO login and no password). The UI must prompt them to set a password before they can disconnect the final login provider.
+
+#### 5.1.4 Comprehensive Account Recovery
+- **Goal:** Provide a secure way for users to regain access to their account if they lose their primary credentials and MFA device.
+- **Feature:** A defined, secure account recovery flow that goes beyond a simple password reset. This may involve identity verification through secondary email, answering pre-set security questions, or a manual support intervention process.
+
+### 5.2 Horizon 2: External Enterprise Product (`[Scope: H2-Enterprise]`)
+These are high-value, enterprise-grade features that will be prioritized for the marketable, third-party version of the product.
+
+#### 5.2.1 Advanced Access Control (ABAC)
+- **Goal:** Implement a more powerful and flexible permission system for business accounts.
+- **Feature:** An Attribute-Based Access Control (ABAC) system where permissions are not just tied to static roles (RBAC) but can be defined by rules and policies based on user attributes, resource attributes, and context. This will be critical for complex enterprise scenarios.
+
+#### 5.2.2 Platform Extensibility & Customization
+- **Goal:** Provide the tools for customers to deeply integrate and customize the platform to fit their specific needs.
+- **Features:**
+    - **Custom Data Schemas:** Provide a mechanism for customers to extend core data models (like Users and Organizations) with their own custom fields and attributes.
+    - **Pluggable Business Logic:** Enable customers to inject their own logic into core workflows (e.g., via webhooks triggered on events like user registration or payment failure).
+    - **Developer SDKs:** Offer comprehensive SDKs for various languages and frameworks to facilitate seamless integration and interaction with the platform's APIs.
+    - **UI Theming & White-Labeling:** Allow for deep customization of the user interface components to match the customer's brand identity.
+
+---
+
+## 6. Non-Functional Requirements (NFRs)
+
+- **Security:**
+    - **Password Policy (`[Scope: H1-MVP]`):** Passwords must be at least 8 characters and include at least one uppercase letter, one lowercase letter, one number, and one special character.
+    - **Data Encryption (`[Scope: H1-MVP]`):** All data in transit must be encrypted (eg.via HTTPS/TLS 1.2+). All sensitive data at rest (e.g., passwords, API keys) must be securely hashed using a modern, salted hashing algorithm (e.g., Argon2, bcrypt).
+    - **Session Management (`[Scope: H1-MVP]`):** Session tokens must be securely stored (e.g., httpOnly cookies) and must have a defined, reasonable expiration time.
+    - **Rate Limiting (`[Scope: H1-MVP]`):** Sensitive endpoints (login, password reset, registration, email verification resend) must be rate-limited to prevent abuse.
+    - **PII Redaction (`[Scope: H1-Core]`):** All error details and audit logs accessible to admins or developers must have Personally Identifiable Information (PII) automatically redacted.
+    - **Backend Audit Log (`[Scope: H1-MVP]`):** A secure, non-user-facing audit log must record critical security events (e.g., successful logins, failed logins, password changes, account deletions). This log is for internal security analysis.
+
+- **Performance (`[Scope: H1-MVP]`):**
+    - API response time for interactive user operations must be < 500ms at the 95th percentile.
+    - Page load time (LCP) for all primary pages must be < 2 seconds.
+    - **Note:** Performance targets will be re-evaluated and likely made more stringent for `[Scope: H2-Enterprise]`.
+
+- **Reliability (`[Scope: H1-MVP]`):**
+    - The system will have a target uptime of 99.9% for the **Foundational Core Module** (`[Scope: H1-Core]`). This will be increased to 99.99% for `[Scope: H2-Enterprise]`.
+
+- **Testability (`[Scope: H1-MVP]`):**
+    - The architecture must support isolated testing of each layer, using mock implementations for dependencies (e.g., database adapters, email services).
+
+- **Documentation (`[Scope: H1-MVP]`):**
+    - A clear "Getting Started" guide and API reference for the host application developer is a required deliverable for the MVP.
+
+- **Accessibility (`[Scope: H1-MVP]`):**
+    - All UI components must comply with WCAG 2.1 Level AA standards.
+
+- **Regulatory Compliance (`[Scope: H1-MVP]`):**
+    - The system must be designed to be geography-aware, enabling compliance with local data privacy and protection regulations, such as GDPR for European users. This serves as the overarching principle that drives the functional requirements for compliance.
+
+---
+
+## 7. Technology Stack
+Current assumptions - to be finalized during architecture definition
+- **Frontend:** Next.js (App Router), React, TypeScript, Tailwind CSS
+- **Component Primitives:** Shadcn UI
+  - *Architectural Note: Shadcn UI is used to provide accessible, unstyled component primitives. Its "copy-paste" model allows us to have full control over the final implementation and styling, directly supporting our "Headless UI" and "custom-built" architectural principles.*
+- **State Management:** Zustand
+- **Backend/Database:** Supabase (as the default, initial implementation behind the database adapter interface)
+- **Payment Provider:** Stripe
+- **Testing:** Vitest, React Testing Library, Playwright (E2E)
+
+---
+
+## 8. Glossary
+
+- **ABAC:** Attribute-Based Access Control
+- **MFA:** Multi-Factor Authentication
+- **MVP:** Minimum Viable Product
+- **NFR:** Non-Functional Requirement
+- **PII:** Personally Identifiable Information
+- **PRD:** Product Requirements Document
+- **RBAC:** Role-Based Access Control
+- **SSO:** Single Sign-On 
