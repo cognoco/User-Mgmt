@@ -1,3 +1,4 @@
+export {};
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET, DELETE } from '@app/api/session/route';
 import { withRouteAuth } from '@/middleware/auth';
