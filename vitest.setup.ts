@@ -1,5 +1,25 @@
 /// <reference types="vitest/globals" />
+
+// --- Core mocks that must be registered BEFORE any modules are imported ---
+// Mock Prisma client to avoid requiring generated client in tests and to ensure
+// the stub is available to all modules (including those imported by other
+// setup files).
+vi.mock('@/lib/database/prisma', () => {
+  const prismaMock = {
+    $connect: vi.fn(),
+    $disconnect: vi.fn(),
+    teamMember: {
+      findUnique: vi.fn(),
+      findFirst: vi.fn(),
+      delete: vi.fn(),
+    },
+  };
+  return { prisma: prismaMock };
+});
+
+// Delay importing any project modules until core mocks are registered
 import './src/tests/setup';
+
 import '@testing-library/jest-dom';
 import { expect, afterEach, vi } from 'vitest';
 
@@ -7,13 +27,6 @@ import { expect, afterEach, vi } from 'vitest';
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost:54321'; // Dummy URL
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'dummy-anon-key'; // Dummy key
 
-// Mock Prisma client to avoid requiring generated client in tests
-vi.mock('@/lib/database/prisma', () => ({
-  prisma: {
-    $connect: vi.fn(),
-    $disconnect: vi.fn(),
-  },
-}));
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
 import { createMockAuthStore } from '@/tests/mocks/auth.store.mock';
@@ -331,3 +344,45 @@ vi.mock('@supabase/supabase-js', async () => {
   };
 });
 // --- End Global Supabase Mock ---
+
+vi.mock('@prisma/client', () => {
+  // Minimal stub for PrismaClient to satisfy imports in code under test
+  class PrismaClient {
+    constructor() {}
+  }
+  return { PrismaClient };
+});
+
+// Mock simplewebauthn/server to prevent bundler errors in tests that indirectly import WebAuthn helpers
+vi.mock('@simplewebauthn/server', () => ({
+  generateAuthenticationOptions: vi.fn(() => ({})),
+  verifyAuthenticationResponse: vi.fn(() => ({})),
+  generateRegistrationOptions: vi.fn(() => ({})),
+  verifyRegistrationResponse: vi.fn(() => ({})),
+}));
+
+// Mock service container to avoid adapter registry complexities
+vi.mock('@/lib/config/serviceContainer', async () => {
+  const { getApiTeamService } = await import('@/services/team/factory');
+  const defaultUser = { id: 'test-user' } as any;
+  return {
+    getServiceContainer: (overrides: any = {}) => {
+      const teamService = getApiTeamService();
+      const container = {
+        // Minimal auth service that simply returns a fixed user, sufficient for tests
+        auth: {
+          getCurrentUser: vi.fn().mockResolvedValue(defaultUser),
+        },
+        // Permission service stub (expand if specific permission logic is needed in future tests)
+        permission: {
+          getUserPermissions: vi.fn().mockResolvedValue([]),
+        },
+        user: {},
+        team: teamService,
+        addressService: {},
+        ...overrides,
+      } as any;
+      return container;
+    },
+  };
+});

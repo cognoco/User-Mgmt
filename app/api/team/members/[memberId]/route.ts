@@ -1,5 +1,5 @@
 import { type NextRequest } from 'next/server';
-
+import { NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/database/prisma';
 import { z } from 'zod';
@@ -75,6 +75,19 @@ export async function DELETE(
   { params }: { params: Promise<{ memberId: string }> }
 ) {
   const resolvedParams = await params;
-  const parsedParams = paramSchema.parse(resolvedParams);
-  return middleware((r, auth) => handleDelete(r, auth, parsedParams))(req);
+  const parsed = paramSchema.safeParse(resolvedParams);
+
+  if (!parsed.success) {
+    const err = new ApiError(
+      ERROR_CODES.INVALID_REQUEST,
+      'Invalid member ID format',
+      400
+    );
+    return new NextResponse(JSON.stringify(err.toResponse()), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  return middleware((r, auth) => handleDelete(r, auth, parsed.data))(req);
 }

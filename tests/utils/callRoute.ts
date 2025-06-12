@@ -45,7 +45,7 @@ export function callRoute(
     requestInit.body = typeof body === 'string' ? body : JSON.stringify(body);
   }
 
-  const req = new NextRequest(urlWithParams.toString(), requestInit);
+  const req = new NextRequest(urlWithParams.toString(), requestInit as any);
   return handler(req);
 }
 
@@ -83,7 +83,7 @@ export function callRouteWithParams<T extends Record<string, string>>(
     requestInit.body = typeof body === 'string' ? body : JSON.stringify(body);
   }
 
-  const req = new NextRequest(urlWithParams.toString(), requestInit);
+  const req = new NextRequest(urlWithParams.toString(), requestInit as any);
   
   // Create a Promise that resolves to the params immediately
   // This simulates how Next.js provides params to route handlers

@@ -13,6 +13,7 @@ export default defineConfig({
         __dirname,
         'src/tests/mocks/simplewebauthn-server.ts'
       ),
+      '@prisma/client': path.resolve(__dirname, 'src/tests/mocks/prisma-client.ts'),
     },
   },
   test: {
