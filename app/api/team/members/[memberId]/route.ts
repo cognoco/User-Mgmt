@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
 
 
 import { prisma } from '@/lib/database/prisma';
@@ -70,7 +70,11 @@ const middleware = createMiddlewareChain([
   routeAuthMiddleware({ requiredPermissions: [Permission.REMOVE_TEAM_MEMBER] })
 ]);
 
-export const DELETE = (
+export async function DELETE(
   req: NextRequest,
-  ctx: { params: Promise<{ memberId: string }> }
-) => middleware((r, auth) => handleDelete(r, auth, paramSchema.parse(ctx.params)))(req);
+  { params }: { params: Promise<{ memberId: string }> }
+) {
+  const resolvedParams = await params;
+  const parsedParams = paramSchema.parse(resolvedParams);
+  return middleware((r, auth) => handleDelete(r, auth, parsedParams))(req);
+}

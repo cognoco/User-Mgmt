@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createApiHandler, emptySchema } from '@/lib/api/routeHelpers';
 import {
   createSuccessResponse,
@@ -19,7 +19,7 @@ const UpdateTeamSchema = z.object({
 const ParamSchema = z.object({ teamId: z.string().min(1, 'Invalid team id') });
 
 async function handleGet(
-  _req: Request,
+  _req: NextRequest,
   _auth: AuthContext,
   _data: unknown,
   services: ServiceContainer,
@@ -33,7 +33,7 @@ async function handleGet(
 }
 
 async function handlePatch(
-  _req: Request,
+  _req: NextRequest,
   _auth: AuthContext,
   data: z.infer<typeof UpdateTeamSchema>,
   services: ServiceContainer,
@@ -47,7 +47,7 @@ async function handlePatch(
 }
 
 async function handleDelete(
-  _req: Request,
+  _req: NextRequest,
   _auth: AuthContext,
   _data: unknown,
   services: ServiceContainer,
@@ -60,11 +60,12 @@ async function handleDelete(
   return createSuccessResponse({ success: true });
 }
 
-export const GET = (
-  req: Request,
-  ctx: { params: Promise<{ teamId: string }> }
-) => {
-  const parsed = ParamSchema.safeParse(ctx.params);
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ teamId: string }> }
+) {
+  const resolvedParams = await params;
+  const parsed = ParamSchema.safeParse(resolvedParams);
   if (!parsed.success) {
     return NextResponse.json(
       new ApiError(ERROR_CODES.INVALID_REQUEST, parsed.error.message, 400).toResponse(),
@@ -72,13 +73,14 @@ export const GET = (
     );
   }
   return createApiHandler(emptySchema, (r, a, d, s) => handleGet(r, a, d, s, parsed.data.teamId), { requireAuth: true })(req);
-};
+}
 
-export const PATCH = (
-  req: Request,
-  ctx: { params: Promise<{ teamId: string }> }
-) => {
-  const parsed = ParamSchema.safeParse(ctx.params);
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ teamId: string }> }
+) {
+  const resolvedParams = await params;
+  const parsed = ParamSchema.safeParse(resolvedParams);
   if (!parsed.success) {
     return NextResponse.json(
       new ApiError(ERROR_CODES.INVALID_REQUEST, parsed.error.message, 400).toResponse(),
@@ -86,13 +88,14 @@ export const PATCH = (
     );
   }
   return createApiHandler(UpdateTeamSchema, (r, a, d, s) => handlePatch(r, a, d, s, parsed.data.teamId), { requireAuth: true })(req);
-};
+}
 
-export const DELETE = (
-  req: Request,
-  ctx: { params: Promise<{ teamId: string }> }
-) => {
-  const parsed = ParamSchema.safeParse(ctx.params);
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ teamId: string }> }
+) {
+  const resolvedParams = await params;
+  const parsed = ParamSchema.safeParse(resolvedParams);
   if (!parsed.success) {
     return NextResponse.json(
       new ApiError(ERROR_CODES.INVALID_REQUEST, parsed.error.message, 400).toResponse(),
@@ -100,4 +103,4 @@ export const DELETE = (
     );
   }
   return createApiHandler(emptySchema, (r, a, d, s) => handleDelete(r, a, d, s, parsed.data.teamId), { requireAuth: true })(req);
-};
+}
