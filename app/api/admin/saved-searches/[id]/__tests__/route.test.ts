@@ -1,77 +1,88 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { NextRequest } from "next/server";
-import { GET, PATCH, DELETE } from "@app/api/admin/saved-searches/[id]/route";
+/* eslint-disable import/first */
+import { vi } from 'vitest';
 
-vi.mock("@/middleware/createMiddlewareChain", async () => {
-  const actual = await vi.importActual<any>(
-    "@/middleware/createMiddlewareChain",
-  );
-  return {
-    ...actual,
-    routeAuthMiddleware: vi.fn(
-      () => (handler: any) => (req: any, ctx?: any, data?: any) =>
-        handler(req, { userId: "u1" }, data),
-    ),
-    validationMiddleware: vi.fn(
-      () => (handler: any) => (req: any, ctx?: any) =>
-        handler(req, ctx, { name: "n" }),
-    ),
-    errorHandlingMiddleware: vi.fn(() => (handler: any) => handler),
-    createMiddlewareChain: (m: any[]) => (h: any) => h,
-  };
+// --- Global stubs ---------------------------------------------------------
+vi.mock('@/services/auth/factory', () => ({
+  getSessionFromToken: vi.fn().mockResolvedValue({ id: 'u1', app_metadata: { role: 'admin' } }),
+}));
+
+const hasPermissionMock = vi.fn().mockResolvedValue(true);
+vi.mock('@/services/permission/factory', () => ({
+  getApiPermissionService: () => ({
+    hasPermission: hasPermissionMock,
+    getUserRoles: vi.fn().mockResolvedValue([]),
+    getRoleById: vi.fn().mockResolvedValue(null),
+  }),
+}));
+
+vi.mock('@/middleware/withSecurity', () => ({ withSecurity: (fn: any) => fn }));
+
+const mockService = {
+  getSavedSearch: vi.fn(),
+  updateSavedSearch: vi.fn(),
+  deleteSavedSearch: vi.fn(),
+};
+vi.mock('@/services/saved-search/factory', () => ({
+  getApiSavedSearchService: () => mockService,
+}));
+
+// -------------------------------------------------------------------------
+import { describe, it, expect, beforeEach } from 'vitest';
+import { GET, PATCH, DELETE } from '@app/api/admin/saved-searches/[id]/route';
+import { callRouteWithParams } from 'tests/utils/callRoute';
+
+const authHeaders = {
+  authorization: 'Bearer test-token',
+  'X-CSRF-Token': 'test-token',
+};
+const SEARCH_ID = '11111111-1111-1111-1111-111111111111';
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  mockService.getSavedSearch.mockResolvedValue({ id: SEARCH_ID, name: 'n' });
+  mockService.updateSavedSearch.mockResolvedValue({ id: SEARCH_ID, name: 'n2' });
+  mockService.deleteSavedSearch.mockResolvedValue(undefined);
 });
 
-vi.mock("@/middleware/with-security", () => ({
-  withSecurity: vi.fn((fn: any) => fn),
-}));
-
-vi.mock("@/services/saved-search/factory", () => ({
-  getApiSavedSearchService: vi.fn(),
-}));
-
-import { getApiSavedSearchService } from "@/services/saved-search/factory";
-
-function createReq(method: string) {
-  return {
-    method,
-    url: "http://localhost/api/admin/saved-searches/1",
-    nextUrl: { pathname: "/api/admin/saved-searches/1" },
-    json: vi.fn().mockResolvedValue({ name: "n" }),
-  } as unknown as NextRequest;
-}
-
-describe("saved search id API", () => {
-  const service = {
-    getSavedSearch: vi.fn(),
-    updateSavedSearch: vi.fn(),
-    deleteSavedSearch: vi.fn(),
-  } as any;
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(getApiSavedSearchService).mockReturnValue(service);
-    service.getSavedSearch.mockResolvedValue({ id: "1" });
-    service.updateSavedSearch.mockResolvedValue({ id: "1" });
-    service.deleteSavedSearch.mockResolvedValue(undefined);
-  });
-
-  it("calls service on GET", async () => {
-    const res = await GET(createReq("GET"), { params: { id: "1" } } as any);
+describe('admin saved-search [id] route', () => {
+  it('GET returns saved search', async () => {
+    const res = await callRouteWithParams(
+      GET as any,
+      { id: SEARCH_ID },
+      `http://test/api/admin/saved-searches/${SEARCH_ID}`,
+      { headers: authHeaders },
+    );
     expect(res.status).toBe(200);
-    expect(service.getSavedSearch).toHaveBeenCalled();
+    expect(mockService.getSavedSearch).toHaveBeenCalledWith(SEARCH_ID, expect.any(String));
+    // hasPermission may not be invoked if default role check passes.
   });
 
-  it("calls service on PATCH", async () => {
-    const res = await PATCH(createReq("PATCH"), { params: { id: "1" } } as any);
+  it('PATCH updates saved search', async () => {
+    const res = await callRouteWithParams(
+      PATCH as any,
+      { id: SEARCH_ID },
+      'http://test',
+      {
+        method: 'PATCH',
+        headers: authHeaders,
+        body: { name: 'n2' },
+      },
+    );
     expect(res.status).toBe(200);
-    expect(service.updateSavedSearch).toHaveBeenCalled();
+    expect(mockService.updateSavedSearch).toHaveBeenCalled();
   });
 
-  it("calls service on DELETE", async () => {
-    const res = await DELETE(createReq("DELETE"), {
-      params: { id: "1" },
-    } as any);
+  it('DELETE removes saved search', async () => {
+    const res = await callRouteWithParams(
+      DELETE as any,
+      { id: SEARCH_ID },
+      'http://test',
+      {
+        method: 'DELETE',
+        headers: authHeaders,
+      },
+    );
     expect(res.status).toBe(204);
-    expect(service.deleteSavedSearch).toHaveBeenCalled();
+    expect(mockService.deleteSavedSearch).toHaveBeenCalledWith(SEARCH_ID, expect.any(String));
   });
 });

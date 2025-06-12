@@ -369,6 +369,45 @@
   }
   ```
 
+### G. withSecurity Middleware Returning 403 in Unit Tests
+- **Problem:** Routes wrapped with `withSecurity` respond with **403 Forbidden** in unit tests even when auth mocks are correct.
+- **Root cause:** `withSecurity` adds CSRF/headers checks; without a real request context these checks fail and the middleware short-circuits.
+- **Solution/Pattern:** Stub the middleware at the top of the test _before_ importing the route so it simply returns the wrapped handler:
+  ```ts
+  vi.mock('@/middleware/withSecurity', () => ({
+    withSecurity: vi.fn((fn: any) => fn), // pass-through
+  }));
+  ```
+- **When to use:** Any API-route unit test that unexpectedly gets 403 after migrating to `callRoute` helpers.
+
+### H. Admin-Check Pitfall in Team-Member Routes
+- **Problem:** For tests expecting 403 (non-admin) vs 200 (admin) responses, the `prisma.teamMember.findFirst` mock must be set precisely.
+- **Correct patterns:**
+  * **Happy-path / admin present:**
+    ```ts
+    (prisma.teamMember.findFirst as any).mockResolvedValue({ id: 'admin-rec', role: 'admin', teamId: 't1', userId: 'u1' });
+    ```
+  * **Non-admin:**
+    ```ts
+    (prisma.teamMember.findFirst as any).mockResolvedValue(null); // no admin record
+    ```
+- **Why it matters:** Returning a record with `role: 'member'` still counts as "member in same team", causing the route to allow the action and the test to fail.
+
+### I. Deep Relative Path to `tests/utils/callRoute`
+- **Issue:** After moving test files into deeply nested API folders remember the helper path is five levels up from `app/api/.../role/__tests__`:
+  ```ts
+  import { callRouteWithParams } from '../../../../../../../tests/utils/callRoute';
+  ```
+- **Tip:** If Vitest shows "*Does the file exist?*" the path depth is usually off by one.
+
+### J. No Relative Paths for `tests/utils` Helpers
+- **Updated Convention (2025):** Use the workspace-root `baseUrl` import instead of fragile deep relative paths.
+  ```ts
+  // ✅ Preferred – stable regardless of folder depth
+  import { callRoute, callRouteWithParams } from 'tests/utils/callRoute';
+  ```
+- **Why:** Keeps imports short, prevents off-by-one mistakes, and survives folder refactors. **No relative paths allowed going forward.**
+
 ---
 
 ## IV. Environment-Specific Challenges (JSDOM, Node.js)

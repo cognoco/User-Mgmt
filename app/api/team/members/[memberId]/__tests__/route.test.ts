@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DELETE } from '@app/api/team/members/[memberId]/route';
 import { prisma } from '@/lib/database/prisma';
 import { withRouteAuth } from '@/middleware/auth';
-import { callRouteWithParams } from '../../../../../../tests/utils/callRoute';
+import { callRouteWithParams } from 'tests/utils/callRoute';
 import { NextResponse } from 'next/server';
 
 // Combined mocks

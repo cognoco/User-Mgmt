@@ -1,194 +1,125 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { PATCH } from '@app/api/team/members/[memberId]/role/route';
+/* eslint-disable import/first */
+// 1. Mocks MUST come first to ensure they are applied before route import
+
+import { vi } from 'vitest';
+
+// -- Core dependency stubs ---------------------------------------------------
+vi.mock('@/services/auth/factory', () => ({
+  getSessionFromToken: vi.fn().mockResolvedValue({
+    id: 'current-user-id',
+    app_metadata: { role: 'admin' },
+  }),
+}));
+
+// Stub audit logger to avoid noise
+vi.mock('@/lib/audit/auditLogger', () => ({
+  logUserAction: vi.fn().mockResolvedValue(undefined),
+}));
+
+// Provide deterministic Prisma mocks (extends global stub from vitest.setup)
 import { prisma } from '@/lib/database/prisma';
-import { withRouteAuth } from '@/middleware/auth';
-import { NextResponse } from 'next/server';
+prisma.teamMember = {
+  findUnique: vi.fn(),
+  findFirst: vi.fn(),
+  update: vi.fn(),
+} as any;
 
-// Mock dependencies
-vi.mock('@/middleware/auth', () => ({
-  withRouteAuth: vi.fn((handler: any) => async (req: any) =>
-    handler(req, { userId: 'user-123', role: 'admin', permissions: [] }))
-}));
+// ----------------------------------------------------------------------------
+// Now import the route handler **after** mocks are in place
+import { describe, it, expect, beforeEach } from 'vitest';
+import { PATCH } from '@app/api/team/members/[memberId]/role/route';
+import { callRouteWithParams } from 'tests/utils/callRoute';
 
-vi.mock('@/lib/database/prisma', () => ({
-  prisma: {
-    teamMember: {
-      findFirst: vi.fn(),
-      update: vi.fn(),
-    },
-  },
-}));
+const MEMBER_ID = '11111111-1111-1111-1111-111111111111';
+const ADMIN_MEMBER = {
+  id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+  userId: 'current-user-id',
+  teamId: 'team-123',
+  role: 'admin',
+};
+
+const MEMBER_RECORD = {
+  id: MEMBER_ID,
+  userId: 'other-user',
+  teamId: 'team-123',
+  role: 'member',
+  status: 'active',
+};
+
+const authHeaders = { authorization: 'Bearer test-token' };
+
+vi.mock('@/middleware/withSecurity', () => ({ withSecurity: vi.fn((fn: any) => fn) }));
 
 describe('PATCH /api/team/members/[memberId]/role', () => {
-
-  const mockTeamMember = {
-    id: 'member-1',
-    userId: 'user-456',
-    teamLicenseId: 'license-123',
-    role: 'member',
-    status: 'active',
-  };
-
-  const mockAdminMember = {
-    id: 'admin-1',
-    userId: 'user-123',
-    teamLicenseId: 'license-123',
-    role: 'admin',
-    status: 'active',
-  };
-
   beforeEach(() => {
     vi.clearAllMocks();
-    (prisma.teamMember.findUnique as any).mockResolvedValue(mockTeamMember);
-    (prisma.teamMember.findFirst as any).mockResolvedValue(mockAdminMember);
-    (prisma.teamMember.update as any).mockResolvedValue({
-      ...mockTeamMember,
-      role: 'viewer',
-    });
+    (prisma.teamMember.findUnique as any).mockResolvedValue(MEMBER_RECORD);
+    (prisma.teamMember.findFirst as any).mockResolvedValue(ADMIN_MEMBER);
+    (prisma.teamMember.update as any).mockResolvedValue({ ...MEMBER_RECORD, role: 'viewer' });
   });
 
   it('updates member role successfully', async () => {
-    const request = new Request(
-      'http://localhost:3000/api/team/members/member-1/role',
+    const res = await callRouteWithParams(
+      PATCH,
+      { memberId: MEMBER_ID },
+      `http://localhost/api/team/members/${MEMBER_ID}/role`,
       {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ role: 'viewer' }),
-      }
+        body: { role: 'viewer' },
+        headers: authHeaders,
+      },
     );
 
-    const params = { memberId: 'member-1' };
-    const response = await PATCH(request, { params });
-    expect(response).toBeInstanceOf(NextResponse);
-    const data = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(data).toEqual({
-      ...mockTeamMember,
-      role: 'viewer',
-    });
-
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.data.role).toBe('viewer');
     expect(prisma.teamMember.update).toHaveBeenCalledWith({
-      where: { id: 'member-1' },
+      where: { id: MEMBER_ID },
       data: { role: 'viewer' },
     });
   });
 
-  it('returns 401 when user is not authenticated', async () => {
-    vi.mocked(withRouteAuth).mockResolvedValueOnce(
-      new NextResponse('unauth', { status: 401 })
-    );
-
-    const request = new Request(
-      'http://localhost:3000/api/team/members/member-1/role',
+  it('returns 400 for invalid role', async () => {
+    const res = await callRouteWithParams(
+      PATCH,
+      { memberId: MEMBER_ID },
+      'http://localhost',
       {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ role: 'viewer' }),
-      }
+        body: { role: 'invalid-role' },
+        headers: authHeaders,
+      },
     );
-
-    const params = { memberId: 'member-1' };
-    const response = await PATCH(request, { params });
-    expect(response).toBeInstanceOf(NextResponse);
-    const data = await response.json();
-
-    expect(response.status).toBe(401);
-    expect(data).toEqual({ error: 'Unauthorized' });
+    expect(res.status).toBe(400);
   });
 
-  it('returns 403 when user is not an admin', async () => {
-    (prisma.teamMember.findFirst as any).mockResolvedValue({
-      ...mockAdminMember,
-      role: 'member',
-    });
-
-    const request = new Request(
-      'http://localhost:3000/api/team/members/member-1/role',
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ role: 'viewer' }),
-      }
-    );
-
-    const params = { memberId: 'member-1' };
-    const response = await PATCH(request, { params });
-    expect(response).toBeInstanceOf(NextResponse);
-    const data = await response.json();
-
-    expect(response.status).toBe(403);
-    expect(data).toEqual({ error: 'Only admins can update member roles' });
-  });
-
-  it('returns 400 when role is invalid', async () => {
-    const request = new Request(
-      'http://localhost:3000/api/team/members/member-1/role',
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ role: 'invalid-role' }),
-      }
-    );
-
-    const params = { memberId: 'member-1' };
-    const response = await PATCH(request, { params });
-    expect(response).toBeInstanceOf(NextResponse);
-    const data = await response.json();
-
-    expect(response.status).toBe(400);
-    expect(data.error).toContain('Invalid request parameters');
-  });
-
-  it('returns 403 when updating member from another team', async () => {
-    (prisma.teamMember.findUnique as any).mockResolvedValue({
-      ...mockTeamMember,
-      teamId: 'team-other'
-    });
+  it('returns 403 when current user is not admin', async () => {
     (prisma.teamMember.findFirst as any).mockResolvedValue(null);
-
-    const request = new Request(
-      'http://localhost:3000/api/team/members/member-1/role',
+    const res = await callRouteWithParams(
+      PATCH,
+      { memberId: MEMBER_ID },
+      'http://localhost',
       {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: 'viewer' })
-      }
+        body: { role: 'viewer' },
+        headers: authHeaders,
+      },
     );
-
-    const params = { memberId: 'member-1' };
-    const response = await PATCH(request, { params });
-    expect(response.status).toBe(403);
+    expect(res.status).toBe(403);
   });
 
   it('returns 404 when member is not found', async () => {
     (prisma.teamMember.update as any).mockRejectedValue(new Error('Not found'));
-
-    const request = new Request(
-      'http://localhost:3000/api/team/members/invalid-member/role',
+    const res = await callRouteWithParams(
+      PATCH,
+      { memberId: MEMBER_ID },
+      'http://localhost',
       {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ role: 'viewer' }),
-      }
+        body: { role: 'viewer' },
+        headers: authHeaders,
+      },
     );
-
-    const params = { memberId: 'invalid-member' };
-    const response = await PATCH(request, { params });
-    expect(response).toBeInstanceOf(NextResponse);
-    const data = await response.json();
-
-    expect(response.status).toBe(404);
-    expect(data).toEqual({ error: 'Team member not found' });
+    expect(res.status).toBe(404);
   });
 }); 

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET, PATCH, DELETE } from '@app/api/team/[teamId]/route';
 import { getApiTeamService } from '@/services/team/factory';
-import { callRouteWithParams } from '../../../../../tests/utils/callRoute';
+import { callRouteWithParams } from 'tests/utils/callRoute';
 
 vi.mock('@/services/team/factory', () => ({ getApiTeamService: vi.fn() }));
 // The updated routes rely on internal auth middleware (createApiHandler).

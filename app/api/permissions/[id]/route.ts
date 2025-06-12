@@ -22,6 +22,7 @@ const handleGet = async (req: NextRequest) => {
 export const GET = createApiHandler(emptySchema, handleGet, {
   requireAuth: true,
   requiredPermissions: [PermissionValues.MANAGE_ROLES],
+  includePermissions: true,
   rateLimit: { windowMs: 15 * 60 * 1000, max: 50 },
 });
 
@@ -30,6 +31,7 @@ const methodNotAllowed = createApiHandler(emptySchema, async () => {
 }, {
   requireAuth: true,
   requiredPermissions: [PermissionValues.MANAGE_ROLES],
+  includePermissions: true,
 });
 
 export const PUT = methodNotAllowed;
