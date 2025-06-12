@@ -8,7 +8,6 @@ import { webhookUpdateSchema } from '@/core/webhooks/models/webhook'
 import { getServiceContainer } from '@/lib/config/serviceContainer'
 
 const updateSchema = webhookUpdateSchema
-const idParamSchema = z.object({ webhookId: z.string() })
 
 async function handleGet(req: NextRequest, ctx: any, _data: unknown, params: Promise<{ webhookId: string }>) {
   
@@ -21,6 +20,7 @@ async function handleGet(req: NextRequest, ctx: any, _data: unknown, params: Pro
   if (!hook) {
     throw new ApiError(ERROR_CODES.NOT_FOUND, 'Webhook not found', 404)
   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { secret: _s, ...safe } = hook
   return createSuccessResponse(safe)
 }
@@ -54,7 +54,7 @@ async function handlePatch(
     ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
     userAgent: req.headers.get('user-agent') || 'unknown',
     targetResourceType: 'webhook',
-    targetResourceId: params.webhookId,
+    targetResourceId: webhookId,
     details: {
       name: result.webhook.name,
       url: result.webhook.url,
@@ -80,7 +80,7 @@ async function handleDelete(
   if (!existing) {
     throw new ApiError(ERROR_CODES.NOT_FOUND, 'Webhook not found', 404)
   }
-  const result = await service.deleteWebhook(ctx.userId!, params.webhookId)
+  const result = await service.deleteWebhook(ctx.userId!, webhookId)
   if (!result.success) {
     throw createServerError(result.error || 'Failed to delete webhook')
   }
@@ -91,7 +91,7 @@ async function handleDelete(
     ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
     userAgent: req.headers.get('user-agent') || 'unknown',
     targetResourceType: 'webhook',
-    targetResourceId: params.webhookId,
+    targetResourceId: webhookId,
     details: { name: existing.name, url: existing.url },
   })
   return createSuccessResponse({ message: 'Webhook deleted successfully' })

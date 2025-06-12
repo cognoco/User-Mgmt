@@ -18,6 +18,7 @@
 - [XV. Admin API Permission Testing Issues and Solutions](#xv-admin-api-permission-testing-issues-and-solutions)
 - [XVI. API Authentication Route Testing Issues and Solutions](#xvi-api-authentication-route-testing-issues-and-solutions)
 - [XVII. Recent API Route Test Fixes (December 2024)](#xvii-recent-api-route-test-fixes-december-2024)
+- [XVIII. Hanging Test & Timeout Pitfalls (January 2025)](#xviii-hanging-test--timeout-pitfalls-january-2025)
 
 ---
 
@@ -1857,3 +1858,64 @@ These patterns should be applied to future API route tests to maintain test reli
   ```
 - **Applied To:** `app/api/auth/login/__tests__/route.test.ts` and should be pattern for all API route tests using `createApiHandler`.
 - **Prevention:** Always mock the service container rather than trying to mock individual adapters or service factories in API route tests.
+
+### G. API-Key Delete Route Test Issues (January 2025)
+
+While updating `app/api/api-keys/[keyId]/__tests__/route.test.ts` to the new single-argument handler signature we ran into a few pitfalls that are worth recording:
+
+1. **File Appeared to "Hang" – No Tests Executed**  
+   * **Root cause:** The test imported the route *before* mocking the heavy dependencies (`rateLimit`, `auth`, `serviceContainer`).  Because the real `checkRateLimit` and factory code executed at import-time the worker thread blocked and Vitest showed the file as *queued* with "0 tests".  
+   * **Fix:** Register all relevant `vi.mock(..)` calls (rate-limit, auth, service container) **before** importing the route.  After that the file executed instantly.
+
+2. **Mock-Path Mismatch (`rate-limit` vs `rateLimit`)**  
+   * Several tests mocked `@/middleware/rate-limit`, but the actual code imports `@/middleware/rateLimit`.  The mismatch meant the real middleware ran, causing unexpected behaviour.  
+   * **Fix:** Standardised on `@/middleware/rateLimit` and added a safety alias mock in `vitest.setup.ts`:
+     ```ts
+     vi.mock('@/middleware/rateLimit',   () => ({ checkRateLimit: vi.fn().mockResolvedValue(false) }))
+     vi.mock('@/middleware/rate-limit', () => ({ checkRateLimit: vi.fn().mockResolvedValue(false) }))
+     ```
+
+3. **ASI Trap – `console.log()` Followed by a Line Starting with `(`**  
+   * Missing semicolon after `console.log()` produced `TypeError: console.log(...) is not a function`.  JS parsed the next line (`(service.revokeApiKey ...)`) as a call on the return value of `console.log`.  
+   * **Fix:** Always terminate debugging statements with `;` or place them on their own line to avoid Automatic-Semicolon-Insertion surprises.
+
+4. **Unexpected `401` Instead of `200`**  
+   * Even with auth middleware mocked, the request lacked an `Authorization` header, so `createAuthMiddleware` treated it as unauthenticated.  
+   * **Fix:** Provide a dummy bearer token when using `callRouteWithParams`:
+     ```ts
+     callRouteWithParams(DELETE, params, 'http://test', {
+       method: 'DELETE',
+       headers: { authorization: 'Bearer test-token' }
+     })
+     ```
+
+5. **Service Container Circular Dependencies**  
+   * Importing the real service container triggered adapter-registry look-ups and circular factory calls.  
+   * **Fix:** Mock `@/lib/config/serviceContainer` to return a minimal stub (`{ apiKey: mockApiKeyService, auth: mockAuthService }`).
+
+**Takeaways / Best Practices**
+• Always stub heavyweight dependencies before route import.  
+• Standardise middleware import paths and provide alias mocks for legacy cases.  
+• Guard against ASI issues with explicit semicolons.  
+• Include an `Authorization` header in route tests that require auth, even when the auth middleware itself is mocked.  
+• Prefer mocking the **entire** service container over individual factories to avoid circular-dependency land-mines.
+
+### XVIII. Hanging Test & Timeout Pitfalls (January 2025)
+
+While converting legacy API-route tests to the new `callRouteWithParams` helper we ran into a recurring **"[queued] / 0 tests"** symptom.  The root causes and mitigations are captured here so future contributors can unblock themselves quickly.
+
+| Symptom | Root Cause | Fix / Work-around |
+| --- | --- | --- |
+| `vitest run …` shows file as **[queued]** forever, zero tests collected | The route module was imported **before** heavy dependencies were stubbed, so ESM evaluated the real factories (e.g. `rateLimit`, `serviceContainer`) which opened DB connections / awaited network I/O. Vitest waits on that promise, appearing to hang. | *Always* place **all `vi.mock()` calls above the first import of the route under test. If the route pulls a large circular‐dependency graph, mock the *entire* service container:`vi.mock('@/lib/config/serviceContainer', () => ({ getServiceContainer: () => mockContainer }))` |
+| Individual test exceeds default 5 s timeout | Genuine long-running async (e.g. cryptographic key-gen) or accidental hang caused by un-awaited promises. | Prefer **fixing the underlying hang** (mock heavy work, spy on chain) rather than bumping global timeout. If a test legitimately needs more time, pass a per-test timeout: `it('does X', async () => { … }, 10_000)` |
+| `checkRateLimit` still hits real Redis despite mock | Path mismatch – production imports `@/middleware/rateLimit` (camelCase) but tests mocked `@/middleware/rate-limit`. | Provide **both** alias mocks in global setup *or* standardise path and update mocks. |
+| ASI gotcha: `console.log()` followed by newline & `(` | Missing semicolon after debug statement turned next line into a function call on `console.log`'s return value. | Append `;` or remove debug line entirely. |
+
+**Key Takeaways**
+1. Mock first, import later – prevents ESM evaluation of real code.
+2. Mock the *container*, not individual factories, to dodge circular-dep chains.
+3. Use per-test timeouts sparingly; hanging usually means missing mock.
+4. Path casing matters for mocks on case-sensitive filesystems.
+5. Beware of ASI when adding log statements during debugging.
+
+All recent fixes (webhook, API-key, team-member DELETE suites) follow these rules. Refer to those tests for working patterns.

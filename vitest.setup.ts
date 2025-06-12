@@ -386,3 +386,43 @@ vi.mock('@/lib/config/serviceContainer', async () => {
     },
   };
 });
+
+// ---- Global Test Mocks Added for faster route tests ----
+import { NextRequest } from 'next/server';
+
+// Stub the expensive rateLimit middleware everywhere
+vi.mock('@/middleware/rateLimit', () => ({
+  checkRateLimit: vi.fn().mockResolvedValue(false),
+  createRateLimit: () => () => (handler: any) => handler,
+}));
+// Old dashed path safety
+vi.mock('@/middleware/rate-limit', () => ({
+  checkRateLimit: vi.fn().mockResolvedValue(false),
+  createRateLimit: () => () => (handler: any) => handler,
+}));
+
+// Stub route auth middleware so tests don't have to duplicate it
+vi.mock('@/middleware/auth', () => ({
+  withRouteAuth: vi.fn(async (handler: any, req: any) => {
+    (req as any).auth = { userId: 'test-user-id', role: 'user' };
+    return handler(req, { userId: 'test-user-id', role: 'user' });
+  }),
+}));
+
+// Lightweight replacement for createAuthenticatedRequest to avoid large Supabase mock tree
+vi.mock('@/tests/utils/requestHelpers', () => {
+  const createAuthenticatedRequest = (
+    method: string,
+    url: string,
+    body?: any) => {
+    const headers: Record<string, string> = { authorization: 'Bearer test-token', 'content-type': 'application/json' };
+    const init: RequestInit = { method, headers } as any;
+    if (body !== undefined) {
+      init.body = JSON.stringify(body);
+    }
+    return new NextRequest(new URL(url), init as any);
+  };
+  return { createAuthenticatedRequest };
+});
+
+// --------------------------------------------------------
