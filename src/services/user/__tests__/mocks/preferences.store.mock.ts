@@ -47,7 +47,6 @@ export function createMockPreferencesStore(
   usePreferencesStore.getState = store.getState;
   usePreferencesStore.setState = store.setState;
   usePreferencesStore.subscribe = vi.fn(); // no-op
-  usePreferencesStore.destroy = vi.fn(); // no-op
 
   return usePreferencesStore;
 } 
