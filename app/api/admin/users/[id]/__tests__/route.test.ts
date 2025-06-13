@@ -77,13 +77,13 @@ describe('Admin Users by ID API', () => {
   });
 
   it('calls auth middleware for GET', async () => {
-    await GET(req, ctx);
+    await GET(req);
     const { routeAuthMiddleware } = await import('@/middleware/createMiddlewareChain');
     expect(routeAuthMiddleware).toHaveBeenCalled();
   });
 
   it('calls auth middleware for PUT', async () => {
-    await PUT(req, ctx);
+    await PUT(req);
     const { routeAuthMiddleware } = await import('@/middleware/createMiddlewareChain');
     const { withSecurity } = await import('@/middleware/withSecurity');
     expect(routeAuthMiddleware).toHaveBeenCalled();
@@ -91,7 +91,7 @@ describe('Admin Users by ID API', () => {
   });
 
   it('calls auth middleware for DELETE', async () => {
-    await DELETE(req, ctx);
+    await DELETE(req);
     const { routeAuthMiddleware } = await import('@/middleware/createMiddlewareChain');
     const { withSecurity } = await import('@/middleware/withSecurity');
     expect(routeAuthMiddleware).toHaveBeenCalled();

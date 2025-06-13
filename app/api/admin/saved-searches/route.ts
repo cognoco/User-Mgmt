@@ -10,7 +10,7 @@ import {
 import type { RouteAuthContext } from "@/middleware/auth";
 import { withSecurity } from "@/middleware/withSecurity";
 import { getApiSavedSearchService } from "@/services/saved-search/factory";
-import { Permission } from "@/lib/rbac/roles";
+import { PermissionValues } from "@/lib/rbac/roles";
 
 const savedSearchParamsSchema = z.object({
   query: z.string().optional(),
@@ -64,12 +64,12 @@ async function createSavedSearch(
 
 const getMiddleware = createMiddlewareChain([
   errorHandlingMiddleware(),
-  routeAuthMiddleware({ requiredPermissions: [Permission.ACCESS_ADMIN_DASHBOARD] }),
+  routeAuthMiddleware({ requiredPermissions: [PermissionValues.ACCESS_ADMIN_DASHBOARD] }),
 ]);
 
 const postMiddleware = createMiddlewareChain([
   errorHandlingMiddleware(),
-  routeAuthMiddleware({ requiredPermissions: [Permission.ACCESS_ADMIN_DASHBOARD] }),
+  routeAuthMiddleware({ requiredPermissions: [PermissionValues.ACCESS_ADMIN_DASHBOARD] }),
   validationMiddleware(createSavedSearchSchema),
 ]);
 
