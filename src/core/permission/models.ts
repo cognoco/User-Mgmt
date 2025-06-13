@@ -6,69 +6,74 @@
 
 import { z } from 'zod';
 
-/**
- * System permissions as string literals
- */
-export const PermissionValues = {
+//
+// Runtime & type-safe Permission representation
+// -------------------------------------------------
+// 1. We expose a **string enum** `Permission` so that
+//    - `Permission.XYZ` is available at runtime (removing TS2693 errors).
+//    - The enum itself doubles as the compile-time type.
+// 2. For backward compatibility we retain the old `PermissionValues`
+//    constant by aliasing it to the enum object.
+// -------------------------------------------------
+
+export enum Permission {
   // User Management
-  ADMIN_ACCESS: 'ADMIN_ACCESS',
-  VIEW_ALL_USER_ACTION_LOGS: 'VIEW_ALL_USER_ACTION_LOGS',
-  EDIT_USER_PROFILES: 'EDIT_USER_PROFILES',
-  DELETE_USER_ACCOUNTS: 'DELETE_USER_ACCOUNTS',
+  ADMIN_ACCESS = 'ADMIN_ACCESS',
+  VIEW_ALL_USER_ACTION_LOGS = 'VIEW_ALL_USER_ACTION_LOGS',
+  EDIT_USER_PROFILES = 'EDIT_USER_PROFILES',
+  DELETE_USER_ACCOUNTS = 'DELETE_USER_ACCOUNTS',
   
   // Role Management
-  MANAGE_ROLES: 'MANAGE_ROLES',
+  MANAGE_ROLES = 'MANAGE_ROLES',
   
   // Analytics & Data
-  VIEW_ANALYTICS: 'VIEW_ANALYTICS',
-  EXPORT_DATA: 'EXPORT_DATA',
+  VIEW_ANALYTICS = 'VIEW_ANALYTICS',
+  EXPORT_DATA = 'EXPORT_DATA',
   
   // System Settings
-  MANAGE_SETTINGS: 'MANAGE_SETTINGS',
-  MANAGE_API_KEYS: 'MANAGE_API_KEYS',
+  MANAGE_SETTINGS = 'MANAGE_SETTINGS',
+  MANAGE_API_KEYS = 'MANAGE_API_KEYS',
   
   // Team Management
-  INVITE_USERS: 'INVITE_USERS',
-  MANAGE_TEAMS: 'MANAGE_TEAMS',
+  INVITE_USERS = 'INVITE_USERS',
+  MANAGE_TEAMS = 'MANAGE_TEAMS',
   
   // Billing & Subscription
-  MANAGE_BILLING: 'MANAGE_BILLING',
-  MANAGE_SUBSCRIPTIONS: 'MANAGE_SUBSCRIPTIONS',
-  VIEW_INVOICES: 'VIEW_INVOICES',
-  UPDATE_SUBSCRIPTION: 'UPDATE_SUBSCRIPTION',
+  MANAGE_BILLING = 'MANAGE_BILLING',
+  MANAGE_SUBSCRIPTIONS = 'MANAGE_SUBSCRIPTIONS',
+  VIEW_INVOICES = 'VIEW_INVOICES',
+  UPDATE_SUBSCRIPTION = 'UPDATE_SUBSCRIPTION',
 
   // Organization Settings
-  MANAGE_ORG_SETTINGS: 'MANAGE_ORG_SETTINGS',
-  CONFIGURE_SSO: 'CONFIGURE_SSO',
-  MANAGE_DOMAINS: 'MANAGE_DOMAINS',
+  MANAGE_ORG_SETTINGS = 'MANAGE_ORG_SETTINGS',
+  CONFIGURE_SSO = 'CONFIGURE_SSO',
+  MANAGE_DOMAINS = 'MANAGE_DOMAINS',
 
   // Admin Dashboard
-  ACCESS_ADMIN_DASHBOARD: 'ACCESS_ADMIN_DASHBOARD',
-  VIEW_ADMIN_DASHBOARD: 'VIEW_ADMIN_DASHBOARD',
-  VIEW_AUDIT_LOGS: 'VIEW_AUDIT_LOGS',
+  ACCESS_ADMIN_DASHBOARD = 'ACCESS_ADMIN_DASHBOARD',
+  VIEW_ADMIN_DASHBOARD = 'VIEW_ADMIN_DASHBOARD',
+  VIEW_AUDIT_LOGS = 'VIEW_AUDIT_LOGS',
   
   // Team Management
-  INVITE_TEAM_MEMBER: 'INVITE_TEAM_MEMBER',
-  REMOVE_TEAM_MEMBER: 'REMOVE_TEAM_MEMBER',
-  UPDATE_MEMBER_ROLE: 'UPDATE_MEMBER_ROLE',
-  VIEW_TEAM_MEMBERS: 'VIEW_TEAM_MEMBERS',
+  INVITE_TEAM_MEMBER = 'INVITE_TEAM_MEMBER',
+  REMOVE_TEAM_MEMBER = 'REMOVE_TEAM_MEMBER',
+  UPDATE_MEMBER_ROLE = 'UPDATE_MEMBER_ROLE',
+  VIEW_TEAM_MEMBERS = 'VIEW_TEAM_MEMBERS',
   
   // Project Management
-  CREATE_PROJECT: 'CREATE_PROJECT',
-  DELETE_PROJECT: 'DELETE_PROJECT',
-  EDIT_PROJECT: 'EDIT_PROJECT',
-  VIEW_PROJECTS: 'VIEW_PROJECTS',
-} as const;
+  CREATE_PROJECT = 'CREATE_PROJECT',
+  DELETE_PROJECT = 'DELETE_PROJECT',
+  EDIT_PROJECT = 'EDIT_PROJECT',
+  VIEW_PROJECTS = 'VIEW_PROJECTS',
+}
 
-/**
- * Type representing all possible permissions
- */
-export type Permission = typeof PermissionValues[keyof typeof PermissionValues];
+// Preserve original constant name for existing imports
+export const PermissionValues = Permission;
 
 /**
  * Zod schema for validating permissions
  */
-export const PermissionSchema = z.enum(Object.values(PermissionValues) as [string, ...string[]]);
+export const PermissionSchema = z.enum(Object.values(Permission) as [string, ...string[]]);
 
 /**
  * User roles in the system
@@ -168,78 +173,78 @@ export type RolePermissionMap = {
  * Default role definitions with permissions
  */
 export const DefaultRoleDefinitions: RolePermissionMap = {
-  SUPER_ADMIN: Object.values(PermissionValues),
+  SUPER_ADMIN: Object.values(Permission),
   
   ADMIN: [
-    PermissionValues.ADMIN_ACCESS,
-    PermissionValues.VIEW_ALL_USER_ACTION_LOGS,
-    PermissionValues.EDIT_USER_PROFILES,
-    PermissionValues.DELETE_USER_ACCOUNTS,
-    PermissionValues.MANAGE_ROLES,
-    PermissionValues.VIEW_ANALYTICS,
-    PermissionValues.EXPORT_DATA,
-    PermissionValues.MANAGE_SETTINGS,
-    PermissionValues.MANAGE_API_KEYS,
-    PermissionValues.INVITE_USERS,
-    PermissionValues.MANAGE_TEAMS,
-    PermissionValues.ACCESS_ADMIN_DASHBOARD,
-    PermissionValues.VIEW_ADMIN_DASHBOARD,
-    PermissionValues.INVITE_TEAM_MEMBER,
-    PermissionValues.REMOVE_TEAM_MEMBER,
-    PermissionValues.UPDATE_MEMBER_ROLE,
-    PermissionValues.VIEW_TEAM_MEMBERS,
-    PermissionValues.CREATE_PROJECT,
-    PermissionValues.DELETE_PROJECT,
-    PermissionValues.EDIT_PROJECT,
-    PermissionValues.VIEW_PROJECTS,
+    Permission.ADMIN_ACCESS,
+    Permission.VIEW_ALL_USER_ACTION_LOGS,
+    Permission.EDIT_USER_PROFILES,
+    Permission.DELETE_USER_ACCOUNTS,
+    Permission.MANAGE_ROLES,
+    Permission.VIEW_ANALYTICS,
+    Permission.EXPORT_DATA,
+    Permission.MANAGE_SETTINGS,
+    Permission.MANAGE_API_KEYS,
+    Permission.INVITE_USERS,
+    Permission.MANAGE_TEAMS,
+    Permission.ACCESS_ADMIN_DASHBOARD,
+    Permission.VIEW_ADMIN_DASHBOARD,
+    Permission.INVITE_TEAM_MEMBER,
+    Permission.REMOVE_TEAM_MEMBER,
+    Permission.UPDATE_MEMBER_ROLE,
+    Permission.VIEW_TEAM_MEMBERS,
+    Permission.CREATE_PROJECT,
+    Permission.DELETE_PROJECT,
+    Permission.EDIT_PROJECT,
+    Permission.VIEW_PROJECTS,
   ],
   
   MANAGER: [
-    PermissionValues.VIEW_ALL_USER_ACTION_LOGS,
-    PermissionValues.EDIT_USER_PROFILES,
-    PermissionValues.VIEW_ANALYTICS,
-    PermissionValues.EXPORT_DATA,
-    PermissionValues.INVITE_USERS,
-    PermissionValues.MANAGE_TEAMS,
-    PermissionValues.VIEW_ADMIN_DASHBOARD,
-    PermissionValues.INVITE_TEAM_MEMBER,
-    PermissionValues.REMOVE_TEAM_MEMBER,
-    PermissionValues.UPDATE_MEMBER_ROLE,
-    PermissionValues.VIEW_TEAM_MEMBERS,
-    PermissionValues.CREATE_PROJECT,
-    PermissionValues.DELETE_PROJECT,
-    PermissionValues.EDIT_PROJECT,
-    PermissionValues.VIEW_PROJECTS,
+    Permission.VIEW_ALL_USER_ACTION_LOGS,
+    Permission.EDIT_USER_PROFILES,
+    Permission.VIEW_ANALYTICS,
+    Permission.EXPORT_DATA,
+    Permission.INVITE_USERS,
+    Permission.MANAGE_TEAMS,
+    Permission.VIEW_ADMIN_DASHBOARD,
+    Permission.INVITE_TEAM_MEMBER,
+    Permission.REMOVE_TEAM_MEMBER,
+    Permission.UPDATE_MEMBER_ROLE,
+    Permission.VIEW_TEAM_MEMBERS,
+    Permission.CREATE_PROJECT,
+    Permission.DELETE_PROJECT,
+    Permission.EDIT_PROJECT,
+    Permission.VIEW_PROJECTS,
   ],
   
   USER: [
-    PermissionValues.VIEW_ANALYTICS,
-    PermissionValues.EXPORT_DATA,
-    PermissionValues.VIEW_TEAM_MEMBERS,
-    PermissionValues.EDIT_PROJECT,
-    PermissionValues.VIEW_PROJECTS,
+    Permission.VIEW_ANALYTICS,
+    Permission.EXPORT_DATA,
+    Permission.VIEW_TEAM_MEMBERS,
+    Permission.EDIT_PROJECT,
+    Permission.VIEW_PROJECTS,
   ],
   
   VIEWER: [
-    PermissionValues.VIEW_TEAM_MEMBERS,
-    PermissionValues.VIEW_PROJECTS,
+    Permission.VIEW_TEAM_MEMBERS,
+    Permission.VIEW_PROJECTS,
   ],
   
   BILLING_MANAGER: [
-    PermissionValues.VIEW_TEAM_MEMBERS,
-    PermissionValues.MANAGE_BILLING,
-    PermissionValues.MANAGE_SUBSCRIPTIONS,
-    PermissionValues.VIEW_INVOICES,
-    PermissionValues.UPDATE_SUBSCRIPTION,
-    PermissionValues.VIEW_PROJECTS,
+    Permission.VIEW_TEAM_MEMBERS,
+    Permission.MANAGE_BILLING,
+    Permission.MANAGE_SUBSCRIPTIONS,
+    Permission.VIEW_INVOICES,
+    Permission.UPDATE_SUBSCRIPTION,
+    Permission.VIEW_PROJECTS,
   ],
   
   MEMBER: [
-    PermissionValues.VIEW_TEAM_MEMBERS,
-    PermissionValues.VIEW_INVOICES,
-    PermissionValues.VIEW_PROJECTS,
-    PermissionValues.EDIT_PROJECT,
-    PermissionValues.CREATE_PROJECT,
+    Permission.VIEW_TEAM_MEMBERS,
+    Permission.VIEW_INVOICES,
+    Permission.VIEW_PROJECTS,
+    Permission.EDIT_PROJECT,
+    Permission.CREATE_PROJECT,
   ],
 };
 
