@@ -1,12 +1,9 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET, POST, DELETE } from '@app/api/organizations/[orgId]/sso/domains/route';
 
 describe('Domain Verification API Routes', () => {
   const mockOrgId = 'test-org-123';
-  const mockParams = { params: Promise.resolve({ orgId: mockOrgId }) } as {
-    params: Promise<{ orgId: string }>;
-  };
   
   beforeEach(() => {
     vi.resetModules();
@@ -18,7 +15,12 @@ describe('Domain Verification API Routes', () => {
         new URL(`http://localhost/api/organizations/${mockOrgId}/sso/domains`)
       );
 
-      const response = await GET(request, mockParams);
+      const response = await GET(
+        request,
+        { params: Promise.resolve({ orgId: mockOrgId }) } as {
+          params: Promise<{ orgId: string }>;
+        }
+      );
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -37,14 +39,24 @@ describe('Domain Verification API Routes', () => {
           body: JSON.stringify({ domain: 'example.com' }),
         }
       );
-      await POST(addRequest, mockParams);
+      await POST(
+        addRequest,
+        { params: Promise.resolve({ orgId: mockOrgId }) } as {
+          params: Promise<{ orgId: string }>;
+        }
+      );
 
       // Then get the list
       const request = new NextRequest(
         new URL(`http://localhost/api/organizations/${mockOrgId}/sso/domains`)
       );
 
-      const response = await GET(request, mockParams);
+      const response = await GET(
+        request,
+        { params: Promise.resolve({ orgId: mockOrgId }) } as {
+          params: Promise<{ orgId: string }>;
+        }
+      );
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -68,7 +80,12 @@ describe('Domain Verification API Routes', () => {
         }
       );
 
-      const response = await POST(request, mockParams);
+      const response = await POST(
+        request,
+        { params: Promise.resolve({ orgId: mockOrgId }) } as {
+          params: Promise<{ orgId: string }>;
+        }
+      );
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -89,7 +106,12 @@ describe('Domain Verification API Routes', () => {
         }
       );
 
-      const response = await POST(request, mockParams);
+      const response = await POST(
+        request,
+        { params: Promise.resolve({ orgId: mockOrgId }) } as {
+          params: Promise<{ orgId: string }>;
+        }
+      );
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -105,7 +127,12 @@ describe('Domain Verification API Routes', () => {
           body: JSON.stringify({ domain: 'duplicate.com' }),
         }
       );
-      await POST(firstRequest, mockParams);
+      await POST(
+        firstRequest,
+        { params: Promise.resolve({ orgId: mockOrgId }) } as {
+          params: Promise<{ orgId: string }>;
+        }
+      );
 
       // Try to add same domain again
       const secondRequest = new NextRequest(
@@ -116,7 +143,12 @@ describe('Domain Verification API Routes', () => {
         }
       );
 
-      const response = await POST(secondRequest, mockParams);
+      const response = await POST(
+        secondRequest,
+        { params: Promise.resolve({ orgId: mockOrgId }) } as {
+          params: Promise<{ orgId: string }>;
+        }
+      );
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -134,7 +166,12 @@ describe('Domain Verification API Routes', () => {
           body: JSON.stringify({ domain: 'todelete.com' }),
         }
       );
-      await POST(addRequest, mockParams);
+      await POST(
+        addRequest,
+        { params: Promise.resolve({ orgId: mockOrgId }) } as {
+          params: Promise<{ orgId: string }>;
+        }
+      );
 
       // Then delete it
       const deleteRequest = new NextRequest(
@@ -145,14 +182,24 @@ describe('Domain Verification API Routes', () => {
         }
       );
 
-      const response = await DELETE(deleteRequest, mockParams);
+      const response = await DELETE(
+        deleteRequest,
+        { params: Promise.resolve({ orgId: mockOrgId }) } as {
+          params: Promise<{ orgId: string }>;
+        }
+      );
       expect(response.status).toBe(200);
 
       // Verify domain was removed
       const getRequest = new NextRequest(
         new URL(`http://localhost/api/organizations/${mockOrgId}/sso/domains`)
       );
-      const getResponse = await GET(getRequest, mockParams);
+      const getResponse = await GET(
+        getRequest,
+        { params: Promise.resolve({ orgId: mockOrgId }) } as {
+          params: Promise<{ orgId: string }>;
+        }
+      );
       const data = await getResponse.json();
 
       expect(data.domains).toHaveLength(0);
@@ -167,7 +214,12 @@ describe('Domain Verification API Routes', () => {
         }
       );
 
-      const response = await DELETE(request, mockParams);
+      const response = await DELETE(
+        request,
+        { params: Promise.resolve({ orgId: mockOrgId }) } as {
+          params: Promise<{ orgId: string }>;
+        }
+      );
       const data = await response.json();
 
       expect(response.status).toBe(404);
