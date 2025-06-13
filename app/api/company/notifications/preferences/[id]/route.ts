@@ -13,18 +13,23 @@ async function handlePatch(
   auth: AuthContext,
   data: z.infer<typeof updateSchema>,
   services: ServiceContainer,
-  id: Promise<string>
+  params: Promise<{ id: string }>
 ) {
-  const resolvedId = await id;
-  const updated = await services.companyNotification!.updatePreference(auth.userId!, resolvedId, data);
+  const { id } = await params;
+  const updated = await services.companyNotification!.updatePreference(
+    auth.userId!,
+    id,
+    data,
+  );
   return NextResponse.json(updated, { status: 200 });
 }
 
-export async function PATCH(req: Request, ctx: { params: { id: string } }) {
-  const { params } = ctx;
-  return createApiHandler(
+export const PATCH = async (
+  req: NextRequest,
+  ctx: { params: Promise<{ id: string }> },
+) =>
+  createApiHandler(
     updateSchema,
-    (r, a, d, s) => handlePatch(r, a, d, s, Promise.resolve(params.id)),
-    { requireAuth: true }
-  )(req as NextRequest);
-}
+    (r, a, d, s) => handlePatch(r, a, d, s, ctx.params),
+    { requireAuth: true },
+  )(req);

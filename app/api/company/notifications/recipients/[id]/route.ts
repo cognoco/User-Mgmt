@@ -7,21 +7,22 @@ async function handleDelete(
   auth: AuthContext,
   _data: unknown,
   services: ServiceContainer,
-  id: Promise<string>
+  params: Promise<{ id: string }>
 ) {
-  const resolvedId = await id;
-  await services.companyNotification!.removeRecipient(auth.userId!, resolvedId);
+  const { id } = await params;
+  await services.companyNotification!.removeRecipient(auth.userId!, id);
   return NextResponse.json(
     { success: true, message: 'Recipient removed successfully' },
     { status: 200 }
   );
 }
 
-export async function DELETE(req: Request, ctx: { params: { id: string } }) {
-  const { params } = ctx;
-  return createApiHandler(
+export const DELETE = async (
+  req: NextRequest,
+  ctx: { params: Promise<{ id: string }> },
+) =>
+  createApiHandler(
     emptySchema,
-    (r, a, d, s) => handleDelete(r, a, d, s, Promise.resolve(params.id)),
-    { requireAuth: true }
-  )(req as NextRequest);
-}
+    (r, a, d, s) => handleDelete(r, a, d, s, ctx.params),
+    { requireAuth: true },
+  )(req);
