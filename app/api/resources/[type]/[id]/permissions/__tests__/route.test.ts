@@ -25,7 +25,7 @@ beforeEach(() => {
 
 describe('resource permissions list API', () => {
   it('returns paginated permissions', async () => {
-    mockService.getPermissionsForResource.mockResolvedValue([
+    vi.mocked(mockService.getPermissionsForResource!).mockResolvedValue([
       { id: '1', userId: 'u1', permission: 'VIEW_PROJECTS', resourceType: 'project', resourceId: 'p1', createdAt: new Date() },
       { id: '2', userId: 'u2', permission: 'VIEW_PROJECTS', resourceType: 'project', resourceId: 'p1', createdAt: new Date() },
     ]);
@@ -34,6 +34,9 @@ describe('resource permissions list API', () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.data.length).toBe(2);
-    expect(mockService.getPermissionsForResource).toHaveBeenCalledWith('project', 'p1');
+    expect(mockService.getPermissionsForResource!).toHaveBeenCalledWith(
+      'project',
+      'p1',
+    );
   });
 });

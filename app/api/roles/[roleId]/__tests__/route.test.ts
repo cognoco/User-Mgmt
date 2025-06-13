@@ -25,31 +25,31 @@ beforeEach(() => {
 
 describe('roles id API', () => {
   it('GET returns role', async () => {
-    mockService.getRoleById.mockResolvedValue({ id: '1' });
+    vi.mocked(mockService.getRoleById!).mockResolvedValue({ id: '1' });
     const res = await GET(createAuthenticatedRequest('GET', 'http://test/api/roles/1'));
     expect(res.status).toBe(200);
   });
 
   it('PATCH updates role', async () => {
     const req = createAuthenticatedRequest('PATCH', 'http://test/api/roles/1', { name: 'n' });
-    mockService.updateRole.mockResolvedValue({ id: '1' });
+    vi.mocked(mockService.updateRole!).mockResolvedValue({ id: '1' });
     const res = await PATCH(req as any);
     expect(res.status).toBe(200);
-    expect(mockService.updateRole).toHaveBeenCalledWith('1', { name: 'n' }, 'u1');
+    expect(mockService.updateRole!).toHaveBeenCalledWith('1', { name: 'n' }, 'u1');
   });
 
   it('PUT updates role', async () => {
     const req = createAuthenticatedRequest('PUT', 'http://test/api/roles/1', { name: 'n' });
-    mockService.updateRole.mockResolvedValue({ id: '1' });
+    vi.mocked(mockService.updateRole!).mockResolvedValue({ id: '1' });
     const res = await PUT(req as any);
     expect(res.status).toBe(200);
-    expect(mockService.updateRole).toHaveBeenCalledWith('1', { name: 'n' }, 'u1');
+    expect(mockService.updateRole!).toHaveBeenCalledWith('1', { name: 'n' }, 'u1');
   });
 
   it('DELETE removes role', async () => {
-    mockService.deleteRole.mockResolvedValue(true);
+    vi.mocked(mockService.deleteRole!).mockResolvedValue(true);
     const res = await DELETE(createAuthenticatedRequest('DELETE', 'http://test/api/roles/1'));
     expect(res.status).toBe(204);
-    expect(mockService.deleteRole).toHaveBeenCalledWith('1', 'u1');
+    expect(mockService.deleteRole!).toHaveBeenCalledWith('1', 'u1');
   });
 });
