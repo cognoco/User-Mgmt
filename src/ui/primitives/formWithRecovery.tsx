@@ -2,7 +2,10 @@ import React, { useId, useTransition } from 'react';
 import { ErrorBoundary } from '@/ui/primitives/errorBoundary';
 import { Button } from '@/ui/primitives/button';
 
-interface FormWithRecoveryProps extends React.FormHTMLAttributes<HTMLFormElement> {
+type FormWithRecoveryProps = Omit<
+  React.FormHTMLAttributes<HTMLFormElement>,
+  'onError' | 'onSubmit'
+> & {
   /**
    * Function to call when the form is submitted successfully
    */
@@ -27,7 +30,12 @@ interface FormWithRecoveryProps extends React.FormHTMLAttributes<HTMLFormElement
    * Text to show on the recovery button
    */
   recoveryButtonText?: string;
-}
+
+  /**
+   * Children can be a React node or a render prop receiving the pending state
+   */
+  children?: React.ReactNode | ((state: { isPending: boolean }) => React.ReactNode);
+};
 
 /**
  * A form component that can recover from errors during submission

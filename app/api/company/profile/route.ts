@@ -4,11 +4,12 @@ import { getApiCompanyService } from "@/services/company/factory";
 import { createApiHandler, emptySchema } from "@/lib/api/routeHelpers";
 import { createSuccessResponse } from "@/lib/api/common";
 import { logUserAction } from "@/lib/audit/auditLogger";
-import { type RouteAuthContext } from "@/middleware/auth";
+import { type AuthContext } from "@/core/config/interfaces";
 import { withSecurity } from "@/middleware/withSecurity";
 import { checkRateLimit } from "@/middleware/rateLimit";
 import { PermissionValues } from "@/types/rbac";
 import { companyProfileUpdateSchema } from "@/lib/schemas/profile.schema";
+import type { CompanyProfile } from "@/types/company";
 
 // Company Profile Schema
 const CompanyProfileSchema = z.object({
@@ -36,7 +37,7 @@ type CompanyProfileUpdateRequest = z.infer<typeof companyProfileUpdateSchema>;
 
 async function handlePost(
   request: NextRequest,
-  auth: RouteAuthContext,
+  auth: AuthContext,
   data?: CompanyProfileRequest,
 ) {
   const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
@@ -125,14 +126,14 @@ async function handlePost(
 export const POST = withSecurity((req: NextRequest) =>
   createApiHandler(
     CompanyProfileSchema,
-    (r, a, d) => handlePost(r, { userId: a.userId || null, permissions: a.permissions, user: a.user } as RouteAuthContext, d),
+    (r, a, d) => handlePost(r, a, d),
     { requireAuth: true, requiredPermissions: [PermissionValues.EDIT_USER_PROFILES] }
   )(req)
 );
 
 async function handleGet(
   request: NextRequest,
-  auth: RouteAuthContext,
+  auth: AuthContext,
   _data: unknown,
 ) {
   const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
@@ -189,7 +190,7 @@ async function handleGet(
 }
 
 export const GET = withSecurity((req: NextRequest) =>
-  createApiHandler(emptySchema, (r, a, d) => handleGet(r, { userId: a.userId || null, permissions: a.permissions, user: a.user } as RouteAuthContext, d), {
+  createApiHandler(emptySchema, (r, a, d) => handleGet(r, a, d), {
     requireAuth: true,
     requiredPermissions: [PermissionValues.EDIT_USER_PROFILES],
   })(req)
@@ -197,7 +198,7 @@ export const GET = withSecurity((req: NextRequest) =>
 
 async function handlePut(
   request: NextRequest,
-  auth: RouteAuthContext,
+  auth: AuthContext,
   data: CompanyProfileUpdateRequest,
 ) {
   // Get IP and User Agent early
@@ -238,7 +239,7 @@ async function handlePut(
     // 4. Update Profile
     const fieldsToUpdate = Object.fromEntries(
       Object.entries(data).filter(([_, value]) => value !== null)
-    );
+    ) as Partial<CompanyProfile>;
     const updatedProfile = await companyService.updateProfile(
       companyProfileIdForLogging,
       fieldsToUpdate,
@@ -300,14 +301,14 @@ async function handlePut(
 export const PUT = withSecurity((req: NextRequest) =>
   createApiHandler(
     companyProfileUpdateSchema,
-    (r, a, d) => handlePut(r, { userId: a.userId || null, permissions: a.permissions, user: a.user } as RouteAuthContext, d),
+    (r, a, d) => handlePut(r, a, d),
     { requireAuth: true, requiredPermissions: [PermissionValues.EDIT_USER_PROFILES] }
   )(req)
 );
 
 async function handleDelete(
   request: NextRequest,
-  auth: RouteAuthContext,
+  auth: AuthContext,
 ) {
   // Get IP and User Agent early
   const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
@@ -408,7 +409,7 @@ async function handleDelete(
 }
 
 export const DELETE = withSecurity((req: NextRequest) =>
-  createApiHandler(emptySchema, (r, a, d) => handleDelete(r, { userId: a.userId || null, permissions: a.permissions, user: a.user } as RouteAuthContext), {
+  createApiHandler(emptySchema, (r, a, _d) => handleDelete(r, a), {
     requireAuth: true,
     requiredPermissions: [PermissionValues.EDIT_USER_PROFILES],
   })(req)

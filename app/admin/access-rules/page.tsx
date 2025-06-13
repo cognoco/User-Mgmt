@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import React from 'react';
 import AccessRulesClientPage from '@app/admin/access-rules/ClientPage';
 
 export const metadata: Metadata = {

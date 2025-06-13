@@ -1,3 +1,4 @@
+import { type NextRequest } from 'next/server';
 import { createSuccessResponse } from '@/lib/api/common';
 import { getAllRoles } from '@/lib/rbac/roles';
 import {
@@ -14,6 +15,6 @@ const middleware = createMiddlewareChain([
   errorHandlingMiddleware()
 ]);
 
-export function GET() {
-  return middleware(() => handleGet())();
+export function GET(req: NextRequest) {
+  return middleware(() => handleGet())(req);
 }

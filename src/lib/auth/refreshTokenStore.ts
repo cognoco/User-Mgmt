@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { prisma } from '@/lib/database/prisma';
+import type { Prisma } from '@prisma/client';
 
 function hashToken(token: string): string {
   return crypto.createHash('sha256').update(token).digest('hex');
@@ -28,7 +29,7 @@ export async function rotateRefreshToken(
   newToken: string,
 ): Promise<void> {
   const hashedOld = hashToken(oldToken);
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const existing = await tx.refresh_tokens.findFirst({
       where: { token: hashedOld, user_id: userId, revoked: false },
     });

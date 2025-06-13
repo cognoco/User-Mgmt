@@ -23,13 +23,15 @@
     "paths": {
       "@/*": ["./src/*"],
       "@app/*": ["./app/*"],
-      "@components/*": ["./src/components/*"],
-      "@lib/*": ["./src/lib/*"],
-      "@core/*": ["./src/core/*"],
-      "@services/*": ["./src/services/*"],
-      "@adapters/*": ["./src/adapters/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@utils/*": ["./src/utils/*"]
+      "@/components/*": ["./src/components/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/core/*": ["./src/core/*"],
+      "@/services/*": ["./src/services/*"],
+      "@/adapters/*": ["./src/adapters/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/ui/*": ["./src/ui/*"],
+      "@/tests/*": ["./src/tests/*"]
     },
     "types": [
       "react",

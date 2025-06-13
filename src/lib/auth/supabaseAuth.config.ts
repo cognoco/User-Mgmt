@@ -59,7 +59,7 @@ export const supabaseAuthConfig: SupabaseAuthConfig = {
 export function validateSupabaseAuthConfig(
   config: SupabaseAuthConfig = supabaseAuthConfig
 ): boolean {
-  const required = [
+  const required: { name: string; value: string | undefined }[] = [
     { name: 'NEXT_PUBLIC_SUPABASE_URL', value: config.url },
     { name: 'NEXT_PUBLIC_SUPABASE_ANON_KEY', value: config.anonKey },
   ];

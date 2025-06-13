@@ -61,8 +61,8 @@ export async function getUser(): Promise<User | null> {
       role: 'ADMIN',
       emailVerified: true,
       image: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
   }
   

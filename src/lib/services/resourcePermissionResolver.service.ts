@@ -8,38 +8,35 @@ export class ResourcePermissionResolver {
 
   constructor() {
     this.db = getServiceSupabase();
-    this.relationshipService = createResourceRelationshipService(this.db);
+    this.relationshipService = createResourceRelationshipService();
   }
 
   /**
    * Get all ancestors for a resource (recursive parents)
    */
   async getResourceAncestors(resourceType: string, resourceId: string, maxDepth = 10): Promise<any[]> {
-    const cacheKey = `${resourceType}:${resourceId}`;
-    return permissionCacheService.resourcePermissions.getOrCreate(cacheKey, async () => {
-      const ancestors = [] as any[];
-      let currentType = resourceType;
-      let currentId = resourceId;
-      let depth = 0;
+    const ancestors: any[] = [];
+    let currentType = resourceType;
+    let currentId = resourceId;
+    let depth = 0;
 
-      while (depth < maxDepth) {
-        const parents = await this.relationshipService.getParentResources(currentType, currentId);
-        if (!parents || parents.length === 0) break;
+    while (depth < maxDepth) {
+      const parents = await this.relationshipService.getParentResources(currentType, currentId);
+      if (!parents || parents.length === 0) break;
 
-        const parent = parents[0];
-        ancestors.push({
-          type: parent.parent_type,
-          id: parent.parent_id,
-          relationshipType: parent.relationship_type
-        });
+      const parent = parents[0];
+      ancestors.push({
+        type: parent.parent_type,
+        id: parent.parent_id,
+        relationshipType: parent.relationship_type,
+      });
 
-        currentType = parent.parent_type;
-        currentId = parent.parent_id;
-        depth++;
-      }
+      currentType = parent.parent_type;
+      currentId = parent.parent_id;
+      depth++;
+    }
 
-      return ancestors;
-    });
+    return ancestors;
   }
 
   /**
@@ -53,8 +50,8 @@ export class ResourcePermissionResolver {
       .eq('user_id', userId)
       .eq('resource_type', resourceType)
       .eq('resource_id', resourceId);
-
-    const directPerms = directPermissions?.map(p => p.permission) || [];
+    const directPerms = (directPermissions as { permission: string }[] | null ?? [])
+      .map((p) => p.permission);
 
     // Get ancestors for inheritance
     const ancestors = await this.getResourceAncestors(resourceType, resourceId);
@@ -63,7 +60,7 @@ export class ResourcePermissionResolver {
     if (ancestors.length === 0) return directPerms;
 
     // Get inherited permissions from ancestors
-    const inheritedPermsPromises = ancestors.map(ancestor => {
+    const inheritedPermsPromises = ancestors.map((ancestor) => {
       return this.db
         .from('resource_permissions')
         .select('permission')
@@ -75,13 +72,12 @@ export class ResourcePermissionResolver {
     const inheritedPermsResults = await Promise.all(inheritedPermsPromises);
 
     // Combine all permissions, with direct permissions taking precedence
-    const allPerms = new Set(directPerms);
-    inheritedPermsResults.forEach(result => {
-      if (result.data) {
-        result.data.forEach(p => allPerms.add(p.permission));
-      }
+    const allPerms = new Set<string>(directPerms);
+    inheritedPermsResults.forEach((result) => {
+      ((result.data as { permission: string }[] | null) ?? []).forEach((p) =>
+        allPerms.add(p.permission)
+      );
     });
-
     return Array.from(allPerms);
   }
 

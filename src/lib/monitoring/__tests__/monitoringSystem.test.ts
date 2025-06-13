@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const addAlertNotifier = vi.fn();
-vi.mock('../error-system', () => ({ telemetry: { addAlertNotifier } }));
+vi.mock('@/lib/monitoring/errorSystem', () => ({ telemetry: { addAlertNotifier } }));
 
 const registerError = vi.fn();
 vi.mock('@/lib/telemetry/alert-manager', () => ({
@@ -19,8 +19,12 @@ vi.mock('@/core/common/errors', async () => {
 const { initializeMonitoringSystem } = await import('@/lib/monitoring/monitoringSystem');
 
 describe('monitoring-system', () => {
-  beforeEach(() => {
+  let initializeMonitoringSystem: typeof import('../monitoringSystem').initializeMonitoringSystem;
+
+  beforeEach(async () => {
     vi.clearAllMocks();
+    vi.resetModules();
+    ({ initializeMonitoringSystem } = await import('@/lib/monitoring/monitoringSystem'));
   });
 
   it('registers alert notifier', () => {
@@ -30,8 +34,13 @@ describe('monitoring-system', () => {
 
   it('forwards alerts to alert manager', () => {
     initializeMonitoringSystem();
-    const cb = addAlertNotifier.mock.calls[0][0];
-    cb({ errorType: 'ERR', message: 'boom', severity: 'critical', count: 1 });
+    const notifier = addAlertNotifier.mock.calls[0][0];
+    notifier.notify({
+      errorType: 'ERR',
+      message: 'boom',
+      severity: 'critical',
+      count: 1,
+    });
     expect(registerError).toHaveBeenCalled();
   });
 });
