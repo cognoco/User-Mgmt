@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
-import { createServerClient, type Session } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
+import type { Session } from '@supabase/supabase-js';
 
 /**
  * Supabase authentication configuration.
@@ -26,7 +27,7 @@ export const supabaseAuthConfig = {
  * returns the active session if one exists.
  */
 export async function auth(): Promise<Session | null> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   const supabase = createServerClient(
     supabaseAuthConfig.url,
