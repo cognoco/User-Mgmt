@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiAuthService } from '@/services/auth/factory';
+import { getSessionFromToken } from '@/services/auth/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
 import type { Permission } from '@/core/permission/models';
 import { isPermission } from '@/lib/rbac/roles';
@@ -47,24 +47,20 @@ export function withPermissionCheck(
 ) {
   return async (req: NextRequest) => {
     try {
-      const authService = getApiAuthService();
-
       const permissionService = getApiPermissionService();
-      const session = await authService.getSession(
-        req.headers.get('authorization') || ''
-      );
 
+      const token = req.headers.get('authorization') || '';
+      const user = await getSessionFromToken(token);
 
-      if (!session?.user?.id) {
+      if (!user?.id) {
         console.warn('[withPermissionCheck] no valid session');
-
         return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
           status: 401,
           headers: { 'Content-Type': 'application/json' },
         });
       }
 
-      const userId = session.user.id;
+      const userId = user.id;
 
       const cacheKey = `${userId}:${options.requiredPermission}`;
       const cache = getPermissionCache();

@@ -1,11 +1,12 @@
 import { z, ZodType } from 'zod';
+import { PermissionSchema } from '@/core/permission/models';
 
 /** Options for route authentication middleware */
 export const routeAuthOptionsSchema = z
   .object({
     optional: z.boolean().optional(),
     includeUser: z.boolean().optional(),
-    requiredPermissions: z.array(z.string()).optional(),
+    requiredPermissions: z.array(PermissionSchema).optional(),
     requiredRoles: z.array(z.string()).optional(),
   })
   .strict();

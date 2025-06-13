@@ -37,14 +37,14 @@ export const useAuthStore = () => {
 
     setLoading: (isLoading: boolean) => auth.setLoading(isLoading),
 
-    handleSessionTimeout: () => auth.handleSessionTimeout(),
+      handleSessionTimeout: () => auth.authService.handleSessionTimeout(),
     
     refreshToken: async () => auth.refreshToken(),
 
-    login: async (data: LoginPayload): Promise<AuthResult> => {
-      console.log('[DEPRECATED] Using auth.store login - please migrate to useAuth');
-      return auth.login(data);
-    },
+      login: async (data: LoginPayload): Promise<AuthResult> => {
+        console.log('[DEPRECATED] Using auth.store login - please migrate to useAuth');
+        return auth.login(data.email, data.password, data.rememberMe);
+      },
 
     logout: async () => {
       console.log('[DEPRECATED] Using auth.store logout - please migrate to useAuth');
@@ -56,8 +56,8 @@ export const useAuthStore = () => {
       return auth.register(data);
     },
 
-    clearError: () => auth.clearError(),
-    clearSuccessMessage: () => auth.clearSuccessMessage(),
+      clearError: () => auth.clearError(),
+      clearSuccessMessage: () => auth.clearSuccess(),
     setUser: (user: User | null) => auth.setUser(user),
     setToken: (token: string | null) => auth.setToken(token),
 
@@ -82,22 +82,29 @@ export const useAuthStore = () => {
     },
 
 
-    updatePassword: async (oldPassword: string, newPassword: string): Promise<void> => {
-      console.log('[DEPRECATED] Using auth.store updatePassword - please migrate to useAuth');
-      return auth.updatePassword(oldPassword, newPassword);
-    },
+      updatePassword: async (
+        oldPassword: string,
+        newPassword: string,
+      ): Promise<{ success: boolean; error?: string }> => {
+        console.log('[DEPRECATED] Using auth.store updatePassword - please migrate to useAuth');
+        return auth.updatePassword(oldPassword, newPassword);
+      },
 
 
-    verifyEmail: async (token: string): Promise<void> => {
-      console.log('[DEPRECATED] Using auth.store verifyEmail - please migrate to useAuth');
-      return auth.verifyEmail(token);
-    },
+      verifyEmail: async (
+        token: string,
+      ): Promise<{ success: boolean; error?: string }> => {
+        console.log('[DEPRECATED] Using auth.store verifyEmail - please migrate to useAuth');
+        return auth.verifyEmail(token);
+      },
 
 
-    deleteAccount: async (password?: string): Promise<void> => {
-      console.log('[DEPRECATED] Using auth.store deleteAccount - please migrate to useAuth');
-      return auth.deleteAccount(password);
-    }
+      deleteAccount: async (
+        password?: string,
+      ): Promise<{ success: boolean; error?: string }> => {
+        console.log('[DEPRECATED] Using auth.store deleteAccount - please migrate to useAuth');
+        return auth.deleteAccount(password);
+      }
     // End of compatibility layer
 
   };

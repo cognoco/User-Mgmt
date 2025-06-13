@@ -4,10 +4,8 @@ import {
   PermissionSchema,
   RoleValues,
   RoleSchema,
-  type Permission,
-  type Role,
-  type UserRole,
 } from '@/core/permission/models';
+import type { Permission, Role, UserRole } from '@/core/permission/models';
 
 export {
   PermissionValues,
@@ -15,7 +13,7 @@ export {
   RoleValues,
   RoleSchema,
 } from '@/core/permission/models';
-export type { Permission, Role, UserRole } from '@/core/permission/models';
+export type { Permission, Role, UserRole };
 
 // User role assignment schema
 export const userRoleSchema = z.object({

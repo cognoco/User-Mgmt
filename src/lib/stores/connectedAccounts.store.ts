@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
-import { ConnectedAccountsState } from '@/types/connectedAccounts';
+import { ConnectedAccountsState, ConnectedAccount } from '@/types/connectedAccounts';
 import { OAuthProvider } from '@/types/oauth';
 
-export const useConnectedAccountsStore = create<ConnectedAccountsState>((set: (fn: (state: ConnectedAccountsState) => Partial<ConnectedAccountsState> | ConnectedAccountsState) => void) => ({
+export const useConnectedAccountsStore = create<ConnectedAccountsState>((set) => ({
   accounts: [],
   isLoading: false,
   error: null,
