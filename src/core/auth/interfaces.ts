@@ -215,10 +215,10 @@ export interface AuthService {
   
   /**
    * Delete the current user's account
-   * 
-   * @param passwordOrParams Either a password string or an object with userId and password
+   *
+   * @param password Current password for verification (optional)
    */
-  deleteAccount(passwordOrParams?: string | { userId: string; password: string }): Promise<{ success: boolean; error?: string }>;
+  deleteAccount(password?: string): Promise<void>;
 
   /**
    * Get account details for a user
