@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api/axios';
 import type { UserPreferences } from '@/types/database';
-import { useAuth } from '@/lib/hooks/useAuth'; // To ensure user is authenticated
+import { useAuth } from '@/lib/hooks/useAuth'; // React hook for components
+import { useAuthStore } from '@/stores/auth.store';
 
 export interface PreferencesState {
   preferences: UserPreferences | null;
@@ -78,7 +79,7 @@ const preferencesStoreBase = create<PreferencesInternalState>((set) => ({
   },
 }));
 
-export function usePreferencesStore(): PreferencesState {
+function createUsePreferencesStore(): PreferencesState {
   const store = preferencesStoreBase();
   const { user } = useAuth();
 
@@ -88,3 +89,23 @@ export function usePreferencesStore(): PreferencesState {
     updatePreferences: (data) => store.updatePreferences(user?.id, data),
   };
 }
+
+export const usePreferencesStore: (() => PreferencesState) & {
+  getState: () => PreferencesState;
+  setState: typeof preferencesStoreBase.setState;
+  subscribe: typeof preferencesStoreBase.subscribe;
+  destroy: typeof preferencesStoreBase.destroy;
+} = Object.assign(createUsePreferencesStore, {
+  getState: () => {
+    const state = preferencesStoreBase.getState();
+    const userId = useAuthStore.getState().user?.id;
+    return {
+      ...state,
+      fetchPreferences: () => state.fetchPreferences(userId),
+      updatePreferences: (data: Partial<UserPreferences>) => state.updatePreferences(userId, data),
+    } as PreferencesState;
+  },
+  setState: preferencesStoreBase.setState,
+  subscribe: preferencesStoreBase.subscribe,
+  destroy: preferencesStoreBase.destroy,
+});
