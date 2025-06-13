@@ -4,7 +4,7 @@ import { GET, POST, DELETE } from '@app/api/organizations/[orgId]/sso/domains/ro
 
 describe('Domain Verification API Routes', () => {
   const mockOrgId = 'test-org-123';
-  const mockParams = { params: { orgId: mockOrgId } };
+  const mockParams = { params: Promise.resolve({ orgId: mockOrgId }) };
   
   beforeEach(() => {
     vi.resetModules();
