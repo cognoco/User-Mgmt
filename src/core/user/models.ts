@@ -36,6 +36,36 @@ export interface UserProfile {
    * User's last name (optional)
    */
   lastName?: string;
+
+  /**
+   * Public display name (optional)
+   */
+  displayName?: string;
+
+  /**
+   * Short biography (optional)
+   */
+  bio?: string | null;
+
+  /**
+   * User location (optional)
+   */
+  location?: string | null;
+
+  /**
+   * Personal website URL (optional)
+   */
+  website?: string | null;
+
+  /**
+   * Contact phone number (optional)
+   */
+  phoneNumber?: string | null;
+
+  /**
+   * URL to the user's avatar image (optional)
+   */
+  avatarUrl?: string | null;
   
   /**
    * User's full name (optional, may be generated from first and last name)
