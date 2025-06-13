@@ -6,7 +6,7 @@ import { getApiSessionService } from '@/services/session/factory';
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ sessionId: string }> }) {
   const user = await getUserFromRequest(req);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const { sessionId } = params;
+  const { sessionId } = await params;
   const service = getApiSessionService();
   try {
     await service!.revokeUserSession(user.id, sessionId);
