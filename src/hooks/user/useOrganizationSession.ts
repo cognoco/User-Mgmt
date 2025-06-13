@@ -99,11 +99,15 @@ export function useTerminateUserSessions(orgId: string) {
     setLoading(true);
     setError(null);
     setCount(null);
-    const { data, error } = await supabase.rpc('terminate_user_sessions', { user_id: userId, organization_id: orgId });
+    const { data, error } = await supabase.rpc('terminate_user_sessions', {
+      user_id: userId,
+      organization_id: orgId
+    });
     if (error) setError(error.message);
-    setCount(data?.count || 0);
+    const terminatedCount = (data as { count?: number } | null)?.count ?? 0;
+    setCount(terminatedCount);
     setLoading(false);
-    return { count: data?.count || 0, error };
+    return { count: terminatedCount, error };
   }, [orgId]);
 
   return { terminateUserSessions, loading, error, count };

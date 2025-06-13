@@ -1,11 +1,22 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatErrorMessage } from '@/lib/i18n/messages';
+import { ApiError } from '@/lib/api/common';
 
 interface ApiErrorShape {
   code?: string;
   message: string;
   details?: unknown;
+}
+
+export interface ParsedApiError {
+  message: string;
+  code: string;
+  status: number;
+}
+
+export function isApiError(err: unknown): err is ApiError {
+  return err instanceof ApiError;
 }
 
 /**
@@ -55,19 +66,21 @@ export function parseApiError(err: unknown): ParsedApiError {
       code: err.code,
       status: err.status,
     };
-  } else if (err instanceof Error) {
+  }
+
+  if (err instanceof Error) {
     return {
       message: err.message,
       code: 'UNKNOWN_ERROR',
       status: 500,
     };
-  } else {
-    return {
-      message: 'An unknown error occurred',
-      code: 'UNKNOWN_ERROR',
-      status: 500,
-    };
   }
+
+  return {
+    message: 'An unknown error occurred',
+    code: 'UNKNOWN_ERROR',
+    status: 500,
+  };
 }
 
 export default useApiError;

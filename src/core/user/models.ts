@@ -45,7 +45,7 @@ export interface UserProfile {
   /**
    * URL to the user's profile picture (optional)
    */
-  profilePictureUrl?: string;
+  profilePictureUrl?: string | null;
   
   /**
    * Whether the user account is active
