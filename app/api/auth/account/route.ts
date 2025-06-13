@@ -57,45 +57,8 @@ export const DELETE = createApiHandler(
     });
 
     try {
-      // Delete account using the AuthService
-      const result = await services.auth.deleteAccount({
-        userId,
-        password,
-      });
+      await services.auth.deleteAccount(password);
 
-      // Handle the result
-      if (!result.success) {
-        console.error("Account deletion failed for user:", userId, result.error);
-
-        // Log the failed deletion
-        await logUserAction({
-          userId,
-          action: "ACCOUNT_DELETION_FAILED",
-          status: "FAILURE",
-          ipAddress,
-          userAgent,
-          targetResourceType: "account",
-          targetResourceId: userId,
-          details: { error: result.error },
-        });
-
-        // Return appropriate error based on the error type
-        if (result.error === "INVALID_PASSWORD") {
-          throw new ApiError(
-            ERROR_CODES.UNAUTHORIZED,
-            "Incorrect password provided.",
-            401,
-          );
-        } else {
-          throw new ApiError(
-            ERROR_CODES.INTERNAL_ERROR,
-            result.error || "Account deletion failed.",
-            500,
-          );
-        }
-      }
-
-      // Log the successful deletion
       await logUserAction({
         action: "ACCOUNT_DELETION_COMPLETED",
         status: "SUCCESS",
@@ -107,18 +70,15 @@ export const DELETE = createApiHandler(
 
       console.log("Account deletion successful for user:", userId);
 
-      // Return success
       return createSuccessResponse({ message: "Account successfully deleted." });
     } catch (error) {
-      // Handle Unexpected Errors
       console.error("Account deletion process error for user:", userId, error);
       const message =
-        error instanceof Error ? error.message : "An unexpected error occurred";
+        error instanceof Error ? error.message : "Account deletion failed";
 
-      // Log the error
       await logUserAction({
         userId,
-        action: "ACCOUNT_DELETION_ERROR",
+        action: "ACCOUNT_DELETION_FAILED",
         status: "FAILURE",
         ipAddress,
         userAgent,
@@ -127,11 +87,7 @@ export const DELETE = createApiHandler(
         details: { error: message },
       });
 
-      throw new ApiError(
-        ERROR_CODES.INTERNAL_ERROR,
-        "Account deletion failed due to an unexpected error.",
-        500,
-      );
+      throw new ApiError(ERROR_CODES.INTERNAL_ERROR, message, 500);
     }
   },
   { 

@@ -8,7 +8,9 @@ import {
 } from "@/middleware/createMiddlewareChain";
 import { z } from "zod";
 import { getApiAdminService } from "@/services/admin/factory";
+import { PermissionValues } from "@/core/permission/models";
 import { PermissionValues } from "@/lib/rbac/roles";
+
 
 const querySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
