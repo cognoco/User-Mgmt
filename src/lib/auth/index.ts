@@ -32,8 +32,8 @@ export const authOptions: Record<string, never> = {};
 /**
  * Create a Supabase client configured with the current request cookies.
  */
-export function getSupabaseServerClient(): SupabaseClient {
-  const cookieStore = cookies();
+export async function getSupabaseServerClient(): Promise<SupabaseClient> {
+  const cookieStore = await cookies();
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -50,7 +50,7 @@ export function getSupabaseServerClient(): SupabaseClient {
  * Sign the current user out of Supabase.
  */
 export async function signOut(): Promise<void> {
-  const supabase = getSupabaseServerClient();
+  const supabase = await getSupabaseServerClient();
   await supabase.auth.signOut();
 }
 
