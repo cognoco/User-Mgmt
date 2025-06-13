@@ -1,7 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { POST } from '@app/api/company/validate/route';
+import { NextRequest } from 'next/server';
 
-const mockRequest = (body: any) => new Request('http://localhost', { method: 'POST', body: JSON.stringify(body) });
+const mockRequest = (body: any) =>
+  new NextRequest('http://localhost', {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json' }
+  });
 
 describe('POST /api/company/validate', () => {
   it('returns valid: true for a valid company name', async () => {
