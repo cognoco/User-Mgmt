@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/database/prisma';
-import { Permission, RoleType, RoleDefinition } from '@/lib/rbac/roles';
+import { Permission, RoleType, RoleDefinition, type RoleInfo } from '@/lib/rbac/roles';
 import type { Role } from '@/core/permission/models';
 
 /**
@@ -16,8 +16,9 @@ export async function initializeRolePermissions() {
   );
 
   // Create or update permissions for each role
-  const updates = Object.entries(RoleDefinition).flatMap(([role, def]) => {
-    return def.permissions.map(permission => {
+  const updates = (Object.entries(RoleDefinition) as [RoleType, RoleInfo][])
+    .flatMap(([role, def]) => {
+    return def.permissions.map((permission) => {
       const key = `${role}-${permission}`;
       if (!existingMap.has(key)) {
         return prisma.rolePermission.create({
