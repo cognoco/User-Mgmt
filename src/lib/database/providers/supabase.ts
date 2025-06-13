@@ -9,7 +9,13 @@ export class SupabaseProvider implements DatabaseProvider {
     if (!config.connectionString) {
       throw new Error('Supabase connection string is required');
     }
-    this.client = createClient(config.connectionString);
+    const key =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!key) {
+      throw new Error('Supabase key is required');
+    }
+    this.client = createClient(config.connectionString, key);
   }
 
   // User operations
