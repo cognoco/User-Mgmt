@@ -7,7 +7,7 @@ import {
   checkRolePermission,
   syncRolePermissions,
 } from '@/lib/rbac/roleService';
-import { TeamRole } from '@prisma/client';
+import type { RoleType } from '@/lib/rbac/roles';
 
 vi.mock('@/lib/database/prisma', () => ({
   prisma: {
@@ -39,7 +39,7 @@ describe('Role Service', () => {
     it('should not create existing role permissions', async () => {
       const existingPermission = {
         id: '1',
-        role: TeamRole.ADMIN,
+        role: 'ADMIN' as RoleType,
         permission: Permission.VIEW_TEAM_MEMBERS,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -53,7 +53,7 @@ describe('Role Service', () => {
       // Should not recreate existing permission
       expect(prisma.rolePermission.create).not.toHaveBeenCalledWith({
         data: {
-          role: TeamRole.ADMIN,
+          role: 'ADMIN' as RoleType,
           permission: Permission.VIEW_TEAM_MEMBERS,
         },
       });
@@ -69,14 +69,14 @@ describe('Role Service', () => {
 
       vi.mocked(prisma.rolePermission.findMany).mockResolvedValue(mockPermissions);
 
-      const permissions = await getRolePermissions(TeamRole.ADMIN);
+      const permissions = await getRolePermissions('ADMIN');
 
       expect(permissions).toEqual([
         Permission.VIEW_TEAM_MEMBERS,
         Permission.INVITE_TEAM_MEMBER,
       ]);
       expect(prisma.rolePermission.findMany).toHaveBeenCalledWith({
-        where: { role: TeamRole.ADMIN },
+        where: { role: 'ADMIN' },
         select: { permission: true },
       });
     });
@@ -87,14 +87,14 @@ describe('Role Service', () => {
       vi.mocked(prisma.rolePermission.count).mockResolvedValue(1);
 
       const hasPermission = await checkRolePermission(
-        TeamRole.ADMIN,
+        'ADMIN',
         Permission.VIEW_TEAM_MEMBERS
       );
 
       expect(hasPermission).toBe(true);
       expect(prisma.rolePermission.count).toHaveBeenCalledWith({
         where: {
-          role: TeamRole.ADMIN,
+          role: 'ADMIN',
           permission: Permission.VIEW_TEAM_MEMBERS,
         },
       });
@@ -104,7 +104,7 @@ describe('Role Service', () => {
       vi.mocked(prisma.rolePermission.count).mockResolvedValue(0);
 
       const hasPermission = await checkRolePermission(
-        TeamRole.VIEWER,
+        'VIEWER',
         Permission.MANAGE_BILLING
       );
 
@@ -113,8 +113,8 @@ describe('Role Service', () => {
 
     it('should return false for invalid permission', async () => {
       const hasPermission = await checkRolePermission(
-        TeamRole.ADMIN,
-        'INVALID_PERMISSION'
+        'ADMIN',
+        'INVALID_PERMISSION' as Permission
       );
 
       expect(hasPermission).toBe(false);
