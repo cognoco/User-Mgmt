@@ -119,6 +119,8 @@ export interface UserRole {
   id: string;
   userId: string;
   roleId: string;
+  /** Optional role name when joined from roles table */
+  roleName?: string;
   role?: RoleEntity;
   assignedBy: string;
   createdAt: Date;
