@@ -1,9 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import type { User } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiAuthService } from '@/services/auth/factory';
 import { getApiPermissionService } from '@/services/permission/factory';
-import { Permission } from '@/lib/rbac/roles';
+import { getSessionFromToken } from '@/services/auth/factory';
+import type { Permission } from '@/core/permission/models';
 import { ApiError } from '@/lib/api/common/apiError';
 import { createAuthApiError } from '@/middleware/authErrors';
 import { createErrorResponse } from '@/lib/api/common/responseFormatter';
@@ -55,10 +55,7 @@ export function withAuth(
         ? authHeader.split(' ')[1]
         : authHeader;
 
-      const authService = getApiAuthService();
-      const session = await authService.getSession(token);
-
-      const user = session?.user as User | undefined;
+      const user = await getSessionFromToken(token);
       if (!user) {
         const err = createAuthApiError('INVALID_TOKEN');
         return res.status(err.status).json(err.toResponse());
@@ -187,13 +184,13 @@ export async function withAuthRequest(
   permission?: Permission
 ): Promise<NextResponse> {
   return withRouteAuth(
-    (r, ctx) => {
+    async (r, ctx) => {
       if (!ctx.userId) {
         const err = createAuthApiError('MISSING_TOKEN');
         return createErrorResponse(err);
       }
 
-      if (permission && !ctx.permissions.includes(permission)) {
+      if (permission && !(ctx.permissions ?? []).includes(permission)) {
         const err = createAuthApiError('INSUFFICIENT_PERMISSIONS');
         return createErrorResponse(err);
       }
@@ -201,7 +198,7 @@ export async function withAuthRequest(
       return handler(r, {
         userId: ctx.userId,
         role: ctx.role,
-        permissions: ctx.permissions,
+        permissions: ctx.permissions ?? [],
       });
     },
     req,
