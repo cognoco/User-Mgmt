@@ -15,6 +15,7 @@ export {
   RoleValues,
   RoleSchema,
 } from '@/core/permission/models';
+export type { Permission, Role, UserRole } from '@/core/permission/models';
 
 // User role assignment schema
 export const userRoleSchema = z.object({
