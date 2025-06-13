@@ -2,6 +2,7 @@
 import { telemetry } from '@/lib/monitoring/errorSystem';
 import { AlertManager, AlertRule } from '@/lib/telemetry/alertManager';
 import { ApplicationError } from '@/core/common/errors';
+import type { TelemetryAlert } from '@/lib/monitoring/telemetry';
 
 let initialized = false;
 export const alertManager = new AlertManager();
@@ -20,12 +21,14 @@ export function initializeMonitoringSystem(config: MonitoringConfig = {}): void 
     }
   }
 
-  telemetry.addAlertNotifier(alert => {
-    const error = new ApplicationError(
-      alert.errorType as any,
-      alert.message,
-      alert.severity === 'critical' ? 500 : 400,
-    );
-    alertManager.registerError(error);
+  telemetry.addAlertNotifier({
+    notify(alert: TelemetryAlert) {
+      const error = new ApplicationError(
+        alert.errorType as any,
+        alert.message,
+        alert.severity === 'critical' ? 500 : 400,
+      );
+      alertManager.registerError(error);
+    },
   });
 }
