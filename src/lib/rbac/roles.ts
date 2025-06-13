@@ -1,38 +1,11 @@
 import { z } from 'zod';
+import {
+  PermissionValues as Permission,
+  type Permission as PermissionType,
+} from '@/core/permission/models';
 
-/**
- * Defines all available permissions in the system
- */
-export const Permission = {
-  // Team Management
-  INVITE_TEAM_MEMBER: 'INVITE_TEAM_MEMBER',
-  REMOVE_TEAM_MEMBER: 'REMOVE_TEAM_MEMBER',
-  UPDATE_MEMBER_ROLE: 'UPDATE_MEMBER_ROLE',
-  VIEW_TEAM_MEMBERS: 'VIEW_TEAM_MEMBERS',
-  
-  // Billing & Subscription
-  MANAGE_BILLING: 'MANAGE_BILLING',
-  VIEW_INVOICES: 'VIEW_INVOICES',
-  UPDATE_SUBSCRIPTION: 'UPDATE_SUBSCRIPTION',
-  
-  // Organization Settings
-  MANAGE_ORG_SETTINGS: 'MANAGE_ORG_SETTINGS',
-  CONFIGURE_SSO: 'CONFIGURE_SSO',
-  MANAGE_DOMAINS: 'MANAGE_DOMAINS',
-  
-  // Project Management
-  CREATE_PROJECT: 'CREATE_PROJECT',
-  DELETE_PROJECT: 'DELETE_PROJECT',
-  EDIT_PROJECT: 'EDIT_PROJECT',
-  VIEW_PROJECTS: 'VIEW_PROJECTS',
-  
-  // Admin Functions
-  VIEW_AUDIT_LOGS: 'VIEW_AUDIT_LOGS',
-  MANAGE_API_KEYS: 'MANAGE_API_KEYS',
-  ACCESS_ADMIN_DASHBOARD: 'ACCESS_ADMIN_DASHBOARD',
-} as const;
-
-export type Permission = typeof Permission[keyof typeof Permission];
+export { Permission };
+export type Permission = PermissionType;
 
 /**
  * Defines the standard roles and their associated permissions
@@ -41,7 +14,7 @@ export const RoleDefinition = {
   ADMIN: {
     name: 'Admin',
     description: 'Full access to all features and settings',
-    permissions: Object.values(Permission),
+    permissions: Object.values(Permission) as Permission[],
   },
   
   BILLING_MANAGER: {
@@ -53,7 +26,7 @@ export const RoleDefinition = {
       Permission.VIEW_INVOICES,
       Permission.UPDATE_SUBSCRIPTION,
       Permission.VIEW_PROJECTS,
-    ],
+    ] as Permission[],
   },
   
   MEMBER: {
@@ -65,7 +38,7 @@ export const RoleDefinition = {
       Permission.VIEW_PROJECTS,
       Permission.EDIT_PROJECT,
       Permission.CREATE_PROJECT,
-    ],
+    ] as Permission[],
   },
   
   VIEWER: {
@@ -74,7 +47,7 @@ export const RoleDefinition = {
     permissions: [
       Permission.VIEW_TEAM_MEMBERS,
       Permission.VIEW_PROJECTS,
-    ],
+    ] as Permission[],
   },
 } as const;
 
@@ -103,7 +76,7 @@ export function isRole(value: string): value is RoleType {
  * Get permissions for a specific role
  */
 export function getPermissionsForRole(role: RoleType): Permission[] {
-  return RoleDefinition[role].permissions;
+  return Array.from(RoleDefinition[role].permissions);
 }
 
 /**
