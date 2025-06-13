@@ -29,7 +29,7 @@ describe('IDP Configuration API Routes', () => {
   });
 
   describe('SAML Configuration', () => {
-    const mockParams = { params: { orgId: mockOrgId, idpType: 'saml' } };
+    const mockParams = { params: Promise.resolve({ orgId: mockOrgId, idpType: 'saml' }) };
     const validSamlConfig = {
       entityId: 'https://test-idp.com/metadata',
       ssoUrl: 'https://test-idp.com/sso',
@@ -106,7 +106,7 @@ describe('IDP Configuration API Routes', () => {
   });
 
   describe('OIDC Configuration', () => {
-    const mockParams = { params: { orgId: mockOrgId, idpType: 'oidc' } };
+    const mockParams = { params: Promise.resolve({ orgId: mockOrgId, idpType: 'oidc' }) };
     const validOidcConfig = {
       clientId: 'test-client-id',
       clientSecret: 'test-client-secret',
@@ -192,7 +192,7 @@ describe('IDP Configuration API Routes', () => {
   });
 
   it('returns 404 for invalid IDP type', async () => {
-    const mockParams = { params: { orgId: mockOrgId, idpType: 'invalid' } };
+    const mockParams = { params: Promise.resolve({ orgId: mockOrgId, idpType: 'invalid' }) };
     const request = new NextRequest(
       new URL(`http://localhost/api/organizations/${mockOrgId}/sso/invalid/config`)
     );
