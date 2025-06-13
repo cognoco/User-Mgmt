@@ -45,7 +45,7 @@ class NotificationPreferencesService {
     try {
       // Update in store
       const result = await usePreferencesStore.getState().updatePreferences({
-        notifications: preferences
+        notifications: preferences as any
       });
 
       // Apply to notification service
