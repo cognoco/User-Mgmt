@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withRouteAuth } from '@/middleware/auth';
 import { validateAuthToken } from '@/middleware/validateAuthToken';
 import { getApiPermissionService } from '@/services/permission/factory';
-import { Permission } from '@/lib/rbac/roles';
+import { Permission } from '@/core/permission/models';
 
 vi.mock('../validate-auth-token');
 vi.mock('@/services/permission/factory');
