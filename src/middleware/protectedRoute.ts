@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withRouteAuth, type RouteAuthContext } from '@/middleware/auth';
+import type { Permission } from '@/core/permission/models';
 import { checkRateLimit } from '@/middleware/rateLimit';
 import { ApiError, ERROR_CODES } from '@/lib/api/common';
 import { createErrorResponse } from '@/lib/api/common/responseFormatter';
 
 export interface ProtectedRouteOptions {
   skipRateLimit?: boolean;
-  requiredPermission?: string;
+  requiredPermission?: Permission;
 }
 
 export type ProtectedRouteHandler = (
