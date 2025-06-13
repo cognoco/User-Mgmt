@@ -19,15 +19,15 @@ vi.mock('@/hooks/user/useDeleteAccount');
 
 describe('DeleteAccountDialog', () => {
   let handleClose: ReturnType<typeof vi.fn>;
-  let mockDeleteAccount: Mock<() => Promise<void>>;
+  let mockDeleteAccount: Mock<() => Promise<{ success: boolean; error?: string }>>;
   const mockUseDeleteAccount = vi.mocked(useDeleteAccount);
 
   beforeEach(() => {
     // Reset mocks before each test
     handleClose = vi.fn();
-    mockDeleteAccount = vi.fn<() => Promise<void>>();
+    mockDeleteAccount = vi.fn<() => Promise<{ success: boolean; error?: string }>>();
     mockUseDeleteAccount.mockReturnValue({
-      deleteAccount: mockDeleteAccount as () => Promise<void>,
+      deleteAccount: mockDeleteAccount as () => Promise<{ success: boolean; error?: string }>,
       isLoading: false,
       error: null,
     });
@@ -97,7 +97,7 @@ describe('DeleteAccountDialog', () => {
 
    it('should show loading state when isLoading is true', () => {
     mockUseDeleteAccount.mockReturnValue({
-      deleteAccount: mockDeleteAccount as () => Promise<void>,
+      deleteAccount: mockDeleteAccount as () => Promise<{ success: boolean; error?: string }>,
       isLoading: true, // Set loading state
       error: null,
     });

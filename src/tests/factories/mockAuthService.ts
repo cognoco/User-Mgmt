@@ -1,6 +1,6 @@
 export const createMockAuthService = () => ({
   getCurrentUser: vi.fn().mockResolvedValue({ id: 'u1', email: 'test@example.com' }),
-  deleteAccount: vi.fn().mockResolvedValue(undefined),
+  deleteAccount: vi.fn().mockResolvedValue({ success: true }),
   updatePassword: vi.fn().mockResolvedValue({ success: true }),
   login: vi.fn().mockResolvedValue({ success: true }),
   logout: vi.fn().mockResolvedValue(undefined),

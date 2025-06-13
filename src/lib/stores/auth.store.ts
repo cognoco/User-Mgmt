@@ -94,7 +94,9 @@ export const useAuthStore = () => {
     },
 
 
-    deleteAccount: async (password?: string): Promise<void> => {
+    deleteAccount: async (
+      password?: string | { userId: string; password: string },
+    ): Promise<{ success: boolean; error?: string }> => {
       console.log('[DEPRECATED] Using auth.store deleteAccount - please migrate to useAuth');
       return auth.deleteAccount(password);
     }

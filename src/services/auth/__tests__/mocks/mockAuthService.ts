@@ -102,7 +102,7 @@ export class MockAuthService implements AuthService {
     }
   });
 
-  deleteAccount = vi.fn().mockImplementation(async (_password?: string): Promise<void> => {
+  deleteAccount = vi.fn().mockImplementation(async (_password?: string): Promise<{ success: boolean }> => {
     this.mockUser = null;
     this.mockAuthState = {
       ...this.mockAuthState,
@@ -111,6 +111,7 @@ export class MockAuthService implements AuthService {
       token: null
     };
     this.notifyListeners(null);
+    return { success: true };
   });
 
   setupMFA = vi.fn().mockImplementation(async (): Promise<MFASetupResponse> => {

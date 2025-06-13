@@ -36,7 +36,7 @@ const defaultState: AuthState = {
   verifyEmail: promiseVoid,
   clearError: vi.fn(),
   clearSuccessMessage: vi.fn(),
-  deleteAccount: promiseVoid,
+  deleteAccount: promiseAuthResult,
   setUser: vi.fn(),
   setToken: vi.fn(),
   setupMFA: promiseMFASetup,
@@ -164,7 +164,7 @@ export function createMockAuthStore(
         await (globalThis as any).api?.delete?.('/api/auth/delete-account', { data: { password } });
       } catch (err) {
         store.error = (err && typeof err === 'object' && 'response' in err && (err as any).response?.data?.error) ? (err as any).response.data.error : 'Delete failed';
-        return { error: store.error };
+        return { success: false, error: store.error };
       }
       if (store.user && store.user.email === 'test@example.com') {
         store.user = null;
@@ -172,10 +172,10 @@ export function createMockAuthStore(
         if (typeof window !== 'undefined' && window.localStorage) {
           window.localStorage.removeItem('auth_token');
         }
-        return {};
+        return { success: true };
       } else {
         store.error = 'Delete failed';
-        return { error: 'Delete failed' };
+        return { success: false, error: 'Delete failed' };
       }
     }),
     // --- End stateful mock implementations ---

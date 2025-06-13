@@ -21,7 +21,7 @@ describe('AccountDeletion', () => {
   });
 
   it('confirms deletion for private account', async () => {
-    const deleteAccount = vi.fn().mockResolvedValue(undefined);
+    const deleteAccount = vi.fn().mockResolvedValue({ success: true });
     mockUseAuth.mockReturnValue({ deleteAccount, user: { id: '1', userType: UserType.PRIVATE }, isLoading: false, error: null });
     mockUseTeams.mockReturnValue({ teams: [] });
     mockUseSubscription.mockReturnValue({ userSubscription: null });
@@ -40,7 +40,7 @@ describe('AccountDeletion', () => {
   });
 
   it('requires password for corporate account', async () => {
-    const deleteAccount = vi.fn().mockResolvedValue(undefined);
+    const deleteAccount = vi.fn().mockResolvedValue({ success: true });
     mockUseAuth.mockReturnValue({ deleteAccount, user: { id: '1', userType: UserType.CORPORATE }, isLoading: false, error: null });
     mockUseTeams.mockReturnValue({ teams: [] });
     mockUseSubscription.mockReturnValue({ userSubscription: null });

@@ -198,7 +198,7 @@ describe("useAuth hook", () => {
   it("verifies email and deletes account", async () => {
     (mockAuthService.sendVerificationEmail as any).mockResolvedValue({ success: true });
     (mockAuthService.verifyEmail as any).mockResolvedValue(undefined);
-    (mockAuthService.deleteAccount as any).mockResolvedValue(undefined);
+    (mockAuthService.deleteAccount as any).mockResolvedValue({ success: true });
     const { result } = renderHook(() => useAuth(), { wrapper });
     await act(async () => {
       await result.current.sendVerificationEmail("a@test.com");

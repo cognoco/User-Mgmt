@@ -460,19 +460,37 @@ export class DefaultAuthService
     }
   }
 
-  async deleteAccount(password?: string): Promise<void> {
-    const id = this.user?.id;
+  async deleteAccount(
+    passwordOrParams?: string | { userId: string; password: string },
+  ): Promise<{ success: boolean; error?: string }> {
+    const id =
+      typeof passwordOrParams === 'object' ? passwordOrParams.userId : this.user?.id;
+    const password =
+      typeof passwordOrParams === 'object' ? passwordOrParams.password : passwordOrParams;
+
     try {
       await this.provider.deleteAccount(password);
       this.sessionTracker.cleanup();
       this.persistToken(null);
       this.user = null;
       this.emit({ type: 'account_deleted', timestamp: Date.now(), userId: id ?? '' });
-      await this.logAction({ userId: id, action: 'ACCOUNT_DELETION', status: 'SUCCESS', targetResourceType: 'user', targetResourceId: id });
+      await this.logAction({
+        userId: id,
+        action: 'ACCOUNT_DELETION',
+        status: 'SUCCESS',
+        targetResourceType: 'user',
+        targetResourceId: id,
+      });
+      return { success: true };
     } catch (error) {
       const message = translateError(error, { defaultMessage: 'Account deletion failed' });
-      await this.logAction({ userId: id, action: 'ACCOUNT_DELETION', status: 'FAILURE', details: { error: message } });
-      throw new Error(message);
+      await this.logAction({
+        userId: id,
+        action: 'ACCOUNT_DELETION',
+        status: 'FAILURE',
+        details: { error: message },
+      });
+      return { success: false, error: message };
     }
   }
 

@@ -96,7 +96,9 @@ export interface AuthState {
   verifyEmail: (token: string) => Promise<void>; // Consider returning status
   clearError: () => void;
   clearSuccessMessage: () => void; 
-  deleteAccount: (password?: string) => Promise<void>;
+  deleteAccount: (
+    password?: string | { userId: string; password: string },
+  ) => Promise<{ success: boolean; error?: string }>;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   setupMFA: () => Promise<MFASetupResponse>;

@@ -47,7 +47,10 @@ export const createMockAuthStore = (): MockAuthStore => ({
   mfaQrCode: null,
   mfaBackupCodes: null,
   clearSuccessMessage: vi.fn<[], void>(),
-  deleteAccount: vi.fn<[string?], Promise<void>>(),
+  deleteAccount: vi.fn<
+    [string | { userId: string; password: string }?],
+    Promise<{ success: boolean; error?: string }>
+  >(),
   setUser: vi.fn<[import('@/types/auth').User | null], void>(),
   setToken: vi.fn<[string | null], void>(),
   setupMFA: vi.fn<[], Promise<import('@/types/auth').MFASetupResponse>>(),
