@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/database/prisma';
 import { Permission, RoleType, RoleDefinition } from '@/lib/rbac/roles';
-import { TeamRole } from '@prisma/client';
+import type { Role } from '@/core/permission/models';
 
 /**
  * Initialize role permissions in the database
@@ -9,7 +9,10 @@ export async function initializeRolePermissions() {
   // Get all existing permissions
   const existingPermissions = await prisma.rolePermission.findMany();
   const existingMap = new Map(
-    existingPermissions.map(p => [`${p.role}-${p.permission}`, p])
+    existingPermissions.map((p: { role: string; permission: string }) => [
+      `${p.role}-${p.permission}`,
+      p,
+    ])
   );
 
   // Create or update permissions for each role
@@ -19,7 +22,7 @@ export async function initializeRolePermissions() {
       if (!existingMap.has(key)) {
         return prisma.rolePermission.create({
           data: {
-            role: role as TeamRole,
+            role,
             permission,
           },
         });
@@ -34,12 +37,12 @@ export async function initializeRolePermissions() {
 /**
  * Get all permissions for a specific role
  */
-export async function getRolePermissions(role: TeamRole): Promise<string[]> {
+export async function getRolePermissions(role: RoleType): Promise<string[]> {
   const permissions = await prisma.rolePermission.findMany({
     where: { role },
     select: { permission: true },
   });
-  return permissions.map(p => p.permission);
+  return permissions.map((p: { permission: string }) => p.permission);
 }
 
 /**
@@ -49,38 +52,31 @@ export async function getRolePermissions(role: TeamRole): Promise<string[]> {
  * @param permission The permission to check for
  * @returns A boolean indicating if the role has the permission
  */
-export async function checkRolePermission(role: Role, permission: Permission): Promise<boolean> {
-  // In a real app, this would check a database or policy definition
-  // For now, return simple rules for E2E testing
-  
-  if (role === 'SUPER_ADMIN' || role === 'ADMIN') {
-    return true;
-  }
-  
-  if (role === 'MANAGER') {
-    // Managers can view logs but not admin access
-    return permission !== 'ADMIN_ACCESS';
-  }
-  
-  if (role === 'USER') {
-    // Regular users have limited permissions
-    return ['EXPORT_DATA', 'VIEW_ANALYTICS'].includes(permission as string);
-  }
-  
-  return false;
+export async function checkRolePermission(
+  role: Role,
+  permission: Permission,
+): Promise<boolean> {
+  const def = RoleDefinition[role as RoleType];
+  return def
+    ? (def.permissions as readonly Permission[]).includes(permission)
+    : false;
 }
 
 /**
  * Get all roles with their permissions
  */
 export async function getAllRolesWithPermissions() {
-  const roles = Object.keys(RoleDefinition) as TeamRole[];
+  const roles = Object.keys(RoleDefinition) as RoleType[];
   const permissions = await Promise.all(
-    roles.map(async (role) => ({
-      role,
-      permissions: await getRolePermissions(role),
-      ...RoleDefinition[role as RoleType],
-    }))
+    roles.map(async (role) => {
+      const { permissions: defaultPermissions, ...info } =
+        RoleDefinition[role as RoleType];
+      return {
+        role,
+        permissions: await getRolePermissions(role),
+        ...info,
+      };
+    })
   );
 
   return permissions;
@@ -97,7 +93,7 @@ export async function syncRolePermissions() {
       OR: [
         {
           role: {
-            notIn: Object.keys(RoleDefinition) as TeamRole[],
+            notIn: Object.keys(RoleDefinition) as RoleType[],
           },
         },
         {
