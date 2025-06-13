@@ -94,7 +94,6 @@ export const usePreferencesStore: (() => PreferencesState) & {
   getState: () => PreferencesState;
   setState: typeof preferencesStoreBase.setState;
   subscribe: typeof preferencesStoreBase.subscribe;
-  destroy: typeof preferencesStoreBase.destroy;
 } = Object.assign(createUsePreferencesStore, {
   getState: () => {
     const state = preferencesStoreBase.getState();
@@ -107,5 +106,4 @@ export const usePreferencesStore: (() => PreferencesState) & {
   },
   setState: preferencesStoreBase.setState,
   subscribe: preferencesStoreBase.subscribe,
-  destroy: preferencesStoreBase.destroy,
 });
