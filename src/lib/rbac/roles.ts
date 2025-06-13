@@ -34,10 +34,16 @@ export const Permission = {
 
 export type Permission = typeof Permission[keyof typeof Permission];
 
+export interface RoleInfo {
+  name: string;
+  description: string;
+  permissions: readonly Permission[];
+}
+
 /**
  * Defines the standard roles and their associated permissions
  */
-export const RoleDefinition = {
+export const RoleDefinition: Record<string, RoleInfo> = {
   ADMIN: {
     name: 'Admin',
     description: 'Full access to all features and settings',
@@ -76,7 +82,7 @@ export const RoleDefinition = {
       Permission.VIEW_PROJECTS,
     ],
   },
-} as const;
+};
 
 export type RoleType = keyof typeof RoleDefinition;
 
@@ -102,7 +108,7 @@ export function isRole(value: string): value is RoleType {
 /**
  * Get permissions for a specific role
  */
-export function getPermissionsForRole(role: RoleType): Permission[] {
+export function getPermissionsForRole(role: RoleType): readonly Permission[] {
   return RoleDefinition[role].permissions;
 }
 
