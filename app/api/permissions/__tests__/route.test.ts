@@ -16,7 +16,9 @@ beforeEach(() => {
 
 describe('permissions root API', () => {
   it('GET returns permissions', async () => {
-    mockPermissionService.getAllPermissions!.mockResolvedValue(['READ']);
+    vi.mocked(mockPermissionService.getAllPermissions!).mockResolvedValue([
+      'READ',
+    ]);
     const res = await GET(createAuthenticatedRequest('GET', 'http://test'));
     expect(res.status).toBe(200);
     const body = await res.json();

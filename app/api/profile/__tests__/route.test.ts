@@ -102,7 +102,9 @@ describe('/api/profile', () => {
         email: 'jane@example.com',
       } as any);
       
-      vi.mocked(mockUserService.updateUserProfile).mockResolvedValue(mockResult as any);
+      vi.mocked(mockUserService.updateUserProfile!).mockResolvedValue(
+        mockResult as any,
+      );
 
       const request = new NextRequest('http://localhost:3000/api/profile', {
         method: 'PATCH',
@@ -117,7 +119,10 @@ describe('/api/profile', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(mockUserService.updateUserProfile).toHaveBeenCalledWith('123', updateData);
+      expect(mockUserService.updateUserProfile!).toHaveBeenCalledWith(
+        '123',
+        updateData,
+      );
       expect(data.success).toBe(true);
       expect(data.data).toEqual(mockResult.profile);
     });
@@ -145,7 +150,7 @@ describe('/api/profile', () => {
       const response = await PATCH(request);
       
       expect(response.status).toBe(400);
-      expect(mockUserService.updateUserProfile).not.toHaveBeenCalled();
+      expect(mockUserService.updateUserProfile!).not.toHaveBeenCalled();
     });
   });
 });
