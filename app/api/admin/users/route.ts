@@ -8,7 +8,7 @@ import {
 } from "@/middleware/createMiddlewareChain";
 import { z } from "zod";
 import { getApiAdminService } from "@/services/admin/factory";
-import { Permission } from "@/lib/rbac/roles";
+import { PermissionValues } from "@/core/permission/models";
 
 const querySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
@@ -59,7 +59,7 @@ async function handleGet(
 
 const getMiddleware = createMiddlewareChain([
   errorHandlingMiddleware(),
-  routeAuthMiddleware({ requiredPermissions: [Permission.ACCESS_ADMIN_DASHBOARD] }),
+  routeAuthMiddleware({ requiredPermissions: [PermissionValues.ACCESS_ADMIN_DASHBOARD] }),
   validationMiddleware(querySchema),
 ]);
 

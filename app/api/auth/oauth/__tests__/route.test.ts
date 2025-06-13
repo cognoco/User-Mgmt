@@ -1,4 +1,6 @@
-let POST: (req: Request) => Promise<Response>;
+import type { NextRequest, NextResponse } from 'next/server';
+
+let POST: (req: NextRequest) => Promise<NextResponse>;
 // import { cookies } from 'next/headers';
 // import { NextResponse } from 'next/server';
 import { OAuthProvider } from "@/types/oauth";
