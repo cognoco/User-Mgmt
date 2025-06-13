@@ -21,7 +21,17 @@ describe('DefaultAdminService.exportUsers', () => {
     const users = [
       { id: '1', firstName: 'A', lastName: 'B', email: 'a@b.com', status: 'active', role: 'user', createdAt: '2020-01-01T00:00:00Z', lastLoginAt: null },
     ];
-    provider.searchUsers = vi.fn().mockResolvedValue({ users, pagination: { page: 1, limit: 1, totalCount: 1, totalPages: 1 } });
+    provider.searchUsers = vi.fn().mockResolvedValue({
+      users,
+      pagination: {
+        page: 1,
+        pageSize: 1,
+        totalItems: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    });
     const result = await service.exportUsers({}, 'csv');
     expect(result.filename).toMatch(/\.csv$/);
     expect(result.data).toContain('ID');
@@ -31,7 +41,17 @@ describe('DefaultAdminService.exportUsers', () => {
     const users = [
       { id: '1', firstName: 'A', lastName: 'B', email: 'a@b.com', status: 'active', role: 'user', createdAt: '2020-01-01T00:00:00Z', lastLoginAt: null },
     ];
-    provider.searchUsers = vi.fn().mockResolvedValue({ users, pagination: { page: 1, limit: 1, totalCount: 1, totalPages: 1 } });
+    provider.searchUsers = vi.fn().mockResolvedValue({
+      users,
+      pagination: {
+        page: 1,
+        pageSize: 1,
+        totalItems: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    });
     const result = await service.exportUsers({}, 'json');
     expect(result.filename).toMatch(/\.json$/);
     expect(result.data).toContain('"id": "1"');
